@@ -188,24 +188,9 @@
 			<artifactId>scijava-ui-swing</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>rsyntaxtextarea</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>autocomplete</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fifesoft</groupId>
-			<artifactId>languagesupport</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>script-editor</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>cern.extjfx</groupId>
-			<artifactId>extjfx</artifactId>
+			<artifactId>extjfx-samples</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 	</dependencies>
 	<description>Suite of tools for processing single-molecule TIRF and flow-stretching data in the Structure and Dynamics of Molecular Machines research group.</description>

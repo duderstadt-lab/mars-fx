@@ -57,7 +57,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-import de.mpg.biochem.mars.autoComplete.MethodDocs;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.util.MARSMath;
 import ij.text.TextWindow;
@@ -561,8 +560,6 @@ public class MARSResultsTable extends AbstractTable<Column<? extends Object>, Ob
 	 * @param  column  name of the column.
 	 * @return      maximum value in the column.
 	 */
-	@MethodDocs(desc = "Returns the maximum value in the column. <p> Not sure why this p is here.",
-            params = {"column - name of the column.","return - maximum value in the column."})
 	public double max(String column) {
 		if (get(column) == null)
 			return Double.NaN;
