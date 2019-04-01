@@ -72,14 +72,36 @@ import org.scijava.table.GenericColumn;
 
 import de.mpg.biochem.mars.ImageProcessing.MoleculeIntegrator;
 import de.mpg.biochem.mars.ImageProcessing.PeakTracker;
+import de.mpg.biochem.mars.kcp.KCPCommand;
 import de.mpg.biochem.mars.table.*;
 import de.mpg.biochem.mars.util.LogBuilder;
 import de.mpg.biochem.mars.util.MARSMath;
 import io.scif.services.FormatService;
 
 /**
- * MARSImageMetaData records act as the storage location for all information
- * about specific data collections, including imaging settings, frame timing..
+ * MARSImageMetaData records hold image metadata information collected
+ * at the time of data acquisition, such as frame timing, filters used,
+ * excitation wavelength, exposure time, etc. MARSImageMetaData records 
+ * are stored in {@link MoleculeArchive}s to allow for fast and efficient retrieval 
+ * and optimal organization. 
+ * <p>
+ * MARSImageMetaData records allow for storage of different kinds
+ * of image metadata in a simplified format. They contain a primary {@link MARSResultsTable} 
+ * (or DataTable) with properties per time/slice of a video. To facilitate efficient 
+ * and reproducible processing MARSImageMetaData records may also contain calculated parameters, tags, 
+ * and notes. MARSImageMetaData records are given a UID string at the time of creation derived from 
+ * a hash of metadata field. This ensure the same image sequence will always have the same UID. If
+ * no metadata format is chosen This serves as their primary identifier within 
+ * {@link MoleculeArchive}s and for a range of transformations and merging operations. 
+ * Molecule records also have a UID string for corresponding {@link MARSImageMetaData} records, 
+ * which contain information about the imaging settings, the timing of frames etc.. 
+ * during data collection. 
+ * </p>
+ * <p>
+ * MARSImageMetaData records can be saved to JSON for storage when done processing. They are then either 
+ * stored as an array within MoleculeArchive .yama files or as individual json files within 
+ * .yama.store directories.
+ * </p>
  * 
  * @author Karl Duderstadt
  */
@@ -296,7 +318,7 @@ public class MARSImageMetaData {
 				JsonFactory jsonF = new JsonFactory();
 
 			    JsonParser jParser = jsonF.createParser(inputStream);
-			    
+
 			    jParser.nextToken();
 
 			    while (jParser.nextToken() != JsonToken.END_OBJECT) {

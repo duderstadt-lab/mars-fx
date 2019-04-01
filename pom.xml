@@ -203,6 +203,10 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>script-editor</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>cern.extjfx</groupId>
+			<artifactId>extjfx</artifactId>
+		</dependency>
 	</dependencies>
 	<description>Suite of tools for processing single-molecule TIRF and flow-stretching data in the Structure and Dynamics of Molecular Machines research group.</description>
 </project>
