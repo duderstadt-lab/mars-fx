@@ -62,7 +62,7 @@ public class JavaFxFrame extends JFrame {
 
 	public void initFX(JFXPanel fxPanel) {
 		//Scene scene = new Scene(new LargeDataSetsSample());
-		Scene scene = new Scene(new OverlayChartSample());
+		Scene scene = new Scene(new LinePlot());
 		
 		this.fxPanel.setScene(scene);
 		this.setSize(1000, 600);
