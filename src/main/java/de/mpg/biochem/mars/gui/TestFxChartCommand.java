@@ -29,7 +29,7 @@ import cern.extjfx.samples.chart.*;
 		@Menu(label = "JavaFX", weight = 20,
 			mnemonic = 'i'),
 		@Menu(label = "Test GUI", weight = 10, mnemonic = 'g')})
-public class TestFxChart extends DynamicCommand implements Command {
+public class TestFxChartCommand extends DynamicCommand implements Command {
 	
 	@Parameter
 	private ImageJ ij;
