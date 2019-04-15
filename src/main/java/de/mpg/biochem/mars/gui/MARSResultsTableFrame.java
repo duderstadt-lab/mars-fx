@@ -80,7 +80,7 @@ public class MARSResultsTableFrame extends JFrame {
 	public void initFX(JFXPanel fxPanel) {	
 		try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MARSResultsTableFrame.class.getResource("/view/TableFrameLayout.fxml"));
+            loader.setLocation(MARSResultsTableFrame.class.getResource("view/TableFrameLayout.fxml"));
             
             TableFrameLayout = (BorderPane) loader.load();
 
