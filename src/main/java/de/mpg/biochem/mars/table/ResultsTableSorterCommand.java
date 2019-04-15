@@ -95,7 +95,7 @@ public class ResultsTableSorterCommand extends DynamicCommand implements Initial
 		}
 		
 		if (table.getWindow() != null)
-			table.getWindow().update();
+			table.getWindow().reloadData();
 	}
 	
 	public void setTable(MARSResultsTable table) {

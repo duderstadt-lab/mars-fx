@@ -28,8 +28,8 @@ import cern.extjfx.samples.chart.*;
 			mnemonic = 's'),
 		@Menu(label = "JavaFX", weight = 20,
 			mnemonic = 'i'),
-		@Menu(label = "Test GUI", weight = 10, mnemonic = 'g')})
-public class TestFxChartCommand extends DynamicCommand implements Command {
+		@Menu(label = "Test Plot", weight = 10, mnemonic = 'g')})
+public class TestPlotCommand extends DynamicCommand implements Command {
 	
 	@Parameter
 	private ImageJ ij;
@@ -37,8 +37,8 @@ public class TestFxChartCommand extends DynamicCommand implements Command {
 	@Override
 	public void run() {
 		// Launch JavaFX interface
-		JavaFxFrame app = new JavaFxFrame(ij);
-		app.setTitle("JavaFX");
+		PlotFrame app = new PlotFrame(ij);
+		app.setTitle("Plot");
 		app.init();
 	}
 }

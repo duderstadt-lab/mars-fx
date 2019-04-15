@@ -38,6 +38,8 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
+import de.mpg.biochem.mars.gui.MARSResultsTableFrame;
+import net.imagej.ImageJ;
 import net.imagej.display.WindowService;
 
 @Plugin(type = DisplayViewer.class)
@@ -45,6 +47,9 @@ public class MARSResultsTableView extends AbstractDisplayViewer<MARSResultsTable
 	
 	@Parameter
     private ResultsTableService resultsTableService;
+	
+	@Parameter
+	private ImageJ ij;
 	
 	//This method is called to create and display a window
 	//here we override it to make sure that calls like uiService.show( .. for SDMMResultsTable 
@@ -58,7 +63,11 @@ public class MARSResultsTableView extends AbstractDisplayViewer<MARSResultsTable
 		d.setName(results.getName());
 		
 		//We also create a new window since we assume it is a new table...
-		new MARSResultsTableWindow(results.getName(), results, resultsTableService);
+		//new MARSResultsTableWindow(results.getName(), results, resultsTableService);
+		
+		MARSResultsTableFrame tableFrame = new MARSResultsTableFrame(results.getName(), results, resultsTableService);
+		tableFrame.setTitle(results.getName());
+		tableFrame.init();
 	}
 
 	@Override

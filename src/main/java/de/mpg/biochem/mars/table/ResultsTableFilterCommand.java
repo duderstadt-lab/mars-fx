@@ -205,7 +205,7 @@ public class ResultsTableFilterCommand extends DynamicCommand implements Initial
 		resultsTableService.deleteRows(table, delList);
 		
 		if (table.getWindow() != null)
-			table.getWindow().update();
+			table.getWindow().reloadData();
 	}
 	
     public void setTable(MARSResultsTable table) {

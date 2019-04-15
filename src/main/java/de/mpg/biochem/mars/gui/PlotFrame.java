@@ -1,4 +1,5 @@
 package de.mpg.biochem.mars.gui;
+
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -28,7 +29,12 @@ import net.imagej.display.ImageDisplay;
 
 import cern.extjfx.samples.chart.*;
 
-public class JavaFxFrame extends JFrame {
+public class PlotFrame extends JFrame {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Parameter
 	private LogService log;
@@ -37,7 +43,7 @@ public class JavaFxFrame extends JFrame {
 
 	private JFXPanel fxPanel;
 
-	public JavaFxFrame(ImageJ ij) {
+	public PlotFrame(ImageJ ij) {
 		ij.context().inject(this);
 		this.ij = ij;
 	}
@@ -46,6 +52,8 @@ public class JavaFxFrame extends JFrame {
 	 * Create the JFXPanel that make the link between Swing (IJ) and JavaFX plugin.
 	 */
 	public void init() {
+		//TODO add PlotPanel for JFXPanel..
+		
 		this.fxPanel = new JFXPanel();
 		this.add(this.fxPanel);
 		this.setVisible(true);
@@ -62,9 +70,35 @@ public class JavaFxFrame extends JFrame {
 
 	public void initFX(JFXPanel fxPanel) {
 		//Scene scene = new Scene(new LargeDataSetsSample());
-		Scene scene = new Scene(new LinePlot());
+		Scene scene = new Scene(new Plot());
 		
 		this.fxPanel.setScene(scene);
 		this.setSize(1000, 600);
+		
+		/*
+		// Init the root layout
+		try {
+			FXMLLoader loader = new FXMLLoader();
+			loader.setLocation(MainAppFrame.class.getResource("/sc/fiji/omevisual/gui/view/RootLayout.fxml"));
+			AnchorPane rootLayout = (AnchorPane) loader.load();
+
+			// Get the controller and add an ImageJ context to it.
+			RootLayoutController controller = loader.getController();
+			controller.setContext(ij.context());
+			controller.setImage(this.image);
+
+			// Show the scene containing the root layout.
+			Scene scene = new Scene(rootLayout);
+			this.fxPanel.setScene(scene);
+
+			// Resize the JFrame to the JavaFX scene
+			this.setSize((int) scene.getWidth(), (int) scene.getHeight());
+
+			controller.fill(md);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		*/
 	}
 }

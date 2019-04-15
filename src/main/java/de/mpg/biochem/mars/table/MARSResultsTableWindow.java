@@ -99,7 +99,7 @@ public class MARSResultsTableWindow implements ActionListener {
 		this.results = results;
 		this.resultsTableService = resultsTableService;
 		this.uiService = resultsTableService.getUIService();
-		results.setWindow(this);
+		//results.setWindow(this);
 		createFrame(name);
 		
 		// add window to window manager

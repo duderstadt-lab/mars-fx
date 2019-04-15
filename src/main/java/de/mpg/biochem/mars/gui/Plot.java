@@ -17,11 +17,10 @@ import javafx.scene.control.Spinner;
 import javafx.scene.layout.GridPane;
 
 import javafx.scene.chart.XYChart;
-
 import de.mpg.biochem.mars.table.*;
 import org.scijava.table.*;
 
-public class LinePlot extends AbstractSamplePane {
+public class Plot extends AbstractSamplePane {
 	DataReducingObservableList<Number, Number> data;
 
 	@Override
@@ -73,7 +72,7 @@ public class LinePlot extends AbstractSamplePane {
 
 		XYChartPane<Number, Number> chartPane = new XYChartPane<>(lineChart);
 		chartPane.getPlugins().addAll(new Zoomer(), new Panner(), new DataPointTooltip(), new CrosshairIndicator<>());
-
+		
 		return chartPane;
 	}
 }
