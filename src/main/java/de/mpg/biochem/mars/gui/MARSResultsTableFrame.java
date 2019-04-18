@@ -10,6 +10,7 @@ import org.scijava.ui.UIService;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
@@ -99,5 +100,7 @@ public class MARSResultsTableFrame extends JFrame {
         }
 	}
 	
-
+	public MARSResultsTable getTable() {
+		return table;
+	}
 }
