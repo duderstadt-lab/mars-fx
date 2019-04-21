@@ -249,22 +249,24 @@ public class MARSDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
         double pointX = point.getX();
         double pointY = point.getY();
         
-        circle.setCenterX(pointX);
-        circle.setCenterY(pointY);
-
-        double width = label.prefWidth(-1);
-        double height = label.prefHeight(width);
-
-        double xLocation = pointX + LABEL_X_OFFSET;
-        double yLocation = pointY - LABEL_Y_OFFSET - height;
-
-        if (xLocation + width > plotAreaBounds.getMaxX()) {
-            xLocation = pointX - LABEL_X_OFFSET - width;
+        if (plotAreaBounds.contains(point)) {
+	        circle.setCenterX(pointX);
+	        circle.setCenterY(pointY);
+	
+	        double width = label.prefWidth(-1);
+	        double height = label.prefHeight(width);
+	
+	        double xLocation = pointX + LABEL_X_OFFSET;
+	        double yLocation = pointY - LABEL_Y_OFFSET - height;
+	
+	        if (xLocation + width > plotAreaBounds.getMaxX()) {
+	            xLocation = pointX - LABEL_X_OFFSET - width;
+	        }
+	        if (yLocation < plotAreaBounds.getMinY()) {
+	            yLocation = pointY + LABEL_Y_OFFSET;
+	        }
+	        label.resizeRelocate(xLocation, yLocation, width, height);
         }
-        if (yLocation < plotAreaBounds.getMinY()) {
-            yLocation = pointY + LABEL_Y_OFFSET;
-        }
-        label.resizeRelocate(xLocation, yLocation, width, height);
     }
     
     private Point2D getLocationInScene(Data<X, Y> pointInPlotArea) {

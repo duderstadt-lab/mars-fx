@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.gui;
 
+import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.NumericAxis;
 import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
@@ -73,11 +74,12 @@ public class Plot extends BorderPane {
 	LineChart<Number, Number> lineChart;
 	XYChartPane<Number, Number> chartPane;
 	
-	Zoomer zoomer;
 	Panner panner;
 	
 	BooleanProperty trackSelected = new SimpleBooleanProperty();
-	BooleanProperty zoomSelected = new SimpleBooleanProperty();
+	BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
+	BooleanProperty zoomXSelected = new SimpleBooleanProperty();
+	BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	BooleanProperty panSelected = new SimpleBooleanProperty();
 	BooleanProperty crosshairSelected = new SimpleBooleanProperty();
 
@@ -96,8 +98,7 @@ public class Plot extends BorderPane {
         }
         setCenter(centerPane);
         setTop(createToolBar());
-        
-        zoomer = new Zoomer(true);
+
     	panner = new Panner();
     	panner.setMouseFilter(PAN_MOUSE_FILTER);
 	}
@@ -105,16 +106,22 @@ public class Plot extends BorderPane {
 	private Node createToolBar() { 
 		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> addPlugin(new MARSDataPointTooltip<Number, Number>(), Cursor.DEFAULT),
 				null, trackSelected);
-		Action zoomCursor = new Action("select region", "Shortcut+S", PLUS, e -> addPlugin(zoomer, Cursor.CROSSHAIR),
-				null, zoomSelected);
-		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(panner, Cursor.OPEN_HAND),
+		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> addPlugin(new Zoomer(true), Cursor.CROSSHAIR),
+				null, zoomXYSelected);
+		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> addPlugin(new Zoomer(AxisMode.X, true), Cursor.H_RESIZE),
+				null, zoomXSelected);
+		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> addPlugin(new Zoomer(AxisMode.Y, true), Cursor.V_RESIZE),
+				null, zoomYSelected);
+		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(panner, Cursor.MOVE),
 				null, panSelected);
 		Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", CROSSHAIRS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
 				null, crosshairSelected);
 		
 		Node[] toolButtons = ActionUtils.createToolBarButtons(
 				trackCursor,
-				zoomCursor,
+				zoomXYCursor,
+				zoomXCursor,
+				zoomYCursor,
 				panCursor,
 				crosshairCursor);
 		
@@ -204,7 +211,7 @@ public class Plot extends BorderPane {
 	}
 	
 	private boolean toolSelected() {
-		if (trackSelected.get() || zoomSelected.get() || panSelected.get() || crosshairSelected.get())
+		if (trackSelected.get() || zoomXYSelected.get() || zoomXSelected.get() || zoomYSelected.get() || panSelected.get() || crosshairSelected.get())
 			return true;
 		else
 			return false;

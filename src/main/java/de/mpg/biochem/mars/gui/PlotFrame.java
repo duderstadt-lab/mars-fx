@@ -60,7 +60,7 @@ public class PlotFrame extends JFrame {
 		//Scene scene = new Scene(new LargeDataSetsSample());
 		plot = new Plot();
 		Scene scene = new Scene(plot);
-		
+		scene.getStylesheets().add("de/mpg/biochem/mars/gui/view/JMetroDarkTheme.css");
 		this.fxPanel.setScene(scene);
 		this.setSize(1000, 600);
 
