@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.gui.view;
 
+import de.mpg.biochem.mars.gui.PlotFrame;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -35,9 +36,9 @@ public class SinglePlotDialogController {
     }
 
     /**
-     * Sets the person to be edited in the dialog.
+     * Sets the table used to determine the available columns.
      * 
-     * @param person
+     * @param table
      */
     public void setTable(MARSResultsTable table) {
         this.table = table;
@@ -60,6 +61,18 @@ public class SinglePlotDialogController {
      */
     @FXML
     private void handleOk() {
+    	//We should create a new plot window using the specified input columns
+    	PlotFrame plotFrame = new PlotFrame();
+    	plotFrame.setTitle("Plot");
+    	plotFrame.init();
+    	
+    	if (table.hasColumn(xColumn.getValue()) && table.hasColumn(yColumn.getValue())) {
+    		plotFrame.getPlot().addLinePlot(table, xColumn.getValue(), yColumn.getValue());
+    		plotFrame.getPlot().setXLabel(xColumn.getValue());
+    		plotFrame.getPlot().setYLabel(yColumn.getValue());
+    	} else 
+    		System.out.println("Column not Found!");
+    	
         okClicked = true;
         dialogStage.close();
     }
