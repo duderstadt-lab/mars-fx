@@ -114,7 +114,7 @@ public class Plot extends BorderPane {
 				null, zoomYSelected);
 		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(panner, Cursor.MOVE),
 				null, panSelected);
-		Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", CROSSHAIRS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
+		Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", PLUS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
 				null, crosshairSelected);
 		
 		Node[] toolButtons = ActionUtils.createToolBarButtons(
@@ -192,7 +192,21 @@ public class Plot extends BorderPane {
 		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
 	}
-	
+	/*
+	 * TODO Finishe segment plot as overlay ???
+	public void addSegmentPlot(MARSResultsTable segmentTable) {
+		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
+		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+		for (int row=0; row< table.getRowCount(); row++) {
+			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
+		}
+		
+		lineChart.getData().add(series);
+		lineChart.setStyle("-fx-stroke-width: 1px;");
+		lineChart.setCreateSymbols(false);
+		lineChart.setAnimated(false);
+	}
+	*/
 	// Cursor Util functions
 	
 	private void addPlugin(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
