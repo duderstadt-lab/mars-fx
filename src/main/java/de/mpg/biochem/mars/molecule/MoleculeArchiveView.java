@@ -39,6 +39,7 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
+import de.mpg.biochem.mars.gui.MoleculeArchiveFrame;
 import net.imagej.display.WindowService;
 
 @Plugin(type = DisplayViewer.class)
@@ -58,7 +59,10 @@ public class MoleculeArchiveView extends AbstractDisplayViewer<MoleculeArchive> 
 		moleculeArchiveService.addArchive(archive);
 		d.setName(archive.getName());
 		
-		new MoleculeArchiveWindow(archive, moleculeArchiveService);
+		//new MoleculeArchiveWindow(archive, moleculeArchiveService);
+		MoleculeArchiveFrame moleculeFrame = new MoleculeArchiveFrame(archive, moleculeArchiveService);
+		moleculeFrame.setTitle(archive.getName());
+		moleculeFrame.init();
 	}
 
 	@Override
