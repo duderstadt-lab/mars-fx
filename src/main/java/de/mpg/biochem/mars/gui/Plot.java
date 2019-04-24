@@ -187,10 +187,10 @@ public class Plot extends BorderPane {
 			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
 		}
 
-		lineChart.getData().add(series);
 		lineChart.setStyle("-fx-stroke-width: 1px;");
 		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
+		lineChart.getData().add(series);
 	}
 	/*
 	 * TODO Finishe segment plot as overlay ???

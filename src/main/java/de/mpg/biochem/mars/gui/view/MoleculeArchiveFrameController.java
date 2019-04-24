@@ -67,7 +67,7 @@ public class MoleculeArchiveFrameController {
         tabContainer.setTabMaxWidth(tabWidth);
         tabContainer.setTabMinHeight(tabWidth);
         tabContainer.setTabMaxHeight(tabWidth);
-        //tabContainer.setRotateGraphic(true);
+        tabContainer.setRotateGraphic(true);
 
         EventHandler<Event> replaceBackgroundColorHandler = event -> {
             lastSelectedTabIndex = tabContainer.getSelectionModel().getSelectedIndex();
@@ -96,10 +96,10 @@ public class MoleculeArchiveFrameController {
         label.setTextAlignment(TextAlignment.CENTER);
 
         BorderPane tabPane = new BorderPane();
-        //tabPane.setRotate(90.0);
+        tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(icon, "1.2em"));
-        tabPane.setBottom(label);
+        //tabPane.setBottom(label);
 
         tab.setText("");
         tab.setGraphic(tabPane);
