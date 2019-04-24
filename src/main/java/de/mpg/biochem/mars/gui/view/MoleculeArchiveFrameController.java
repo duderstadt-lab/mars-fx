@@ -80,7 +80,7 @@ public class MoleculeArchiveFrameController {
             }
         };
 
-        configureTab(propertiesTab, "Properties", TACHOMETER, propertiesContainer, getClass().getResource("MAProperties.fxml"), replaceBackgroundColorHandler);
+        configureTab(propertiesTab, "Properties", DASHBOARD, propertiesContainer, getClass().getResource("MAProperties.fxml"), replaceBackgroundColorHandler);
         configureTab(imageMetaDataTab, "ImageMetaData", IMAGE, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
         configureTab(moleculesTab, "Molecules", COG, moleculesContainer, getClass().getResource("MAProperties.fxml"), replaceBackgroundColorHandler);
 
@@ -96,7 +96,7 @@ public class MoleculeArchiveFrameController {
         label.setTextAlignment(TextAlignment.CENTER);
 
         BorderPane tabPane = new BorderPane();
-        tabPane.setRotate(90.0);
+        //tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(icon, "1.2em"));
         tabPane.setBottom(label);
