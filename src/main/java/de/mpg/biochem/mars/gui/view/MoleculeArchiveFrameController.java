@@ -12,6 +12,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -19,6 +20,8 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
 import java.io.IOException;
@@ -26,16 +29,19 @@ import java.net.URL;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+
+
 public class MoleculeArchiveFrameController {
 
     @FXML
     private JFXTabPane tabContainer;
 
     @FXML
-    private Tab propertiesTab;
+    private Tab metricsTab;
 
     @FXML
-    private AnchorPane propertiesContainer;
+    private AnchorPane metricsContainer;
 
     @FXML
     private Tab imageMetaDataTab;
@@ -48,9 +54,20 @@ public class MoleculeArchiveFrameController {
     
     @FXML
     private AnchorPane moleculesContainer;
+    
+    @FXML
+    private Tab commentsTab;
+    
+    @FXML
+    private AnchorPane commentsContainer;
+    
+    @FXML
+    private Tab settingsTab;
+    
+    @FXML
+    private AnchorPane settingsContainer;
 
-
-    private double tabWidth = 90.0;
+    private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
 
     /// Life cycle
@@ -79,16 +96,23 @@ public class MoleculeArchiveFrameController {
                 currentTab.setStyle("-fx-background-color: -fx-accent;");
             }
         };
+        
+        Region microscopeIcon = new Region();
+        microscopeIcon.getStyleClass().add("microscopeIcon");
 
-        configureTab(propertiesTab, "Properties", DASHBOARD, propertiesContainer, getClass().getResource("MAProperties.fxml"), replaceBackgroundColorHandler);
-        configureTab(imageMetaDataTab, "ImageMetaData", IMAGE, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
-        configureTab(moleculesTab, "Molecules", COG, moleculesContainer, getClass().getResource("MAProperties.fxml"), replaceBackgroundColorHandler);
-
-        propertiesTab.setStyle("-fx-background-color: -fx-focus-color;");
+        configureTab(metricsTab, "Metrics", FontAwesomeIconFactory.get().createIcon(DASHBOARD, "1.3em"), metricsContainer, getClass().getResource("MAMetrics.fxml"), replaceBackgroundColorHandler);
+        configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
+        configureTab(moleculesTab, "Molecules", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.GRAIN, "1.3em"), moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
+        configureTab(commentsTab, "Comments", FontAwesomeIconFactory.get().createIcon(BOOK, "1.3em"), commentsContainer, getClass().getResource("MAComments.fxml"), replaceBackgroundColorHandler);
+        configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
+        
+        metricsTab.setStyle("-fx-background-color: -fx-focus-color;");
+        
     }
 
-    private void configureTab(Tab tab, String title, GlyphIcons icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-
+    private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
+    	
+    	
         Label label = new Label(title);
         label.setMaxWidth(tabWidth - 20);
         label.setPadding(new Insets(5, 0, 0, 0));
@@ -98,7 +122,7 @@ public class MoleculeArchiveFrameController {
         BorderPane tabPane = new BorderPane();
         tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
-        tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(icon, "1.2em"));
+        tabPane.setCenter(icon);
         //tabPane.setBottom(label);
 
         tab.setText("");
