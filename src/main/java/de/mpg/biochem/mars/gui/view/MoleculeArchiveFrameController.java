@@ -100,10 +100,16 @@ public class MoleculeArchiveFrameController {
         Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
 
-        configureTab(metricsTab, "Metrics", FontAwesomeIconFactory.get().createIcon(DASHBOARD, "1.3em"), metricsContainer, getClass().getResource("MAMetrics.fxml"), replaceBackgroundColorHandler);
+        Region moleculeIcon = new Region();
+        moleculeIcon.getStyleClass().add("moleculeIcon");
+        
+        Region bookIcon = new Region();
+        bookIcon.getStyleClass().add("bookIcon");
+        
+        configureTab(metricsTab, "Metrics", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), metricsContainer, getClass().getResource("MAMetrics.fxml"), replaceBackgroundColorHandler);
         configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
-        configureTab(moleculesTab, "Molecules", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.GRAIN, "1.3em"), moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
-        configureTab(commentsTab, "Comments", FontAwesomeIconFactory.get().createIcon(BOOK, "1.3em"), commentsContainer, getClass().getResource("MAComments.fxml"), replaceBackgroundColorHandler);
+        configureTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
+        configureTab(commentsTab, "Comments", bookIcon, commentsContainer, getClass().getResource("MAComments.fxml"), replaceBackgroundColorHandler);
         configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
         
         metricsTab.setStyle("-fx-background-color: -fx-focus-color;");
@@ -111,8 +117,7 @@ public class MoleculeArchiveFrameController {
     }
 
     private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-    	
-    	
+
         Label label = new Label(title);
         label.setMaxWidth(tabWidth - 20);
         label.setPadding(new Insets(5, 0, 0, 0));
