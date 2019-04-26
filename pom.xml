@@ -319,11 +319,6 @@
 			<version>0.12.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<version>3.8.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.markdownwriterfx</groupId>
 			<artifactId>markdown-writer-fx</artifactId>
 			<version>0.12</version>

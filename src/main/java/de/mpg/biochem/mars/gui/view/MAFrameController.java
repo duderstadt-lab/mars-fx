@@ -26,22 +26,26 @@ import javafx.scene.text.TextAlignment;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.gui.MARSResultsTableFrame;
+import de.mpg.biochem.mars.gui.MoleculeArchiveFrame;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 
-public class MoleculeArchiveFrameController {
+public class MAFrameController {
 
     @FXML
     private JFXTabPane tabContainer;
 
     @FXML
-    private Tab metricsTab;
+    private Tab dashboardTab;
 
     @FXML
-    private AnchorPane metricsContainer;
+    private AnchorPane dashboardContainer;
 
     @FXML
     private Tab imageMetaDataTab;
@@ -66,6 +70,11 @@ public class MoleculeArchiveFrameController {
     
     @FXML
     private AnchorPane settingsContainer;
+    
+	@FXML
+	private MoleculeArchive archive;
+	
+	private ArrayList<MAPaneController> tabPaneControllers;
 
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -74,8 +83,16 @@ public class MoleculeArchiveFrameController {
 
     @FXML
     public void initialize() {
+    	tabPaneControllers = new ArrayList<MAPaneController>();
         configureView();
     }
+    
+	public void setArchive(MoleculeArchive archive) {
+		this.archive = archive;
+		
+		for (MAPaneController controller :tabPaneControllers)
+			controller.setArchive(archive);
+	}
 
     /// Private
 
@@ -106,24 +123,25 @@ public class MoleculeArchiveFrameController {
         Region bookIcon = new Region();
         bookIcon.getStyleClass().add("bookIcon");
         
-        configureTab(metricsTab, "Metrics", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), metricsContainer, getClass().getResource("MAMetrics.fxml"), replaceBackgroundColorHandler);
+        configureTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("MADashboard.fxml"), replaceBackgroundColorHandler);
         configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
         configureTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
         configureTab(commentsTab, "Comments", bookIcon, commentsContainer, getClass().getResource("MAComments.fxml"), replaceBackgroundColorHandler);
         configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
         
-        metricsTab.setStyle("-fx-background-color: -fx-focus-color;");
+        dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
         
     }
 
     private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-
+/*
         Label label = new Label(title);
         label.setMaxWidth(tabWidth - 20);
         label.setPadding(new Insets(5, 0, 0, 0));
         label.setStyle("-fx-text-fill: black; -fx-font-size: 8pt; -fx-font-weight: normal;");
         label.setTextAlignment(TextAlignment.CENTER);
-
+*/
+    	
         BorderPane tabPane = new BorderPane();
         tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
@@ -137,7 +155,12 @@ public class MoleculeArchiveFrameController {
 
         if (containerPane != null && resourceURL != null) {
             try {
-                Parent contentView = FXMLLoader.load(resourceURL);
+            	FXMLLoader loader = new FXMLLoader();
+    	        loader.setLocation(resourceURL);
+                Parent contentView = loader.load();
+                
+                MAPaneController controller = loader.getController();
+                tabPaneControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 AnchorPane.setTopAnchor(contentView, 0.0);
                 AnchorPane.setBottomAnchor(contentView, 0.0);

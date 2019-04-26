@@ -75,12 +75,15 @@ public class MoleculeArchiveFrame extends JFrame {
 	public void initFX(JFXPanel fxPanel) {	
 		try {
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MoleculeArchiveFrameController.class.getResource("MoleculeArchiveFrameLayout.fxml"));
+			loader.setLocation(MAFrameController.class.getResource("MAFrameLayout.fxml"));
 			StackPane root = (StackPane) loader.load();
 			
 			Scene scene = new Scene(root);
 			this.fxPanel.setScene(scene);
 			this.setSize(600, 600);
+			
+			MAFrameController controller = loader.getController();
+            controller.setArchive(archive);
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -58,8 +58,8 @@ import java.util.function.Predicate;
 
 //import org.controlsfx.control.PopOver;
 //import org.controlsfx.control.PopOver.ArrowLocation;
-import de.mpg.biochem.mars.util.Action;
-import de.mpg.biochem.mars.util.ActionUtils;
+import org.markdownwriterfx.util.Action;
+import org.markdownwriterfx.util.ActionUtils;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
