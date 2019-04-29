@@ -75,6 +75,8 @@ public class MAFrameController {
 	private MoleculeArchive archive;
 	
 	private ArrayList<MAPaneController> tabPaneControllers;
+	
+    private MACommentsController commentsController;
 
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -126,27 +128,40 @@ public class MAFrameController {
         configureTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("MADashboard.fxml"), replaceBackgroundColorHandler);
         configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
         configureTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
-        configureTab(commentsTab, "Comments", bookIcon, commentsContainer, getClass().getResource("MAComments.fxml"), replaceBackgroundColorHandler);
+        configureCommentsTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
         configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
         
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
         
     }
-
-    private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-/*
-        Label label = new Label(title);
-        label.setMaxWidth(tabWidth - 20);
-        label.setPadding(new Insets(5, 0, 0, 0));
-        label.setStyle("-fx-text-fill: black; -fx-font-size: 8pt; -fx-font-weight: normal;");
-        label.setTextAlignment(TextAlignment.CENTER);
-*/
+    
+    //Here we manually create the Comment Controller so we can load the MarkDown editor.
+    private void configureCommentsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
+    	commentsController = new MACommentsController(archive);
+    	tabPaneControllers.add(commentsController);
     	
+    	BorderPane tabPane = new BorderPane();
+        tabPane.setRotate(90.0);
+        tabPane.setMaxWidth(tabWidth);
+        tabPane.setCenter(icon);
+
+        tab.setText("");
+        tab.setGraphic(tabPane);
+
+        tab.setOnSelectionChanged(onSelectionChangedEvent);
+        
+        containerPane.getChildren().add(commentsController);
+        AnchorPane.setTopAnchor(commentsController, 0.0);
+        AnchorPane.setBottomAnchor(commentsController, 0.0);
+        AnchorPane.setRightAnchor(commentsController, 0.0);
+        AnchorPane.setLeftAnchor(commentsController, 0.0);
+    }
+    
+    private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
         BorderPane tabPane = new BorderPane();
         tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(icon);
-        //tabPane.setBottom(label);
 
         tab.setText("");
         tab.setGraphic(tabPane);
