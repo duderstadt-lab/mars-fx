@@ -1,5 +1,4 @@
 /*******************************************************************************
- * Copyright (C) 2019, Karl Duderstadt
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -87,6 +86,7 @@ import de.mpg.biochem.mars.table.MARSResultsTable;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
 import ij.gui.ImageLayout;
+import ij.gui.ImageWindow;
 
 public class MoleculePanel extends JPanel implements BoundsChangedListener, MoleculeChangedListener {
 

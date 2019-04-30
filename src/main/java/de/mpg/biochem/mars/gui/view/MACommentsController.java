@@ -80,7 +80,7 @@ public class MACommentsController extends BorderPane implements MAPaneController
 		
 		Utils.fixSpaceAfterDeadKey(scene);
 		
-		Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
+		//Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
     }
     
 	static private Preferences getPrefsRoot() {
