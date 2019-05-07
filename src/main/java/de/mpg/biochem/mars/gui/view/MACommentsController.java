@@ -226,12 +226,8 @@ public class MACommentsController extends BorderPane implements MAPaneController
 		toolBar.getItems().add(new Separator());
 
 		// preview actions
-		Node[] previewButtons = ActionUtils.createToolBarButtons(
-				viewPreviewAction);
-		ToggleGroup viewGroup = new ToggleGroup();
-		for (Node n : previewButtons)
-			((ToggleButton)n).setToggleGroup(viewGroup);
-		toolBar.getItems().addAll(previewButtons);
+		Node previewButton = ActionUtils.createToolBarButton(viewPreviewAction);
+		toolBar.getItems().add(previewButton);
 
 		return toolBar;
 	}

@@ -84,6 +84,9 @@ public class CommentEditor extends AnchorPane {
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
 		
+		Options.markdownRendererProperty().addListener(previewTypeListener);
+		previewVisible.addListener(previewTypeListener);
+		
 		initialize();
 	}
 
@@ -152,12 +155,8 @@ public class CommentEditor extends AnchorPane {
 		MarkdownPreviewPane.Type previewType = Type.None;
 		if (previewVisible.get())
 			previewType = MarkdownPreviewPane.Type.Web;
-		else if (htmlSourceVisible.get())
-			previewType = MarkdownPreviewPane.Type.Source;
-		else if (markdownAstVisible.get())
-			previewType = MarkdownPreviewPane.Type.Ast;
-		else if (externalVisible.get() && MarkdownPreviewPane.hasExternalPreview())
-		    previewType = MarkdownPreviewPane.Type.External;
+		else 
+			previewType = Type.None;
 		return previewType;
 	}
 
