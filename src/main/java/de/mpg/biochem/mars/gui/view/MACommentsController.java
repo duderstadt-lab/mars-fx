@@ -54,6 +54,7 @@ public class MACommentsController extends BorderPane implements MAPaneController
 	private Scene scene;
 	private Node extensionsButton;
     final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
+    final BooleanProperty editModeActive = new SimpleBooleanProperty(false);
 
     private CommentEditor commentEditor;
     
@@ -92,32 +93,35 @@ public class MACommentsController extends BorderPane implements MAPaneController
 	}
     
     private Node createToolBar() {
+    	Action editModeAction = new Action("Edit", "Shortcut+E", PENCIL,
+				null, null, editModeActive);
+    	
 		// Edit actions
 		Action editUndoAction = new Action(Messages.get("MainWindow.editUndoAction"), "Shortcut+Z", UNDO,
-				e -> commentEditor.getEditor().undo(), null);
+				e -> commentEditor.getEditor().undo(), editModeActive);
 		Action editRedoAction = new Action(Messages.get("MainWindow.editRedoAction"), "Shortcut+Y", REPEAT,
-				e -> commentEditor.getEditor().redo(), null);
+				e -> commentEditor.getEditor().redo(), editModeActive);
 		Action editCutAction = new Action(Messages.get("MainWindow.editCutAction"), "Shortcut+X", CUT,
-				e -> commentEditor.getEditor().cut(), null);
+				e -> commentEditor.getEditor().cut(), editModeActive);
 		Action editCopyAction = new Action(Messages.get("MainWindow.editCopyAction"), "Shortcut+C", COPY,
-				e -> commentEditor.getEditor().copy(), null);
+				e -> commentEditor.getEditor().copy(), editModeActive);
 		Action editPasteAction = new Action(Messages.get("MainWindow.editPasteAction"), "Shortcut+V", PASTE,
-				e -> commentEditor.getEditor().paste(), null);
+				e -> commentEditor.getEditor().paste(), editModeActive);
 		Action editSelectAllAction = new Action(Messages.get("MainWindow.editSelectAllAction"), "Shortcut+A", null,
-				e -> commentEditor.getEditor().selectAll(), null);
+				e -> commentEditor.getEditor().selectAll(), editModeActive);
 		Action editFindAction = new Action(Messages.get("MainWindow.editFindAction"), "Shortcut+F", SEARCH,
-				e -> commentEditor.getEditor().find(false), null);
+				e -> commentEditor.getEditor().find(false), editModeActive);
 		Action editReplaceAction = new Action(Messages.get("MainWindow.editReplaceAction"), "Shortcut+H", RETWEET,
-				e -> commentEditor.getEditor().find(true), null);
+				e -> commentEditor.getEditor().find(true), editModeActive);
 		Action editFindNextAction = new Action(Messages.get("MainWindow.editFindNextAction"), "F3", null,
-				e -> commentEditor.getEditor().findNextPrevious(true), null);
+				e -> commentEditor.getEditor().findNextPrevious(true), editModeActive);
 		Action editFindPreviousAction = new Action(Messages.get("MainWindow.editFindPreviousAction"), "Shift+F3", null,
-				e -> commentEditor.getEditor().findNextPrevious(false), null);
+				e -> commentEditor.getEditor().findNextPrevious(false), editModeActive);
 
 		Action editFormatAllAction = new Action(Messages.get("MainWindow.editFormatAll"), "Shortcut+Shift+F", null,
-				e -> commentEditor.getEditor().getSmartEdit().format(false, null), null);
+				e -> commentEditor.getEditor().getSmartEdit().format(false, null), editModeActive);
 		Action editFormatSelectionAction = new Action(Messages.get("MainWindow.editFormatSelection"), "Shortcut+Shift+Alt+F", null,
-				e -> commentEditor.getEditor().getSmartEdit().format(true, null), null);
+				e -> commentEditor.getEditor().getSmartEdit().format(true, null), editModeActive);
 		
 		// View actions
 		Action viewPreviewAction = new Action(Messages.get("MainWindow.viewPreviewAction"), null, EYE,
@@ -131,40 +135,40 @@ public class MACommentsController extends BorderPane implements MAPaneController
 
 		// Insert actions
 		Action insertBoldAction = new Action(Messages.get("MainWindow.insertBoldAction"), "Shortcut+B", BOLD,
-				e -> commentEditor.getEditor().getSmartEdit().insertBold(Messages.get("MainWindow.insertBoldText")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertBold(Messages.get("MainWindow.insertBoldText")), editModeActive);
 		Action insertItalicAction = new Action(Messages.get("MainWindow.insertItalicAction"), "Shortcut+I", ITALIC,
-				e -> commentEditor.getEditor().getSmartEdit().insertItalic(Messages.get("MainWindow.insertItalicText")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertItalic(Messages.get("MainWindow.insertItalicText")), editModeActive);
 		Action insertStrikethroughAction = new Action(Messages.get("MainWindow.insertStrikethroughAction"), "Shortcut+T", STRIKETHROUGH,
-				e -> commentEditor.getEditor().getSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")), editModeActive);
 		Action insertCodeAction = new Action(Messages.get("MainWindow.insertCodeAction"), "Shortcut+K", CODE,
-				e -> commentEditor.getEditor().getSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")), editModeActive);
 
 		Action insertLinkAction = new Action(Messages.get("MainWindow.insertLinkAction"), "Shortcut+L", LINK,
-				e -> commentEditor.getEditor().getSmartEdit().insertLink(), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertLink(), editModeActive);
 		Action insertImageAction = new Action(Messages.get("MainWindow.insertImageAction"), "Shortcut+G", PICTURE_ALT,
-				e -> commentEditor.getEditor().getSmartEdit().insertImage(), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertImage(), editModeActive);
 
 		Action insertUnorderedListAction = new Action(Messages.get("MainWindow.insertUnorderedListAction"), "Shortcut+U", LIST_UL,
-				e -> commentEditor.getEditor().getSmartEdit().insertUnorderedList(), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertUnorderedList(), editModeActive);
 		Action insertOrderedListAction = new Action(Messages.get("MainWindow.insertOrderedListAction"), "Shortcut+Shift+U", LIST_OL,
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n1. ", ""), null);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n1. ", ""), editModeActive);
 		Action insertBlockquoteAction = new Action(Messages.get("MainWindow.insertBlockquoteAction"), "Ctrl+Q", QUOTE_LEFT, // not Shortcut+Q because of conflict on Mac
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n> ", ""), null);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n> ", ""), editModeActive);
 		Action insertFencedCodeBlockAction = new Action(Messages.get("MainWindow.insertFencedCodeBlockAction"), "Shortcut+Shift+K", FILE_CODE_ALT,
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n```\n", "\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")), null);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n```\n", "\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")), editModeActive);
 
 		Action insertHeader1Action = new Action(Messages.get("MainWindow.insertHeader1Action"), "Shortcut+1", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(1, Messages.get("MainWindow.insertHeader1Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(1, Messages.get("MainWindow.insertHeader1Text")), editModeActive);
 		Action insertHeader2Action = new Action(Messages.get("MainWindow.insertHeader2Action"), "Shortcut+2", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(2, Messages.get("MainWindow.insertHeader2Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(2, Messages.get("MainWindow.insertHeader2Text")), editModeActive);
 		Action insertHeader3Action = new Action(Messages.get("MainWindow.insertHeader3Action"), "Shortcut+3", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(3, Messages.get("MainWindow.insertHeader3Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(3, Messages.get("MainWindow.insertHeader3Text")), editModeActive);
 		Action insertHeader4Action = new Action(Messages.get("MainWindow.insertHeader4Action"), "Shortcut+4", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(4, Messages.get("MainWindow.insertHeader4Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(4, Messages.get("MainWindow.insertHeader4Text")), editModeActive);
 		Action insertHeader5Action = new Action(Messages.get("MainWindow.insertHeader5Action"), "Shortcut+5", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(5, Messages.get("MainWindow.insertHeader5Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(5, Messages.get("MainWindow.insertHeader5Text")), editModeActive);
 		Action insertHeader6Action = new Action(Messages.get("MainWindow.insertHeader6Action"), "Shortcut+6", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")), null);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")), editModeActive);
 
 		//Action insertHorizontalRuleAction = new Action(Messages.get("MainWindow.insertHorizontalRuleAction"), null, null,
 		//		e -> getActiveSmartEdit().surroundSelection("\n\n---\n\n", ""),
@@ -192,6 +196,10 @@ public class MACommentsController extends BorderPane implements MAPaneController
 				new Action(insertFencedCodeBlockAction, createActiveEditBooleanProperty(SmartEdit::fencedCodeProperty)),
 				null,
 				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)));
+		
+		toolBar.getItems().add(0, new Separator());
+		Node editModeButton = ActionUtils.createToolBarButton(editModeAction);
+		toolBar.getItems().add(0, editModeButton);
 
 		// horizontal spacer
 		Region spacer = new Region();
@@ -209,7 +217,9 @@ public class MACommentsController extends BorderPane implements MAPaneController
 		Options.markdownRendererProperty().addListener((ob, o, n) -> {
 			previewRenderer.getSelectionModel().select(n);
 		});
-		toolBar.getItems().add(previewRenderer);
+		
+		//For the moment we just leave the CommonMark Editor
+		//toolBar.getItems().add(previewRenderer);
 
 		// markdown extensions popover
 		String title = Messages.get("MainWindow.MarkdownExtensions");
@@ -245,6 +255,10 @@ public class MACommentsController extends BorderPane implements MAPaneController
 				// would throw a "bound value cannot be set" exception
 			}
 		};
+		
+		b.unbind();
+		
+		b.bind(func.apply(commentEditor.getEditor().getSmartEdit()));
 		
 		return b;
 	}
