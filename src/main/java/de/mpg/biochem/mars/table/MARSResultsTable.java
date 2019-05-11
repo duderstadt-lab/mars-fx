@@ -73,7 +73,6 @@ import net.imglib2.type.numeric.real.DoubleType;
  * 
  * @author Karl Duderstadt
  */
-//public class MARSResultsTable extends AbstractTable<DoubleColumn, Double> implements ResultsTable {
 public class MARSResultsTable extends AbstractTable<Column<? extends Object>, Object> implements GenericTable {
 
 	/**

@@ -11,6 +11,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -21,6 +22,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
@@ -38,18 +40,18 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 public class MAFrameController {
 
-    @FXML
+	@FXML
     private JFXTabPane tabContainer;
 
-    @FXML
+	@FXML
     private Tab dashboardTab;
-
-    @FXML
+	
+	@FXML
     private AnchorPane dashboardContainer;
 
-    @FXML
+	@FXML
     private Tab imageMetaDataTab;
-
+    
     @FXML
     private AnchorPane imageMetaDataContainer;
 
@@ -70,28 +72,24 @@ public class MAFrameController {
     
     @FXML
     private AnchorPane settingsContainer;
-    
-	@FXML
-	private MoleculeArchive archive;
 	
 	private ArrayList<MAPaneController> tabPaneControllers;
 	
     private MACommentsController commentsController;
+    
+    private MAMoleculesController moleculesController;
 
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
-
-    /// Life cycle
-
+    
     @FXML
     public void initialize() {
     	tabPaneControllers = new ArrayList<MAPaneController>();
         configureView();
     }
+
     
 	public void setArchive(MoleculeArchive archive) {
-		this.archive = archive;
-		
 		for (MAPaneController controller :tabPaneControllers)
 			controller.setArchive(archive);
 	}
@@ -127,7 +125,7 @@ public class MAFrameController {
         
         configureTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("MADashboard.fxml"), replaceBackgroundColorHandler);
         configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
-        configureTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, getClass().getResource("MAMolecules.fxml"), replaceBackgroundColorHandler);
+        configureMoleculesTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
         configureCommentsTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
         configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
         
@@ -137,7 +135,7 @@ public class MAFrameController {
     
     //Here we manually create the Comment Controller so we can load the MarkDown editor.
     private void configureCommentsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	commentsController = new MACommentsController(archive);
+    	commentsController = new MACommentsController();
     	tabPaneControllers.add(commentsController);
     	
     	BorderPane tabPane = new BorderPane();
@@ -155,6 +153,28 @@ public class MAFrameController {
         AnchorPane.setBottomAnchor(commentsController, 0.0);
         AnchorPane.setRightAnchor(commentsController, 0.0);
         AnchorPane.setLeftAnchor(commentsController, 0.0);
+    }
+    
+  //Here we manually create the Molecules Controller.
+    private void configureMoleculesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
+    	moleculesController = new MAMoleculesController();
+    	tabPaneControllers.add(moleculesController);
+    	
+    	BorderPane tabPane = new BorderPane();
+        tabPane.setRotate(90.0);
+        tabPane.setMaxWidth(tabWidth);
+        tabPane.setCenter(icon);
+
+        tab.setText("");
+        tab.setGraphic(tabPane);
+
+        tab.setOnSelectionChanged(onSelectionChangedEvent);
+        
+        containerPane.getChildren().add(moleculesController.getNode());
+        AnchorPane.setTopAnchor(moleculesController.getNode(), 0.0);
+        AnchorPane.setBottomAnchor(moleculesController.getNode(), 0.0);
+        AnchorPane.setRightAnchor(moleculesController.getNode(), 0.0);
+        AnchorPane.setLeftAnchor(moleculesController.getNode(), 0.0);
     }
     
     private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
@@ -186,5 +206,4 @@ public class MAFrameController {
             }
         }
     }
-
 }

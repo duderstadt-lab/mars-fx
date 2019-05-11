@@ -20,7 +20,6 @@ public class MASettingsController implements MAPaneController {
 	}
 	
 	public void handleToggleSmileEncoding() {
-		System.out.println("Toggled");
 		if (smileEncodingButton.isSelected()) {
 			archive.setSMILEOutputEncoding();
 		} else {

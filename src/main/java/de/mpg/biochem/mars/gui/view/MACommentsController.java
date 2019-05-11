@@ -51,6 +51,8 @@ import org.markdownwriterfx.preview.MarkdownPreviewPane;
 import org.markdownwriterfx.util.Utils;
 
 public class MACommentsController extends BorderPane implements MAPaneController {
+	
+	private BorderPane borderPane;
 	private Scene scene;
 	private Node extensionsButton;
     final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
@@ -60,7 +62,7 @@ public class MACommentsController extends BorderPane implements MAPaneController
     
 	MoleculeArchive archive;
 	
-	public MACommentsController(MoleculeArchive archive) {
+	public MACommentsController() {
 		this.archive = archive;
 		initialize();
 	}
