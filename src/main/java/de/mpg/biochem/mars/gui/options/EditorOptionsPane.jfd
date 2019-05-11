@@ -1,0 +1,120 @@
+JFDML JFormDesigner: "999.9.9.9.9999" Java: "1.8.0_181" encoding: "UTF-8"
+
+new FormModel {
+	"i18n.autoExternalize": true
+	"i18n.bundlePackage": "de.mpg.biochem.mars.gui"
+	"i18n.bundleName": "messages"
+	"i18n.keyPrefix": "EditorOptionsPane"
+	contentType: "form/javafx"
+	root: new FormRoot {
+		add( new FormContainer( "org.tbee.javafx.scene.layout.fxml.MigPane", new FormLayoutManager( class org.tbee.javafx.scene.layout.fxml.MigPane ) {
+			"$layoutConstraints": "hidemode 3"
+			"$columnConstraints": "[indent,fill]0[fill][fill][fill]"
+			"$rowConstraints": "[][][][]para[][][][]"
+		} ) {
+			name: "this"
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "markersTitle"
+				"text": new FormMessage( null, "EditorOptionsPane.markersTitle.text" )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 0 2 1"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "strongEmphasisMarkerLabel"
+				"text": new FormMessage( null, "EditorOptionsPane.strongEmphasisMarkerLabel.text" )
+				"mnemonicParsing": true
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 1"
+			} )
+			add( new FormComponent( "javafx.scene.control.ChoiceBox" ) {
+				name: "strongEmphasisMarkerField"
+				auxiliary() {
+					"JavaCodeGenerator.typeParameters": "String"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 2 1"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "emphasisMarkerLabel"
+				"text": new FormMessage( null, "EditorOptionsPane.emphasisMarkerLabel.text" )
+				"mnemonicParsing": true
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 2"
+			} )
+			add( new FormComponent( "javafx.scene.control.ChoiceBox" ) {
+				name: "emphasisMarkerField"
+				auxiliary() {
+					"JavaCodeGenerator.typeParameters": "String"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 2 2"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "bulletListMarkerLabel"
+				"text": new FormMessage( null, "EditorOptionsPane.bulletListMarkerLabel.text" )
+				"mnemonicParsing": true
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 3"
+			} )
+			add( new FormComponent( "javafx.scene.control.ChoiceBox" ) {
+				name: "bulletListMarkerField"
+				auxiliary() {
+					"JavaCodeGenerator.typeParameters": "String"
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 2 3"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "formatTitle"
+				"text": new FormMessage( null, "EditorOptionsPane.formatTitle.text" )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 0 4 2 1"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "wrapLineLengthLabel"
+				"text": new FormMessage( null, "EditorOptionsPane.wrapLineLengthLabel.text" )
+				"mnemonicParsing": true
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 5"
+			} )
+			add( new FormComponent( "de.mpg.biochem.mars.gui.controls.IntSpinner" ) {
+				name: "wrapLineLengthField"
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 2 5"
+			} )
+			add( new FormComponent( "javafx.scene.control.Label" ) {
+				name: "wrapLineLengthLabel2"
+				"text": new FormMessage( null, "EditorOptionsPane.wrapLineLengthLabel2.text" )
+				auxiliary() {
+					"JavaCodeGenerator.variableLocal": true
+				}
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 3 5"
+			} )
+			add( new FormComponent( "javafx.scene.control.CheckBox" ) {
+				name: "formatOnSaveCheckBox"
+				"text": new FormMessage( null, "EditorOptionsPane.formatOnSaveCheckBox.text" )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 6 2 1,alignx left,growx 0"
+			} )
+			add( new FormComponent( "javafx.scene.control.CheckBox" ) {
+				name: "formatOnlyModifiedParagraphsCheckBox"
+				"text": new FormMessage( null, "EditorOptionsPane.formatOnlyModifiedParagraphsCheckBox.text" )
+			}, new FormLayoutConstraints( class net.miginfocom.layout.CC ) {
+				"value": "cell 1 7 2 1,alignx left,growx 0"
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new javafx.geometry.Point2D( 0.0, 0.0 )
+			"size": new javafx.geometry.Dimension2D( 400.0, 300.0 )
+		} )
+	}
+}

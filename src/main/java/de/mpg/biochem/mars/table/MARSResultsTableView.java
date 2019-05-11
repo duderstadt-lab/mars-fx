@@ -38,7 +38,7 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
-import de.mpg.biochem.mars.gui.MARSResultsTableFrame;
+import de.mpg.biochem.mars.gui.table.MARSResultsTableFrame;
 import net.imagej.ImageJ;
 import net.imagej.display.WindowService;
 

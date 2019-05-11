@@ -1,0 +1,46 @@
+JFDML JFormDesigner: "999.9.9.9.9999" Java: "1.8.0_192" encoding: "UTF-8"
+
+new FormModel {
+	"i18n.bundlePackage": "de.mpg.biochem.mars.gui"
+	"i18n.bundleName": "messages"
+	"i18n.keyPrefix": "OptionsDialog"
+	"i18n.autoExternalize": true
+	contentType: "form/javafx"
+	root: new FormRoot {
+		add( new FormContainer( "javafx.scene.control.TabPane", new FormLayoutManager( class javafx.scene.control.TabPane ) ) {
+			name: "tabPane"
+			"tabClosingPolicy": enum javafx.scene.control.TabPane$TabClosingPolicy UNAVAILABLE
+			add( new FormContainer( "javafx.scene.control.Tab", new FormLayoutManager( class javafx.scene.control.Tab ) ) {
+				name: "generalTab"
+				"text": new FormMessage( null, "OptionsDialog.generalTab.text" )
+				add( new FormComponent( "de.mpg.biochem.mars.gui.options.GeneralOptionsPane" ) {
+					name: "generalOptionsPane"
+				} )
+			} )
+			add( new FormContainer( "javafx.scene.control.Tab", new FormLayoutManager( class javafx.scene.control.Tab ) ) {
+				name: "editorTab"
+				"text": new FormMessage( null, "OptionsDialog.editorTab.text" )
+				add( new FormComponent( "de.mpg.biochem.mars.gui.options.EditorOptionsPane" ) {
+					name: "editorOptionsPane"
+				} )
+			} )
+			add( new FormContainer( "javafx.scene.control.Tab", new FormLayoutManager( class javafx.scene.control.Tab ) ) {
+				name: "markdownTab"
+				"text": new FormMessage( null, "OptionsDialog.markdownTab.text" )
+				add( new FormComponent( "de.mpg.biochem.mars.gui.options.MarkdownOptionsPane" ) {
+					name: "markdownOptionsPane"
+				} )
+			} )
+			add( new FormContainer( "javafx.scene.control.Tab", new FormLayoutManager( class javafx.scene.control.Tab ) ) {
+				name: "stylesheetsTab"
+				"text": new FormMessage( null, "OptionsDialog.stylesheetsTab.text" )
+				add( new FormComponent( "de.mpg.biochem.mars.gui.options.StylesheetsOptionsPane" ) {
+					name: "stylesheetsOptionsPane"
+				} )
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new javafx.geometry.Point2D( 0.0, 0.0 )
+			"size": new javafx.geometry.Dimension2D( 600.0, 560.0 )
+		} )
+	}
+}

@@ -58,7 +58,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-import de.mpg.biochem.mars.gui.MARSResultsTableFrame;
+import de.mpg.biochem.mars.gui.table.MARSResultsTableFrame;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.util.MARSMath;
 import ij.text.TextWindow;

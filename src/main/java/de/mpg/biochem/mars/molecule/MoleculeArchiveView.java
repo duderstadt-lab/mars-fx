@@ -39,7 +39,7 @@ import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
-import de.mpg.biochem.mars.gui.MoleculeArchiveFrame;
+import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveFrame;
 import net.imagej.display.WindowService;
 
 @Plugin(type = DisplayViewer.class)

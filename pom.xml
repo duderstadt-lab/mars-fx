@@ -91,29 +91,6 @@
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
-	
-<build>
-	    <plugins>
-	    <plugin>
-		    <groupId>org.apache.maven.plugins</groupId>
-		    <artifactId>maven-enforcer-plugin</artifactId>
-		    <executions>
-		        <execution>
-		            <id>enforce-versions</id>
-		            <goals>
-		                <goal>enforce</goal>
-		            </goals>
-		        </execution>
-		    </executions>
-		    <configuration>
-		        <rules>
-		            <AlwaysPass />
-		        </rules>
-		        <fail>false</fail>
-		    </configuration>
-		</plugin>
-	    </plugins>
-	  </build>
 
 	<dependencies>
 		<dependency>
@@ -337,23 +314,13 @@
 			<version>0.12.1</version>
 		</dependency>
 		<dependency>
-			<groupId>org.markdownwriterfx</groupId>
-			<artifactId>markdown-writer-fx</artifactId>
-			<version>0.12</version>
-		</dependency>
-		<dependency>
 			<groupId>org.fxmisc.richtext</groupId>
 			<artifactId>richtextfx</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
-				<dependency>
-			<groupId>com.miglayout</groupId>
-			<artifactId>miglayout-javafx</artifactId>
-			<version>5.2</version>
-		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>
-			<artifactId>miglayout-core</artifactId>
+			<artifactId>miglayout-javafx</artifactId>
 			<version>5.2</version>
 		</dependency>
 	</dependencies>
