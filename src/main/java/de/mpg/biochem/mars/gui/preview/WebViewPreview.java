@@ -142,6 +142,7 @@ class WebViewPreview
 			+ "<body" + scrollScript + ">\n"
 			+ renderer.getHtml(false)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
+			+ "<script>" + anchorFixer() + "</script>\n"
 			+ "</body>\n"
 			+ "</html>");
 	}
@@ -166,6 +167,21 @@ class WebViewPreview
 
 	private String highlightNodesAt(IndexRange range) {
 		return "preview.highlightNodesAt(" + range.getEnd() + ")";
+	}
+	
+	private String anchorFixer() {
+		String anchorFixerScript = "  document.onclick = function (e) {\n" + 
+				"  e = e ||  window.event;\n" + 
+				"  var element = e.target || e.srcElement;\n" + 
+				"\n" + 
+				"  if (element.tagName == 'A') {\n" + 
+				"    if (element.href.charAt(0) == '#') {\n" + 
+				"      document.getElementById(element.href.substring(1,element.href.length)).scrollIntoView();\n" + 
+				"    }\n" + 
+				"    return false; // prevent default action and stop event propagation\n" + 
+				"  }\n" + 
+				"}\n";
+		return anchorFixerScript;
 	}
 
 	private String prismSyntaxHighlighting(Node astRoot) {
