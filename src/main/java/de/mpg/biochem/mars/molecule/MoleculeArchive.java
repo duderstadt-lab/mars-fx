@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.molecule;
 
 import de.mpg.biochem.mars.ImageProcessing.*;
+import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveFrame;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -123,7 +124,7 @@ import org.scijava.table.*;
 public class MoleculeArchive {
 	private String name;
 	
-	private MoleculeArchiveWindow win;
+	private MoleculeArchiveFrame win;
 	
 	//Services that the archive will need access to but that are not initialized..
 	private MoleculeArchiveService moleculeArchiveService;
@@ -1575,7 +1576,7 @@ public class MoleculeArchive {
 	 * 
 	 * @return The MoleculeArchiveWindow containing this archive.
 	 */
-	public MoleculeArchiveWindow getWindow() {
+	public MoleculeArchiveFrame getWindow() {
 		return win;
 	}
 	
@@ -1584,7 +1585,7 @@ public class MoleculeArchive {
 	 * 
 	 * @param win Set the MoleculeArchiveWindow that contains this archive.
 	 */
-	public void setWindow(MoleculeArchiveWindow win) {
+	public void setWindow(MoleculeArchiveFrame win) {
 		this.win = win;
 	}
 	
@@ -1593,7 +1594,7 @@ public class MoleculeArchive {
 	 */
 	public void lock() {
 		if (win != null) {
-			win.lockArchive();
+			win.getController().lockArchive();
 		}
 	}
 	
@@ -1602,7 +1603,7 @@ public class MoleculeArchive {
 	 */
 	public void unlock() {
 		if (win != null) {
-			win.unlockArchive();
+			win.getController().unlockArchive();
 		}
 	}
 	

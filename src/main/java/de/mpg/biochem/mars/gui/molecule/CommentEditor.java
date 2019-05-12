@@ -78,9 +78,7 @@ public class CommentEditor extends AnchorPane {
 	
 	private MoleculeArchive archive;
 
-	public CommentEditor(MoleculeArchive archive) {
-		this.archive = archive;
-		
+	public CommentEditor() {
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
 		
@@ -166,8 +164,6 @@ public class CommentEditor extends AnchorPane {
 
 		markdownEditorPane.pathProperty().bind(path);
 
-		load();
-
 		// clear undo history after first load
 		markdownEditorPane.getUndoManager().forgetHistory();
 
@@ -204,9 +200,15 @@ public class CommentEditor extends AnchorPane {
 		editor.set(markdownEditorPane);
 	}
 
+	void setArchive(MoleculeArchive archive) {
+		this.archive = archive;
+		load();
+	}
+	
 	void load() {
-		//markdownEditorPane.setMarkdown(archive.getComments());
-		markdownEditorPane.setMarkdown("");
+		if (archive.getComments() == null)
+			archive.setComments("");
+		markdownEditorPane.setMarkdown(archive.getComments());
 		markdownEditorPane.getUndoManager().mark();
 	}
 

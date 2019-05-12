@@ -154,7 +154,7 @@ public class MoleculeArchiveWindow {
 	
 	public MoleculeArchiveWindow(MoleculeArchive archive, MoleculeArchiveService moleculeArchiveService) {
 		this.archive = archive;
-		archive.setWindow(this);
+		//archive.setWindow(this);
 		this.moleculeArchiveService = moleculeArchiveService;
 		this.prefService = 	moleculeArchiveService.getPrefService();
 		this.uiService = moleculeArchiveService.getUIService();

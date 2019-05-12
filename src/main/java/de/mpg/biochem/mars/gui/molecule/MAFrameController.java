@@ -77,6 +77,8 @@ public class MAFrameController {
     private MACommentsController commentsController;
     
     private MAMoleculesController moleculesController;
+    
+    private MoleculeArchive archive;
 
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -86,15 +88,13 @@ public class MAFrameController {
     	tabPaneControllers = new ArrayList<MAPaneController>();
         configureView();
     }
-
     
 	public void setArchive(MoleculeArchive archive) {
-		for (MAPaneController controller :tabPaneControllers)
+		this.archive = archive;
+		for (MAPaneController controller: tabPaneControllers)
 			controller.setArchive(archive);
 	}
-
-    /// Private
-
+	
     private void configureView() {
         tabContainer.setTabMinWidth(tabWidth);
         tabContainer.setTabMaxWidth(tabWidth);
@@ -204,5 +204,27 @@ public class MAFrameController {
                 e.printStackTrace();
             }
         }
+    }
+    
+    @FXML
+    private void handleClose() {
+    	archive.getWindow().close();
+    	save();
+    }
+    
+    public void updateAll() {
+    	
+    }
+    
+    public void save() {
+    	
+    }
+    
+    public void lockArchive() {
+    	
+    }
+    
+    public void unlockArchive() {
+    	
     }
 }

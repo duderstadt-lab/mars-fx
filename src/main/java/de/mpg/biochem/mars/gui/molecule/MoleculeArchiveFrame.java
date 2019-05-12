@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.gui.molecule;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.JFrame;
@@ -21,47 +23,64 @@ import ij.WindowManager;
 
 import de.mpg.biochem.mars.molecule.*;
 
-public class MoleculeArchiveFrame extends JFrame {
+public class MoleculeArchiveFrame {
 
 	private static final long serialVersionUID = 1L;
-
-	@Parameter
-	private LogService log;
 	
 	@Parameter
-    private ResultsTableService resultsTableService;
+    private MoleculeArchiveService moleculeArchiveService;
 	
     @Parameter
     private UIService uiService;
 
 	private MoleculeArchive archive;
+	
+	private MAFrameController controller;
+	
+	private JFrame frame;
+	private String title;
 
 	private JFXPanel fxPanel;
 
 	public MoleculeArchiveFrame(MoleculeArchive archive, MoleculeArchiveService moleculeArchiveService) {
-		//ij.context().inject(this);
-		//this.ij = ij;
+		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
-		//table.setWindow(this);
-		
-		// add window to window manager
-		// IJ1 style IJ2 doesn't seem to work...
-		if (!uiService.isHeadless())
-			WindowManager.addWindow(this);
+		this.moleculeArchiveService = moleculeArchiveService;
 	}
 
 	/**
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
 	public void init() {
-		//TODO add PlotPanel for JFXPanel..
+		frame = new JFrame(title);
+		
+		frame.addWindowListener(new WindowAdapter() {
+	         public void windowClosing(WindowEvent e) {
+					//try {
+						//if (archive.isLocked())
+						close();
+					//} catch (IOException e1) {
+						// TODO Auto-generated catch block
+					//	e1.printStackTrace();
+					//}
+	         }
+	      });
 		
 		this.fxPanel = new JFXPanel();
-		this.add(this.fxPanel);
-		this.setVisible(true);
+		frame.add(this.fxPanel);
+		frame.setVisible(true);
+		
+		if (!uiService.isHeadless())
+			WindowManager.addWindow(frame);
 
+		System.out.println("init");
+		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
+		// Allows multiple runLaters in the same session...
+		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
+		Platform.setImplicitExit(false);
+		
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -72,16 +91,17 @@ public class MoleculeArchiveFrame extends JFrame {
 	}
 
 	public void initFX(JFXPanel fxPanel) {	
+		System.out.println("init JFXPanel");
 		try {
 			FXMLLoader loader = new FXMLLoader();
 			loader.setLocation(MAFrameController.class.getResource("MAFrameLayout.fxml"));
-			StackPane root = (StackPane) loader.load();
+			BorderPane root = (BorderPane) loader.load();
 			
 			Scene scene = new Scene(root);
 			this.fxPanel.setScene(scene);
-			this.setSize(600, 600);
+			frame.setSize(600, 600);
 			
-			MAFrameController controller = loader.getController();
+			controller = loader.getController();
             controller.setArchive(archive);
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,5 +110,36 @@ public class MoleculeArchiveFrame extends JFrame {
 	
 	public MoleculeArchive getArchive() {
 		return archive;
+	}
+	
+	public MAFrameController getController() {
+		return controller;
+	}
+	
+	public JFrame getFrame() {
+		return frame;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
+	public void close() {
+		moleculeArchiveService.removeArchive(archive.getName());
+		
+		//TODO make sure active archive contents is saved on close !!!!
+		/*
+		if (archive.isVirtual()) {
+			imageMetaDataPanel.saveCurrentRecord();
+			moleculePanel.saveCurrentRecord();
+			archive.save();
+		}
+		*/
+
+		if (!uiService.isHeadless())
+			WindowManager.removeWindow(frame);
+		
+		frame.setVisible(false);
+		frame.dispose();
 	}
 }

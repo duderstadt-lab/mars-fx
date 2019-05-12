@@ -51,8 +51,7 @@ import de.mpg.biochem.mars.gui.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.gui.util.Utils;
 
 public class MACommentsController extends BorderPane implements MAPaneController {
-	
-	private BorderPane borderPane;
+
 	private Scene scene;
 	private Node extensionsButton;
     final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
@@ -63,7 +62,6 @@ public class MACommentsController extends BorderPane implements MAPaneController
 	MoleculeArchive archive;
 	
 	public MACommentsController() {
-		this.archive = archive;
 		initialize();
 	}
 	
@@ -73,7 +71,7 @@ public class MACommentsController extends BorderPane implements MAPaneController
     	//Build markdown gui
 		getStyleClass().add("main");
 		setPrefSize(800, 800);
-		commentEditor = new CommentEditor(archive);
+		commentEditor = new CommentEditor();
     	setCenter(commentEditor);
 		
 		setTop(createToolBar());
@@ -279,5 +277,6 @@ public class MACommentsController extends BorderPane implements MAPaneController
 	@Override
 	public void setArchive(MoleculeArchive archive) {
 		this.archive = archive;
+		commentEditor.setArchive(archive);
 	}
 }

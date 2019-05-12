@@ -106,8 +106,8 @@ public class AddTimeCommand extends DynamicCommand implements Command {
 				
 				//Unlock the window so it can be changed
 			    if (!uiService.isHeadless()) {
-			    	archive.getWindow().updateAll();
-					archive.getWindow().unlockArchive();
+			    	archive.getWindow().getController().updateAll();
+					archive.getWindow().getController().unlockArchive();
 				}
 				return;
 			}

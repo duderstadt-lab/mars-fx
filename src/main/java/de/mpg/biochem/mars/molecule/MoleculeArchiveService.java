@@ -45,6 +45,7 @@ import org.scijava.script.ScriptService;
 import org.scijava.service.Service;
 import org.scijava.ui.UIService;
 
+import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveFrame;
 import net.imagej.ImageJService;
 
 @Plugin(type = Service.class)
@@ -135,9 +136,10 @@ public class MoleculeArchiveService extends AbstractPTService<MoleculeArchiveSer
 			addArchive(archive);
 		if (!uiService.isHeadless()) {
 			if (archives.get(name).getWindow() != null) {
-				archives.get(name).getWindow().updateAll();
+				archives.get(name).getWindow().getController().updateAll();
 			} else {
-				MoleculeArchiveWindow win = new MoleculeArchiveWindow(archive, this);
+				MoleculeArchiveFrame win = new MoleculeArchiveFrame(archive, this);
+				win.init();
 				archives.get(name).setWindow(win);
 			}
 		}
@@ -179,7 +181,7 @@ public class MoleculeArchiveService extends AbstractPTService<MoleculeArchiveSer
 		return archives.get(name);
 	}
 	
-	public MoleculeArchiveWindow getArchiveWindow(String name) {
+	public MoleculeArchiveFrame getArchiveWindow(String name) {
 		return archives.get(name).getWindow();
 	}
 	

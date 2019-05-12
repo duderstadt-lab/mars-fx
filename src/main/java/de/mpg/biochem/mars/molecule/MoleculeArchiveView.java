@@ -59,9 +59,7 @@ public class MoleculeArchiveView extends AbstractDisplayViewer<MoleculeArchive> 
 		moleculeArchiveService.addArchive(archive);
 		d.setName(archive.getName());
 		
-		//new MoleculeArchiveWindow(archive, moleculeArchiveService);
 		MoleculeArchiveFrame moleculeFrame = new MoleculeArchiveFrame(archive, moleculeArchiveService);
-		moleculeFrame.setTitle(archive.getName());
 		moleculeFrame.init();
 	}
 
