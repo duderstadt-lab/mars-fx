@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.gui.molecule;
+package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,8 @@ public class MoleculeIndexTableController {
     private ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
     private FilteredList<MoleculeIndexRow> filteredData;
+    
+    private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
 
     public MoleculeIndexTableController() {        
         initialize();
@@ -64,6 +66,9 @@ public class MoleculeIndexTableController {
         metaUIDColumn.setSortable(false);
         moleculeIndexTable.getColumns().add(metaUIDColumn);
         
+        moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> updateMoleculeSubTabs(newMoleculeIndexRow));
+        
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         
         filterField = new TextField();
@@ -99,6 +104,16 @@ public class MoleculeIndexTableController {
     	return borderPane;
     }
     
+    public void updateMoleculeSubTabs(MoleculeIndexRow moleculeIndexRow) {
+    	System.out.println("row selected " + moleculeIndexRow.getUID());
+    	
+    	if (moleculeSubTabControllers == null)
+    		return;
+    	
+    	for (MoleculeSubTab controller : moleculeSubTabControllers)
+    		controller.setMolecule(archive.get(moleculeIndexRow.getUID()));
+    }
+    
     public void loadData() {
     	//moleculeIndexTable.getItems().clear();
     	moleculeRowList.clear();
@@ -114,6 +129,10 @@ public class MoleculeIndexTableController {
     public void setArchive(MoleculeArchive archive) {
     	this.archive = archive;
     	loadData();
+    }
+    
+    public void setMoleculeSubTabList(ArrayList<MoleculeSubTab> moleculeSubTabControllers) {
+    	this.moleculeSubTabControllers = moleculeSubTabControllers;
     }
     
     private class MoleculeIndexRow {

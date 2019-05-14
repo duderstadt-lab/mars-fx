@@ -33,11 +33,12 @@ import java.util.ArrayList;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculesTabController;
 import de.mpg.biochem.mars.gui.table.MARSResultsTableFrame;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 
-public class MAFrameController {
+public class MoleculeArchiveFrameController {
 
 	@FXML
     private JFXTabPane tabContainer;
@@ -72,11 +73,11 @@ public class MAFrameController {
     @FXML
     private AnchorPane settingsContainer;
 	
-	private ArrayList<MAPaneController> tabPaneControllers;
+	private ArrayList<MoleculeArchiveSubTab> tabPaneControllers;
 	
-    private MACommentsController commentsController;
+    private CommentsTabController commentsController;
     
-    private MAMoleculesController moleculesController;
+    private MoleculesTabController moleculesController;
     
     private MoleculeArchive archive;
 
@@ -85,13 +86,13 @@ public class MAFrameController {
     
     @FXML
     public void initialize() {
-    	tabPaneControllers = new ArrayList<MAPaneController>();
+    	tabPaneControllers = new ArrayList<MoleculeArchiveSubTab>();
         configureView();
     }
     
 	public void setArchive(MoleculeArchive archive) {
 		this.archive = archive;
-		for (MAPaneController controller: tabPaneControllers)
+		for (MoleculeArchiveSubTab controller: tabPaneControllers)
 			controller.setArchive(archive);
 	}
 	
@@ -134,7 +135,7 @@ public class MAFrameController {
     
     //Here we manually create the Comment Controller so we can load the MarkDown editor.
     private void configureCommentsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	commentsController = new MACommentsController();
+    	commentsController = new CommentsTabController();
     	tabPaneControllers.add(commentsController);
     	
     	BorderPane tabPane = new BorderPane();
@@ -156,7 +157,7 @@ public class MAFrameController {
     
   //Here we manually create the Molecules Controller.
     private void configureMoleculesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	moleculesController = new MAMoleculesController();
+    	moleculesController = new MoleculesTabController();
     	tabPaneControllers.add(moleculesController);
     	
     	BorderPane tabPane = new BorderPane();
@@ -193,7 +194,7 @@ public class MAFrameController {
     	        loader.setLocation(resourceURL);
                 Parent contentView = loader.load();
                 
-                MAPaneController controller = loader.getController();
+                MoleculeArchiveSubTab controller = loader.getController();
                 tabPaneControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 AnchorPane.setTopAnchor(contentView, 0.0);

@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXToggleButton;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.fxml.FXML;
 
-public class MASettingsController implements MAPaneController {
+public class SettingsTabController implements MoleculeArchiveSubTab {
 	
 	MoleculeArchive archive;
 	

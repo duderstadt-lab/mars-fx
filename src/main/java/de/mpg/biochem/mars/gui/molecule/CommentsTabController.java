@@ -50,7 +50,7 @@ import de.mpg.biochem.mars.gui.options.Options.RendererType;
 import de.mpg.biochem.mars.gui.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.gui.util.Utils;
 
-public class MACommentsController extends BorderPane implements MAPaneController {
+public class CommentsTabController extends BorderPane implements MoleculeArchiveSubTab {
 
 	private Scene scene;
 	private Node extensionsButton;
@@ -61,7 +61,7 @@ public class MACommentsController extends BorderPane implements MAPaneController
     
 	MoleculeArchive archive;
 	
-	public MACommentsController() {
+	public CommentsTabController() {
 		initialize();
 	}
 	

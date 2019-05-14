@@ -35,7 +35,7 @@ public class MoleculeArchiveFrame {
 
 	private MoleculeArchive archive;
 	
-	private MAFrameController controller;
+	private MoleculeArchiveFrameController controller;
 	
 	private JFrame frame;
 	private String title;
@@ -73,8 +73,6 @@ public class MoleculeArchiveFrame {
 		
 		if (!uiService.isHeadless())
 			WindowManager.addWindow(frame);
-
-		System.out.println("init");
 		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		// Allows multiple runLaters in the same session...
@@ -91,10 +89,9 @@ public class MoleculeArchiveFrame {
 	}
 
 	public void initFX(JFXPanel fxPanel) {	
-		System.out.println("init JFXPanel");
 		try {
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MAFrameController.class.getResource("MAFrameLayout.fxml"));
+			loader.setLocation(MoleculeArchiveFrameController.class.getResource("MoleculeArchiveFrameLayout.fxml"));
 			BorderPane root = (BorderPane) loader.load();
 			
 			Scene scene = new Scene(root);
@@ -112,7 +109,7 @@ public class MoleculeArchiveFrame {
 		return archive;
 	}
 	
-	public MAFrameController getController() {
+	public MoleculeArchiveFrameController getController() {
 		return controller;
 	}
 	
