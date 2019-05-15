@@ -26,6 +26,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 
 public class MoleculeOverviewController implements MoleculeSubTab {
 	
@@ -50,7 +51,7 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 	@FXML
     private AnchorPane notesTabContainer;
 	
-	private PropertiesTableController propertiesTableController;
+	private PropertiesTabController propertiesTableController;
 	
 	private NotesTabController notesTabController;
 	
@@ -63,7 +64,6 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 	
 	@FXML
     public void initialize() {
-		System.out.println("overview initialized");
 		moleculeTabControllers = new ArrayList<MoleculeSubTab>();
         configureTabs();
     }
@@ -105,7 +105,7 @@ public class MoleculeOverviewController implements MoleculeSubTab {
     	        loader.setLocation(resourceURL);
                 Parent contentView = loader.load();
                 
-                MoleculeSubTab controller = loader.getController();
+                MoleculeSubTab controller = (MoleculeSubTab) loader.getController();
                 moleculeTabControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 
@@ -120,7 +120,7 @@ public class MoleculeOverviewController implements MoleculeSubTab {
     }
    
    private void configurePropertiesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-	   propertiesTableController = new PropertiesTableController();
+	   propertiesTableController = new PropertiesTabController();
 	   moleculeTabControllers.add(propertiesTableController);
    	
    	   BorderPane tabPane = new BorderPane();
@@ -160,8 +160,6 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 		
 		if (moleculeTabControllers == null)
 			return;
-		
-		System.out.println("moleculeTabControllers is not null");
 		
 		for (MoleculeSubTab controller: moleculeTabControllers)
 			controller.setMolecule(molecule);

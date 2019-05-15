@@ -1,18 +1,91 @@
 package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 
-import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveSubTab;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PropertiesTabController implements MoleculeArchiveSubTab {
+import de.mpg.biochem.mars.molecule.Molecule;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.BorderPane;
+
+public class PropertiesTabController implements MoleculeSubTab {
+    
+	private Molecule molecule;
 	
-	private MoleculeArchive archive;
+	private BorderPane borderPane;
 	
-	public PropertiesTabController() {
-		
+    private TextField addParameterField;
+    private TableView<ParameterRow> parameterTable;
+    private ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
+
+    public PropertiesTabController() {        
+        initialize();
+    }
+
+    private void initialize() {
+    	parameterTable = new TableView<ParameterRow>();
+
+        TableColumn<ParameterRow, String> ParameterColumn = new TableColumn<>("Parameter");
+        ParameterColumn.setCellValueFactory(parameterRow ->
+                new ReadOnlyObjectWrapper<>(parameterRow.getValue().getName())
+        );
+        ParameterColumn.setSortable(false);
+        parameterTable.getColumns().add(ParameterColumn);
+        
+        //TODO how to also allow editing of this parameter
+        TableColumn<ParameterRow, Double> valueColumn = new TableColumn<>("Value");
+        valueColumn.setCellValueFactory(parameterRow ->
+                new ReadOnlyObjectWrapper<>(parameterRow.getValue().getValue())
+        );
+        valueColumn.setSortable(false);
+        parameterTable.getColumns().add(valueColumn);
+        
+        parameterTable.setItems(parameterRowList);
+        
+        borderPane = new BorderPane();
+        //borderPane.setBottom(addParameterField);
+        borderPane.setCenter(parameterTable);
+    }
+    
+    public Node getNode() {
+    	return borderPane;
+    }
+    
+    public void loadData() {
+    	parameterRowList.clear();
+
+    	for (String parameter : molecule.getParameters().keySet()) {
+        	parameterRowList.add(new ParameterRow(parameter));
+        }
 	}
-	
-	@Override
-	public void setArchive(MoleculeArchive archive) {
-		this.archive = archive;
-	}
+    
+    public void setMolecule(Molecule molecule) {
+    	this.molecule = molecule;
+    	loadData();
+    }
+    
+    private class ParameterRow {
+    	private String parameter;
+    	
+    	ParameterRow(String parameter) {
+    		this.parameter = parameter;
+    	}
+    	
+    	public String getName() {
+    		return parameter;
+    	}
+    	
+    	public double getValue() {
+    		return molecule.getParameter(parameter);
+    	}
+    }
 }

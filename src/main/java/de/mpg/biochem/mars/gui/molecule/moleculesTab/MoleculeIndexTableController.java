@@ -105,8 +105,6 @@ public class MoleculeIndexTableController {
     }
     
     public void updateMoleculeSubTabs(MoleculeIndexRow moleculeIndexRow) {
-    	System.out.println("row selected " + moleculeIndexRow.getUID());
-    	
     	if (moleculeSubTabControllers == null)
     		return;
     	

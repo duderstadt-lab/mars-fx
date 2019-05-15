@@ -123,11 +123,11 @@ public class MoleculeArchiveFrameController {
         Region bookIcon = new Region();
         bookIcon.getStyleClass().add("bookIcon");
         
-        configureTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("MADashboard.fxml"), replaceBackgroundColorHandler);
-        configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("MAImageMetaData.fxml"), replaceBackgroundColorHandler);
+        configureTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("DashboardTab.fxml"), replaceBackgroundColorHandler);
+        configureTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("ImageMetaDataTab.fxml"), replaceBackgroundColorHandler);
         configureMoleculesTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
         configureCommentsTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
-        configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("MASettings.fxml"), replaceBackgroundColorHandler);
+        configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, getClass().getResource("SettingsTab.fxml"), replaceBackgroundColorHandler);
         
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
         

@@ -23,35 +23,33 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	private SplitPane splitPane;
 	private MoleculeArchive archive;
 	private MoleculeIndexTableController moleculeIndexTableController;
-	private MoleculeOverviewController moleculeOverviewController;
-	
 	private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
 
 	public MoleculesTabController() {
 		moleculeSubTabControllers = new ArrayList<MoleculeSubTab>();
-		
-		splitPane = new SplitPane();
-		ObservableList<Node> splitItems = splitPane.getItems();
-		
-		//Initialize MoleculeSubTab Controllers
+
 		moleculeIndexTableController = new MoleculeIndexTableController();
-		moleculeOverviewController = new MoleculeOverviewController();
-		
-		//Add MoleculeSubTab Controllers to a list
-		moleculeSubTabControllers.add(moleculeOverviewController);
-		
-		//Give the list to the moleculeIndexTableController 
-		//so when a new molecule is selected all sub tabs are updated
-		moleculeIndexTableController.setMoleculeSubTabList(moleculeSubTabControllers);
 		
 		try {
 			FXMLLoader loader = new FXMLLoader();
         	loader.setLocation(getClass().getResource("MoleculeOverview.fxml"));
 		
-			Parent propertiesPane = loader.load();
-		
+			Parent moleculeOverviewNode = loader.load();
+			
+			MoleculeSubTab moleculeOverview = (MoleculeSubTab) loader.getController();
+			
+			//Add MoleculeSubTab Controllers to a list
+			moleculeSubTabControllers.add(moleculeOverview);
+			
+			//Give the list to the moleculeIndexTableController 
+			//so when a new molecule is selected all sub tabs are updated
+			moleculeIndexTableController.setMoleculeSubTabList(moleculeSubTabControllers);
+			
+			//Create split pane
+			splitPane = new SplitPane();
+			ObservableList<Node> splitItems = splitPane.getItems();
 			splitItems.add(moleculeIndexTableController.getNode());
-			splitItems.add(propertiesPane);
+			splitItems.add(moleculeOverviewNode);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
