@@ -24,6 +24,8 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	private MoleculeArchive archive;
 	private MoleculeIndexTableController moleculeIndexTableController;
 	private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
+	
+	private MoleculeTablesPane moleculeTablesPane;
 
 	public MoleculesTabController() {
 		moleculeSubTabControllers = new ArrayList<MoleculeSubTab>();
@@ -31,12 +33,14 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 		moleculeIndexTableController = new MoleculeIndexTableController();
 		
 		try {
+			//Load MoleculeOverview Pane that will have UID, Tags, Parameter etc info...
 			FXMLLoader loader = new FXMLLoader();
         	loader.setLocation(getClass().getResource("MoleculeOverview.fxml"));
-		
 			Parent moleculeOverviewNode = loader.load();
-			
 			MoleculeSubTab moleculeOverview = (MoleculeSubTab) loader.getController();
+			
+			//Load Molecule Tables/Plot Pane
+			moleculeTablesPane = new MoleculeTablesPane();
 			
 			//Add MoleculeSubTab Controllers to a list
 			moleculeSubTabControllers.add(moleculeOverview);
@@ -49,6 +53,7 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 			splitPane = new SplitPane();
 			ObservableList<Node> splitItems = splitPane.getItems();
 			splitItems.add(moleculeIndexTableController.getNode());
+			splitItems.add(moleculeTablesPane.getNode());
 			splitItems.add(moleculeOverviewNode);
 			
 		} catch (IOException e) {
