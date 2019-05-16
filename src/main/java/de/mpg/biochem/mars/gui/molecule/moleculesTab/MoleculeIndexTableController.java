@@ -1,8 +1,13 @@
 package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.controlsfx.control.textfield.CustomTextField;
+
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -12,6 +17,7 @@ import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -23,7 +29,8 @@ public class MoleculeIndexTableController {
 	
 	private BorderPane borderPane;
 	
-    private TextField filterField;
+    private CustomTextField filterField;
+    private Label nOfHitCountLabel;
     private TableView<MoleculeIndexRow> moleculeIndexTable;
     private ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
@@ -67,12 +74,19 @@ public class MoleculeIndexTableController {
         moleculeIndexTable.getColumns().add(metaUIDColumn);
         
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
-                (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> updateMoleculeSubTabs(newMoleculeIndexRow));
+            (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
+                if (newMoleculeIndexRow != null)
+            		updateMoleculeSubTabs(newMoleculeIndexRow);
+        });
         
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         
-        filterField = new TextField();
+        filterField = new CustomTextField();
+        nOfHitCountLabel = new Label();
         
+        filterField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
+        filterField.setRight(nOfHitCountLabel);
+        filterField.getStyleClass().add("find");
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
             filteredData.setPredicate(molIndexRow -> {
                 // If filter text is empty, display everything.
@@ -91,6 +105,7 @@ public class MoleculeIndexTableController {
                 }
                 return false;
             });
+            nOfHitCountLabel.setText(filterField.getText().isEmpty() ? "" : "" + filteredData.size());
         });
         
         moleculeIndexTable.setItems(filteredData);
@@ -108,8 +123,8 @@ public class MoleculeIndexTableController {
     	if (moleculeSubTabControllers == null)
     		return;
     	
-    	for (MoleculeSubTab controller : moleculeSubTabControllers)
-    		controller.setMolecule(archive.get(moleculeIndexRow.getUID()));
+		for (MoleculeSubTab controller : moleculeSubTabControllers)
+			controller.setMolecule(archive.get(moleculeIndexRow.getUID()));
     }
     
     public void loadData() {
