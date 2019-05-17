@@ -25,10 +25,13 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	private MoleculeIndexTableController moleculeIndexTableController;
 	private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
 	
+	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveSubTabControllers;
+	
 	private MoleculeTablesPane moleculeTablesPane;
 
 	public MoleculesTabController() {
 		moleculeSubTabControllers = new ArrayList<MoleculeSubTab>();
+		moleculeArchiveSubTabControllers = new ArrayList<MoleculeArchiveSubTab>();
 
 		moleculeIndexTableController = new MoleculeIndexTableController();
 		
@@ -38,6 +41,10 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
         	loader.setLocation(getClass().getResource("MoleculeOverview.fxml"));
 			Parent moleculeOverviewNode = loader.load();
 			MoleculeSubTab moleculeOverview = (MoleculeSubTab) loader.getController();
+			
+			//Add MoleculeArchiveSubTab Controllers to a list
+			moleculeArchiveSubTabControllers.add((MoleculeArchiveSubTab) loader.getController());
+			moleculeArchiveSubTabControllers.add((MoleculeArchiveSubTab) moleculeIndexTableController);
 			
 			//Load Molecule Tables/Plot Pane
 			moleculeTablesPane = new MoleculeTablesPane();
@@ -72,7 +79,12 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	@Override
 	public void setArchive(MoleculeArchive archive) {
 		this.archive = archive;
-		this.moleculeIndexTableController.setArchive(archive);
+		
+		if (moleculeArchiveSubTabControllers == null)
+			return;
+		
+		for (MoleculeArchiveSubTab controller: moleculeArchiveSubTabControllers)
+			controller.setArchive(archive);
 	}
 
 }

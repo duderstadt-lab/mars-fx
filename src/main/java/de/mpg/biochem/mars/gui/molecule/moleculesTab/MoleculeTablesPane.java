@@ -67,7 +67,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 		for (ArrayList<String> segmentTableName : molecule.getSegmentTableNames()) {
 			Tab segmentTableTab = new Tab(segmentTableName.get(1) + " vs " + segmentTableName.get(0));
 			BorderPane segmentTableContainer = new BorderPane();
-			plotTab.setContent(segmentTableContainer);
+			segmentTableTab.setContent(segmentTableContainer);
 			segmentTableContainer.setCenter(new MARSTableView(molecule.getSegmentsTable(segmentTableName)));
 			
 			tabPane.getTabs().add(segmentTableTab);

@@ -28,7 +28,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public class MoleculeOverviewController implements MoleculeSubTab {
+public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchiveSubTab {
 	
 	@FXML
 	private JFXTabPane tabContainer;
@@ -57,7 +57,11 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 	
 	private Molecule molecule;
 	
+	private MoleculeArchive archive;
+	
 	private ArrayList<MoleculeSubTab> moleculeTabControllers;
+	
+	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveTabControllers;
 	
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -65,6 +69,7 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 	@FXML
     public void initialize() {
 		moleculeTabControllers = new ArrayList<MoleculeSubTab>();
+		moleculeArchiveTabControllers = new ArrayList<MoleculeArchiveSubTab>();
         configureTabs();
     }
 	
@@ -104,6 +109,8 @@ public class MoleculeOverviewController implements MoleculeSubTab {
             	FXMLLoader loader = new FXMLLoader();
     	        loader.setLocation(resourceURL);
                 Parent contentView = loader.load();
+                
+                moleculeArchiveTabControllers.add((MoleculeArchiveSubTab) loader.getController());
                 
                 MoleculeSubTab controller = (MoleculeSubTab) loader.getController();
                 moleculeTabControllers.add(controller);
@@ -163,5 +170,16 @@ public class MoleculeOverviewController implements MoleculeSubTab {
 		
 		for (MoleculeSubTab controller: moleculeTabControllers)
 			controller.setMolecule(molecule);
+	}
+
+	@Override
+	public void setArchive(MoleculeArchive archive) {
+		this.archive = archive;
+		
+		if (moleculeArchiveTabControllers == null)
+			return;
+		
+		for (MoleculeArchiveSubTab controller: moleculeArchiveTabControllers)
+			controller.setArchive(archive);
 	}
 }

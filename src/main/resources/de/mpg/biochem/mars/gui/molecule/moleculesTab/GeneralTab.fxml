@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import com.jfoenix.controls.JFXChipView?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
 
-<AnchorPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.gui.molecule.moleculesTab.GeneralTabController">
-
-	<!-- TODO Add Nodes -->
+<AnchorPane prefHeight="350.0" prefWidth="200.0" stylesheets="@MoleculeOverview.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.gui.molecule.moleculesTab.GeneralTabController">
+   <children>
+      <BorderPane fx:id="UIDIconContainer" layoutX="56.0" layoutY="32.0" prefHeight="40.0" prefWidth="40.0" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="20.0" />
+      <Label fx:id="UIDLabel" layoutX="39.0" layoutY="78.0" prefHeight="20.0" prefWidth="160.0" text="UID" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="60.0" />
+      <Button fx:id="UIDClippyButton" prefHeight="20.0" prefWidth="20.0" AnchorPane.leftAnchor="170.0" AnchorPane.topAnchor="60.0" />
+      <BorderPane fx:id="metaUIDIconContainer" prefHeight="40.0" prefWidth="40.0" AnchorPane.leftAnchor="80.0" AnchorPane.topAnchor="85.0" />
+      <Label fx:id="metaUIDLabel" prefHeight="20.0" prefWidth="90.0" text="metaUID" AnchorPane.leftAnchor="40.0" AnchorPane.topAnchor="125.0" />
+      <Button fx:id="metaUIDClippyButton" prefHeight="20.0" prefWidth="20.0" AnchorPane.leftAnchor="130.0" AnchorPane.topAnchor="125.0" />
+      <Label fx:id="Tags" text="Tags" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="160.0" />
+      <JFXChipView fx:id="chipView" minHeight="200.0" minWidth="200.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="180.0" />
+   </children>
 </AnchorPane>
-

@@ -8,6 +8,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -23,7 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 
-public class MoleculeIndexTableController {
+public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     
 	private MoleculeArchive archive;
 	
