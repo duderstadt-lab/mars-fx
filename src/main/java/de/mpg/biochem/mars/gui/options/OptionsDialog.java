@@ -38,9 +38,8 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Window;
-import de.mpg.biochem.mars.gui.MarkdownWriterFXApp;
+import de.mpg.biochem.mars.gui.MarsApp;
 import de.mpg.biochem.mars.gui.Messages;
-import de.mpg.biochem.mars.gui.projects.ProjectManager;
 import de.mpg.biochem.mars.gui.util.Utils;
 
 /**
@@ -60,7 +59,7 @@ public class OptionsDialog
 		tabPane.getStyleClass().add(TabPane.STYLE_CLASS_FLOATING);
 
 		// add "Store in project" checkbox to buttonbar
-		boolean oldStoreInProject = Options.isStoreInProject();
+		//boolean oldStoreInProject = Options.isStoreInProject();
 		ButtonType storeInProjectButtonType = new ButtonType(Messages.get("OptionsDialog.storeInProject.text"), ButtonData.LEFT);
 		setDialogPane(new DialogPane() {
 			@Override
@@ -68,8 +67,8 @@ public class OptionsDialog
 				if (buttonType == storeInProjectButtonType) {
 					CheckBox storeInProjectButton = new CheckBox(buttonType.getText());
 					ButtonBar.setButtonData(storeInProjectButton, buttonType.getButtonData());
-					storeInProjectButton.setSelected(oldStoreInProject);
-					storeInProjectButton.setDisable(ProjectManager.getActiveProject() == null);
+	//				storeInProjectButton.setSelected(oldStoreInProject);
+	//				storeInProjectButton.setDisable(ProjectManager.getActiveProject() == null);
 					return storeInProjectButton;
 				}
 				return super.createButton(buttonType);
@@ -83,8 +82,8 @@ public class OptionsDialog
 		// save options on OK clicked
 		dialogPane.lookupButton(ButtonType.OK).addEventHandler(ActionEvent.ACTION, e -> {
 			boolean newStoreInProject = ((CheckBox)dialogPane.lookupButton(storeInProjectButtonType)).isSelected();
-			if (newStoreInProject != oldStoreInProject)
-				Options.storeInProject(newStoreInProject);
+	//		if (newStoreInProject != oldStoreInProject)
+		//		Options.storeInProject(newStoreInProject);
 
 			save();
 			e.consume();
@@ -96,13 +95,13 @@ public class OptionsDialog
 		load();
 
 		// select last tab
-		int tabIndex = MarkdownWriterFXApp.getState().getInt("lastOptionsTab", -1);
+		int tabIndex = MarsApp.getState().getInt("lastOptionsTab", -1);
 		if (tabIndex > 0 && tabIndex < tabPane.getTabs().size())
 			tabPane.getSelectionModel().select(tabIndex);
 
 		// remember last selected tab
 		setOnHidden(e -> {
-			MarkdownWriterFXApp.getState().putInt("lastOptionsTab", tabPane.getSelectionModel().getSelectedIndex());
+			MarsApp.getState().putInt("lastOptionsTab", tabPane.getSelectionModel().getSelectedIndex());
 		});
 	}
 

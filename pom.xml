@@ -91,13 +91,13 @@
 			<url>http://maven.imagej.net/content/groups/public</url>
 		</repository>
 	</repositories>
-	
+		
 	<build>
 	    <resources>
 	    <resource>
 	      <directory>src/main/resources</directory>
 	      <includes>
-	        <include>project.properties</include>
+	        <include>**/*</include>
 	      </includes>
 	      <filtering>true</filtering>
 	    </resource>

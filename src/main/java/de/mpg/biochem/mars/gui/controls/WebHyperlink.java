@@ -30,7 +30,7 @@ package de.mpg.biochem.mars.gui.controls;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Hyperlink;
-import de.mpg.biochem.mars.gui.MarkdownWriterFXApp;
+import de.mpg.biochem.mars.gui.MarsApp;
 
 /**
  * Hyperlink that opens a URL in the default web browser.
@@ -46,7 +46,7 @@ public class WebHyperlink
 
 	@Override
 	public void fire() {
-		MarkdownWriterFXApp.showDocument(getUri());
+		MarsApp.showDocument(getUri());
 	}
 
 	// 'uri' property

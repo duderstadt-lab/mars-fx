@@ -2,7 +2,6 @@
     -fx-base: white;
     -fx-color: -fx-base;
 
-    -fx-font-family: "Montserrat";
     -fx-accent: rgb(246, 246, 246);
     -fx-default-button: -fx-accent;
     -jfx-primary-color: -fx-accent;

@@ -44,12 +44,12 @@ import de.mpg.biochem.mars.gui.util.StageState;
  *
  * @author Karl Tauber
  */
-public class MarkdownWriterFXApp
+public class MarsApp
 	extends Application
 {
 	private static Application app;
 
-	private MainWindow mainWindow;
+	//private MainWindow mainWindow;
 	@SuppressWarnings("unused")
 	private StageState stageState;
 
@@ -79,7 +79,7 @@ public class MarkdownWriterFXApp
 			}).start();
 		}
 
-		mainWindow = new MainWindow();
+		//mainWindow = new MainWindow();
 
 		stageState = new StageState(primaryStage, getState());
 
@@ -87,7 +87,7 @@ public class MarkdownWriterFXApp
 				new Image("org/markdownwriterfx/markdownwriterfx32.png"),
 				new Image("org/markdownwriterfx/markdownwriterfx128.png"));
 		primaryStage.setTitle("Markdown Writer FX");
-		primaryStage.setScene(mainWindow.getScene());
+		//primaryStage.setScene(mainWindow.getScene());
 		primaryStage.show();
 	}
 

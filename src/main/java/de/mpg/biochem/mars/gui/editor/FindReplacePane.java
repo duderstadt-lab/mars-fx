@@ -58,7 +58,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 import org.fxmisc.richtext.MultiChangeBuilder;
 import org.fxmisc.richtext.model.TwoDimensional.Bias;
 import org.fxmisc.wellbehaved.event.Nodes;
-import de.mpg.biochem.mars.gui.MarkdownWriterFXApp;
+import de.mpg.biochem.mars.gui.MarsApp;
 import de.mpg.biochem.mars.gui.Messages;
 import de.mpg.biochem.mars.gui.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.gui.util.Range;
@@ -77,9 +77,9 @@ class FindReplacePane
 	}
 
 	private static PrefsBooleanProperty matchCase = new PrefsBooleanProperty(
-			MarkdownWriterFXApp.getState(), "findMatchCase", false);
+			MarsApp.getState(), "findMatchCase", false);
 	private static PrefsBooleanProperty regex = new PrefsBooleanProperty(
-			MarkdownWriterFXApp.getState(), "findRegex", false);
+			MarsApp.getState(), "findRegex", false);
 
 	private final List<HitsChangeListener> listeners = new ArrayList<>();
 	private final MarkdownTextArea textArea;

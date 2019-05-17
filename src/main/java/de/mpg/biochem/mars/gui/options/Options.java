@@ -71,7 +71,9 @@ public class Options
 	public static void load(Preferences globalOptions) {
 		Options.globalOptions = globalOptions;
 
-		options = getProjectOptions(ProjectManager.getActiveProject());
+		//options = getProjectOptions(ProjectManager.getActiveProject());
+		
+		options = globalOptions;
 
 		fontFamily.init(options, "fontFamily", null, value -> safeFontFamily(value));
 		fontSize.init(options, "fontSize", DEF_FONT_SIZE);
@@ -95,9 +97,9 @@ public class Options
 		additionalCSS.init(options, "additionalCSS", null);
 
 		// listen to active project
-		ProjectManager.activeProjectProperty().addListener((observer, oldProject, newProject) -> {
-			set(getProjectOptions(newProject));
-		});
+		//ProjectManager.activeProjectProperty().addListener((observer, oldProject, newProject) -> {
+		//set(getProjectOptions(newProject));
+		//});
 	}
 
 	private static void set(Preferences options) {
@@ -128,6 +130,7 @@ public class Options
 		additionalCSS.setPreferences(options);
 	}
 
+
 	private static Preferences getProjectOptions(File project) {
 		if (project != null) {
 			Preferences projectOptions = ProjectSettings.get(project).getOptions();
@@ -137,6 +140,7 @@ public class Options
 
 		return globalOptions;
 	}
+	
 
 	static boolean isStoreInProject() {
 		return options != globalOptions;
