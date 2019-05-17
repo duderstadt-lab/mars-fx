@@ -44,6 +44,7 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 			
 			//Add MoleculeSubTab Controllers to a list
 			moleculeSubTabControllers.add(moleculeOverview);
+			moleculeSubTabControllers.add(moleculeTablesPane);
 			
 			//Give the list to the moleculeIndexTableController 
 			//so when a new molecule is selected all sub tabs are updated
