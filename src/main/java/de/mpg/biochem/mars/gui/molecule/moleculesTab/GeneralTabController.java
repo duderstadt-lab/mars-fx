@@ -5,8 +5,13 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXChipView;
+import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.skins.JFXChipViewSkin;
+import com.jfoenix.controls.JFXButton;
+import javafx.scene.control.TextArea;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveSubTab;
@@ -24,19 +29,19 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	private BorderPane UIDIconContainer;
 	
 	@FXML
-	private Label UIDLabel;
+	private JFXTextField UIDLabel;
 	
 	@FXML
-	private Button UIDClippyButton;
+	private JFXButton UIDClippyButton;
 	
 	@FXML
 	private BorderPane metaUIDIconContainer;
 	
 	@FXML
-	private Label metaUIDLabel;
+	private JFXTextField metaUIDLabel;
 	
 	@FXML
-	private Button metaUIDClippyButton;
+	private JFXButton metaUIDClippyButton;
 	
 	@FXML
 	private Label Tags;
@@ -44,22 +49,24 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	@FXML
 	private JFXChipView<String> chipView;
 	
+	final Clipboard clipboard = Clipboard.getSystemClipboard();
+	
 	private Molecule molecule;
 	
 	private MoleculeArchive archive;
 	
 	@FXML
     public void initialize() {
-		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2em"));
-		
-		//BorderPane UIDClippy = new BorderPane();
-		//UIDClippy.setCenter(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1em"));
-		//UIDClippyButton.setGraphic(UIDClippy);
+		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
+		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
 		
 		Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
 		metaUIDIconContainer.setCenter(microscopeIcon);
-		//metaUIDClippyButton.setGraphic(UIDClippy);
+		metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+		
+		UIDLabel.setEditable(false);
+		metaUIDLabel.setEditable(false);
     }
 	
 	public void update() {
@@ -71,8 +78,37 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		
+		/*
+		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		chipView.setSkin(skin);
+        TextArea textArea = (TextArea) ((FlowPane)skin.getChildren().get(0)).getChildren().get(0);
+        textArea.focusedProperty().addListener((obs, oldValue, newValue) -> {
+            System.out.println(newValue);
+            if (!newValue) {
+                if (StringUtils.isNotBlank(textArea.getText())) {
+                    view.getChips().add(textArea.getText());
+                    textArea.clear();
+                }
+            }
+        });
+        */
+	}
+	
+	@FXML
+	private void handleUIDClippy() {
+		ClipboardContent content = new ClipboardContent();
+	    content.putString(UIDLabel.getText());
+	    clipboard.setContent(content);
 	}
 
+	@FXML
+	private void handleMetaUIDClippy() {
+		ClipboardContent content = new ClipboardContent();
+	    content.putString(metaUIDLabel.getText());
+	    clipboard.setContent(content);
+	}
+	
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;

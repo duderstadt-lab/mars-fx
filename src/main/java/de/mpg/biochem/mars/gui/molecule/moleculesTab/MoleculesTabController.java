@@ -60,9 +60,16 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 			//Create split pane
 			splitPane = new SplitPane();
 			ObservableList<Node> splitItems = splitPane.getItems();
+			
+			SplitPane.setResizableWithParent(moleculeIndexTableController.getNode(), Boolean.FALSE);
 			splitItems.add(moleculeIndexTableController.getNode());
+			
 			splitItems.add(moleculeTablesPane.getNode());
+			
+			SplitPane.setResizableWithParent(moleculeOverviewNode, Boolean.FALSE);
 			splitItems.add(moleculeOverviewNode);
+			
+			splitPane.setDividerPosition(0, 0.2);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

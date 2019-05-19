@@ -2,23 +2,28 @@ package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 
 import java.util.ArrayList;
 
+import de.mpg.biochem.mars.gui.molecule.moleculesTab.plot.PlotOptionsController;
 import de.mpg.biochem.mars.gui.table.MARSTableView;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 public class MoleculeTablesPane implements MoleculeSubTab {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
 	
-	private BorderPane dataTableContainer, plotContainer;
+	private BorderPane dataTableContainer;
+	private PlotOptionsController plotOptionsController;
 	
 	private Molecule molecule;
 	
@@ -37,8 +42,8 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plotContainer = new BorderPane();
-		plotTab.setContent(plotContainer);
+		plotOptionsController = new PlotOptionsController();
+		plotTab.setContent(plotOptionsController.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);

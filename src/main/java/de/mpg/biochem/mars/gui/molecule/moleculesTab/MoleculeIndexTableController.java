@@ -50,6 +50,7 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         rowIndexCol.setCellValueFactory(molIndexRow ->
                 new ReadOnlyObjectWrapper<>(molIndexRow.getValue().getIndex())
         );
+        rowIndexCol.setPrefWidth(50);
         rowIndexCol.setSortable(false);
         moleculeIndexTable.getColumns().add(rowIndexCol);
 

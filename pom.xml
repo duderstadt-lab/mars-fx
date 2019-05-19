@@ -183,7 +183,7 @@
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-octicons</artifactId>
-			<version>3.3.0-2</version>
+			<version>4.3.0-5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfoenix</groupId>
