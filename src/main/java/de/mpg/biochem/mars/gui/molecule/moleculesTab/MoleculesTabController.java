@@ -69,7 +69,7 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 			SplitPane.setResizableWithParent(moleculeOverviewNode, Boolean.FALSE);
 			splitItems.add(moleculeOverviewNode);
 			
-			splitPane.setDividerPosition(0, 0.2);
+			//splitPane.setDividerPosition(0, 0.2);
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

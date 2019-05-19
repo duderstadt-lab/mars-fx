@@ -56,32 +56,42 @@ import javafx.scene.input.MouseEvent;
 
 import java.util.function.Predicate;
 
-//import org.controlsfx.control.PopOver;
-//import org.controlsfx.control.PopOver.ArrowLocation;
+import de.mpg.biochem.mars.gui.molecule.moleculesTab.DatasetOptionsPane;
+import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculeSubTab;
+import de.mpg.biochem.mars.gui.options.MarkdownExtensionsPane;
+
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.PopOver.ArrowLocation;
 import de.mpg.biochem.mars.gui.util.Action;
 import de.mpg.biochem.mars.gui.util.ActionUtils;
+import de.mpg.biochem.mars.molecule.Molecule;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-public class Plot extends BorderPane {
-	DataReducingObservableList<Number, Number> data;
+public class Plot extends BorderPane implements MoleculeSubTab {
+	private DataReducingObservableList<Number, Number> data;
 	
 	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
 	
-	NumericAxis xAxis;
-	NumericAxis yAxis;
-	LineChart<Number, Number> lineChart;
-	XYChartPane<Number, Number> chartPane;
+	private NumericAxis xAxis;
+	private NumericAxis yAxis;
+	private LineChart<Number, Number> lineChart;
+	private XYChartPane<Number, Number> chartPane;
 	
-	Panner panner;
+	private Molecule molecule;
 	
-	BooleanProperty trackSelected = new SimpleBooleanProperty();
-	BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
-	BooleanProperty zoomXSelected = new SimpleBooleanProperty();
-	BooleanProperty zoomYSelected = new SimpleBooleanProperty();
-	BooleanProperty panSelected = new SimpleBooleanProperty();
-	BooleanProperty crosshairSelected = new SimpleBooleanProperty();
+	private Panner panner;
+	
+	private Node datasetOptions;
+	private DatasetOptionsPane datasetOptionsPane;
+	
+	private BooleanProperty trackSelected = new SimpleBooleanProperty();
+	private BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
+	private BooleanProperty zoomXSelected = new SimpleBooleanProperty();
+	private BooleanProperty zoomYSelected = new SimpleBooleanProperty();
+	private BooleanProperty panSelected = new SimpleBooleanProperty();
+	private BooleanProperty crosshairSelected = new SimpleBooleanProperty();
 
 	public Plot() {
 		Label titleLabel = new Label(getDescription());
@@ -143,14 +153,26 @@ public class Plot extends BorderPane {
 		Action resetXYZoom = new Action("Reset Zoom", "Shortcut+R", EXPAND, e -> resetXYZoom());
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
+		//settings
+		Action properties = new Action("settings", "Shortcut+S", COG, e -> properties());
+		toolBar.getItems().add(ActionUtils.createToolBarButton(properties));
+		
 		// horizontal spacer
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
 		
-		//settings
-		Action properties = new Action("settings", "Shortcut+S", COG, e -> properties());
-		toolBar.getItems().add(ActionUtils.createToolBarButton(properties));
+		datasetOptionsPane = new DatasetOptionsPane(true);
+		datasetOptions = ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
+			PopOver popOver = new PopOver();
+			popOver.setTitle("Dataset");
+			popOver.setHeaderAlwaysVisible(true);
+			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
+			popOver.setContentNode(datasetOptionsPane);
+			popOver.show(datasetOptions);
+		}));
+		
+		toolBar.getItems().add(datasetOptions);
 		
 		return toolBar;
 	}
@@ -252,6 +274,10 @@ public class Plot extends BorderPane {
 		
 	}
 	
+	private void dataOptions() {
+		
+	}
+	
 	public void setXLabel(String xAxisLabel) {
 		xAxis.setLabel(xAxisLabel);
 	}
@@ -263,4 +289,14 @@ public class Plot extends BorderPane {
 	protected Node createControlPane() {
         return null;
     }
+	
+	private void reloadData() {
+		
+	}
+
+	@Override
+	public void setMolecule(Molecule molecule) {
+		// TODO Auto-generated method stub
+		reloadData();
+	}
 }
