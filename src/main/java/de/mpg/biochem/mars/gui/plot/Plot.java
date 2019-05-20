@@ -162,7 +162,7 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
 		
-		datasetOptionsPane = new DatasetOptionsPane(true);
+		datasetOptionsPane = new DatasetOptionsPane();
 		datasetOptions = ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle("Dataset");

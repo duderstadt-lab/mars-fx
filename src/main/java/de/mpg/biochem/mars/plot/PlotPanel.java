@@ -46,6 +46,7 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import de.mpg.biochem.mars.gui.plot.PlotProperties;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 

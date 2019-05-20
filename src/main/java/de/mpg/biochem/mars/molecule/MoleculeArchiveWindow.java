@@ -73,8 +73,8 @@ import org.scijava.prefs.PrefService;
 import org.scijava.ui.UIService;
 import org.scijava.widget.FileWidget;
 
+import de.mpg.biochem.mars.gui.plot.PlotProperties;
 import de.mpg.biochem.mars.plot.PlotDialog;
-import de.mpg.biochem.mars.plot.PlotProperties;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 
 import ij.WindowManager;

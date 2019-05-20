@@ -31,6 +31,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import javax.swing.JPanel;
 
+import de.mpg.biochem.mars.gui.plot.PlotProperties;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.plot.Plot.Type;
 import de.mpg.biochem.mars.table.MARSResultsTable;

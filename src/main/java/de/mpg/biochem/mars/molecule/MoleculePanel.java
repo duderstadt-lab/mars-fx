@@ -78,10 +78,10 @@ import javax.swing.table.TableRowSorter;
 import org.decimal4j.util.DoubleRounder;
 import org.scijava.log.LogService;
 
+import de.mpg.biochem.mars.gui.plot.PlotProperties;
 import de.mpg.biochem.mars.plot.BoundsChangedListener;
 import de.mpg.biochem.mars.plot.CurvePlot;
 import de.mpg.biochem.mars.plot.PlotPanel;
-import de.mpg.biochem.mars.plot.PlotProperties;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import ij.ImagePlus;
 import ij.gui.ImageCanvas;
