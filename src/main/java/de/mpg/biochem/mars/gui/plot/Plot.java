@@ -162,7 +162,7 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
 		
-		datasetOptionsPane = new DatasetOptionsPane();
+		datasetOptionsPane = new DatasetOptionsPane(molecule, this);
 		datasetOptions = ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle("Dataset");
@@ -203,16 +203,28 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	}
 	
 	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn) {
+		addLinePlot(table, xColumn, yColumn, Color.BLACK);
+	}
+	
+	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color) {
 		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
 		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 		for (int row=0; row< table.getRowCount(); row++) {
 			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
 		}
 
-		lineChart.setStyle("-fx-stroke-width: 1px;");
+		//
+		
 		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
 		lineChart.getData().add(series);
+		lineChart.applyCss();
+		lineChart.setStyle("-fx-stroke: blue; -fx-stroke-width: 1px;");//#" + colorToHex(color) + ";");
+		lineChart.applyCss();
+	}
+	
+	public void clear() {
+		lineChart.getData().clear();
 	}
 	/*
 	 * TODO Finishe segment plot as overlay ???
@@ -293,10 +305,42 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	private void reloadData() {
 		
 	}
+	
+	private String colorToHex(Color color) {
+	    String hex1;
+	    String hex2;
+
+	    hex1 = Integer.toHexString(color.hashCode()).toUpperCase();
+
+	    switch (hex1.length()) {
+	    case 2:
+	        hex2 = "000000";
+	        break;
+	    case 3:
+	        hex2 = String.format("00000%s", hex1.substring(0,1));
+	        break;
+	    case 4:
+	        hex2 = String.format("0000%s", hex1.substring(0,2));
+	        break;
+	    case 5:
+	        hex2 = String.format("000%s", hex1.substring(0,3));
+	        break;
+	    case 6:
+	        hex2 = String.format("00%s", hex1.substring(0,4));
+	        break;
+	    case 7:
+	        hex2 = String.format("0%s", hex1.substring(0,5));
+	        break;
+	    default:
+	        hex2 = hex1.substring(0, 6);
+	    }
+	    return hex2;
+	}
 
 	@Override
 	public void setMolecule(Molecule molecule) {
 		// TODO Auto-generated method stub
+		datasetOptionsPane.setMolecule(molecule);
 		reloadData();
 	}
 }

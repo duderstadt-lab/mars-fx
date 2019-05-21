@@ -77,8 +77,11 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
-                if (newMoleculeIndexRow != null)
+                if (newMoleculeIndexRow != null) {
             		updateMoleculeSubTabs(newMoleculeIndexRow);
+            		moleculeIndexTable.requestFocus();
+            		System.out.println("" + moleculeIndexTable.isFocused());
+                }
         });
         
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
@@ -127,6 +130,8 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     	
 		for (MoleculeSubTab controller : moleculeSubTabControllers)
 			controller.setMolecule(archive.get(moleculeIndexRow.getUID()));
+		
+		
     }
     
     public void loadData() {

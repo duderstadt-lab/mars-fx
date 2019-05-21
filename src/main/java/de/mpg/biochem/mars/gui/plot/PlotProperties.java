@@ -26,21 +26,20 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.gui.plot;
 
-import java.awt.Color;
+import javafx.scene.paint.Color;
 
 public class PlotProperties {
 		private String xColumn;
 		private String yColumn;
-		private int type = 0;
+		private String type;
 		
-		private String CurveName;
+		private String curveName;
 		
-		//Add color setting?
-		private Color color = Color.black;
-		private Color segments_color = Color.red;
+		private Color color;
+		private Color segments_color;
 		
-		public PlotProperties(String xColumn, String yColumn, Color color, int type, Color segments_color) {
-			this.CurveName = yColumn + " vs " + xColumn;
+		public PlotProperties(String xColumn, String yColumn, Color color, String type, Color segments_color) {
+			this.curveName = yColumn + " vs " + xColumn;
 			this.xColumn = xColumn;
 			this.yColumn = yColumn;
 			this.color = color;
@@ -48,8 +47,8 @@ public class PlotProperties {
 			this.segments_color = segments_color;
 		}
 		
-		public PlotProperties(String CurveName, String xColumn, String yColumn, Color color, int type, Color segments_color) {
-			this.CurveName = CurveName;
+		public PlotProperties(String curveName, String xColumn, String yColumn, Color color, String type, Color segments_color) {
+			this.curveName = curveName;
 			this.xColumn = xColumn;
 			this.yColumn = yColumn;
 			this.color = color;
@@ -58,10 +57,10 @@ public class PlotProperties {
 		}
 		
 		public String getCurveName() {
-			return CurveName;
+			return curveName;
 		}
 		
-		public int getType() {
+		public String getType() {
 			return type;
 		}
 		
