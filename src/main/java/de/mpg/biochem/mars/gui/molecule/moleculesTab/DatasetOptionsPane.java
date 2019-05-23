@@ -3,6 +3,7 @@ package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
@@ -63,8 +64,8 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		
 		add(new Label("Title "), "");
 		add(titleField, "wrap");
-		add(new Label("X Axis "), "");
-		add(xNameField, "wrap");
+		//add(new Label("X Axis "), "");
+		//add(xNameField, "wrap");
 		add(new Label("Y Axis "), "");
 		add(yNameField, "wrap");
 		add(new Label("X Axis Column"), "");
@@ -72,9 +73,10 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		
 		add(plotPropertiesTable, "span, wrap");
 		
-		add(addButton, "left");
-		add(removeButton, "left");
+		add(addButton, "split 2");
+		add(removeButton, "");
 		add(updateButton, "right");
+		updateButton.setCenterShape(true);
 	}
 	
 	private void initComponents() {
@@ -84,6 +86,8 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		xColumnField = new ComboBox<>();
 		
 		plotPropertiesTable = new TableView<PlotPropertiesRow>();
+		
+		plotPropertiesTable.prefHeightProperty().set(200);
         
         TableColumn<PlotPropertiesRow, ComboBox<String>> typeColumn = new TableColumn<>("Type");
 		typeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTypeField()));
@@ -137,10 +141,10 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.3em");
 		updateButton.setGraphic(syncIcon);
 		updateButton.setOnAction(e -> {
-			RotateTransition rt = new RotateTransition(Duration.millis(500), syncIcon);
-		     rt.setByAngle(360);
-		     rt.setCycleCount(1);
-		     rt.play();
+			//RotateTransition rt = new RotateTransition(Duration.millis(500), syncIcon);
+		     //rt.setByAngle(360);
+		     //rt.setCycleCount(4);
+		     //rt.play();
 		     updatePlot();
 		     //rt.stop();
 		});
@@ -148,14 +152,29 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 	
 	public void updatePlot() {
 		plot.clear();
-		for (PlotPropertiesRow propertiesRow : plotPropertiesRowList) {
+		for (int i=0;i<plotPropertiesRowList.size();i++) {
+			PlotPropertiesRow propertiesRow = plotPropertiesRowList.get(i);
+			String xColumnName = xColumnField.getSelectionModel().getSelectedItem();
+			String yColumnName = propertiesRow.getYColumn();
+			
 			if (xColumnField.getSelectionModel().getSelectedIndex() != -1 
 				&& propertiesRow.yColumnField().getSelectionModel().getSelectedIndex() != -1)
 					plot.addLinePlot(molecule.getDataTable(), 
-						xColumnField.getSelectionModel().getSelectedItem(), 
-						propertiesRow.getYColumn(),
-						propertiesRow.getColor());
+						xColumnName, 
+						yColumnName,
+						propertiesRow.getColor(), i);
+			// && molecule.getSegmentTableNames().contains(new ArrayList<String>(new ArrayList<>(Arrays.asList(xColumnName, yColumnName))))
+			if(propertiesRow.drawSegments())
+				plot.addSegmentPlot(molecule.getSegmentsTable(xColumnField.getSelectionModel().getSelectedItem(), propertiesRow.getYColumn()));
 		}
+		if (!titleField.getText().equals(""))
+			plot.setTitle(titleField.getText());
+		if (xColumnField.getSelectionModel().getSelectedIndex() != -1)
+			plot.setXLabel(xColumnField.getSelectionModel().getSelectedItem());
+		if (!yNameField.getText().equals(""))
+			plot.setYLabel(yNameField.getText());
+		
+		//plot.updateLegend();
 	}
 	
 	@Override

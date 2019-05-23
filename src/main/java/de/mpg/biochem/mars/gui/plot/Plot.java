@@ -33,6 +33,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.chart.XYChart;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
@@ -54,6 +55,8 @@ import de.mpg.biochem.mars.table.*;
 import cern.extjfx.chart.plugins.*;
 import javafx.scene.input.MouseEvent;
 
+import java.util.HashMap;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import de.mpg.biochem.mars.gui.molecule.moleculesTab.DatasetOptionsPane;
@@ -86,12 +89,14 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	private Node datasetOptions;
 	private DatasetOptionsPane datasetOptionsPane;
 	
+	private HashMap<Integer, String> seriesColorMap = new HashMap<>();
+	
 	private BooleanProperty trackSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomXSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	private BooleanProperty panSelected = new SimpleBooleanProperty();
-	private BooleanProperty crosshairSelected = new SimpleBooleanProperty();
+	//private BooleanProperty crosshairSelected = new SimpleBooleanProperty();
 
 	public Plot() {
 		Label titleLabel = new Label(getDescription());
@@ -124,16 +129,15 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 				null, zoomYSelected);
 		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(panner, Cursor.MOVE),
 				null, panSelected);
-		Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", PLUS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
-				null, crosshairSelected);
+		//Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", PLUS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
+		//		null, crosshairSelected);
 		
 		Node[] toolButtons = ActionUtils.createToolBarButtons(
 				trackCursor,
 				zoomXYCursor,
 				zoomXCursor,
 				zoomYCursor,
-				panCursor,
-				crosshairCursor);
+				panCursor);
 		
 		ToggleGroup toolGroup = new ToggleGroup();
 		for (Node n : toolButtons)
@@ -174,6 +178,9 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 		toolBar.getItems().add(datasetOptions);
 		
+		Action addPlot = new Action("Add Plot", "Shortcut+A", PLUS, e -> addChart());
+		toolBar.getItems().add(ActionUtils.createToolBarButton(addPlot));
+		
 		return toolBar;
 	}
 	
@@ -197,52 +204,86 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		yAxis.setAutoRangePadding(0);
 		
 		lineChart = new LineChart<>(xAxis, yAxis);
+		lineChart.setCreateSymbols(false);
+		lineChart.setAnimated(false);
 		chartPane = new XYChartPane<>(lineChart);
+		chartPane.setLegendVisible(false);
 		
 		return chartPane;
 	}
 	
-	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn) {
-		addLinePlot(table, xColumn, yColumn, Color.BLACK);
+	public void addChart() {
+		
 	}
 	
-	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color) {
+	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn) {
+		addLinePlot(table, xColumn, yColumn, Color.BLACK, -1);
+	}
+	
+	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color, int index) {
 		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
 		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 		for (int row=0; row< table.getRowCount(); row++) {
 			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
 		}
 
-		//
+		series.setName(yColumn);
 		
-		lineChart.setCreateSymbols(false);
-		lineChart.setAnimated(false);
 		lineChart.getData().add(series);
-		lineChart.applyCss();
-		lineChart.setStyle("-fx-stroke: blue; -fx-stroke-width: 1px;");//#" + colorToHex(color) + ";");
-		lineChart.applyCss();
+		final String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
+		final String lineStyle = String.format("-fx-stroke-width: 1px; -fx-stroke: %s;", colorString);
+		series.getNode().lookup(".chart-series-line").setStyle(lineStyle);
+		
+		seriesColorMap.put(index, colorString);
 	}
 	
 	public void clear() {
 		lineChart.getData().clear();
+		seriesColorMap.clear();
 	}
-	/*
-	 * TODO Finishe segment plot as overlay ???
+	
+	public void setTitle(String name) {
+		chartPane.setTitle(name);
+	}
+
 	public void addSegmentPlot(MARSResultsTable segmentTable) {
-		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
-		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-		for (int row=0; row< table.getRowCount(); row++) {
-			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
-		}
+		LineChart<Number, Number> segmentChart = new LineChart<>(xAxis, yAxis);
 		
-		lineChart.getData().add(series);
-		lineChart.setStyle("-fx-stroke-width: 1px;");
-		lineChart.setCreateSymbols(false);
-		lineChart.setAnimated(false);
+		//for (int row=0; row< segmentTable.getRowCount(); row++) {
+			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+			
+			//series.getData().add(new XYChart.Data<Number, Number>(segmentTable.getValue("x1", row), segmentTable.getValue("y1", row)));
+			//series.getData().add(new XYChart.Data<Number, Number>(segmentTable.getValue("x2", row), segmentTable.getValue("y2", row)));
+			
+			series.getData().add(new XYChart.Data<Number, Number>(1, 5000));
+			series.getData().add(new XYChart.Data<Number, Number>(1, 5000));
+			
+			
+			segmentChart.getData().add(series);
+		//}
+		 
+		segmentChart.setStyle("-fx-stroke-width: 1px;");
+		segmentChart.setCreateSymbols(false);
+		segmentChart.setAnimated(false);
+		chartPane.getOverlayCharts().add(segmentChart);
+	}
+	
+	/*
+	public void updateLegend() {
+		Platform.runLater(() -> {
+			for (Node node: chartPane.lookupAll(".chart-legend-item-symbol")) {
+	            for (String styleClass: node.getStyleClass()) {
+	                if (styleClass.startsWith("series")) {
+	                    final int i = Integer.parseInt(styleClass.substring(6));
+	                    if (seriesColorMap.containsKey(i))
+	                    	node.setStyle("-fx-background-color: " + seriesColorMap.get(i) + ", white;");
+	                    //break;
+	                }
+	            }
+			}
+		});
 	}
 	*/
-	// Cursor Util functions
-	
 	private void addPlugin(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
 		removePlugins();
 		if (toolSelected()) {
@@ -259,7 +300,7 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	}
 	
 	private boolean toolSelected() {
-		if (trackSelected.get() || zoomXYSelected.get() || zoomXSelected.get() || zoomYSelected.get() || panSelected.get() || crosshairSelected.get())
+		if (trackSelected.get() || zoomXYSelected.get() || zoomXSelected.get() || zoomYSelected.get() || panSelected.get())
 			return true;
 		else
 			return false;
@@ -286,10 +327,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 	}
 	
-	private void dataOptions() {
-		
-	}
-	
 	public void setXLabel(String xAxisLabel) {
 		xAxis.setLabel(xAxisLabel);
 	}
@@ -301,46 +338,9 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	protected Node createControlPane() {
         return null;
     }
-	
-	private void reloadData() {
-		
-	}
-	
-	private String colorToHex(Color color) {
-	    String hex1;
-	    String hex2;
-
-	    hex1 = Integer.toHexString(color.hashCode()).toUpperCase();
-
-	    switch (hex1.length()) {
-	    case 2:
-	        hex2 = "000000";
-	        break;
-	    case 3:
-	        hex2 = String.format("00000%s", hex1.substring(0,1));
-	        break;
-	    case 4:
-	        hex2 = String.format("0000%s", hex1.substring(0,2));
-	        break;
-	    case 5:
-	        hex2 = String.format("000%s", hex1.substring(0,3));
-	        break;
-	    case 6:
-	        hex2 = String.format("00%s", hex1.substring(0,4));
-	        break;
-	    case 7:
-	        hex2 = String.format("0%s", hex1.substring(0,5));
-	        break;
-	    default:
-	        hex2 = hex1.substring(0, 6);
-	    }
-	    return hex2;
-	}
 
 	@Override
 	public void setMolecule(Molecule molecule) {
-		// TODO Auto-generated method stub
 		datasetOptionsPane.setMolecule(molecule);
-		reloadData();
 	}
 }
