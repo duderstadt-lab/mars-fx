@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.gui.molecule.moleculesTab;
+package de.mpg.biochem.mars.gui.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
 
@@ -7,9 +7,8 @@ import java.util.Arrays;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculeSubTab;
 import de.mpg.biochem.mars.gui.options.Options;
-import de.mpg.biochem.mars.gui.plot.Plot;
-import de.mpg.biochem.mars.gui.plot.PlotProperties;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -34,10 +33,11 @@ import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXTextField;
 
 public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 	
-	private TextField titleField, xNameField, yNameField;
+	private TextField titleField, yNameField;
 	private JFXButton removeButton, addButton, updateButton;
 	private ComboBox<String> xColumnField;
 	
@@ -64,8 +64,6 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		
 		add(new Label("Title "), "");
 		add(titleField, "wrap");
-		//add(new Label("X Axis "), "");
-		//add(xNameField, "wrap");
 		add(new Label("Y Axis "), "");
 		add(yNameField, "wrap");
 		add(new Label("X Axis Column"), "");
@@ -76,12 +74,10 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		add(addButton, "split 2");
 		add(removeButton, "");
 		add(updateButton, "right");
-		updateButton.setCenterShape(true);
 	}
 	
 	private void initComponents() {
 		titleField = new TextField();
-		xNameField = new TextField();
 		yNameField = new TextField();
 		xColumnField = new ComboBox<>();
 		
@@ -109,18 +105,30 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
         plotPropertiesTable.getColumns().add(colorColumn);
         colorColumn.setStyle("-fx-alignment: CENTER;");
         
+        TableColumn<PlotPropertiesRow, JFXTextField> strokeColumn = new TableColumn<>("Stroke");
+        strokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getWidthField()));
+        strokeColumn.setPrefWidth(50);
+        strokeColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(strokeColumn);
+        strokeColumn.setStyle("-fx-alignment: CENTER;");
+        
         TableColumn<PlotPropertiesRow, JFXCheckBox> drawSegmentsColumn = new TableColumn<>("Segments");
         drawSegmentsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDrawSegmentsField()));
-        //colorColumn.setPrefWidth(50);
         drawSegmentsColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(drawSegmentsColumn);
         drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotPropertiesRow, ComboBox<Color>> segmentsColorColumn = new TableColumn<>("Segment Color");
-        segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColor()));
+        segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
         segmentsColorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsColorColumn);
         segmentsColorColumn.setStyle("-fx-alignment: CENTER;");
+        
+        TableColumn<PlotPropertiesRow, JFXTextField> segmentsStrokeColumn = new TableColumn<>("Segment Stroke");
+        segmentsStrokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsWidthField()));
+        segmentsStrokeColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(segmentsStrokeColumn);
+        segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");
         
         plotPropertiesTable.setItems(plotPropertiesRowList);
 		
@@ -152,20 +160,24 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 	
 	public void updatePlot() {
 		plot.clear();
+		
 		for (int i=0;i<plotPropertiesRowList.size();i++) {
 			PlotPropertiesRow propertiesRow = plotPropertiesRowList.get(i);
 			String xColumnName = xColumnField.getSelectionModel().getSelectedItem();
 			String yColumnName = propertiesRow.getYColumn();
+			
+			ArrayList<String> segmentTableName = new ArrayList<String>();
+			segmentTableName.add(xColumnName);
+			segmentTableName.add(yColumnName);
 			
 			if (xColumnField.getSelectionModel().getSelectedIndex() != -1 
 				&& propertiesRow.yColumnField().getSelectionModel().getSelectedIndex() != -1)
 					plot.addLinePlot(molecule.getDataTable(), 
 						xColumnName, 
 						yColumnName,
-						propertiesRow.getColor(), i);
-			// && molecule.getSegmentTableNames().contains(new ArrayList<String>(new ArrayList<>(Arrays.asList(xColumnName, yColumnName))))
-			if(propertiesRow.drawSegments())
-				plot.addSegmentPlot(molecule.getSegmentsTable(xColumnField.getSelectionModel().getSelectedItem(), propertiesRow.getYColumn()));
+						propertiesRow.getColor(), propertiesRow.getWidth(), i);
+			if(propertiesRow.drawSegments() && molecule.getSegmentTableNames().contains(segmentTableName))
+				plot.addSegmentPlot(molecule.getSegmentsTable(xColumnField.getSelectionModel().getSelectedItem(), propertiesRow.getYColumn()), propertiesRow.getSegmentsColor(), propertiesRow.getSegmentsWidth());
 		}
 		if (!titleField.getText().equals(""))
 			plot.setTitle(titleField.getText());
@@ -174,7 +186,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		if (!yNameField.getText().equals(""))
 			plot.setYLabel(yNameField.getText());
 		
-		//plot.updateLegend();
+		plot.updateLegend();
 	}
 	
 	@Override
@@ -203,6 +215,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 	private class PlotPropertiesRow {
 		private ComboBox<String> yColumnField, typeField;
 		private ComboBox<Color> colorField, segmentColorField;
+		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
 		private PlotProperties properties;
 		
@@ -216,9 +229,11 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 			typeField = new ComboBox<>();
 			yColumnField = new ComboBox<>();
 			colorField = new ComboBox<>();
+			widthField = new JFXTextField();
 
 			drawSegmentsColumn = new JFXCheckBox();
 			segmentColorField = new ComboBox<>();
+			segmentsWidthField = new JFXTextField();
 			
 			Callback<ListView<Color>, ListCell<Color>> factory = new Callback<ListView<Color>, ListCell<Color>>() {
 		        @Override
@@ -246,9 +261,15 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 			colorField.getSelectionModel().select(properties.getColor());
 			colorField.setPrefWidth(50);
 			
+			widthField.setText("1.0");
+			widthField.setPrefWidth(50);
+			
 			segmentColorField.getItems().addAll(colors);
 			segmentColorField.getSelectionModel().select(properties.getSegmentsColor());
 			segmentColorField.setPrefWidth(50);
+			
+			segmentsWidthField.setText("1.0");
+			segmentsWidthField.setPrefWidth(50);
 		}
 		
 		public ComboBox<String> getTypeField() {
@@ -259,7 +280,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 			return colorField;
 		}
 		
-		public ComboBox<Color> getSegmentsColor() {
+		public ComboBox<Color> getSegmentsColorField() {
 			return segmentColorField;
 		}
 		
@@ -269,6 +290,22 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		
 		public JFXCheckBox getDrawSegmentsField() {
 			return drawSegmentsColumn;
+		}
+		
+		public JFXTextField getWidthField() {
+			return widthField;
+		}
+		
+		public String getWidth() {
+			return widthField.getText();
+		}
+		
+		public String getSegmentsWidth() {
+			return segmentsWidthField.getText();
+		}
+		
+		public JFXTextField getSegmentsWidthField() {
+			return segmentsWidthField;
 		}
 		
 		public String getType() {
@@ -286,11 +323,15 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		public Color getColor() {
 			return colorField.getSelectionModel().getSelectedItem();
 		}
+		
+		public Color getSegmentsColor() {
+			return segmentColorField.getSelectionModel().getSelectedItem();
+		}
 	}
 	
 	static class ColorRectCell extends ListCell<Color>{
 	      @Override
-	      public void updateItem(Color item, boolean empty){
+	      public void updateItem(Color item, boolean empty) {
 	          super.updateItem(item, empty);
 	          Rectangle rect = new Rectangle(15,15);
 	          if(item != null){

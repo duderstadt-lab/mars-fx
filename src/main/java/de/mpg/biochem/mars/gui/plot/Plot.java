@@ -13,6 +13,9 @@ import cern.extjfx.chart.plugins.Zoomer;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.ImageCursor;
+import javafx.scene.shape.Shape;
+import javafx.scene.shape.Line;
+import javafx.scene.shape.Circle;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart.Series;
@@ -55,11 +58,12 @@ import de.mpg.biochem.mars.table.*;
 import cern.extjfx.chart.plugins.*;
 import javafx.scene.input.MouseEvent;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import de.mpg.biochem.mars.gui.molecule.moleculesTab.DatasetOptionsPane;
 import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculeSubTab;
 import de.mpg.biochem.mars.gui.options.MarkdownExtensionsPane;
 
@@ -81,6 +85,11 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	private NumericAxis yAxis;
 	private LineChart<Number, Number> lineChart;
 	private XYChartPane<Number, Number> chartPane;
+	
+	//private ArrayList<XYChart.Series<Number, Number>> seriesData;
+	private ArrayList<MARSResultsTable> segmentTables;
+	private ArrayList<Color> segmentColors;
+	private ArrayList<String> segmentWidths;
 	
 	private Molecule molecule;
 	
@@ -114,6 +123,10 @@ public class Plot extends BorderPane implements MoleculeSubTab {
         setCenter(centerPane);
         setTop(createToolBar());
 
+        segmentTables = new ArrayList<>();
+        segmentColors = new ArrayList<>();
+        segmentWidths = new ArrayList<>();
+        
     	panner = new Panner();
     	panner.setMouseFilter(PAN_MOUSE_FILTER);
 	}
@@ -203,11 +216,40 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		yAxis.setForceZeroInRange(false);
 		yAxis.setAutoRangePadding(0);
 		
-		lineChart = new LineChart<>(xAxis, yAxis);
+		lineChart = new LineChart<Number, Number>(xAxis, yAxis) {
+
+            private List<Shape> shapes = new ArrayList<>();
+
+            @Override
+            public void layoutPlotChildren() {
+                super.layoutPlotChildren();
+                getPlotChildren().removeAll(shapes);
+                shapes.clear();
+                for (int i=0;i<segmentTables.size();i++) {
+                	MARSResultsTable segmentTable = segmentTables.get(i);
+                	for (int row=0;row<segmentTable.getRowCount();row++) {
+                		if (!Double.isNaN(segmentTable.getValue("x1", row)) && 
+                			!Double.isNaN(segmentTable.getValue("y1", row)) &&	
+                			!Double.isNaN(segmentTable.getValue("x2", row)) &&
+                			!Double.isNaN(segmentTable.getValue("y2", row))) {
+			                    double x1 = xAxis.getDisplayPosition(segmentTable.getValue("x1", row));
+			                    double y1 = yAxis.getDisplayPosition(segmentTable.getValue("y1", row));
+			                    double x2 = xAxis.getDisplayPosition(segmentTable.getValue("x2", row));
+			                    double y2 = yAxis.getDisplayPosition(segmentTable.getValue("y2", row));
+			                    Line line = new Line(x1, y1, x2, y2);
+			                    line.setStroke(segmentColors.get(i));
+			                    line.setStrokeWidth(1);
+			                    shapes.add(line);
+                		}	
+                	}
+                }
+                getPlotChildren().addAll(shapes);
+            }
+        };
 		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
 		chartPane = new XYChartPane<>(lineChart);
-		chartPane.setLegendVisible(false);
+		//chartPane.setLegendVisible(false);
 		
 		return chartPane;
 	}
@@ -217,10 +259,10 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	}
 	
 	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn) {
-		addLinePlot(table, xColumn, yColumn, Color.BLACK, -1);
+		addLinePlot(table, xColumn, yColumn, Color.BLACK, "1.0", -1);
 	}
 	
-	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color, int index) {
+	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color, String width, int index) {
 		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
 		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
 		for (int row=0; row< table.getRowCount(); row++) {
@@ -231,13 +273,15 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 		lineChart.getData().add(series);
 		final String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
-		final String lineStyle = String.format("-fx-stroke-width: 1px; -fx-stroke: %s;", colorString);
+		final String lineStyle = String.format("-fx-stroke-width: " + width + "px; -fx-stroke: %s;", colorString);
 		series.getNode().lookup(".chart-series-line").setStyle(lineStyle);
 		
 		seriesColorMap.put(index, colorString);
 	}
 	
 	public void clear() {
+		segmentTables.clear();
+		segmentColors.clear();
 		lineChart.getData().clear();
 		seriesColorMap.clear();
 	}
@@ -246,29 +290,12 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		chartPane.setTitle(name);
 	}
 
-	public void addSegmentPlot(MARSResultsTable segmentTable) {
-		LineChart<Number, Number> segmentChart = new LineChart<>(xAxis, yAxis);
-		
-		//for (int row=0; row< segmentTable.getRowCount(); row++) {
-			XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-			
-			//series.getData().add(new XYChart.Data<Number, Number>(segmentTable.getValue("x1", row), segmentTable.getValue("y1", row)));
-			//series.getData().add(new XYChart.Data<Number, Number>(segmentTable.getValue("x2", row), segmentTable.getValue("y2", row)));
-			
-			series.getData().add(new XYChart.Data<Number, Number>(1, 5000));
-			series.getData().add(new XYChart.Data<Number, Number>(1, 5000));
-			
-			
-			segmentChart.getData().add(series);
-		//}
-		 
-		segmentChart.setStyle("-fx-stroke-width: 1px;");
-		segmentChart.setCreateSymbols(false);
-		segmentChart.setAnimated(false);
-		chartPane.getOverlayCharts().add(segmentChart);
+	public void addSegmentPlot(MARSResultsTable segmentTable, Color color, String width) {
+		segmentTables.add(segmentTable);
+		segmentColors.add(color);
+		segmentWidths.add(width);
 	}
 	
-	/*
 	public void updateLegend() {
 		Platform.runLater(() -> {
 			for (Node node: chartPane.lookupAll(".chart-legend-item-symbol")) {
@@ -276,14 +303,14 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	                if (styleClass.startsWith("series")) {
 	                    final int i = Integer.parseInt(styleClass.substring(6));
 	                    if (seriesColorMap.containsKey(i))
-	                    	node.setStyle("-fx-background-color: " + seriesColorMap.get(i) + ", white;");
+	                    	node.setStyle("-fx-background-color: " + seriesColorMap.get(i) + ", " + seriesColorMap.get(i) + ";");
 	                    //break;
 	                }
 	            }
 			}
 		});
 	}
-	*/
+	
 	private void addPlugin(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
 		removePlugins();
 		if (toolSelected()) {
@@ -306,22 +333,10 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 			return false;
 	}
 	
-	// Remaining Actions
-	
 	private void resetXYZoom() {
 		xAxis.setAutoRanging(true);
 		yAxis.setAutoRanging(true);
 	}
-	/*
-	private void resetXZoom() {
-		xAxis.setAutoRanging(true);
-	}
-	
-	private void resetYZoom() {
-		yAxis.setAutoRanging(true);
-	}
-	*/
-	// Settings
 	
 	private void properties() {
 		
