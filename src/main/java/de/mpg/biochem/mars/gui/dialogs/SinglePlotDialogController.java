@@ -1,6 +1,7 @@
 package de.mpg.biochem.mars.gui.dialogs;
 
 import de.mpg.biochem.mars.gui.plot.PlotFrame;
+import de.mpg.biochem.mars.gui.plot.PlotSeries;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
@@ -67,7 +68,7 @@ public class SinglePlotDialogController {
     	plotFrame.init();
     	
     	if (table.hasColumn(xColumn.getValue()) && table.hasColumn(yColumn.getValue())) {
-    		plotFrame.getPlot().addLinePlot(table, xColumn.getValue(), yColumn.getValue());
+    		plotFrame.getPlot().addSeries(new PlotSeries(table, xColumn.getValue(), yColumn.getValue()));
     		plotFrame.getPlot().setXLabel(xColumn.getValue());
     		plotFrame.getPlot().setYLabel(yColumn.getValue());
     	} else 

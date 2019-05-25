@@ -40,6 +40,7 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.*;
@@ -86,11 +87,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	private LineChart<Number, Number> lineChart;
 	private XYChartPane<Number, Number> chartPane;
 	
-	//private ArrayList<XYChart.Series<Number, Number>> seriesData;
-	private ArrayList<MARSResultsTable> segmentTables;
-	private ArrayList<Color> segmentColors;
-	private ArrayList<String> segmentWidths;
-	
 	private Molecule molecule;
 	
 	private Panner panner;
@@ -98,22 +94,13 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	private Node datasetOptions;
 	private DatasetOptionsPane datasetOptionsPane;
 	
-	private HashMap<Integer, String> seriesColorMap = new HashMap<>();
-	
 	private BooleanProperty trackSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomXSelected = new SimpleBooleanProperty();
 	private BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	private BooleanProperty panSelected = new SimpleBooleanProperty();
-	//private BooleanProperty crosshairSelected = new SimpleBooleanProperty();
 
 	public Plot() {
-		Label titleLabel = new Label(getDescription());
-        titleLabel.setStyle("-fx-border-color: grey");
-        titleLabel.setWrapText(true);
-        titleLabel.setMaxWidth(Double.MAX_VALUE);
-        setTop(titleLabel);
-
         SplitPane centerPane = new SplitPane(createSamplePane());
         Node controlPane = createControlPane();
         if (controlPane != null) {
@@ -122,10 +109,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
         }
         setCenter(centerPane);
         setTop(createToolBar());
-
-        segmentTables = new ArrayList<>();
-        segmentColors = new ArrayList<>();
-        segmentWidths = new ArrayList<>();
         
     	panner = new Panner();
     	panner.setMouseFilter(PAN_MOUSE_FILTER);
@@ -142,8 +125,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 				null, zoomYSelected);
 		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(panner, Cursor.MOVE),
 				null, panSelected);
-		//Action crosshairCursor = new Action("crosshair Indicator", "Shortcut+C", PLUS, e -> addPlugin(new CrosshairIndicator<Number, Number>(), Cursor.CROSSHAIR),
-		//		null, crosshairSelected);
 		
 		Node[] toolButtons = ActionUtils.createToolBarButtons(
 				trackCursor,
@@ -158,15 +139,7 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 		ToolBar toolBar = new ToolBar(toolButtons);
 		toolBar.getItems().add(new Separator());
-		/*
-		 * Needs to be manually written.
-		 * 
-		Action resetXZoom = new Action("Reset Zoom", "Shortcut+X", ARROWS_H, e -> resetXZoom());
-		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXZoom));
-		
-		Action resetYZoom = new Action("Reset Zoom", "Shortcut+Y", ARROWS_V, e -> resetYZoom());
-		toolBar.getItems().add(ActionUtils.createToolBarButton(resetYZoom));
-		*/
+
 		Action resetXYZoom = new Action("Reset Zoom", "Shortcut+R", EXPAND, e -> resetXYZoom());
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
@@ -196,14 +169,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 		return toolBar;
 	}
-	
-	public String getName() {
-		return "Data Set";
-	}
-
-	public String getDescription() {
-		return "Plot";
-	}
 
 	public Node createSamplePane() {
 		xAxis = new NumericAxis();
@@ -217,7 +182,6 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		yAxis.setAutoRangePadding(0);
 		
 		lineChart = new LineChart<Number, Number>(xAxis, yAxis) {
-
             private List<Shape> shapes = new ArrayList<>();
 
             @Override
@@ -225,22 +189,24 @@ public class Plot extends BorderPane implements MoleculeSubTab {
                 super.layoutPlotChildren();
                 getPlotChildren().removeAll(shapes);
                 shapes.clear();
-                for (int i=0;i<segmentTables.size();i++) {
-                	MARSResultsTable segmentTable = segmentTables.get(i);
-                	for (int row=0;row<segmentTable.getRowCount();row++) {
-                		if (!Double.isNaN(segmentTable.getValue("x1", row)) && 
-                			!Double.isNaN(segmentTable.getValue("y1", row)) &&	
-                			!Double.isNaN(segmentTable.getValue("x2", row)) &&
-                			!Double.isNaN(segmentTable.getValue("y2", row))) {
-			                    double x1 = xAxis.getDisplayPosition(segmentTable.getValue("x1", row));
-			                    double y1 = yAxis.getDisplayPosition(segmentTable.getValue("y1", row));
-			                    double x2 = xAxis.getDisplayPosition(segmentTable.getValue("x2", row));
-			                    double y2 = yAxis.getDisplayPosition(segmentTable.getValue("y2", row));
-			                    Line line = new Line(x1, y1, x2, y2);
-			                    line.setStroke(segmentColors.get(i));
-			                    line.setStrokeWidth(1);
-			                    shapes.add(line);
-                		}	
+                for (int i=0;i<getPlotSeriesList().size();i++) {
+                	if (molecule.hasSegmentsTable(getPlotSeriesList().get(i).getXColumn(), getPlotSeriesList().get(i).getYColumn())) {
+	                	MARSResultsTable segmentTable = molecule.getSegmentsTable(getPlotSeriesList().get(i).getXColumn(), getPlotSeriesList().get(i).getYColumn());
+	                	for (int row=0;row<segmentTable.getRowCount();row++) {
+	                		if (!Double.isNaN(segmentTable.getValue("x1", row)) && 
+	                			!Double.isNaN(segmentTable.getValue("y1", row)) &&	
+	                			!Double.isNaN(segmentTable.getValue("x2", row)) &&
+	                			!Double.isNaN(segmentTable.getValue("y2", row))) {
+				                    double x1 = xAxis.getDisplayPosition(segmentTable.getValue("x1", row));
+				                    double y1 = yAxis.getDisplayPosition(segmentTable.getValue("y1", row));
+				                    double x2 = xAxis.getDisplayPosition(segmentTable.getValue("x2", row));
+				                    double y2 = yAxis.getDisplayPosition(segmentTable.getValue("y2", row));
+				                    Line line = new Line(x1, y1, x2, y2);
+				                    line.setStroke(getPlotSeriesList().get(i).getSegmentsColor());
+				                    line.setStrokeWidth(1);
+				                    shapes.add(line);
+	                		}	
+	                	}
                 	}
                 }
                 getPlotChildren().addAll(shapes);
@@ -258,42 +224,16 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 		
 	}
 	
-	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn) {
-		addLinePlot(table, xColumn, yColumn, Color.BLACK, "1.0", -1);
-	}
-	
-	public void addLinePlot(MARSResultsTable table, String xColumn, String yColumn, Color color, String width, int index) {
-		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
-		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
-		for (int row=0; row< table.getRowCount(); row++) {
-			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
-		}
-
-		series.setName(yColumn);
-		
-		lineChart.getData().add(series);
-		final String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
-		final String lineStyle = String.format("-fx-stroke-width: " + width + "px; -fx-stroke: %s;", colorString);
-		series.getNode().lookup(".chart-series-line").setStyle(lineStyle);
-		
-		seriesColorMap.put(index, colorString);
+	public void addSeries(PlotSeries plotSeries) {
+		getPlotSeriesList().add(plotSeries);
 	}
 	
 	public void clear() {
-		segmentTables.clear();
-		segmentColors.clear();
 		lineChart.getData().clear();
-		seriesColorMap.clear();
 	}
 	
 	public void setTitle(String name) {
 		chartPane.setTitle(name);
-	}
-
-	public void addSegmentPlot(MARSResultsTable segmentTable, Color color, String width) {
-		segmentTables.add(segmentTable);
-		segmentColors.add(color);
-		segmentWidths.add(width);
 	}
 	
 	public void updateLegend() {
@@ -302,13 +242,65 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 	            for (String styleClass: node.getStyleClass()) {
 	                if (styleClass.startsWith("series")) {
 	                    final int i = Integer.parseInt(styleClass.substring(6));
-	                    if (seriesColorMap.containsKey(i))
-	                    	node.setStyle("-fx-background-color: " + seriesColorMap.get(i) + ", " + seriesColorMap.get(i) + ";");
-	                    //break;
+	                    if (getPlotSeriesList().size() > i) {
+	                    	Color color = getPlotSeriesList().get(i).getColor();
+	                    	String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
+	                    	node.setStyle("-fx-background-color: " + colorString + ", " + colorString + ";");
+	                    }
 	                }
 	            }
 			}
 		});
+	}
+	
+	public ObservableList<PlotSeries> getPlotSeriesList() {
+		return datasetOptionsPane.getPlotSeriesList();
+	}
+	
+	public void update() {
+		clear();
+
+		for (int i=0;i<getPlotSeriesList().size();i++) {
+			String xColumnName = getPlotSeriesList().get(i).getXColumn();
+			String yColumnName = getPlotSeriesList().get(i).getYColumn();
+			
+			ArrayList<String> segmentTableName = new ArrayList<String>();
+			segmentTableName.add(xColumnName);
+			segmentTableName.add(yColumnName);
+			
+			if (getPlotSeriesList().get(i).xColumnField().getSelectionModel().getSelectedIndex() != -1 
+				&& getPlotSeriesList().get(i).yColumnField().getSelectionModel().getSelectedIndex() != -1)
+					loadPlotSeries(getPlotSeriesList().get(i));
+		}
+		if (!datasetOptionsPane.getTitle().equals(""))
+			setTitle(datasetOptionsPane.getTitle());
+		if (!datasetOptionsPane.getXAxisName().equals(""))
+			setXLabel(datasetOptionsPane.getXAxisName());
+		if (!datasetOptionsPane.getYAxisName().equals(""))
+			setYLabel(datasetOptionsPane.getYAxisName());
+		
+		updateLegend();
+	}
+	
+	private void loadPlotSeries(PlotSeries plotSeries) {
+		MARSResultsTable table = molecule.getDataTable();
+		String xColumn = plotSeries.getXColumn();
+		String yColumn = plotSeries.getYColumn();
+		String width = plotSeries.getWidth();
+		Color color = plotSeries.getColor();
+		
+		//data = new DataReducingObservableList<>(xAxis, RandomDataGenerator.generateData(0, 1, pointsCount));
+		XYChart.Series<Number, Number> series = new XYChart.Series<Number, Number>();
+		for (int row=0; row< table.getRowCount(); row++) {
+			series.getData().add(new XYChart.Data<Number, Number>(table.getValue(xColumn, row), table.getValue(yColumn, row)));
+		}
+
+		series.setName(plotSeries.getYColumn());
+		
+		lineChart.getData().add(series);
+		final String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
+		final String lineStyle = String.format("-fx-stroke-width: %s; -fx-stroke: %s;", width, colorString);
+		series.getNode().lookup(".chart-series-line").setStyle(lineStyle);
 	}
 	
 	private void addPlugin(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
@@ -356,6 +348,8 @@ public class Plot extends BorderPane implements MoleculeSubTab {
 
 	@Override
 	public void setMolecule(Molecule molecule) {
+		this.molecule = molecule;
 		datasetOptionsPane.setMolecule(molecule);
+		update();
 	}
 }

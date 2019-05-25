@@ -80,7 +80,6 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
                 if (newMoleculeIndexRow != null) {
             		updateMoleculeSubTabs(newMoleculeIndexRow);
             		moleculeIndexTable.requestFocus();
-            		System.out.println("" + moleculeIndexTable.isFocused());
                 }
         });
         
