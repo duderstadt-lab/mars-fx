@@ -68,9 +68,9 @@ public class SinglePlotDialogController {
     	plotFrame.init();
     	
     	if (table.hasColumn(xColumn.getValue()) && table.hasColumn(yColumn.getValue())) {
-    		plotFrame.getPlot().addSeries(new PlotSeries(table, xColumn.getValue(), yColumn.getValue()));
-    		plotFrame.getPlot().setXLabel(xColumn.getValue());
-    		plotFrame.getPlot().setYLabel(yColumn.getValue());
+    		//plotFrame.getPlot().addSeries(new PlotSeries(table, xColumn.getValue(), yColumn.getValue()));
+    		//plotFrame.getPlot().setXLabel(xColumn.getValue());
+    		//plotFrame.getPlot().setYLabel(yColumn.getValue());
     	} else 
     		System.out.println("Column not Found!");
     	

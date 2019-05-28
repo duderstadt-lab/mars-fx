@@ -33,6 +33,7 @@ import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
@@ -46,11 +47,11 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 	
 	private Molecule molecule;
 	
-	private Plot plot;
+	private SubPlot subPlot;
 
-	public DatasetOptionsPane(Molecule molecule, Plot plot) {
+	public DatasetOptionsPane(Molecule molecule, SubPlot subPlot) {
 		this.molecule = molecule;
-		this.plot = plot;
+		this.subPlot = subPlot;
 		
 		setLayout("insets dialog");
 		
@@ -93,7 +94,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
         yValuesColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(yValuesColumn);
         
-        TableColumn<PlotSeries, ComboBox<Color>> colorColumn = new TableColumn<>("Color");
+        TableColumn<PlotSeries, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getColorField()));
         //colorColumn.setPrefWidth(70);
         colorColumn.setSortable(false);
@@ -113,7 +114,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
         plotPropertiesTable.getColumns().add(drawSegmentsColumn);
         drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<PlotSeries, ComboBox<Color>> segmentsColorColumn = new TableColumn<>("Segment Color");
+        TableColumn<PlotSeries, JFXColorPicker> segmentsColorColumn = new TableColumn<>("Segment Color");
         segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
         segmentsColorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsColorColumn);
@@ -150,7 +151,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		     rt.setByAngle(360);
 		     rt.setCycleCount(4);
 		     rt.play();
-		     plot.update();
+		     subPlot.update();
 		     rt.stop();
 		});
 	}
@@ -185,6 +186,10 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		return yNameField.getText();
 	}
 	
+	public ComboBox<String> xColumnField() {
+		return xColumnField;
+	}
+	
 	public String getXAxisName() {
 		if (xColumnField.getSelectionModel().getSelectedIndex() != -1)
 			return xColumnField.getSelectionModel().getSelectedItem();
@@ -192,8 +197,8 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 			return "";
 	}
 	
-	public void setPlot(Plot plot) {
-		this.plot = plot;
+	public void setSubPlot(SubPlot subPlot) {
+		this.subPlot = subPlot;
 	}
 }
 

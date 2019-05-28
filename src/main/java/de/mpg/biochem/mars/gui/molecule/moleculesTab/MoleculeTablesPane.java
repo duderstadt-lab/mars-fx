@@ -2,7 +2,7 @@ package de.mpg.biochem.mars.gui.molecule.moleculesTab;
 
 import java.util.ArrayList;
 
-import de.mpg.biochem.mars.gui.plot.Plot;
+import de.mpg.biochem.mars.gui.plot.PlotPane;
 import de.mpg.biochem.mars.gui.table.MARSTableView;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
@@ -23,7 +23,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 	private Tab plotTab;
 	
 	private BorderPane dataTableContainer;
-	private Plot plot;
+	private PlotPane plot;
 	
 	private Molecule molecule;
 	
@@ -42,7 +42,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plot = new Plot();
+		plot = new PlotPane();
 		plotTab.setContent(plot);
 		
 		tabPane.getTabs().add(dataTableTab);

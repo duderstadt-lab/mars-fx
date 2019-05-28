@@ -43,7 +43,7 @@ public class PlotFrame extends JFrame {
 
 	private JFXPanel fxPanel;
 	
-	private Plot plot;
+	private PlotPane plot;
 
 	public PlotFrame() {
 		//ij.context().inject(this);
@@ -58,14 +58,14 @@ public class PlotFrame extends JFrame {
 		this.setVisible(true);
 
 		//Scene scene = new Scene(new LargeDataSetsSample());
-		plot = new Plot();
+		plot = new PlotPane();
 		Scene scene = new Scene(plot);
 		this.fxPanel.setScene(scene);
 		this.setSize(1000, 600);
 
 	}
 	
-	public Plot getPlot() {
+	public PlotPane getPlot() {
 		return plot;
 	}
 }

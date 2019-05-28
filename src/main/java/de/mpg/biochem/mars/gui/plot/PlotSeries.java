@@ -27,28 +27,30 @@
 package de.mpg.biochem.mars.gui.plot;
 
 import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 import de.mpg.biochem.mars.table.MARSResultsTable;
+import javafx.event.EventHandler;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Callback;
 
 public class PlotSeries {
 		private ComboBox<String> yColumnField, xColumnField, typeField;
-		private ComboBox<Color> colorField, segmentColorField;
+		private JFXColorPicker colorField, segmentColorField;
 		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
 		
 		private MARSResultsTable table;
 		
 		private String[] columnHeadings;
-		
-		protected static Color[] colors = {Color.BLACK, Color.BLUE, Color.CYAN, Color.GRAY, Color.GREEN, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.RED, Color.YELLOW};
-		
+
 		protected static String[] types = {"Line","Scatter","Bar"};
 		
 		public PlotSeries(MARSResultsTable table, ComboBox<String> xColumnField) {
@@ -56,13 +58,20 @@ public class PlotSeries {
 			this.columnHeadings = table.getColumnHeadings();
 			initComponents();
 			load();
-			
-			//xColumnField.getSelectionModel().select("slice");
-			//yColumnField.getSelectionModel().select("x");
-			
-			//PlotSeries(table, "slice", "x");
 		}
 		
+		public PlotSeries(MARSResultsTable table, ComboBox<String> xColumnField, String yColumn) {
+			this.xColumnField = xColumnField;
+			this.table = table;
+			this.columnHeadings = table.getColumnHeadings();
+			initComponents();
+			load();
+			
+			//xColumnField.getSelectionModel().select(xColumn);
+			yColumnField.getSelectionModel().select(yColumn);
+		}
+		
+		//REMOVE ME WHEN READY
 		public PlotSeries(MARSResultsTable table, String xColumn, String yColumn) {
 			this.table = table;
 			this.columnHeadings = table.getColumnHeadings();
@@ -75,27 +84,13 @@ public class PlotSeries {
 		
 		void initComponents() {
 			typeField = new ComboBox<>();
-			//xColumnField = new ComboBox<>();
 			yColumnField = new ComboBox<>();
-			colorField = new ComboBox<>();
+			colorField = new JFXColorPicker();
 			widthField = new JFXTextField();
 
 			drawSegmentsColumn = new JFXCheckBox();
-			segmentColorField = new ComboBox<>();
+			segmentColorField = new JFXColorPicker();
 			segmentsWidthField = new JFXTextField();
-			
-			Callback<ListView<Color>, ListCell<Color>> factory = new Callback<ListView<Color>, ListCell<Color>>() {
-		        @Override
-		        public ListCell<Color> call(ListView<Color> list) {
-		            return new ColorRectCell();
-		        }
-		    };
-
-		    colorField.setCellFactory(factory);
-		    colorField.setButtonCell(factory.call(null));
-			
-		    segmentColorField.setCellFactory(factory);
-		    segmentColorField.setButtonCell(factory.call(null));
 		}
 		
 		void load() {
@@ -103,13 +98,11 @@ public class PlotSeries {
 			
 			yColumnField.getItems().addAll(columnHeadings);
 			
-			colorField.getItems().addAll(colors);
 			colorField.setPrefWidth(50);
 			
 			widthField.setText("1.0");
 			widthField.setPrefWidth(50);
 			
-			segmentColorField.getItems().addAll(colors);
 			segmentColorField.setPrefWidth(50);
 			
 			segmentsWidthField.setText("1.0");
@@ -120,19 +113,19 @@ public class PlotSeries {
 		
 		void setDefaults() {
 			typeField.getSelectionModel().select("Line");
-			colorField.getSelectionModel().select(Color.BLACK);
-			segmentColorField.getSelectionModel().select(Color.RED);
+			colorField.setValue(Color.BLACK);
+			segmentColorField.setValue(Color.RED);
 		}
 		
 		public ComboBox<String> getTypeField() {
 			return typeField;
 		}
 		
-		public ComboBox<Color> getColorField() {
+		public JFXColorPicker getColorField() {
 			return colorField;
 		}
 		
-		public ComboBox<Color> getSegmentsColorField() {
+		public JFXColorPicker getSegmentsColorField() {
 			return segmentColorField;
 		}
 		
@@ -185,27 +178,15 @@ public class PlotSeries {
 		}
 		
 		public Color getColor() {
-			return colorField.getSelectionModel().getSelectedItem();
+			return colorField.getValue();
 		}
 		
 		public Color getSegmentsColor() {
-			return segmentColorField.getSelectionModel().getSelectedItem();
+			return segmentColorField.getValue();
 		}
 		
 		public MARSResultsTable getDataTable() {
 			return table;
-		}
-		
-		static class ColorRectCell extends ListCell<Color> {
-		      @Override
-		      public void updateItem(Color item, boolean empty) {
-		          super.updateItem(item, empty);
-		          Rectangle rect = new Rectangle(15,15);
-		          if(item != null){
-		              rect.setFill(item);
-		              setGraphic(rect);
-		          }
-		      }
 		}
 }
 

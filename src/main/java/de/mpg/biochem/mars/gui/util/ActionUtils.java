@@ -89,10 +89,14 @@ public class ActionUtils
 		}
 		return buttons;
 	}
-
+	
 	public static ButtonBase createToolBarButton(Action action) {
+		return createToolBarButton(action, "1.2em");
+	}
+
+	public static ButtonBase createToolBarButton(Action action, String size) {
 		ButtonBase button = (action.selected != null) ? new ToggleButton() : new Button();
-		button.setGraphic(FontAwesomeIconFactory.get().createIcon(action.icon, "1.2em"));
+		button.setGraphic(FontAwesomeIconFactory.get().createIcon(action.icon, size));
 		String tooltip = action.text;
 		if (tooltip.endsWith("..."))
 			tooltip = tooltip.substring(0, tooltip.length() - 3);
