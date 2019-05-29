@@ -137,6 +137,7 @@ public class SubPlot implements MoleculeSubTab {
         };
 		scatterChart.setAnimated(false);
 		*/
+		
 		chartPane = new XYChartPane<>(lineChart);
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);
@@ -188,7 +189,7 @@ public class SubPlot implements MoleculeSubTab {
 			if (getPlotSeriesList().get(i).xColumnField().getSelectionModel().getSelectedIndex() != -1 
 				&& getPlotSeriesList().get(i).yColumnField().getSelectionModel().getSelectedIndex() != -1)
 					loadPlotSeries(getPlotSeriesList().get(i), lineChart);
-			//NEED TO ADD SCATTER PLOT UPDATE HERE
+			//TODO NEED TO ADD SCATTER PLOT UPDATE HERE
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
 			setTitle(datasetOptionsPane.getTitle());
@@ -198,6 +199,7 @@ public class SubPlot implements MoleculeSubTab {
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
 		updateLegend();
+		resetXYZoom();
 	}
 	
 	private void loadPlotSeries(PlotSeries plotSeries, LineChart<Number, Number> currentLineChart) {
@@ -248,6 +250,9 @@ public class SubPlot implements MoleculeSubTab {
 		double yMIN = Double.MAX_VALUE;
 		double yMAX = Double.MIN_VALUE;
 		
+		if (getPlotSeriesList().size() == 0)
+			return;
+		
 		for (int i=0; i < getPlotSeriesList().size(); i++) {
 			String xColumn = getPlotSeriesList().get(i).getXColumn();
 			String yColumn = getPlotSeriesList().get(i).getYColumn();
@@ -271,11 +276,22 @@ public class SubPlot implements MoleculeSubTab {
 				yMAX = ymax;
 		}
 		
-		xAxis.setLowerBound(xMIN);
-		xAxis.setUpperBound(xMAX);
 		
-		yAxis.setLowerBound(yMIN);
-		yAxis.setUpperBound(yMAX);
+		if (xAxis.getLowerBound() > xMAX || xAxis.getLowerBound() > xMIN) {
+			xAxis.setLowerBound(xMIN);
+			xAxis.setUpperBound(xMAX);
+		} else {
+			xAxis.setUpperBound(xMAX);
+			xAxis.setLowerBound(xMIN);
+		}
+
+		if (yAxis.getLowerBound() > yMAX || yAxis.getLowerBound() > yMIN) {
+			yAxis.setLowerBound(yMIN);
+			yAxis.setUpperBound(yMAX);
+		} else {
+			yAxis.setUpperBound(yMAX);
+			yAxis.setLowerBound(yMIN);
+		}
 	}
 	
 	public NumericAxis getXAxis() {

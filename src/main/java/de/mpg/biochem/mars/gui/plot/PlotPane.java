@@ -217,20 +217,22 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 		
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
-
+		
 		for (SubPlot otherSubPlot : charts) {
 			if (subplot.equals(otherSubPlot))
 				continue;
 			
 			subplot.getXAxis().setAutoRanging(false);
-			subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
-			subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
 			
-			otherSubPlot.getXAxis().setAutoRanging(false);
-			otherSubPlot.getXAxis().lowerBoundProperty().bindBidirectional(subplot.getXAxis().lowerBoundProperty());
-			otherSubPlot.getXAxis().upperBoundProperty().bindBidirectional(subplot.getXAxis().upperBoundProperty());
+			if (otherSubPlot.getXAxis().getLowerBound() > subplot.getXAxis().getUpperBound() || otherSubPlot.getXAxis().getLowerBound() > subplot.getXAxis().getLowerBound()) {
+				subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
+				subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
+			} else {
+				subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
+				subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
+			}
 		}
-				
+			
 		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot.getDatasetOptionsButton());
 
 		if (charts.size() > 1) {
@@ -262,9 +264,11 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 			for (int num=1; num <= charts.size(); num++) {
 				charts.get(num-1).getDatasetOptionsButton().setEnabled(true);
 				charts.get(num-1).getDatasetOptionsButton().setText("" + num);
+				charts.get(num-1).getDatasetOptionsButton().refreshBadge();
 			}
 		} else {
 			charts.get(0).getDatasetOptionsButton().setEnabled(false);
+			charts.get(0).getDatasetOptionsButton().refreshBadge();
 		}
 	}
 	
