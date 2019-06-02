@@ -9,12 +9,17 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculeSubTab;
 import de.mpg.biochem.mars.gui.options.Options;
+import de.mpg.biochem.mars.gui.table.TableSubTab;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.table.MARSResultsTable;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Point3D;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -36,21 +41,26 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
+import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
+
+public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	private TextField titleField, yNameField;
-	private JFXButton removeButton, addButton, updateButton;
+	private JFXButton removeButton, addButton;//, updateButton;
+	private Label updateLabel;
 	private ComboBox<String> xColumnField;
 	
 	private TableView<PlotSeries> plotPropertiesTable;
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
-	private Molecule molecule;
+	private MARSResultsTable table;
 	
 	private SubPlot subPlot;
 
-	public DatasetOptionsPane(Molecule molecule, SubPlot subPlot) {
-		this.molecule = molecule;
+	public DatasetOptionsPane(MARSResultsTable table, SubPlot subPlot) {
+		this.table = table;
 		this.subPlot = subPlot;
 		
 		setLayout("insets dialog");
@@ -68,7 +78,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		
 		add(addButton, "split 2");
 		add(removeButton, "");
-		add(updateButton, "right");
+		add(updateLabel, "right");
 	}
 	
 	private void initComponents() {
@@ -79,15 +89,17 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		plotPropertiesTable = new TableView<PlotSeries>();
 		
 		plotPropertiesTable.prefHeightProperty().set(200);
+		plotPropertiesTable.prefWidthProperty().set(400);
         
         TableColumn<PlotSeries, ComboBox<String>> typeColumn = new TableColumn<>("Type");
 		typeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTypeField()));
-		typeColumn.setPrefWidth(70);
+		typeColumn.setMinWidth(100);
 		typeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(typeColumn);
         typeColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, ComboBox<String>> yValuesColumn = new TableColumn<>("Y Values");
+        yValuesColumn.setMinWidth(100);
         yValuesColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().yColumnField()));
         yValuesColumn.setStyle("-fx-alignment: CENTER;");
 
@@ -96,25 +108,27 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
         
         TableColumn<PlotSeries, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getColorField()));
-        //colorColumn.setPrefWidth(70);
+        colorColumn.setMinWidth(50);
         colorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(colorColumn);
         colorColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXTextField> strokeColumn = new TableColumn<>("Stroke");
         strokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getWidthField()));
-        strokeColumn.setPrefWidth(40);
+        strokeColumn.setMinWidth(100);
         strokeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(strokeColumn);
         strokeColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXCheckBox> drawSegmentsColumn = new TableColumn<>("Segments");
+        drawSegmentsColumn.setMinWidth(50);
         drawSegmentsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDrawSegmentsField()));
         drawSegmentsColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(drawSegmentsColumn);
         drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXColorPicker> segmentsColorColumn = new TableColumn<>("Segment Color");
+        drawSegmentsColumn.setMinWidth(100);
         segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
         segmentsColorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsColorColumn);
@@ -122,7 +136,7 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
         
         TableColumn<PlotSeries, JFXTextField> segmentsStrokeColumn = new TableColumn<>("Segment Stroke");
         segmentsStrokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsWidthField()));
-        segmentsStrokeColumn.setPrefWidth(40);
+        segmentsStrokeColumn.setMinWidth(100);
         segmentsStrokeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsStrokeColumn);
         segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");
@@ -139,36 +153,63 @@ public class DatasetOptionsPane extends MigPane implements MoleculeSubTab  {
 		addButton = new JFXButton();
 		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS_CIRCLE, "1.3em"));
 		addButton.setOnAction(e -> {
-			PlotSeries defaultPlotSeries = new PlotSeries(molecule.getDataTable(), xColumnField);
+			PlotSeries defaultPlotSeries = new PlotSeries(table, xColumnField);
 			plotSeriesList.add(defaultPlotSeries);
 		});
 		
-		updateButton = new JFXButton();
 		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.3em");
-		updateButton.setGraphic(syncIcon);
-		updateButton.setOnAction(e -> {
-			 RotateTransition rt = new RotateTransition(Duration.millis(500), syncIcon);
-		     rt.setByAngle(360);
-		     rt.setCycleCount(4);
+		
+		updateLabel = new Label();
+		updateLabel.setGraphic(syncIcon);
+		updateLabel.setCenterShape(true);
+		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.setByAngle(0);
+		rt.setByAngle(360);
+	    rt.setCycleCount(Animation.INDEFINITE);
+	     
+		updateLabel.setOnMouseClicked(e -> {
+			
 		     rt.play();
+		     
+			/*
+		     Task<Void> spin = new Task<Void>() {
+	            @Override
+	            protected Void call() throws Exception {
+	    		     rt.setByAngle(360);
+	    		     rt.setCycleCount(10000);
+	    		     rt.play();
+	                return null;
+	            }
+	         };
+	         spin.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+	            @Override
+	            public void handle(WorkerStateEvent event) {
+	            	
+	            }
+	         });
+	          new Thread(spin).start();
+	          
+	         */
+	        
 		     subPlot.update();
-		     rt.stop();
+	         rt.stop();
 		});
 	}
 	
 	@Override
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
+	public void setTable(MARSResultsTable table) {
+		this.table = table;
 		
 		String xSelection = xColumnField.getSelectionModel().getSelectedItem();
 		xColumnField.getItems().clear();
-		xColumnField.getItems().addAll(molecule.getDataTable().getColumnHeadings());
+		xColumnField.getItems().addAll(table.getColumnHeadings());
 		xColumnField.getSelectionModel().select(xSelection);
 		
 		for (PlotSeries propertiesRow : plotSeriesList) {
 			String ySelection = propertiesRow.yColumnField().getSelectionModel().getSelectedItem();
 			propertiesRow.yColumnField().getItems().clear();
-			propertiesRow.yColumnField().getItems().addAll(molecule.getDataTable().getColumnHeadings());
+			propertiesRow.yColumnField().getItems().addAll(table.getColumnHeadings());
 			if (ySelection != null)
 				propertiesRow.yColumnField().getSelectionModel().select(ySelection);
 		}

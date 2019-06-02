@@ -9,6 +9,7 @@ import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.skins.JFXChipViewSkin;
 import com.jfoenix.controls.JFXButton;
 import javafx.scene.control.TextArea;
+import javafx.scene.layout.FlowPane;
 
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -18,8 +19,10 @@ import de.mpg.biochem.mars.gui.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
@@ -79,20 +82,17 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
 		
+		// JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		// chipView.setSkin(skin);
+	        
 		/*
-		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
-		chipView.setSkin(skin);
-        TextArea textArea = (TextArea) ((FlowPane)skin.getChildren().get(0)).getChildren().get(0);
-        textArea.focusedProperty().addListener((obs, oldValue, newValue) -> {
-            System.out.println(newValue);
-            if (!newValue) {
-                if (StringUtils.isNotBlank(textArea.getText())) {
-                    view.getChips().add(textArea.getText());
-                    textArea.clear();
-                }
-            }
-        });
-        */
+		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
+			if (node instanceof TextArea) {
+				//((TextArea) node).cancelEdit();
+				System.out.println("Cancel Edit");
+			}
+		}
+		*/
 	}
 	
 	@FXML

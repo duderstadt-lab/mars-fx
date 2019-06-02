@@ -55,10 +55,6 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	
 	private NotesTabController notesTabController;
 	
-	private Molecule molecule;
-	
-	private MoleculeArchive archive;
-	
 	private ArrayList<MoleculeSubTab> moleculeTabControllers;
 	
 	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveTabControllers;
@@ -163,8 +159,6 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
    }
    
    public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
-		
 		if (moleculeTabControllers == null)
 			return;
 		
@@ -174,8 +168,6 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 
 	@Override
 	public void setArchive(MoleculeArchive archive) {
-		this.archive = archive;
-		
 		if (moleculeArchiveTabControllers == null)
 			return;
 		

@@ -47,23 +47,23 @@ public class PlotSeries {
 		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
 		
-		private MARSResultsTable table;
+		private MARSResultsTable dataTable;
 		
 		private String[] columnHeadings;
 
-		protected static String[] types = {"Line","Scatter","Bar"};
+		protected static String[] types = {"Line","Scatter"};
 		
-		public PlotSeries(MARSResultsTable table, ComboBox<String> xColumnField) {
+		public PlotSeries(MARSResultsTable dataTable, ComboBox<String> xColumnField) {
 			this.xColumnField = xColumnField;
-			this.columnHeadings = table.getColumnHeadings();
+			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
 			load();
 		}
 		
-		public PlotSeries(MARSResultsTable table, ComboBox<String> xColumnField, String yColumn) {
+		public PlotSeries(MARSResultsTable dataTable, ComboBox<String> xColumnField, String yColumn) {
 			this.xColumnField = xColumnField;
-			this.table = table;
-			this.columnHeadings = table.getColumnHeadings();
+			this.dataTable = dataTable;
+			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
 			load();
 			
@@ -72,9 +72,9 @@ public class PlotSeries {
 		}
 		
 		//REMOVE ME WHEN READY
-		public PlotSeries(MARSResultsTable table, String xColumn, String yColumn) {
-			this.table = table;
-			this.columnHeadings = table.getColumnHeadings();
+		public PlotSeries(MARSResultsTable dataTable, String xColumn, String yColumn) {
+			this.dataTable = dataTable;
+			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
 			load();
 			
@@ -186,7 +186,7 @@ public class PlotSeries {
 		}
 		
 		public MARSResultsTable getDataTable() {
-			return table;
+			return dataTable;
 		}
 }
 

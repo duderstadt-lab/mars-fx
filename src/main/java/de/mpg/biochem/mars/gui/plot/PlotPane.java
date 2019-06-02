@@ -81,6 +81,7 @@ import com.jfoenix.controls.JFXBadge;
 
 import de.mpg.biochem.mars.gui.util.Action;
 import de.mpg.biochem.mars.gui.util.ActionUtils;
+import de.mpg.biochem.mars.gui.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.Molecule;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
@@ -92,6 +93,8 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	
 	private ArrayList<SubPlot> charts;
 	private ToolBar toolBar;
+	
+	private StyleSheetUpdater styleSheetUpdater;
 	
 	enum ChartPlugin {
 	  TRACK, ZOOMXY, ZOOMX, ZOOMY, PAN
@@ -115,6 +118,8 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 
 	public PlotPane() {
 		setTop(createToolBar());
+		
+		styleSheetUpdater = new StyleSheetUpdater();
 		
 		plotOptionsPane = new PlotOptionsPane();
 		
@@ -294,6 +299,10 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	
 	public IntegerProperty maxPointsCount() {
 		return maxPointsCount;
+	}
+	
+	public StyleSheetUpdater getStyleSheetUpdater() {
+		return this.styleSheetUpdater;
 	}
 	
 	public void setMaxPointsCount(int maxPoints) {
