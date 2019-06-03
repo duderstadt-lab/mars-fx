@@ -1,6 +1,8 @@
 package de.mpg.biochem.mars.gui.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,6 +12,8 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.gui.molecule.moleculesTab.MoleculeSubTab;
 import de.mpg.biochem.mars.gui.options.Options;
 import de.mpg.biochem.mars.gui.table.TableSubTab;
+import de.mpg.biochem.mars.gui.util.Action;
+import de.mpg.biochem.mars.gui.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.animation.Animation;
@@ -18,37 +22,23 @@ import javafx.animation.RotateTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.geometry.Point3D;
-import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.util.Callback;
-import javafx.util.Duration;
 import javafx.scene.text.Text;
 
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 
-import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-import javafx.concurrent.Task;
-import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
-
 public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	private TextField titleField, yNameField;
-	private JFXButton removeButton, addButton;//, updateButton;
-	private Label updateLabel;
+	private Button removeButton, addButton, updateButton;
 	private ComboBox<String> xColumnField;
 	
 	private TableView<PlotSeries> plotPropertiesTable;
@@ -78,7 +68,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		
 		add(addButton, "split 2");
 		add(removeButton, "");
-		add(updateLabel, "right");
+		add(updateButton, "right");
 	}
 	
 	private void initComponents() {
@@ -143,25 +133,52 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
         
         plotPropertiesTable.setItems(plotSeriesList);
 		
-		removeButton = new JFXButton();
-		removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS_CIRCLE, "1.3em"));
+		removeButton = new Button();
+		removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+		removeButton.setCenterShape(true);
+		removeButton.setStyle(
+                "-fx-background-radius: 5em; " +
+                "-fx-min-width: 20px; " +
+                "-fx-min-height: 20px; " +
+                "-fx-max-width: 20px; " +
+                "-fx-max-height: 20px;"
+        );
 		removeButton.setOnAction(e -> {
 			if(plotPropertiesTable.getSelectionModel().getSelectedIndex() != -1)
 				plotSeriesList.remove(plotPropertiesTable.getSelectionModel().getSelectedIndex());
 		});
 		
-		addButton = new JFXButton();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS_CIRCLE, "1.3em"));
+		addButton = new Button();
+		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setCenterShape(true);
+		addButton.setStyle(
+                "-fx-background-radius: 5em; " +
+                "-fx-min-width: 20px; " +
+                "-fx-min-height: 20px; " +
+                "-fx-max-width: 20px; " +
+                "-fx-max-height: 20px;"
+        );
 		addButton.setOnAction(e -> {
 			PlotSeries defaultPlotSeries = new PlotSeries(table, xColumnField);
 			plotSeriesList.add(defaultPlotSeries);
 		});
+
+		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.0em");
+		updateButton = new Button();
+		updateButton.setGraphic(syncIcon);
+		updateButton.setCenterShape(true);
+		updateButton.setStyle(
+                "-fx-background-radius: 5em; " +
+                "-fx-min-width: 20px; " +
+                "-fx-min-height: 20px; " +
+                "-fx-max-width: 20px; " +
+                "-fx-max-height: 20px;"
+        );
+		updateButton.setOnMouseClicked(e -> {
+		     subPlot.update();
+		});
 		
-		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.3em");
-		
-		updateLabel = new Label();
-		updateLabel.setGraphic(syncIcon);
-		updateLabel.setCenterShape(true);
+		/*
 		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
 		rt.setInterpolator(Interpolator.LINEAR);
 		rt.setByAngle(0);
@@ -169,10 +186,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	    rt.setCycleCount(Animation.INDEFINITE);
 	     
 		updateLabel.setOnMouseClicked(e -> {
-			
-		     rt.play();
-		     
-			/*
+		     //rt.play();
 		     Task<Void> spin = new Task<Void>() {
 	            @Override
 	            protected Void call() throws Exception {
@@ -190,11 +204,11 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	         });
 	          new Thread(spin).start();
 	          
-	         */
 	        
 		     subPlot.update();
-	         rt.stop();
+	         //rt.stop();
 		});
+		*/
 	}
 	
 	@Override
