@@ -12,10 +12,10 @@
 	</parent>
 
 	<groupId>de.mpg.biochem</groupId>
-	<artifactId>mars</artifactId>
-	<version>1.0.0-SNAPSHOT-fxbeta8</version>
+	<artifactId>mars-fx</artifactId>
+	<version>1.0.0-SNAPSHOT-beta1</version>
 
-	<name>mars</name>
+	<name>mars-fx</name>
 	<url>http://biochem.mpg.de/duderstadt/</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
@@ -66,14 +66,14 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://gitlab-laue.biochem.mpg.de/SDMM/mars</connection>
-		<developerConnection>scm:git:git@gitlab-laue.biochem.mpg.de/SDMM/mars.git</developerConnection>
+		<connection>scm:git:git://gitlab-laue.biochem.mpg.de/SDMM/mars-fx</connection>
+		<developerConnection>scm:git:git@gitlab-laue.biochem.mpg.de/SDMM/mars-fx.git</developerConnection>
 		<tag>HEAD</tag>
-		<url>git@laue.biochem.mpg.de:SDMM/mars.git</url>
+		<url>git@laue.biochem.mpg.de:SDMM/mars-fx.git</url>
 	</scm>
 	<issueManagement>
 		<system>GitLab Issues</system>
-		<url>https://gitlab-laue.biochem.mpg.de/SDMM/mars/issues</url>
+		<url>https://gitlab-laue.biochem.mpg.de/SDMM/mars-fx/issues</url>
 	</issueManagement>
 	<ciManagement>
 		<system>None</system>
@@ -336,10 +336,15 @@
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
+			<groupId>de.mpg.biochem</groupId>
+			<artifactId>mars-core</artifactId>
+			<version>1.0.0-SNAPSHOT-beta1</version>
+		</dependency>
+		<dependency>
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-javafx</artifactId>
 			<version>5.2</version>
 		</dependency>
 	</dependencies>
-	<description>Suite of tools for processing single-molecule TIRF and flow-stretching data in the Structure and Dynamics of Molecular Machines research group.</description>
+	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
 </project>
