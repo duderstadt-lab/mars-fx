@@ -5,9 +5,12 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXChipView;
+import com.jfoenix.controls.JFXDefaultChip;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.skins.JFXChipViewSkin;
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXChip;
+
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
 
@@ -18,6 +21,7 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -81,6 +85,21 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		
+		//I think items can only be added or remove and only one at a time !
+		//Soooo this should cover all cases.
+		chipView.getChips().addListener(new ListChangeListener<String>() {
+			@Override
+			public void onChanged(Change<? extends String> c) {
+				while (c.next()) {
+		             if (c.wasRemoved()) {
+		                   molecule.removeTag(c.getRemoved().get(0));
+		             } else if (c.wasAdded()) {
+		            	 molecule.addTag(c.getAddedSubList().get(0));
+		             }
+				}
+			}
+		});
 		
 		// JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
 		// chipView.setSkin(skin);
