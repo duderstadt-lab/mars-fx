@@ -35,7 +35,7 @@ import java.util.ResourceBundle;
  */
 public class Messages
 {
-	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.gui.messages";
+	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.fx.messages";
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
 
 	private Messages() {

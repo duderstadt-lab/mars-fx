@@ -15,10 +15,11 @@ import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MARSResultsTableWindow;
 import de.mpg.biochem.mars.table.ResultsTableService;
 import ij.WindowManager;
 
-public class MARSResultsTableFrame extends JFrame {
+public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableWindow {
 
 	private static final long serialVersionUID = 1L;
 
@@ -32,13 +33,13 @@ public class MARSResultsTableFrame extends JFrame {
     private UIService uiService;
 
 	private MARSResultsTable table;
-	private MARSTableView tableView;
+	private MARSTableFxView tableView;
 	
 	private BorderPane TableFrameLayout;
 
 	private JFXPanel fxPanel;
 
-	public MARSResultsTableFrame(String name, MARSResultsTable table, ResultsTableService resultsTableService) {
+	public MARSResultsTableFxFrame(String name, MARSResultsTable table, ResultsTableService resultsTableService) {
 		//ij.context().inject(this);
 		//this.ij = ij;
 		this.resultsTableService = resultsTableService;
@@ -80,7 +81,7 @@ public class MARSResultsTableFrame extends JFrame {
 	public void initFX(JFXPanel fxPanel) {	
 		try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MARSResultsTableFrame.class.getResource("TableFrameLayout.fxml"));
+            loader.setLocation(MARSResultsTableFxFrame.class.getResource("TableFrameLayout.fxml"));
             
             TableFrameLayout = (BorderPane) loader.load();
 
@@ -90,7 +91,7 @@ public class MARSResultsTableFrame extends JFrame {
             TableFrameController controller = loader.getController();
             controller.setFrame(this);
             
-            tableView = new MARSTableView(table);
+            tableView = new MARSTableFxView(table);
             TableFrameLayout.setCenter(tableView);
             
             this.setSize(600, 600);
@@ -101,5 +102,11 @@ public class MARSResultsTableFrame extends JFrame {
 	
 	public MARSResultsTable getTable() {
 		return table;
+	}
+
+	@Override
+	public void update() {
+		// TODO Auto-generated method stub
+		
 	}
 }

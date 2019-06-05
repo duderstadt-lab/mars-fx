@@ -49,7 +49,7 @@ public class MarkdownExtensions
 	static final HashMap<String, String> flexmarkExtClasses = new HashMap<>();
 
 	static {
-		ResourceBundle bundle = ResourceBundle.getBundle("de.mpg.biochem.mars.gui.MarkdownExtensions");
+		ResourceBundle bundle = ResourceBundle.getBundle("de.mpg.biochem.mars.fx.MarkdownExtensions");
 		for (String key : bundle.keySet()) {
 			String value = bundle.getString(key);
 			if (key.startsWith("commonmark.ext."))

@@ -1,9 +1,8 @@
-package de.mpg.biochem.mars.fx.syntaxhighlighter;
+package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.scene.chart.Axis;

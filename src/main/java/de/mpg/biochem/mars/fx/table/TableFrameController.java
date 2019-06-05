@@ -24,13 +24,13 @@ import javafx.fxml.FXMLLoader;
 public class TableFrameController {
 
 	@FXML
-	private MARSResultsTableFrame tableFrame;
+	private MARSResultsTableFxFrame tableFrame;
 	
 	public void setContext(Context context) {
 		context.inject(this);
 	}
 	
-	public void setFrame(MARSResultsTableFrame tableFrame) {
+	public void setFrame(MARSResultsTableFxFrame tableFrame) {
 		this.tableFrame = tableFrame;
 	}
 	

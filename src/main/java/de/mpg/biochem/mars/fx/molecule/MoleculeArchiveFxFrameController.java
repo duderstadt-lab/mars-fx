@@ -34,11 +34,11 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculesTabController;
-import de.mpg.biochem.mars.fx.table.MARSResultsTableFrame;
+import de.mpg.biochem.mars.fx.table.MARSResultsTableFxFrame;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 
-public class MoleculeArchiveFrameController {
+public class MoleculeArchiveFxFrameController {
 
 	@FXML
     private JFXTabPane tabContainer;

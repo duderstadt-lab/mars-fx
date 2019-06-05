@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<AnchorPane prefHeight="300.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.gui.dialogs.SinglePlotDialogController">
+<AnchorPane prefHeight="300.0" prefWidth="300.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.fx.dialogs.SinglePlotDialogController">
    <children>
       <GridPane alignment="CENTER" layoutX="14.0" layoutY="14.0" prefHeight="145.0" prefWidth="272.0">
         <columnConstraints>

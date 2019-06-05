@@ -7,10 +7,10 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-public class MARSTableView extends TableView<ObservableList<Object>> {
+public class MARSTableFxView extends TableView<ObservableList<Object>> {
 	private MARSResultsTable table;
 	
-	public MARSTableView(MARSResultsTable table) {
+	public MARSTableFxView(MARSResultsTable table) {
 		this.table = table;
 		buildTableView();
 	}

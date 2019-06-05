@@ -1,9 +1,8 @@
-package de.mpg.biochem.mars.fx.table;
+package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;

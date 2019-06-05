@@ -3,7 +3,7 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.plot.PlotPane;
-import de.mpg.biochem.mars.fx.table.MARSTableView;
+import de.mpg.biochem.mars.fx.table.MARSTableFxView;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.beans.value.ChangeListener;
@@ -51,13 +51,13 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/gui/molecule/moleculesTab/MoleculeTablesPane.css");
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 	}
 	
 	public void loadDataTable() {
-		dataTableContainer.setCenter(new MARSTableView(molecule.getDataTable()));
+		dataTableContainer.setCenter(new MARSTableFxView(molecule.getDataTable()));
 	}
 	
 	public void loadPlot() {
@@ -73,7 +73,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 			Tab segmentTableTab = new Tab(segmentTableName.get(1) + " vs " + segmentTableName.get(0));
 			BorderPane segmentTableContainer = new BorderPane();
 			segmentTableTab.setContent(segmentTableContainer);
-			segmentTableContainer.setCenter(new MARSTableView(molecule.getSegmentsTable(segmentTableName)));
+			segmentTableContainer.setCenter(new MARSTableFxView(molecule.getSegmentsTable(segmentTableName)));
 			
 			tabPane.getTabs().add(segmentTableTab);
 		}

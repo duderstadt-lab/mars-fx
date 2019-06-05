@@ -23,7 +23,7 @@ import ij.WindowManager;
 
 import de.mpg.biochem.mars.molecule.*;
 
-public class MoleculeArchiveFrame {
+public class MoleculeArchiveFxFrame {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -35,14 +35,14 @@ public class MoleculeArchiveFrame {
 
 	private MoleculeArchive archive;
 	
-	private MoleculeArchiveFrameController controller;
+	private MoleculeArchiveFxFrameController controller;
 	
 	private JFrame frame;
 	private String title;
 
 	private JFXPanel fxPanel;
 
-	public MoleculeArchiveFrame(MoleculeArchive archive, MoleculeArchiveService moleculeArchiveService) {
+	public MoleculeArchiveFxFrame(MoleculeArchive archive, MoleculeArchiveService moleculeArchiveService) {
 		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
@@ -91,12 +91,12 @@ public class MoleculeArchiveFrame {
 	public void initFX(JFXPanel fxPanel) {	
 		try {
 			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MoleculeArchiveFrameController.class.getResource("MoleculeArchiveFrameLayout.fxml"));
+			loader.setLocation(MoleculeArchiveFxFrameController.class.getResource("MoleculeArchiveFxFrameLayout.fxml"));
 			BorderPane root = (BorderPane) loader.load();
 			
 			Scene scene = new Scene(root);
 			this.fxPanel.setScene(scene);
-			frame.setSize(600, 600);
+			frame.setSize(800, 600);
 			
 			controller = loader.getController();
             controller.setArchive(archive);
@@ -109,7 +109,7 @@ public class MoleculeArchiveFrame {
 		return archive;
 	}
 	
-	public MoleculeArchiveFrameController getController() {
+	public MoleculeArchiveFxFrameController getController() {
 		return controller;
 	}
 	

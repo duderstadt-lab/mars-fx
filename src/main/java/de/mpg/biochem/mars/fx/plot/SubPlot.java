@@ -16,8 +16,6 @@ import cern.extjfx.chart.XYChartPlugin;
 import cern.extjfx.chart.data.*;
 import cern.extjfx.chart.data.DataReducingObservableList;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubTab;
-import de.mpg.biochem.mars.fx.syntaxhighlighter.LineChartWithSegments;
-import de.mpg.biochem.mars.fx.table.ScatterChartWithSegments;
 import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
