@@ -3,11 +3,12 @@
 <?import com.jfoenix.controls.JFXButton?>
 <?import com.jfoenix.controls.JFXChipView?>
 <?import com.jfoenix.controls.JFXTextField?>
+<?import com.jfoenix.controls.JFXTextArea?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<AnchorPane prefHeight="350.0" prefWidth="220.0" stylesheets="@GeneralTab.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.fx.molecule.moleculesTab.GeneralTabController">
+<AnchorPane prefHeight="350.0" prefWidth="220.0" minWidth="220.0" stylesheets="@GeneralTab.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.fx.molecule.moleculesTab.GeneralTabController">
    <children>
       <BorderPane fx:id="UIDIconContainer" layoutX="56.0" layoutY="32.0" prefHeight="55.0" prefWidth="60.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="5.0" />
       <JFXTextField fx:id="UIDLabel" layoutX="39.0" layoutY="78.0" prefHeight="20.0" prefWidth="180.0" text="UID" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="60.0" />
@@ -16,6 +17,8 @@
       <JFXTextField fx:id="metaUIDLabel" prefHeight="20.0" prefWidth="90.0" text="metaUID" AnchorPane.leftAnchor="55.0" AnchorPane.topAnchor="150.0"/>
       <JFXButton fx:id="metaUIDClippyButton" prefHeight="20.0" prefWidth="20.0" AnchorPane.leftAnchor="145.0" AnchorPane.topAnchor="150.0" onAction="#handleMetaUIDClippy"/>
       <Label fx:id="Tags" text="Tags" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="200.0" />
-      <JFXChipView fx:id="chipView" layoutY="231.0" minHeight="149.0" minWidth="200.0" prefHeight="149.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="231.0" />
+      <JFXChipView fx:id="chipView" layoutY="221.0" minHeight="170.0" prefHeight="170.0" prefWidth="200.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="221.0" />
+	  <Label fx:id="Notes" text="Notes" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="400.0" />
+      <JFXTextArea fx:id="notesTextArea" layoutY="421.0" minHeight="149.0" prefHeight="149.0" prefWidth="190.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="431.0" />
    </children>
 </AnchorPane>

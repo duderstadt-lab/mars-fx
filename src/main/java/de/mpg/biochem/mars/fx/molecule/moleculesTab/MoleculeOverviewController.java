@@ -45,15 +45,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	@FXML
     private AnchorPane propertiesTabContainer;
 	
-	@FXML
-    private Tab notesTab;
-	
-	@FXML
-    private AnchorPane notesTabContainer;
-	
 	private PropertiesTabController propertiesTableController;
-	
-	private NotesTabController notesTabController;
 	
 	private ArrayList<MoleculeSubTab> moleculeTabControllers;
 	
@@ -89,8 +81,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
         
         configureTab(generalTab, "General", FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.1em"), generalTabContainer, getClass().getResource("GeneralTab.fxml"), replaceBackgroundColorHandler);
         configurePropertiesTab(propertiesTab, "Properties", FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"), propertiesTabContainer, replaceBackgroundColorHandler);
-        configureNotesTab(notesTab, "Notes", FontAwesomeIconFactory.get().createIcon(CLIPBOARD, "1.1em"), notesTabContainer, replaceBackgroundColorHandler);
-	}
+   }
 	
    private void configureTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
         BorderPane tabPane = new BorderPane();
@@ -138,24 +129,6 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
        AnchorPane.setBottomAnchor(propertiesTableController.getNode(), 0.0);
        AnchorPane.setRightAnchor(propertiesTableController.getNode(), 0.0);
        AnchorPane.setLeftAnchor(propertiesTableController.getNode(), 0.0);
-   }
-	
-   private void configureNotesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-	   notesTabController = new NotesTabController();
-	   moleculeTabControllers.add(notesTabController);
-   	
-   	   BorderPane tabPane = new BorderPane();
-       tabPane.setMaxWidth(tabWidth);
-       tabPane.setCenter(icon);
-
-       tab.setText("");
-       tab.setGraphic(tabPane);
-       
-       containerPane.getChildren().add(notesTabController.getNode());
-       AnchorPane.setTopAnchor(notesTabController.getNode(), 0.0);
-       AnchorPane.setBottomAnchor(notesTabController.getNode(), 0.0);
-       AnchorPane.setRightAnchor(notesTabController.getNode(), 0.0);
-       AnchorPane.setLeftAnchor(notesTabController.getNode(), 0.0);
    }
    
    public void setMolecule(Molecule molecule) {

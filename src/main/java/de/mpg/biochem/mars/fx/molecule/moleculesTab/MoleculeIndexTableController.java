@@ -17,6 +17,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
@@ -114,8 +115,17 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         
         moleculeIndexTable.setItems(filteredData);
         
+        
+        filterField.setStyle(
+                "-fx-background-radius: 2em; "
+        );
+
         borderPane = new BorderPane();
+        Insets insets = new Insets(5);
+       
         borderPane.setTop(filterField);
+        BorderPane.setMargin(filterField, insets);
+        
         borderPane.setCenter(moleculeIndexTable);
     }
     

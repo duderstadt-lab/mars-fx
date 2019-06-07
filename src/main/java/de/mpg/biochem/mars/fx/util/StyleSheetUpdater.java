@@ -19,7 +19,12 @@ public class StyleSheetUpdater {
 	private String css;
 	
     public StyleSheetUpdater() {
-        URL.setURLStreamHandlerFactory(new StringURLStreamHandlerFactory());
+    	try {
+        	URL.setURLStreamHandlerFactory(new StringURLStreamHandlerFactory());
+    	} catch (Error error) {
+    		//Do nothing ??
+    		//This will happen if the URL is already set for this JVM
+    	}
     }
     
     public void addStyleSheet(Parent parent, String css) {

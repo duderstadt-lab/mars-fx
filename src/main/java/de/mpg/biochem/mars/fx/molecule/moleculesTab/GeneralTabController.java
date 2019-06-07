@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXDefaultChip;
+import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
 import com.jfoenix.skins.JFXChipViewSkin;
 import com.jfoenix.controls.JFXButton;
@@ -21,6 +22,8 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -56,6 +59,12 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	@FXML
 	private JFXChipView<String> chipView;
 	
+	@FXML
+	private Label Notes;
+	
+	@FXML
+	private JFXTextArea notesTextArea;
+	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
 	private Molecule molecule;
@@ -74,6 +83,8 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		
 		UIDLabel.setEditable(false);
 		metaUIDLabel.setEditable(false);
+		
+		notesTextArea.setPromptText("none");
     }
 	
 	public void update() {
@@ -99,6 +110,15 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		             }
 				}
 			}
+		});
+		
+		notesTextArea.setText(molecule.getNotes());
+		
+		notesTextArea.textProperty().addListener(new ChangeListener<String>() {
+		    @Override
+		    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+		        molecule.setNotes(notesTextArea.getText());
+		    }
 		});
 		
 		// JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
