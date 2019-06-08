@@ -37,9 +37,8 @@ import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 public class DatasetOptionsPane extends MigPane implements TableSubTab {
-	private TextField titleField, yNameField;
+	private TextField titleField, xNameField, yNameField;
 	private Button removeButton, addButton, updateButton;
-	private ComboBox<String> xColumnField;
 	
 	private TableView<PlotSeries> plotPropertiesTable;
 	
@@ -59,10 +58,10 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		
 		add(new Label("Title "), "");
 		add(titleField, "wrap");
+		add(new Label("X Axis "), "");
+		add(xNameField, "wrap");
 		add(new Label("Y Axis "), "");
 		add(yNameField, "wrap");
-		add(new Label("X Axis Column"), "");
-		add(xColumnField, "wrap");
 		
 		add(plotPropertiesTable, "span, wrap");
 		
@@ -74,7 +73,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	private void initComponents() {
 		titleField = new TextField();
 		yNameField = new TextField();
-		xColumnField = new ComboBox<>();
+		xNameField = new TextField();
 		
 		plotPropertiesTable = new TableView<PlotSeries>();
 		
@@ -87,6 +86,14 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		typeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(typeColumn);
         typeColumn.setStyle("-fx-alignment: CENTER;");
+		
+		TableColumn<PlotSeries, ComboBox<String>> xValuesColumn = new TableColumn<>("X Values");
+        xValuesColumn.setMinWidth(100);
+        xValuesColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().xColumnField()));
+        xValuesColumn.setStyle("-fx-alignment: CENTER;");
+        
+        xValuesColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(xValuesColumn);
         
         TableColumn<PlotSeries, ComboBox<String>> yValuesColumn = new TableColumn<>("Y Values");
         yValuesColumn.setMinWidth(100);
@@ -159,8 +166,10 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
                 "-fx-max-height: 20px;"
         );
 		addButton.setOnAction(e -> {
-			PlotSeries defaultPlotSeries = new PlotSeries(table, xColumnField);
-			plotSeriesList.add(defaultPlotSeries);
+			if (table != null) {
+				PlotSeries defaultPlotSeries = new PlotSeries(table);
+				plotSeriesList.add(defaultPlotSeries);
+			}
 		});
 
 		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.0em");
@@ -215,12 +224,13 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	public void setTable(MARSResultsTable table) {
 		this.table = table;
 		
-		String xSelection = xColumnField.getSelectionModel().getSelectedItem();
-		xColumnField.getItems().clear();
-		xColumnField.getItems().addAll(table.getColumnHeadings());
-		xColumnField.getSelectionModel().select(xSelection);
-		
 		for (PlotSeries propertiesRow : plotSeriesList) {
+			String xSelection = propertiesRow.xColumnField().getSelectionModel().getSelectedItem();
+			propertiesRow.xColumnField().getItems().clear();
+			propertiesRow.xColumnField().getItems().addAll(table.getColumnHeadings());
+			if (xSelection != null)
+				propertiesRow.yColumnField().getSelectionModel().select(xSelection);
+			
 			String ySelection = propertiesRow.yColumnField().getSelectionModel().getSelectedItem();
 			propertiesRow.yColumnField().getItems().clear();
 			propertiesRow.yColumnField().getItems().addAll(table.getColumnHeadings());
@@ -237,19 +247,12 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		return titleField.getText();
 	}
 	
+	public String getXAxisName() {
+		return xNameField.getText();
+	}
+	
 	public String getYAxisName() {
 		return yNameField.getText();
-	}
-	
-	public ComboBox<String> xColumnField() {
-		return xColumnField;
-	}
-	
-	public String getXAxisName() {
-		if (xColumnField.getSelectionModel().getSelectedIndex() != -1)
-			return xColumnField.getSelectionModel().getSelectedItem();
-		else
-			return "";
 	}
 	
 	public void setSubPlot(SubPlot subPlot) {

@@ -53,25 +53,13 @@ public class PlotSeries {
 
 		protected static String[] types = {"Line","Scatter"};
 		
-		public PlotSeries(MARSResultsTable dataTable, ComboBox<String> xColumnField) {
-			this.xColumnField = xColumnField;
-			this.columnHeadings = dataTable.getColumnHeadings();
-			initComponents();
-			load();
-		}
-		
-		public PlotSeries(MARSResultsTable dataTable, ComboBox<String> xColumnField, String yColumn) {
-			this.xColumnField = xColumnField;
+		public PlotSeries(MARSResultsTable dataTable) {
 			this.dataTable = dataTable;
 			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
 			load();
-			
-			//xColumnField.getSelectionModel().select(xColumn);
-			yColumnField.getSelectionModel().select(yColumn);
 		}
-		
-		//REMOVE ME WHEN READY
+
 		public PlotSeries(MARSResultsTable dataTable, String xColumn, String yColumn) {
 			this.dataTable = dataTable;
 			this.columnHeadings = dataTable.getColumnHeadings();
@@ -84,6 +72,7 @@ public class PlotSeries {
 		
 		void initComponents() {
 			typeField = new ComboBox<>();
+			xColumnField = new ComboBox<>();
 			yColumnField = new ComboBox<>();
 			colorField = new JFXColorPicker();
 			widthField = new JFXTextField();
@@ -96,6 +85,7 @@ public class PlotSeries {
 		void load() {
 			typeField.getItems().addAll(types);
 			
+			xColumnField.getItems().addAll(columnHeadings);
 			yColumnField.getItems().addAll(columnHeadings);
 			
 			colorField.setPrefWidth(50);
@@ -135,10 +125,6 @@ public class PlotSeries {
 		
 		public ComboBox<String> xColumnField() {
 			return xColumnField;
-		}
-		
-		public void setXColumnField(ComboBox<String> xColumnField) {
-			this.xColumnField = xColumnField;
 		}
 					
 		public JFXCheckBox getDrawSegmentsField() {
