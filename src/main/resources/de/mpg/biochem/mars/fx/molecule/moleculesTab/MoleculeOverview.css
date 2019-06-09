@@ -49,7 +49,7 @@
  .microscopeIcon {
     -icon-paint: black;
     -fx-background-color: -icon-paint;
-    -size: 24;
+    -size: 30;
     -fx-min-height: -size;
     -fx-min-width: -size;
     -fx-max-height: -size;

@@ -10,6 +10,7 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -80,7 +81,9 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
                 if (newMoleculeIndexRow != null) {
             		updateMoleculeSubTabs(newMoleculeIndexRow);
-            		moleculeIndexTable.requestFocus();
+            		Platform.runLater(() -> {
+            			moleculeIndexTable.requestFocus();
+            		});
                 }
         });
         

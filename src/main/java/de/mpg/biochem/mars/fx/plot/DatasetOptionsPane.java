@@ -229,7 +229,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 			propertiesRow.xColumnField().getItems().clear();
 			propertiesRow.xColumnField().getItems().addAll(table.getColumnHeadings());
 			if (xSelection != null)
-				propertiesRow.yColumnField().getSelectionModel().select(xSelection);
+				propertiesRow.xColumnField().getSelectionModel().select(xSelection);
 			
 			String ySelection = propertiesRow.yColumnField().getSelectionModel().getSelectedItem();
 			propertiesRow.yColumnField().getItems().clear();

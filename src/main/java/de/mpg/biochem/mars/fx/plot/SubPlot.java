@@ -154,6 +154,8 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		NumericAxis xAxis = createAxis();
 		NumericAxis yAxis = createAxis();
 		
+		resetXYZoom();
+		
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
 		
@@ -184,6 +186,8 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 
 		NumericAxis xAxis = createAxis();
 		NumericAxis yAxis = createAxis();
+		
+		resetXYZoom();
 		
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
@@ -227,7 +231,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 	}
 	
 	public void setYLabel(String yAxisLabel) {
-		dummyChart.getXAxis().setLabel(yAxisLabel);
+		dummyChart.getYAxis().setLabel(yAxisLabel);
 	}
 	
 	public void resetXYZoom() {

@@ -71,6 +71,9 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	
 	private MoleculeArchive archive;
 	
+	private ListChangeListener<String> chipsListener;
+	private ChangeListener<String> notesListener;
+	
 	@FXML
     public void initialize() {
 		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
@@ -88,46 +91,54 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
     }
 	
 	public void update() {
+		if (chipsListener == null) {
+			chipsListener = new ListChangeListener<String>() {
+				@Override
+				public void onChanged(Change<? extends String> c) {
+					while (c.next()) {
+			             if (c.wasRemoved()) {
+			                 molecule.removeTag(c.getRemoved().get(0));
+			             } else if (c.wasAdded()) {
+			            	 molecule.addTag(c.getAddedSubList().get(0));
+			             }
+					}
+				}
+			};
+		}
+		
+		if (notesListener == null) {
+			notesListener = new ChangeListener<String>() {
+			    @Override
+			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+			        molecule.setNotes(notesTextArea.getText());
+			    }
+			};
+		}
+		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getImageMetaDataUID());
 		
+		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
-		chipView.getChips().addAll(molecule.getTags());
+		if (molecule.getTags().size() > 0)
+			chipView.getChips().addAll(molecule.getTags());
+		chipView.getChips().addListener(chipsListener);
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
 		
-		//I think items can only be added or remove and only one at a time !
-		//Soooo this should cover all cases.
-		chipView.getChips().addListener(new ListChangeListener<String>() {
-			@Override
-			public void onChanged(Change<? extends String> c) {
-				while (c.next()) {
-		             if (c.wasRemoved()) {
-		                   molecule.removeTag(c.getRemoved().get(0));
-		             } else if (c.wasAdded()) {
-		            	 molecule.addTag(c.getAddedSubList().get(0));
-		             }
-				}
-			}
-		});
-		
+		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(molecule.getNotes());
-		
-		notesTextArea.textProperty().addListener(new ChangeListener<String>() {
-		    @Override
-		    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-		        molecule.setNotes(notesTextArea.getText());
-		    }
-		});
-		
-		// JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
-		// chipView.setSkin(skin);
-	        
+		notesTextArea.textProperty().addListener(notesListener);
+
 		/*
+		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		chipView.setSkin(skin);
+	        
 		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
 			if (node instanceof TextArea) {
-				//((TextArea) node).cancelEdit();
+				((TextArea) node).cancelEdit();
+				((TextArea) node).setEditable(false);
 				System.out.println("Cancel Edit");
 			}
 		}

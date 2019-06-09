@@ -229,7 +229,7 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 			
 			subplot.getXAxis().setAutoRanging(false);
 			
-			if (otherSubPlot.getXAxis().getLowerBound() > subplot.getXAxis().getUpperBound() || otherSubPlot.getXAxis().getLowerBound() > subplot.getXAxis().getLowerBound()) {
+			if (subplot.getXAxis().getUpperBound() > otherSubPlot.getXAxis().getLowerBound() || subplot.getXAxis().getLowerBound() > otherSubPlot.getXAxis().getLowerBound()) {
 				subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
 				subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
 			} else {
