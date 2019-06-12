@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
@@ -20,6 +20,7 @@ import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
+import de.mpg.biochem.mars.molecule.MARSImageMetaData;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.beans.value.ChangeListener;
@@ -34,7 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubTab {
+public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, MoleculeArchiveSubTab {
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -44,15 +45,6 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	
 	@FXML
 	private JFXButton UIDClippyButton;
-	
-	@FXML
-	private BorderPane metaUIDIconContainer;
-	
-	@FXML
-	private JFXTextField metaUIDLabel;
-	
-	@FXML
-	private JFXButton metaUIDClippyButton;
 	
 	@FXML
 	private Label Tags;
@@ -68,7 +60,7 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private Molecule molecule;
+	private MARSImageMetaData meta;
 	
 	private MoleculeArchive archive;
 	
@@ -77,16 +69,12 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	
 	@FXML
     public void initialize() {
-		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
-		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-		
 		Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
-		metaUIDIconContainer.setCenter(microscopeIcon);
-		metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+        UIDIconContainer.setCenter(microscopeIcon);
+        UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
 		
 		UIDLabel.setEditable(false);
-		metaUIDLabel.setEditable(false);
 		
 		notesTextArea.setPromptText("none");
     }
@@ -98,9 +86,9 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 				public void onChanged(Change<? extends String> c) {
 					while (c.next()) {
 			             if (c.wasRemoved()) {
-			                 molecule.removeTag(c.getRemoved().get(0));
+			                 meta.removeTag(c.getRemoved().get(0));
 			             } else if (c.wasAdded()) {
-			            	 molecule.addTag(c.getAddedSubList().get(0));
+			            	 meta.addTag(c.getAddedSubList().get(0));
 			             }
 					}
 				}
@@ -111,39 +99,26 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 			notesListener = new ChangeListener<String>() {
 			    @Override
 			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-			        molecule.setNotes(notesTextArea.getText());
+			        meta.setNotes(notesTextArea.getText());
 			    }
 			};
 		}
 		
-		UIDLabel.setText(molecule.getUID());
-		metaUIDLabel.setText(molecule.getImageMetaDataUID());
+		UIDLabel.setText(meta.getUID());
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
-		if (molecule.getTags().size() > 0)
-			chipView.getChips().addAll(molecule.getTags());
+		if (meta.getTags().size() > 0)
+			chipView.getChips().addAll(meta.getTags());
 		chipView.getChips().addListener(chipsListener);
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
 		
 		notesTextArea.textProperty().removeListener(notesListener);
-		notesTextArea.setText(molecule.getNotes());
+		notesTextArea.setText(meta.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
 
-		/*
-		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
-		chipView.setSkin(skin);
-	        
-		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
-			if (node instanceof TextArea) {
-				((TextArea) node).cancelEdit();
-				((TextArea) node).setEditable(false);
-				System.out.println("Cancel Edit");
-			}
-		}
-		*/
 	}
 	
 	@FXML
@@ -153,21 +128,14 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	    clipboard.setContent(content);
 	}
 
-	@FXML
-	private void handleMetaUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(metaUIDLabel.getText());
-	    clipboard.setContent(content);
-	}
-	
-	@Override
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
-		update();
-	}
-
 	@Override
 	public void setArchive(MoleculeArchive archive) {
 		this.archive = archive;
+	}
+
+	@Override
+	public void setImageMetaData(MARSImageMetaData meta) {
+		this.meta = meta;
+		update();
 	}
 }

@@ -55,7 +55,6 @@ public class LineChartWithSegments extends LineChart<Number,Number> {
 		
 		final String colorString = String.format("rgba(%d, %d, %d, %f)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
 		final String lineStyle = String.format(".chart-series-line { -fx-stroke-width: %s; -fx-stroke: %s; }", width, colorString);
-		
-		styleSheetUpdater.addStyleSheet(this, lineStyle);
+		getStylesheets().add(styleSheetUpdater.getStyleSheetURL(lineStyle));
 	}
 }

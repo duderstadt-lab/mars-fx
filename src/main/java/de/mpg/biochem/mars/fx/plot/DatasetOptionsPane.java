@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -38,7 +39,7 @@ import com.jfoenix.controls.JFXTextField;
 
 public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	private TextField titleField, xNameField, yNameField;
-	private Button removeButton, addButton, updateButton;
+	private Button addButton, updateButton;
 	
 	private TableView<PlotSeries> plotPropertiesTable;
 	
@@ -65,8 +66,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		
 		add(plotPropertiesTable, "span, wrap");
 		
-		add(addButton, "split 2");
-		add(removeButton, "");
+		add(addButton, "");
 		add(updateButton, "right");
 	}
 	
@@ -78,7 +78,43 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		plotPropertiesTable = new TableView<PlotSeries>();
 		
 		plotPropertiesTable.prefHeightProperty().set(200);
-		plotPropertiesTable.prefWidthProperty().set(400);
+		plotPropertiesTable.prefWidthProperty().set(500);
+		
+		TableColumn<PlotSeries, PlotSeries> deleteColumn = new TableColumn<>();
+    	deleteColumn.setPrefWidth(30);
+    	deleteColumn.setMinWidth(30);
+    	deleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+    	deleteColumn.setCellFactory(param -> new TableCell<PlotSeries, PlotSeries>() {
+            private final Button removeButton = new Button();
+
+            @Override
+            protected void updateItem(PlotSeries plotSeries, boolean empty) {
+                super.updateItem(plotSeries, empty);
+
+                if (plotSeries == null) {
+                    setGraphic(null);
+                    return;
+                }
+                
+                removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+        		removeButton.setCenterShape(true);
+        		removeButton.setStyle(
+                        "-fx-background-radius: 5em; " +
+                        "-fx-min-width: 18px; " +
+                        "-fx-min-height: 18px; " +
+                        "-fx-max-width: 18px; " +
+                        "-fx-max-height: 18px;"
+                );
+        		
+                setGraphic(removeButton);
+                removeButton.setOnAction(e -> {
+        			plotSeriesList.remove(plotSeries);
+        		});
+            }
+        });
+    	deleteColumn.setStyle( "-fx-alignment: CENTER;");
+    	deleteColumn.setSortable(false);
+    	plotPropertiesTable.getColumns().add(deleteColumn);
         
         TableColumn<PlotSeries, ComboBox<String>> typeColumn = new TableColumn<>("Type");
 		typeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTypeField()));
@@ -139,21 +175,6 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
         segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");
         
         plotPropertiesTable.setItems(plotSeriesList);
-		
-		removeButton = new Button();
-		removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
-		removeButton.setCenterShape(true);
-		removeButton.setStyle(
-                "-fx-background-radius: 5em; " +
-                "-fx-min-width: 20px; " +
-                "-fx-min-height: 20px; " +
-                "-fx-max-width: 20px; " +
-                "-fx-max-height: 20px;"
-        );
-		removeButton.setOnAction(e -> {
-			if(plotPropertiesTable.getSelectionModel().getSelectedIndex() != -1)
-				plotSeriesList.remove(plotPropertiesTable.getSelectionModel().getSelectedIndex());
-		});
 		
 		addButton = new Button();
 		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));

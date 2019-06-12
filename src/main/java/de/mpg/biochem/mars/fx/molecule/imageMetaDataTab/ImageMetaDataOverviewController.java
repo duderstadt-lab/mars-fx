@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLIPBOARD;
@@ -13,6 +13,7 @@ import com.jfoenix.controls.JFXTabPane;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveFxFrameController;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
+import de.mpg.biochem.mars.molecule.MARSImageMetaData;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -31,7 +32,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchiveSubTab {
+public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, MoleculeArchiveSubTab {
 	
 	@FXML
 	private JFXTabPane tabContainer;
@@ -48,9 +49,9 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	@FXML
     private AnchorPane propertiesTabContainer;
 	
-	private PropertiesTabController propertiesTableController;
+	private ImageMetaDataPropertiesTableController propertiesTableController;
 	
-	private ArrayList<MoleculeSubTab> moleculeTabControllers;
+	private ArrayList<ImageMetaDataSubTab> metaTabControllers;
 	
 	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveTabControllers;
 	
@@ -59,7 +60,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	
 	@FXML
     public void initialize() {
-		moleculeTabControllers = new ArrayList<MoleculeSubTab>();
+		metaTabControllers = new ArrayList<ImageMetaDataSubTab>();
 		moleculeArchiveTabControllers = new ArrayList<MoleculeArchiveSubTab>();
         configureTabs();
     }
@@ -82,7 +83,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
             }
         };
         
-        configureTab(generalTab, "General", FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.1em"), generalTabContainer, getClass().getResource("GeneralTab.fxml"), replaceBackgroundColorHandler);
+        configureTab(generalTab, "General", FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.1em"), generalTabContainer, getClass().getResource("ImageMetaDataGeneralTab.fxml"), replaceBackgroundColorHandler);
         configurePropertiesTab(propertiesTab, "Properties", FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"), propertiesTabContainer, replaceBackgroundColorHandler);
    }
 	
@@ -102,8 +103,8 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
                 
                 moleculeArchiveTabControllers.add((MoleculeArchiveSubTab) loader.getController());
                 
-                MoleculeSubTab controller = (MoleculeSubTab) loader.getController();
-                moleculeTabControllers.add(controller);
+                ImageMetaDataSubTab controller = (ImageMetaDataSubTab) loader.getController();
+                metaTabControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 
                 AnchorPane.setTopAnchor(contentView, 0.0);
@@ -117,8 +118,8 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
     }
    
    private void configurePropertiesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-	   propertiesTableController = new PropertiesTabController();
-	   moleculeTabControllers.add(propertiesTableController);
+	   propertiesTableController = new ImageMetaDataPropertiesTableController();
+	   metaTabControllers.add(propertiesTableController);
    	
    	   BorderPane tabPane = new BorderPane();
        tabPane.setMaxWidth(tabWidth);
@@ -133,14 +134,6 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
        AnchorPane.setRightAnchor(propertiesTableController.getNode(), 0.0);
        AnchorPane.setLeftAnchor(propertiesTableController.getNode(), 0.0);
    }
-   
-   public void setMolecule(Molecule molecule) {
-		if (moleculeTabControllers == null)
-			return;
-		
-		for (MoleculeSubTab controller: moleculeTabControllers)
-			controller.setMolecule(molecule);
-	}
 
 	@Override
 	public void setArchive(MoleculeArchive archive) {
@@ -149,5 +142,14 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 		
 		for (MoleculeArchiveSubTab controller: moleculeArchiveTabControllers)
 			controller.setArchive(archive);
+	}
+
+	@Override
+	public void setImageMetaData(MARSImageMetaData meta) {
+		if (metaTabControllers == null)
+			return;
+		
+		for (ImageMetaDataSubTab controller: metaTabControllers)
+			controller.setImageMetaData(meta);
 	}
 }

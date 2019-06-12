@@ -94,7 +94,7 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	private ArrayList<SubPlot> charts;
 	private ToolBar toolBar;
 	
-	private StyleSheetUpdater styleSheetUpdater;
+	private static StyleSheetUpdater styleSheetUpdater;
 	
 	enum ChartPlugin {
 	  TRACK, ZOOMXY, ZOOMX, ZOOMY, PAN
@@ -119,7 +119,8 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	public PlotPane() {
 		setTop(createToolBar());
 		
-		styleSheetUpdater = new StyleSheetUpdater();
+		if (styleSheetUpdater == null)
+			styleSheetUpdater = new StyleSheetUpdater();
 		
 		plotOptionsPane = new PlotOptionsPane();
 		
@@ -215,7 +216,7 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	}
 	
 	public void addChart() {
-		SubPlot subplot = new SubPlot(this);
+		SubPlot subplot = new SubPlot(this, "Plot " + (charts.size() + 1));
 		if (molecule != null)
 			subplot.setMolecule(molecule);
 		charts.add(subplot);

@@ -51,13 +51,13 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 	
 	private PlotPane plotPane;
 	
-	public SubPlot(PlotPane plotPane) {
+	public SubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
 		datasetOptionsPane = new DatasetOptionsPane(getDataTable(), this);
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
-			popOver.setTitle("Dataset");
+			popOver.setTitle(plotTitle);
 			popOver.setHeaderAlwaysVisible(true);
 			popOver.setAutoHide(false);
 			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);

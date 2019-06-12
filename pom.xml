@@ -296,41 +296,6 @@
 			<version>0.35.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-autolink</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-gfm-strikethrough</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-gfm-tables</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-heading-anchor</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-ins</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.atlassian.commonmark</groupId>
-			<artifactId>commonmark-ext-yaml-front-matter</artifactId>
-			<version>0.12.1</version>
-		</dependency>
-		<dependency>
 			<groupId>org.fxmisc.richtext</groupId>
 			<artifactId>richtextfx</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
@@ -338,7 +303,7 @@
 		<dependency>
 			<groupId>de.mpg.biochem</groupId>
 			<artifactId>mars-core</artifactId>
-			<version>1.0.0-SNAPSHOT-beta2</version>
+			<version>1.0.0-SNAPSHOT-beta7</version>
 		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>

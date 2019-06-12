@@ -1,22 +1,28 @@
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.util.ArrayList;
+
 import com.jfoenix.controls.JFXToggleButton;
 
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.layout.BorderPane;
 
 public class SettingsTabController implements MoleculeArchiveSubTab {
 	
-	MoleculeArchive archive;
+	private MoleculeArchive archive;
 	
-	@FXML
 	private JFXToggleButton smileEncodingButton;
-
-	@Override
-	public void setArchive(MoleculeArchive archive) {
-		this.archive = archive;
-		
-		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
+	
+	private BorderPane borderPane;
+	
+	public SettingsTabController() {
+		smileEncodingButton = new JFXToggleButton();
+		borderPane = new BorderPane();
+		borderPane.setCenter(smileEncodingButton);
 	}
 	
 	public void handleToggleSmileEncoding() {
@@ -27,4 +33,18 @@ public class SettingsTabController implements MoleculeArchiveSubTab {
 		}
 	}
 
+	@Override
+	public void setArchive(MoleculeArchive archive) {
+		this.archive = archive;
+		
+		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
+	}
+	
+	public Node getNode() {
+		return this.borderPane;
+	}
+	
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
+	}
 }

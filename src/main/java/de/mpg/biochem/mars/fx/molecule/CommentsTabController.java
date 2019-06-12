@@ -32,6 +32,7 @@ import javafx.scene.layout.VBox;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 

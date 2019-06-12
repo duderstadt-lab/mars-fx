@@ -9,28 +9,32 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.net.URLStreamHandlerFactory;
 
-import javafx.scene.Parent;
-
 /**
- * and : http://stackoverflow.com/questions/24704515/in-javafx-8-can-i-provide-a-stylesheet-from-a-string
+ * http://stackoverflow.com/questions/24704515/in-javafx-8-can-i-provide-a-stylesheet-from-a-string
  */
 public class StyleSheetUpdater {
 
 	private String css;
 	
+	private static StringURLStreamHandlerFactory urlFactory;
+	
     public StyleSheetUpdater() {
-    	try {
-        	URL.setURLStreamHandlerFactory(new StringURLStreamHandlerFactory());
-    	} catch (Error error) {
-    		//Do nothing ??
-    		//This will happen if the URL is already set for this JVM
+    	if (urlFactory == null) {
+    		urlFactory = new StringURLStreamHandlerFactory();
+        	URL.setURLStreamHandlerFactory(urlFactory);
     	}
     }
-    
+    /*
     public void addStyleSheet(Parent parent, String css) {
     	this.css = css;
     	
     	parent.getStylesheets().add("internal:"+System.nanoTime()+"stylesheet.css");
+    }
+    */
+    public String getStyleSheetURL(String css) {
+    	this.css = css;
+    	
+    	return "internal:"+System.nanoTime()+"stylesheet.css";
     }
     
 	private class StringURLConnection extends URLConnection {

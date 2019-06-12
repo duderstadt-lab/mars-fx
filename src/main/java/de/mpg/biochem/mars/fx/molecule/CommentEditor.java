@@ -30,6 +30,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -44,6 +46,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Menu;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.AnchorPane;
@@ -215,6 +218,10 @@ public class CommentEditor extends AnchorPane {
 	void save() {
 		archive.setComments(markdownEditorPane.getMarkdown());
 		markdownEditorPane.getUndoManager().mark();
+	}
+	
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
 	}
 }
 

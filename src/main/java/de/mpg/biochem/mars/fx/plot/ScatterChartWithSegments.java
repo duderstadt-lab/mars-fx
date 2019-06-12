@@ -56,7 +56,6 @@ public class ScatterChartWithSegments extends ScatterChart<Number,Number> {
 		
 		final String colorString = String.format("rgba(%d, %d, %d, %f)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
 		final String symbolStyle = String.format(".chart-symbol { -fx-background-radius: %s; -fx-padding: %s; -fx-background-color: %s; }", width, width, colorString);
-		
-		styleSheetUpdater.addStyleSheet(this, symbolStyle);
+		getStylesheets().add(styleSheetUpdater.getStyleSheetURL(symbolStyle));
 	}
 }

@@ -123,7 +123,6 @@ public class MarkdownPreviewPane
 		activePreview = null;
 
 		switch (rendererType) {
-			case CommonMark:	activeRenderer = new CommonmarkPreviewRenderer(); break;
 			case FlexMark:		activeRenderer = new FlexmarkPreviewRenderer(); break;
 		}
 	}

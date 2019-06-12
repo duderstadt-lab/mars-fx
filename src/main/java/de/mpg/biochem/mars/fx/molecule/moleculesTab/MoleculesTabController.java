@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
+import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveFxFrameController;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
@@ -15,6 +16,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 
@@ -88,4 +91,7 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 			controller.setArchive(archive);
 	}
 
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
+	}
 }
