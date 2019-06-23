@@ -21,6 +21,7 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -167,14 +168,27 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		lineChart.setCreateSymbols(false);
 		lineChart.setAnimated(false);
 		
-		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis);
-		ArrayData<Number, Number> sourceData = ArrayData.of(getDataTable().getColumnAsDoubles(xColumn), getDataTable().getColumnAsDoubles(yColumn));
-		reducedData.setData(sourceData);
+		List<Data<Number, Number>> data = new ArrayList<>();
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			double x = getDataTable().getValue(xColumn, row);
+			double y = getDataTable().getValue(yColumn, row);
+			
+			if (!Double.isNaN(x) && !Double.isNaN(y))
+				data.add(new Data<>(x, y));
+		}
+		
+		//If the columns are entirely NaN values. Don't add he plot
+		if (data.size() == 0)
+			return;
+		
+		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
+		
+		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis, sourceData);
 		reducedData.maxPointsCountProperty().bind(plotPane.maxPointsCount());
 		
 		Series<Number, Number> series = new Series<>(plotSeries.getYColumn(), reducedData);
 		lineChart.getData().add(series);
-		
+			
 		lineChart.updateStyle(plotPane.getStyleSheetUpdater());
 		
 		chartPane.getOverlayCharts().add(lineChart);
@@ -199,9 +213,22 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		ScatterChartWithSegments scatterChart = new ScatterChartWithSegments(segmentsTable, plotSeries, xAxis, yAxis);
 		scatterChart.setAnimated(false);
 		
-		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis);
-		ArrayData<Number, Number> sourceData = ArrayData.of(getDataTable().getColumnAsDoubles(xColumn), getDataTable().getColumnAsDoubles(yColumn));
-		reducedData.setData(sourceData);
+		List<Data<Number, Number>> data = new ArrayList<>();
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			double x = getDataTable().getValue(xColumn, row);
+			double y = getDataTable().getValue(yColumn, row);
+			
+			if (!Double.isNaN(x) && !Double.isNaN(y))
+				data.add(new Data<>(x, y));
+		}
+		
+		//If the columns are entirely NaN values. Don't add he plot
+		if (data.size() == 0)
+			return;
+		
+		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
+		
+		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis, sourceData);
 		reducedData.maxPointsCountProperty().bind(plotPane.maxPointsCount());
 		
 		Series<Number, Number> series = new Series<>(plotSeries.getYColumn(), reducedData);

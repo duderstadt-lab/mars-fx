@@ -89,8 +89,8 @@ public class MoleculeArchiveFxFrameController {
 	
 	private DashboardTabController dashboardTabController;
 	private ImageMetaDataTabController imageMetaDataTabController;
-    private MoleculesTabController moleculesController;
-    private CommentsTabController commentsController;
+    private MoleculesTabController moleculesTabController;
+    private CommentsTabController commentsTabController;
     private SettingsTabController settingsTabController; 
     
     private MoleculeArchive archive;
@@ -152,16 +152,15 @@ public class MoleculeArchiveFxFrameController {
         			@Override
         			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
         				if (newValue == dashboardTab) {
-        					System.out.println("Dashboard");
         					updateMenus(dashboardTabController.getMenus());
         				} else if (newValue == imageMetaDataTab) {
-        					System.out.println("ImageMetaData");
+        					updateMenus(imageMetaDataTabController.getMenus());
         				} else if (newValue == moleculesTab) {
-        					System.out.println("Molecules");
+        					updateMenus(moleculesTabController.getMenus());
         				} else if (newValue == commentsTab) {
-        					System.out.println("Comments");
+        					updateMenus(commentsTabController.getMenus());
         				} else if (newValue == settingsTab) {
-        					System.out.println("Settings");
+        					updateMenus(settingsTabController.getMenus());
         				}
         			}
         		});
@@ -214,23 +213,23 @@ public class MoleculeArchiveFxFrameController {
     }
     
     private void configureMoleculesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	moleculesController = new MoleculesTabController();
-    	tabPaneControllers.add(moleculesController);
+    	moleculesTabController = new MoleculesTabController();
+    	tabPaneControllers.add(moleculesTabController);
     	
     	buildTab(tab, icon, onSelectionChangedEvent);
         
-        containerPane.getChildren().add(moleculesController.getNode());
-        configureAnchorPane(moleculesController.getNode());
+        containerPane.getChildren().add(moleculesTabController.getNode());
+        configureAnchorPane(moleculesTabController.getNode());
     }
     
     private void configureCommentsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	commentsController = new CommentsTabController();
-    	tabPaneControllers.add(commentsController);
+    	commentsTabController = new CommentsTabController();
+    	tabPaneControllers.add(commentsTabController);
     	
     	buildTab(tab, icon, onSelectionChangedEvent);
         
-        containerPane.getChildren().add(commentsController);
-        configureAnchorPane(commentsController);
+        containerPane.getChildren().add(commentsTabController);
+        configureAnchorPane(commentsTabController);
     }
     
     private void configureSettingsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {

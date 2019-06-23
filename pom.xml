@@ -303,7 +303,7 @@
 		<dependency>
 			<groupId>de.mpg.biochem</groupId>
 			<artifactId>mars-core</artifactId>
-			<version>1.0.0-SNAPSHOT-beta7</version>
+			<version>1.0.0-SNAPSHOT-beta9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>

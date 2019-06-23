@@ -59,7 +59,9 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 
     private CommentEditor commentEditor;
     
-	MoleculeArchive archive;
+	private MoleculeArchive archive;
+	
+	private ArrayList<Menu> menus;
 	
 	public CommentsTabController() {
 		initialize();
@@ -67,6 +69,8 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 	
     public void initialize() {
     	Options.load(getOptions());
+    	
+    	menus = new ArrayList<Menu>();
     	
     	//Build markdown gui
 		getStyleClass().add("main");
@@ -170,10 +174,67 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 		Action insertHeader6Action = new Action(Messages.get("MainWindow.insertHeader6Action"), "Shortcut+6", HEADER,
 				e -> commentEditor.getEditor().getSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")), editModeActive);
 
-		//Action insertHorizontalRuleAction = new Action(Messages.get("MainWindow.insertHorizontalRuleAction"), null, null,
-		//		e -> getActiveSmartEdit().surroundSelection("\n\n---\n\n", ""),
-		//		activeFileEditorIsNull);
+		Action insertHorizontalRuleAction = new Action(Messages.get("MainWindow.insertHorizontalRuleAction"), null, null,
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n---\n\n", ""));
 
+		Menu editMenu = ActionUtils.createMenu("Edit",
+				editUndoAction,
+				editRedoAction,
+				null,
+				editCutAction,
+				editCopyAction,
+				editPasteAction,
+				editSelectAllAction,
+				null,
+				editFindAction,
+				editReplaceAction,
+				null,
+				editFindNextAction,
+				editFindPreviousAction,
+				null,
+				editFormatAllAction,
+				editFormatSelectionAction);
+
+		Menu viewMenu = ActionUtils.createMenu("View",
+				viewPreviewAction,
+				null,
+				viewShowLineNoAction,
+				viewShowWhitespaceAction,
+				viewShowImagesEmbeddedAction);
+
+		Menu insertMenu = ActionUtils.createMenu("Insert",
+				insertBoldAction,
+				insertItalicAction,
+				insertStrikethroughAction,
+				insertCodeAction,
+				null,
+				insertLinkAction,
+				insertImageAction,
+				null,
+				insertUnorderedListAction,
+				insertOrderedListAction,
+				insertBlockquoteAction,
+				insertFencedCodeBlockAction,
+				null,
+				insertHeader1Action,
+				insertHeader2Action,
+				insertHeader3Action,
+				insertHeader4Action,
+				insertHeader5Action,
+				insertHeader6Action,
+				null,
+				insertHorizontalRuleAction);
+		
+		menus.add(editMenu);
+		menus.add(viewMenu);
+		menus.add(insertMenu);
+/*
+		Menu toolsMenu = ActionUtils.createMenu(Messages.get("MainWindow.toolsMenu"),
+				toolsOptionsAction);
+
+		Menu helpMenu = ActionUtils.createMenu(Messages.get("MainWindow.helpMenu"),
+				helpAboutAction);
+		*/
 		// Tools actions
 		//Action toolsOptionsAction = new Action(Messages.get("MainWindow.toolsOptionsAction"), "Shortcut+,", null, e -> toolsOptions());
 
@@ -278,5 +339,9 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 	public void setArchive(MoleculeArchive archive) {
 		this.archive = archive;
 		commentEditor.setArchive(archive);
+	}
+	
+	public ArrayList<Menu> getMenus() {
+		return menus;
 	}
 }

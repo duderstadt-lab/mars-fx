@@ -13,6 +13,8 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -87,7 +89,18 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
             		});
                 }
         });
-        
+        /*
+        moleculeIndexTable.focusedProperty().addListener(
+                new ChangeListener<Boolean>() {
+					@Override
+					public void changed(ObservableValue<? extends Boolean> observable, Boolean wasFocused, Boolean isFocused) {
+						if (!isFocused) {
+			            	 moleculeIndexTable.requestFocus();
+			            }
+					}
+                }
+            );
+        */
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         
         filterField = new CustomTextField();
@@ -97,6 +110,10 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         filterField.setRight(nOfHitCountLabel);
         filterField.getStyleClass().add("find");
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+        	//If we don't clear the selection while we are searching the table will
+        	//steal the focus after every letter we type.
+        	moleculeIndexTable.getSelectionModel().clearSelection();
+        	
             filteredData.setPredicate(molIndexRow -> {
                 // If filter text is empty, display everything.
                 if (newValue == null || newValue.isEmpty()) {
@@ -148,15 +165,11 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     }
     
     public void loadData() {
-    	//moleculeIndexTable.getItems().clear();
     	moleculeRowList.clear();
 
     	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
         	moleculeRowList.add(new MoleculeIndexRow(index));
         }
-    	//filteredData.clear();
-    	//filteredData.addAll(moleculeRowList);
-    	//moleculeIndexTable.setItems(filteredData);
 	}
     
     public void setArchive(MoleculeArchive archive) {

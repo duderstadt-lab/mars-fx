@@ -21,8 +21,9 @@ import javafx.scene.layout.VBox;
 public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	private TabPane tabPane;
 	private Tab dataTableTab;
-	
 	private BorderPane dataTableContainer;
+	
+	private Tab logTab;
 	
 	private MARSImageMetaData meta;
 	

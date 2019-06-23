@@ -88,4 +88,8 @@ public class ImageMetaDataTabController implements MoleculeArchiveSubTab {
 		for (MoleculeArchiveSubTab controller: moleculeArchiveSubTabControllers)
 			controller.setArchive(archive);
 	}
+	
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
+	}
 }

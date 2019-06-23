@@ -27,7 +27,7 @@ public class LineChartWithSegments extends LineChart<Number,Number> {
         super.layoutPlotChildren();
         getPlotChildren().removeAll(shapes);
         shapes.clear();
-        if (segmentsTable != null) {
+        if (plotSeries.drawSegments() && segmentsTable != null) {
 	        for (int row=0;row<segmentsTable.getRowCount();row++) {
 	    		if (!Double.isNaN(segmentsTable.getValue("x1", row)) && 
 	    			!Double.isNaN(segmentsTable.getValue("y1", row)) &&	

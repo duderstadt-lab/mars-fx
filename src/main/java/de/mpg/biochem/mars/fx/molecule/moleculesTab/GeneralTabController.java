@@ -132,15 +132,17 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		notesTextArea.setText(molecule.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
 
-		/*
+		
 		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
-	        
+	     /*   
 		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
 			if (node instanceof TextArea) {
-				((TextArea) node).cancelEdit();
-				((TextArea) node).setEditable(false);
-				System.out.println("Cancel Edit");
+				//((TextArea) node).cancelEdit();
+				
+				//((TextArea) node).setEditable(false);
+				if (((TextArea) node).isFocused())
+					System.out.println("Focused");
 			}
 		}
 		*/
