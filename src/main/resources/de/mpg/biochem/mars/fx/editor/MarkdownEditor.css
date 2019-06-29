@@ -235,3 +235,7 @@
 .markdown-editor .abbr {
 	-fx-fill: #004D40;
 }
+
+.scroll-bar > .track {
+	-mwfx-hit: #FBC02D;
+}

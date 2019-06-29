@@ -115,7 +115,7 @@ public class LogPane
 		findHitsChangeListener = this::findHitsChanged;
 		findReplacePane.addListener(findHitsChangeListener);
 		
-		borderPane.setBottom(findReplacePane.getNode());
+		borderPane.setTop(findReplacePane.getNode());
 
 		// workaround a problem with wrong selection after undo:
 		//   after undo the selection is 0-0, anchor is 0, but caret position is correct

@@ -192,6 +192,9 @@ class FindReplacePane
 	}
 
 	private void clearHits() {
+		//textArea.selectedTextProperty()
+		//TODO remove text selection
+		findField.setText("");
 		hits.clear();
 		setActiveHitIndex(-1, false);
 		updateOverviewRuler();
@@ -383,7 +386,7 @@ class FindReplacePane
 		for (int i = 0; i < markerCount; i++) {
 			if (i > 0)
 				buf.append(',');
-			buf.append("-mwfx-hit");
+			buf.append("#FBC02D");
 		}
 
 		// build CSS border insets
