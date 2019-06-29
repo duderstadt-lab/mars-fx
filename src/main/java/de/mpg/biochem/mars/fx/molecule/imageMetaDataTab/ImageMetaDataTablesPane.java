@@ -2,11 +2,16 @@ package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
 
 import java.util.ArrayList;
 
+import com.vladsch.flexmark.parser.Parser;
+
+import de.mpg.biochem.mars.fx.controls.BottomSlidePane;
+import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MARSTableFxView;
 import de.mpg.biochem.mars.molecule.MARSImageMetaData;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.table.MARSResultsTable;
+import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
@@ -14,9 +19,11 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 
 public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	private TabPane tabPane;
@@ -24,6 +31,9 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	private BorderPane dataTableContainer;
 	
 	private Tab logTab;
+	private BorderPane logContainer;
+	
+	private LogPane logPane;
 	
 	private MARSImageMetaData meta;
 	
@@ -43,6 +53,17 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
+		logTab = new Tab();
+		logTab.setText("Log");
+		logContainer = new BorderPane();
+		logTab.setContent(logContainer);
+		
+		logPane = new LogPane();
+		//logPane.setEditable(false);
+		logContainer.setCenter(logPane.getNode());
+		
+		tabPane.getTabs().add(logTab);
+		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/imageMetaDataTab/MetaTablesPane.css");
@@ -54,6 +75,10 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 		dataTableContainer.setCenter(new MARSTableFxView(meta.getDataTable()));
 	}
 	
+	public void loadLog() {
+		logPane.setMarkdown(meta.getLog());
+	}
+	
 	Node getNode() {
 		return tabPane;
 	}
@@ -62,6 +87,6 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	public void setImageMetaData(MARSImageMetaData meta) {
 		this.meta = meta;
 		loadDataTable();
-		//load log ??
+		loadLog();
 	}
 }
