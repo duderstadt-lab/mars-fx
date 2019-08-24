@@ -161,7 +161,8 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     }
     
     public void saveMolecule() {
-    	archive.put(molecule);
+    	if (molecule != null)
+    		archive.put(molecule);
     }
     
     public void updateMoleculeSubTabs(MoleculeIndexRow moleculeIndexRow) {

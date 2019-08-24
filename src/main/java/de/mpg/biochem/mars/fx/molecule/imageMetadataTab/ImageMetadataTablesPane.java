@@ -66,7 +66,7 @@ public class ImageMetadataTablesPane implements ImageMetadataSubTab {
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/imageMetaDataTab/MetaTablesPane.css");
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/imageMetadataTab/MetaTablesPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 	}
