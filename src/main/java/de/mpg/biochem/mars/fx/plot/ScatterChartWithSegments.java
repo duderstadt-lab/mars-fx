@@ -5,7 +5,7 @@ import java.util.List;
 
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.paint.Color;
@@ -13,11 +13,11 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 public class ScatterChartWithSegments extends ScatterChart<Number,Number> {
-	private MARSResultsTable segmentsTable;
+	private MarsTable segmentsTable;
 	private List<Shape> shapes = new ArrayList<>();
 	private PlotSeries plotSeries;
 	
-	public ScatterChartWithSegments(MARSResultsTable segmentsTable, PlotSeries plotSeries, Axis<Number> xAxis, Axis<Number> yAxis) {
+	public ScatterChartWithSegments(MarsTable segmentsTable, PlotSeries plotSeries, Axis<Number> xAxis, Axis<Number> yAxis) {
 		super(xAxis, yAxis);
 		this.segmentsTable = segmentsTable;
 		this.plotSeries = plotSeries;

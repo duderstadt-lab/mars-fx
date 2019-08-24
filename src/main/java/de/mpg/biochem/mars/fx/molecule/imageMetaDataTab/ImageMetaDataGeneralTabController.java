@@ -20,7 +20,7 @@ import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.beans.value.ChangeListener;
@@ -60,7 +60,7 @@ public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, M
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private MARSImageMetaData meta;
+	private MarsImageMetadata meta;
 	
 	private MoleculeArchive archive;
 	
@@ -134,7 +134,7 @@ public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, M
 	}
 
 	@Override
-	public void setImageMetaData(MARSImageMetaData meta) {
+	public void setImageMetaData(MarsImageMetadata meta) {
 		this.meta = meta;
 		update();
 	}

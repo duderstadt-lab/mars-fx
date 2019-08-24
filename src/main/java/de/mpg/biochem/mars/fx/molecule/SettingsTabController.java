@@ -34,7 +34,7 @@ public class SettingsTabController implements MoleculeArchiveSubTab {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<?,?,?> archive) {
 		this.archive = archive;
 		
 		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());

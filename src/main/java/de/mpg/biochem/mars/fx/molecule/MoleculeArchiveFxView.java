@@ -46,7 +46,7 @@ import de.mpg.biochem.mars.molecule.*;
 
 
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH)
-public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive> implements DisplayViewer<MoleculeArchive> {
+public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive<?,?,?>> implements DisplayViewer<MoleculeArchive<?,?,?>> {
 	
 	@Parameter
     private MoleculeArchiveService moleculeArchiveService;
@@ -56,10 +56,10 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	//will use this method automatically..
 	@Override
 	public void view(final UserInterface ui, final Display<?> d) {	
-		MoleculeArchive archive = (MoleculeArchive)d.get(0);
+		MoleculeArchive<?,?,?> archive = (MoleculeArchive<?,?,?>)d.get(0);
 		archive.setName(d.getName());
 
-		moleculeArchiveService.addArchive(archive);
+		//moleculeArchiveService.addArchive(archive);
 		d.setName(archive.getName());
 
 		MoleculeArchiveFxFrame moleculeFrame = new MoleculeArchiveFxFrame(archive, moleculeArchiveService);

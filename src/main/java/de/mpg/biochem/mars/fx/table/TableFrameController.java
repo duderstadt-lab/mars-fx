@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import de.mpg.biochem.mars.fx.dialogs.SinglePlotDialogController;
-import de.mpg.biochem.mars.table.MARSResultsTable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -24,13 +23,13 @@ import javafx.fxml.FXMLLoader;
 public class TableFrameController {
 
 	@FXML
-	private MARSResultsTableFxFrame tableFrame;
+	private MarsTableFxFrame tableFrame;
 	
 	public void setContext(Context context) {
 		context.inject(this);
 	}
 	
-	public void setFrame(MARSResultsTableFxFrame tableFrame) {
+	public void setFrame(MarsTableFxFrame tableFrame) {
 		this.tableFrame = tableFrame;
 	}
 	

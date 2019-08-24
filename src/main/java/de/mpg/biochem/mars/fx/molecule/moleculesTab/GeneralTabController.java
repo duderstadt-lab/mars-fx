@@ -70,7 +70,7 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	
 	private Molecule molecule;
 	
-	private MoleculeArchive archive;
+	private MoleculeArchive<?,?,?> archive;
 	
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
@@ -117,7 +117,7 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		}
 		
 		UIDLabel.setText(molecule.getUID());
-		metaUIDLabel.setText(molecule.getImageMetaDataUID());
+		metaUIDLabel.setText(molecule.getImageMetadataUID());
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
@@ -169,7 +169,7 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<?,?,?> archive) {
 		this.archive = archive;
 	}
 }

@@ -1,7 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
 
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 
 public interface ImageMetaDataSubTab {
-	public void setImageMetaData(MARSImageMetaData meta);
+	public void setImageMetaData(MarsImageMetadata meta);
 }

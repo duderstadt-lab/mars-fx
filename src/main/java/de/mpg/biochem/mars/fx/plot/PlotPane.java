@@ -280,7 +280,7 @@ public class PlotPane extends BorderPane implements MoleculeSubTab {
 	
 	private XYChartPlugin<Number, Number> generateChartPlugin(ChartPlugin pluginName) {
 		switch (pluginName) {
-	      case TRACK: return new MARSDataPointTooltip<Number, Number>();
+	      case TRACK: return new MarsDataPointTooltip<Number, Number>();
 	      case ZOOMXY: return new Zoomer(true);
 	      case ZOOMX: return new Zoomer(AxisMode.X, true);
 	      case ZOOMY: return new Zoomer(AxisMode.Y, true);

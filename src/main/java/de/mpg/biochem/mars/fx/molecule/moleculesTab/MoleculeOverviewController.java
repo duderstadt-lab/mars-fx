@@ -143,7 +143,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<?,?,?> archive) {
 		if (moleculeArchiveTabControllers == null)
 			return;
 		

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.paint.Color;
@@ -12,11 +12,11 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Shape;
 
 public class LineChartWithSegments extends LineChart<Number,Number> {
-	private MARSResultsTable segmentsTable;
+	private MarsTable segmentsTable;
 	private List<Shape> shapes = new ArrayList<>();
 	private PlotSeries plotSeries;
 	
-	public LineChartWithSegments(MARSResultsTable segmentsTable, PlotSeries plotSeries, Axis<Number> xAxis, Axis<Number> yAxis) {
+	public LineChartWithSegments(MarsTable segmentsTable, PlotSeries plotSeries, Axis<Number> xAxis, Axis<Number> yAxis) {
 		super(xAxis, yAxis);
 		this.segmentsTable = segmentsTable;
 		this.plotSeries = plotSeries;

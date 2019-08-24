@@ -20,7 +20,7 @@ import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
@@ -45,7 +45,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 	private double yMAX = 100;
 	
 	private Molecule molecule;
-	private MARSResultsTable table;
+	private MarsTable table;
 	
 	private JFXBadge datasetOptionsButton;
 	private DatasetOptionsPane datasetOptionsPane;
@@ -160,7 +160,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
 		
-		MARSResultsTable segmentsTable = null;
+		MarsTable segmentsTable = null;
 		if (molecule.hasSegmentsTable(xColumn, yColumn))
 			segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
 		
@@ -206,7 +206,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
 		
-		MARSResultsTable segmentsTable = null;
+		MarsTable segmentsTable = null;
 		if (molecule.hasSegmentsTable(xColumn, yColumn))
 			segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
 
@@ -355,7 +355,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 		return datasetOptionsButton;
 	}
 	
-	private MARSResultsTable getDataTable() {
+	private MarsTable getDataTable() {
 		if (molecule != null) {
 			return molecule.getDataTable();
 		} else if (table != null) {
@@ -372,7 +372,7 @@ public class SubPlot implements MoleculeSubTab, TableSubTab {
 	}
 
 	@Override
-	public void setTable(MARSResultsTable table) {
+	public void setTable(MarsTable table) {
 		this.table = table;
 		datasetOptionsPane.setTable(table);
 		update();

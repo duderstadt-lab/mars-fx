@@ -10,7 +10,10 @@ import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXToggleButton;
 
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -24,7 +27,7 @@ import javafx.scene.layout.BorderPane;
 public class MoleculesTabController implements MoleculeArchiveSubTab {
 	
 	private SplitPane splitPane;
-	private MoleculeArchive archive;
+	private MoleculeArchive<?,?,?> archive;
 	private MoleculeIndexTableController moleculeIndexTableController;
 	private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
 	
@@ -81,7 +84,7 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		
 		if (moleculeArchiveSubTabControllers == null)

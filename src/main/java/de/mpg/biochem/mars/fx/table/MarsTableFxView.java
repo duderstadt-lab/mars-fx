@@ -1,16 +1,16 @@
 package de.mpg.biochem.mars.fx.table;
 
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
-public class MARSTableFxView extends TableView<ObservableList<Object>> {
-	private MARSResultsTable table;
+public class MarsTableFxView extends TableView<ObservableList<Object>> {
+	private MarsTable table;
 	
-	public MARSTableFxView(MARSResultsTable table) {
+	public MarsTableFxView(MarsTable table) {
 		this.table = table;
 		buildTableView();
 	}

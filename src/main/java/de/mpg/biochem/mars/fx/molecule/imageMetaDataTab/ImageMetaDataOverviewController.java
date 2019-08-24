@@ -13,7 +13,7 @@ import com.jfoenix.controls.JFXTabPane;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveFxFrameController;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -145,7 +145,7 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
 	}
 
 	@Override
-	public void setImageMetaData(MARSImageMetaData meta) {
+	public void setImageMetaData(MarsImageMetadata meta) {
 		if (metaTabControllers == null)
 			return;
 		

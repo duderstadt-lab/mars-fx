@@ -27,7 +27,7 @@ public class DashboardTabController implements MoleculeArchiveSubTab {
     }
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<?,?,?> archive) {
 		this.archive = archive;
 	}
 	

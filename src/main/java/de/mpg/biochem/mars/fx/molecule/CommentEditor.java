@@ -46,6 +46,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -73,13 +74,15 @@ public class CommentEditor extends AnchorPane {
 	private SplitPane splitPane;
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
+
+	final PrefsBooleanProperty editMode = new PrefsBooleanProperty(false);
 	
 	final PrefsBooleanProperty previewVisible = new PrefsBooleanProperty(true);
 	final PrefsBooleanProperty htmlSourceVisible = new PrefsBooleanProperty();
 	final PrefsBooleanProperty markdownAstVisible = new PrefsBooleanProperty();
 	final PrefsBooleanProperty externalVisible = new PrefsBooleanProperty();
 	
-	private MoleculeArchive archive;
+	private MoleculeArchive<?,?,?> archive;
 
 	public CommentEditor() {
 		@SuppressWarnings("rawtypes")
@@ -87,6 +90,9 @@ public class CommentEditor extends AnchorPane {
 		
 		Options.markdownRendererProperty().addListener(previewTypeListener);
 		previewVisible.addListener(previewTypeListener);
+		
+		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditMode();
+		editMode.addListener(editModeListener);
 		
 		initialize();
 	}
@@ -151,6 +157,58 @@ public class CommentEditor extends AnchorPane {
 				splitItems.remove(previewPane);
 		});
 	}
+	
+	private boolean updateEditModePending;
+	private void updateEditMode() {
+		if (markdownPreviewPane == null)
+			return;
+
+		// avoid too many (and useless) runLater() invocations
+		if (updateEditModePending)
+			return;
+		updateEditModePending = true;
+		
+		Platform.runLater(() -> {
+			updateEditModePending = false;
+			
+			MarkdownPreviewPane.Type previewType = getPreviewType();
+
+			markdownPreviewPane.setRendererType(Options.getMarkdownRenderer());
+			markdownPreviewPane.setType(previewType);
+
+			// add/remove editopPane from splitPane
+			ObservableList<Node> splitItems = splitPane.getItems();
+			Node previewPane = markdownPreviewPane.getNode();
+			if (!splitItems.contains(markdownEditorPane.getNode())) {
+				showEditor();				
+			} else {
+				showPreview();
+			}
+		});
+	}
+	
+	public void showPreview() {
+		ObservableList<Node> splitItems = splitPane.getItems();
+		Node previewPane = markdownPreviewPane.getNode();
+		if (!splitItems.contains(previewPane)) {
+			previewVisible.set(true);
+			System.out.println("adding Preview");
+			splitItems.add(previewPane);
+		}
+		if (splitItems.contains(markdownEditorPane.getNode())) {
+			splitItems.remove(markdownEditorPane.getNode());
+			markdownPreviewPane.editorSelectionProperty().unbind();
+			markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+		}
+	}
+	
+	public void showEditor() {
+		ObservableList<Node> splitItems = splitPane.getItems();
+		if (!splitItems.contains(markdownEditorPane.getNode())) {
+			splitItems.add(0, markdownEditorPane.getNode());
+			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());				
+		}
+	}
 
 	private MarkdownPreviewPane.Type getPreviewType() {
 		MarkdownPreviewPane.Type previewType = Type.None;
@@ -176,7 +234,7 @@ public class CommentEditor extends AnchorPane {
 		markdownPreviewPane.markdownASTProperty().bind(markdownEditorPane.markdownASTProperty());
 		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
 		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane.scrollYProperty());
-
+		
 		// bind properties
 		readOnly.bind(markdownEditorPane.readOnlyProperty());
 
@@ -186,9 +244,9 @@ public class CommentEditor extends AnchorPane {
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 
-		splitPane = new SplitPane(markdownEditorPane.getNode());
+		//splitPane = new SplitPane(markdownEditorPane.getNode());
 		if (getPreviewType() != MarkdownPreviewPane.Type.None)
-			splitPane.getItems().add(markdownPreviewPane.getNode());
+			splitPane = new SplitPane(markdownPreviewPane.getNode());
 		
 		getChildren().add(splitPane);
         AnchorPane.setTopAnchor(splitPane, 0.0);
@@ -201,9 +259,13 @@ public class CommentEditor extends AnchorPane {
 
 		// update 'editor' property
 		editor.set(markdownEditorPane);
+		
+		//We unbind selections until edit mode is activated.
+		markdownPreviewPane.editorSelectionProperty().unbind();
+		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 	}
 
-	void setArchive(MoleculeArchive archive) {
+	void setArchive(MoleculeArchive<?,?,?> archive) {
 		this.archive = archive;
 		load();
 	}

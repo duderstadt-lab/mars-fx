@@ -29,7 +29,6 @@ package de.mpg.biochem.mars.fx.molecule;
 import org.scijava.Priority;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 
 import de.mpg.biochem.mars.molecule.*;
@@ -41,7 +40,7 @@ import de.mpg.biochem.mars.molecule.*;
  * @author Karl Duderstadt
  */
 @Plugin(type = Display.class, priority = Priority.HIGH)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive> implements Display<MoleculeArchive> {
+public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?>> implements Display<MoleculeArchive<?,?,?>> {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public MoleculeArchiveFxDisplay() {

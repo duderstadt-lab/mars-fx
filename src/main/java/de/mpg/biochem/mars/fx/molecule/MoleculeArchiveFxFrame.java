@@ -17,8 +17,8 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import de.mpg.biochem.mars.table.MARSResultsTable;
-import de.mpg.biochem.mars.table.ResultsTableService;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.table.MarsTableService;
 import ij.WindowManager;
 
 import de.mpg.biochem.mars.molecule.*;
@@ -33,7 +33,7 @@ public class MoleculeArchiveFxFrame {
     @Parameter
     private UIService uiService;
 
-	private MoleculeArchive archive;
+	private MoleculeArchive<?,?,?> archive;
 	
 	private MoleculeArchiveFxFrameController controller;
 	
@@ -42,7 +42,7 @@ public class MoleculeArchiveFxFrame {
 
 	private JFXPanel fxPanel;
 
-	public MoleculeArchiveFxFrame(MoleculeArchive archive, MoleculeArchiveService moleculeArchiveService) {
+	public MoleculeArchiveFxFrame(MoleculeArchive<?,?,?> archive, MoleculeArchiveService moleculeArchiveService) {
 		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
@@ -105,7 +105,7 @@ public class MoleculeArchiveFxFrame {
         }
 	}
 	
-	public MoleculeArchive getArchive() {
+	public MoleculeArchive<?,?,?> getArchive() {
 		return archive;
 	}
 	

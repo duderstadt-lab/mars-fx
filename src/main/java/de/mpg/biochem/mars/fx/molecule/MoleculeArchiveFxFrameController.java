@@ -31,27 +31,42 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SingleSelectionModel;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
+import org.scijava.widget.FileWidget;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.molecule.imageMetaDataTab.ImageMetaDataTabController;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculesTabController;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import de.mpg.biochem.mars.fx.util.*;
 
 
 public class MoleculeArchiveFxFrameController {
+	
+	@Parameter
+	private MoleculeArchiveService moleculeArchiveService;
 
 	@FXML
 	private BorderPane borderPane;
 	
 	@FXML
     private JFXTabPane tabContainer;
+	
+	private SingleSelectionModel<Tab> selectionModel;
 
 	@FXML
     private Tab dashboardTab;
@@ -83,6 +98,8 @@ public class MoleculeArchiveFxFrameController {
     @FXML
     private AnchorPane settingsContainer;
     
+    private boolean lockArchive = false;
+    
 	private MenuBar menuBar;
 	
 	private ArrayList<MoleculeArchiveSubTab> tabPaneControllers;
@@ -93,7 +110,7 @@ public class MoleculeArchiveFxFrameController {
     private CommentsTabController commentsTabController;
     private SettingsTabController settingsTabController; 
     
-    private MoleculeArchive archive;
+    private MoleculeArchive<?,?,?> archive;
 
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -105,7 +122,7 @@ public class MoleculeArchiveFxFrameController {
         buildMenuBar();
     }
     
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		for (MoleculeArchiveSubTab controller: tabPaneControllers)
 			controller.setArchive(archive);
@@ -169,12 +186,14 @@ public class MoleculeArchiveFxFrameController {
     private void buildMenuBar() {
 		// File actions
 		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
-		Action fileSaveAsAction = new Action("Save As", null, null, e -> saveAs());
+		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
+		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
 		Action fileCloseAction = new Action("close", null, null, e -> handleClose());
 		
 		Menu fileMenu = ActionUtils.createMenu("File",
 				fileSaveAction,
-				fileSaveAsAction,
+				fileSaveCopyAction,
+				fileSaveVirtualStoreAction,
 				null,
 				fileCloseAction);
 		
@@ -272,18 +291,103 @@ public class MoleculeArchiveFxFrameController {
     }
     
     public void save() {
-    	
+    	 if (!lockArchive) {
+        	 moleculePanel.saveCurrentRecord();
+        	 imageMetadataPanel.saveCurrentRecord();
+        	 
+        	 try {
+	 			 if (archive.getFile() != null) {
+	 				 if(archive.getFile().getName().equals(archive.getName())) {
+	 				 	try {
+							archive.save();
+						} catch (IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+	 				 } else {
+	 					 //the archive name has changed... so let's check with the user about the new name...
+						saveAs(archive.getFile());
+	 				 }
+	 			 } else {
+	 				saveAs(new File(archive.getName()));
+	 			 }
+        	 } catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			 }
+ 			updateAll();
+    	 }
     }
     
-    public void saveAs() {
-    	
+    public void saveCopy() {
+    	if (!lockArchive) {
+		    moleculePanel.saveCurrentRecord();
+    	    imageMetadataPanel.saveCurrentRecord();
+    	    
+    	    String fileName = archive.getName();
+    	    if (fileName.endsWith(".store"))
+    	    	fileName = fileName.substring(0, fileName.length() - 5);
+    	    
+    	    try {
+ 				if (archive.getFile() != null) {
+					saveAs(new File(archive.getFile(), fileName));
+ 				} else {
+ 					saveAs(new File(fileName));
+ 				}
+    	    } catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+				updateAll();
+    	}
     }
+    
+	private boolean saveAs(File saveAsFile) throws IOException {
+		File file = archive.getMoleculeArchiveService().getContext().getService(UIService.class).chooseFile(saveAsFile, FileWidget.SAVE_STYLE);
+		if (file != null) {
+			archive.saveAs(file);
+			return true;
+		}
+		return false;
+	}
+    
+    public void saveVirtualStoreCopy() {
+    	 if (!lockArchive) {
+ 		    moleculePanel.saveCurrentRecord();
+     	    imageMetadataPanel.saveCurrentRecord();
+ 		 	
+ 		 	String name = archive.getName();
+ 		 	
+ 		 	if (name.endsWith(".yama")) {
+ 		 		name += ".store";
+ 		 	} else if (!name.endsWith(".yama.store")) {
+     		 	name += ".yama.store";
+     		}
+ 		 
+				try {
+					saveAsVirtualStore(new File(name));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    	 }
+    }
+    
+	private void saveAsVirtualStore(File saveAsFile) throws IOException {
+		File virtualDirectory = archive.getMoleculeArchiveService().getContext().getService(UIService.class).chooseFile(saveAsFile, FileWidget.SAVE_STYLE);
+		if (virtualDirectory != null) {	
+			archive.saveAsVirtualStore(virtualDirectory);
+		}
+	}
     
     public void lockArchive() {
-    	
+    	lockArchive = true;
+		//We move to the dashboard Tab
+    	tabContainer.getSelectionModel().select(0);
     }
     
     public void unlockArchive() {
-    	
+    	updateAll();
+		lockArchive = false;
     }
 }

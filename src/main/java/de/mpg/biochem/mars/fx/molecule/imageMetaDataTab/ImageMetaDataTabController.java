@@ -9,7 +9,10 @@ import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeIndexTableController;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubTab;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeTablesPane;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -22,7 +25,7 @@ import javafx.scene.control.SplitPane;
 public class ImageMetaDataTabController implements MoleculeArchiveSubTab {
 	
 	private SplitPane splitPane;
-	private MoleculeArchive archive;
+	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	private ImageMetaDataIndexTableController metaIndexTableController;
 	private ArrayList<ImageMetaDataSubTab> metaSubTabControllers;
 	
@@ -79,7 +82,7 @@ public class ImageMetaDataTabController implements MoleculeArchiveSubTab {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		
 		if (moleculeArchiveSubTabControllers == null)

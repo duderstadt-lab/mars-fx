@@ -1,7 +1,7 @@
 package de.mpg.biochem.mars.fx.table;
 
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 
 public interface TableSubTab {
-	public void setTable(MARSResultsTable molecule);
+	public void setTable(MarsTable molecule);
 }

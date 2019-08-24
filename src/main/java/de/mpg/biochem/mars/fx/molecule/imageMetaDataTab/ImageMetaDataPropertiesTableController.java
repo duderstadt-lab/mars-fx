@@ -8,7 +8,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -34,7 +34,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 
 public class ImageMetaDataPropertiesTableController implements ImageMetaDataSubTab {
     
-	private MARSImageMetaData meta;
+	private MarsImageMetadata meta;
 	
 	private BorderPane borderPane;
 	
@@ -189,7 +189,7 @@ public class ImageMetaDataPropertiesTableController implements ImageMetaDataSubT
     }
 
 	@Override
-	public void setImageMetaData(MARSImageMetaData meta) {
+	public void setImageMetaData(MarsImageMetadata meta) {
 		this.meta = meta;
     	loadData();
 	}

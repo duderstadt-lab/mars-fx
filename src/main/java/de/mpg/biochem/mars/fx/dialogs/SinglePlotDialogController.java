@@ -2,7 +2,7 @@ package de.mpg.biochem.mars.fx.dialogs;
 
 import de.mpg.biochem.mars.fx.plot.PlotFrame;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
@@ -14,7 +14,7 @@ public class SinglePlotDialogController {
     @FXML
     private ComboBox<String> yColumn;
     
-    private MARSResultsTable table;
+    private MarsTable table;
 
     private Stage dialogStage;
     private boolean okClicked = false;
@@ -41,7 +41,7 @@ public class SinglePlotDialogController {
      * 
      * @param table
      */
-    public void setTable(MARSResultsTable table) {
+    public void setTable(MarsTable table) {
         this.table = table;
 
         xColumn.getItems().addAll(table.getColumnHeadingList());

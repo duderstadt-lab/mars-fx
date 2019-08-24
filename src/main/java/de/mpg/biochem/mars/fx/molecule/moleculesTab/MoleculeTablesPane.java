@@ -3,9 +3,9 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.plot.PlotPane;
-import de.mpg.biochem.mars.fx.table.MARSTableFxView;
+import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
@@ -57,7 +57,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 	}
 	
 	public void loadDataTable() {
-		dataTableContainer.setCenter(new MARSTableFxView(molecule.getDataTable()));
+		dataTableContainer.setCenter(new MarsTableFxView(molecule.getDataTable()));
 	}
 	
 	public void loadPlot() {
@@ -73,7 +73,7 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 			Tab segmentTableTab = new Tab(segmentTableName.get(1) + " vs " + segmentTableName.get(0));
 			BorderPane segmentTableContainer = new BorderPane();
 			segmentTableTab.setContent(segmentTableContainer);
-			segmentTableContainer.setCenter(new MARSTableFxView(molecule.getSegmentsTable(segmentTableName)));
+			segmentTableContainer.setCenter(new MarsTableFxView(molecule.getSegmentsTable(segmentTableName)));
 			
 			tabPane.getTabs().add(segmentTableTab);
 		}

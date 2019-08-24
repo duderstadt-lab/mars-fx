@@ -7,10 +7,10 @@ import com.vladsch.flexmark.parser.Parser;
 import de.mpg.biochem.mars.fx.controls.BottomSlidePane;
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
-import de.mpg.biochem.mars.fx.table.MARSTableFxView;
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.fx.table.MarsTableFxView;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
@@ -35,7 +35,7 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	
 	private LogPane logPane;
 	
-	private MARSImageMetaData meta;
+	private MarsImageMetadata meta;
 	
 	public ImageMetaDataTablesPane() {
 		tabPane = new TabPane();
@@ -72,7 +72,7 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	}
 	
 	public void loadDataTable() {
-		dataTableContainer.setCenter(new MARSTableFxView(meta.getDataTable()));
+		dataTableContainer.setCenter(new MarsTableFxView(meta.getDataTable()));
 	}
 	
 	public void loadLog() {
@@ -84,7 +84,7 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	}
 
 	@Override
-	public void setImageMetaData(MARSImageMetaData meta) {
+	public void setImageMetaData(MarsImageMetadata meta) {
 		this.meta = meta;
 		loadDataTable();
 		loadLog();

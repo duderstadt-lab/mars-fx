@@ -9,12 +9,14 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.Separator;
@@ -46,6 +48,7 @@ import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.Utils;
@@ -54,12 +57,13 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 
 	private Scene scene;
 	private Node extensionsButton;
+	private ToolBar nonEditToolBar;
+	private ToolBar editToolBar;
     final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
-    final BooleanProperty editModeActive = new SimpleBooleanProperty(false);
 
     private CommentEditor commentEditor;
     
-	private MoleculeArchive archive;
+	private MoleculeArchive<?,?,?> archive;
 	
 	private ArrayList<Menu> menus;
 	
@@ -78,7 +82,9 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 		commentEditor = new CommentEditor();
     	setCenter(commentEditor);
 		
-		setTop(createToolBar());
+    	initializeToolBars();
+    	
+		setTop(nonEditToolBar);
     	
 		scene = new Scene(this);
 		scene.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
@@ -96,36 +102,40 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 		return getPrefsRoot().node("options");
 	}
     
-    private Node createToolBar() {
+    private void initializeToolBars() {
     	Action editModeAction = new Action("Edit", "Shortcut+E", PENCIL,
-				null, null, editModeActive);
+				null, null, commentEditor.editMode);
+		Node editModeButton = ActionUtils.createToolBarButton(editModeAction);
+
+    	nonEditToolBar = new ToolBar();
+    	nonEditToolBar.getItems().add(0, editModeButton);
     	
 		// Edit actions
 		Action editUndoAction = new Action(Messages.get("MainWindow.editUndoAction"), "Shortcut+Z", UNDO,
-				e -> commentEditor.getEditor().undo(), editModeActive);
+				e -> commentEditor.getEditor().undo());
 		Action editRedoAction = new Action(Messages.get("MainWindow.editRedoAction"), "Shortcut+Y", REPEAT,
-				e -> commentEditor.getEditor().redo(), editModeActive);
+				e -> commentEditor.getEditor().redo());
 		Action editCutAction = new Action(Messages.get("MainWindow.editCutAction"), "Shortcut+X", CUT,
-				e -> commentEditor.getEditor().cut(), editModeActive);
+				e -> commentEditor.getEditor().cut());
 		Action editCopyAction = new Action(Messages.get("MainWindow.editCopyAction"), "Shortcut+C", COPY,
-				e -> commentEditor.getEditor().copy(), editModeActive);
+				e -> commentEditor.getEditor().copy());
 		Action editPasteAction = new Action(Messages.get("MainWindow.editPasteAction"), "Shortcut+V", PASTE,
-				e -> commentEditor.getEditor().paste(), editModeActive);
+				e -> commentEditor.getEditor().paste());
 		Action editSelectAllAction = new Action(Messages.get("MainWindow.editSelectAllAction"), "Shortcut+A", null,
-				e -> commentEditor.getEditor().selectAll(), editModeActive);
+				e -> commentEditor.getEditor().selectAll());
 		Action editFindAction = new Action(Messages.get("MainWindow.editFindAction"), "Shortcut+F", SEARCH,
-				e -> commentEditor.getEditor().find(false), editModeActive);
+				e -> commentEditor.getEditor().find(false));
 		Action editReplaceAction = new Action(Messages.get("MainWindow.editReplaceAction"), "Shortcut+H", RETWEET,
-				e -> commentEditor.getEditor().find(true), editModeActive);
+				e -> commentEditor.getEditor().find(true));
 		Action editFindNextAction = new Action(Messages.get("MainWindow.editFindNextAction"), "F3", null,
-				e -> commentEditor.getEditor().findNextPrevious(true), editModeActive);
+				e -> commentEditor.getEditor().findNextPrevious(true));
 		Action editFindPreviousAction = new Action(Messages.get("MainWindow.editFindPreviousAction"), "Shift+F3", null,
-				e -> commentEditor.getEditor().findNextPrevious(false), editModeActive);
+				e -> commentEditor.getEditor().findNextPrevious(false));
 
 		Action editFormatAllAction = new Action(Messages.get("MainWindow.editFormatAll"), "Shortcut+Shift+F", null,
-				e -> commentEditor.getEditor().getSmartEdit().format(false, null), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().format(false, null));
 		Action editFormatSelectionAction = new Action(Messages.get("MainWindow.editFormatSelection"), "Shortcut+Shift+Alt+F", null,
-				e -> commentEditor.getEditor().getSmartEdit().format(true, null), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().format(true, null));
 		
 		// View actions
 		Action viewPreviewAction = new Action(Messages.get("MainWindow.viewPreviewAction"), null, EYE,
@@ -139,40 +149,40 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 
 		// Insert actions
 		Action insertBoldAction = new Action(Messages.get("MainWindow.insertBoldAction"), "Shortcut+B", BOLD,
-				e -> commentEditor.getEditor().getSmartEdit().insertBold(Messages.get("MainWindow.insertBoldText")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertBold(Messages.get("MainWindow.insertBoldText")));
 		Action insertItalicAction = new Action(Messages.get("MainWindow.insertItalicAction"), "Shortcut+I", ITALIC,
-				e -> commentEditor.getEditor().getSmartEdit().insertItalic(Messages.get("MainWindow.insertItalicText")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertItalic(Messages.get("MainWindow.insertItalicText")));
 		Action insertStrikethroughAction = new Action(Messages.get("MainWindow.insertStrikethroughAction"), "Shortcut+T", STRIKETHROUGH,
-				e -> commentEditor.getEditor().getSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")));
 		Action insertCodeAction = new Action(Messages.get("MainWindow.insertCodeAction"), "Shortcut+K", CODE,
-				e -> commentEditor.getEditor().getSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")));
 
 		Action insertLinkAction = new Action(Messages.get("MainWindow.insertLinkAction"), "Shortcut+L", LINK,
-				e -> commentEditor.getEditor().getSmartEdit().insertLink(), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertLink());
 		Action insertImageAction = new Action(Messages.get("MainWindow.insertImageAction"), "Shortcut+G", PICTURE_ALT,
-				e -> commentEditor.getEditor().getSmartEdit().insertImage(), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertImage());
 
 		Action insertUnorderedListAction = new Action(Messages.get("MainWindow.insertUnorderedListAction"), "Shortcut+U", LIST_UL,
-				e -> commentEditor.getEditor().getSmartEdit().insertUnorderedList(), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertUnorderedList());
 		Action insertOrderedListAction = new Action(Messages.get("MainWindow.insertOrderedListAction"), "Shortcut+Shift+U", LIST_OL,
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n1. ", ""), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n1. ", ""));
 		Action insertBlockquoteAction = new Action(Messages.get("MainWindow.insertBlockquoteAction"), "Ctrl+Q", QUOTE_LEFT, // not Shortcut+Q because of conflict on Mac
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n> ", ""), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n> ", ""));
 		Action insertFencedCodeBlockAction = new Action(Messages.get("MainWindow.insertFencedCodeBlockAction"), "Shortcut+Shift+K", FILE_CODE_ALT,
-				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n```\n", "\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n```\n", "\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")));
 
 		Action insertHeader1Action = new Action(Messages.get("MainWindow.insertHeader1Action"), "Shortcut+1", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(1, Messages.get("MainWindow.insertHeader1Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(1, Messages.get("MainWindow.insertHeader1Text")));
 		Action insertHeader2Action = new Action(Messages.get("MainWindow.insertHeader2Action"), "Shortcut+2", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(2, Messages.get("MainWindow.insertHeader2Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(2, Messages.get("MainWindow.insertHeader2Text")));
 		Action insertHeader3Action = new Action(Messages.get("MainWindow.insertHeader3Action"), "Shortcut+3", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(3, Messages.get("MainWindow.insertHeader3Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(3, Messages.get("MainWindow.insertHeader3Text")));
 		Action insertHeader4Action = new Action(Messages.get("MainWindow.insertHeader4Action"), "Shortcut+4", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(4, Messages.get("MainWindow.insertHeader4Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(4, Messages.get("MainWindow.insertHeader4Text")));
 		Action insertHeader5Action = new Action(Messages.get("MainWindow.insertHeader5Action"), "Shortcut+5", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(5, Messages.get("MainWindow.insertHeader5Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(5, Messages.get("MainWindow.insertHeader5Text")));
 		Action insertHeader6Action = new Action(Messages.get("MainWindow.insertHeader6Action"), "Shortcut+6", HEADER,
-				e -> commentEditor.getEditor().getSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")), editModeActive);
+				e -> commentEditor.getEditor().getSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")));
 
 		Action insertHorizontalRuleAction = new Action(Messages.get("MainWindow.insertHorizontalRuleAction"), null, null,
 				e -> commentEditor.getEditor().getSmartEdit().surroundSelection("\n\n---\n\n", ""));
@@ -240,7 +250,7 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 
 		//---- ToolBar ----
 
-		ToolBar toolBar = ActionUtils.createToolBar(
+		editToolBar = ActionUtils.createToolBar(
 				editUndoAction,
 				editRedoAction,
 				null,
@@ -258,14 +268,12 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 				null,
 				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)));
 		
-		toolBar.getItems().add(0, new Separator());
-		Node editModeButton = ActionUtils.createToolBarButton(editModeAction);
-		toolBar.getItems().add(0, editModeButton);
+		editToolBar.getItems().add(0, new Separator());
 
 		// horizontal spacer
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
-		toolBar.getItems().add(spacer);
+		editToolBar.getItems().add(spacer);
 
 		// preview renderer type choice box
 		ChoiceBox<RendererType> previewRenderer = new ChoiceBox<>();
@@ -293,15 +301,41 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 					popOver.setContentNode(new MarkdownExtensionsPane(true));
 					popOver.show(extensionsButton);
 				}));
-		toolBar.getItems().add(extensionsButton);
-		toolBar.getItems().add(new Separator());
+		editToolBar.getItems().add(extensionsButton);
+		editToolBar.getItems().add(new Separator());
 
+		Action editModeAction2 = new Action("Edit", "Shortcut+E", PENCIL,
+				null, null, commentEditor.editMode);
+		Node editModeButton2 = ActionUtils.createToolBarButton(editModeAction2);
+
+    	editToolBar.getItems().add(0, editModeButton2);
+		
 		// preview actions
 		Node previewButton = ActionUtils.createToolBarButton(viewPreviewAction);
-		toolBar.getItems().add(previewButton);
-
-		return toolBar;
+		editToolBar.getItems().add(previewButton);
+		
+    	ChangeListener editModeListener = (observable, oldValue, newValue) -> updateToolsAndMenus();
+    	commentEditor.editMode.addListener(editModeListener);
 	}
+    
+    private boolean updateToolsAndMenus;
+    private void updateToolsAndMenus() {
+    	// avoid too many (and useless) runLater() invocations
+		if (updateToolsAndMenus)
+			return;
+		updateToolsAndMenus = true;
+		
+		Platform.runLater(() -> {
+			updateToolsAndMenus = false;
+
+			if (commentEditor.editMode.get()) {
+				setTop(editToolBar);
+			} else {
+				commentEditor.showPreview();
+				setTop(nonEditToolBar);
+			}
+		});
+    }
     
 	/**
 	 * Creates a boolean property that is bound to another boolean value
@@ -336,7 +370,7 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 		}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<?,?,?> archive) {
 		this.archive = archive;
 		commentEditor.setArchive(archive);
 	}

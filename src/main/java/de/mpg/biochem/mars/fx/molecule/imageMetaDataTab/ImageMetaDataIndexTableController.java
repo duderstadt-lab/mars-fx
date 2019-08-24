@@ -9,7 +9,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
-import de.mpg.biochem.mars.molecule.MARSImageMetaData;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
@@ -134,13 +134,13 @@ public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab 
     		return;
     	
 		for (ImageMetaDataSubTab controller : metaSubTabControllers)
-			controller.setImageMetaData(archive.getImageMetaData(metaIndexRow.getUID()));
+			controller.setImageMetaData(archive.getImageMetadata(metaIndexRow.getUID()));
     }
     
     public void loadData() {
     	metaRowList.clear();
 
-    	for (int index = 0; index < archive.getNumberOfImageMetaDataRecords(); index++) {
+    	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
         	metaRowList.add(new MetaIndexRow(index));
         }
 	}
@@ -166,11 +166,11 @@ public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab 
     	}
     	
     	String getUID() {
-    		return archive.getImageMetaDataUIDAtIndex(index);
+    		return archive.getImageMetadataUIDAtIndex(index);
     	}
     	
     	String getTags() {
-    		return archive.getImageMetaDataTagList(archive.getImageMetaDataUIDAtIndex(index));
+    		return archive.getImageMetadataTagList(archive.getImageMetadataUIDAtIndex(index));
     	}
     }
 }

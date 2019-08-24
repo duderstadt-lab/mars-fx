@@ -10,16 +10,13 @@ import org.scijava.ui.UIService;
 
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
-import de.mpg.biochem.mars.table.MARSResultsTable;
-import de.mpg.biochem.mars.table.MARSResultsTableWindow;
-import de.mpg.biochem.mars.table.ResultsTableService;
+import de.mpg.biochem.mars.table.*;
 import ij.WindowManager;
 
-public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableWindow {
+public class MarsTableFxFrame extends JFrame implements MarsTableWindow {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,25 +24,25 @@ public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableW
 	private LogService log;
 	
 	@Parameter
-    private ResultsTableService resultsTableService;
+    private MarsTableService marsTableService;
 	
     @Parameter
     private UIService uiService;
 
-	private MARSResultsTable table;
-	private MARSTableFxView tableView;
+	private MarsTable table;
+	private MarsTableFxView tableView;
 	
 	private BorderPane TableFrameLayout;
 
 	private JFXPanel fxPanel;
 
-	public MARSResultsTableFxFrame(String name, MARSResultsTable table, ResultsTableService resultsTableService) {
+	public MarsTableFxFrame(String name, MarsTable table, MarsTableService marsTableService) {
 		//ij.context().inject(this);
 		//this.ij = ij;
-		this.resultsTableService = resultsTableService;
+		this.marsTableService = marsTableService;
 		this.table = table;
 		this.setName(name);
-		this.uiService = resultsTableService.getUIService();
+		this.uiService = marsTableService.getUIService();
 		table.setWindow(this);
 		
 		// add window to window manager
@@ -81,7 +78,7 @@ public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableW
 	public void initFX(JFXPanel fxPanel) {	
 		try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MARSResultsTableFxFrame.class.getResource("TableFrameLayout.fxml"));
+            loader.setLocation(MarsTableFxFrame.class.getResource("TableFrameLayout.fxml"));
             
             TableFrameLayout = (BorderPane) loader.load();
 
@@ -91,7 +88,7 @@ public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableW
             TableFrameController controller = loader.getController();
             controller.setFrame(this);
             
-            tableView = new MARSTableFxView(table);
+            tableView = new MarsTableFxView(table);
             TableFrameLayout.setCenter(tableView);
             
             this.setSize(600, 600);
@@ -100,7 +97,7 @@ public class MARSResultsTableFxFrame extends JFrame implements MARSResultsTableW
         }
 	}
 	
-	public MARSResultsTable getTable() {
+	public MarsTable getTable() {
 		return table;
 	}
 

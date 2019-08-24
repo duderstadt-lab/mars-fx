@@ -9,7 +9,10 @@ import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -31,7 +34,7 @@ import javafx.scene.layout.BorderPane;
 
 public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     
-	private MoleculeArchive archive;
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private BorderPane borderPane;
 	
@@ -43,6 +46,8 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     private FilteredList<MoleculeIndexRow> filteredData;
     
     private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
+    
+    private Molecule molecule;
 
     public MoleculeIndexTableController() {        
         initialize();
@@ -83,6 +88,7 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
                 if (newMoleculeIndexRow != null) {
+                	saveMolecule();
             		updateMoleculeSubTabs(newMoleculeIndexRow);
             		Platform.runLater(() -> {
             			moleculeIndexTable.requestFocus();
@@ -154,14 +160,18 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     	return borderPane;
     }
     
+    public void saveMolecule() {
+    	archive.put(molecule);
+    }
+    
     public void updateMoleculeSubTabs(MoleculeIndexRow moleculeIndexRow) {
     	if (moleculeSubTabControllers == null)
     		return;
     	
+    	molecule = archive.get(moleculeIndexRow.getUID());
+    	
 		for (MoleculeSubTab controller : moleculeSubTabControllers)
-			controller.setMolecule(archive.get(moleculeIndexRow.getUID()));
-		
-		
+			controller.setMolecule(molecule);
     }
     
     public void loadData() {
@@ -172,7 +182,7 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         }
 	}
     
-    public void setArchive(MoleculeArchive archive) {
+    public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;
     	loadData();
     }
@@ -201,7 +211,7 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
     	}
     	
     	String getImageMetaDataUID() {
-    		return archive.getImageMetaDataUIDforMolecule(archive.getUIDAtIndex(index));
+    		return archive.getImageMetadataUIDforMolecule(archive.getUIDAtIndex(index));
     	}
     }
 }

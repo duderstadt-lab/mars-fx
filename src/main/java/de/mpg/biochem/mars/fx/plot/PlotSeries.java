@@ -30,16 +30,9 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-import de.mpg.biochem.mars.table.MARSResultsTable;
-import javafx.event.EventHandler;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.util.Callback;
 
 public class PlotSeries {
 		private ComboBox<String> yColumnField, xColumnField, typeField;
@@ -47,20 +40,20 @@ public class PlotSeries {
 		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
 		
-		private MARSResultsTable dataTable;
+		private MarsTable dataTable;
 		
 		private String[] columnHeadings;
 
 		protected static String[] types = {"Line","Scatter"};
 		
-		public PlotSeries(MARSResultsTable dataTable) {
+		public PlotSeries(MarsTable dataTable) {
 			this.dataTable = dataTable;
 			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
 			load();
 		}
 
-		public PlotSeries(MARSResultsTable dataTable, String xColumn, String yColumn) {
+		public PlotSeries(MarsTable dataTable, String xColumn, String yColumn) {
 			this.dataTable = dataTable;
 			this.columnHeadings = dataTable.getColumnHeadings();
 			initComponents();
@@ -171,7 +164,7 @@ public class PlotSeries {
 			return segmentColorField.getValue();
 		}
 		
-		public MARSResultsTable getDataTable() {
+		public MarsTable getDataTable() {
 			return dataTable;
 		}
 }

@@ -15,7 +15,7 @@ import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MARSResultsTable;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
@@ -45,11 +45,11 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
-	private MARSResultsTable table;
+	private MarsTable table;
 	
 	private SubPlot subPlot;
 
-	public DatasetOptionsPane(MARSResultsTable table, SubPlot subPlot) {
+	public DatasetOptionsPane(MarsTable table, SubPlot subPlot) {
 		this.table = table;
 		this.subPlot = subPlot;
 		
@@ -242,7 +242,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	}
 	
 	@Override
-	public void setTable(MARSResultsTable table) {
+	public void setTable(MarsTable table) {
 		this.table = table;
 		
 		for (PlotSeries propertiesRow : plotSeriesList) {
