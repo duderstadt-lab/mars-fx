@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +32,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class ImageMetaDataPropertiesTableController implements ImageMetaDataSubTab {
+public class ImageMetadataPropertiesTableController implements ImageMetadataSubTab {
     
 	private MarsImageMetadata meta;
 	
@@ -42,7 +42,7 @@ public class ImageMetaDataPropertiesTableController implements ImageMetaDataSubT
     private TableView<ParameterRow> parameterTable;
     private ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
 
-    public ImageMetaDataPropertiesTableController() {        
+    public ImageMetadataPropertiesTableController() {        
         initialize();
     }
 

@@ -33,7 +33,7 @@ public class MoleculeArchiveFxFrame {
     @Parameter
     private UIService uiService;
 
-	private MoleculeArchive<?,?,?> archive;
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private MoleculeArchiveFxFrameController controller;
 	
@@ -42,7 +42,7 @@ public class MoleculeArchiveFxFrame {
 
 	private JFXPanel fxPanel;
 
-	public MoleculeArchiveFxFrame(MoleculeArchive<?,?,?> archive, MoleculeArchiveService moleculeArchiveService) {
+	public MoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
 		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
@@ -105,7 +105,7 @@ public class MoleculeArchiveFxFrame {
         }
 	}
 	
-	public MoleculeArchive<?,?,?> getArchive() {
+	public MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	

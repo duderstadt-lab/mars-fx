@@ -1,7 +1,10 @@
 package de.mpg.biochem.mars.fx.molecule;
 
 import de.jensd.fx.glyphs.GlyphIcons;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -63,7 +66,7 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 
     private CommentEditor commentEditor;
     
-	private MoleculeArchive<?,?,?> archive;
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private ArrayList<Menu> menus;
 	
@@ -370,7 +373,7 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 		}
 
 	@Override
-	public void setArchive(MoleculeArchive<?,?,?> archive) {
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		commentEditor.setArchive(archive);
 	}

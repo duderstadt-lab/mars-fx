@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLIPBOARD;
@@ -32,7 +32,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, MoleculeArchiveSubTab {
+public class ImageMetadataOverviewController implements ImageMetadataSubTab, MoleculeArchiveSubTab {
 	
 	@FXML
 	private JFXTabPane tabContainer;
@@ -49,9 +49,9 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
 	@FXML
     private AnchorPane propertiesTabContainer;
 	
-	private ImageMetaDataPropertiesTableController propertiesTableController;
+	private ImageMetadataPropertiesTableController propertiesTableController;
 	
-	private ArrayList<ImageMetaDataSubTab> metaTabControllers;
+	private ArrayList<ImageMetadataSubTab> metaTabControllers;
 	
 	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveTabControllers;
 	
@@ -60,7 +60,7 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
 	
 	@FXML
     public void initialize() {
-		metaTabControllers = new ArrayList<ImageMetaDataSubTab>();
+		metaTabControllers = new ArrayList<ImageMetadataSubTab>();
 		moleculeArchiveTabControllers = new ArrayList<MoleculeArchiveSubTab>();
         configureTabs();
     }
@@ -103,7 +103,7 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
                 
                 moleculeArchiveTabControllers.add((MoleculeArchiveSubTab) loader.getController());
                 
-                ImageMetaDataSubTab controller = (ImageMetaDataSubTab) loader.getController();
+                ImageMetadataSubTab controller = (ImageMetadataSubTab) loader.getController();
                 metaTabControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 
@@ -118,7 +118,7 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
     }
    
    private void configurePropertiesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-	   propertiesTableController = new ImageMetaDataPropertiesTableController();
+	   propertiesTableController = new ImageMetadataPropertiesTableController();
 	   metaTabControllers.add(propertiesTableController);
    	
    	   BorderPane tabPane = new BorderPane();
@@ -149,7 +149,7 @@ public class ImageMetaDataOverviewController implements ImageMetaDataSubTab, Mol
 		if (metaTabControllers == null)
 			return;
 		
-		for (ImageMetaDataSubTab controller: metaTabControllers)
+		for (ImageMetadataSubTab controller: metaTabControllers)
 			controller.setImageMetaData(meta);
 	}
 }

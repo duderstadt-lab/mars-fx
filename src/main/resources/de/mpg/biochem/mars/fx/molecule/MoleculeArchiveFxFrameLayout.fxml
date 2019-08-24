@@ -17,9 +17,9 @@
 	                <AnchorPane fx:id="dashboardContainer" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
 	              </content>
 	            </Tab>
-	            <Tab fx:id="imageMetaDataTab" closable="false" text="ImageMetaData">
+	            <Tab fx:id="imageMetadataTab" closable="false" text="ImageMetadata">
 	              <content>
-	                <AnchorPane fx:id="imageMetaDataContainer" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+	                <AnchorPane fx:id="imageMetadataContainer" minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
 	              </content>
 	            </Tab>
 	            <Tab fx:id="moleculesTab" closable="false" text="Molecules">

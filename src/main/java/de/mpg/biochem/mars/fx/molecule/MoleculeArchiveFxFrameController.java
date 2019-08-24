@@ -45,7 +45,7 @@ import org.scijava.widget.FileWidget;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.fx.molecule.imageMetaDataTab.ImageMetaDataTabController;
+import de.mpg.biochem.mars.fx.molecule.imageMetadataTab.ImageMetadataTabController;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculesTabController;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -75,10 +75,10 @@ public class MoleculeArchiveFxFrameController {
     private AnchorPane dashboardContainer;
 
 	@FXML
-    private Tab imageMetaDataTab;
+    private Tab imageMetadataTab;
     
     @FXML
-    private AnchorPane imageMetaDataContainer;
+    private AnchorPane imageMetadataContainer;
 
     @FXML
     private Tab moleculesTab;
@@ -105,7 +105,7 @@ public class MoleculeArchiveFxFrameController {
 	private ArrayList<MoleculeArchiveSubTab> tabPaneControllers;
 	
 	private DashboardTabController dashboardTabController;
-	private ImageMetaDataTabController imageMetaDataTabController;
+	private ImageMetadataTabController imageMetadataTabController;
     private MoleculesTabController moleculesTabController;
     private CommentsTabController commentsTabController;
     private SettingsTabController settingsTabController; 
@@ -156,7 +156,9 @@ public class MoleculeArchiveFxFrameController {
         bookIcon.getStyleClass().add("bookIcon");
         
         configureDashBoardTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("DashboardTab.fxml"), replaceBackgroundColorHandler);
-        configureImageMetaDataTab(imageMetaDataTab, "ImageMetaData", microscopeIcon, imageMetaDataContainer, getClass().getResource("ImageMetaDataTab.fxml"), replaceBackgroundColorHandler);
+        System.out.println("here");
+        configureImageMetadataTab(imageMetadataTab, "ImageMetadata", microscopeIcon, imageMetadataContainer, replaceBackgroundColorHandler);
+        System.out.println("here 2");
         configureMoleculesTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
         configureCommentsTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
         configureSettingsTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, replaceBackgroundColorHandler);
@@ -170,8 +172,8 @@ public class MoleculeArchiveFxFrameController {
         			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
         				if (newValue == dashboardTab) {
         					updateMenus(dashboardTabController.getMenus());
-        				} else if (newValue == imageMetaDataTab) {
-        					updateMenus(imageMetaDataTabController.getMenus());
+        				} else if (newValue == imageMetadataTab) {
+        					updateMenus(imageMetadataTabController.getMenus());
         				} else if (newValue == moleculesTab) {
         					updateMenus(moleculesTabController.getMenus());
         				} else if (newValue == commentsTab) {
@@ -221,14 +223,14 @@ public class MoleculeArchiveFxFrameController {
         configureAnchorPane(dashboardTabController.getNode());
     }
     
-    private void configureImageMetaDataTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-    	imageMetaDataTabController = new ImageMetaDataTabController();
-    	tabPaneControllers.add(imageMetaDataTabController);
+    private void configureImageMetadataTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
+    	imageMetadataTabController = new ImageMetadataTabController();
+    	tabPaneControllers.add(imageMetadataTabController);
     	
     	buildTab(tab, icon, onSelectionChangedEvent);
         
-        containerPane.getChildren().add(imageMetaDataTabController.getNode());
-        configureAnchorPane(imageMetaDataTabController.getNode());
+        containerPane.getChildren().add(imageMetadataTabController.getNode());
+        configureAnchorPane(imageMetadataTabController.getNode());
     }
     
     private void configureMoleculesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
@@ -292,8 +294,8 @@ public class MoleculeArchiveFxFrameController {
     
     public void save() {
     	 if (!lockArchive) {
-        	 moleculePanel.saveCurrentRecord();
-        	 imageMetadataPanel.saveCurrentRecord();
+    		 moleculesTabController.saveCurrentRecord();
+    		 imageMetadataTabController.saveCurrentRecord();
         	 
         	 try {
 	 			 if (archive.getFile() != null) {
@@ -321,8 +323,8 @@ public class MoleculeArchiveFxFrameController {
     
     public void saveCopy() {
     	if (!lockArchive) {
-		    moleculePanel.saveCurrentRecord();
-    	    imageMetadataPanel.saveCurrentRecord();
+    		moleculesTabController.saveCurrentRecord();
+    		imageMetadataTabController.saveCurrentRecord();
     	    
     	    String fileName = archive.getName();
     	    if (fileName.endsWith(".store"))
@@ -353,8 +355,8 @@ public class MoleculeArchiveFxFrameController {
     
     public void saveVirtualStoreCopy() {
     	 if (!lockArchive) {
- 		    moleculePanel.saveCurrentRecord();
-     	    imageMetadataPanel.saveCurrentRecord();
+    		moleculesTabController.saveCurrentRecord();
+    		imageMetadataTabController.saveCurrentRecord();
  		 	
  		 	String name = archive.getName();
  		 	

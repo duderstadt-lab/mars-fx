@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
@@ -23,6 +23,7 @@ import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -35,7 +36,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, MoleculeArchiveSubTab {
+public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, MoleculeArchiveSubTab {
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -62,7 +63,7 @@ public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, M
 	
 	private MarsImageMetadata meta;
 	
-	private MoleculeArchive archive;
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
@@ -129,7 +130,7 @@ public class ImageMetaDataGeneralTabController implements ImageMetaDataSubTab, M
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 

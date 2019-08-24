@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,36 +22,36 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.SplitPane;
 
-public class ImageMetaDataTabController implements MoleculeArchiveSubTab {
+public class ImageMetadataTabController implements MoleculeArchiveSubTab {
 	
 	private SplitPane splitPane;
 	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
-	private ImageMetaDataIndexTableController metaIndexTableController;
-	private ArrayList<ImageMetaDataSubTab> metaSubTabControllers;
+	private ImageMetadataIndexTableController metaIndexTableController;
+	private ArrayList<ImageMetadataSubTab> metaSubTabControllers;
 	
 	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveSubTabControllers;
 	
-	private ImageMetaDataTablesPane metaTablesPane;
+	private ImageMetadataTablesPane metaTablesPane;
 
-	public ImageMetaDataTabController() {
-		metaSubTabControllers = new ArrayList<ImageMetaDataSubTab>();
+	public ImageMetadataTabController() {
+		metaSubTabControllers = new ArrayList<ImageMetadataSubTab>();
 		moleculeArchiveSubTabControllers = new ArrayList<MoleculeArchiveSubTab>();
 
-		metaIndexTableController = new ImageMetaDataIndexTableController();
+		metaIndexTableController = new ImageMetadataIndexTableController();
 		
 		try {
 			//Load ImageMetaDataOverview Pane that will have UID, Tags, Parameter etc info...
 			FXMLLoader loader = new FXMLLoader();
-        	loader.setLocation(getClass().getResource("ImageMetaDataOverview.fxml"));
+        	loader.setLocation(getClass().getResource("ImageMetadataOverview.fxml"));
 			Parent metaOverviewNode = loader.load();
-			ImageMetaDataSubTab metaOverview = (ImageMetaDataSubTab) loader.getController();
+			ImageMetadataSubTab metaOverview = (ImageMetadataSubTab) loader.getController();
 			
 			//Add MoleculeArchiveSubTab Controllers to a list
 			moleculeArchiveSubTabControllers.add((MoleculeArchiveSubTab) loader.getController());
 			moleculeArchiveSubTabControllers.add((MoleculeArchiveSubTab) metaIndexTableController);
 			
 			//Load ImageMetaData Tables/Plot Pane
-			metaTablesPane = new ImageMetaDataTablesPane();
+			metaTablesPane = new ImageMetadataTablesPane();
 			
 			//Add ImageMetaDataSubTab Controllers to a list
 			metaSubTabControllers.add(metaOverview);
@@ -79,6 +79,10 @@ public class ImageMetaDataTabController implements MoleculeArchiveSubTab {
 	
 	public Node getNode() {
 		return splitPane;
+	}
+	
+	public void saveCurrentRecord() {
+		metaIndexTableController.saveImageMetadata();
 	}
 
 	@Override

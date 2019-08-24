@@ -13,9 +13,11 @@ import com.jfoenix.controls.JFXTabPane;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveFxFrameController;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -143,7 +145,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive<?,?,?> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		if (moleculeArchiveTabControllers == null)
 			return;
 		

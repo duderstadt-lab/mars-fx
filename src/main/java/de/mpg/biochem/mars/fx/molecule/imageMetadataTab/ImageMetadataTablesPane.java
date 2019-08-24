@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import java.util.ArrayList;
 
@@ -25,7 +25,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
-public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
+public class ImageMetadataTablesPane implements ImageMetadataSubTab {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private BorderPane dataTableContainer;
@@ -37,7 +37,7 @@ public class ImageMetaDataTablesPane implements ImageMetaDataSubTab {
 	
 	private MarsImageMetadata meta;
 	
-	public ImageMetaDataTablesPane() {
+	public ImageMetadataTablesPane() {
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 		

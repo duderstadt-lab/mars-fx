@@ -82,6 +82,10 @@ public class MoleculesTabController implements MoleculeArchiveSubTab {
 	public Node getNode() {
 		return splitPane;
 	}
+	
+	public void saveCurrentRecord() {
+		moleculeIndexTableController.saveMolecule();
+	}
 
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {

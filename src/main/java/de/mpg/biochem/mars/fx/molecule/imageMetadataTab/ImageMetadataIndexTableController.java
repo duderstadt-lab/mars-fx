@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetaDataTab;
+package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -10,7 +10,9 @@ import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -28,9 +30,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 
-public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab {
+public class ImageMetadataIndexTableController implements MoleculeArchiveSubTab {
     
-	private MoleculeArchive archive;
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	
+	private MarsImageMetadata marsImageMetadata;
 	
 	private BorderPane borderPane;
 	
@@ -41,9 +45,9 @@ public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab 
     
     private FilteredList<MetaIndexRow> filteredData;
     
-    private ArrayList<ImageMetaDataSubTab> metaSubTabControllers;
+    private ArrayList<ImageMetadataSubTab> metaSubTabControllers;
 
-    public ImageMetaDataIndexTableController() {        
+    public ImageMetadataIndexTableController() {        
         initialize();
     }
 
@@ -133,8 +137,10 @@ public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab 
     	if (metaSubTabControllers == null)
     		return;
     	
-		for (ImageMetaDataSubTab controller : metaSubTabControllers)
-			controller.setImageMetaData(archive.getImageMetadata(metaIndexRow.getUID()));
+    	marsImageMetadata = archive.getImageMetadata(metaIndexRow.getUID());
+    	
+		for (ImageMetadataSubTab controller : metaSubTabControllers)
+			controller.setImageMetaData(marsImageMetadata);
     }
     
     public void loadData() {
@@ -145,12 +151,17 @@ public class ImageMetaDataIndexTableController implements MoleculeArchiveSubTab 
         }
 	}
     
-    public void setArchive(MoleculeArchive archive) {
+    public void saveImageMetadata() {
+    	if (marsImageMetadata != null)
+    		archive.putImageMetadata(marsImageMetadata);
+    }
+    
+    public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
     	this.archive = archive;
     	loadData();
     }
     
-    public void setMetaSubTabList(ArrayList<ImageMetaDataSubTab> moleculeSubTabControllers) {
+    public void setMetaSubTabList(ArrayList<ImageMetadataSubTab> moleculeSubTabControllers) {
     	this.metaSubTabControllers = moleculeSubTabControllers;
     }
     
