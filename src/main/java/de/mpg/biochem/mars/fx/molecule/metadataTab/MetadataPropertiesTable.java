@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
+package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +10,8 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -32,8 +34,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class ImageMetadataPropertiesTableController implements ImageMetadataSubTab {
+public class MetadataPropertiesTable implements MetadataSubPane {
     
+	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	private MarsImageMetadata meta;
 	
 	private BorderPane borderPane;
@@ -42,7 +45,7 @@ public class ImageMetadataPropertiesTableController implements ImageMetadataSubT
     private TableView<ParameterRow> parameterTable;
     private ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
 
-    public ImageMetadataPropertiesTableController() {        
+    public MetadataPropertiesTable() {        
         initialize();
     }
 
@@ -187,9 +190,12 @@ public class ImageMetadataPropertiesTableController implements ImageMetadataSubT
     		}
     	}
     }
-
-	@Override
-	public void setImageMetaData(MarsImageMetadata meta) {
+    
+    public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
+    	this.archive = archive;
+    }
+    
+	public void setMetadata(MarsImageMetadata meta) {
 		this.meta = meta;
     	loadData();
 	}

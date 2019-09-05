@@ -15,7 +15,7 @@ import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
 import cern.extjfx.chart.data.*;
 import cern.extjfx.chart.data.DataReducingObservableList;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubTab;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -33,7 +33,7 @@ import javafx.scene.chart.XYChart.Data;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
-public class SubPlot implements MoleculeSubTab, TableSubTab {
+public class SubPlot implements MoleculeSubPane, TableSubTab {
 	private NumericAxis globalXAxis, globalYAxis;
 	private LineChart<Number, Number> dummyChart;
 	private XYChartPane<Number, Number> chartPane;

@@ -1,57 +1,61 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
+package de.mpg.biochem.mars.fx.molecule;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
-
 import org.controlsfx.control.textfield.CustomTextField;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
+import javafx.scene.control.Menu;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
+import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 
-public class ImageMetadataIndexTableController implements MoleculeArchiveSubTab {
-    
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MetadataSubPane<I>, O extends MetadataSubPane<I>> extends AbstractMoleculeArchiveTab<M,I,P> {
 	
-	private MarsImageMetadata marsImageMetadata;
+	protected SplitPane splitPane;
+	protected C metadataCenterPane;
+	protected O metadataPropertiesPane;
 	
-	private BorderPane borderPane;
+	protected I marsImageMetadata;
 	
-    private CustomTextField filterField;
-    private Label nOfHitCountLabel;
-    private TableView<MetaIndexRow> metaIndexTable;
-    private ObservableList<MetaIndexRow> metaRowList = FXCollections.observableArrayList();
+	protected CustomTextField filterField;
+	protected Label nOfHitCountLabel;
+	protected TableView<MetaIndexRow> metaIndexTable;
+	protected ObservableList<MetaIndexRow> metaRowList = FXCollections.observableArrayList();
     
-    private FilteredList<MetaIndexRow> filteredData;
-    
-    private ArrayList<ImageMetadataSubTab> metaSubTabControllers;
+	protected FilteredList<MetaIndexRow> filteredData;
 
-    public ImageMetadataIndexTableController() {        
-        initialize();
-    }
-
-    private void initialize() {
+	public AbstractMarsImageMetadataTab() {
+		super();
+			
+		splitPane = new SplitPane();
+		ObservableList<Node> splitItems = splitPane.getItems();
+		
+		splitItems.add(buildMetadataTableIndex());
+		
+		metadataCenterPane = createMetadataCenterPane();
+		splitItems.add(metadataCenterPane.getNode());
+		
+		metadataPropertiesPane = createMetadataPropertiesPane();
+		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
+		splitItems.add(metadataPropertiesPane.getNode());	
+	}
+	
+	protected Node buildMetadataTableIndex() {
     	metaIndexTable = new TableView<MetaIndexRow>();
     	
         TableColumn<MetaIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
@@ -79,7 +83,11 @@ public class ImageMetadataIndexTableController implements MoleculeArchiveSubTab 
         metaIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMetaIndexRow, newMetaIndexRow) -> {
                 if (newMetaIndexRow != null) {
-            		updateMetaSubTabs(newMetaIndexRow);
+                	marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
+                	
+                	//Update center pane and properties pane.
+                	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
+                	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
             		Platform.runLater(() -> {
             			metaIndexTable.requestFocus();
             		});
@@ -115,35 +123,24 @@ public class ImageMetadataIndexTableController implements MoleculeArchiveSubTab 
         
         metaIndexTable.setItems(filteredData);
         
-        
-        filterField.setStyle(
-                "-fx-background-radius: 2em; "
-        );
+        filterField.setStyle("-fx-background-radius: 2em; ");
 
-        borderPane = new BorderPane();
+        BorderPane borderPane = new BorderPane();
         Insets insets = new Insets(5);
        
         borderPane.setTop(filterField);
         BorderPane.setMargin(filterField, insets);
         
         borderPane.setCenter(metaIndexTable);
-    }
-    
-    public Node getNode() {
-    	return borderPane;
-    }
-    
-    public void updateMetaSubTabs(MetaIndexRow metaIndexRow) {
-    	if (metaSubTabControllers == null)
-    		return;
-    	
-    	marsImageMetadata = archive.getImageMetadata(metaIndexRow.getUID());
-    	
-		for (ImageMetadataSubTab controller : metaSubTabControllers)
-			controller.setImageMetaData(marsImageMetadata);
-    }
-    
-    public void loadData() {
+        
+        return borderPane;
+	}
+	
+	public Node getNode() {
+		return splitPane;
+	}
+	
+	public void loadData() {
     	metaRowList.clear();
 
     	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
@@ -151,21 +148,40 @@ public class ImageMetadataIndexTableController implements MoleculeArchiveSubTab 
         }
 	}
     
-    public void saveImageMetadata() {
+    public void saveCurrentRecord() {
     	if (marsImageMetadata != null)
     		archive.putImageMetadata(marsImageMetadata);
     }
     
-    public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-    	this.archive = archive;
-    	loadData();
+    public void update() {
+    	if (archive.getNumberOfImageMetadataRecords() > 0) {
+    		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
+    		marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
+        	
+        	//Update center pane and properties pane.
+        	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
+        	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
+			Platform.runLater(() -> {
+				metaIndexTable.requestFocus();
+			});
+    	}
     }
-    
-    public void setMetaSubTabList(ArrayList<ImageMetadataSubTab> moleculeSubTabControllers) {
-    	this.metaSubTabControllers = moleculeSubTabControllers;
-    }
-    
-    private class MetaIndexRow {
+
+	@Override
+	public void setArchive(MoleculeArchive<M, I, P> archive) {
+		this.archive = archive;
+		loadData();
+	}
+	
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
+	}
+	
+	public abstract C createMetadataCenterPane();
+	
+	public abstract O createMetadataPropertiesPane();
+	
+	protected class MetaIndexRow {
     	private int index;
     	
     	MetaIndexRow(int index) {

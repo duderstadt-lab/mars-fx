@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>25.0.0</version>
+		<version>27.0.1</version>
 		<relativePath />
 	</parent>
 
@@ -83,6 +83,20 @@
 		<package-name>de.mpg.biochem.mars</package-name>
 		<license.licenseName>BSD-2</license.licenseName>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
+
+		<!-- NB: Deploy releases to the SciJava Maven repository. -->
+		<releaseProfiles>deploy-to-scijava</releaseProfiles>
+
+		<mars-core.version>1.0.0-beta-2-SNAPSHOT</mars-core.version>
+		<jackson.version>2.6.5</jackson.version>
+		<jackson-core.version>${jackson.version}</jackson-core.version>
+		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
+		<org.apache.commons.codec.version>1.8</org.apache.commons.codec.version>
+		<base58-codec.version>1.2.0</base58-codec.version>
+		<decimal4j.version>1.0.3</decimal4j.version>
+		<junit-jupiter.version>5.2.0</junit-jupiter.version>
+		<junit-jupiter-api.version>${junit-jupiter.version}</junit-jupiter-api.version>
+		<junit-jupiter-engine.version>${junit-jupiter.version}</junit-jupiter-engine.version>
 	</properties>
 	
 	<repositories>
@@ -106,59 +120,71 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>de.mpg.biochem</groupId>
+			<artifactId>mars-core</artifactId>
+			<version>${mars-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-ij</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>net.imagej</groupId>
-			<artifactId>imagej</artifactId>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-realtransform</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-ui</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>scijava-table</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
-			<artifactId>fiji-lib</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.6.5</version>
-		</dependency>
-		<dependency>
-    		<groupId>com.fasterxml.jackson.core</groupId>
-    		<artifactId>jackson-annotations</artifactId>
-   			<version>2.6.0</version>
-  		</dependency>
-  		<dependency>
-    		<groupId>com.fasterxml.jackson.core</groupId>
-    		<artifactId>jackson-core</artifactId>
-   			 <version>2.6.5</version>
-  		</dependency>
-		<dependency>
-			<groupId>org.apache.directory.studio</groupId>
-			<artifactId>org.apache.commons.codec</artifactId>
-			<version>1.8</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-smile</artifactId>
-			<version>2.6.5</version>
-		</dependency>
-		<dependency>
-			<groupId>com.chrylis</groupId>
-			<artifactId>base58-codec</artifactId>
-			<version>1.2.0</version>
+			<artifactId>spim_data</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.decimal4j</groupId>
 			<artifactId>decimal4j</artifactId>
-			<version>1.0.3</version>
+			<version>${decimal4j.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>${junit-jupiter-api.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit-jupiter-engine.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>scijava-ui-swing</artifactId>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer-vistools</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>sc.fiji</groupId>
+			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>cern.extjfx</groupId>
@@ -299,11 +325,6 @@
 			<groupId>org.fxmisc.richtext</groupId>
 			<artifactId>richtextfx</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>de.mpg.biochem</groupId>
-			<artifactId>mars-core</artifactId>
-			<version>LATEST</version>
 		</dependency>
 		<dependency>
 			<groupId>com.miglayout</groupId>

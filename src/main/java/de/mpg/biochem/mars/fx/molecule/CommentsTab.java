@@ -56,8 +56,10 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.Utils;
 
-public class CommentsTabController extends BorderPane implements MoleculeArchiveSubTab {
+public class CommentsTab extends AbstractMoleculeArchiveTab {
 
+	private BorderPane borderPane;
+	
 	private Scene scene;
 	private Node extensionsButton;
 	private ToolBar nonEditToolBar;
@@ -65,12 +67,10 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
     final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
 
     private CommentEditor commentEditor;
-    
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private ArrayList<Menu> menus;
 	
-	public CommentsTabController() {
+	public CommentsTab() {
 		initialize();
 	}
 	
@@ -80,16 +80,17 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
     	menus = new ArrayList<Menu>();
     	
     	//Build markdown gui
-		getStyleClass().add("main");
-		setPrefSize(800, 800);
+    	borderPane = new BorderPane();
+    	borderPane.getStyleClass().add("main");
+    	borderPane.setPrefSize(800, 800);
 		commentEditor = new CommentEditor();
-    	setCenter(commentEditor);
+		borderPane.setCenter(commentEditor);
 		
     	initializeToolBars();
     	
-		setTop(nonEditToolBar);
+    	borderPane.setTop(nonEditToolBar);
     	
-		scene = new Scene(this);
+		scene = new Scene(borderPane);
 		scene.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
 		
 		Utils.fixSpaceAfterDeadKey(scene);
@@ -332,10 +333,10 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 			updateToolsAndMenus = false;
 
 			if (commentEditor.editMode.get()) {
-				setTop(editToolBar);
+				borderPane.setTop(editToolBar);
 			} else {
 				commentEditor.showPreview();
-				setTop(nonEditToolBar);
+				borderPane.setTop(nonEditToolBar);
 			}
 		});
     }
@@ -368,7 +369,7 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 			alert.setTitle(title);
 			alert.setHeaderText(null);
 			alert.setContentText(MessageFormat.format(contentTextFormat, contentTextArgs));
-			alert.initOwner(getScene().getWindow());
+			alert.initOwner(scene.getWindow());
 			return alert;
 		}
 
@@ -380,5 +381,10 @@ public class CommentsTabController extends BorderPane implements MoleculeArchive
 	
 	public ArrayList<Menu> getMenus() {
 		return menus;
+	}
+
+	@Override
+	public Node getNode() {
+		return borderPane;
 	}
 }

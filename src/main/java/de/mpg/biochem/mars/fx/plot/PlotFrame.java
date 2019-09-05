@@ -24,7 +24,6 @@ import javafx.embed.swing.JFXPanel;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
-import net.imagej.ImageJ;
 import net.imagej.display.ImageDisplay;
 
 import cern.extjfx.samples.chart.*;

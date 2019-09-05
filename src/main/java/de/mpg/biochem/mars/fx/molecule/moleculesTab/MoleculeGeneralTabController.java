@@ -19,7 +19,6 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -36,7 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubTab {
+public class MoleculeGeneralTabController implements MoleculeSubPane, MoleculeArchiveSubTab {
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -135,8 +134,8 @@ public class GeneralTabController implements MoleculeSubTab, MoleculeArchiveSubT
 		notesTextArea.textProperty().addListener(notesListener);
 
 		
-		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
-		chipView.setSkin(skin);
+		//JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		//chipView.setSkin(skin);
 	     /*   
 		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
 			if (node instanceof TextArea) {

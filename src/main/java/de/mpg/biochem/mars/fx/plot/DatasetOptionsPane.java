@@ -9,7 +9,7 @@ import java.util.Arrays;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubTab;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;

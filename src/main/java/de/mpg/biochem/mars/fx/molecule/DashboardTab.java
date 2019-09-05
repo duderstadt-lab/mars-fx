@@ -14,13 +14,11 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
-public class DashboardTabController implements MoleculeArchiveSubTab {
-	
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
-	
+public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
 	
-    public DashboardTabController() {
+    public DashboardTab() {
+    	super();
     	borderPane = new BorderPane();
     	borderPane.setCenter(new Label("Coming soon..."));
     }
@@ -28,11 +26,6 @@ public class DashboardTabController implements MoleculeArchiveSubTab {
     public Node getNode() {
     	return borderPane;
     }
-
-	@Override
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
 	
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();

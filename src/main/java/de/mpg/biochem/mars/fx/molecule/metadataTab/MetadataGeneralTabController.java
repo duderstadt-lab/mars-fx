@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.imageMetadataTab;
+package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
@@ -19,7 +19,6 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -36,7 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, MoleculeArchiveSubTab {
+public class MetadataGeneralTabController implements MetadataSubPane {
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -61,7 +60,7 @@ public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, M
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private MarsImageMetadata meta;
+	private MarsImageMetadata marsImageMetadata;
 	
 	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
@@ -87,9 +86,9 @@ public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, M
 				public void onChanged(Change<? extends String> c) {
 					while (c.next()) {
 			             if (c.wasRemoved()) {
-			                 meta.removeTag(c.getRemoved().get(0));
+			                 marsImageMetadata.removeTag(c.getRemoved().get(0));
 			             } else if (c.wasAdded()) {
-			            	 meta.addTag(c.getAddedSubList().get(0));
+			            	 marsImageMetadata.addTag(c.getAddedSubList().get(0));
 			             }
 					}
 				}
@@ -100,26 +99,25 @@ public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, M
 			notesListener = new ChangeListener<String>() {
 			    @Override
 			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-			        meta.setNotes(notesTextArea.getText());
+			        marsImageMetadata.setNotes(notesTextArea.getText());
 			    }
 			};
 		}
 		
-		UIDLabel.setText(meta.getUID());
+		UIDLabel.setText(marsImageMetadata.getUID());
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
-		if (meta.getTags().size() > 0)
-			chipView.getChips().addAll(meta.getTags());
+		if (marsImageMetadata.getTags().size() > 0)
+			chipView.getChips().addAll(marsImageMetadata.getTags());
 		chipView.getChips().addListener(chipsListener);
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
 		
 		notesTextArea.textProperty().removeListener(notesListener);
-		notesTextArea.setText(meta.getNotes());
+		notesTextArea.setText(marsImageMetadata.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
-
 	}
 	
 	@FXML
@@ -129,14 +127,19 @@ public class ImageMetadataGeneralTabController implements ImageMetadataSubTab, M
 	    clipboard.setContent(content);
 	}
 
-	@Override
 	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 
-	@Override
-	public void setImageMetaData(MarsImageMetadata meta) {
-		this.meta = meta;
+	public Node getNode() {
+		// TODO Auto-generated method stub
+		//For the moment this is not needed
+		//and the Pane is only in the fxml??
+		return null;
+	}
+
+	public void setMetadata(MarsImageMetadata marsImageMetadata) {
+		this.marsImageMetadata = marsImageMetadata;
 		update();
 	}
 }

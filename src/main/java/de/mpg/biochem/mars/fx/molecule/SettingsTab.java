@@ -14,7 +14,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 
-public class SettingsTabController implements MoleculeArchiveSubTab {
+public class SettingsTab implements MoleculeArchiveSubTab {
 	
 	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
@@ -22,7 +22,7 @@ public class SettingsTabController implements MoleculeArchiveSubTab {
 	
 	private BorderPane borderPane;
 	
-	public SettingsTabController() {
+	public SettingsTab() {
 		smileEncodingButton = new JFXToggleButton();
 		borderPane = new BorderPane();
 		borderPane.setCenter(smileEncodingButton);

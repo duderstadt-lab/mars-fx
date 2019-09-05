@@ -70,7 +70,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubTab;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -86,7 +86,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-public class PlotPane extends BorderPane implements MoleculeSubTab {
+public class PlotPane extends BorderPane implements MoleculeSubPane {
 	
 	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);

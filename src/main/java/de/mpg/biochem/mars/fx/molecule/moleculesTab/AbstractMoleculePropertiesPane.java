@@ -33,7 +33,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchiveSubTab {
+public class AbstractMoleculePropertiesPane implements MoleculeSubPane {
 	
 	@FXML
 	private JFXTabPane tabContainer;
@@ -50,9 +50,9 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	@FXML
     private AnchorPane propertiesTabContainer;
 	
-	private PropertiesTabController propertiesTableController;
+	private MoleculePropertiesTable propertiesTableController;
 	
-	private ArrayList<MoleculeSubTab> moleculeTabControllers;
+	private ArrayList<MoleculeSubPane> moleculeTabControllers;
 	
 	private ArrayList<MoleculeArchiveSubTab> moleculeArchiveTabControllers;
 	
@@ -61,7 +61,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 	
 	@FXML
     public void initialize() {
-		moleculeTabControllers = new ArrayList<MoleculeSubTab>();
+		moleculeTabControllers = new ArrayList<MoleculeSubPane>();
 		moleculeArchiveTabControllers = new ArrayList<MoleculeArchiveSubTab>();
         configureTabs();
     }
@@ -104,7 +104,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
                 
                 moleculeArchiveTabControllers.add((MoleculeArchiveSubTab) loader.getController());
                 
-                MoleculeSubTab controller = (MoleculeSubTab) loader.getController();
+                MoleculeSubPane controller = (MoleculeSubPane) loader.getController();
                 moleculeTabControllers.add(controller);
                 containerPane.getChildren().add(contentView);
                 
@@ -119,7 +119,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
     }
    
    private void configurePropertiesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-	   propertiesTableController = new PropertiesTabController();
+	   propertiesTableController = new MoleculePropertiesTable();
 	   moleculeTabControllers.add(propertiesTableController);
    	
    	   BorderPane tabPane = new BorderPane();
@@ -140,7 +140,7 @@ public class MoleculeOverviewController implements MoleculeSubTab, MoleculeArchi
 		if (moleculeTabControllers == null)
 			return;
 		
-		for (MoleculeSubTab controller: moleculeTabControllers)
+		for (MoleculeSubPane controller: moleculeTabControllers)
 			controller.setMolecule(molecule);
 	}
 

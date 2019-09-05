@@ -32,12 +32,14 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SingleSelectionModel;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 
+import org.apache.commons.io.FilenameUtils;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
 import org.scijava.widget.FileWidget;
@@ -45,8 +47,6 @@ import org.scijava.widget.FileWidget;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.fx.molecule.imageMetadataTab.ImageMetadataTabController;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculesTabController;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -65,8 +65,6 @@ public class MoleculeArchiveFxFrameController {
 	
 	@FXML
     private JFXTabPane tabContainer;
-	
-	private SingleSelectionModel<Tab> selectionModel;
 
 	@FXML
     private Tab dashboardTab;
@@ -104,11 +102,11 @@ public class MoleculeArchiveFxFrameController {
 	
 	private ArrayList<MoleculeArchiveSubTab> tabPaneControllers;
 	
-	private DashboardTabController dashboardTabController;
-	private ImageMetadataTabController imageMetadataTabController;
-    private MoleculesTabController moleculesTabController;
-    private CommentsTabController commentsTabController;
-    private SettingsTabController settingsTabController; 
+	private DashboardTab dashboardTabController;
+	private DefaultMarsImageMetadataTab imageMetadataTabController;
+    private DefaultMoleculesTab moleculesTabController;
+    private CommentsTab commentsTabController;
+    private SettingsTab settingsTabController; 
     
     private MoleculeArchive<?,?,?> archive;
 
@@ -155,11 +153,20 @@ public class MoleculeArchiveFxFrameController {
         Region bookIcon = new Region();
         bookIcon.getStyleClass().add("bookIcon");
         
-        configureDashBoardTab(dashboardTab, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, getClass().getResource("DashboardTab.fxml"), replaceBackgroundColorHandler);
-        configureImageMetadataTab(imageMetadataTab, "ImageMetadata", microscopeIcon, imageMetadataContainer, replaceBackgroundColorHandler);
-        configureMoleculesTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
-        configureCommentsTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
-        configureSettingsTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, replaceBackgroundColorHandler);
+        
+        dashboardTabController = new DashboardTab();
+        configureTab(dashboardTab, dashboardTabController, "Dashboard", MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"), dashboardContainer, replaceBackgroundColorHandler);
+        
+        configureTab(imageMetadataTab, "ImageMetadata", microscopeIcon, imageMetadataContainer, replaceBackgroundColorHandler);
+        
+        
+        configureTab(moleculesTab, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
+        
+        
+        configureTab(commentsTab, "Comments", bookIcon, commentsContainer, replaceBackgroundColorHandler);
+        
+        
+        configureTab(settingsTab, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, replaceBackgroundColorHandler);
         
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
         
@@ -197,6 +204,11 @@ public class MoleculeArchiveFxFrameController {
 				null,
 				fileCloseAction);
 		
+		//fileMenu.setOnShowing(e -> {System.out.println("on showing");});
+		//fileMenu.setOnShown(e -> {System.out.println("on shown");});
+		//fileMenu.setOnHiding(e -> {System.out.println("on hiding");});
+		//fileMenu.setOnHidden(e -> {System.out.println("on hidden"); e.consume();});
+		
 		menuBar = new MenuBar(fileMenu);
 		
 		borderPane.setTop(menuBar);
@@ -211,70 +223,21 @@ public class MoleculeArchiveFxFrameController {
     	}
     }
     
-    private void configureDashBoardTab(Tab tab, String title, Node icon, AnchorPane containerPane, URL resourceURL, EventHandler<Event> onSelectionChangedEvent) {
-    	dashboardTabController = new DashboardTabController();
-    	tabPaneControllers.add(dashboardTabController);
+    private void configureTab(Tab tab, MoleculeArchiveTab controller, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
+    	tabPaneControllers.add(controller);
     	
-    	buildTab(tab, icon, onSelectionChangedEvent);
-        
-        containerPane.getChildren().add(dashboardTabController.getNode());
-        configureAnchorPane(dashboardTabController.getNode());
-    }
-    
-    private void configureImageMetadataTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	imageMetadataTabController = new ImageMetadataTabController();
-    	tabPaneControllers.add(imageMetadataTabController);
-    	
-    	buildTab(tab, icon, onSelectionChangedEvent);
-        
-        containerPane.getChildren().add(imageMetadataTabController.getNode());
-        configureAnchorPane(imageMetadataTabController.getNode());
-    }
-    
-    private void configureMoleculesTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	moleculesTabController = new MoleculesTabController();
-    	tabPaneControllers.add(moleculesTabController);
-    	
-    	buildTab(tab, icon, onSelectionChangedEvent);
-        
-        containerPane.getChildren().add(moleculesTabController.getNode());
-        configureAnchorPane(moleculesTabController.getNode());
-    }
-    
-    private void configureCommentsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	commentsTabController = new CommentsTabController();
-    	tabPaneControllers.add(commentsTabController);
-    	
-    	buildTab(tab, icon, onSelectionChangedEvent);
-        
-        containerPane.getChildren().add(commentsTabController);
-        configureAnchorPane(commentsTabController);
-    }
-    
-    private void configureSettingsTab(Tab tab, String title, Node icon, AnchorPane containerPane, EventHandler<Event> onSelectionChangedEvent) {
-    	settingsTabController = new SettingsTabController();
-    	tabPaneControllers.add(settingsTabController);
-    	
-    	buildTab(tab, icon, onSelectionChangedEvent);
-        
-        containerPane.getChildren().add(settingsTabController.getNode());
-        configureAnchorPane(settingsTabController.getNode());
-    }
-    
-    private void buildTab(Tab tab, Node icon, EventHandler<Event> onSelectionChangedEvent) {
     	BorderPane tabPane = new BorderPane();
         tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(icon);
-
+        
         tab.setText("");
         tab.setGraphic(tabPane);
-
         tab.setOnSelectionChanged(onSelectionChangedEvent);
-    }
-    
-    private void configureAnchorPane(Node node) {
-    	AnchorPane.setTopAnchor(node, 0.0);
+        
+        Node node = controller.getNode();
+        containerPane.getChildren().add(node);
+        AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
         AnchorPane.setLeftAnchor(node, 0.0);
@@ -287,7 +250,8 @@ public class MoleculeArchiveFxFrameController {
     }
     
     public void updateAll() {
-    	
+    	moleculesTabController.update();
+		imageMetadataTabController.update();
     }
     
     public void save() {
@@ -328,11 +292,14 @@ public class MoleculeArchiveFxFrameController {
     	    if (fileName.endsWith(".store"))
     	    	fileName = fileName.substring(0, fileName.length() - 5);
     	    
+    	    System.out.println("fN" + fileName);
+    	    System.out.println("AP" + archive.getFile().getParentFile().toString());
+    	    
     	    try {
  				if (archive.getFile() != null) {
-					saveAs(new File(archive.getFile(), fileName));
+					saveAs(new File(archive.getFile().getParentFile(), fileName));
  				} else {
- 					saveAs(new File(fileName));
+ 					saveAs(new File(System.getProperty("user.home"), fileName));
  				}
     	    } catch (IOException e1) {
 				// TODO Auto-generated catch block
@@ -343,7 +310,19 @@ public class MoleculeArchiveFxFrameController {
     }
     
 	private boolean saveAs(File saveAsFile) throws IOException {
-		File file = archive.getMoleculeArchiveService().getContext().getService(UIService.class).chooseFile(saveAsFile, FileWidget.SAVE_STYLE);
+		FileChooser fileChooser = new FileChooser();
+		
+		if (saveAsFile == null) {
+			saveAsFile = new File(System.getProperty("user.home"));
+		}
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		fileChooser.setInitialFileName(saveAsFile.getName());
+		//FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(exporter.getExtensionDescription(),
+		//		exporter.getExtensionFilters());
+		//fileChooser.getExtensionFilters().add(extFilter);
+
+		File file = fileChooser.showSaveDialog(this.tabContainer.getScene().getWindow());
+		
 		if (file != null) {
 			archive.saveAs(file);
 			return true;
@@ -364,17 +343,29 @@ public class MoleculeArchiveFxFrameController {
      		 	name += ".yama.store";
      		}
  		 
-				try {
-					saveAsVirtualStore(new File(name));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			try {
+				saveAsVirtualStore(new File(name));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
     	 }
     }
     
 	private void saveAsVirtualStore(File saveAsFile) throws IOException {
-		File virtualDirectory = archive.getMoleculeArchiveService().getContext().getService(UIService.class).chooseFile(saveAsFile, FileWidget.SAVE_STYLE);
+		FileChooser fileChooser = new FileChooser();
+		
+		if (saveAsFile == null) {
+			saveAsFile = new File(System.getProperty("user.home"));
+		}
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		fileChooser.setInitialFileName(saveAsFile.getName());
+		//FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(exporter.getExtensionDescription(),
+		//		exporter.getExtensionFilters());
+		//fileChooser.getExtensionFilters().add(extFilter);
+
+		File virtualDirectory = fileChooser.showSaveDialog(this.tabContainer.getScene().getWindow());
+		
 		if (virtualDirectory != null) {	
 			archive.saveAsVirtualStore(virtualDirectory);
 		}

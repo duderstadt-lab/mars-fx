@@ -1,60 +1,67 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.molecule;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveSubTab;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
+import javafx.scene.control.Menu;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 
-public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
-    
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MoleculeSubPane<M>, O extends MoleculeSubPane<M>> extends AbstractMoleculeArchiveTab<M,I,P> {
 	
-	private BorderPane borderPane;
+	protected SplitPane splitPane;
+	protected C moleculeCenterPane;
+	protected O moleculePropertiesPane;
 	
-    private CustomTextField filterField;
-    private Label nOfHitCountLabel;
-    private TableView<MoleculeIndexRow> moleculeIndexTable;
-    private ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
+	protected MoleculeArchive<M, I, P> archive;
+	
+	protected M molecule;
+	
+	protected CustomTextField filterField;
+	protected Label nOfHitCountLabel;
+    protected TableView<MoleculeIndexRow> moleculeIndexTable;
+    protected ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
-    private FilteredList<MoleculeIndexRow> filteredData;
-    
-    private ArrayList<MoleculeSubTab> moleculeSubTabControllers;
-    
-    private Molecule molecule;
+	protected FilteredList<MoleculeIndexRow> filteredData;
 
-    public MoleculeIndexTableController() {        
-        initialize();
-    }
-
-    private void initialize() {
-    	moleculeIndexTable = new TableView<MoleculeIndexRow>();
+	public AbstractMoleculesTab() {
+		super();
+		
+		splitPane = new SplitPane();
+		ObservableList<Node> splitItems = splitPane.getItems();
+		
+		splitItems.add(buildMoleculeTableIndex());
+		
+		moleculeCenterPane = createMoleculeCenterPane();
+		splitItems.add(moleculeCenterPane.getNode());
+		
+		moleculePropertiesPane = createMoleculePropertiesPane();
+		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
+		splitItems.add(moleculePropertiesPane.getNode());	
+	}
+	
+	protected Node buildMoleculeTableIndex() {
+		moleculeIndexTable = new TableView<MoleculeIndexRow>();
     	
         TableColumn<MoleculeIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
         rowIndexCol.setCellValueFactory(molIndexRow ->
@@ -88,25 +95,17 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
                 if (newMoleculeIndexRow != null) {
-                	saveMolecule();
-            		updateMoleculeSubTabs(newMoleculeIndexRow);
+                	molecule = archive.get(newMoleculeIndexRow.getUID());
+                	
+                	//Update center pane and properties pane.
+                	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent<M>(molecule));
+                	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent<M>(molecule));
             		Platform.runLater(() -> {
             			moleculeIndexTable.requestFocus();
             		});
                 }
         });
-        /*
-        moleculeIndexTable.focusedProperty().addListener(
-                new ChangeListener<Boolean>() {
-					@Override
-					public void changed(ObservableValue<? extends Boolean> observable, Boolean wasFocused, Boolean isFocused) {
-						if (!isFocused) {
-			            	 moleculeIndexTable.requestFocus();
-			            }
-					}
-                }
-            );
-        */
+
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         
         filterField = new CustomTextField();
@@ -147,32 +146,49 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
                 "-fx-background-radius: 2em; "
         );
 
-        borderPane = new BorderPane();
+        BorderPane borderPane = new BorderPane();
         Insets insets = new Insets(5);
        
         borderPane.setTop(filterField);
         BorderPane.setMargin(filterField, insets);
         
         borderPane.setCenter(moleculeIndexTable);
-    }
-    
-    public Node getNode() {
-    	return borderPane;
-    }
-    
-    public void saveMolecule() {
+        
+        return borderPane;
+	}
+	
+	public void saveCurrentRecord() {
     	if (molecule != null)
     		archive.put(molecule);
     }
     
-    public void updateMoleculeSubTabs(MoleculeIndexRow moleculeIndexRow) {
-    	if (moleculeSubTabControllers == null)
-    		return;
-    	
-    	molecule = archive.get(moleculeIndexRow.getUID());
-    	
-		for (MoleculeSubTab controller : moleculeSubTabControllers)
-			controller.setMolecule(molecule);
+    public void update() {
+    	if (archive.getNumberOfImageMetadataRecords() > 0) {
+    		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
+    		molecule = archive.get(newMoleculeIndexRow.getUID());
+        	
+    		//Update center pane and properties pane.
+        	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+        	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+    		Platform.runLater(() -> {
+    			moleculeIndexTable.requestFocus();
+    		});
+    	}
+    }
+	
+	public Node getNode() {
+		return splitPane;
+	}
+
+	@Override
+	public void setArchive(MoleculeArchive<M, I, P> archive) {
+		this.archive = archive;
+		loadData();
+	}
+    
+    public void saveMolecule() {
+    	if (molecule != null)
+    		archive.put(molecule);
     }
     
     public void loadData() {
@@ -183,16 +199,15 @@ public class MoleculeIndexTableController implements MoleculeArchiveSubTab {
         }
 	}
     
-    public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-    	this.archive = archive;
-    	loadData();
-    }
-    
-    public void setMoleculeSubTabList(ArrayList<MoleculeSubTab> moleculeSubTabControllers) {
-    	this.moleculeSubTabControllers = moleculeSubTabControllers;
-    }
-    
-    private class MoleculeIndexRow {
+	public ArrayList<Menu> getMenus() {
+		return new ArrayList<Menu>();
+	}
+	
+	public abstract C createMoleculeCenterPane();
+	
+	public abstract O createMoleculePropertiesPane();
+	
+	protected class MoleculeIndexRow {
     	private int index;
     	
     	MoleculeIndexRow(int index) {

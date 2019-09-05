@@ -31,7 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class PropertiesTabController implements MoleculeSubTab {
+public class MoleculePropertiesTable implements MoleculeSubPane {
     
 	private Molecule molecule;
 	
@@ -41,7 +41,7 @@ public class PropertiesTabController implements MoleculeSubTab {
     private TableView<ParameterRow> parameterTable;
     private ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
 
-    public PropertiesTabController() {        
+    public MoleculePropertiesTable() {        
         initialize();
     }
 

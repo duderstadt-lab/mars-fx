@@ -1,10 +1,12 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
-
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
@@ -17,7 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public class MoleculeTablesPane implements MoleculeSubTab {
+public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
@@ -25,9 +27,11 @@ public class MoleculeTablesPane implements MoleculeSubTab {
 	private BorderPane dataTableContainer;
 	private PlotPane plot;
 	
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	
 	private Molecule molecule;
 	
-	public MoleculeTablesPane() {
+	public AbstractMoleculeCenterPane() {
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 		
