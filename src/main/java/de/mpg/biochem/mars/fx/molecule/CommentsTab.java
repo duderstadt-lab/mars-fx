@@ -71,11 +71,14 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	private ArrayList<Menu> menus;
 	
 	public CommentsTab() {
-		initialize();
-	}
-	
-    public void initialize() {
-    	Options.load(getOptions());
+		super();
+		
+		Region bookIcon = new Region();
+        bookIcon.getStyleClass().add("bookIcon");
+		
+		setIcon(bookIcon);
+		
+		Options.load(getOptions());
     	
     	menus = new ArrayList<Menu>();
     	
@@ -96,7 +99,9 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		Utils.fixSpaceAfterDeadKey(scene);
 		
 		//Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
-    }
+		
+		setContent(borderPane);
+	}
     
 	static private Preferences getPrefsRoot() {
 		return Preferences.userRoot().node("markdownwriterfx");
@@ -381,10 +386,5 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	
 	public ArrayList<Menu> getMenus() {
 		return menus;
-	}
-
-	@Override
-	public Node getNode() {
-		return borderPane;
 	}
 }

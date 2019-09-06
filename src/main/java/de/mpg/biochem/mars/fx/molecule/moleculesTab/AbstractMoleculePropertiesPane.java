@@ -65,7 +65,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabsContainer.disableAnimationProperty();
         
         stackPane.getChildren().add(tabsContainer);
-        
+        /*
         stackPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
 		    @SuppressWarnings("unchecked")
 			@Override
@@ -73,7 +73,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 		        setMolecule((M) molecule);
 		    }
 		});
-		
+		*/
 		configureTabs();
    }
 	
@@ -83,6 +83,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.1em"));
 
+        generalTab = new Tab();
         generalTab.setText("");
         generalTab.setGraphic(tabPane);
         generalTab.closableProperty().set(false);
@@ -118,6 +119,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
     	propertiesTabPane.setMaxWidth(tabWidth);
     	propertiesTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"));
 
+    	propertiesTab = new Tab();
         propertiesTab.setText("");
         propertiesTab.setGraphic(tabPane);
         propertiesTab.closableProperty().set(false);

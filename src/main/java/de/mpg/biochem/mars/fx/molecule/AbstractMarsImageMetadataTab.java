@@ -21,6 +21,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 
@@ -41,7 +42,12 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 
 	public AbstractMarsImageMetadataTab() {
 		super();
-			
+		
+		Region microscopeIcon = new Region();
+        microscopeIcon.getStyleClass().add("microscopeIcon");
+        
+		setIcon(microscopeIcon);
+		
 		splitPane = new SplitPane();
 		ObservableList<Node> splitItems = splitPane.getItems();
 		
@@ -53,6 +59,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		metadataPropertiesPane = createMetadataPropertiesPane();
 		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(metadataPropertiesPane.getNode());	
+		
+		setContent(splitPane);
 	}
 	
 	@SuppressWarnings("unchecked")

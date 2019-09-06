@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
-<AnchorPane prefHeight="350.0" prefWidth="220.0" minWidth="220.0" stylesheets="@MetadataGeneralTab.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.fx.molecule.imageMetadataTab.MetadataGeneralTabController">
+<AnchorPane prefHeight="350.0" prefWidth="220.0" minWidth="220.0" stylesheets="@MetadataGeneralTab.css" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataGeneralTabController">
    <children>
       <BorderPane fx:id="UIDIconContainer" layoutX="53.0" layoutY="32.0" prefHeight="60.0" prefWidth="70.0" AnchorPane.leftAnchor="70.0" AnchorPane.topAnchor="5.0" />
       <JFXTextField fx:id="UIDLabel" layoutX="39.0" layoutY="78.0" prefHeight="20.0" prefWidth="90.0" text="UID" AnchorPane.leftAnchor="55.0" AnchorPane.topAnchor="60.0" />

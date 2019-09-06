@@ -4,28 +4,34 @@ import java.util.ArrayList;
 
 import com.jfoenix.controls.JFXToggleButton;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
+
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 
-public class SettingsTab implements MoleculeArchiveTab {
+public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
 	
-	private MoleculeArchive<?,?,?> archive;
+	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	private JFXToggleButton smileEncodingButton;
 	
 	private BorderPane borderPane;
 	
 	public SettingsTab() {
+		super();
+		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
+		
 		smileEncodingButton = new JFXToggleButton();
 		borderPane = new BorderPane();
 		borderPane.setCenter(smileEncodingButton);
+		
+		setContent(borderPane);
 	}
 	
 	public void handleToggleSmileEncoding() {
@@ -45,7 +51,7 @@ public class SettingsTab implements MoleculeArchiveTab {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		
 		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());

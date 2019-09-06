@@ -82,17 +82,25 @@ import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import com.jfoenix.controls.JFXBadge;
 
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-public class PlotPane extends BorderPane implements MoleculeSubPane {
+//Should probably abstract this as well to allow for subclasses with different Molecule types
+//but for the moment we keep it as is....
+
+public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
 	
 	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
 	
 	private ArrayList<SubPlot> charts;
 	private ToolBar toolBar;
+	
+	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	private static StyleSheetUpdater styleSheetUpdater;
 	
@@ -329,5 +337,15 @@ public class PlotPane extends BorderPane implements MoleculeSubPane {
 			add(new Label("Points #: "), "");
 			add(pointsCountSpinner, "");
 		}
+	}
+
+	@Override
+	public Node getNode() {
+		return this;
+	}
+
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
 	}
 }

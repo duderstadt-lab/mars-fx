@@ -25,6 +25,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 
 public abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane<? extends Molecule>, O extends MoleculeSubPane<? extends Molecule>> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane splitPane;
@@ -45,6 +46,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public AbstractMoleculesTab() {
 		super();
 		
+		Region moleculeIcon = new Region();
+        moleculeIcon.getStyleClass().add("moleculeIcon");
+        
+        setIcon(moleculeIcon);
+		
 		splitPane = new SplitPane();
 		ObservableList<Node> splitItems = splitPane.getItems();
 		
@@ -56,6 +62,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		moleculePropertiesPane = createMoleculePropertiesPane();
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
+		
+		setContent(splitPane);
 	}
 	
 	@SuppressWarnings("unchecked")

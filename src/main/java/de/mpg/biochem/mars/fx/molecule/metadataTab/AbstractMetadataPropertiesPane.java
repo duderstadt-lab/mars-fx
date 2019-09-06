@@ -92,11 +92,13 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.1em"));
 
+        generalTab = new Tab();
+        generalTabContainer = new AnchorPane();
         generalTab.setText("");
         generalTab.setGraphic(tabPane);
         generalTab.closableProperty().set(false);
         
-        URL resourceURL = getClass().getResource("ImageMetaDataGeneralTab.fxml");
+        URL resourceURL = getClass().getResource("MetadataGeneralTab.fxml");
         
         generalTabContainer = new AnchorPane();
         generalTabContainer.minHeight(0.0);
@@ -127,6 +129,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
     	propertiesTabPane.setMaxWidth(tabWidth);
     	propertiesTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"));
 
+    	propertiesTab = new Tab();
         propertiesTab.setText("");
         propertiesTab.setGraphic(tabPane);
         propertiesTab.closableProperty().set(false);
