@@ -4,24 +4,24 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.EventType;
 
-public class MarsImageMetadataSelectionChangedEvent<I extends MarsImageMetadata> extends MarsImageMetadataEvent<I> {
+public class MarsImageMetadataSelectionChangedEvent extends MarsImageMetadataEvent {
 		
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 
-		public static final EventType<MarsImageMetadataSelectionChangedEvent<?>> MARS_IMAGE_METADATA_SELECTION_CHANGED = new EventType<>(MARS_IMAGE_METADATA_EVENT, "MarsImageMetadataSelectionChanged");
+		public static final EventType<MarsImageMetadataSelectionChangedEvent> MARS_IMAGE_METADATA_SELECTION_CHANGED = new EventType<>(MARS_IMAGE_METADATA_EVENT, "MarsImageMetadataSelectionChanged");
 
-	    private final I marsImageMetadata;
+	    private final MarsImageMetadata marsImageMetadata;
 
-	    public MarsImageMetadataSelectionChangedEvent(I marsImageMetadata) {
+	    public MarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
 	        super(MARS_IMAGE_METADATA_SELECTION_CHANGED);
 	        this.marsImageMetadata = marsImageMetadata;
 	    }
 
 	    @Override
-	    public void invokeHandler(MarsImageMetadataEventHandler<I> handler) {
+	    public void invokeHandler(MarsImageMetadataEventHandler handler) {
 	        handler.onMarsImageMetadataSelectionChangedEvent(marsImageMetadata);
 	    }
 	}

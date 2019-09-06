@@ -86,8 +86,8 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
                 	marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
-                	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
-                	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
+                	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+                	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
             		Platform.runLater(() -> {
             			metaIndexTable.requestFocus();
             		});
@@ -159,8 +159,8 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
     		marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
         	
         	//Update center pane and properties pane.
-        	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
-        	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent<I>(marsImageMetadata));
+        	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+        	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
 			Platform.runLater(() -> {
 				metaIndexTable.requestFocus();
 			});

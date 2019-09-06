@@ -35,7 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class MoleculeGeneralTabController implements MoleculeSubPane, MoleculeArchiveSubTab {
+public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -172,5 +172,13 @@ public class MoleculeGeneralTabController implements MoleculeSubPane, MoleculeAr
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+	}
+
+	@Override
+	public Node getNode() {
+		// TODO Auto-generated method stub
+		//For the moment this is not needed
+		//and the Pane is only in the fxml??
+		return null;
 	}
 }

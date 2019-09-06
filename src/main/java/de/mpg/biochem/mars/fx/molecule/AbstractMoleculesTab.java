@@ -7,7 +7,6 @@ import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -27,8 +26,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MoleculeSubPane<M>, O extends MoleculeSubPane<M>> extends AbstractMoleculeArchiveTab<M,I,P> {
-	
+public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MoleculeSubPane<?>, O extends MoleculeSubPane<?>> extends AbstractMoleculeArchiveTab<M,I,P> {
 	protected SplitPane splitPane;
 	protected C moleculeCenterPane;
 	protected O moleculePropertiesPane;
@@ -98,8 +96,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
                 	molecule = archive.get(newMoleculeIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
-                	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent<M>(molecule));
-                	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent<M>(molecule));
+                	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+                	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
             		Platform.runLater(() -> {
             			moleculeIndexTable.requestFocus();
             		});
@@ -185,11 +183,6 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
 		this.archive = archive;
 		loadData();
 	}
-    
-    public void saveMolecule() {
-    	if (molecule != null)
-    		archive.put(molecule);
-    }
     
     public void loadData() {
     	moleculeRowList.clear();

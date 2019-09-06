@@ -14,9 +14,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 
-public class SettingsTab implements MoleculeArchiveSubTab {
+public class SettingsTab implements MoleculeArchiveTab {
 	
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	private MoleculeArchive<?,?,?> archive;
 	
 	private JFXToggleButton smileEncodingButton;
 	
@@ -35,13 +35,6 @@ public class SettingsTab implements MoleculeArchiveSubTab {
 			archive.unsetSMILEOutputEncoding();
 		}
 	}
-
-	@Override
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-		
-		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
-	}
 	
 	public Node getNode() {
 		return this.borderPane;
@@ -49,5 +42,12 @@ public class SettingsTab implements MoleculeArchiveSubTab {
 	
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
+	}
+
+	@Override
+	public void setArchive(MoleculeArchive archive) {
+		this.archive = archive;
+		
+		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
 	}
 }

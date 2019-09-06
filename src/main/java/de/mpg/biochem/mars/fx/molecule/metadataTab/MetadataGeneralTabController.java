@@ -35,7 +35,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class MetadataGeneralTabController implements MetadataSubPane {
+public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMetadata> {
 	
 	@FXML
 	private BorderPane UIDIconContainer;

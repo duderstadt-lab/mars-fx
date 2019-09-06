@@ -19,7 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane {
+public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane<Molecule> {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
@@ -83,7 +83,7 @@ public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane {
 		}
 	}
 	
-	Node getNode() {
+	public Node getNode() {
 		return tabPane;
 	}
 	

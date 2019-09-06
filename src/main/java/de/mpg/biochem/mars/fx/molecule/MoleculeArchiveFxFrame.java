@@ -35,7 +35,7 @@ public class MoleculeArchiveFxFrame {
 
 	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
-	private MoleculeArchiveFxFrameController controller;
+	private MoleculeArchiveFxTabs controller;
 	
 	private JFrame frame;
 	private String title;
@@ -57,15 +57,9 @@ public class MoleculeArchiveFxFrame {
 		
 		frame.addWindowListener(new WindowAdapter() {
 	         public void windowClosing(WindowEvent e) {
-					//try {
-						//if (archive.isLocked())
-						close();
-					//} catch (IOException e1) {
-						// TODO Auto-generated catch block
-					//	e1.printStackTrace();
-					//}
+				close();
 	         }
-	      });
+	    });
 		
 		this.fxPanel = new JFXPanel();
 		frame.add(this.fxPanel);
@@ -89,28 +83,14 @@ public class MoleculeArchiveFxFrame {
 	}
 
 	public void initFX(JFXPanel fxPanel) {	
-		try {
-			FXMLLoader loader = new FXMLLoader();
-			loader.setLocation(MoleculeArchiveFxFrameController.class.getResource("MoleculeArchiveFxFrameLayout.fxml"));
-			BorderPane root = (BorderPane) loader.load();
-			
-			Scene scene = new Scene(root);
-			this.fxPanel.setScene(scene);
-			frame.setSize(800, 600);
-			
-			controller = loader.getController();
-            controller.setArchive(archive);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+		MoleculeArchiveFxTabs moleculeArchiveFxTabs = new MoleculeArchiveFxTabs(archive);
+		Scene scene = new Scene((BorderPane) moleculeArchiveFxTabs.getNode());
+		this.fxPanel.setScene(scene);
+		frame.setSize(800, 600);
 	}
 	
 	public MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> getArchive() {
 		return archive;
-	}
-	
-	public MoleculeArchiveFxFrameController getController() {
-		return controller;
 	}
 	
 	public JFrame getFrame() {
@@ -123,15 +103,6 @@ public class MoleculeArchiveFxFrame {
 	
 	public void close() {
 		moleculeArchiveService.removeArchive(archive.getName());
-		
-		//TODO make sure active archive contents is saved on close !!!!
-		/*
-		if (archive.isVirtual()) {
-			imageMetaDataPanel.saveCurrentRecord();
-			moleculePanel.saveCurrentRecord();
-			archive.save();
-		}
-		*/
 
 		if (!uiService.isHeadless())
 			WindowManager.removeWindow(frame);

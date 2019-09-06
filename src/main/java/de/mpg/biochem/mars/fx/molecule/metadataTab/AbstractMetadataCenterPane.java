@@ -62,7 +62,8 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		tabPane.getSelectionModel().select(dataTableTab);
 		
 		tabPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, new MarsImageMetadataEventHandler() {
-		    @Override
+		    @SuppressWarnings("unchecked")
+			@Override
 		    public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
 		        setMetadata((I)marsImageMetadata);
 		    }

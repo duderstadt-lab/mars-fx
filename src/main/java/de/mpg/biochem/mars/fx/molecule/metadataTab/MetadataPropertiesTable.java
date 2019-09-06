@@ -34,7 +34,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class MetadataPropertiesTable implements MetadataSubPane {
+public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadata> {
     
 	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	private MarsImageMetadata meta;
