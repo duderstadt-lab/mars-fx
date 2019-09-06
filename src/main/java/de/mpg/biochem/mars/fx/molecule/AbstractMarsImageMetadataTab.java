@@ -24,7 +24,7 @@ import javafx.scene.layout.BorderPane;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 
-public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MetadataSubPane<I>, O extends MetadataSubPane<I>> extends AbstractMoleculeArchiveTab<M,I,P> {
+public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, C extends MetadataSubPane<? extends MarsImageMetadata>, O extends MetadataSubPane<? extends MarsImageMetadata>> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
 	
 	protected SplitPane splitPane;
 	protected C metadataCenterPane;
@@ -55,6 +55,7 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
 		splitItems.add(metadataPropertiesPane.getNode());	
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected Node buildMetadataTableIndex() {
     	metaIndexTable = new TableView<MetaIndexRow>();
     	
@@ -83,7 +84,7 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
         metaIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMetaIndexRow, newMetaIndexRow) -> {
                 if (newMetaIndexRow != null) {
-                	marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
+                	marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
                 	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
@@ -153,10 +154,11 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
     		archive.putImageMetadata(marsImageMetadata);
     }
     
-    public void update() {
+    @SuppressWarnings("unchecked")
+	public void update() {
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
     		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
-    		marsImageMetadata = archive.getImageMetadata(newMetaIndexRow.getUID());
+    		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
         	
         	//Update center pane and properties pane.
         	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
@@ -168,7 +170,7 @@ public abstract class AbstractMarsImageMetadataTab<M extends Molecule, I extends
     }
 
 	@Override
-	public void setArchive(MoleculeArchive<M, I, P> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		loadData();
 	}

@@ -1,4 +1,25 @@
- package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.molecule;
+
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+
+import javax.swing.JFrame;
+
+import org.scijava.log.LogService;
+import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
+
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.table.MarsTableService;
+import ij.WindowManager;
 
 import com.jfoenix.controls.JFXTabPane;
 
@@ -54,54 +75,106 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.util.*;
 
+import de.mpg.biochem.mars.molecule.*;
 
-public class MoleculeArchiveFxTabs {
+public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane<? extends MarsImageMetadata>, ? extends MetadataSubPane<? extends MarsImageMetadata>>, 
+		M extends MoleculesTab<? extends MoleculeSubPane<? extends Molecule>, ? extends MoleculeSubPane<? extends Molecule>>> {
 	
 	@Parameter
-	private MoleculeArchiveService moleculeArchiveService;
-
-	private BorderPane borderPane;
-    private JFXTabPane tabsContainer;
-
-    private Tab dashboardTab;
-    private AnchorPane dashboardContainer;
-    
-    private Tab imageMetadataTab;
-    private AnchorPane imageMetadataContainer;
-    
-    private Tab moleculesTab;
-    private AnchorPane moleculesContainer;
-    
-    private Tab commentsTab;
-    private AnchorPane commentsContainer;
-
-    private Tab settingsTab;
-    private AnchorPane settingsContainer;
-    
-    private boolean lockArchive = false;
-    
-	private MenuBar menuBar;
+    protected MoleculeArchiveService moleculeArchiveService;
 	
-	private DashboardTab dashboardTabController;
-    private CommentsTab commentsTabController;
-    private SettingsTab settingsTabController; 
-    
-    //This part will remain in the subclasses
-    private DefaultMarsImageMetadataTab imageMetadataTabController;
-    private DefaultMoleculesTab moleculesTabController;
-    
-    private MoleculeArchive<?,?,?> archive;
+    @Parameter
+    protected UIService uiService;
 
-    private double tabWidth = 60.0;
-    public static int lastSelectedTabIndex = 0;
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	
+	protected JFrame frame;
+	protected String title;
+	protected JFXPanel fxPanel;
+
+	protected BorderPane borderPane;
+    protected JFXTabPane tabsContainer;
+
+    protected Tab dashboardTab;
+    protected AnchorPane dashboardContainer;
     
-    public MoleculeArchiveFxTabs(MoleculeArchive<?,?,?> archive) {
-    	this.archive = archive;
-    	
-    	borderPane = new BorderPane();
-    	borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxTabs.css");
+    protected Tab imageMetadataTab;
+    protected AnchorPane imageMetadataContainer;
+    
+    protected Tab moleculesTab;
+    protected AnchorPane moleculesContainer;
+    
+    protected Tab commentsTab;
+    protected AnchorPane commentsContainer;
+
+    protected Tab settingsTab;
+    protected AnchorPane settingsContainer;
+    
+    protected boolean lockArchive = false;
+    
+	protected MenuBar menuBar;
+	
+	protected DashboardTab dashboardTabController;
+    protected CommentsTab commentsTabController;
+    protected SettingsTab settingsTabController; 
+    
+    protected I imageMetadataTabController;
+    protected M moleculesTabController;
+
+    protected double tabWidth = 60.0;
+    public static int lastSelectedTabIndex = 0;
+
+	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
+		this.title = archive.getName();
+		this.archive = archive;
+		this.uiService = moleculeArchiveService.getUIService();
+		this.moleculeArchiveService = moleculeArchiveService;
+	}
+
+	/**
+	 * JFXPanel creates a link between Swing and JavaFX.
+	 */
+	public void init() {
+		frame = new JFrame(title);
+		
+		frame.addWindowListener(new WindowAdapter() {
+	         public void windowClosing(WindowEvent e) {
+				close();
+	         }
+	    });
+		
+		this.fxPanel = new JFXPanel();
+		frame.add(this.fxPanel);
+		
+		if (!uiService.isHeadless())
+			WindowManager.addWindow(frame);
+		
+		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
+		// Allows multiple runLaters in the same session...
+		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
+		Platform.setImplicitExit(false);
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				initFX(fxPanel);
+			}
+		});
+
+	}
+
+	public void initFX(JFXPanel fxPanel) {	
+		this.fxPanel.setScene(buildScene());
+		frame.setSize(800, 600);
+		frame.setVisible(true);
+	}
+	
+	protected Scene buildScene() {
+		borderPane = new BorderPane();
+    	borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
     	
     	tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(128.0);
@@ -114,11 +187,13 @@ public class MoleculeArchiveFxTabs {
         tabsContainer.setTabMaxHeight(tabWidth);
         tabsContainer.setRotateGraphic(true);
     	
-        configureView();
+        buildTabs();
         buildMenuBar();
-    }
+        
+        return new Scene(borderPane);
+	}
 	
-    private void configureView() {
+	private void buildTabs() {
         EventHandler<Event> replaceBackgroundColorHandler = event -> {
             lastSelectedTabIndex = tabsContainer.getSelectionModel().getSelectedIndex();
 
@@ -149,33 +224,33 @@ public class MoleculeArchiveFxTabs {
         settingsTabController = new SettingsTab();
         configureTab(settingsTab, settingsTabController, "Settings", FontAwesomeIconFactory.get().createIcon(COG, "1.3em"), settingsContainer, replaceBackgroundColorHandler);
         
-        imageMetadataTabController = new DefaultMarsImageMetadataTab();
+        imageMetadataTabController = createImageMetadataTab();
         configureTab(imageMetadataTab, imageMetadataTabController, "ImageMetadata", microscopeIcon, imageMetadataContainer, replaceBackgroundColorHandler);
         
-        moleculesTabController = new DefaultMoleculesTab();
+        moleculesTabController = createMoleculesTab();
         configureTab(moleculesTab, moleculesTabController, "Molecules", moleculeIcon, moleculesContainer, replaceBackgroundColorHandler);
         
         tabsContainer.getSelectionModel().selectedItemProperty().addListener(
-        		new ChangeListener<Tab>() {
+    		new ChangeListener<Tab>() {
 
-        			@Override
-        			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-        				if (newValue == dashboardTab) {
-        					updateMenus(dashboardTabController.getMenus());
-        				} else if (newValue == imageMetadataTab) {
-        					updateMenus(imageMetadataTabController.getMenus());
-        				} else if (newValue == moleculesTab) {
-        					updateMenus(moleculesTabController.getMenus());
-        				} else if (newValue == commentsTab) {
-        					updateMenus(commentsTabController.getMenus());
-        				} else if (newValue == settingsTab) {
-        					updateMenus(settingsTabController.getMenus());
-        				}
-        			}
-        		});
+    			@Override
+    			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+    				if (newValue == dashboardTab) {
+    					updateMenus(dashboardTabController.getMenus());
+    				} else if (newValue == imageMetadataTab) {
+    					updateMenus(imageMetadataTabController.getMenus());
+    				} else if (newValue == moleculesTab) {
+    					updateMenus(moleculesTabController.getMenus());
+    				} else if (newValue == commentsTab) {
+    					updateMenus(commentsTabController.getMenus());
+    				} else if (newValue == settingsTab) {
+    					updateMenus(settingsTabController.getMenus());
+    				}
+    			}
+    		});
     }
-    
-    private void buildMenuBar() {
+	
+	protected void buildMenuBar() {
 		// File actions
 		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
@@ -192,9 +267,31 @@ public class MoleculeArchiveFxTabs {
 		menuBar = new MenuBar(fileMenu);
 		
 		borderPane.setTop(menuBar);
-    }
-    
-    public void updateMenus(ArrayList<Menu> menus) {
+	}
+	
+	public MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> getArchive() {
+		return archive;
+	}
+	
+	public JFrame getFrame() {
+		return frame;
+	}
+	
+	public String getTitle() {
+		return title;
+	}
+	
+	public void close() {
+		moleculeArchiveService.removeArchive(archive.getName());
+
+		if (!uiService.isHeadless())
+			WindowManager.removeWindow(frame);
+		
+		frame.setVisible(false);
+		frame.dispose();
+	}
+
+	public void updateMenus(ArrayList<Menu> menus) {
     	while (menuBar.getMenus().size() > 1)
     		menuBar.getMenus().remove(1);
     	if(menus.size() > 0) {
@@ -209,12 +306,21 @@ public class MoleculeArchiveFxTabs {
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(icon);
         
+        tab = new Tab();
         tab.setText("");
         tab.setGraphic(tabPane);
         tab.setOnSelectionChanged(onSelectionChangedEvent);
+        tab.closableProperty().set(false);
         
         Node node = controller.getNode();
+        
+        containerPane = new AnchorPane();
+        containerPane.minHeight(0);
+        containerPane.minWidth(0);
+        containerPane.prefHeight(180.0);
+        containerPane.prefWidth(200.0);
         containerPane.getChildren().add(node);
+        
         AnchorPane.setTopAnchor(node, 0.0);
         AnchorPane.setBottomAnchor(node, 0.0);
         AnchorPane.setRightAnchor(node, 0.0);
@@ -225,7 +331,6 @@ public class MoleculeArchiveFxTabs {
     	return borderPane;
     }
     
-    @FXML
     private void handleClose() {
     	archive.getWindow().close();
     	save();
@@ -352,7 +457,15 @@ public class MoleculeArchiveFxTabs {
 			archive.saveAsVirtualStore(virtualDirectory);
 		}
 	}
-    
+	
+	public abstract I createImageMetadataTab();
+	
+	public abstract M createMoleculesTab();
+	
+	public DashboardTab getDashboard() {
+		return dashboardTabController;
+	}
+	
     public void lockArchive() {
     	lockArchive = true;
 		//We move to the dashboard Tab
@@ -363,4 +476,5 @@ public class MoleculeArchiveFxTabs {
     	updateAll();
 		lockArchive = false;
     }
+
 }

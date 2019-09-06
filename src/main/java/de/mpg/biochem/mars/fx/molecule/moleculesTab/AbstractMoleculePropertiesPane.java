@@ -19,6 +19,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
@@ -136,16 +137,19 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabsContainer.getTabs().add(generalTab);
         tabsContainer.getTabs().add(propertiesTab);
 	}
+	
+	public Node getNode() {
+		return stackPane;
+	}
+	
+	public void setArchive(MoleculeArchive<M, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
    
    public void setMolecule(M molecule) {
 		this.molecule = molecule;
 		
 		moleculeGeneralTabController.setMolecule(molecule);
 		moleculePropertiesTable.setMolecule(molecule);
-	}
-
-	@Override
-	public void setArchive(MoleculeArchive<M, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
 	}
 }

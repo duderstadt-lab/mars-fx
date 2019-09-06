@@ -6,7 +6,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class DefaultMarsImageMetadataTab extends AbstractMarsImageMetadataTab<Molecule, MarsImageMetadata, MoleculeArchiveProperties, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
+public class DefaultMarsImageMetadataTab extends AbstractMarsImageMetadataTab<MarsImageMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
 	
 	public DefaultMarsImageMetadataTab() {
 		super();

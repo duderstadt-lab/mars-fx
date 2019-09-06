@@ -1,6 +1,8 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
-public class DefaultMoleculePropertiesPane extends AbstractMoleculePropertiesPane {
+import de.mpg.biochem.mars.molecule.Molecule;
+
+public class DefaultMoleculePropertiesPane extends AbstractMoleculePropertiesPane<Molecule> {
 	public DefaultMoleculePropertiesPane() {
 		super();
 	}

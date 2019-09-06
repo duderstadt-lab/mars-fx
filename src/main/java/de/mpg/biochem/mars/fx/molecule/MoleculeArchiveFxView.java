@@ -61,7 +61,7 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 
 		d.setName(archive.getName());
 
-		MoleculeArchiveFxFrame moleculeFrame = new MoleculeArchiveFxFrame(archive, moleculeArchiveService);
+		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, moleculeArchiveService);
 		moleculeFrame.init();
 	}
 

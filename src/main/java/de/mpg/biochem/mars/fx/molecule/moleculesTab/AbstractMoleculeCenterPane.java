@@ -19,7 +19,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane<Molecule> {
+public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements MoleculeSubPane<M> {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
@@ -27,9 +27,9 @@ public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane<Mole
 	private BorderPane dataTableContainer;
 	private PlotPane plot;
 	
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
-	private Molecule molecule;
+	private M molecule;
 	
 	public AbstractMoleculeCenterPane() {
 		tabPane = new TabPane();
@@ -87,7 +87,11 @@ public abstract class AbstractMoleculeCenterPane implements MoleculeSubPane<Mole
 		return tabPane;
 	}
 	
-   public void setMolecule(Molecule molecule) {
+	public void setArchive(MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+   public void setMolecule(M molecule) {
 		this.molecule = molecule;
 		loadDataTable();
 		loadPlot();

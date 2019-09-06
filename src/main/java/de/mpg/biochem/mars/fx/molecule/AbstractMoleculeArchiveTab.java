@@ -9,9 +9,9 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 
-public abstract class AbstractMoleculeArchiveTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties> implements MoleculeArchiveTab<M,I,P> {
+public abstract class AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
 	
-	protected MoleculeArchive<M,I,P> archive;
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMoleculeArchiveTab() {
 		super();
@@ -21,7 +21,7 @@ public abstract class AbstractMoleculeArchiveTab<M extends Molecule, I extends M
     
     public abstract ArrayList<Menu> getMenus();
 
-	public void setArchive(MoleculeArchive<M,I,P> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 	

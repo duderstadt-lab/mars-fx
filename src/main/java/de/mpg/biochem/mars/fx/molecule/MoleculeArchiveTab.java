@@ -8,7 +8,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.scene.control.Menu;
 
-public interface MoleculeArchiveTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties> extends ViewableNode {
-	public void setArchive(MoleculeArchive<M, I, P> archive);
+public interface MoleculeArchiveTab extends ViewableNode {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive);
 	public ArrayList<Menu> getMenus();
 }

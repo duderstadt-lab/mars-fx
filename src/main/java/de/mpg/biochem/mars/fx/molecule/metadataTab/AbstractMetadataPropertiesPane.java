@@ -14,7 +14,6 @@ import com.jfoenix.controls.JFXTabPane;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEventHandler;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveFxTabs;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;

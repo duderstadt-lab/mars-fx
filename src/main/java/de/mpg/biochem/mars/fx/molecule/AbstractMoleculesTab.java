@@ -26,12 +26,12 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsImageMetadata, P extends MoleculeArchiveProperties, C extends MoleculeSubPane<?>, O extends MoleculeSubPane<?>> extends AbstractMoleculeArchiveTab<M,I,P> {
+public abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane<? extends Molecule>, O extends MoleculeSubPane<? extends Molecule>> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane splitPane;
 	protected C moleculeCenterPane;
 	protected O moleculePropertiesPane;
 	
-	protected MoleculeArchive<M, I, P> archive;
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	protected M molecule;
 	
@@ -58,6 +58,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
 		splitItems.add(moleculePropertiesPane.getNode());	
 	}
 	
+	@SuppressWarnings("unchecked")
 	protected Node buildMoleculeTableIndex() {
 		moleculeIndexTable = new TableView<MoleculeIndexRow>();
     	
@@ -93,7 +94,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
                 if (newMoleculeIndexRow != null) {
-                	molecule = archive.get(newMoleculeIndexRow.getUID());
+                	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
                 	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
@@ -160,10 +161,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
     		archive.put(molecule);
     }
     
-    public void update() {
+    @SuppressWarnings("unchecked")
+	public void update() {
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
     		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
-    		molecule = archive.get(newMoleculeIndexRow.getUID());
+    		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
         	
     		//Update center pane and properties pane.
         	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
@@ -179,7 +181,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, I extends MarsIma
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive<M, I, P> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		loadData();
 	}
