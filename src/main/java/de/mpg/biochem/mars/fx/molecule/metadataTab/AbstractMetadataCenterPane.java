@@ -57,7 +57,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/imageMetadataTab/MetaTablesPane.css");
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/metadataTab/MetaTablesPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		

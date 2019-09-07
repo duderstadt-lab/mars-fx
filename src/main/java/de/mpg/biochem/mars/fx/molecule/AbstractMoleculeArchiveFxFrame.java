@@ -172,8 +172,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         tabsContainer.setTabMaxHeight(tabWidth);
         tabsContainer.setRotateGraphic(true);
     	
-        buildTabs();
         buildMenuBar();
+        buildTabs();
         
         stackPane = new StackPane();
         stackPane.getChildren().add(tabsContainer);
@@ -190,8 +190,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         settingsTab = new SettingsTab();
         
         imageMetadataTab = createImageMetadataTab();
-        
-        /*
         moleculesTab = createMoleculesTab();
 
         tabsContainer.getSelectionModel().selectedItemProperty().addListener(
@@ -200,29 +198,37 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			@Override
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				if (newValue == dashboardTab) {
+    					if (dashboardTab.getMenus() == null)
+    						System.out.println("dashboard");
     					updateMenus(dashboardTab.getMenus());
     				} else if (newValue == imageMetadataTab) {
+    					if (imageMetadataTab.getMenus() == null)
+    						System.out.println("imageMetadataTab");
     					updateMenus(imageMetadataTab.getMenus());
     				} else if (newValue == moleculesTab) {
+    					if (moleculesTab.getMenus() == null)
+    						System.out.println("moleculesTab");
     					updateMenus(moleculesTab.getMenus());
     				} else if (newValue == commentsTab) {
+    					if (commentsTab.getMenus() == null)
+    						System.out.println("commentsTab");
     					updateMenus(commentsTab.getMenus());
     				} else if (newValue == settingsTab) {
+    					if (settingsTab.getMenus() == null)
+    						System.out.println("settingsTab");
     					updateMenus(settingsTab.getMenus());
     				}
     			}
     		});
-         */
         
         tabsContainer.getTabs().add(dashboardTab);
         tabsContainer.getTabs().add((Tab)imageMetadataTab);
-        //tabsContainer.getTabs().add((Tab)moleculesTab);
+        tabsContainer.getTabs().add((Tab)moleculesTab);
         tabsContainer.getTabs().add(commentsTab);
         tabsContainer.getTabs().add(settingsTab);
     }
 	
 	protected void buildMenuBar() {
-		// File actions
 		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
@@ -240,7 +246,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		borderPane.setTop(menuBar);
 	}
 	
-	public MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	
@@ -262,7 +268,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		frame.dispose();
 	}
 
-	public void updateMenus(ArrayList<Menu> menus) {
+	public void updateMenus(ArrayList<Menu> menus) {	
     	while (menuBar.getMenus().size() > 1)
     		menuBar.getMenus().remove(1);
     	if(menus.size() > 0) {
@@ -296,18 +302,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	 				 	try {
 							archive.save();
 						} catch (IOException e1) {
-							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 	 				 } else {
-	 					 //the archive name has changed... so let's check with the user about the new name...
+	 				    //the archive name has changed... so let's check with the user about the new name...
 						saveAs(archive.getFile());
 	 				 }
 	 			 } else {
 	 				saveAs(new File(archive.getName()));
 	 			 }
         	 } catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			 }
  			updateAll();
@@ -323,9 +327,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	    if (fileName.endsWith(".store"))
     	    	fileName = fileName.substring(0, fileName.length() - 5);
     	    
-    	    System.out.println("fN" + fileName);
-    	    System.out.println("AP" + archive.getFile().getParentFile().toString());
-    	    
     	    try {
  				if (archive.getFile() != null) {
 					saveAs(new File(archive.getFile().getParentFile(), fileName));
@@ -333,10 +334,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
  					saveAs(new File(System.getProperty("user.home"), fileName));
  				}
     	    } catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-				updateAll();
+			updateAll();
     	}
     }
     

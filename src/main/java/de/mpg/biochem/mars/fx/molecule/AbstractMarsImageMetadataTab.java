@@ -145,10 +145,6 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
         return borderPane;
 	}
 	
-	public Node getNode() {
-		return splitPane;
-	}
-	
 	public void loadData() {
     	metaRowList.clear();
 
