@@ -24,7 +24,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	protected BorderPane logContainer;
 	protected LogPane logPane;
 	
-	protected MoleculeArchive<Molecule,I,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	protected I imageMetadata;
 	
@@ -78,7 +78,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		logPane.setMarkdown(imageMetadata.getLog());
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule,I,MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 

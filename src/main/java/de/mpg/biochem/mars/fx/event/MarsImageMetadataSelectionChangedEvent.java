@@ -11,7 +11,7 @@ public class MarsImageMetadataSelectionChangedEvent extends MarsImageMetadataEve
 		 */
 		private static final long serialVersionUID = 1L;
 
-		public static final EventType<MarsImageMetadataSelectionChangedEvent> MARS_IMAGE_METADATA_SELECTION_CHANGED = new EventType<>(MARS_IMAGE_METADATA_EVENT, "MarsImageMetadataSelectionChanged");
+		public static final EventType<MarsImageMetadataEvent> MARS_IMAGE_METADATA_SELECTION_CHANGED = new EventType<>(MARS_IMAGE_METADATA_EVENT, "MARS_IMAGE_METADATA_SELECTION_CHANGED");
 
 	    private final MarsImageMetadata marsImageMetadata;
 

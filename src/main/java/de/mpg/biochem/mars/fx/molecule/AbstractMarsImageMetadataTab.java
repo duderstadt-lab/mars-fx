@@ -144,14 +144,6 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
         
         return borderPane;
 	}
-	
-	public void loadData() {
-    	metaRowList.clear();
-
-    	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
-        	metaRowList.add(new MetaIndexRow(index));
-        }
-	}
     
     public void saveCurrentRecord() {
     	if (marsImageMetadata != null)
@@ -176,9 +168,22 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
-		loadData();
+		metaRowList.clear();
+
+    	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
+        	metaRowList.add(new MetaIndexRow(index));
+        }
+    	metadataCenterPane.setArchive(archive);
+    	metadataPropertiesPane.setArchive(archive);
+    	update();
 	}
 	
+	@Override
+	public Node getNode() {
+		return splitPane;
+	}
+	
+	@Override
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
 	}

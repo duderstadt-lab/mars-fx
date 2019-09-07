@@ -226,6 +226,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         tabsContainer.getTabs().add((Tab)moleculesTab);
         tabsContainer.getTabs().add(commentsTab);
         tabsContainer.getTabs().add(settingsTab);
+        
+        dashboardTab.setArchive(archive);
+        imageMetadataTab.setArchive(archive);
+        moleculesTab.setArchive(archive);
+        commentsTab.setArchive(archive);
+        settingsTab.setArchive(archive);
     }
 	
 	protected void buildMenuBar() {
@@ -275,10 +281,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     		for (Menu menu : menus)
     			menuBar.getMenus().add(menu);
     	}
-    }
-    
-    public Node getNode() {
-    	return borderPane;
     }
     
     private void handleClose() {

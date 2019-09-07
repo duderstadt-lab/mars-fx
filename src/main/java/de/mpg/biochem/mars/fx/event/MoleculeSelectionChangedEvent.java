@@ -10,7 +10,7 @@ public class MoleculeSelectionChangedEvent extends MoleculeEvent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeSelectionChangedEvent> MOLECULE_SELECTION_CHANGED = new EventType<>(MOLECULE_EVENT, "MoleculeSelectionChanged");
+	public static final EventType<MoleculeEvent> MOLECULE_SELECTION_CHANGED = new EventType<>(MOLECULE_EVENT, "MOLECULE_SELECTION_CHANGED");
 
     private final Molecule molecule;
 

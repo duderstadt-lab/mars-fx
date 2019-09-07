@@ -1,6 +1,9 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
+
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEventHandler;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -27,7 +30,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 	private BorderPane dataTableContainer;
 	private PlotPane plot;
 	
-	protected MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private M molecule;
 	
@@ -58,6 +61,14 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
+		
+		tabPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
+		    @SuppressWarnings("unchecked")
+			@Override
+		    public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		        setMolecule((M) molecule);
+		    }
+		});
 	}
 	
 	public void loadDataTable() {
@@ -87,7 +98,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		return tabPane;
 	}
 	
-	public void setArchive(MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 	

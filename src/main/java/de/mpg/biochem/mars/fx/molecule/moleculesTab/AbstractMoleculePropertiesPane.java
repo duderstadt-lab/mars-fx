@@ -29,7 +29,7 @@ import javafx.scene.layout.StackPane;
 
 public abstract class AbstractMoleculePropertiesPane<M extends Molecule> implements MoleculeSubPane<M> {
 	
-	protected StackPane stackPane;
+	protected StackPane rootPane;
 	protected JFXTabPane tabsContainer;
 	protected Tab generalTab;
 	protected AnchorPane generalTabContainer;
@@ -40,7 +40,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	protected MoleculeGeneralTabController moleculeGeneralTabController;
 	protected MoleculePropertiesTable moleculePropertiesTable;
 	
-	protected MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	protected M molecule;
 	
@@ -48,10 +48,10 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
     public static int lastSelectedTabIndex = 0;
 	
 	public AbstractMoleculePropertiesPane() {
-		stackPane = new StackPane();
-		stackPane.prefWidth(220.0);
-		stackPane.prefHeight(220.0);
-		stackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeOverview.css");
+		rootPane = new StackPane();
+		rootPane.prefWidth(220.0);
+		rootPane.prefHeight(220.0);
+		rootPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeOverview.css");
 		
 		tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(350.0);
@@ -64,16 +64,16 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabsContainer.setTabMaxHeight(30.0);
         tabsContainer.disableAnimationProperty();
         
-        stackPane.getChildren().add(tabsContainer);
-        /*
-        stackPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
+        rootPane.getChildren().add(tabsContainer);
+        
+        rootPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
 		    @SuppressWarnings("unchecked")
 			@Override
 		    public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		        setMolecule((M) molecule);
 		    }
 		});
-		*/
+		
 		configureTabs();
    }
 	
@@ -95,6 +95,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         generalTabContainer.minWidth(0.0);
         generalTabContainer.prefHeight(250.0);
         generalTabContainer.prefWidth(220.0);
+        generalTab.setContent(generalTabContainer);
         
         try {
         	FXMLLoader loader = new FXMLLoader();
@@ -121,7 +122,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 
     	propertiesTab = new Tab();
         propertiesTab.setText("");
-        propertiesTab.setGraphic(tabPane);
+        propertiesTab.setGraphic(propertiesTabPane);
         propertiesTab.closableProperty().set(false);
         
         propertiesTabContainer = new AnchorPane();
@@ -135,17 +136,21 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         AnchorPane.setBottomAnchor(moleculePropertiesTable.getNode(), 0.0);
         AnchorPane.setRightAnchor(moleculePropertiesTable.getNode(), 0.0);
         AnchorPane.setLeftAnchor(moleculePropertiesTable.getNode(), 0.0);
-
+        propertiesTab.setContent(propertiesTabContainer);
+        
         tabsContainer.getTabs().add(generalTab);
         tabsContainer.getTabs().add(propertiesTab);
 	}
 	
 	public Node getNode() {
-		return stackPane;
+		return rootPane;
 	}
 	
-	public void setArchive(MoleculeArchive<M, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+		
+		moleculeGeneralTabController.setArchive(archive);
+		moleculePropertiesTable.setArchive(archive);
 	}
    
    public void setMolecule(M molecule) {

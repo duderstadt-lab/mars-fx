@@ -384,6 +384,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		commentEditor.setArchive(archive);
 	}
 	
+	public Node getNode() {
+		return borderPane;
+	}
+	
 	public ArrayList<Menu> getMenus() {
 		return menus;
 	}

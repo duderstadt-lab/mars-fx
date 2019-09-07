@@ -184,6 +184,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	}
     }
 	
+    @Override
 	public Node getNode() {
 		return splitPane;
 	}
@@ -191,17 +192,17 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
-		loadData();
-	}
-    
-    public void loadData() {
-    	moleculeRowList.clear();
+		moleculeRowList.clear();
 
     	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
         	moleculeRowList.add(new MoleculeIndexRow(index));
         }
+    	moleculeCenterPane.setArchive(archive);
+    	moleculePropertiesPane.setArchive(archive);
+    	update();
 	}
     
+    @Override
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
 	}

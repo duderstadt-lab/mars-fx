@@ -3,6 +3,7 @@ package de.mpg.biochem.mars.fx.molecule;
 import java.util.ArrayList;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
@@ -19,6 +20,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	setContent(borderPane);
     }
+    
+    public Node getNode() {
+		return borderPane;
+	}
     
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();

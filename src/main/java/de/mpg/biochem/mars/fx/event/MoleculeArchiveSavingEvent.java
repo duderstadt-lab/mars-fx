@@ -10,7 +10,7 @@ public class MoleculeArchiveSavingEvent extends MoleculeArchiveEvent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveSavingEvent> MOLECULE_ARCHIVE_SAVING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MoleculeArchiveSaving");
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVING");
 
     private final MoleculeArchive<?,?,?> archive;
 

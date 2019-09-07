@@ -7,7 +7,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 public interface MoleculeSubPane<M extends Molecule> extends ViewableNode {
-	public void setArchive(MoleculeArchive<M,MarsImageMetadata,MoleculeArchiveProperties> archive);
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive);
 	public void setMolecule(M molecule);
 }
 

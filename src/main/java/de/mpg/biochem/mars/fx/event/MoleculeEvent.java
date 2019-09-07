@@ -9,7 +9,7 @@ public abstract class MoleculeEvent extends Event {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final EventType<MoleculeEvent> MOLECULE_EVENT = new EventType<>(ANY);
+	public static final EventType<MoleculeEvent> MOLECULE_EVENT = new EventType<>(ANY, "MOLECULE_EVENT");
 
     public MoleculeEvent(EventType<? extends Event> eventType) {
         super(eventType);

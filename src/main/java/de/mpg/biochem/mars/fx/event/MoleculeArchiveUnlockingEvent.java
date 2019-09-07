@@ -10,7 +10,7 @@ public class MoleculeArchiveUnlockingEvent extends MoleculeArchiveEvent {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveUnlockingEvent> MOLECULE_ARCHIVE_UNLOCKING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MoleculeArchiveUnlocking");
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_UNLOCKING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_UNLOCKING");
 
     private final MoleculeArchive<?,?,?> archive;
 

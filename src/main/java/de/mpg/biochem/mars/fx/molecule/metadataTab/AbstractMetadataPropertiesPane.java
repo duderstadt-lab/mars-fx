@@ -52,7 +52,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	protected double tabWidth = 60.0;
 	protected int lastSelectedTabIndex = 0;
 	
-	protected MoleculeArchive<Molecule,I,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	protected I marsImageMetadata;
 	
@@ -105,6 +105,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         generalTabContainer.minWidth(0.0);
         generalTabContainer.prefHeight(250.0);
         generalTabContainer.prefWidth(220.0);
+        generalTab.setContent(generalTabContainer);
         
         try {
         	FXMLLoader loader = new FXMLLoader();
@@ -131,7 +132,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 
     	propertiesTab = new Tab();
         propertiesTab.setText("");
-        propertiesTab.setGraphic(tabPane);
+        propertiesTab.setGraphic(propertiesTabPane);
         propertiesTab.closableProperty().set(false);
         
         propertiesTabContainer = new AnchorPane();
@@ -145,13 +146,17 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         AnchorPane.setBottomAnchor(metadataPropertiesTable.getNode(), 0.0);
         AnchorPane.setRightAnchor(metadataPropertiesTable.getNode(), 0.0);
         AnchorPane.setLeftAnchor(metadataPropertiesTable.getNode(), 0.0);
+        propertiesTab.setContent(propertiesTabContainer);
 
         tabsContainer.getTabs().add(generalTab);
         tabsContainer.getTabs().add(propertiesTab);
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule,I,MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+		
+		metadataGeneralTabController.setArchive(archive);
+		metadataPropertiesTable.setArchive(archive);
 	}
 
 	public void setMetadata(I marsImageMetadata) {

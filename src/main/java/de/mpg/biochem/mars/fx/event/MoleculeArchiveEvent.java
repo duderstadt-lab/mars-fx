@@ -9,7 +9,7 @@ public abstract class MoleculeArchiveEvent extends Event {
 	 * , I extends MarsImageMetadata, P extends MoleculeArchiveProperties
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_EVENT = new EventType<>(ANY);
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_EVENT = new EventType<>(ANY, "MOLECULE_ARCHIVE_EVENT");
 
     public MoleculeArchiveEvent(EventType<? extends Event> eventType) {
         super(eventType);
