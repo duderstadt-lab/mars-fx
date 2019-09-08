@@ -19,6 +19,8 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -26,6 +28,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -168,6 +171,11 @@ public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 		this.molecule = molecule;
 		update();
 	}
+	
+    @Override
+    public void handle(MoleculeEvent event) {
+        event.invokeHandler(this);
+    }
 
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
@@ -180,5 +188,17 @@ public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 		//For the moment this is not needed
 		//and the Pane is only in the fxml??
 		return null;
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		// TODO Auto-generated method stub
+		
 	}
 }

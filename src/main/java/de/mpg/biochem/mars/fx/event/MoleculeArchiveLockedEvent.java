@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.fx.event;
 
+import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveTab;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.event.EventType;
 
@@ -20,7 +21,7 @@ public class MoleculeArchiveLockedEvent extends MoleculeArchiveEvent {
     }
 
     @Override
-    public void invokeHandler(MoleculeArchiveEventHandler handler) {
+    public void invokeHandler(MoleculeArchiveTab handler) {
         handler.onMoleculeArchiveLockedEvent(archive);
     }
 

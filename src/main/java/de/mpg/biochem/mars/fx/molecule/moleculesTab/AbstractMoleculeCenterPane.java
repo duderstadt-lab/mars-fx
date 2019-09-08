@@ -3,7 +3,6 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEventHandler;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -13,6 +12,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -62,13 +62,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
-		tabPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
-		    @SuppressWarnings("unchecked")
-			@Override
-		    public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		        setMolecule((M) molecule);
-		    }
-		});
+		tabPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 	}
 	
 	public void loadDataTable() {
@@ -94,6 +88,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		setMolecule((M) molecule);
+	}
+	
 	public Node getNode() {
 		return tabPane;
 	}
@@ -108,4 +107,15 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		loadPlot();
 		loadSegmentTables();
 	}
+   
+   @Override
+   public void handle(MoleculeEvent event) {
+	   event.invokeHandler(this);
+   }
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	} 
 }

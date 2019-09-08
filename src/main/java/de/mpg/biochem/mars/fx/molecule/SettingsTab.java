@@ -11,6 +11,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
@@ -55,5 +56,46 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		this.archive = archive;
 		
 		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+
+	@Override
+	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
 	}
 }

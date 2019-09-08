@@ -13,7 +13,6 @@ import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
-import de.mpg.biochem.mars.fx.event.MarsImageMetadataEventHandler;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
@@ -75,13 +74,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         
         stackPane.getChildren().add(tabsContainer);
         
-        stackPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, new MarsImageMetadataEventHandler() { 
-		    @SuppressWarnings("unchecked")
-			@Override
-		    public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		        setMetadata((I) marsImageMetadata);
-		    }
-		});
+        stackPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
 		
 		configureTabs();
 	}
@@ -169,4 +162,18 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	public Node getNode() {
 		return stackPane;
 	}
+	
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+        setMetadata((I) marsImageMetadata);
+    }
+	
+	@Override
+    public void handle(MarsImageMetadataEvent event) {
+	   event.invokeHandler(this);
+    } 
 }

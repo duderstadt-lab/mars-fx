@@ -10,13 +10,13 @@ import java.net.URL;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.event.MoleculeEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -66,13 +66,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         
         rootPane.getChildren().add(tabsContainer);
         
-        rootPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, new MoleculeEventHandler() { 
-		    @SuppressWarnings("unchecked")
-			@Override
-		    public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		        setMolecule((M) molecule);
-		    }
-		});
+        rootPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		
 		configureTabs();
    }
@@ -146,6 +140,15 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 		return rootPane;
 	}
 	
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+        setMolecule((M) molecule);
+    }
+	
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 		
@@ -158,5 +161,10 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 		
 		moleculeGeneralTabController.setMolecule(molecule);
 		moleculePropertiesTable.setMolecule(molecule);
-	}
+   }
+   
+   @Override
+   public void handle(MoleculeEvent event) {
+	   event.invokeHandler(this);
+   } 
 }

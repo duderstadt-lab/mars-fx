@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.fx.event;
 
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.EventType;
 
@@ -20,7 +21,7 @@ public class MoleculeSelectionChangedEvent extends MoleculeEvent {
     }
 
     @Override
-    public void invokeHandler(MoleculeEventHandler handler) {
+    public void invokeHandler(MoleculeSubPane<?> handler) {
         handler.onMoleculeSelectionChangedEvent(molecule);
     }
 }

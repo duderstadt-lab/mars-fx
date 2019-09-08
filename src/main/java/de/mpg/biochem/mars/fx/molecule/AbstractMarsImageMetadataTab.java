@@ -13,6 +13,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -51,7 +52,9 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		splitPane = new SplitPane();
 		ObservableList<Node> splitItems = splitPane.getItems();
 		
-		splitItems.add(buildMetadataTableIndex());
+		Node metadataTableIndexContainer = buildMetadataTableIndex();
+		SplitPane.setResizableWithParent(metadataTableIndexContainer, Boolean.FALSE);
+		splitItems.add(metadataTableIndexContainer);
 		
 		metadataCenterPane = createMetadataCenterPane();
 		splitItems.add(metadataCenterPane.getNode());
@@ -211,4 +214,45 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     		return archive.getImageMetadataTagList(archive.getImageMetadataUIDAtIndex(index));
     	}
     }
+
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+
+	@Override
+	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.fx.event;
 
+import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import javafx.event.Event;
 import javafx.event.EventType;
 
@@ -15,6 +16,5 @@ public abstract class MarsImageMetadataEvent extends Event {
         super(eventType);
     }
 
-    public abstract void invokeHandler(MarsImageMetadataEventHandler handler);
-
+    public abstract void invokeHandler(MetadataSubPane<?> handler);
 }

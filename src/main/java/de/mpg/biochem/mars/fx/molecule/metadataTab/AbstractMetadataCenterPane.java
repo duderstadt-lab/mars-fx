@@ -2,12 +2,13 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
-import de.mpg.biochem.mars.fx.event.MarsImageMetadataEventHandler;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -61,13 +62,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
-		tabPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, new MarsImageMetadataEventHandler() {
-		    @SuppressWarnings("unchecked")
-			@Override
-		    public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		        setMetadata((I)marsImageMetadata);
-		    }
-		});
+		tabPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
 	}
 	
 	protected void loadDataTable() {
@@ -89,7 +84,21 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		loadLog();
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+		setMetadata((I)marsImageMetadata);
+	}
+	
 	public Node getNode() {
 		return tabPane;
 	}
+	
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+	
+	@Override
+    public void handle(MarsImageMetadataEvent event) {
+	   event.invokeHandler(this);
+    } 
 }

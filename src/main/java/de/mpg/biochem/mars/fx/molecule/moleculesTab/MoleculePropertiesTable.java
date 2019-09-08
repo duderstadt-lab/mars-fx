@@ -2,6 +2,7 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -9,6 +10,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -180,9 +182,26 @@ public class MoleculePropertiesTable implements MoleculeSubPane<Molecule> {
     		}
     	}
     }
+    
+    @Override
+    public void handle(MoleculeEvent event) {
+        event.invokeHandler(this);
+    }
 
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		// TODO Auto-generated method stub
+		
 	}
 }

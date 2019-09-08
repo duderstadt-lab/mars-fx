@@ -2,6 +2,7 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import java.util.ArrayList;
 
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -46,6 +47,20 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
     
     public abstract ArrayList<Menu> getMenus();
 
+    public abstract void onMoleculeArchiveLockingEvent(MoleculeArchive<?,?,?> archive);
+    public abstract void onMoleculeArchiveLockedEvent(MoleculeArchive<?,?,?> archive);
+    
+    public abstract void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?,?,?> archive);
+    public abstract void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?,?,?> archive);
+    
+    public abstract void onMoleculeArchiveSavingEvent(MoleculeArchive<?,?,?> archive);
+    public abstract void onMoleculeArchiveSavedEvent(MoleculeArchive<?,?,?> archive);
+
+    @Override
+    public void handle(MoleculeArchiveEvent event) {
+        event.invokeHandler(this);
+    }
+    
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}

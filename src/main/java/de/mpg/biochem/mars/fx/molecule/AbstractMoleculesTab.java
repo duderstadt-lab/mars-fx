@@ -6,6 +6,8 @@ import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -17,6 +19,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -27,8 +30,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane<? extends Molecule>, O extends MoleculeSubPane<? extends Molecule>> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
-	protected SplitPane splitPane;
+public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane<? extends Molecule>, O extends MoleculeSubPane<? extends Molecule>> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
+	protected SplitPane rootPane;
 	protected C moleculeCenterPane;
 	protected O moleculePropertiesPane;
 	
@@ -51,19 +54,24 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
         
         setIcon(moleculeIcon);
 		
-		splitPane = new SplitPane();
-		ObservableList<Node> splitItems = splitPane.getItems();
+		rootPane = new SplitPane();
+		ObservableList<Node> splitItems = rootPane.getItems();
 		
-		splitItems.add(buildMoleculeTableIndex());
+		Node moleculeTableIndexContainer = buildMoleculeTableIndex();
+		SplitPane.setResizableWithParent(moleculeTableIndexContainer, Boolean.FALSE);
+		splitItems.add(moleculeTableIndexContainer);
 		
 		moleculeCenterPane = createMoleculeCenterPane();
 		splitItems.add(moleculeCenterPane.getNode());
 		
 		moleculePropertiesPane = createMoleculePropertiesPane();
+		moleculePropertiesPane.getNode().maxWidth(220);
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
-		setContent(splitPane);
+		rootPane.addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
+		
+		setContent(rootPane);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -168,26 +176,16 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	if (molecule != null)
     		archive.put(molecule);
     }
-    
-    @SuppressWarnings("unchecked")
-	public void update() {
-    	if (archive.getNumberOfImageMetadataRecords() > 0) {
-    		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
-    		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
-        	
-    		//Update center pane and properties pane.
-        	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
-        	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
-    		Platform.runLater(() -> {
-    			moleculeIndexTable.requestFocus();
-    		});
-    	}
-    }
 	
     @Override
 	public Node getNode() {
-		return splitPane;
+		return rootPane;
 	}
+    
+    @Override
+    public void fireEvent(Event event) {
+    	getNode().fireEvent(event);
+    }
 
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
@@ -199,7 +197,6 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
         }
     	moleculeCenterPane.setArchive(archive);
     	moleculePropertiesPane.setArchive(archive);
-    	update();
 	}
     
     @Override
@@ -234,4 +231,45 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     		return archive.getImageMetadataUIDforMolecule(archive.getUIDAtIndex(index));
     	}
     }
+
+	@Override
+	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		saveCurrentRecord();
+	}
+	
+	@Override
+	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// Nothing to do...
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		if (archive.getNumberOfMolecules() > 0) {
+    		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
+    		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
+        	
+    		//Update center pane and properties pane.
+        	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+        	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+    		Platform.runLater(() -> {
+    			moleculeIndexTable.requestFocus();
+    		});
+    	}
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// Unlocking process is done...
+	}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+		saveCurrentRecord();
+	}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// Saving process is done...
+	}
 }

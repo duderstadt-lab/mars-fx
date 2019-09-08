@@ -70,6 +70,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
+import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.util.Action;
@@ -347,5 +349,15 @@ public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+	}
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+	}
+
+	@Override
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		// TODO Auto-generated method stub
 	}
 }

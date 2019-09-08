@@ -7,6 +7,7 @@ import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -18,6 +19,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.collections.transformation.SortedList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -198,5 +200,22 @@ public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadat
 	public void setMetadata(MarsImageMetadata meta) {
 		this.meta = meta;
     	loadData();
+	}
+
+	@Override
+	public void handle(MarsImageMetadataEvent event) {
+		event.invokeHandler(this);
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+		// TODO Auto-generated method stub
+		
 	}
 }

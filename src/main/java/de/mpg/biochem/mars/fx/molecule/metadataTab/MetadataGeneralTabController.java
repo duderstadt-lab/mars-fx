@@ -19,6 +19,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -26,6 +27,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -141,5 +143,22 @@ public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMe
 	public void setMetadata(MarsImageMetadata marsImageMetadata) {
 		this.marsImageMetadata = marsImageMetadata;
 		update();
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void handle(MarsImageMetadataEvent event) {
+		event.invokeHandler(this);
 	}
 }

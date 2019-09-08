@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.event;
 
+import de.mpg.biochem.mars.fx.molecule.MarsImageMetadataTab;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.EventType;
@@ -21,7 +23,7 @@ public class MarsImageMetadataSelectionChangedEvent extends MarsImageMetadataEve
 	    }
 
 	    @Override
-	    public void invokeHandler(MarsImageMetadataEventHandler handler) {
+	    public void invokeHandler(MetadataSubPane<?> handler) {
 	        handler.onMarsImageMetadataSelectionChangedEvent(marsImageMetadata);
 	    }
 	}

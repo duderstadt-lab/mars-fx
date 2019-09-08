@@ -13,6 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -390,5 +391,47 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	
 	public ArrayList<Menu> getMenus() {
 		return menus;
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
+		// TODO Auto-generated method stub
+		
 	}
 }

@@ -15,6 +15,7 @@ import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
 import cern.extjfx.chart.data.*;
 import cern.extjfx.chart.data.DataReducingObservableList;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
@@ -26,6 +27,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -385,5 +387,22 @@ public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
 	@Override
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
+	}
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		// TODO Auto-generated method stub
+		
 	}
 }
