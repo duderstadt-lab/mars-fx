@@ -12,14 +12,13 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Tab;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractMoleculeArchiveTab extends Tab implements MoleculeArchiveTab {
 
     protected double tabWidth = 60.0;
-	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+    
+    protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
         Tab currentTab = (Tab) event.getTarget();
@@ -46,23 +45,42 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
 	}
     
     public abstract ArrayList<Menu> getMenus();
-
-    public abstract void onMoleculeArchiveLockingEvent(MoleculeArchive<?,?,?> archive);
-    public abstract void onMoleculeArchiveLockedEvent(MoleculeArchive<?,?,?> archive);
     
-    public abstract void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?,?,?> archive);
-    public abstract void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?,?,?> archive);
-    
-    public abstract void onMoleculeArchiveSavingEvent(MoleculeArchive<?,?,?> archive);
-    public abstract void onMoleculeArchiveSavedEvent(MoleculeArchive<?,?,?> archive);
+    @Override
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    	this.archive = archive;
+    }
 
     @Override
     public void handle(MoleculeArchiveEvent event) {
         event.invokeHandler(this);
+        event.consume();
     }
-    
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
+
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
 	}
 	
+	public abstract Node getNode();
+	
+	//Override any events below that should trigger a specific response.
+	
+	@Override
+	public void onMoleculeArchiveLockingEvent() {}
+
+	@Override
+	public void onMoleculeArchiveLockedEvent() {}
+
+	@Override
+	public void onMoleculeArchiveUnlockingEvent() {}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent() {}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent() {}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent() {}
 }

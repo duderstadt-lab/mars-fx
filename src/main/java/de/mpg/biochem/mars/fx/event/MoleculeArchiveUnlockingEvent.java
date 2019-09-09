@@ -1,7 +1,5 @@
 package de.mpg.biochem.mars.fx.event;
 
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveTab;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import javafx.event.EventType;
 
 public class MoleculeArchiveUnlockingEvent extends MoleculeArchiveEvent {
@@ -13,16 +11,13 @@ public class MoleculeArchiveUnlockingEvent extends MoleculeArchiveEvent {
 
 	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_UNLOCKING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_UNLOCKING");
 
-    private final MoleculeArchive<?,?,?> archive;
-
-    public MoleculeArchiveUnlockingEvent(MoleculeArchive<?,?,?> archive) {
+    public MoleculeArchiveUnlockingEvent() {
         super(MOLECULE_ARCHIVE_UNLOCKING);
-        this.archive = archive;
     }
 
     @Override
-    public void invokeHandler(MoleculeArchiveTab handler) {
-        handler.onMoleculeArchiveUnlockingEvent(archive);
+    public void invokeHandler(MoleculeArchiveEventHandler handler) {
+        handler.onMoleculeArchiveUnlockingEvent();
     }
 
 }

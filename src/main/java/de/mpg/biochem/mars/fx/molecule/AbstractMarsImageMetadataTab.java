@@ -13,7 +13,6 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -23,12 +22,14 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 
-public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, C extends MetadataSubPane<? extends MarsImageMetadata>, O extends MetadataSubPane<? extends MarsImageMetadata>> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
+public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
 	
-	protected SplitPane splitPane;
+	protected SplitPane rootPane;
 	protected C metadataCenterPane;
 	protected O metadataPropertiesPane;
 	
@@ -49,8 +50,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
         
 		setIcon(microscopeIcon);
 		
-		splitPane = new SplitPane();
-		ObservableList<Node> splitItems = splitPane.getItems();
+		rootPane = new SplitPane();
+		ObservableList<Node> splitItems = rootPane.getItems();
 		
 		Node metadataTableIndexContainer = buildMetadataTableIndex();
 		SplitPane.setResizableWithParent(metadataTableIndexContainer, Boolean.FALSE);
@@ -61,9 +62,11 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		
 		metadataPropertiesPane = createMetadataPropertiesPane();
 		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
-		splitItems.add(metadataPropertiesPane.getNode());	
+		splitItems.add(metadataPropertiesPane.getNode());
 		
-		setContent(splitPane);
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
+		
+		setContent(rootPane);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -153,22 +156,22 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     		archive.putImageMetadata(marsImageMetadata);
     }
 
-	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-		metaRowList.clear();
-
+    @Override
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    	super.onInitializeMoleculeArchiveEvent(archive);
+    	
+    	metaRowList.clear();
     	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
         	metaRowList.add(new MetaIndexRow(index));
         }
-    	metadataCenterPane.setArchive(archive);
-    	metadataPropertiesPane.setArchive(archive);
-    	onMoleculeArchiveUnlockedEvent(archive);
-	}
+    	metadataCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+    	metadataPropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+    	onMoleculeArchiveUnlockingEvent();
+    }
 	
 	@Override
 	public Node getNode() {
-		return splitPane;
+		return rootPane;
 	}
 	
 	@Override
@@ -201,37 +204,20 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     }
 
 	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveLockingEvent() {
 		saveCurrentRecord();
-	}
-
-	@Override
-	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveUnlockingEvent() {
 		if (archive.getNumberOfImageMetadataRecords() > 0) {
     		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
     		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
         	
         	//Update center pane and properties pane.
-        	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
-        	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+        	metadataCenterPane.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+        	metadataPropertiesPane.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
 			Platform.runLater(() -> {
 				//metaIndexTable.requestFocus();
 				metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
@@ -240,13 +226,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	}
 
 	@Override
-	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveSavingEvent() {
 		saveCurrentRecord();
-	}
-
-	@Override
-	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
 	}
 }

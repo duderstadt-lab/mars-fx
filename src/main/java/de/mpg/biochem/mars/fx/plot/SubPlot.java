@@ -13,17 +13,13 @@ import com.jfoenix.controls.JFXBadge;
 import cern.extjfx.chart.NumericAxis;
 import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
-import cern.extjfx.chart.data.*;
 import cern.extjfx.chart.data.DataReducingObservableList;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -31,14 +27,10 @@ import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.chart.XYChart.Data;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 
-public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
+public class SubPlot implements MoleculeSubPane, TableSubTab {
 	private NumericAxis globalXAxis, globalYAxis;
 	private LineChart<Number, Number> dummyChart;
 	private XYChartPane<Number, Number> chartPane;
@@ -49,7 +41,6 @@ public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
 	private double yMIN = 0;
 	private double yMAX = 100;
 	
-	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	private Molecule molecule;
 	private MarsTable table;
 	
@@ -85,6 +76,8 @@ public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
 		chartPane.setMaxWidth(Double.MAX_VALUE);		
 		//For the moment lets hide the legend
 		chartPane.setLegendVisible(false);
+		
+		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 	}
 	
 	private NumericAxis createAxis() {
@@ -369,13 +362,6 @@ public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
 		}
 		return null;
 	}
-	
-	@Override
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
-		datasetOptionsPane.setTable(getDataTable());
-		update();
-	}
 
 	@Override
 	public void setTable(MarsTable table) {
@@ -385,24 +371,20 @@ public class SubPlot implements MoleculeSubPane<Molecule>, TableSubTab {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	@Override
 	public void handle(MoleculeEvent event) {
 		event.invokeHandler(this);
+		event.consume();
 	}
 
 	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
+		getNode().fireEvent(event);
 	}
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		// TODO Auto-generated method stub
-		
+		this.molecule = molecule;
+		datasetOptionsPane.setTable(getDataTable());
+		update();
 	}
 }

@@ -2,12 +2,8 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -15,7 +11,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> implements MetadataSubPane<I> {
+public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> implements MetadataSubPane {
 	
 	protected TabPane tabPane;
 	protected BorderPane dataTableContainer;
@@ -25,9 +21,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	protected BorderPane logContainer;
 	protected LogPane logPane;
 	
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
-	
-	protected I imageMetadata;
+	protected I marsImageMetadata;
 	
 	public AbstractMetadataCenterPane() {
 		tabPane = new TabPane();
@@ -66,33 +60,27 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	}
 	
 	protected void loadDataTable() {
-		dataTableContainer.setCenter(new MarsTableFxView(imageMetadata.getDataTable()));
+		dataTableContainer.setCenter(new MarsTableFxView(marsImageMetadata.getDataTable()));
 	}
 	
 	protected void loadLog() {
-		logPane.setMarkdown(imageMetadata.getLog());
+		logPane.setMarkdown(marsImageMetadata.getLog());
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	public void setMetadata(I imageMetadata) {
-		//Need to fix this...
-		this.imageMetadata = imageMetadata;
+	@SuppressWarnings("unchecked")
+	@Override
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+		this.marsImageMetadata = (I) marsImageMetadata;
 		loadDataTable();
 		loadLog();
 	}
 	
-	@SuppressWarnings("unchecked")
-	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		setMetadata((I)marsImageMetadata);
-	}
-	
+	@Override
 	public Node getNode() {
 		return tabPane;
 	}
 	
+	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
@@ -100,5 +88,6 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	@Override
     public void handle(MarsImageMetadataEvent event) {
 	   event.invokeHandler(this);
+	   event.consume();
     } 
 }

@@ -2,35 +2,30 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
 
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MarsTableFxView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.table.MarsTable;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
 
-public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements MoleculeSubPane<M> {
+public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements MoleculeSubPane {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
 	
 	private BorderPane dataTableContainer;
 	private PlotPane plot;
-	
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private M molecule;
 	
@@ -62,15 +57,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
-		tabPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-	}
-	
-	public void loadDataTable() {
-		dataTableContainer.setCenter(new MarsTableFxView(molecule.getDataTable()));
-	}
-	
-	public void loadPlot() {
-		plot.setMolecule(molecule);
+		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 	}
 	
 	public void loadSegmentTables() {
@@ -90,32 +77,31 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 	
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		setMolecule((M) molecule);
+		this.molecule = (M) molecule;
+		
+		//Update DataTable
+		dataTableContainer.setCenter(new MarsTableFxView(molecule.getDataTable()));
+		
+		//Update Plot
+		plot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		
+		//Load SegmentTables
+		loadSegmentTables();
 	}
 	
+	@Override
 	public Node getNode() {
 		return tabPane;
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-	
-   public void setMolecule(M molecule) {
-		this.molecule = molecule;
-		loadDataTable();
-		loadPlot();
-		loadSegmentTables();
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
 	}
    
    @Override
    public void handle(MoleculeEvent event) {
 	   event.invokeHandler(this);
+	   event.consume();
    }
-
-	@Override
-	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
-	} 
 }

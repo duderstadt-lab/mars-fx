@@ -10,10 +10,13 @@ import java.net.URL;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
-//import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
@@ -27,7 +30,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 
-public abstract class AbstractMoleculePropertiesPane<M extends Molecule> implements MoleculeSubPane<M> {
+public abstract class AbstractMoleculePropertiesPane<M extends Molecule> implements MoleculeSubPane {
 	
 	protected StackPane rootPane;
 	protected JFXTabPane tabsContainer;
@@ -40,9 +43,9 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	protected MoleculeGeneralTabController moleculeGeneralTabController;
 	protected MoleculePropertiesTable moleculePropertiesTable;
 	
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
-	
 	protected M molecule;
+	
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
     private double tabWidth = 60.0;
     public static int lastSelectedTabIndex = 0;
@@ -66,8 +69,16 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         
         rootPane.getChildren().add(tabsContainer);
         
-        rootPane.addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-		
+        getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+        getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        		moleculeGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		moleculePropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        	}
+        });
+        
 		configureTabs();
    }
 	
@@ -136,35 +147,28 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabsContainer.getTabs().add(propertiesTab);
 	}
 	
+	@Override
 	public Node getNode() {
 		return rootPane;
 	}
 	
+	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-        setMolecule((M) molecule);
+		this.molecule = (M) molecule;
+		
+		moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     }
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-		
-		moleculeGeneralTabController.setArchive(archive);
-		moleculePropertiesTable.setArchive(archive);
-	}
-   
-   public void setMolecule(M molecule) {
-		this.molecule = molecule;
-		
-		moleculeGeneralTabController.setMolecule(molecule);
-		moleculePropertiesTable.setMolecule(molecule);
-   }
    
    @Override
    public void handle(MoleculeEvent event) {
 	   event.invokeHandler(this);
+	   event.consume();
    } 
 }

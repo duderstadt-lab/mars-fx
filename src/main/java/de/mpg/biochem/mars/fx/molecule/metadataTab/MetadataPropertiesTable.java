@@ -1,47 +1,28 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.controlsfx.control.textfield.CustomTextField;
-
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.event.Event;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadata> {
+public class MetadataPropertiesTable implements MetadataSubPane {
     
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
-	private MarsImageMetadata meta;
+	private MarsImageMetadata marsImageMetadata;
 	
-	private BorderPane borderPane;
+	private BorderPane rootPane;
 	
     private CustomTextField addParameterField;
     private TableView<ParameterRow> parameterTable;
@@ -83,7 +64,7 @@ public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadat
         		
                 setGraphic(removeButton);
                 removeButton.setOnAction(e -> {
-        			meta.removeParameter(pRow.getName());
+                	marsImageMetadata.removeParameter(pRow.getName());
         			loadData();
         		});
             }
@@ -132,7 +113,7 @@ public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadat
         );
 		addButton.setOnAction(e -> {
 			if (!addParameterField.getText().equals(""))
-			meta.setParameter(addParameterField.getText(), Double.NaN);
+				marsImageMetadata.setParameter(addParameterField.getText(), Double.NaN);
 			loadData();
 		});
 		
@@ -147,23 +128,25 @@ public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadat
                 "-fx-background-radius: 2em; "
         );
 
-        borderPane = new BorderPane();
+        rootPane = new BorderPane();
         Insets insets = new Insets(5);
         
-        borderPane.setCenter(parameterTable);
+        rootPane.setCenter(parameterTable);
         
-        borderPane.setBottom(addParameterField);
+        rootPane.setBottom(addParameterField);
         BorderPane.setMargin(addParameterField, insets);
+        
+        getNode().addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
     }
     
     public Node getNode() {
-    	return borderPane;
+    	return rootPane;
     }
     
     public void loadData() {
     	parameterRowList.clear();
 
-    	for (String parameter : meta.getParameters().keySet()) {
+    	for (String parameter : marsImageMetadata.getParameters().keySet()) {
         	parameterRowList.add(new ParameterRow(parameter));
         }
 	}
@@ -180,42 +163,33 @@ public class MetadataPropertiesTable implements MetadataSubPane<MarsImageMetadat
     	}
     	
     	public String getValue() {
-    		return String.valueOf(meta.getParameter(parameter));
+    		return String.valueOf(marsImageMetadata.getParameter(parameter));
     	}
     	
     	public void setValue(String value) {
     		try {
     			double num = Double.valueOf(value);
-    			meta.setParameter(getName(), num);
+    			marsImageMetadata.setParameter(getName(), num);
     		} catch (NumberFormatException e) {
     			//Do nothing for the moment...
     		}
     	}
     }
-    
-    public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-    	this.archive = archive;
-    }
-    
-	public void setMetadata(MarsImageMetadata meta) {
-		this.meta = meta;
-    	loadData();
-	}
 
 	@Override
 	public void handle(MarsImageMetadataEvent event) {
 		event.invokeHandler(this);
+		event.consume();
 	}
 
 	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
+		getNode().fireEvent(event);
 	}
 
 	@Override
 	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		// TODO Auto-generated method stub
-		
+		this.marsImageMetadata = marsImageMetadata;
+    	loadData();
 	}
 }

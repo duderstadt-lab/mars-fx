@@ -11,64 +11,23 @@ import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
-    protected BorderPane borderPane;
+    protected BorderPane rootPane;
 	
     public DashboardTab() {
     	super();
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
-    	borderPane = new BorderPane();
-    	borderPane.setCenter(new Label("Coming soon..."));
+    	rootPane = new BorderPane();
+    	rootPane.setCenter(new Label("Coming soon..."));
     	
-    	setContent(borderPane);
+    	setContent(rootPane);
     }
     
     public Node getNode() {
-		return borderPane;
+		return rootPane;
 	}
     
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
-	}
-
-	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
 	}
 }

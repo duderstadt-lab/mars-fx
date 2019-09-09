@@ -19,7 +19,10 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -34,10 +37,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMetadata> {
+public class MetadataGeneralTabController implements MetadataSubPane {
+
+	@FXML
+	private AnchorPane rootPane;
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -62,8 +69,6 @@ public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMe
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private MarsImageMetadata marsImageMetadata;
-	
 	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
 	private ListChangeListener<String> chipsListener;
@@ -79,9 +84,34 @@ public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMe
 		UIDLabel.setEditable(false);
 		
 		notesTextArea.setPromptText("none");
+		
+		getNode().addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        	}
+        });
     }
 	
-	public void update() {
+	@FXML
+	private void handleUIDClippy() {
+		ClipboardContent content = new ClipboardContent();
+	    content.putString(UIDLabel.getText());
+	    clipboard.setContent(content);
+	}
+
+	public Node getNode() {
+		return rootPane;
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+
+	@Override
+	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
 		if (chipsListener == null) {
 			chipsListener = new ListChangeListener<String>() {
 				@Override
@@ -121,44 +151,10 @@ public class MetadataGeneralTabController implements MetadataSubPane<MarsImageMe
 		notesTextArea.setText(marsImageMetadata.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
 	}
-	
-	@FXML
-	private void handleUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(UIDLabel.getText());
-	    clipboard.setContent(content);
-	}
-
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	public Node getNode() {
-		// TODO Auto-generated method stub
-		//For the moment this is not needed
-		//and the Pane is only in the fxml??
-		return null;
-	}
-
-	public void setMetadata(MarsImageMetadata marsImageMetadata) {
-		this.marsImageMetadata = marsImageMetadata;
-		update();
-	}
-
-	@Override
-	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	@Override
 	public void handle(MarsImageMetadataEvent event) {
 		event.invokeHandler(this);
+		event.consume();
 	}
 }

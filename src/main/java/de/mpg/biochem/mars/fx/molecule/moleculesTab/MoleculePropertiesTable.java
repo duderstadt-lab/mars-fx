@@ -21,12 +21,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class MoleculePropertiesTable implements MoleculeSubPane<Molecule> {
+public class MoleculePropertiesTable implements MoleculeSubPane {
     
-	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	private Molecule molecule;
 	
-	private BorderPane borderPane;
+	private BorderPane rootPane;
 	
     private CustomTextField addParameterField;
     private TableView<ParameterRow> parameterTable;
@@ -132,17 +131,19 @@ public class MoleculePropertiesTable implements MoleculeSubPane<Molecule> {
                 "-fx-background-radius: 2em; "
         );
 
-        borderPane = new BorderPane();
+        rootPane = new BorderPane();
         Insets insets = new Insets(5);
         
-        borderPane.setCenter(parameterTable);
+        rootPane.setCenter(parameterTable);
         
-        borderPane.setBottom(addParameterField);
+        rootPane.setBottom(addParameterField);
         BorderPane.setMargin(addParameterField, insets);
+        
+        getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
     }
     
     public Node getNode() {
-    	return borderPane;
+    	return rootPane;
     }
     
     public void loadData() {
@@ -152,11 +153,6 @@ public class MoleculePropertiesTable implements MoleculeSubPane<Molecule> {
         	parameterRowList.add(new ParameterRow(parameter));
         }
 	}
-    
-    public void setMolecule(Molecule molecule) {
-    	this.molecule = molecule;
-    	loadData();
-    }
     
     private class ParameterRow {
     	private String parameter;
@@ -186,22 +182,17 @@ public class MoleculePropertiesTable implements MoleculeSubPane<Molecule> {
     @Override
     public void handle(MoleculeEvent event) {
         event.invokeHandler(this);
+        event.consume();
     }
 
 	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
+		getNode().fireEvent(event);
 	}
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		// TODO Auto-generated method stub
-		
+		this.molecule = molecule;
+    	loadData();
 	}
 }

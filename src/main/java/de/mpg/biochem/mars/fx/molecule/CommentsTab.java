@@ -1,39 +1,26 @@
 package de.mpg.biochem.mars.fx.molecule;
 
-import de.jensd.fx.glyphs.GlyphIcons;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
-import javafx.collections.ObservableList;
-import javafx.event.Event;
-import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.IndexRange;
 import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.Separator;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Alert.AlertType;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
@@ -46,13 +33,10 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import de.mpg.biochem.mars.fx.*;
-import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.editor.SmartEdit;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.Utils;
@@ -380,8 +364,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		}
 
 	@Override
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    	super.onInitializeMoleculeArchiveEvent(archive);
 		commentEditor.setArchive(archive);
 	}
 	
@@ -394,41 +378,12 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	}
 
 	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveLockingEvent() {
 		commentEditor.save();
 	}
 
 	@Override
-	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveSavingEvent() {
 		commentEditor.save();
-	}
-
-	@Override
-	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
 	}
 }

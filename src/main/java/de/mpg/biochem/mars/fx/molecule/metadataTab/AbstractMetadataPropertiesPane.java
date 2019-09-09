@@ -12,7 +12,11 @@ import java.util.ArrayList;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
+import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
@@ -35,7 +39,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata> implements MetadataSubPane<I> {
+public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata> implements MetadataSubPane {
 	
 	protected StackPane stackPane;
 	protected JFXTabPane tabsContainer;
@@ -51,9 +55,9 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	protected double tabWidth = 60.0;
 	protected int lastSelectedTabIndex = 0;
 	
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
-	
 	protected I marsImageMetadata;
+	
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMetadataPropertiesPane() {
 		stackPane = new StackPane();
@@ -74,7 +78,16 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         
         stackPane.getChildren().add(tabsContainer);
         
-        stackPane.addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
+        getNode().addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
+        getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        		
+        		metadataGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        	}
+        });
 		
 		configureTabs();
 	}
@@ -145,35 +158,28 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         tabsContainer.getTabs().add(propertiesTab);
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-		
-		metadataGeneralTabController.setArchive(archive);
-		metadataPropertiesTable.setArchive(archive);
-	}
-
-	public void setMetadata(I marsImageMetadata) {
-		this.marsImageMetadata = marsImageMetadata;
-		
-		metadataGeneralTabController.setMetadata(marsImageMetadata);
-		metadataPropertiesTable.setMetadata(marsImageMetadata);
-	}
-	
+	@Override
 	public Node getNode() {
 		return stackPane;
 	}
 	
+	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
 	
 	@SuppressWarnings("unchecked")
+	@Override
 	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-        setMetadata((I) marsImageMetadata);
+		this.marsImageMetadata = (I) marsImageMetadata;
+		
+		metadataGeneralTabController.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+		metadataPropertiesTable.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
     }
 	
 	@Override
     public void handle(MarsImageMetadataEvent event) {
 	   event.invokeHandler(this);
+	   event.consume();
     } 
 }

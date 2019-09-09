@@ -1,79 +1,34 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import cern.extjfx.chart.AxisMode;
-import cern.extjfx.chart.NumericAxis;
-import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
-import cern.extjfx.chart.data.DataReducingObservableList;
-import cern.extjfx.chart.plugins.CrosshairIndicator;
-import cern.extjfx.chart.plugins.DataPointTooltip;
 import cern.extjfx.chart.plugins.Panner;
 import cern.extjfx.chart.plugins.Zoomer;
 
-import javafx.geometry.Insets;
 import javafx.scene.Cursor;
-import javafx.scene.ImageCursor;
-import javafx.scene.shape.Shape;
-import javafx.scene.shape.Line;
-import javafx.scene.shape.Circle;
 import javafx.scene.Node;
-import javafx.scene.chart.LineChart;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.chart.XYChart;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.*;
-import javafx.scene.*;
-import javafx.scene.canvas.*;
-import javafx.scene.image.*;
-import javafx.scene.paint.*;
-import javafx.scene.text.*;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-
-import de.mpg.biochem.mars.table.*;
-
-import cern.extjfx.chart.plugins.*;
 import javafx.scene.input.MouseEvent;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
-
-import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
@@ -81,28 +36,21 @@ import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
-
-import com.jfoenix.controls.JFXBadge;
-
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 //Should probably abstract this as well to allow for subclasses with different Molecule types
 //but for the moment we keep it as is....
 
-public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
+public class PlotPane extends BorderPane implements MoleculeSubPane {
 	
 	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
 	
 	private ArrayList<SubPlot> charts;
 	private ToolBar toolBar;
-	
-	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	private static StyleSheetUpdater styleSheetUpdater;
 	
@@ -139,6 +87,8 @@ public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
         setCenter(chartsPane);
         
 		addChart();
+		
+		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 	}
 
 	private Node createToolBar() { 
@@ -228,7 +178,7 @@ public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
 	public void addChart() {
 		SubPlot subplot = new SubPlot(this, "Plot " + (charts.size() + 1));
 		if (molecule != null)
-			subplot.setMolecule(molecule);
+			subplot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		charts.add(subplot);
 		
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
@@ -319,13 +269,6 @@ public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
 	public void setMaxPointsCount(int maxPoints) {
 		maxPointsCount.set(maxPoints);
 	}
-
-	@Override
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
-		for (SubPlot subPlot : charts) 
-			subPlot.setMolecule(molecule);
-	}
 	
 	class PlotOptionsPane extends MigPane  {
 		public PlotOptionsPane() {
@@ -347,17 +290,15 @@ public class PlotPane extends BorderPane implements MoleculeSubPane<Molecule> {
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	@Override
 	public void handle(MoleculeEvent event) {
 		event.invokeHandler(this);
+		event.consume();
 	}
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		// TODO Auto-generated method stub
+		this.molecule = molecule;
+		for (SubPlot subPlot : charts) 
+			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	}
 }

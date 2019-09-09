@@ -18,21 +18,19 @@ import javafx.scene.layout.BorderPane;
 
 public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
 	
-	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
-	
 	private JFXToggleButton smileEncodingButton;
 	
-	private BorderPane borderPane;
+	private BorderPane rootPane;
 	
 	public SettingsTab() {
 		super();
 		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
 		
 		smileEncodingButton = new JFXToggleButton();
-		borderPane = new BorderPane();
-		borderPane.setCenter(smileEncodingButton);
+		rootPane = new BorderPane();
+		rootPane.setCenter(smileEncodingButton);
 		
-		setContent(borderPane);
+		setContent(rootPane);
 	}
 	
 	public void handleToggleSmileEncoding() {
@@ -44,7 +42,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	}
 	
 	public Node getNode() {
-		return this.borderPane;
+		return this.rootPane;
 	}
 	
 	public ArrayList<Menu> getMenus() {
@@ -52,50 +50,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	}
 
 	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    	super.onInitializeMoleculeArchiveEvent(archive);
 		
 		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
-	}
-
-	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
 	}
 }

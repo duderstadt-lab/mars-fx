@@ -6,8 +6,8 @@ import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -30,12 +30,10 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane<? extends Molecule>, O extends MoleculeSubPane<? extends Molecule>> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
+public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
 	protected C moleculeCenterPane;
 	protected O moleculePropertiesPane;
-	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	protected M molecule;
 	
@@ -69,7 +67,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
-		rootPane.addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		
 		setContent(rootPane);
 	}
@@ -113,8 +111,8 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
                 	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
-                	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
-                	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+                	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+                	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
             		Platform.runLater(() -> {
             			moleculeIndexTable.requestFocus();
             		});
@@ -187,18 +185,19 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     	getNode().fireEvent(event);
     }
 
-	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-		moleculeRowList.clear();
+    @Override
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    	super.onInitializeMoleculeArchiveEvent(archive);
+    	
+    	moleculeRowList.clear();
 
     	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
         	moleculeRowList.add(new MoleculeIndexRow(index));
         }
-    	moleculeCenterPane.setArchive(archive);
-    	moleculePropertiesPane.setArchive(archive);
-    	onMoleculeArchiveUnlockingEvent(archive);
-	}
+    	moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+    	moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+    	onMoleculeArchiveUnlockingEvent();
+    }
     
     @Override
 	public ArrayList<Menu> getMenus() {
@@ -234,25 +233,20 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     }
 
 	@Override
-	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveLockingEvent() {
 		saveCurrentRecord();
-	}
-	
-	@Override
-	public void onMoleculeArchiveLockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// Nothing to do...
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMoleculeArchiveUnlockingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveUnlockingEvent() {
 		if (archive.getNumberOfMolecules() > 0) {
     		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
     		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
         	
     		//Update center pane and properties pane.
-        	moleculeCenterPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
-        	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
+        	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+        	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     		Platform.runLater(() -> {
     			moleculeIndexTable.requestFocus();
     			//moleculeIndexTable.getSelectionModel().select(moleculeIndexTable.getSelectionModel().selectedItemProperty().get());
@@ -261,17 +255,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	}
 
 	@Override
-	public void onMoleculeArchiveUnlockedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// Unlocking process is done...
-	}
-
-	@Override
-	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
+	public void onMoleculeArchiveSavingEvent() {
 		saveCurrentRecord();
-	}
-
-	@Override
-	public void onMoleculeArchiveSavedEvent(MoleculeArchive<?, ?, ?> archive) {
-		// Saving process is done...
 	}
 }

@@ -19,6 +19,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -35,10 +36,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
+public class MoleculeGeneralTabController implements MoleculeSubPane {
+	
+	@FXML
+	private AnchorPane rootPane;
 	
 	@FXML
 	private BorderPane UIDIconContainer;
@@ -72,12 +77,10 @@ public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private Molecule molecule;
-	
-	private MoleculeArchive<?,?,?> archive;
-	
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
+	
+	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	@FXML
     public void initialize() {
@@ -93,9 +96,48 @@ public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 		metaUIDLabel.setEditable(false);
 		
 		notesTextArea.setPromptText("none");
+		
+		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        	}
+        });
     }
 	
-	public void update() {
+	@FXML
+	private void handleUIDClippy() {
+		ClipboardContent content = new ClipboardContent();
+	    content.putString(UIDLabel.getText());
+	    clipboard.setContent(content);
+	}
+
+	@FXML
+	private void handleMetaUIDClippy() {
+		ClipboardContent content = new ClipboardContent();
+	    content.putString(metaUIDLabel.getText());
+	    clipboard.setContent(content);
+	}
+	
+    @Override
+    public void handle(MoleculeEvent event) {
+        event.invokeHandler(this);
+        event.consume();
+    }
+
+	@Override
+	public Node getNode() {
+		return rootPane;
+	}
+
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
+	}
+
+	@Override
+	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		if (chipsListener == null) {
 			chipsListener = new ListChangeListener<String>() {
 				@Override
@@ -150,55 +192,5 @@ public class MoleculeGeneralTabController implements MoleculeSubPane<Molecule> {
 			}
 		}
 		*/
-	}
-	
-	@FXML
-	private void handleUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(UIDLabel.getText());
-	    clipboard.setContent(content);
-	}
-
-	@FXML
-	private void handleMetaUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(metaUIDLabel.getText());
-	    clipboard.setContent(content);
-	}
-	
-	@Override
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
-		update();
-	}
-	
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-    }
-
-	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-
-	@Override
-	public Node getNode() {
-		// TODO Auto-generated method stub
-		//For the moment this is not needed
-		//and the Pane is only in the fxml??
-		return null;
-	}
-
-	@Override
-	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		// TODO Auto-generated method stub
-		
 	}
 }
