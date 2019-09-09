@@ -197,6 +197,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         }
     	moleculeCenterPane.setArchive(archive);
     	moleculePropertiesPane.setArchive(archive);
+    	onMoleculeArchiveUnlockingEvent(archive);
 	}
     
     @Override
@@ -254,6 +255,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         	moleculePropertiesPane.getNode().fireEvent(new MoleculeSelectionChangedEvent(molecule));
     		Platform.runLater(() -> {
     			moleculeIndexTable.requestFocus();
+    			//moleculeIndexTable.getSelectionModel().select(moleculeIndexTable.getSelectionModel().selectedItemProperty().get());
     		});
     	}
 	}

@@ -203,6 +203,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			@Override
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				updateMenus(((MoleculeArchiveTab)newValue).getMenus());
+    				if (oldValue == commentsTab) {
+    					System.out.println("commentsTab");
+    					commentsTab.onMoleculeArchiveSavingEvent(archive);
+    				} else if (oldValue == imageMetadataTab) {
+    					imageMetadataTab.onMoleculeArchiveSavingEvent(archive);
+    				} else if (oldValue == moleculesTab) {
+    					moleculesTab.onMoleculeArchiveSavingEvent(archive);
+    				}
     			}
     		});
         

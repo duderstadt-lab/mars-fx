@@ -277,7 +277,7 @@ public class CommentEditor extends AnchorPane {
 		markdownEditorPane.getUndoManager().mark();
 	}
 
-	void save() {
+	public void save() {
 		archive.setComments(markdownEditorPane.getMarkdown());
 		markdownEditorPane.getUndoManager().mark();
 	}

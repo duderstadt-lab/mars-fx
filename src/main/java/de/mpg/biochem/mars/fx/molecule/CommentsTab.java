@@ -395,14 +395,12 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
+		getNode().fireEvent(event);
 	}
 
 	@Override
 	public void onMoleculeArchiveLockingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
+		commentEditor.save();
 	}
 
 	@Override
@@ -425,8 +423,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void onMoleculeArchiveSavingEvent(MoleculeArchive<?, ?, ?> archive) {
-		// TODO Auto-generated method stub
-		
+		commentEditor.save();
 	}
 
 	@Override
