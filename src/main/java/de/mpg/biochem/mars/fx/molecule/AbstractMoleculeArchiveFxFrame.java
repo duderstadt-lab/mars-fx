@@ -55,6 +55,9 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.stage.FileChooser;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -186,7 +189,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         stackPane.getChildren().add(tabsContainer);
         borderPane.setCenter(stackPane);
         
-        return new Scene(borderPane);
+        Scene scene = new Scene(borderPane);
+
+        return scene;
 	}
 	
 	private void buildTabs() {
@@ -237,7 +242,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				fileSaveVirtualStoreAction,
 				null,
 				fileCloseAction);
-		
+
 		menuBar = new MenuBar(fileMenu);
 		
 		borderPane.setTop(menuBar);

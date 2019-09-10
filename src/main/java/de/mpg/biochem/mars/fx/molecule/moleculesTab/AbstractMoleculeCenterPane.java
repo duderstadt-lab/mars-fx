@@ -2,16 +2,11 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
 
-import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
-import de.mpg.biochem.mars.fx.table.MarsTableFxView;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -19,13 +14,13 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements MoleculeSubPane {
+public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane> implements MoleculeSubPane {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
 	
 	private BorderPane dataTableContainer;
-	private PlotPane plot;
+	private P plotPane;
 	
 	private M molecule;
 	
@@ -44,8 +39,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plot = new PlotPane();
-		plotTab.setContent(plot);
+		plotPane = createPlotPane();
+		plotTab.setContent(plotPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
@@ -69,7 +64,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 			Tab segmentTableTab = new Tab(segmentTableName.get(1) + " vs " + segmentTableName.get(0));
 			BorderPane segmentTableContainer = new BorderPane();
 			segmentTableTab.setContent(segmentTableContainer);
-			segmentTableContainer.setCenter(new MarsTableFxView(molecule.getSegmentsTable(segmentTableName)));
+			segmentTableContainer.setCenter(new MarsTableView(molecule.getSegmentsTable(segmentTableName)));
 			
 			tabPane.getTabs().add(segmentTableTab);
 		}
@@ -80,14 +75,16 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule> implements 
 		this.molecule = (M) molecule;
 		
 		//Update DataTable
-		dataTableContainer.setCenter(new MarsTableFxView(molecule.getDataTable()));
+		dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
 		
 		//Update Plot
-		plot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		
 		//Load SegmentTables
 		loadSegmentTables();
 	}
+	
+	public abstract P createPlotPane();
 	
 	@Override
 	public Node getNode() {

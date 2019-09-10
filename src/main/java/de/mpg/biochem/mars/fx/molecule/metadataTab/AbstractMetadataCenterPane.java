@@ -2,7 +2,7 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
-import de.mpg.biochem.mars.fx.table.MarsTableFxView;
+import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import javafx.event.Event;
 import javafx.scene.Node;
@@ -60,7 +60,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	}
 	
 	protected void loadDataTable() {
-		dataTableContainer.setCenter(new MarsTableFxView(marsImageMetadata.getDataTable()));
+		dataTableContainer.setCenter(new MarsTableView(marsImageMetadata.getDataTable()));
 	}
 	
 	protected void loadLog() {

@@ -11,7 +11,6 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.table.TableSubTab;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -37,7 +36,7 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-public class DatasetOptionsPane extends MigPane implements TableSubTab {
+public class DatasetOptionsPane extends MigPane {
 	private TextField titleField, xNameField, yNameField;
 	private Button addButton, updateButton;
 	
@@ -47,9 +46,9 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 	
 	private MarsTable table;
 	
-	private SubPlot subPlot;
+	private AbstractSubPlot subPlot;
 
-	public DatasetOptionsPane(MarsTable table, SubPlot subPlot) {
+	public DatasetOptionsPane(MarsTable table, AbstractSubPlot subPlot) {
 		this.table = table;
 		this.subPlot = subPlot;
 		
@@ -241,7 +240,6 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		*/
 	}
 	
-	@Override
 	public void setTable(MarsTable table) {
 		this.table = table;
 		
@@ -276,7 +274,7 @@ public class DatasetOptionsPane extends MigPane implements TableSubTab {
 		return yNameField.getText();
 	}
 	
-	public void setSubPlot(SubPlot subPlot) {
+	public void setSubPlot(AbstractSubPlot subPlot) {
 		this.subPlot = subPlot;
 	}
 }
