@@ -145,7 +145,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/table/TableWindowPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
@@ -163,10 +163,6 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	public void close() {
     	
     }
-	
-	public MarsTable getTable() {
-		return table;
-	}
 
 	@Override
 	public void update() {

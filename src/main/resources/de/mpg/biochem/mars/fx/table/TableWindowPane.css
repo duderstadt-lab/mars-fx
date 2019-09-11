@@ -1,0 +1,72 @@
+/*---- main tab pane ----*/
+
+.tab-pane {
+	-mwfx-tab-background: derive(-fx-background,25%);
+	-mwfx-tab-active: #f47806;
+	
+    -fx-tab-max-width: 10em;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+	-fx-background-color: -mwfx-tab-background;
+	-fx-background-insets: 0 1 1 0;
+	-fx-background-radius: 0;
+	-fx-padding: 0.5em 0.5em 0.5em 0.5em;
+	-fx-font-size: 1.2em;
+}
+
+.tab-pane {
+  -fx-tab-min-height:35px;
+  -fx-tab-max-height:35px;
+}
+
+.tab-pane > .tab-header-area {
+	-fx-padding: 0 0.25em 0 0;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+	-fx-background-color: -fx-outer-border, transparent, -mwfx-tab-background;
+	-fx-background-insets: 1 1 0 1, 0 0 1 0, 1;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab.preview {
+	-fx-font-style: italic;
+}
+
+/* orange marker for selected/hover tab */
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+	-fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
+	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:hover {
+	-fx-background-color: derive(-mwfx-tab-active,35%), -mwfx-tab-background;
+	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+
+/* make tab texts brighter, except selected tab */
+.tab-pane .tab-label {
+	-fx-text-fill: derive(-fx-text-base-color,35%);
+}
+.tab-pane .tab:selected .tab-label,
+.tab-pane .tab:hover .tab-label {
+	-fx-text-fill: -fx-text-base-color;
+}
+
+.tab-pane .focus-indicator {
+	visibility: hidden;
+}
+
+
+/* hide tab-close-button by default; show it only for selected tab and on hover */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+	-fx-background-color: transparent;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
+.tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
+	-fx-background-color: -fx-mark-color;
+	-fx-opacity: 0.4;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
+	-fx-background-color: red;
+	-fx-opacity: 1.0;
+}
