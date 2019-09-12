@@ -86,7 +86,6 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
         ParameterColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         parameterTable.getColumns().add(ParameterColumn);
         
-        //TODO how to also allow editing of this parameter
         TableColumn<ParameterRow, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         valueColumn.setOnEditCommit(
