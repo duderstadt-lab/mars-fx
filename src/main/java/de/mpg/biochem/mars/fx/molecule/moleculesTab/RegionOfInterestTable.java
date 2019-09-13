@@ -155,9 +155,16 @@ public class RegionOfInterestTable implements MoleculeSubPane {
         TableColumn<RegionOfInterest, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> {
         	JFXColorPicker colorPicker = new JFXColorPicker();
-        	String color = cellData.getValue().getColor();
-        	if (color != null)
-        		colorPicker.setValue(Color.web(color));
+        	Color color = Color.web("rgba(50,50,50,0.2)");
+        	try {
+        		color = Color.web(cellData.getValue().getColor());
+        	} catch (NullPointerException e1) {
+        		//e1.printStackTrace();
+        		
+        	} catch (IllegalArgumentException e2) {
+        		//e2.printStackTrace();
+        	}
+        	colorPicker.setValue(color);
         	colorPicker.setOnAction(action -> {
 			     Color c = colorPicker.getValue();
 			     cellData.getValue().setColor(c.toString());
