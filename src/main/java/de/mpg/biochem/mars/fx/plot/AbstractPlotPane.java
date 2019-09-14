@@ -80,8 +80,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		charts = new ArrayList<SubPlot>();
 		chartsPane = new VBox();
         setCenter(chartsPane);
-        
-		//addChart();
 	}
 
 	private Node createToolBar() { 
@@ -161,9 +159,9 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	private void addPlugin(ChartPlugin pluginName, Cursor cursor) {
 		for (SubPlot subPlot : charts) {
 			if (toolSelected()) {
-				subPlot.addPlugin(generateChartPlugin(pluginName), cursor);
+				subPlot.setTool(generateChartPlugin(pluginName), cursor);
 			} else {
-				subPlot.removePlugins();
+				subPlot.removeTools();
 			}
 		}
 	}

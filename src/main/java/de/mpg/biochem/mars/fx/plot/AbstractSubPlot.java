@@ -10,6 +10,7 @@ import com.jfoenix.controls.JFXBadge;
 import cern.extjfx.chart.NumericAxis;
 import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
+import cern.extjfx.chart.plugins.AbstractValueIndicator;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.MarsTable;
@@ -107,7 +108,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return datasetOptionsPane.getPlotSeriesList();
 	}
 	
-	protected void update() {
+	public void update() {
 		clear();
 
 		for (int i=0;i<getPlotSeriesList().size();i++) {
@@ -132,17 +133,19 @@ public abstract class AbstractSubPlot implements SubPlot {
 		resetXYZoom();
 	}
 	
-	public void addPlugin(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
-		removePlugins();
+	@Override
+	public void setTool(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
+		removeTools();
 
 		chartPane.getPlugins().add(plugin);
 		chartPane.setCursor(cursor);
 	}
 	
-	public void removePlugins() {
-		while (chartPane.getPlugins().size()>0)
-			chartPane.getPlugins().remove(0);
-		
+	@Override
+	public void removeTools() {
+		for (XYChartPlugin<Number, Number> plugin : chartPane.getPlugins())
+			if (!(plugin instanceof AbstractValueIndicator))
+				chartPane.getPlugins().remove(plugin);
 		chartPane.setCursor(Cursor.DEFAULT);
 	}
 	

@@ -46,9 +46,9 @@ public class DatasetOptionsPane extends MigPane {
 	
 	private MarsTable table;
 	
-	private AbstractSubPlot subPlot;
+	private SubPlot subPlot;
 
-	public DatasetOptionsPane(MarsTable table, AbstractSubPlot subPlot) {
+	public DatasetOptionsPane(MarsTable table, SubPlot subPlot) {
 		this.table = table;
 		this.subPlot = subPlot;
 		
@@ -274,7 +274,7 @@ public class DatasetOptionsPane extends MigPane {
 		return yNameField.getText();
 	}
 	
-	public void setSubPlot(AbstractSubPlot subPlot) {
+	public void setSubPlot(SubPlot subPlot) {
 		this.subPlot = subPlot;
 	}
 }

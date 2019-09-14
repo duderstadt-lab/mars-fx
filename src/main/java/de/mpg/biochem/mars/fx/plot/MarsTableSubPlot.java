@@ -115,10 +115,16 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		// TODO Auto-generated method stub
 		
 	}
-/*
+
 	@Override
-	public void setTable(MarsTable table) {
-		this.table = table;
+	public void removeTools() {
+		// TODO Auto-generated method stub
+		
 	}
-	*/
+
+	@Override
+	public void removeIndicators() {
+		// TODO Auto-generated method stub
+		
+	}
 }

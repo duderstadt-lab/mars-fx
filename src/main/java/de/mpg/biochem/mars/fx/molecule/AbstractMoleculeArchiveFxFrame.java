@@ -57,6 +57,7 @@ import javafx.scene.control.SingleSelectionModel;
 import javafx.stage.FileChooser;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 
 import java.io.File;
@@ -211,7 +212,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				updateMenus(((MoleculeArchiveTab)newValue).getMenus());
     				if (oldValue == commentsTab) {
-    					System.out.println("commentsTab");
     					commentsTab.fireEvent(new MoleculeArchiveSavingEvent());
     				} else if (oldValue == imageMetadataTab) {
     					imageMetadataTab.fireEvent(new MoleculeArchiveSavingEvent());
