@@ -4,6 +4,8 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 
@@ -18,13 +20,17 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.*;
 import ij.WindowManager;
+import ij.io.SaveDialog;
 
 public class MarsTableFxFrame implements MarsTableWindow {
 
@@ -52,6 +58,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	protected BorderPane borderPane;
 
 	private JFXPanel fxPanel;
+	private Scene scene;
 
 	public MarsTableFxFrame(String name, MarsTable table, MarsTableService marsTableService) {
 		this.marsTableService = marsTableService;
@@ -102,7 +109,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		borderPane.setTop(buildMenuBar());
 		borderPane.setCenter(buildTabs());
 
-		Scene scene = new Scene(borderPane);
+		scene = new Scene(borderPane);
 		
 		this.fxPanel.setScene(scene);
 
@@ -111,13 +118,16 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	}
 	
 	protected MenuBar buildMenuBar() {
-		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
-		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
+		Action fileSaveAsYAMTAction = new Action("Save as YAMT", "Shortcut+S", FLOPPY_ALT, e -> save());
+		Action fileSaveAsCSVAction = new Action("Export to CSV", "Shortcut+C", null, e -> saveAsCSV());
+		Action fileSaveAsJSONAction = new Action("Export to JSON", "Shortcut+C", null, e -> saveAsJSON());
+		
 		Action fileCloseAction = new Action("close", null, null, e -> close());
 		
 		Menu fileMenu = ActionUtils.createMenu("File",
-				fileSaveAction,
-				fileSaveCopyAction,
+				fileSaveAsYAMTAction,
+				fileSaveAsCSVAction,
+				fileSaveAsJSONAction,
 				null,
 				fileCloseAction);
 
@@ -152,12 +162,70 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		return tabPane;
 	}
 	
-	public void save() {
+	private void save() {
+		FileChooser fileChooser = new FileChooser();
 		
+		File saveAsFile = new File(System.getProperty("user.home"));
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		
+		String name = table.getName();
+		if (!name.endsWith(".yamt"))
+			name += ".yamt";
+		fileChooser.setInitialFileName(name);
+
+		File file = fileChooser.showSaveDialog(scene.getWindow());
+		
+		if (file != null) {
+			try {
+				table.saveAsYAMT(file.getAbsolutePath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
-	public void saveCopy() {
+	private void saveAsCSV() {
+		FileChooser fileChooser = new FileChooser();
 		
+		File saveAsFile = new File(System.getProperty("user.home"));
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		
+		String name = table.getName();
+		if (!name.endsWith(".csv"))
+			name += ".csv";
+		fileChooser.setInitialFileName(name);
+
+		File file = fileChooser.showSaveDialog(scene.getWindow());
+		
+		if (file != null) {
+			try {
+				table.saveAsCSV(file.getAbsolutePath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private void saveAsJSON() {
+		FileChooser fileChooser = new FileChooser();
+		
+		File saveAsFile = new File(System.getProperty("user.home"));
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		
+		String name = table.getName();
+		if (!name.endsWith(".json"))
+			name += ".json";
+		fileChooser.setInitialFileName(name);
+
+		File file = fileChooser.showSaveDialog(scene.getWindow());
+		
+		if (file != null) {
+			try {
+				table.saveAsJSON(file.getAbsolutePath());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public void close() {
