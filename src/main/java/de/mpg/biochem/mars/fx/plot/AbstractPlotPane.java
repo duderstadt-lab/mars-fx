@@ -26,9 +26,10 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 import java.util.function.Predicate;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
+import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
+import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
@@ -36,8 +37,6 @@ import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
-import de.mpg.biochem.mars.molecule.Molecule;
-
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
@@ -47,13 +46,10 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
 	
 	protected ArrayList<SubPlot> charts;
+	protected ArrayList<Action> tools;
 	protected ToolBar toolBar;
 	
 	protected static StyleSheetUpdater styleSheetUpdater;
-	
-	enum ChartPlugin {
-	  TRACK, ZOOMXY, ZOOMX, ZOOMY, PAN
-	}
 	
 	protected VBox chartsPane;
 	
@@ -70,41 +66,58 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected ButtonBase propertiesButton;
 
 	public AbstractPlotPane() {
-		setTop(createToolBar());
-		
 		if (styleSheetUpdater == null)
 			styleSheetUpdater = new StyleSheetUpdater();
-		
 		plotOptionsPane = new PlotOptionsPane();
-		
 		charts = new ArrayList<SubPlot>();
+		tools = new ArrayList<Action>();
 		chartsPane = new VBox();
-        setCenter(chartsPane);
+		setCenter(chartsPane);
+		
+		buildTools();
+		setTop(createToolBar());
+	}
+	
+	protected void buildTools() {
+		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, new MarsDataPointTooltip<Number, Number>(), Cursor.DEFAULT),
+				null, trackSelected);
+		addTool(trackCursor);
+		
+		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, new Zoomer(true), Cursor.CROSSHAIR),
+				null, zoomXYSelected);
+		addTool(zoomXYCursor);
+		
+		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, new Zoomer(AxisMode.X, true), Cursor.H_RESIZE),
+				null, zoomXSelected);
+		addTool(zoomXCursor);
+		
+		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, new Zoomer(AxisMode.Y, true), Cursor.V_RESIZE),
+				null, zoomYSelected);
+		addTool(zoomYCursor);
+		
+		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> { 
+			Panner panner = new Panner();
+			panner.setMouseFilter(PAN_MOUSE_FILTER);
+			setTool(panSelected, panner, Cursor.MOVE); 
+			}, null, panSelected);
+		addTool(panCursor);
+	}
+	
+	protected void addTool(Action action) {
+		tools.add(action);
 	}
 
-	private Node createToolBar() { 
-		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> addPlugin(ChartPlugin.TRACK, Cursor.DEFAULT),
-				null, trackSelected);
-		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> addPlugin(ChartPlugin.ZOOMXY, Cursor.CROSSHAIR),
-				null, zoomXYSelected);
-		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> addPlugin(ChartPlugin.ZOOMX, Cursor.H_RESIZE),
-				null, zoomXSelected);
-		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> addPlugin(ChartPlugin.ZOOMY, Cursor.V_RESIZE),
-				null, zoomYSelected);
-		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> addPlugin(ChartPlugin.PAN, Cursor.MOVE),
-				null, panSelected);
-		
-		Node[] toolButtons = ActionUtils.createToolBarButtons(
-				trackCursor,
-				zoomXYCursor,
-				zoomXCursor,
-				zoomYCursor,
-				panCursor);
-		
+	protected Node createToolBar() { 
+		ToggleButton[] toolButtons = new ToggleButton[tools.size()];
 		ToggleGroup toolGroup = new ToggleGroup();
-		for (Node n : toolButtons)
-			((ToggleButton)n).setToggleGroup(toolGroup);
 		
+		for (int i = 0; i < tools.size(); i++) {
+			 if (tools.get(i) != null) {
+				 toolButtons[i] = (ToggleButton) ActionUtils.createToolBarButton(tools.get(i));
+				 toolButtons[i].setToggleGroup(toolGroup);
+			 }
+		}
+
 		toolBar = new ToolBar(toolButtons);
 		toolBar.getItems().add(new Separator());
 
@@ -156,10 +169,10 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return toolBar;
 	}
 	
-	private void addPlugin(ChartPlugin pluginName, Cursor cursor) {
+	protected void setTool(BooleanProperty selected, XYChartPlugin<Number, Number> plugin, Cursor cursor) {
 		for (SubPlot subPlot : charts) {
-			if (toolSelected()) {
-				subPlot.setTool(generateChartPlugin(pluginName), cursor);
+			if (selected.get()) {
+				subPlot.setTool(plugin, cursor);
 			} else {
 				subPlot.removeTools();
 			}
@@ -215,7 +228,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		updateSubPlotBadges();
 	}
 	
-	private void updateSubPlotBadges() {
+	protected void updateSubPlotBadges() {
 		if (charts.size() > 1) {
 			for (int num=1; num <= charts.size(); num++) {
 				charts.get(num-1).getDatasetOptionsButton().setEnabled(true);
@@ -226,34 +239,14 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			charts.get(0).getDatasetOptionsButton().setEnabled(false);
 			charts.get(0).getDatasetOptionsButton().refreshBadge();
 		}
-	}
-	
-	private XYChartPlugin<Number, Number> generateChartPlugin(ChartPlugin pluginName) {
-		switch (pluginName) {
-	      case TRACK: return new MarsDataPointTooltip<Number, Number>();
-	      case ZOOMXY: return new Zoomer(true);
-	      case ZOOMX: return new Zoomer(AxisMode.X, true);
-	      case ZOOMY: return new Zoomer(AxisMode.Y, true);
-	      case PAN: Panner panner = new Panner();
-	    			panner.setMouseFilter(PAN_MOUSE_FILTER);
-	                return panner;
-	    }
-		return null;
-	}
-	
-	private boolean toolSelected() {
-		if (trackSelected.get() || zoomXYSelected.get() || zoomXSelected.get() || zoomYSelected.get() || panSelected.get())
-			return true;
-		else
-			return false;
-	}
+	}	
 	
 	public IntegerProperty maxPointsCount() {
 		return maxPointsCount;
 	}
 	
 	public StyleSheetUpdater getStyleSheetUpdater() {
-		return this.styleSheetUpdater;
+		return styleSheetUpdater;
 	}
 	
 	public void setMaxPointsCount(int maxPoints) {

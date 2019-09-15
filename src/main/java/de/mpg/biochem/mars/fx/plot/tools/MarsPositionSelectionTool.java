@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.plot;
+package de.mpg.biochem.mars.fx.plot.tools;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,7 +32,7 @@ import javafx.scene.paint.Color;
  * @param <X> type of X values
  * @param <Y> type of Y values
  */
-public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
+public class MarsPositionSelectionTool<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
     /**
      * Name of the CSS class of the tool tip label.
      */
@@ -55,7 +55,7 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
      * Creates a new instance of DataPointTooltip class with {{@link #pickingDistanceProperty() picking distance}
      * initialized to {@value #DEFAULT_PICKING_DISTANCE}.
      */
-    public MarsDataPointTooltip() {
+    public MarsPositionSelectionTool() {
         label.getStyleClass().add(STYLE_CLASS_LABEL);
         circle.setRadius(5.0f);
         circle.setFill(Color.TRANSPARENT);
@@ -68,7 +68,7 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
      *
      * @param pickingDistance the initial value for the {@link #pickingDistanceProperty() pickingDistance} property
      */
-    public MarsDataPointTooltip(double pickingDistance) {
+    public MarsPositionSelectionTool(double pickingDistance) {
         this();
         setPickingDistance(pickingDistance);
     }

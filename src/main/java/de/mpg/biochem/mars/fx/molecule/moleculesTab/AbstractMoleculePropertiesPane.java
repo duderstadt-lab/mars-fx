@@ -155,7 +155,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
        	
     	BorderPane regionsTabPane = new BorderPane();
     	regionsTabPane.setMaxWidth(tabWidth);
-    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"));
+    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE, "1.1em"));
 
     	regionsTab = new Tab();
     	regionsTab.setText("");
@@ -180,7 +180,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
        	
     	BorderPane positionTabPane = new BorderPane();
     	positionTabPane.setMaxWidth(tabWidth);
-    	positionTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(LIST_ALT, "1.1em"));
+    	positionTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.MILESTONE, "1.1em"));
 
     	positionsTab = new Tab();
     	positionsTab.setText("");
