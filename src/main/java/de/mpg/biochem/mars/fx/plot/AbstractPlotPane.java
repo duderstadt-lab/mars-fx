@@ -26,6 +26,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
 import java.util.ArrayList;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
 import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
@@ -79,27 +80,28 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	}
 	
 	protected void buildTools() {
-		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, new MarsDataPointTooltip<Number, Number>(), Cursor.DEFAULT),
-				null, trackSelected);
+		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> { 
+			setTool(trackSelected, () -> new MarsDataPointTooltip<Number, Number>(), Cursor.DEFAULT);
+		}, null, trackSelected);
 		addTool(trackCursor);
 		
-		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, new Zoomer(true), Cursor.CROSSHAIR),
+		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new Zoomer(true), Cursor.CROSSHAIR),
 				null, zoomXYSelected);
 		addTool(zoomXYCursor);
 		
-		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, new Zoomer(AxisMode.X, true), Cursor.H_RESIZE),
+		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, () -> new Zoomer(AxisMode.X, true), Cursor.H_RESIZE),
 				null, zoomXSelected);
 		addTool(zoomXCursor);
 		
-		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, new Zoomer(AxisMode.Y, true), Cursor.V_RESIZE),
+		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, () -> new Zoomer(AxisMode.Y, true), Cursor.V_RESIZE),
 				null, zoomYSelected);
 		addTool(zoomYCursor);
 		
-		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> { 
+		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> setTool(panSelected, () -> {
 			Panner panner = new Panner();
 			panner.setMouseFilter(PAN_MOUSE_FILTER);
-			setTool(panSelected, panner, Cursor.MOVE); 
-			}, null, panSelected);
+			return panner;
+		}, Cursor.MOVE), null, panSelected);
 		addTool(panCursor);
 	}
 	
@@ -169,10 +171,10 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return toolBar;
 	}
 	
-	protected void setTool(BooleanProperty selected, XYChartPlugin<Number, Number> plugin, Cursor cursor) {
+	protected void setTool(BooleanProperty selected, Supplier<XYChartPlugin<Number, Number>> supplier, Cursor cursor) {
 		for (SubPlot subPlot : charts) {
 			if (selected.get()) {
-				subPlot.setTool(plugin, cursor);
+				subPlot.setTool(supplier.get(), cursor);
 			} else {
 				subPlot.removeTools();
 			}

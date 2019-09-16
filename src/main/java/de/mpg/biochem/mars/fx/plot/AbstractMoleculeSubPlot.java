@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.NumericAxis;
 import cern.extjfx.chart.XYChartPlugin;
 import cern.extjfx.chart.data.DataReducingObservableList;
@@ -15,6 +16,7 @@ import cern.extjfx.chart.plugins.YRangeIndicator;
 import cern.extjfx.chart.plugins.YValueIndicator;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.PositionOfInterest;
 import de.mpg.biochem.mars.molecule.RegionOfInterest;
@@ -24,6 +26,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
@@ -43,7 +46,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 	}
 	
-	protected void addLine(PlotSeries plotSeries) {
+	protected XYChart<Number, Number> addLine(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -74,7 +77,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		//If the columns are entirely NaN values. Don't add he plot
 		if (data.size() == 0)
-			return;
+			return null;
 		
 		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
 		
@@ -90,9 +93,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		addRegionsOfInterest(xColumn, yColumn);
 		addPositionsOfInterest(xColumn, yColumn);
+		
+		return lineChart;
 	}
 	
-	protected void addScatter(PlotSeries plotSeries) {
+	protected XYChart<Number, Number> addScatter(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 
@@ -122,7 +127,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		//If the columns are entirely NaN values. Don't add he plot
 		if (data.size() == 0)
-			return;
+			return null;
 		
 		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
 		
@@ -138,6 +143,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		addRegionsOfInterest(xColumn, yColumn);
 		addPositionsOfInterest(xColumn, yColumn);
+		
+		return scatterChart;
 	}
 	
 	protected void addRegionsOfInterest(String xColumn, String yColumn) {

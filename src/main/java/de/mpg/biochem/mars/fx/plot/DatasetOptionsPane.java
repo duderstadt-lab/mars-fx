@@ -19,15 +19,19 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Text;
 
 import org.tbee.javafx.scene.layout.fxml.MigPane;
@@ -45,12 +49,15 @@ public class DatasetOptionsPane extends MigPane {
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
 	private MarsTable table;
+	private final ToggleGroup trackingGroup;
 	
 	private SubPlot subPlot;
 
 	public DatasetOptionsPane(MarsTable table, SubPlot subPlot) {
 		this.table = table;
 		this.subPlot = subPlot;
+		
+		trackingGroup = new ToggleGroup();
 		
 		setLayout("insets dialog");
 		
@@ -114,6 +121,13 @@ public class DatasetOptionsPane extends MigPane {
     	deleteColumn.setStyle( "-fx-alignment: CENTER;");
     	deleteColumn.setSortable(false);
     	plotPropertiesTable.getColumns().add(deleteColumn);
+    	
+    	TableColumn<PlotSeries, RadioButton> trackColumn = new TableColumn<>("Track");
+    	trackColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTrackingButton()));
+    	trackColumn.setMinWidth(50);
+    	trackColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(trackColumn);
+        trackColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, ComboBox<String>> typeColumn = new TableColumn<>("Type");
 		typeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTypeField()));
@@ -188,6 +202,9 @@ public class DatasetOptionsPane extends MigPane {
 		addButton.setOnAction(e -> {
 			if (table != null) {
 				PlotSeries defaultPlotSeries = new PlotSeries(table);
+				defaultPlotSeries.getTrackingButton().setToggleGroup(trackingGroup);
+				if (plotSeriesList.size() < 1)
+					defaultPlotSeries.getTrackingButton().selectedProperty().set(true);
 				plotSeriesList.add(defaultPlotSeries);
 			}
 		});
@@ -256,6 +273,23 @@ public class DatasetOptionsPane extends MigPane {
 			if (ySelection != null)
 				propertiesRow.yColumnField().getSelectionModel().select(ySelection);
 		}
+	}
+	
+	public XYChart<Number, Number> getTrackingChart() {
+		for (PlotSeries series : getPlotSeriesList()) {
+			if (series.trackChart())
+				return series.getChart();
+		}
+		
+		return null;
+	}
+	
+	public PlotSeries getTrackingSeries() {
+		for (PlotSeries series : getPlotSeriesList())
+			if (series.trackChart())
+				return series;
+
+		return null;
 	}
 	
 	public ObservableList<PlotSeries> getPlotSeriesList() {

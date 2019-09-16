@@ -9,6 +9,7 @@ import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 
@@ -22,7 +23,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		update();
 	}
 	
-	protected void addLine(PlotSeries plotSeries) {
+	protected XYChart<Number, Number> addLine(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -49,7 +50,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		
 		//If the columns are entirely NaN values. Don't add he plot
 		if (data.size() == 0)
-			return;
+			return null;
 		
 		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
 		
@@ -62,9 +63,11 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		lineChart.updateStyle(plotPane.getStyleSheetUpdater());
 		
 		chartPane.getOverlayCharts().add(lineChart);
+		
+		return lineChart;
 	}
 	
-	protected void addScatter(PlotSeries plotSeries) {
+	protected XYChart<Number, Number> addScatter(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 
@@ -90,7 +93,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		
 		//If the columns are entirely NaN values. Don't add he plot
 		if (data.size() == 0)
-			return;
+			return null;
 		
 		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
 		
@@ -103,6 +106,8 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		scatterChart.updateStyle(plotPane.getStyleSheetUpdater());
 		
 		chartPane.getOverlayCharts().add(scatterChart);
+		
+		return scatterChart;
 	}
 
 	@Override

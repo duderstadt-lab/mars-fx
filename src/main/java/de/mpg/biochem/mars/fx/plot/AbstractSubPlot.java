@@ -7,10 +7,13 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.jfoenix.controls.JFXBadge;
 
+import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.NumericAxis;
 import cern.extjfx.chart.XYChartPane;
 import cern.extjfx.chart.XYChartPlugin;
 import cern.extjfx.chart.plugins.AbstractValueIndicator;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
+import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.MarsTable;
@@ -18,6 +21,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.chart.XYChart.Data;
 
@@ -85,25 +89,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public void setTitle(String name) {
 		chartPane.setTitle(name);
 	}
-	
-	/*
-	public void updateLegend() {
-		Platform.runLater(() -> {
-			for (Node node: chartPane.lookupAll(".chart-legend-item-symbol")) {
-	            for (String styleClass: node.getStyleClass()) {
-	                if (styleClass.startsWith("series")) {
-	                    final int i = Integer.parseInt(styleClass.substring(6));
-	                    if (getPlotSeriesList().size() > i) {
-	                    	Color color = getPlotSeriesList().get(i).getColor();
-	                    	String colorString = String.format("rgba(%d, %d, %d, 1.0)", Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255));
-	                    	node.setStyle("-fx-background-color: " + colorString + ", " + colorString + ";");
-	                    }
-	                }
-	            }
-			}
-		});
-	}
-	*/
+
 	public ObservableList<PlotSeries> getPlotSeriesList() {
 		return datasetOptionsPane.getPlotSeriesList();
 	}
@@ -116,10 +102,11 @@ public abstract class AbstractSubPlot implements SubPlot {
 			
 			if (plotSeries.xColumnField().getSelectionModel().getSelectedIndex() != -1 
 				&& plotSeries.yColumnField().getSelectionModel().getSelectedIndex() != -1) {
-					if (plotSeries.getType().equals("Line"))
-						addLine(plotSeries);
-					else if (plotSeries.getType().equals("Scatter"))
-						addScatter(plotSeries);
+					if (plotSeries.getType().equals("Line")) {
+						plotSeries.setChart(addLine(plotSeries));
+					} else if (plotSeries.getType().equals("Scatter")) {
+						plotSeries.setChart(addScatter(plotSeries));
+					}
 			}
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
@@ -129,14 +116,21 @@ public abstract class AbstractSubPlot implements SubPlot {
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
-		//updateLegend();
 		resetXYZoom();
 	}
 	
 	@Override
 	public void setTool(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
 		removeTools();
-
+		if (plugin instanceof MarsDataPointTooltip) {
+			((MarsDataPointTooltip<Number, Number>) plugin).setTrackingChart(() -> datasetOptionsPane.getTrackingChart());
+		} else if (plugin instanceof MarsRegionSelectionTool) {
+			MarsRegionSelectionTool tool = (MarsRegionSelectionTool) plugin;
+			if (tool.getAxisMode().equals(AxisMode.X))
+				tool.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+			else
+				tool.setColumn(datasetOptionsPane.getTrackingSeries().getYColumn());
+		}
 		chartPane.getPlugins().add(plugin);
 		chartPane.setCursor(cursor);
 	}
@@ -252,9 +246,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return datasetOptionsButton;
 	}
 	
-	protected abstract void addLine(PlotSeries plotSeries);
+	protected abstract XYChart<Number, Number> addLine(PlotSeries plotSeries);
 	
-	protected abstract void addScatter(PlotSeries plotSeries);
+	protected abstract XYChart<Number, Number> addScatter(PlotSeries plotSeries);
 	
 	protected abstract MarsTable getDataTable();
 }

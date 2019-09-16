@@ -13,6 +13,8 @@ import java.util.function.Predicate;
 
 import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.XYChartPlugin;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.RegionOfInterest;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.EventHandler;
@@ -32,6 +34,9 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     public static final String STYLE_CLASS_SELECTION_RECT = "chart-zoom-rect";
     private static final int SELECTION_RECT_MIN_SIZE = 5;
     private static final Duration DEFAULT_SELECTION_DURATION = Duration.millis(500);
+    
+    private Molecule molecule;
+    private String column;
     
     static boolean isOnlyPrimaryButtonDown(MouseEvent event) {
         return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event.isSecondaryButtonDown();
@@ -61,9 +66,11 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     private Point2D selectionStartPoint = null;
     private Point2D selectionEndPoint = null;
 
-    public MarsRegionSelectionTool(AxisMode selectionMode) {
+    public MarsRegionSelectionTool(AxisMode selectionMode, Molecule molecule) {
         setAxisMode(selectionMode);
 
+        this.molecule = molecule;
+        
         selectionRectangle.setManaged(false);
         selectionRectangle.getStyleClass().add(STYLE_CLASS_SELECTION_RECT);
         getChartChildren().add(selectionRectangle);
@@ -223,12 +230,41 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
         double limitedY = Math.max(Math.min(event.getY(), plotBounds.getMaxY()), plotBounds.getMinY());
         return new Point2D(limitedX, limitedY);
     }
+    
+    public void setColumn(String column) {
+    	this.column = column;
+    }
+    
+    public String getColumn() {
+    	return column;
+    }
 
     private void selectionEnded() {
         selectionRectangle.setVisible(false);
         if (selectionRectangle.getWidth() > SELECTION_RECT_MIN_SIZE && selectionRectangle.getHeight() > SELECTION_RECT_MIN_SIZE) {
-            System.out.println("start " + selectionStartPoint.getX() + " end " + selectionStartPoint.getY());
+        	RegionOfInterest regionOfInterest = new RegionOfInterest(getNewRegionName());
+        	if (molecule.getDataTable().getColumnHeadingList().contains(column))
+        		regionOfInterest.setColumn(column);
+        	
+        	if (getAxisMode().equals(AxisMode.X)) {
+        		regionOfInterest.setStart(toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getXValue().doubleValue());
+        		regionOfInterest.setEnd(toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getXValue().doubleValue());
+        	} else if (getAxisMode().equals(AxisMode.Y)) {
+        		regionOfInterest.setStart(toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getYValue().doubleValue());
+        		regionOfInterest.setEnd(toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getYValue().doubleValue());
+        	}
+			molecule.putRegion(regionOfInterest);
         }
         selectionStartPoint = selectionEndPoint = null;
+    }
+    
+    private String getNewRegionName() {
+    	String newName = "Region 1";
+    	int index = 2;
+    	while (molecule.getRegionNames().contains(newName)) {
+    		newName = "Region " + index;
+    		index++;
+    	}
+    	return newName;
     }
 }

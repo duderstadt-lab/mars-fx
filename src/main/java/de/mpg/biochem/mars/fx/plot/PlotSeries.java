@@ -31,7 +31,9 @@ import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 import de.mpg.biochem.mars.table.MarsTable;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.paint.Color;
 
 public class PlotSeries {
@@ -39,8 +41,11 @@ public class PlotSeries {
 		private JFXColorPicker colorField, segmentColorField;
 		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
+		private RadioButton chartTracking;
 		
 		private MarsTable dataTable;
+		
+		private XYChart<Number, Number> chart;
 		
 		private String[] columnHeadings;
 
@@ -64,6 +69,7 @@ public class PlotSeries {
 		}
 		
 		void initComponents() {
+			chartTracking = new RadioButton();
 			typeField = new ComboBox<>();
 			xColumnField = new ComboBox<>();
 			yColumnField = new ComboBox<>();
@@ -118,6 +124,22 @@ public class PlotSeries {
 		
 		public ComboBox<String> xColumnField() {
 			return xColumnField;
+		}
+		
+		public RadioButton getTrackingButton() {
+			return chartTracking;
+		}
+		
+		public boolean trackChart() {
+			return chartTracking.isSelected();
+		}
+		
+		public void setChart(XYChart<Number, Number> chart) {
+			this.chart = chart;
+		}
+		
+		public XYChart<Number, Number> getChart() {
+			return chart;
 		}
 					
 		public JFXCheckBox getDrawSegmentsField() {

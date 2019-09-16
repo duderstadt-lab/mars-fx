@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import cern.extjfx.chart.plugins.AbstractDataFormattingPlugin;
 import javafx.beans.property.DoubleProperty;
@@ -48,7 +49,7 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
     private static final int LABEL_Y_OFFSET = 5;
 
     private final Label label = new Label();
-    
+    private Supplier<XYChart<X, Y>> trackChartSupplier;
     private final Circle circle = new Circle();
 
     /**
@@ -68,7 +69,7 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
      *
      * @param pickingDistance the initial value for the {@link #pickingDistanceProperty() pickingDistance} property
      */
-    public MarsDataPointTooltip(double pickingDistance) {
+    public MarsDataPointTooltip(XYChart<X, Y> trackChart, double pickingDistance) {
         this();
         setPickingDistance(pickingDistance);
     }
@@ -110,6 +111,10 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
     public final void setPickingDistance(double distance) {
         pickingDistanceProperty().set(distance);
     }
+    
+    public void setTrackingChart(Supplier<XYChart<X, Y>> supplier) {
+    	this.trackChartSupplier = supplier;
+    }
 
     private final EventHandler<MouseEvent> mouseMoveHandler = (MouseEvent event) -> {
         updateToolTip(event);
@@ -142,11 +147,8 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
         Point2D mouseLocation = getLocationInPlotArea(event);
         DataPoint nearestDataPoint = null;
 
-        List<XYChart<X, Y>> charts = new ArrayList<>(getCharts());
-        // Search points from top charts to bottom so that symbols drawn on top have precedence
-        Collections.reverse(charts);
-        for (XYChart<X, Y> chart : charts) {
-            DataPoint point = findNearestDataPointWithinPickingDistance(chart, mouseLocation);
+        if (trackChartSupplier != null) {
+            DataPoint point = findNearestDataPointWithinPickingDistance(trackChartSupplier.get(), mouseLocation);
             if (nearestDataPoint == null
                     || (point != null && point.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
                 nearestDataPoint = point;
@@ -156,6 +158,9 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
     }
 
     private DataPoint findNearestDataPointWithinPickingDistance(XYChart<X, Y> chart, Point2D mouseLocation) {
+    	if (chart == null)
+    		return null;
+    	
         DataPoint nearestDataPoint = null;
 
         X xValue = toDataPoint(chart.getYAxis(), mouseLocation).getXValue();
