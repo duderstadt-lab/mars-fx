@@ -13,6 +13,10 @@ import java.util.function.Predicate;
 
 import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.XYChartPlugin;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
+import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
+import de.mpg.biochem.mars.fx.plot.MarsMoleculePlotPlugin;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.RegionOfInterest;
 import javafx.beans.property.ObjectProperty;
@@ -26,7 +30,7 @@ import javafx.util.Duration;
 
 /**
  */
-public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
+public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> implements MarsMoleculePlotPlugin {
 
     /**
      * Name of the CCS class of the selection rectangle.
@@ -36,18 +40,10 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     private static final Duration DEFAULT_SELECTION_DURATION = Duration.millis(500);
     
     private Molecule molecule;
-    private String column;
+    private DatasetOptionsPane datasetOptionsPane;
     
     static boolean isOnlyPrimaryButtonDown(MouseEvent event) {
         return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event.isSecondaryButtonDown();
-    }
-
-    static boolean isOnlySecondaryButtonDown(MouseEvent event) {
-        return event.getButton() == SECONDARY && !event.isPrimaryButtonDown() && !event.isMiddleButtonDown();
-    }
-
-    static boolean isOnlyCtrlModifierDown(MouseEvent event) {
-        return event.isControlDown() && !event.isAltDown() && !event.isMetaDown() && !event.isShiftDown();
     }
 
     static boolean modifierKeysUp(MouseEvent event) {
@@ -66,10 +62,8 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     private Point2D selectionStartPoint = null;
     private Point2D selectionEndPoint = null;
 
-    public MarsRegionSelectionTool(AxisMode selectionMode, Molecule molecule) {
+    public MarsRegionSelectionTool(AxisMode selectionMode) {
         setAxisMode(selectionMode);
-
-        this.molecule = molecule;
         
         selectionRectangle.setManaged(false);
         selectionRectangle.getStyleClass().add(STYLE_CLASS_SELECTION_RECT);
@@ -194,9 +188,9 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     }
     
     private void inSelectionStarted(MouseEvent event) {
-        selectionStartPoint = new Point2D(event.getX(), event.getY());
-        selectionRectangle.setX(selectionStartPoint.getX());
-        selectionRectangle.setY(selectionStartPoint.getY());
+        selectionStartPoint = getLocationInPlotArea(event);
+        selectionRectangle.setX(event.getX());
+        selectionRectangle.setY(event.getY());
         selectionRectangle.setWidth(0);
         selectionRectangle.setHeight(0);
         selectionRectangle.setVisible(true);
@@ -204,7 +198,10 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
 
     private void inSelectionMoved(MouseEvent event) {
         Bounds plotAreaBounds = getChartPane().getPlotAreaBounds();
-        selectionEndPoint = limitToPlotArea(event, plotAreaBounds);
+        Point2D selectionEnd = limitToPlotArea(event, plotAreaBounds);
+        
+        //Save for region setting in real values..
+        selectionEndPoint = getLocationInPlotArea(event);
 
         double selectionRectX = plotAreaBounds.getMinX();
         double selectionRectY = plotAreaBounds.getMinY();
@@ -212,12 +209,12 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
         double selectionRectHeight = plotAreaBounds.getHeight();
 
         if (getAxisMode().allowsX()) {
-            selectionRectX = Math.min(selectionStartPoint.getX(), selectionEndPoint.getX());
-            selectionRectWidth = Math.abs(selectionEndPoint.getX() - selectionStartPoint.getX());
+            selectionRectX = Math.min(selectionRectangle.getX(), selectionEnd.getX());
+            selectionRectWidth = Math.abs(selectionEnd.getX() - selectionRectangle.getX());
         }
         if (getAxisMode().allowsY()) {
-            selectionRectY = Math.min(selectionStartPoint.getY(), selectionEndPoint.getY());
-            selectionRectHeight = Math.abs(selectionEndPoint.getY() - selectionStartPoint.getY());
+            selectionRectY = Math.min(selectionRectangle.getY(), selectionEnd.getY());
+            selectionRectHeight = Math.abs(selectionEnd.getY() - selectionRectangle.getY());
         }
         selectionRectangle.setX(selectionRectX);
         selectionRectangle.setY(selectionRectY);
@@ -230,30 +227,38 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
         double limitedY = Math.max(Math.min(event.getY(), plotBounds.getMaxY()), plotBounds.getMinY());
         return new Point2D(limitedX, limitedY);
     }
-    
-    public void setColumn(String column) {
-    	this.column = column;
-    }
-    
-    public String getColumn() {
-    	return column;
-    }
 
     private void selectionEnded() {
         selectionRectangle.setVisible(false);
         if (selectionRectangle.getWidth() > SELECTION_RECT_MIN_SIZE && selectionRectangle.getHeight() > SELECTION_RECT_MIN_SIZE) {
         	RegionOfInterest regionOfInterest = new RegionOfInterest(getNewRegionName());
+        	
+        	String column;
+        	if (getAxisMode().equals(AxisMode.X))
+				column = datasetOptionsPane.getTrackingSeries().getXColumn();
+			else
+				column = datasetOptionsPane.getTrackingSeries().getYColumn();
+        	
+        	if (molecule == null)
+        		return;
+        	
         	if (molecule.getDataTable().getColumnHeadingList().contains(column))
         		regionOfInterest.setColumn(column);
         	
         	if (getAxisMode().equals(AxisMode.X)) {
-        		regionOfInterest.setStart(toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getXValue().doubleValue());
-        		regionOfInterest.setEnd(toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getXValue().doubleValue());
+        		double startPoint = toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getXValue().doubleValue();
+        		double endPoint = toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getXValue().doubleValue();
+        		
+        		System.out.println("Start " + startPoint + " endPoint " + endPoint);
+        		
+        		regionOfInterest.setStart(startPoint);
+        		regionOfInterest.setEnd(endPoint);
         	} else if (getAxisMode().equals(AxisMode.Y)) {
         		regionOfInterest.setStart(toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getYValue().doubleValue());
         		regionOfInterest.setEnd(toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getYValue().doubleValue());
         	}
 			molecule.putRegion(regionOfInterest);
+			this.getChartPane().fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
         }
         selectionStartPoint = selectionEndPoint = null;
     }
@@ -267,4 +272,14 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> {
     	}
     	return newName;
     }
+
+	@Override
+	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
+		this.datasetOptionsPane = datasetOptionsPane;
+	}
+
+	@Override
+	public void setMolecule(Molecule molecule) {
+		this.molecule = molecule;
+	}
 }

@@ -1,0 +1,26 @@
+package de.mpg.biochem.mars.fx.event;
+
+import de.mpg.biochem.mars.molecule.Molecule;
+import javafx.event.EventType;
+
+public class MoleculeIndicatorsChangedEvent extends MoleculeEvent {
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public static final EventType<MoleculeEvent> MOLECULE_INDICATORS_CHANGED = new EventType<>(MOLECULE_EVENT, "MOLECULE_INDICATORS_CHANGED");
+
+    private final Molecule molecule;
+
+    public MoleculeIndicatorsChangedEvent(Molecule molecule) {
+        super(MOLECULE_INDICATORS_CHANGED);
+        this.molecule = molecule;
+    }
+
+    @Override
+    public void invokeHandler(MoleculeEventHandler handler) {
+       handler.onMoleculeIndicatorsChangedEvent(molecule);
+    }
+}

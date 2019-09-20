@@ -38,13 +38,21 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		
 		regionSelected = new SimpleBooleanProperty();
 		Action regionSelectionCursor = new Action("region", "Shortcut+R", SQUARE, 
-				e -> setTool(regionSelected, () -> new MarsRegionSelectionTool(AxisMode.X, molecule), Cursor.DEFAULT), 
+				e -> setTool(regionSelected, () -> {
+					MarsRegionSelectionTool tool = new MarsRegionSelectionTool(AxisMode.X);
+					tool.setMolecule(molecule);
+					return tool;
+				}, Cursor.DEFAULT), 
 				null, regionSelected);
 		addTool(regionSelectionCursor);
 		
 		positionSelected = new SimpleBooleanProperty();
 		Action positionSelectionCursor = new Action("position", "Shortcut+P", de.jensd.fx.glyphs.octicons.OctIcon.MILESTONE, 
-				e -> setTool(positionSelected, () -> new MarsPositionSelectionTool<Number, Number>(), Cursor.DEFAULT),
+				e -> setTool(positionSelected, () -> {
+					MarsPositionSelectionTool<Number, Number> tool = new MarsPositionSelectionTool<Number, Number>();
+					tool.setMolecule(molecule);
+					return tool;
+				}, Cursor.DEFAULT),
 				null, positionSelected);
 		addTool(positionSelectionCursor);
 	}
@@ -66,6 +74,11 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		this.molecule = (M) molecule;
 		for (SubPlot subPlot : charts) 
 			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	}
+	
+	@Override
+	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
+		//Nothing required...
 	}
 
 	@Override

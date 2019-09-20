@@ -25,6 +25,7 @@ import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
@@ -211,7 +212,34 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		this.molecule = (M) molecule;
 		removeIndicators();
 		getDatasetOptionsPane().setTable(molecule.getDataTable());
+		for (XYChartPlugin<Number, Number> plugin : chartPane.getPlugins())
+			if (plugin instanceof MarsMoleculePlotPlugin)
+				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();
+	}
+	
+	@Override
+	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
+		clear();
+
+		for (int i=0;i<getPlotSeriesList().size();i++) {
+			PlotSeries plotSeries = getPlotSeriesList().get(i);
+			
+			if (plotSeries.xColumnField().getSelectionModel().getSelectedIndex() != -1 
+				&& plotSeries.yColumnField().getSelectionModel().getSelectedIndex() != -1) {
+					if (plotSeries.getType().equals("Line")) {
+						plotSeries.setChart(addLine(plotSeries));
+					} else if (plotSeries.getType().equals("Scatter")) {
+						plotSeries.setChart(addScatter(plotSeries));
+					}
+			}
+		}
+		if (!datasetOptionsPane.getTitle().equals(""))
+			setTitle(datasetOptionsPane.getTitle());
+		if (!datasetOptionsPane.getXAxisName().equals(""))
+			setXLabel(datasetOptionsPane.getXAxisName());
+		if (!datasetOptionsPane.getYAxisName().equals(""))
+			setYLabel(datasetOptionsPane.getYAxisName());
 	}
 
 	@Override

@@ -1,12 +1,11 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import cern.extjfx.chart.plugins.AbstractDataFormattingPlugin;
+import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
+import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -33,7 +32,7 @@ import javafx.scene.paint.Color;
  * @param <X> type of X values
  * @param <Y> type of Y values
  */
-public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
+public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, Y> implements MarsPlotPlugin {
     /**
      * Name of the CSS class of the tool tip label.
      */
@@ -49,8 +48,9 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
     private static final int LABEL_Y_OFFSET = 5;
 
     private final Label label = new Label();
-    private Supplier<XYChart<X, Y>> trackChartSupplier;
     private final Circle circle = new Circle();
+    
+    private DatasetOptionsPane datasetOptionsPane;
 
     /**
      * Creates a new instance of DataPointTooltip class with {{@link #pickingDistanceProperty() picking distance}
@@ -111,10 +111,6 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
     public final void setPickingDistance(double distance) {
         pickingDistanceProperty().set(distance);
     }
-    
-    public void setTrackingChart(Supplier<XYChart<X, Y>> supplier) {
-    	this.trackChartSupplier = supplier;
-    }
 
     private final EventHandler<MouseEvent> mouseMoveHandler = (MouseEvent event) -> {
         updateToolTip(event);
@@ -147,8 +143,9 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
         Point2D mouseLocation = getLocationInPlotArea(event);
         DataPoint nearestDataPoint = null;
 
-        if (trackChartSupplier != null) {
-            DataPoint point = findNearestDataPointWithinPickingDistance(trackChartSupplier.get(), mouseLocation);
+        if (datasetOptionsPane != null) {
+            @SuppressWarnings("unchecked")
+			DataPoint point = findNearestDataPointWithinPickingDistance((XYChart<X, Y>) datasetOptionsPane.getTrackingChart(), mouseLocation);
             if (nearestDataPoint == null
                     || (point != null && point.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
                 nearestDataPoint = point;
@@ -164,6 +161,7 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
         DataPoint nearestDataPoint = null;
 
         X xValue = toDataPoint(chart.getYAxis(), mouseLocation).getXValue();
+        
         for (DataPoint dataPoint : findPointsToCheck(chart, xValue)) {
             Node node = dataPoint.data.getNode();
             if (node != null && node.isVisible()) {
@@ -175,7 +173,6 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
                 Point2D displayPoint = toDisplayPoint(chart.getYAxis(), dataPoint.data);
                 
                 dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-                //if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
                 if (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse) {
                   nearestDataPoint = dataPoint;
                 }
@@ -299,5 +296,10 @@ public class MarsDataPointTooltip<X, Y> extends AbstractDataFormattingPlugin<X, 
             this.data = data;
         }
     }
+
+	@Override
+	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
+		this.datasetOptionsPane = datasetOptionsPane;
+	}
 }
 

@@ -13,7 +13,9 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -226,6 +228,12 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 		regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		positionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     }
+	
+	@Override
+	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
+		regionOfInterestTable.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
+		positionOfInterestTable.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
+	}
    
    @Override
    public void handle(MoleculeEvent event) {

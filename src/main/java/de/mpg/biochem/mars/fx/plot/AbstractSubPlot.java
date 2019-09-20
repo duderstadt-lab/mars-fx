@@ -122,14 +122,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 	@Override
 	public void setTool(XYChartPlugin<Number, Number> plugin, Cursor cursor) {
 		removeTools();
-		if (plugin instanceof MarsDataPointTooltip) {
-			((MarsDataPointTooltip<Number, Number>) plugin).setTrackingChart(() -> datasetOptionsPane.getTrackingChart());
-		} else if (plugin instanceof MarsRegionSelectionTool) {
-			MarsRegionSelectionTool tool = (MarsRegionSelectionTool) plugin;
-			if (tool.getAxisMode().equals(AxisMode.X))
-				tool.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
-			else
-				tool.setColumn(datasetOptionsPane.getTrackingSeries().getYColumn());
+		if (plugin instanceof MarsPlotPlugin) {
+			((MarsPlotPlugin) plugin).setDatasetOptionsPane(datasetOptionsPane);
 		}
 		chartPane.getPlugins().add(plugin);
 		chartPane.setCursor(cursor);

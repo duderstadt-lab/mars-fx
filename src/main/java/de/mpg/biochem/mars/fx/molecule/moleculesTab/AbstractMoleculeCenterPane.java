@@ -3,6 +3,7 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
@@ -82,6 +83,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		//Load SegmentTables
 		loadSegmentTables();
+	}
+	
+	@Override
+	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
+		plotPane.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
 	}
 	
 	public abstract P createPlotPane();

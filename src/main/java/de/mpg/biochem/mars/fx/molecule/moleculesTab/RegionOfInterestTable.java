@@ -5,6 +5,7 @@ import com.jfoenix.controls.JFXColorPicker;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import javafx.scene.paint.Color;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
@@ -75,6 +76,7 @@ public class RegionOfInterestTable implements MoleculeSubPane {
                 removeButton.setOnAction(e -> {
         			molecule.removeRegion(pRow.getName());
         			loadData();
+        			getNode().fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
         		});
             }
         });
@@ -247,5 +249,10 @@ public class RegionOfInterestTable implements MoleculeSubPane {
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = molecule;
     	loadData();
+	}
+
+	@Override
+	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
+		loadData();
 	}
 }

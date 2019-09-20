@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cern.extjfx.chart.plugins.AbstractDataFormattingPlugin;
+import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
+import de.mpg.biochem.mars.fx.plot.MarsMoleculePlotPlugin;
+import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
@@ -32,7 +35,7 @@ import javafx.scene.paint.Color;
  * @param <X> type of X values
  * @param <Y> type of Y values
  */
-public class MarsPositionSelectionTool<X, Y> extends AbstractDataFormattingPlugin<X, Y> {
+public class MarsPositionSelectionTool<X, Y> extends AbstractDataFormattingPlugin<X, Y> implements MarsMoleculePlotPlugin {
     /**
      * Name of the CSS class of the tool tip label.
      */
@@ -50,6 +53,9 @@ public class MarsPositionSelectionTool<X, Y> extends AbstractDataFormattingPlugi
     private final Label label = new Label();
     
     private final Circle circle = new Circle();
+    
+    private Molecule molecule;
+    private DatasetOptionsPane datasetOptionsPane;
 
     /**
      * Creates a new instance of DataPointTooltip class with {{@link #pickingDistanceProperty() picking distance}
@@ -294,5 +300,15 @@ public class MarsPositionSelectionTool<X, Y> extends AbstractDataFormattingPlugi
             this.data = data;
         }
     }
+
+	@Override
+	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
+		this.datasetOptionsPane = datasetOptionsPane;
+	}
+
+	@Override
+	public void setMolecule(Molecule molecule) {
+		this.molecule = molecule;
+	}
 }
 
