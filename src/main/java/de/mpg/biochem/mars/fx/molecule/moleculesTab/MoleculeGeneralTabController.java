@@ -193,9 +193,4 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		}
 		*/
 	}
-
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		//nothing required..
-	}
 }

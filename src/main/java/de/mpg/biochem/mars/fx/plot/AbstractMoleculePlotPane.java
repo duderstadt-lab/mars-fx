@@ -8,12 +8,15 @@ import cern.extjfx.chart.plugins.Zoomer;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
@@ -30,6 +33,16 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		addChart();
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
+			   @Override 
+			   public void handle(PlotEvent e) { 
+				   	if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
+				   		e.consume();
+				   		for (SubPlot subPlot : charts) 
+							subPlot.fireEvent(new UpdatePlotAreaEvent());
+				   	}
+			   };
+		});
 	}
 	
 	@Override
@@ -74,11 +87,6 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		this.molecule = (M) molecule;
 		for (SubPlot subPlot : charts) 
 			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-	}
-	
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		//Nothing required...
 	}
 
 	@Override

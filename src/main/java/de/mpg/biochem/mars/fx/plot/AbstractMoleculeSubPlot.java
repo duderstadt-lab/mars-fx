@@ -16,6 +16,7 @@ import cern.extjfx.chart.plugins.YRangeIndicator;
 import cern.extjfx.chart.plugins.YValueIndicator;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.PositionOfInterest;
@@ -45,6 +46,16 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		namesOfActivePositions = new HashSet<String>();
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
+			   @Override 
+			   public void handle(PlotEvent e) { 
+				   if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
+					   	removeIndicators();
+						update();
+						e.consume();
+				   }
+			   } 
+			});
 	}
 	
 	protected XYChart<Number, Number> addLine(PlotSeries plotSeries) {
@@ -54,7 +65,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		NumericAxis xAxis = createAxis();
 		NumericAxis yAxis = createAxis();
 		
-		resetXYZoom();
+		//resetXYZoom();
 		
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
@@ -105,7 +116,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		NumericAxis xAxis = createAxis();
 		NumericAxis yAxis = createAxis();
 		
-		resetXYZoom();
+		//resetXYZoom();
 		
 		resetXAxis(xAxis);
 		resetYAxis(yAxis);
@@ -216,30 +227,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			if (plugin instanceof MarsMoleculePlotPlugin)
 				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();
-	}
-	
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		clear();
-
-		for (int i=0;i<getPlotSeriesList().size();i++) {
-			PlotSeries plotSeries = getPlotSeriesList().get(i);
-			
-			if (plotSeries.xColumnField().getSelectionModel().getSelectedIndex() != -1 
-				&& plotSeries.yColumnField().getSelectionModel().getSelectedIndex() != -1) {
-					if (plotSeries.getType().equals("Line")) {
-						plotSeries.setChart(addLine(plotSeries));
-					} else if (plotSeries.getType().equals("Scatter")) {
-						plotSeries.setChart(addScatter(plotSeries));
-					}
-			}
-		}
-		if (!datasetOptionsPane.getTitle().equals(""))
-			setTitle(datasetOptionsPane.getTitle());
-		if (!datasetOptionsPane.getXAxisName().equals(""))
-			setXLabel(datasetOptionsPane.getXAxisName());
-		if (!datasetOptionsPane.getYAxisName().equals(""))
-			setYLabel(datasetOptionsPane.getYAxisName());
+		resetXYZoom();
 	}
 
 	@Override

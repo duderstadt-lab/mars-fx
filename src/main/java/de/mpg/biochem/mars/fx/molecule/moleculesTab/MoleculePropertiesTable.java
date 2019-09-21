@@ -194,9 +194,4 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 		this.molecule = molecule;
     	loadData();
 	}
-
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		//nothing required..
-	}
 }

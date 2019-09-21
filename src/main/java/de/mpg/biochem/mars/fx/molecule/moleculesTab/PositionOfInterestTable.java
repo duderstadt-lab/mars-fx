@@ -5,7 +5,7 @@ import com.jfoenix.controls.JFXColorPicker;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
+import de.mpg.biochem.mars.fx.event.IndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -77,7 +77,7 @@ public class PositionOfInterestTable implements MoleculeSubPane {
                 removeButton.setOnAction(e -> {
                 	molecule.removePosition(pRow.getName());
         			loadData();
-        			getNode().fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
+        			getNode().fireEvent(new IndicatorChangedEvent(molecule));
         		});
             }
         });
@@ -230,10 +230,5 @@ public class PositionOfInterestTable implements MoleculeSubPane {
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = molecule;
     	loadData();
-	}
-
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		loadData();
 	}
 }

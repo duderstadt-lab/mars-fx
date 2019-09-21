@@ -10,9 +10,10 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -74,19 +75,25 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		rootPane.setDividerPositions(0.15f, 0.85f);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
-		getNode().addEventFilter(MoleculeEvent.MOLECULE_EVENT, 
-                new EventHandler<MoleculeEvent>() {
-            public void handle(MoleculeEvent e) {  
-            	//if (e.getEventType().getName().equals("MOLECULE_INDICATORS_CHANGED")) {
-            		//System.out.println(e.getTarget().getClass());
-            		//if (e.getTarget().getClass() instanceof XYChartPane)
-            		//	moleculePropertiesPane.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
-            		//else 
-            		//	moleculeCenterPane.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
-            	//	e.consume();       		
-            	//}
-            };
+		getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
+			   @Override 
+			   public void handle(PlotEvent e) { 
+				   	if (e.getEventType().getName().equals("NEW_REGION_ADDED")) {
+				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		e.consume();
+				   	}
+			   };
         });
+		getNode().addEventFilter(MoleculeEvent.MOLECULE_EVENT, new EventHandler<MoleculeEvent>() { 
+			   @Override 
+			   public void handle(MoleculeEvent e) { 
+				   if (e.getEventType().getName().equals("INDICATOR_CHANGED")) {
+				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		e.consume();
+				   }
+			   };
+		});
 		
 		setContent(rootPane);
 	}

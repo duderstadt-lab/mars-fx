@@ -7,16 +7,14 @@ package de.mpg.biochem.mars.fx.plot.tools;
 import static cern.extjfx.chart.AxisMode.XY;
 
 import static javafx.scene.input.MouseButton.PRIMARY;
-import static javafx.scene.input.MouseButton.SECONDARY;
 import java.util.Objects;
 import java.util.function.Predicate;
 
 import cern.extjfx.chart.AxisMode;
 import cern.extjfx.chart.XYChartPlugin;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsMoleculePlotPlugin;
+import de.mpg.biochem.mars.fx.plot.event.NewRegionAddedEvent;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.RegionOfInterest;
 import javafx.beans.property.ObjectProperty;
@@ -248,9 +246,6 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> imple
         	if (getAxisMode().equals(AxisMode.X)) {
         		double startPoint = toDataPoint(getCharts().get(0).getYAxis(), selectionStartPoint).getXValue().doubleValue();
         		double endPoint = toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getXValue().doubleValue();
-        		
-        		System.out.println("Start " + startPoint + " endPoint " + endPoint);
-        		
         		regionOfInterest.setStart(startPoint);
         		regionOfInterest.setEnd(endPoint);
         	} else if (getAxisMode().equals(AxisMode.Y)) {
@@ -258,7 +253,7 @@ public class MarsRegionSelectionTool extends XYChartPlugin<Number, Number> imple
         		regionOfInterest.setEnd(toDataPoint(getCharts().get(0).getYAxis(), selectionEndPoint).getYValue().doubleValue());
         	}
 			molecule.putRegion(regionOfInterest);
-			this.getChartPane().fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
+			this.getChartPane().fireEvent(new NewRegionAddedEvent());
         }
         selectionStartPoint = selectionEndPoint = null;
     }

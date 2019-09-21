@@ -7,5 +7,4 @@ import javafx.event.EventHandler;
 public interface MoleculeEventHandler extends EventHandler<MoleculeEvent> {
 	public void fireEvent(Event event);
 	public void onMoleculeSelectionChangedEvent(Molecule molecule);
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule);
 }

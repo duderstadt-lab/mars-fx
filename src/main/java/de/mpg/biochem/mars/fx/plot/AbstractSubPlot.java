@@ -116,7 +116,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
-		resetXYZoom();
+		//resetXYZoom();
 	}
 	
 	@Override

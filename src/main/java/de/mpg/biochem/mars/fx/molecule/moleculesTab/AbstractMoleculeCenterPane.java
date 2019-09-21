@@ -3,12 +3,14 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -54,6 +56,15 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		tabPane.getSelectionModel().select(dataTableTab);
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
+			   @Override 
+			   public void handle(PlotEvent e) { 
+				   	if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
+				   		plotPane.fireEvent(new UpdatePlotAreaEvent());
+				   		e.consume();
+				   	}
+			   };
+		});
 	}
 	
 	public void loadSegmentTables() {
@@ -83,11 +94,6 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		//Load SegmentTables
 		loadSegmentTables();
-	}
-	
-	@Override
-	public void onMoleculeIndicatorsChangedEvent(Molecule molecule) {
-		plotPane.fireEvent(new MoleculeIndicatorsChangedEvent(molecule));
 	}
 	
 	public abstract P createPlotPane();
