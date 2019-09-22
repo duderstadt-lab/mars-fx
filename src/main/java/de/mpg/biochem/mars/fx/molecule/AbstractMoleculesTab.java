@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
-import cern.extjfx.chart.XYChartPane;
+//import cern.extjfx.chart.XYChartPane;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;

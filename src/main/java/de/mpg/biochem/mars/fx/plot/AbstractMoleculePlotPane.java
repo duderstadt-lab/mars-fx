@@ -3,15 +3,15 @@ package de.mpg.biochem.mars.fx.plot;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE;
 
-import cern.extjfx.chart.AxisMode;
-import cern.extjfx.chart.plugins.Zoomer;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.plugins.Zoomer;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
-import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
-import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.beans.property.BooleanProperty;
@@ -48,7 +48,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	@Override
 	protected void buildTools() {
 		super.buildTools();
-		
+		/*
 		regionSelected = new SimpleBooleanProperty();
 		Action regionSelectionCursor = new Action("region", "Shortcut+R", SQUARE, 
 				e -> setTool(regionSelected, () -> {
@@ -68,6 +68,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				}, Cursor.DEFAULT),
 				null, positionSelected);
 		addTool(positionSelectionCursor);
+		*/
 	}
 	
 	@Override

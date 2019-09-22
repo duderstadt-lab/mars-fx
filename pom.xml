@@ -161,7 +161,6 @@
 			<artifactId>decimal4j</artifactId>
 			<version>${decimal4j.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-api</artifactId>
@@ -185,11 +184,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer_fiji</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>cern.extjfx</groupId>
-			<artifactId>extjfx-samples</artifactId>
-			<version>0.0.1</version>
 		</dependency>
 		<dependency>
     		<groupId>de.jensd</groupId>
@@ -330,6 +324,11 @@
 			<groupId>com.miglayout</groupId>
 			<artifactId>miglayout-javafx</artifactId>
 			<version>5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>de.gsi.chart</groupId>
+			<artifactId>chartfx-chart</artifactId>
+			<version>8.0.3</version>
 		</dependency>
 	</dependencies>
 	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>

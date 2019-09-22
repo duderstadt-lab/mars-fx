@@ -2,22 +2,21 @@ package de.mpg.biochem.mars.fx.plot;
 
 import com.jfoenix.controls.JFXBadge;
 
-import cern.extjfx.chart.NumericAxis;
-import cern.extjfx.chart.XYChartPlugin;
-import de.mpg.biochem.mars.table.MarsTable;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.ChartPlugin;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
 public interface SubPlot {
 	public void resetXYZoom();
-	public NumericAxis getXAxis();
+	public DefaultNumericAxis getXAxis();
 	public void setXLabel(String xAxisLabel);
-	public NumericAxis getYAxis();
+	public DefaultNumericAxis getYAxis();
 	public void setYLabel(String yAxisLabel);
 	public DatasetOptionsPane getDatasetOptionsPane();
 	public JFXBadge getDatasetOptionsButton();
-	public void setTool(XYChartPlugin<Number, Number> plugin, Cursor cursor);
+	public void setTool(ChartPlugin plugin, Cursor cursor);
 	public void removeTools();
 	public void removeIndicators();
 	public Node getNode();

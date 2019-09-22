@@ -1,9 +1,9 @@
 package de.mpg.biochem.mars.fx.plot;
 
-import cern.extjfx.chart.AxisMode;
-import cern.extjfx.chart.XYChartPlugin;
-import cern.extjfx.chart.plugins.Panner;
-import cern.extjfx.chart.plugins.Zoomer;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.plugins.Panner;
+import de.gsi.chart.plugins.Zoomer;
 
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -28,9 +28,9 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
-import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
-import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
@@ -80,11 +80,12 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	}
 	
 	protected void buildTools() {
+		/*
 		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> { 
-			setTool(trackSelected, () -> new MarsDataPointTooltip<Number, Number>(), Cursor.DEFAULT);
+			setTool(trackSelected, () -> new MarsDataPointTooltip(), Cursor.DEFAULT);
 		}, null, trackSelected);
 		addTool(trackCursor);
-		
+		*/
 		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new Zoomer(true), Cursor.CROSSHAIR),
 				null, zoomXYSelected);
 		addTool(zoomXYCursor);
@@ -171,7 +172,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return toolBar;
 	}
 	
-	protected void setTool(BooleanProperty selected, Supplier<XYChartPlugin<Number, Number>> supplier, Cursor cursor) {
+	protected void setTool(BooleanProperty selected, Supplier<ChartPlugin> supplier, Cursor cursor) {
 		for (SubPlot subPlot : charts) {
 			if (selected.get()) {
 				subPlot.setTool(supplier.get(), cursor);

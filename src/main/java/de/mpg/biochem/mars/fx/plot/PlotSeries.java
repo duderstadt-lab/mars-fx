@@ -31,7 +31,7 @@ import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 import de.mpg.biochem.mars.table.MarsTable;
-import javafx.scene.chart.XYChart;
+import de.gsi.chart.XYChart;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.paint.Color;
@@ -45,7 +45,7 @@ public class PlotSeries {
 		
 		private MarsTable dataTable;
 		
-		private XYChart<Number, Number> chart;
+		private XYChart chart;
 		
 		private String[] columnHeadings;
 
@@ -134,11 +134,11 @@ public class PlotSeries {
 			return chartTracking.isSelected();
 		}
 		
-		public void setChart(XYChart<Number, Number> chart) {
+		public void setChart(XYChart chart) {
 			this.chart = chart;
 		}
 		
-		public XYChart<Number, Number> getChart() {
+		public XYChart getChart() {
 			return chart;
 		}
 					

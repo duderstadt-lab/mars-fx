@@ -22,7 +22,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.chart.XYChart;
+import de.gsi.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -275,7 +275,7 @@ public class DatasetOptionsPane extends MigPane {
 		}
 	}
 	
-	public XYChart<Number, Number> getTrackingChart() {
+	public XYChart getTrackingChart() {
 		for (PlotSeries series : getPlotSeriesList()) {
 			if (series.trackChart())
 				return series.getChart();

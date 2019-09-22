@@ -5,19 +5,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import cern.extjfx.chart.AxisMode;
-import cern.extjfx.chart.NumericAxis;
-import cern.extjfx.chart.XYChartPlugin;
-import cern.extjfx.chart.data.DataReducingObservableList;
-import cern.extjfx.chart.plugins.AbstractValueIndicator;
-import cern.extjfx.chart.plugins.XRangeIndicator;
-import cern.extjfx.chart.plugins.XValueIndicator;
-import cern.extjfx.chart.plugins.YRangeIndicator;
-import cern.extjfx.chart.plugins.YValueIndicator;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.plugins.AbstractValueIndicator;
+import de.gsi.chart.plugins.XRangeIndicator;
+import de.gsi.chart.plugins.XValueIndicator;
+import de.gsi.chart.plugins.YRangeIndicator;
+import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.dataset.spi.DoubleDataSet;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
-import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
+//import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.PositionOfInterest;
 import de.mpg.biochem.mars.molecule.RegionOfInterest;
@@ -58,6 +58,62 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			});
 	}
 	
+	protected DoubleDataSet addLine(PlotSeries plotSeries) {
+		String xColumn = plotSeries.getXColumn();
+		String yColumn = plotSeries.getYColumn();
+
+		DoubleDataSet dataset = new DoubleDataSet(plotSeries.getXColumn() + " vs " + plotSeries.getYColumn());
+		
+		//List<Double> xValueList = new ArrayList<>();
+		//List<Double> yValueList = new ArrayList<>();
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			double x = getDataTable().getValue(xColumn, row);
+			double y = getDataTable().getValue(yColumn, row);
+			
+			if (!Double.isNaN(x) && !Double.isNaN(y)) {
+				dataset.add(x, y);
+			}
+		}
+		
+		//final double[] xValues = new double[xValueList.size()];
+		//final double[] yValues = new double[yValueList.size()];
+		//for (int row=0;row<xValueList.size();row++) {
+		//	xValues[row] = xValueList.get(row);
+		//	yValues[row] = yValueList.get(row);
+		//}
+		
+		
+		
+		//If the columns are entirely NaN values. Don't add he plot
+		//if (xValueList.size() == 0)
+		//	return null;
+		
+		return dataset;
+	}
+	
+	protected DoubleDataSet addScatter(PlotSeries plotSeries) {
+		String xColumn = plotSeries.getXColumn();
+		String yColumn = plotSeries.getYColumn();
+
+		DoubleDataSet dataset = new DoubleDataSet(plotSeries.getXColumn() + " vs " + plotSeries.getYColumn());
+		
+		//List<Double> xValueList = new ArrayList<>();
+		//List<Double> yValueList = new ArrayList<>();
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			double x = getDataTable().getValue(xColumn, row);
+			double y = getDataTable().getValue(yColumn, row);
+			
+			if (!Double.isNaN(x) && !Double.isNaN(y)) {
+				dataset.add(x, y);
+			}
+		}
+
+		dataset.setStyle("markerType=circle;");
+		
+		return dataset;
+	}
+	
+	/*
 	protected XYChart<Number, Number> addLine(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
@@ -109,6 +165,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		return lineChart;
 	}
 	
+	
+	
 	protected XYChart<Number, Number> addScatter(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
@@ -158,18 +216,19 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		return scatterChart;
 	}
+	*/
 	
 	protected void addRegionsOfInterest(String xColumn, String yColumn) {
 		for (String regionName : molecule.getRegionNames()) {
 			if (molecule.getRegion(regionName).getColumn().equals(xColumn) && !namesOfActiveRegions.contains(regionName)) {
 				RegionOfInterest roi = molecule.getRegion(regionName);
-				XRangeIndicator<Number> xRangeIndicator = new XRangeIndicator<>(roi.getStart(), roi.getEnd(), roi.getName());
+				XRangeIndicator xRangeIndicator = new XRangeIndicator(this.globalXAxis, roi.getStart(), roi.getEnd(), roi.getName());
 				xRangeIndicator.setLabelVerticalPosition(0.2);
 				namesOfActiveRegions.add(regionName);
 				chartPane.getPlugins().add(xRangeIndicator);
 			} else if (molecule.getRegion(regionName).getColumn().equals(yColumn) && !namesOfActiveRegions.contains(regionName)) {
 				RegionOfInterest roi = molecule.getRegion(regionName);
-				YRangeIndicator<Number> yRangeIndicator = new YRangeIndicator<>(roi.getStart(), roi.getEnd(), roi.getName());
+				YRangeIndicator yRangeIndicator = new YRangeIndicator(this.globalYAxis, roi.getStart(), roi.getEnd(), roi.getName());
 				yRangeIndicator.setLabelVerticalPosition(0.2);
 				namesOfActiveRegions.add(regionName);
 				chartPane.getPlugins().add(yRangeIndicator);
@@ -181,13 +240,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		for (String positionName : molecule.getPositionNames()) {
 			if (molecule.getPosition(positionName).getColumn().equals(xColumn) && !namesOfActivePositions.contains(positionName)) {
 				PositionOfInterest poi = molecule.getPosition(positionName);
-				XValueIndicator<Number> xValueIndicator = new XValueIndicator<>(poi.getPosition(), poi.getName());
+				XValueIndicator xValueIndicator = new XValueIndicator(this.globalXAxis, poi.getPosition(), poi.getName());
 				xValueIndicator.setLabelPosition(0.2);
 				namesOfActivePositions.add(positionName);
 				chartPane.getPlugins().add(xValueIndicator);
 			} else if (molecule.getPosition(positionName).getColumn().equals(yColumn) && !namesOfActivePositions.contains(positionName)) {
 				PositionOfInterest poi = molecule.getPosition(positionName);
-				YValueIndicator<Number> yValueIndicator = new YValueIndicator<>(poi.getPosition(), poi.getName());
+				YValueIndicator yValueIndicator = new YValueIndicator(this.globalYAxis, poi.getPosition(), poi.getName());
 				yValueIndicator.setLabelPosition(0.2);
 				namesOfActivePositions.add(positionName);
 				chartPane.getPlugins().add(yValueIndicator);
@@ -198,7 +257,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	@Override
 	public void removeIndicators() {
 		ArrayList<Object> indicators = new ArrayList<Object>();
-    	for (XYChartPlugin<Number, Number> plugin : chartPane.getPlugins())
+    	for (ChartPlugin plugin : chartPane.getPlugins())
 			if (plugin instanceof AbstractValueIndicator)
 				indicators.add(plugin);
 		chartPane.getPlugins().removeAll(indicators);
@@ -223,7 +282,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		this.molecule = (M) molecule;
 		removeIndicators();
 		getDatasetOptionsPane().setTable(molecule.getDataTable());
-		for (XYChartPlugin<Number, Number> plugin : chartPane.getPlugins())
+		for (ChartPlugin plugin : chartPane.getPlugins())
 			if (plugin instanceof MarsMoleculePlotPlugin)
 				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();
