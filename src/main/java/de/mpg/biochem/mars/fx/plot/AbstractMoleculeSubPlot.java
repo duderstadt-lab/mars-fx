@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
@@ -28,9 +29,6 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
-import javafx.scene.chart.XYChart.Series;
 
 public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends AbstractSubPlot implements MoleculeSubPane {
 	
@@ -82,11 +80,12 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		//	yValues[row] = yValueList.get(row);
 		//}
 		
-		
-		
 		//If the columns are entirely NaN values. Don't add he plot
 		//if (xValueList.size() == 0)
 		//	return null;
+		
+		addRegionsOfInterest(xColumn, yColumn);
+		//addPositionsOfInterest(xColumn, yColumn);
 		
 		return dataset;
 	}

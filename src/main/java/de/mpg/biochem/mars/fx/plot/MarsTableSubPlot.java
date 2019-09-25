@@ -3,15 +3,13 @@ package de.mpg.biochem.mars.fx.plot;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
-import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Data;
-import javafx.scene.chart.XYChart.Series;
 
 public class MarsTableSubPlot extends AbstractSubPlot {
 	protected MarsTable table;

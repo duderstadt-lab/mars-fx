@@ -86,8 +86,12 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
-		for (SubPlot subPlot : charts) 
+		chartsPane.getChildren().clear();
+		
+		for (SubPlot subPlot : charts) {
 			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+			chartsPane.getChildren().add(subPlot.getNode());
+		}
 	}
 
 	@Override

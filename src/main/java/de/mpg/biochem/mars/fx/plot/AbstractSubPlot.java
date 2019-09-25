@@ -19,9 +19,12 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractSubPlot implements SubPlot {
 	protected DefaultNumericAxis globalXAxis, globalYAxis;
@@ -55,15 +58,13 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		globalXAxis = createAxis();
 		globalYAxis = createAxis();
-		
-		//dummyChart = linechart
-		//dummyChart.setCreateSymbols(false);
-		//dummyChart.setAnimated(false);
+
 		
 		dummyDataset = new DoubleDataSet("dummy dataset");
 		
 		chartPane = new XYChart(globalXAxis, globalYAxis);
 		chartPane.getDatasets().add(dummyDataset);
+		chartPane.setAnimated(false);
 		
 		//chartPane.setCommonYAxis(true);
 		chartPane.setMaxHeight(Double.MAX_VALUE);
@@ -76,6 +77,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		DefaultNumericAxis axis = new DefaultNumericAxis();
 		axis.setAutoRangeRounding(false);
 		axis.setForceZeroInRange(false);
+		axis.setAnimated(false);
 		axis.setAutoRangePadding(0);
 		return axis;
 	}
@@ -100,6 +102,15 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public void update() {
 		clear();
 
+		chartPane.getDatasets().add(dummyDataset);
+		chartPane.setAnimated(false);
+		
+		//chartPaneane.setCommonYAxis(true);
+		chartPane.setMaxHeight(Double.MAX_VALUE);
+		chartPane.setMaxWidth(Double.MAX_VALUE);		
+		//For the moment lets hide the legend
+		chartPane.setLegendVisible(false);
+
 		for (int i=0;i<getPlotSeriesList().size();i++) {
 			PlotSeries plotSeries = getPlotSeriesList().get(i);
 			
@@ -118,8 +129,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setXLabel(datasetOptionsPane.getXAxisName());
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
-		
-		//resetXYZoom();
 	}
 	
 	@Override
@@ -244,10 +253,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public JFXBadge getDatasetOptionsButton() {
 		return datasetOptionsButton;
 	}
-	
-	//Datasets ???
-	//protected abstract XYChart<Number, Number> addLine(PlotSeries plotSeries);
-	//protected abstract XYChart<Number, Number> addScatter(PlotSeries plotSeries);
 	
 	protected abstract DoubleDataSet addLine(PlotSeries plotSeries);
 	protected abstract DoubleDataSet addScatter(PlotSeries plotSeries);

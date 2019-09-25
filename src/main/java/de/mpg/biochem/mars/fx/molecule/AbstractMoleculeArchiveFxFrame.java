@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
@@ -55,10 +57,12 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SingleSelectionModel;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -156,6 +160,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
+				//Stage primaryStage = new Stage();
+				//primaryStage.setScene(buildScene());
+		        //primaryStage.show();
 				initFX(fxPanel);
 			}
 		});
@@ -163,7 +170,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
 
 	public void initFX(JFXPanel fxPanel) {	
-		this.fxPanel.setScene(buildScene());
+		Scene scene = buildScene();
+		this.fxPanel.setScene(scene);
 		frame.setSize(800, 600);
 		frame.setVisible(true);
 	}
