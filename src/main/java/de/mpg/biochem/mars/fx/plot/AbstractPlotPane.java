@@ -148,7 +148,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
 		
-		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action("Remove Subplot", "Shortcut+P", PLUS, e -> addChart()), "0.6em");
+		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action("Add Subplot", "Shortcut+P", PLUS, e -> addChart()), "0.6em");
 		addSubPlot.setStyle(
                 "-fx-background-radius: 5em; " +
                 "-fx-min-width: 13px; " +

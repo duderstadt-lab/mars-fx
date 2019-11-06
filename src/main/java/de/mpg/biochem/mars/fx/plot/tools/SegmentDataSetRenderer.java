@@ -137,76 +137,96 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 }
             }
 
-            // check for potentially reduced data range we are supposed to plot
+            if (dataSet.getStyle().equals("Segments")) {
+            	// check for potentially reduced data range we are supposed to plot
 
-            int indexMin = Math.max(0, dataSet.getXIndex(xMin));
-            /* indexMax is excluded in the drawing */
-            int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
-            if (xAxis.isInvertedAxis()) {
-                final int temp = indexMin;
-                indexMin = indexMax - 1;
-                indexMax = temp + 1;
-            }
+                int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                /* indexMax is excluded in the drawing */
+                int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                
+                if (indexMax - indexMin <= 0) {
+                    // zero length/range data set -> nothing to be drawn                
+                    continue;
+                }
 
-            if (indexMax - indexMin <= 0) {
-                // zero length/range data set -> nothing to be drawn                
-                continue;
-            }
+                if (indexMin > 0 && indexMin - 1 % 2 == 0) {
+                	indexMin--;
+                }
+                
+                if (indexMax + 1 < dataSet.getDataCount() && indexMin + 1 % 2 == 0) {
+                	indexMax++;
+                }
 
-            stop = ProcessingProfiler.getTimeDiff(stop,
-                    "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+            	final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
+                        true);
 
-            final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
-                    true);
-            stop = ProcessingProfiler.getTimeDiff(stop, "get CachedPoints");
+                // compute local screen coordinates
+                final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
+                if (isParallelImplementation()) {
+                    localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + dataSetIndex,
+                            indexMin, indexMax, getErrorType(), isPolarPlot);
+                } else {
+                    localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
+                            dataSetOffset + dataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
+                }
+            	
+                // invoke data reduction algorithm
+                localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                        getMinRequiredReductionSize());
+                
+            	drawSegments(gc, localCachedPoints);
 
-            // compute local screen coordinates
-            final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
-            if (isParallelImplementation()) {
-                localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + dataSetIndex,
-                        indexMin, indexMax, getErrorType(), isPolarPlot);
+                localCachedPoints.release();
             } else {
-                localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
-                        dataSetOffset + dataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
-            }
-            stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
+            	// check for potentially reduced data range we are supposed to plot
 
-            // invoke data reduction algorithm
-            localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
-                    getMinRequiredReductionSize());
+                int indexMin = Math.max(0, dataSet.getXIndex(xMin));
+                /* indexMax is excluded in the drawing */
+                int indexMax = Math.min(dataSet.getXIndex(xMax) + 1, dataSet.getDataCount());
+                if (xAxis.isInvertedAxis()) {
+                    final int temp = indexMin;
+                    indexMin = indexMax - 1;
+                    indexMax = temp + 1;
+                }
 
-            // draw individual plot components
-            drawChartCompontents(gc, localCachedPoints);
+                if (indexMax - indexMin <= 0) {
+                    // zero length/range data set -> nothing to be drawn                
+                    continue;
+                }
 
-            stop = ProcessingProfiler.getTimeStamp();
+                stop = ProcessingProfiler.getTimeDiff(stop,
+                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+                
+            	final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
+                        true);
+                stop = ProcessingProfiler.getTimeDiff(stop, "get CachedPoints");
 
-            localCachedPoints.release();
-            ProcessingProfiler.getTimeDiff(stop, "localCachedPoints.release()");
+                // compute local screen coordinates
+                final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
+                if (isParallelImplementation()) {
+                    localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + dataSetIndex,
+                            indexMin, indexMax, getErrorType(), isPolarPlot);
+                } else {
+                    localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
+                            dataSetOffset + dataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot);
+                }
+                stop = ProcessingProfiler.getTimeDiff(stop, "computeScreenCoordinates()");
+
+                // invoke data reduction algorithm
+                localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                        getMinRequiredReductionSize());
+            	
+            	if (dataSet.getStyle().equals("Scatter"))
+            		drawScatter(gc, localCachedPoints);
+                else
+                	drawPolyLine(gc, localCachedPoints);
+            	
+            	stop = ProcessingProfiler.getTimeStamp();
+
+                localCachedPoints.release();
+                ProcessingProfiler.getTimeDiff(stop, "localCachedPoints.release()");
+            }         
         } // end of 'dataSetIndex' loop
-        ProcessingProfiler.getTimeDiff(start);
-    }
-
-    private void drawChartCompontents(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        switch (getErrorType()) {
-        case ERRORBARS:
-            drawErrorBars(gc, localCachedPoints);
-            break;
-        case ERRORSURFACE:
-            drawErrorSurface(gc, localCachedPoints);
-            break;
-        case ERRORCOMBO:
-            if (localCachedPoints.getMinXDistance() >= getDashSize() * 2) {
-                drawErrorBars(gc, localCachedPoints);
-            } else {
-                drawErrorSurface(gc, localCachedPoints);
-            }
-            break;
-        case NONE:
-        default:
-            drawDefaultNoErrors(gc, localCachedPoints);
-            break;
-        }
         ProcessingProfiler.getTimeDiff(start);
     }
 
@@ -263,56 +283,32 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         return canvas;
     }
 
-    /**
-     * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
-     */
-    protected void drawDefaultNoErrors(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-        drawBars(gc, localCachedPoints);
-        drawPolyLine(gc, localCachedPoints);
-        drawMarker(gc, localCachedPoints);
-        drawBubbles(gc, localCachedPoints);
-    }
+    protected static void drawSegments(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+        gc.save();
+        DefaultRenderColorScheme.setLineScheme(gc, "Line",
+                localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
+        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, "Line");
+        
+        System.out.println("count " + localCachedPoints.actualDataCount);
 
-    /**
-     * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
-     */
-    protected void drawPolyLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-        switch (getPolyLineStyle()) {
-        case NONE:
-            return;
-        case AREA:
-            drawPolyLineArea(gc, localCachedPoints);
-            break;
-        case ZERO_ORDER_HOLDER:
-        case STAIR_CASE:
-            drawPolyLineStairCase(gc, localCachedPoints);
-            break;
-        case HISTOGRAM:
-            drawPolyLineHistogram(gc, localCachedPoints);
-            break;
-        case HISTOGRAM_FILLED:
-            drawPolyLineHistogramFilled(gc, localCachedPoints);
-            break;
-        case BEZIER_CURVE:
-            drawPolyLineHistogramBezier(gc, localCachedPoints);
-            break;
-        case NORMAL:
-        default:
-            drawPolyLineLine(gc, localCachedPoints);
-            break;
+        // Skip every other segment
+        for (int i=0; i < localCachedPoints.actualDataCount - 1; i+=2) {
+            final double x1 = localCachedPoints.xValues[i];
+            final double x2 = localCachedPoints.xValues[i + 1];
+            final double y1 = localCachedPoints.yValues[i];
+            final double y2 = localCachedPoints.yValues[i + 1];
+            gc.strokeLine(x1, y1, x2, y2);
+            System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
         }
-    }
 
-    protected static void drawPolyLineLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+        gc.restore();
+    }
+    
+    protected static void drawPolyLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
         gc.save();
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
-
-        // gc.strokePolyline(localCachedPoints.xValues,
-        // localCachedPoints.yValues, localCachedPoints.actualDataCount);
 
         for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
             final double x1 = localCachedPoints.xValues[i];
@@ -322,17 +318,22 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             gc.strokeLine(x1, y1, x2, y2);
         }
 
-        // gc.beginPath();
-        // for (int i=0; i< localCachedPoints.actualDataCount -1; i++) {
-        // double x0 = localCachedPoints.xValues[i];
-        // double x1 = localCachedPoints.xValues[i+1];
-        // double y0 = localCachedPoints.yValues[i];
-        // double y1 = localCachedPoints.yValues[i+1];
-        // gc.moveTo(x0, y0);
-        // gc.lineTo(x1, y1);
-        // }
-        // gc.closePath();
-        // gc.stroke();
+        gc.restore();
+    }
+    
+    protected static void drawScatter(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+        gc.save();
+        DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
+                localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
+        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
+
+        for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
+            final double x1 = localCachedPoints.xValues[i];
+            final double x2 = localCachedPoints.xValues[i + 1];
+            final double y1 = localCachedPoints.yValues[i];
+            final double y2 = localCachedPoints.yValues[i + 1];
+            gc.strokeLine(x1, y1, x2, y2);
+        }
 
         gc.restore();
     }
@@ -513,7 +514,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             final CachedDataPoints localCachedPoints) {
         final int n = localCachedPoints.actualDataCount;
         if (n < 2) {
-            drawPolyLineLine(gc, localCachedPoints);
+            drawPolyLine(gc, localCachedPoints);
             return;
         }
 

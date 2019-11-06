@@ -14,10 +14,12 @@ import de.gsi.chart.plugins.XRangeIndicator;
 import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.YRangeIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.PositionOfInterest;
@@ -56,48 +58,15 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			});
 	}
 	
-	protected DoubleDataSet addLine(PlotSeries plotSeries) {
+	protected void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
-
-		DoubleDataSet dataset = new DoubleDataSet(plotSeries.getXColumn() + " vs " + plotSeries.getYColumn());
 		
-		//List<Double> xValueList = new ArrayList<>();
-		//List<Double> yValueList = new ArrayList<>();
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
-			
-			if (!Double.isNaN(x) && !Double.isNaN(y)) {
-				dataset.add(x, y);
-			}
-		}
+		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
+			return;
 		
-		//final double[] xValues = new double[xValueList.size()];
-		//final double[] yValues = new double[yValueList.size()];
-		//for (int row=0;row<xValueList.size();row++) {
-		//	xValues[row] = xValueList.get(row);
-		//	yValues[row] = yValueList.get(row);
-		//}
+		DoubleDataSet dataset = new DoubleDataSet(yColumn + " vs " + xColumn);
 		
-		//If the columns are entirely NaN values. Don't add he plot
-		//if (xValueList.size() == 0)
-		//	return null;
-		
-		addRegionsOfInterest(xColumn, yColumn);
-		//addPositionsOfInterest(xColumn, yColumn);
-		
-		return dataset;
-	}
-	
-	protected DoubleDataSet addScatter(PlotSeries plotSeries) {
-		String xColumn = plotSeries.getXColumn();
-		String yColumn = plotSeries.getYColumn();
-
-		DoubleDataSet dataset = new DoubleDataSet(plotSeries.getXColumn() + " vs " + plotSeries.getYColumn());
-		
-		//List<Double> xValueList = new ArrayList<>();
-		//List<Double> yValueList = new ArrayList<>();
 		for (int row=0;row<getDataTable().getRowCount();row++) {
 			double x = getDataTable().getValue(xColumn, row);
 			double y = getDataTable().getValue(yColumn, row);
@@ -107,115 +76,37 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			}
 		}
 
-		dataset.setStyle("markerType=circle;");
+		dataset.setStyle(plotSeries.getType());
+		renderer.getDatasets().add(dataset);
 		
-		return dataset;
-	}
-	
-	/*
-	protected XYChart<Number, Number> addLine(PlotSeries plotSeries) {
-		String xColumn = plotSeries.getXColumn();
-		String yColumn = plotSeries.getYColumn();
-		
-		NumericAxis xAxis = createAxis();
-		NumericAxis yAxis = createAxis();
-		
-		//resetXYZoom();
-		
-		resetXAxis(xAxis);
-		resetYAxis(yAxis);
-		
-		MarsTable segmentsTable = null;
-		if (molecule.hasSegmentsTable(xColumn, yColumn))
-			segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
-		
-		LineChartWithSegments lineChart = new LineChartWithSegments(segmentsTable, plotSeries, xAxis, yAxis);
-		lineChart.setCreateSymbols(false);
-		lineChart.setAnimated(false);
-		
-		List<Data<Number, Number>> data = new ArrayList<>();
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
+		//Add segments
+		if (plotSeries.drawSegments() && molecule.hasSegmentsTable(plotSeries.getXColumn(), plotSeries.getYColumn())) {
+			DoubleDataSet segmentsDataSet = new DoubleDataSet("Segments - " + yColumn + " vs " + xColumn);
 			
-			if (!Double.isNaN(x) && !Double.isNaN(y))
-				data.add(new Data<>(x, y));
+			MarsTable segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
+			
+			for (int row=0;row<segmentsTable.getRowCount();row++) {
+				double x1 = segmentsTable.getValue("x1", row);
+				double y1 = segmentsTable.getValue("y1", row);
+				double x2 = segmentsTable.getValue("x2", row);
+				double y2 = segmentsTable.getValue("y2", row);
+				
+				if (!Double.isNaN(x1) && !Double.isNaN(y1) && !Double.isNaN(x2) && !Double.isNaN(y2)) {
+					segmentsDataSet.add(x1, y1);
+					segmentsDataSet.add(x2, y2);
+				}
+			}
+			
+			segmentsDataSet.setStyle("Segments");
+			renderer.getDatasets().add(segmentsDataSet);
 		}
-		
-		//If the columns are entirely NaN values. Don't add he plot
-		if (data.size() == 0)
-			return null;
-		
-		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
-		
-		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis, sourceData);
-		reducedData.maxPointsCountProperty().bind(plotPane.maxPointsCount());
-		
-		Series<Number, Number> series = new Series<>(plotSeries.getYColumn(), reducedData);
-		lineChart.getData().add(series);
 			
-		lineChart.updateStyle(plotPane.getStyleSheetUpdater());
-		
-		chartPane.getOverlayCharts().add(lineChart);
-		
-		addRegionsOfInterest(xColumn, yColumn);
-		addPositionsOfInterest(xColumn, yColumn);
-		
-		return lineChart;
 	}
-	
-	
-	
-	protected XYChart<Number, Number> addScatter(PlotSeries plotSeries) {
-		String xColumn = plotSeries.getXColumn();
-		String yColumn = plotSeries.getYColumn();
 
-		NumericAxis xAxis = createAxis();
-		NumericAxis yAxis = createAxis();
-		
-		//resetXYZoom();
-		
-		resetXAxis(xAxis);
-		resetYAxis(yAxis);
-		
-		MarsTable segmentsTable = null;
-		if (molecule.hasSegmentsTable(xColumn, yColumn))
-			segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
+	//For the moment we make a copy...
+	//maybe long-term we should no make a copy to improve performance.
+	//But that might require a bit change in how things are store so....
 
-		ScatterChartWithSegments scatterChart = new ScatterChartWithSegments(segmentsTable, plotSeries, xAxis, yAxis);
-		scatterChart.setAnimated(false);
-		
-		List<Data<Number, Number>> data = new ArrayList<>();
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
-			
-			if (!Double.isNaN(x) && !Double.isNaN(y))
-				data.add(new Data<>(x, y));
-		}
-		
-		//If the columns are entirely NaN values. Don't add he plot
-		if (data.size() == 0)
-			return null;
-		
-		ObservableList<Data<Number, Number>> sourceData = FXCollections.observableArrayList(data);
-		
-		DataReducingObservableList<Number, Number> reducedData = new DataReducingObservableList<>(xAxis, sourceData);
-		reducedData.maxPointsCountProperty().bind(plotPane.maxPointsCount());
-		
-		Series<Number, Number> series = new Series<>(plotSeries.getYColumn(), reducedData);
-		scatterChart.getData().add(series);
-		
-		scatterChart.updateStyle(plotPane.getStyleSheetUpdater());
-		
-		chartPane.getOverlayCharts().add(scatterChart);
-		
-		addRegionsOfInterest(xColumn, yColumn);
-		addPositionsOfInterest(xColumn, yColumn);
-		
-		return scatterChart;
-	}
-	*/
 	
 	protected void addRegionsOfInterest(String xColumn, String yColumn) {
 		for (String regionName : molecule.getRegionNames()) {

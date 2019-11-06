@@ -6,6 +6,7 @@ import java.util.List;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.dataset.spi.DoubleDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,7 +22,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		update();
 	}
 	
-	protected DoubleDataSet addLine(PlotSeries plotSeries) {
+	protected void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 
@@ -46,47 +47,8 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 			yValues[row] = yValueList.get(row);
 		}
 		
-		//If the columns are entirely NaN values. Don't add he plot
-		if (xValueList.size() == 0)
-			return null;
-
-		dataset.setStyle("markerType=circle;");
-		
-		return dataset;
-	}
-	
-	protected DoubleDataSet addScatter(PlotSeries plotSeries) {
-		String xColumn = plotSeries.getXColumn();
-		String yColumn = plotSeries.getYColumn();
-
-		DoubleDataSet dataset = new DoubleDataSet(plotSeries.getXColumn() + " vs " + plotSeries.getYColumn());
-		
-		List<Double> xValueList = new ArrayList<>();
-		List<Double> yValueList = new ArrayList<>();
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
-			
-			if (!Double.isNaN(x) && !Double.isNaN(y)) {
-				xValueList.add(x);
-				yValueList.add(y);
-			}
-		}
-		
-		final double[] xValues = new double[xValueList.size()];
-		final double[] yValues = new double[yValueList.size()];
-		for (int row=0;row<xValueList.size();row++) {
-			xValues[row] = xValueList.get(row);
-			yValues[row] = yValueList.get(row);
-		}
-		
-		//If the columns are entirely NaN values. Don't add he plot
-		if (xValueList.size() == 0)
-			return null;
-
-		dataset.setStyle("markerType=circle;");
-		
-		return dataset;
+		dataset.setStyle(plotSeries.getType());
+		renderer.getDatasets().add(dataset);
 	}
 	
 	/*
