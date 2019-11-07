@@ -19,6 +19,7 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -65,7 +66,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
 			return;
 		
-		DoubleDataSet dataset = new DoubleDataSet(yColumn + " vs " + xColumn);
+		double lineWidth = Double.valueOf(plotSeries.getWidth());
+		
+		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth);
 		
 		for (int row=0;row<getDataTable().getRowCount();row++) {
 			double x = getDataTable().getValue(xColumn, row);
@@ -81,7 +84,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		//Add segments
 		if (plotSeries.drawSegments() && molecule.hasSegmentsTable(plotSeries.getXColumn(), plotSeries.getYColumn())) {
-			DoubleDataSet segmentsDataSet = new DoubleDataSet("Segments - " + yColumn + " vs " + xColumn);
+			double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
+			
+			MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn, plotSeries.getSegmentsColor(), segmentWidth);
 			
 			MarsTable segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
 			
