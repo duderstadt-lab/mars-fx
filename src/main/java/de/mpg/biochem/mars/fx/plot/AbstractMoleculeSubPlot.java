@@ -66,22 +66,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
 			return;
 		
-		double lineWidth = Double.valueOf(plotSeries.getWidth());
-		
-		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth);
-		
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
-			
-			if (!Double.isNaN(x) && !Double.isNaN(y)) {
-				dataset.add(x, y);
-			}
-		}
-
-		dataset.setStyle(plotSeries.getType());
-		renderer.getDatasets().add(dataset);
-		
 		//Add segments
 		if (plotSeries.drawSegments() && molecule.hasSegmentsTable(plotSeries.getXColumn(), plotSeries.getYColumn())) {
 			double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
@@ -105,7 +89,22 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			segmentsDataSet.setStyle("Segments");
 			renderer.getDatasets().add(segmentsDataSet);
 		}
+		
+		double lineWidth = Double.valueOf(plotSeries.getWidth());
+		
+		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth);
+		
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			double x = getDataTable().getValue(xColumn, row);
+			double y = getDataTable().getValue(yColumn, row);
 			
+			if (!Double.isNaN(x) && !Double.isNaN(y)) {
+				dataset.add(x, y);
+			}
+		}
+
+		dataset.setStyle(plotSeries.getType());
+		renderer.getDatasets().add(dataset);	
 	}
 
 	//For the moment we make a copy...

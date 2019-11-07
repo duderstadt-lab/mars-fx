@@ -104,7 +104,12 @@ public class MarsZoomer extends ChartPlugin {
      * Default zoom scroll filter with {@link MouseEvent#isControlDown() control
      * key down}.
      */
-    public final Predicate<ScrollEvent> defaultScrollFilter = null;//this::isMouseEventWithinCanvas;
+    
+    
+    //For the moment we disable this because for some very strange reason the mouse location is not registered for scroll events
+    //While is it registered for mouse Events...
+    //null;//
+    public final Predicate<ScrollEvent> defaultScrollFilter = this::isMouseEventWithinCanvas;
 
     private Predicate<MouseEvent> zoomInMouseFilter = defaultZoomInMouseFilter;
     private Predicate<MouseEvent> zoomOutMouseFilter = defaultZoomOutMouseFilter;
@@ -168,10 +173,7 @@ public class MarsZoomer extends ChartPlugin {
     };
 
     private final EventHandler<ScrollEvent> zoomScrollHandler = event -> {
-    	System.out.println("Scroll Event");
-    	
         if (getZoomScrollFilter() == null || getZoomScrollFilter().test(event)) {
-        	System.out.println("inside filter part");
             final AxisMode mode = getAxisMode();
             if (zoomStacks.isEmpty()) {
                 makeSnapshotOfView();
@@ -766,11 +768,12 @@ public class MarsZoomer extends ChartPlugin {
     }
 
     private boolean isMouseEventWithinCanvas(final ScrollEvent mouseEvent) {
+    	if (getChart() == null || getChart().getCanvas() == null)
+    		return false;
         final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
+        final Point2D mouseLoc = new Point2D(mouseEvent.getSceneX(), mouseEvent.getSceneY());
+        final Bounds sceneBounds = canvas.localToScene(canvas.getBoundsInLocal());
+        return sceneBounds.contains(mouseLoc);
     }
 
     /**
