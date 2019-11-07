@@ -3,7 +3,7 @@ package de.mpg.biochem.mars.fx.plot;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.Panner;
-import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.plugins.DataPointTooltip;
 
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -81,12 +81,11 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	}
 	
 	protected void buildTools() {
-		/*
-		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> { 
-			setTool(trackSelected, () -> new MarsDataPointTooltip(), Cursor.DEFAULT);
-		}, null, trackSelected);
+		
+		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, () -> new DataPointTooltip(), Cursor.DEFAULT), 
+				null, trackSelected);
 		addTool(trackCursor);
-		*/
+		
 		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(true), Cursor.CROSSHAIR),
 				null, zoomXYSelected);
 		addTool(zoomXYCursor);

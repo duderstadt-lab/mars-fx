@@ -58,6 +58,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			   } 
 			});
 	}
+	//For the moment we make a copy...
+	//maybe long-term we should no make a copy to improve performance.
+	//But that might require a bit change in how things are store so....
 	
 	protected void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
@@ -106,11 +109,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		dataset.setStyle(plotSeries.getType());
 		renderer.getDatasets().add(dataset);	
 	}
-
-	//For the moment we make a copy...
-	//maybe long-term we should no make a copy to improve performance.
-	//But that might require a bit change in how things are store so....
-
 	
 	protected void addRegionsOfInterest(String xColumn, String yColumn) {
 		for (String regionName : molecule.getRegionNames()) {
