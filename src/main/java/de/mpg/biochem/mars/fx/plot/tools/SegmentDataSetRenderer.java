@@ -129,13 +129,18 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                     // zero length/range data set -> nothing to be drawn                
                     continue;
                 }
-
+                
                 if (indexMin > 0 && indexMin%2!=0) {
                 	indexMin--;
                 }
                 
-                if (indexMax + 1 < dataSet.getDataCount() && indexMax + 1 % 2 == 0) {
-                	indexMax++;
+                if (indexMax + 2 < dataSet.getDataCount()) {
+                	if (indexMax+1 % 2 != 0)
+                		indexMax+=1;
+                	else if (indexMax+2 %2 != 0)
+                		indexMax+=2;
+                } else {
+                	indexMax = dataSet.getDataCount();
                 }
 
             	final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
@@ -152,7 +157,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 }
             	
                 // invoke data reduction algorithm
-                localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                localCachedPoints.reduce(rendererDataReducerProperty().get(), false,
                         getMinRequiredReductionSize());
                 
             	drawSegments(gc, localCachedPoints, color, width);
@@ -276,10 +281,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.setLineWidth(width);
         gc.setFill(color);
         gc.setStroke(color);
-        
-        //DefaultRenderColorScheme.setLineScheme(gc, "Line",
-        //        localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
-        //DefaultRenderColorScheme.setGraphicsContextAttributes(gc, "Line");
 
         // Skip every other segment
         for (int i=0; i < localCachedPoints.actualDataCount - 1; i+=2) {
@@ -288,7 +289,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             final double y1 = localCachedPoints.yValues[i];
             final double y2 = localCachedPoints.yValues[i + 1];
             gc.strokeLine(x1, y1, x2, y2);
-            //System.out.println("x1 " + x1 + " y1 " + y1 + " x2 " + x2 + " y2 " + y2);
         }
 
         gc.restore();
@@ -303,10 +303,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         
         //gc.setLineDashes(dashPattern);
         //gc.setFont(font);
-        
-       // DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
-        //        localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
-        //DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
 
         for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
             final double x1 = localCachedPoints.xValues[i];
@@ -328,10 +324,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         
         //gc.setLineDashes(dashPattern);
         //gc.setFont(font);
-        
-        //DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
-        //       localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
-        //DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
 
         for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
             final double x1 = localCachedPoints.xValues[i];

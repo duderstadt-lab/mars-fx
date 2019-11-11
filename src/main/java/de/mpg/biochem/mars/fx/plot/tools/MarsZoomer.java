@@ -105,10 +105,6 @@ public class MarsZoomer extends ChartPlugin {
      * key down}.
      */
     
-    
-    //For the moment we disable this because for some very strange reason the mouse location is not registered for scroll events
-    //While is it registered for mouse Events...
-    //null;//
     public final Predicate<ScrollEvent> defaultScrollFilter = this::isMouseEventWithinCanvas;
 
     private Predicate<MouseEvent> zoomInMouseFilter = defaultZoomInMouseFilter;

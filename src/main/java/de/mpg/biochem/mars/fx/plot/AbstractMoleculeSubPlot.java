@@ -62,7 +62,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	//maybe long-term we should no make a copy to improve performance.
 	//But that might require a bit change in how things are store so....
 	
-	protected void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries) {
+	protected void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -90,7 +90,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			}
 			
 			segmentsDataSet.setStyle("Segments");
-			renderer.getDatasets().add(segmentsDataSet);
+			getChart().getDatasets().add(segmentsDataSet);
 		}
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
@@ -107,7 +107,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		}
 
 		dataset.setStyle(plotSeries.getType());
-		renderer.getDatasets().add(dataset);	
+		getChart().getDatasets().add(dataset);	
 	}
 	
 	protected void addRegionsOfInterest(String xColumn, String yColumn) {

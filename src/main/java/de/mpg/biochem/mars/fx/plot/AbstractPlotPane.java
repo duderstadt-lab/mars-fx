@@ -86,15 +86,15 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 				null, trackSelected);
 		addTool(trackCursor);
 		
-		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(true), Cursor.CROSSHAIR),
+		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(false), Cursor.CROSSHAIR),
 				null, zoomXYSelected);
 		addTool(zoomXYCursor);
 		
-		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, true), Cursor.H_RESIZE),
+		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, false), Cursor.H_RESIZE),
 				null, zoomXSelected);
 		addTool(zoomXCursor);
 		
-		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, true), Cursor.V_RESIZE),
+		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, false), Cursor.V_RESIZE),
 				null, zoomYSelected);
 		addTool(zoomYCursor);
 		

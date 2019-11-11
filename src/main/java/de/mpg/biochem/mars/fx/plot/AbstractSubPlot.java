@@ -35,6 +35,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	protected PlotPane plotPane;
 	
+	//protected  renderer;
+	
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
@@ -55,10 +57,23 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane = new XYChart(globalXAxis, globalYAxis);
 		chartPane.setAnimated(false);
 		
+		chartPane.setAnimated(false);
+		
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);		
 		//For the moment lets hide the legend
 		chartPane.setLegendVisible(false);
+		
+		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
+		
+		final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
+		reductionAlgorithm.setMinPointPixelDistance(0);
+		
+		renderer.setDrawMarker(false);
+		
+		chartPane.getRenderers().setAll(renderer);
+		
+		//chartPane.getGridRenderer()
 	}
 	
 	protected DefaultNumericAxis createAxis() {
@@ -89,26 +104,12 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public void update() {
 		clear();
 
-		chartPane.setAnimated(false);
-		
-		chartPane.setMaxHeight(Double.MAX_VALUE);
-		chartPane.setMaxWidth(Double.MAX_VALUE);		
-		//For the moment lets hide the legend
-		chartPane.setLegendVisible(false);
-		
-		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
-		
-		final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
-		reductionAlgorithm.setMinPointPixelDistance(0);
-		
-		renderer.setDrawMarker(false);
-
 		for (int i=0;i<getPlotSeriesList().size();i++) {
 			PlotSeries plotSeries = getPlotSeriesList().get(i);
 			
 			if (plotSeries.xColumnField().getSelectionModel().getSelectedIndex() != -1 
 				&& plotSeries.yColumnField().getSelectionModel().getSelectedIndex() != -1) {
-					addDataSet(renderer, plotSeries);
+					addDataSet(plotSeries);
 			}
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
@@ -117,9 +118,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setXLabel(datasetOptionsPane.getXAxisName());
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
-		
-		chartPane.getRenderers().clear();
-		chartPane.getRenderers().add(renderer);
 	}
 	
 	@Override
@@ -175,6 +173,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return chartPane;
 	}
 	
+	public XYChart getChart() {
+		return chartPane;
+	}
+	
 	public DatasetOptionsPane getDatasetOptionsPane() {
 		return datasetOptionsPane;
 	}
@@ -183,7 +185,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return datasetOptionsButton;
 	}
 	
-	protected abstract void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries);
+	protected abstract void addDataSet(PlotSeries plotSeries);
 	
 	protected abstract MarsTable getDataTable();
 }

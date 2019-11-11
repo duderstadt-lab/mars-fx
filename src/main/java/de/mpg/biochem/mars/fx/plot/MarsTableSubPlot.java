@@ -23,7 +23,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		update();
 	}
 	
-	protected void addDataSet(SegmentDataSetRenderer renderer, PlotSeries plotSeries) {
+	protected void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -44,7 +44,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		}
 
 		dataset.setStyle(plotSeries.getType());
-		renderer.getDatasets().add(dataset);	
+		getChart().getDatasets().add(dataset);	
 	}
 	
 	@Override
