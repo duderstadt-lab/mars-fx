@@ -1,6 +1,7 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.spi.DoubleDataSet;
 import javafx.scene.paint.Color;
 
@@ -21,7 +22,7 @@ public class MarsDoubleDataSet extends DoubleDataSet {
         this.width = width;
     }
 
-    public MarsDoubleDataSet(final DataSet another, Color color, double width) {
+    public MarsDoubleDataSet(final DataSet2D another, Color color, double width) {
         super(another); 
         this.color = color;
         this.width = width;

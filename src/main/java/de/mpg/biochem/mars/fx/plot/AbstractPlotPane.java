@@ -34,7 +34,6 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -51,8 +50,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected ArrayList<Action> tools;
 	protected ToolBar toolBar;
 	
-	protected static StyleSheetUpdater styleSheetUpdater;
-	
 	protected VBox chartsPane;
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
@@ -68,8 +65,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected ButtonBase propertiesButton;
 
 	public AbstractPlotPane() {
-		if (styleSheetUpdater == null)
-			styleSheetUpdater = new StyleSheetUpdater();
 		plotOptionsPane = new PlotOptionsPane();
 		charts = new ArrayList<SubPlot>();
 		tools = new ArrayList<Action>();
@@ -196,12 +191,12 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			
 			subplot.getXAxis().setAutoRanging(false);
 			
-			if (subplot.getXAxis().getUpperBound() > otherSubPlot.getXAxis().getLowerBound() || subplot.getXAxis().getLowerBound() > otherSubPlot.getXAxis().getLowerBound()) {
-				subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
-				subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
+			if (subplot.getXAxis().getMax() > otherSubPlot.getXAxis().getMin() || subplot.getXAxis().getMin() > otherSubPlot.getXAxis().getMin()) {
+				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot.getXAxis().minProperty());
+				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot.getXAxis().maxProperty());
 			} else {
-				subplot.getXAxis().upperBoundProperty().bindBidirectional(otherSubPlot.getXAxis().upperBoundProperty());
-				subplot.getXAxis().lowerBoundProperty().bindBidirectional(otherSubPlot.getXAxis().lowerBoundProperty());
+				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot.getXAxis().maxProperty());
+				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot.getXAxis().minProperty());
 			}
 		}
 			
@@ -209,9 +204,10 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 
 		if (charts.size() > 1) {
 			for (SubPlot subPlot : charts) {
-				subPlot.getYAxis().setTickLabelRotation(270);
+				subPlot.getYAxis().setTickLabelRotation(-90);
 			}
 		}
+		
 		updateSubPlotBadges();
 	}
 	
@@ -244,18 +240,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		}
 	}	
 	
-	public IntegerProperty maxPointsCount() {
-		return maxPointsCount;
-	}
-	
-	public StyleSheetUpdater getStyleSheetUpdater() {
-		return styleSheetUpdater;
-	}
-	
-	public void setMaxPointsCount(int maxPoints) {
-		maxPointsCount.set(maxPoints);
-	}
-	
 	@Override
 	public Node getNode() {
 		return this;
@@ -264,14 +248,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	class PlotOptionsPane extends MigPane  {
 		public PlotOptionsPane() {
 			setLayout("insets dialog");
-			
-			Spinner<Integer> pointsCountSpinner = new Spinner<>(10, 20_000, maxPointsCount.get(), 10);
-			pointsCountSpinner.setPrefWidth(100);
-			pointsCountSpinner.setEditable(true);
-			maxPointsCount.bind(pointsCountSpinner.valueProperty());
-			
-			add(new Label("Points #: "), "");
-			add(pointsCountSpinner, "");
 		}
 	}
 }

@@ -11,6 +11,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
@@ -57,8 +58,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane = new XYChart(globalXAxis, globalYAxis);
 		chartPane.setAnimated(false);
 		
-		chartPane.setAnimated(false);
-		
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);		
 		//For the moment lets hide the legend
@@ -73,15 +72,20 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		chartPane.getRenderers().setAll(renderer);
 		
-		//chartPane.getGridRenderer()
+		//chartPane.setHorizontalGridLinesVisible(false);
+		//chartPane.setVerticalGridLinesVisible(false);
+		
+		chartPane.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: rgb(237, 14, 14);");
+		chartPane.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: #ed0e0e;");
 	}
 	
 	protected DefaultNumericAxis createAxis() {
 		DefaultNumericAxis axis = new DefaultNumericAxis();
+		axis.setMinorTickCount(0);
 		axis.setAutoRangeRounding(false);
 		axis.setForceZeroInRange(false);
 		axis.setAnimated(false);
-		axis.setAutoRangePadding(0);
+		//axis.setAutoRangePadding(0);
 		return axis;
 	}
 	
@@ -139,11 +143,11 @@ public abstract class AbstractSubPlot implements SubPlot {
 	}
 	
 	public void setXLabel(String xAxisLabel) {
-		chartPane.getXAxis().setLabel(xAxisLabel);
+		chartPane.getXAxis().setName(xAxisLabel);
 	}
 	
 	public void setYLabel(String yAxisLabel) {
-		chartPane.getYAxis().setLabel(yAxisLabel);
+		chartPane.getYAxis().setName(yAxisLabel);
 	}
 	
 	public void resetXYZoom() {

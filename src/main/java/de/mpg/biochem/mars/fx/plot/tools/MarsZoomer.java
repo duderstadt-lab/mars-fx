@@ -319,7 +319,7 @@ public class MarsZoomer extends ChartPlugin {
     }
 
     private static void zoomOnAxis(final Axis axis, final ScrollEvent event) {
-        if (axis.lowerBoundProperty().isBound() || axis.upperBoundProperty().isBound()) {
+        if (axis.minProperty().isBound() || axis.maxProperty().isBound()) {
             return;
         }
         final boolean isZoomIn = event.getDeltaY() > 0;
@@ -327,15 +327,15 @@ public class MarsZoomer extends ChartPlugin {
 
         final double mousePos = isHorizontal ? event.getX() : event.getY();
         final double posOnAxis = axis.getValueForDisplay(mousePos);
-        final double max = axis.getUpperBound();
-        final double min = axis.getLowerBound();
+        final double max = axis.getMax();
+        final double min = axis.getMin();
         Math.abs(max - min);
         final double scaling = isZoomIn ? 0.9 : 1 / 0.9;
         final double diffHalf1 = scaling * Math.abs(posOnAxis - min);
         final double diffHalf2 = scaling * Math.abs(max - posOnAxis);
 
-        axis.setLowerBound(posOnAxis - diffHalf1);
-        axis.setUpperBound(posOnAxis + diffHalf2);
+        axis.setMin(posOnAxis - diffHalf1);
+        axis.setMax(posOnAxis + diffHalf2);
 
         axis.forceRedraw();
     }
@@ -816,17 +816,17 @@ public class MarsZoomer extends ChartPlugin {
             if (!Axes.hasBoundedRange(axis)) {
                 final Timeline xZoomAnimation = new Timeline();
                 xZoomAnimation.getKeyFrames().setAll(
-                        new KeyFrame(Duration.ZERO, new KeyValue(axis.lowerBoundProperty(), axis.getLowerBound()),
-                                new KeyValue(axis.upperBoundProperty(), axis.getUpperBound())),
-                        new KeyFrame(getZoomDuration(), new KeyValue(axis.lowerBoundProperty(), zoomState.zoomRangeMin),
-                                new KeyValue(axis.upperBoundProperty(), zoomState.zoomRangeMax)));
+                        new KeyFrame(Duration.ZERO, new KeyValue(axis.minProperty(), axis.getMin()),
+                                new KeyValue(axis.maxProperty(), axis.getMax())),
+                        new KeyFrame(getZoomDuration(), new KeyValue(axis.minProperty(), zoomState.zoomRangeMin),
+                                new KeyValue(axis.maxProperty(), zoomState.zoomRangeMax)));
                 xZoomAnimation.play();
             }
         } else {
             if (!Axes.hasBoundedRange(axis)) {
                 // only update if this axis is not bound to another (e.g. auto-range) managed axis)
-                axis.setLowerBound(zoomState.zoomRangeMin);
-                axis.setUpperBound(zoomState.zoomRangeMax);
+                axis.setMin(zoomState.zoomRangeMin);
+                axis.setMax(zoomState.zoomRangeMax);
             }
         }
 
@@ -860,7 +860,7 @@ public class MarsZoomer extends ChartPlugin {
         }
         ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
         for (Axis axis : getChart().getAxes()) {
-            axisStateMap.put(axis, new ZoomState(axis.getLowerBound(), axis.getUpperBound(), axis.isAutoRanging(),
+            axisStateMap.put(axis, new ZoomState(axis.getMin(), axis.getMax(), axis.isAutoRanging(),
                     axis.isAutoGrowRanging()));
         }
         zoomStacks.addFirst(axisStateMap);
@@ -945,8 +945,8 @@ public class MarsZoomer extends ChartPlugin {
             }
             final Axis axis = getChart().getFirstAxis(Orientation.HORIZONTAL);
             if (n) {
-                final double minBound = axis.getLowerBound();
-                final double maxBound = axis.getUpperBound();
+                final double minBound = axis.getMin();
+                final double maxBound = axis.getMax();
                 setMin(minBound);
                 setMax(maxBound);
             }
@@ -958,11 +958,11 @@ public class MarsZoomer extends ChartPlugin {
             }
             isUpdating = true;
             final Axis xAxis = getChart().getFirstAxis(Orientation.HORIZONTAL);
-            xAxis.getUpperBound();
-            xAxis.getLowerBound();
+            xAxis.getMax();
+            xAxis.getMin();
             // add a little bit of margin to allow zoom outside the dataset
-            final double minBound = Math.min(xAxis.getLowerBound(), getMin());
-            final double maxBound = Math.max(xAxis.getUpperBound(), getMax());
+            final double minBound = Math.min(xAxis.getMin(), getMin());
+            final double maxBound = Math.max(xAxis.getMax(), getMax());
             if (xRangeSliderInit) {
                 setMin(minBound);
                 setMax(maxBound);
@@ -977,8 +977,8 @@ public class MarsZoomer extends ChartPlugin {
             isUpdating = true;
             final Axis xAxis = getChart().getFirstAxis(Orientation.HORIZONTAL);
             if (xAxis.isAutoRanging() || xAxis.isAutoGrowRanging()) {
-                setMin(xAxis.getLowerBound());
-                setMax(xAxis.getUpperBound());
+                setMin(xAxis.getMin());
+                setMax(xAxis.getMax());
                 isUpdating = false;
                 return;
             }
@@ -997,8 +997,8 @@ public class MarsZoomer extends ChartPlugin {
             final Axis xAxis = getChart().getFirstAxis(Orientation.HORIZONTAL);
             xAxis.setAutoRanging(false);
             xAxis.setAutoGrowRanging(false);
-            xAxis.setLowerBound(getLowValue());
-            xAxis.setUpperBound(getHighValue());
+            xAxis.setMin(getLowValue());
+            xAxis.setMax(getHighValue());
         };
 
         public ZoomRangeSlider(final Chart chart) {
@@ -1014,8 +1014,8 @@ public class MarsZoomer extends ChartPlugin {
             xAxis.autoRangingProperty().addListener(sliderResetHandler);
             xAxis.autoGrowRangingProperty().addListener(sliderResetHandler);
 
-            xAxis.lowerBoundProperty().addListener(rangeChangeListener);
-            xAxis.upperBoundProperty().addListener(rangeChangeListener);
+            xAxis.minProperty().addListener(rangeChangeListener);
+            xAxis.maxProperty().addListener(rangeChangeListener);
 
             // rstein: needed in case of autoranging/sliding xAxis (see
             // RollingBuffer for example)            
@@ -1024,8 +1024,8 @@ public class MarsZoomer extends ChartPlugin {
 
             setOnMouseReleased(mouseEventHandler);
 
-            lowValueProperty().bindBidirectional(xAxis.lowerBoundProperty());
-            highValueProperty().bindBidirectional(xAxis.upperBoundProperty());
+            lowValueProperty().bindBidirectional(xAxis.minProperty());
+            highValueProperty().bindBidirectional(xAxis.maxProperty());
 
             sliderVisibleProperty().addListener((ch, o, n) -> {
                 if (getChart() == null || n.equals(o) || isUpdating) {
