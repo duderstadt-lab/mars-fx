@@ -27,7 +27,7 @@
 
 package de.mpg.biochem.mars.fx.controls;
 
-import de.mpg.biochem.mars.fx.MarsApp;
+import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.control.Hyperlink;
@@ -46,7 +46,7 @@ public class WebHyperlink
 
 	@Override
 	public void fire() {
-		MarsApp.showDocument(getUri());
+		MarsFxGlobalPreferences.showDocument(getUri());
 	}
 
 	// 'uri' property

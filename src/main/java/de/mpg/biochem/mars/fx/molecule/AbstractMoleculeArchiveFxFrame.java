@@ -321,10 +321,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     public void saveCopy() {
     	if (!lockArchive) {
-    		fireEvent(new MoleculeArchiveSavingEvent());
-    		moleculesTab.saveCurrentRecord();
-    		imageMetadataTab.saveCurrentRecord();
-    	    
     	    String fileName = archive.getName();
     	    if (fileName.endsWith(".store"))
     	    	fileName = fileName.substring(0, fileName.length() - 5);
@@ -338,7 +334,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	    } catch (IOException e1) {
 				e1.printStackTrace();
 			}
-    	    fireEvent(new MoleculeArchiveSavedEvent());
     	}
     }
     

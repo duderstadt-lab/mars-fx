@@ -19,6 +19,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
@@ -205,6 +206,10 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         tabsContainer.getTabs().add(propertiesTab);
         tabsContainer.getTabs().add(regionsTab);
         tabsContainer.getTabs().add(positionsTab);
+        
+        tabsContainer.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
+            onMoleculeSelectionChangedEvent(molecule);
+        });
 	}
 	
 	@Override
@@ -222,10 +227,18 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
 		
-		moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		positionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		Tab selectedTab = tabsContainer.getSelectionModel().selectedItemProperty().get();
+		
+		//only update active tab to minimize performance loss during tab switching.
+		if (selectedTab.equals(generalTab)) {
+			moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(propertiesTab)) {
+			moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(regionsTab)) {
+			regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(positionsTab)) {
+			positionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		}
     }
    
    @Override

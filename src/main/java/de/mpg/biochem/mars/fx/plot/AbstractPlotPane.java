@@ -1,5 +1,6 @@
 package de.mpg.biochem.mars.fx.plot;
 
+import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.Panner;
@@ -38,6 +39,7 @@ import de.mpg.biochem.mars.fx.util.ActionUtils;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
+import javafx.util.StringConverter;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 

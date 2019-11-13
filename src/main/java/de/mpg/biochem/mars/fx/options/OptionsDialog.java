@@ -38,7 +38,7 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Window;
-import de.mpg.biochem.mars.fx.MarsApp;
+import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.util.Utils;
 
@@ -95,13 +95,13 @@ public class OptionsDialog
 		load();
 
 		// select last tab
-		int tabIndex = MarsApp.getState().getInt("lastOptionsTab", -1);
+		int tabIndex = MarsFxGlobalPreferences.getState().getInt("lastOptionsTab", -1);
 		if (tabIndex > 0 && tabIndex < tabPane.getTabs().size())
 			tabPane.getSelectionModel().select(tabIndex);
 
 		// remember last selected tab
 		setOnHidden(e -> {
-			MarsApp.getState().putInt("lastOptionsTab", tabPane.getSelectionModel().getSelectedIndex());
+			MarsFxGlobalPreferences.getState().putInt("lastOptionsTab", tabPane.getSelectionModel().getSelectedIndex());
 		});
 	}
 

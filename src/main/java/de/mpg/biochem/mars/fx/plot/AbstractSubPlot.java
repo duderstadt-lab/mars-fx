@@ -8,6 +8,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import com.jfoenix.controls.JFXBadge;
 
 import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
@@ -26,9 +27,10 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.util.StringConverter;
 
 public abstract class AbstractSubPlot implements SubPlot {
-	protected DefaultNumericAxis globalXAxis, globalYAxis;
+	protected DefaultNumericAxis xAxis, yAxis;
 	protected XYChart chartPane;
 	
 	protected JFXBadge datasetOptionsButton;
@@ -52,10 +54,25 @@ public abstract class AbstractSubPlot implements SubPlot {
 			popOver.show(datasetOptionsButton);
 		})));
 		
-		globalXAxis = createAxis();
-		globalYAxis = createAxis();
+		xAxis = createAxis();
+		yAxis = createAxis();
 		
-		chartPane = new XYChart(globalXAxis, globalYAxis);
+		AxisLabelFormatter defaultConverter = yAxis.getAxisLabelFormatter();
+		StringConverter<Number> modifiedConverter = new StringConverter<Number>() {
+		    @Override
+		    public String toString(Number object) {
+		        // N.B. added spaces before/after as work-around
+		        return " " + defaultConverter.toString(object) + " ";
+		    }
+
+		    @Override
+		    public Number fromString(String string) {
+		        return defaultConverter.fromString(string.trim());
+		    }
+		};
+		yAxis.setTickLabelFormatter(modifiedConverter);
+		
+		chartPane = new XYChart(xAxis, yAxis);
 		chartPane.setAnimated(false);
 		
 		chartPane.setMaxHeight(Double.MAX_VALUE);
@@ -160,16 +177,16 @@ public abstract class AbstractSubPlot implements SubPlot {
 				return;
 		}
 
-		globalXAxis.setAutoRanging(true);
-		globalYAxis.setAutoRanging(true);
+		xAxis.setAutoRanging(true);
+		yAxis.setAutoRanging(true);
 	}
 	
 	public DefaultNumericAxis getXAxis() {
-		return globalXAxis;
+		return xAxis;
 	}
 	
 	public DefaultNumericAxis getYAxis() {
-		return globalYAxis;
+		return yAxis;
 	}
 	
 	@Override

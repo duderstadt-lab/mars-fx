@@ -1,4 +1,6 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+import java.util.stream.Collectors;
+
 import org.controlsfx.control.textfield.CustomTextField;
 
 import com.jfoenix.controls.JFXColorPicker;
@@ -227,11 +229,7 @@ public class RegionOfInterestTable implements MoleculeSubPane {
     }
     
     public void loadData() {
-    	regionRowList.clear();
-
-    	for (String name : molecule.getRegionNames()) {
-        	regionRowList.add(molecule.getRegion(name));
-        }
+    	regionRowList.setAll(molecule.getRegionNames().stream().map(name -> molecule.getRegion(name)).collect(Collectors.toList()));
 	}
     
     @Override

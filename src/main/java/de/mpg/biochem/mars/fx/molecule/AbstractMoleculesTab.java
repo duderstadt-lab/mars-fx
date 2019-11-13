@@ -197,6 +197,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	}
 	
 	public void saveCurrentRecord() {
+		System.out.println("Saving record with region number " + molecule.getRegionNames().size());
     	if (molecule != null)
     		archive.put(molecule);
     }

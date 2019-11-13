@@ -34,7 +34,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 
-import javafx.scene.paint.Color;
+import javafx.scene.control.Label;
 
 /**
  * Renders data points with error bars and/or error surfaces 
@@ -89,6 +89,9 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         // make local copy and add renderer specific data sets
         final List<DataSet> localDataSetList = new ArrayList<>(datasets);
         localDataSetList.addAll(super.getDatasets());
+        
+        List<DataSet> regionDataSets = new ArrayList<>();
+        List<DataSet> positionDataSets = new ArrayList<>();
 
         // If there are no data sets
         if (localDataSetList.isEmpty()) {
@@ -114,6 +117,15 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         	final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
+            
+            //If it is just a region then we collect it and plot it at the end...
+        	if (dataSet.getStyle().equals("Region")) {
+        		regionDataSets.add(dataSet);
+        		continue;
+        	} else if (dataSet.getStyle().equals("Position")) {
+        		positionDataSets.add(dataSet);
+        		continue;
+        	}
             
             Color color = Color.BLACK;
             double width = 1;
@@ -226,6 +238,15 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
             }         
         } // end of 'dataSetIndex' loop
+        
+        //Now draw regions... 
+        for (DataSet region : regionDataSets)
+        	drawRegion(gc, chart, (RegionDataSet) region);
+        	
+        //And positions...
+        //for (DataSet position : positionDataSets)
+        //	drawPosition(gc, chart, (PositionDataSet) position);
+        	
         ProcessingProfiler.getTimeDiff(start);
     }
 
@@ -340,6 +361,59 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             gc.strokeLine(x1, y1, x2, y2);
         }
 
+        gc.restore();
+    }
+    
+    protected static void drawRegion(final GraphicsContext gc, Chart chart, RegionDataSet region) {
+        gc.save();
+        
+        //gc.setLineWidth(width);
+        gc.setFill(Color.web("#416ef468"));
+        //gc.setStroke(color);
+
+        double start = ((XYChart) chart).getXAxis().getDisplayPosition(region.getStart());
+        double end = ((XYChart) chart).getXAxis().getDisplayPosition(region.getEnd());
+        double yMin = ((XYChart) chart).getYAxis().getDisplayPosition(((XYChart) chart).getYAxis().getMin());
+        double yMax = ((XYChart) chart).getYAxis().getDisplayPosition(((XYChart) chart).getYAxis().getMax());
+        
+        double width = Math.abs(end - start);
+        double height = Math.abs(yMax - yMin);
+        double x = start;
+        double y = yMax;
+        gc.fillRect(x, y, width, height);
+        
+        System.out.println("x " + x + " y " + y + " width " + width + " height " + height);
+        
+        //What is the center position of the label?
+        double xLabelPos = x + width*(region.getLabelHorizontalPosition()); 
+        double yLabelPos = y + height*(1 - region.getLabelVerticalPosition());
+        
+        
+        gc.setFill(Color.WHITE);
+        
+        gc.fillRect(xLabelPos, yLabelPos, 100, 100);
+        
+        gc.restore();
+    }
+    
+    protected static void drawPosition(final GraphicsContext gc, Chart chart, RegionDataSet region) {
+        gc.save();
+        
+        //gc.setLineWidth(width);
+        gc.setFill(Color.web("#416ef468"));
+        //gc.setStroke(color);
+
+        double start = ((XYChart) chart).getXAxis().getDisplayPosition(region.getStart());
+        double end = ((XYChart) chart).getXAxis().getDisplayPosition(region.getEnd());
+        double yMin = ((XYChart) chart).getYAxis().getDisplayPosition(((XYChart) chart).getYAxis().getMin());
+        double yMax = ((XYChart) chart).getYAxis().getDisplayPosition(((XYChart) chart).getYAxis().getMax());
+        
+        double width = Math.abs(end - start);
+        double height = Math.abs(yMax - yMin);
+        double x = start;
+        double y = yMax;
+        //gc.fillRect(x, y, width, height);
+        
         gc.restore();
     }
 

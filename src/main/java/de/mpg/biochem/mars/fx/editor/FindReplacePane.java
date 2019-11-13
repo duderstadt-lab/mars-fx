@@ -59,7 +59,6 @@ import org.fxmisc.richtext.MultiChangeBuilder;
 import org.fxmisc.richtext.model.TwoDimensional.Bias;
 import org.fxmisc.wellbehaved.event.Nodes;
 
-import de.mpg.biochem.mars.fx.MarsApp;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.Range;
@@ -68,6 +67,8 @@ import de.mpg.biochem.mars.fx.util.Utils;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+
+import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
 
 /**
  * @author Karl Tauber
@@ -79,9 +80,9 @@ class FindReplacePane
 	}
 
 	private static PrefsBooleanProperty matchCase = new PrefsBooleanProperty(
-			MarsApp.getState(), "findMatchCase", false);
+			MarsFxGlobalPreferences.getState(), "findMatchCase", false);
 	private static PrefsBooleanProperty regex = new PrefsBooleanProperty(
-			MarsApp.getState(), "findRegex", false);
+			MarsFxGlobalPreferences.getState(), "findRegex", false);
 
 	private final List<HitsChangeListener> listeners = new ArrayList<>();
 	private final MarkdownTextArea textArea;

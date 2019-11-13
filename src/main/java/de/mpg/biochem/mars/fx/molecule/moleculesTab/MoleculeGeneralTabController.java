@@ -138,10 +138,12 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		System.out.println("UID " +  molecule.getUID());
 		if (chipsListener == null) {
 			chipsListener = new ListChangeListener<String>() {
 				@Override
 				public void onChanged(Change<? extends String> c) {
+					System.out.println(molecule.getUID() + " Tags changed");
 					while (c.next()) {
 			             if (c.wasRemoved()) {
 			                 molecule.removeTag(c.getRemoved().get(0));
@@ -149,6 +151,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			            	 molecule.addTag(c.getAddedSubList().get(0));
 			             }
 					}
+					System.out.println(molecule.getUID() + " Tags " + molecule.getTags());
 				}
 			};
 		}

@@ -39,7 +39,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import de.mpg.biochem.mars.fx.MarsApp;
+import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.util.Utils;
 
@@ -200,6 +200,6 @@ public class ProjectManager
 	}
 
 	private static Preferences getProjectsState() {
-		return MarsApp.getState().node(KEY_PROJECTS);
+		return MarsFxGlobalPreferences.getState().node(KEY_PROJECTS);
 	}
 }
