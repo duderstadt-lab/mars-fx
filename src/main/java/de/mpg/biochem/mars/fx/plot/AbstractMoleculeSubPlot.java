@@ -3,7 +3,9 @@ package de.mpg.biochem.mars.fx.plot;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javafx.scene.paint.Color;
 
@@ -22,9 +24,8 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
-import de.mpg.biochem.mars.fx.plot.tools.PositionDataSet;
-import de.mpg.biochem.mars.fx.plot.tools.RegionDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
+import de.mpg.biochem.mars.fx.util.Utils;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.PositionOfInterest;
@@ -41,14 +42,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	
 	protected M molecule;
 	
-	//Keep track of axes for which indicators have already been added.
-	protected HashSet<String> namesOfActiveRegions, namesOfActivePositions;
-	
 	public AbstractMoleculeSubPlot(PlotPane plotPane, String plotTitle) {
 		super(plotPane, plotTitle);
-		
-		namesOfActiveRegions = new HashSet<String>();
-		namesOfActivePositions = new HashSet<String>();
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
@@ -66,7 +61,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	//maybe long-term we should no make a copy to improve performance.
 	//But that might require a bit change in how things are store so....
 	
-	protected void addDataSet(PlotSeries plotSeries) {
+	public void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -112,73 +107,91 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 
 		dataset.setStyle(plotSeries.getType());
 		getChart().getDatasets().add(dataset);	
+	}
+	
+	public void addIndicators(Set<String> xAxisList, Set<String> yAxisList) {
+		ArrayList<String> regionNames = new ArrayList<>(molecule.getRegionNames());
 		
-		addRegionsOfInterest(xColumn, yColumn);
-		addPositionsOfInterest(xColumn, yColumn);
-	}
-	
-	protected void addRegionsOfInterest(String xColumn, String yColumn) {
-		for (String regionName : molecule.getRegionNames()) {
-			if (molecule.getRegion(regionName).getColumn().equals(xColumn) && !namesOfActiveRegions.contains(regionName)) {
-				RegionOfInterest roi = molecule.getRegion(regionName);
+		String newStyleSheet = "";
+		
+		for (int index=0; index<regionNames.size(); index++) {
+			String regionName = regionNames.get(index);
+			RegionOfInterest roi = molecule.getRegion(regionName);
+			
+			if (xAxisList.contains(roi.getColumn())) {
+				XRangeIndicator xRangeIndicator = new XRangeIndicator(this.xAxis, roi.getStart(), roi.getEnd(), roi.getName());
+				xRangeIndicator.setLabelVerticalPosition(0.2);
 				
-				Color color = Color.BLUE;
+				Color color = Color.web(roi.getColor());
+				newStyleSheet += String.format(".x-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }\n", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), roi.getOpacity());
 				
-				RegionDataSet xRegion = new RegionDataSet(regionName, color, roi.getStart(), roi.getEnd(), 0.2, 0.5);
-				xRegion.setXAxis();
-				//xRangeIndicator.setLabelVerticalPosition(0.2);
-				namesOfActiveRegions.add(regionName);
-				getChart().getDatasets().add(xRegion);
-			} else if (molecule.getRegion(regionName).getColumn().equals(yColumn) && !namesOfActiveRegions.contains(regionName)) {
-				RegionOfInterest roi = molecule.getRegion(regionName);
+				Color solidColor = Utils.rgba2rgb((int) Math.round(color.getRed()*255), (int) Math.round(color.getGreen()*255), (int) Math.round(color.getBlue()*255), roi.getOpacity());
 				
-				Color color = Color.BLUE;
+				newStyleSheet += String.format(".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
+						index, Math.round(solidColor.getRed()*255), Math.round(solidColor.getGreen()*255), Math.round(solidColor.getBlue()*255));
 				
-				//yRangeIndicator.setLabelVerticalPosition(0.2);
-				RegionDataSet yRegion = new RegionDataSet(regionName, color, roi.getStart(), roi.getEnd(), 0.2, 0.5);
-				yRegion.setYAxis();
-				//xRangeIndicator.setLabelVerticalPosition(0.2);
-				namesOfActiveRegions.add(regionName);
-				getChart().getDatasets().add(yRegion);
+				getChart().getPlugins().add(xRangeIndicator);
+			} 
+			
+			if (yAxisList.contains(roi.getColumn())) {
+				YRangeIndicator yRangeIndicator = new YRangeIndicator(this.yAxis, roi.getStart(), roi.getEnd(), roi.getName());
+				yRangeIndicator.setLabelHorizontalPosition(0.2);
+
+				Color color = Color.web(roi.getColor());
+				newStyleSheet += String.format(".y-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), roi.getOpacity());
+				
+				Color solidColor = Utils.rgba2rgb((int) Math.round(color.getRed()*255), (int) Math.round(color.getGreen()*255), (int) Math.round(color.getBlue()*255), roi.getOpacity());
+				
+				newStyleSheet += String.format(".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
+						index, Math.round(solidColor.getRed()*255), Math.round(solidColor.getGreen()*255), Math.round(solidColor.getBlue()*255));
+				
+				getChart().getPlugins().add(yRangeIndicator);
 			}
 		}
-	}
-	
-	protected void addPositionsOfInterest(String xColumn, String yColumn) {
-		for (String positionName : molecule.getPositionNames()) {
-			if (molecule.getPosition(positionName).getColumn().equals(xColumn) && !namesOfActivePositions.contains(positionName)) {
-				PositionOfInterest poi = molecule.getPosition(positionName);
+		
+		ArrayList<String> positionNames = new ArrayList<>(molecule.getPositionNames());
+		for (int index=0; index<positionNames.size(); index++) {
+			String positionName = positionNames.get(index);
+			PositionOfInterest poi = molecule.getPosition(positionName);
+			
+			if (xAxisList.contains(poi.getColumn())) {
+				XValueIndicator xValueIndicator = new XValueIndicator(this.xAxis, poi.getPosition(), poi.getName());
+				xValueIndicator.setLabelPosition(0.2);
 				
-				Color color = Color.BLUE;
+				Color color = Color.web(poi.getColor());
+				newStyleSheet += String.format(".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); }", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
 				
-				PositionDataSet xPosition = new PositionDataSet(positionName, color, poi.getPosition(), 0.2, 0.5);
-				xPosition.setXAxis();
-				//xValueIndicator.setLabelPosition(0.2);
-				namesOfActivePositions.add(positionName);
-				chartPane.getDatasets().add(xPosition);
-			} else if (molecule.getPosition(positionName).getColumn().equals(yColumn) && !namesOfActivePositions.contains(positionName)) {
-				PositionOfInterest poi = molecule.getPosition(positionName);
+				getChart().getPlugins().add(xValueIndicator);
+			}
+			
+			if (yAxisList.contains(poi.getColumn())) {
+				YValueIndicator yValueIndicator = new YValueIndicator(this.yAxis, poi.getPosition(), poi.getName());
+				yValueIndicator.setLabelPosition(0.2);
 				
-				Color color = Color.BLUE;
+				Color color = Color.web(poi.getColor());
+				newStyleSheet += String.format(".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); }", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
 				
-				PositionDataSet yPosition = new PositionDataSet(positionName, color, poi.getPosition(), 0.2, 0.5);
-				yPosition.setYAxis();
-				//xValueIndicator.setLabelPosition(0.2);
-				namesOfActivePositions.add(positionName);
-				chartPane.getDatasets().add(yPosition);
+				getChart().getPlugins().add(yValueIndicator);
 			}
 		}
+		
+		getChart().getStylesheets().add(getPlotPane().getStyleSheetUpdater().getStyleSheetURL(newStyleSheet));
 	}
 
 	@Override
 	public void removeIndicators() {
 		ArrayList<Object> indicators = new ArrayList<Object>();
-    	for (ChartPlugin plugin : chartPane.getPlugins())
+    	for (ChartPlugin plugin : getChart().getPlugins())
 			if (plugin instanceof AbstractValueIndicator)
 				indicators.add(plugin);
-		chartPane.getPlugins().removeAll(indicators);
-		namesOfActiveRegions.clear();
-		namesOfActivePositions.clear();
+		getChart().getPlugins().removeAll(indicators);
+		//remove indicator stylesheets
+		while (getChart().getStylesheets().size() > 1)
+			getChart().getStylesheets().remove(1);
 	}
 	
 	@Override
@@ -198,7 +211,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		this.molecule = (M) molecule;
 		removeIndicators();
 		getDatasetOptionsPane().setTable(molecule.getDataTable());
-		for (ChartPlugin plugin : chartPane.getPlugins())
+		for (ChartPlugin plugin : getChart().getPlugins())
 			if (plugin instanceof MarsMoleculePlotPlugin)
 				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();

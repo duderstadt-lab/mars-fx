@@ -181,6 +181,26 @@ public class RegionOfInterestTable implements MoleculeSubPane {
         colorColumn.setStyle("-fx-alignment: CENTER;");
         regionTable.getColumns().add(colorColumn);
         
+        TableColumn<RegionOfInterest, String> opacityColumn = new TableColumn<>("Opacity");
+        opacityColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        opacityColumn.setOnEditCommit(event -> { 
+        	try {
+    			double num = Double.valueOf(event.getNewValue());
+    			event.getRowValue().setOpacity(num);
+    		} catch (NumberFormatException e) {
+    			//Do nothing for the moment...
+    		}
+        });
+        opacityColumn.setCellValueFactory(regionOfInterest ->
+                new ReadOnlyObjectWrapper<>(String.valueOf(regionOfInterest.getValue().getOpacity()))
+        );
+        opacityColumn.setSortable(false);
+        opacityColumn.setPrefWidth(100);
+        opacityColumn.setMinWidth(100);
+        opacityColumn.setEditable(true);
+        opacityColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
+        regionTable.getColumns().add(opacityColumn);
+        
         regionTable.setItems(regionRowList);
         regionTable.setEditable(true);
 

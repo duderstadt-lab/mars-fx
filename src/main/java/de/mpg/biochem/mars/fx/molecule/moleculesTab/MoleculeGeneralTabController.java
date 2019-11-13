@@ -81,6 +81,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private ChangeListener<String> notesListener;
 	
 	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	private Molecule molecule;
 	
 	@FXML
     public void initialize() {
@@ -104,6 +105,34 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
         		archive = newArchive;
         	}
         });
+		
+		chipsListener = new ListChangeListener<String>() {
+			@Override
+			public void onChanged(Change<? extends String> c) {
+				if (molecule == null)
+					return;
+				
+				while (c.next()) {
+		             if (c.wasRemoved()) {
+		                 molecule.removeTag(c.getRemoved().get(0));
+		             } else if (c.wasAdded()) {
+		            	 molecule.addTag(c.getAddedSubList().get(0));
+		             }
+				}
+			}
+		};
+		
+		if (notesListener == null) {
+			notesListener = new ChangeListener<String>() {
+			    @Override
+			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+			    	if (molecule == null)
+						return;
+			    	
+			        molecule.setNotes(notesTextArea.getText());
+			    }
+			};
+		}
     }
 	
 	@FXML
@@ -138,32 +167,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		System.out.println("UID " +  molecule.getUID());
-		if (chipsListener == null) {
-			chipsListener = new ListChangeListener<String>() {
-				@Override
-				public void onChanged(Change<? extends String> c) {
-					System.out.println(molecule.getUID() + " Tags changed");
-					while (c.next()) {
-			             if (c.wasRemoved()) {
-			                 molecule.removeTag(c.getRemoved().get(0));
-			             } else if (c.wasAdded()) {
-			            	 molecule.addTag(c.getAddedSubList().get(0));
-			             }
-					}
-					System.out.println(molecule.getUID() + " Tags " + molecule.getTags());
-				}
-			};
-		}
-		
-		if (notesListener == null) {
-			notesListener = new ChangeListener<String>() {
-			    @Override
-			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-			        molecule.setNotes(notesTextArea.getText());
-			    }
-			};
-		}
+		this.molecule = molecule;
 		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getImageMetadataUID());

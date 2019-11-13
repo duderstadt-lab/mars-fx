@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.plot;
 
+import java.util.Set;
+
 import com.jfoenix.controls.JFXBadge;
 
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -19,8 +21,9 @@ public interface SubPlot {
 	public void setTool(ChartPlugin plugin, Cursor cursor);
 	public void removeTools();
 	public void removeIndicators();
+	public void addIndicators(Set<String> AxisList, Set<String> yAxisList);
+	public void addDataSet(PlotSeries plotSeries);
 	public Node getNode();
 	public void fireEvent(Event event);
 	public void update();
-	//public void setTable(MarsTable table);
 }

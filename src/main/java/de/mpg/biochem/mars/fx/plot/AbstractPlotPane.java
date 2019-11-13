@@ -35,6 +35,7 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -54,6 +55,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	
 	protected VBox chartsPane;
 	
+	protected static StyleSheetUpdater styleSheetUpdater;
+	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXSelected = new SimpleBooleanProperty();
@@ -67,6 +70,9 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected ButtonBase propertiesButton;
 
 	public AbstractPlotPane() {
+		if (styleSheetUpdater == null)
+			styleSheetUpdater = new StyleSheetUpdater();
+
 		plotOptionsPane = new PlotOptionsPane();
 		charts = new ArrayList<SubPlot>();
 		tools = new ArrayList<Action>();
@@ -241,6 +247,10 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			charts.get(0).getDatasetOptionsButton().refreshBadge();
 		}
 	}	
+	
+	public StyleSheetUpdater getStyleSheetUpdater() {
+		return styleSheetUpdater;
+	}
 	
 	@Override
 	public Node getNode() {

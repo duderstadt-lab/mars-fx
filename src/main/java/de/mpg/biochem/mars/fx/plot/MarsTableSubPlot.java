@@ -2,6 +2,7 @@ package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
@@ -23,7 +24,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		update();
 	}
 	
-	protected void addDataSet(PlotSeries plotSeries) {
+	public void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
@@ -59,13 +60,13 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 	}
 
 	@Override
-	public void removeTools() {
+	public void removeIndicators() {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void removeIndicators() {
+	public void addIndicators(Set<String> AxisList, Set<String> yAxisList) {
 		// TODO Auto-generated method stub
 		
 	}

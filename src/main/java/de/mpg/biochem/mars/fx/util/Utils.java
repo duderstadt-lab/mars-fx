@@ -41,6 +41,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.paint.Color;
 
 /**
  * @author Karl Tauber
@@ -204,5 +205,13 @@ public class Utils
 				lastCharacter = character;
 			}
 		});
+	}
+	
+	//convert transpart color to solid color...
+	public static Color rgba2rgb(int red, int green, int blue, double alpha) {
+		return Color.web(String.format("rgb(%d, %d, %d)", 
+				(int) Math.floor((1 - alpha) * 255 + alpha * red + 0.5), 
+				(int) Math.floor((1 - alpha) * 255 + alpha * green + 0.5), 
+				(int) Math.floor((1 - alpha) * 255 + alpha * blue + 0.5)));
 	}
 }

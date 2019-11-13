@@ -2,6 +2,9 @@ package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINE_CHART;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
@@ -92,6 +95,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 		//chartPane.setHorizontalGridLinesVisible(false);
 		//chartPane.setVerticalGridLinesVisible(false);
 		
+		//User style sheets !
+		
 		chartPane.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: rgb(237, 14, 14);");
 		chartPane.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: #ed0e0e;");
 	}
@@ -124,6 +129,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	public void update() {
 		clear();
+		
+		Set<String> xAxisList = new HashSet<String>();
+		Set<String> yAxisList = new HashSet<String>();
 
 		for (int i=0;i<getPlotSeriesList().size();i++) {
 			PlotSeries plotSeries = getPlotSeriesList().get(i);
@@ -131,6 +139,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 			if (plotSeries.xColumnField().getSelectionModel().getSelectedIndex() != -1 
 				&& plotSeries.yColumnField().getSelectionModel().getSelectedIndex() != -1) {
 					addDataSet(plotSeries);
+					xAxisList.add(plotSeries.getXColumn());
+					yAxisList.add(plotSeries.getYColumn());
 			}
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
@@ -139,6 +149,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setXLabel(datasetOptionsPane.getXAxisName());
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
+		
+		addIndicators(xAxisList, yAxisList);
 	}
 	
 	@Override
@@ -198,6 +210,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return chartPane;
 	}
 	
+	public PlotPane getPlotPane() {
+		return plotPane;
+	}
+	
 	public DatasetOptionsPane getDatasetOptionsPane() {
 		return datasetOptionsPane;
 	}
@@ -206,7 +222,11 @@ public abstract class AbstractSubPlot implements SubPlot {
 		return datasetOptionsButton;
 	}
 	
-	protected abstract void addDataSet(PlotSeries plotSeries);
+	public abstract void addDataSet(PlotSeries plotSeries);
+	
+	public abstract void addIndicators(Set<String> AxisList, Set<String> yAxisList);
+	
+	public abstract void removeIndicators();
 	
 	protected abstract MarsTable getDataTable();
 }
