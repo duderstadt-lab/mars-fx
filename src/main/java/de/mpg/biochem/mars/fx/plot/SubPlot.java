@@ -6,15 +6,16 @@ import com.jfoenix.controls.JFXBadge;
 
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
 public interface SubPlot {
 	public void resetXYZoom();
-	public DefaultNumericAxis getXAxis();
+	public MarsNumericAxis getXAxis();
 	public void setXLabel(String xAxisLabel);
-	public DefaultNumericAxis getYAxis();
+	public MarsNumericAxis getYAxis();
 	public void setYLabel(String yAxisLabel);
 	public DatasetOptionsPane getDatasetOptionsPane();
 	public JFXBadge getDatasetOptionsButton();

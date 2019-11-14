@@ -20,6 +20,7 @@ import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
@@ -33,7 +34,7 @@ import javafx.scene.Node;
 import javafx.util.StringConverter;
 
 public abstract class AbstractSubPlot implements SubPlot {
-	protected DefaultNumericAxis xAxis, yAxis;
+	protected MarsNumericAxis xAxis, yAxis;
 	protected XYChart chartPane;
 	
 	protected JFXBadge datasetOptionsButton;
@@ -60,6 +61,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		xAxis = createAxis();
 		yAxis = createAxis();
 		
+		/*
 		AxisLabelFormatter defaultConverter = yAxis.getAxisLabelFormatter();
 		StringConverter<Number> modifiedConverter = new StringConverter<Number>() {
 		    @Override
@@ -74,6 +76,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		    }
 		};
 		yAxis.setTickLabelFormatter(modifiedConverter);
+		*/
 		
 		chartPane = new XYChart(xAxis, yAxis);
 		chartPane.setAnimated(false);
@@ -101,22 +104,17 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: #ed0e0e;");
 	}
 	
-	protected DefaultNumericAxis createAxis() {
-		DefaultNumericAxis axis = new DefaultNumericAxis();
+	protected MarsNumericAxis createAxis() {
+		MarsNumericAxis axis = new MarsNumericAxis();
 		axis.setMinorTickCount(0);
 		axis.setAutoRangeRounding(false);
 		axis.setForceZeroInRange(false);
 		axis.setAnimated(false);
-		//axis.setAutoRangePadding(0);
 		return axis;
 	}
 	
 	public void addSeries(PlotSeries plotSeries) {
 		getPlotSeriesList().add(plotSeries);
-	}
-	
-	public void clear() {
-		chartPane.getDatasets().clear();
 	}
 	
 	public void setTitle(String name) {
@@ -128,7 +126,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 	}
 	
 	public void update() {
-		clear();
+		chartPane.getDatasets().clear();
+		
+		removeIndicators();
 		
 		Set<String> xAxisList = new HashSet<String>();
 		Set<String> yAxisList = new HashSet<String>();
@@ -193,11 +193,11 @@ public abstract class AbstractSubPlot implements SubPlot {
 		yAxis.setAutoRanging(true);
 	}
 	
-	public DefaultNumericAxis getXAxis() {
+	public MarsNumericAxis getXAxis() {
 		return xAxis;
 	}
 	
-	public DefaultNumericAxis getYAxis() {
+	public MarsNumericAxis getYAxis() {
 		return yAxis;
 	}
 	

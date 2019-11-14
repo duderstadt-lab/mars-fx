@@ -42,6 +42,12 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
 import javafx.util.StringConverter;
 
+import javafx.beans.value.ObservableValue;
+import javafx.beans.value.ChangeListener;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
@@ -62,6 +68,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected BooleanProperty zoomXSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty panSelected = new SimpleBooleanProperty();
+	
+	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();
 	
 	protected IntegerProperty maxPointsCount = new SimpleIntegerProperty(10_000);
 	
@@ -194,6 +202,9 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		chartsPane.getChildren().add(subplot.getNode());
 		
 		for (SubPlot otherSubPlot : charts) {
+			
+			otherSubPlot.getYAxis().setMinWidth(50);
+			
 			if (subplot.equals(otherSubPlot))
 				continue;
 			
@@ -209,14 +220,33 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		}
 			
 		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot.getDatasetOptionsButton());
-
-		if (charts.size() > 1) {
-			for (SubPlot subPlot : charts) {
-				subPlot.getYAxis().setTickLabelRotation(-90);
+		
+		subplot.getYAxis().widthProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				//System.out.println("calculated width " + subplot.getYAxis().calculateWidth() + " actual width " + newValue.doubleValue());
+				updatePlotWidths();
 			}
-		}
+	      });
 		
 		updateSubPlotBadges();
+	}
+	
+	public void updatePlotWidths() {
+		if (charts.size() > 1) {
+			double globalYAxisWidth = 0;
+			for (SubPlot subPlot : charts) {
+				double calcWidth = Math.ceil(subPlot.getYAxis().calculateWidth());
+				if (calcWidth > globalYAxisWidth)
+					globalYAxisWidth = calcWidth;
+			}
+			
+			for (SubPlot subPlot : charts) {
+				double width = subPlot.getYAxis().widthProperty().get();
+				if (width != globalYAxisWidth)
+					subPlot.getYAxis().setMinWidth(globalYAxisWidth);
+			}
+		}
 	}
 	
 	public void removeChart() {
@@ -225,12 +255,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			chartsPane.getChildren().remove(chartsPane.getChildren().size() - 1);
 			
 			toolBar.getItems().remove(toolBar.getItems().size() - 2);
-			
-			if (charts.size() == 1) {
-				for (SubPlot subPlot : charts) {
-					subPlot.getYAxis().setTickLabelRotation(0);
-				}
-			}
 		}
 		updateSubPlotBadges();
 	}
