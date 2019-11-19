@@ -32,6 +32,7 @@ import javafx.css.StyleableProperty;
 
 import javafx.beans.property.ObjectProperty;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
@@ -164,8 +165,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public void removeTools() {
 		for (ChartPlugin plugin : chartPane.getPlugins())
 			if (!(plugin instanceof AbstractValueIndicator)) {
+				if (plugin instanceof MarsZoomer)
+					((MarsZoomer) plugin).removeSliderListeners(chartPane);
 				chartPane.getPlugins().remove(plugin);
-				plugin.setChart(getChart());
 			}
 		chartPane.setCursor(Cursor.DEFAULT);
 	}
