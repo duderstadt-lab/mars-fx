@@ -62,7 +62,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
-		datasetOptionsPane = new DatasetOptionsPane(getDataTable(), this);
+		datasetOptionsPane = createDatasetOptionsPane();
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle(plotTitle);
@@ -100,6 +100,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		chartPane.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: rgb(237, 14, 14);");
 		chartPane.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: #ed0e0e;");
+	}
+	
+	protected DatasetOptionsPane createDatasetOptionsPane() {
+		return new DatasetOptionsPane(getDataTable(), this);
 	}
 	
 	protected MarsNumericAxis createAxis() {

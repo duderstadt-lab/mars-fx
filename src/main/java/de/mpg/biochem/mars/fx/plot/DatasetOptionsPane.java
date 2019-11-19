@@ -7,6 +7,8 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import javafx.scene.layout.HBox;
+
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
@@ -43,6 +45,8 @@ import com.jfoenix.controls.JFXTextField;
 public class DatasetOptionsPane extends MigPane {
 	private TextField titleField, xNameField, yNameField;
 	private Button addButton, updateButton;
+	private RadioButton radioButtonMolecules, radioButtonMetadata, radioButtonNone;
+	private ToggleGroup indicatorSourceGroup;
 	
 	private TableView<PlotSeries> plotPropertiesTable;
 	
@@ -69,6 +73,9 @@ public class DatasetOptionsPane extends MigPane {
 		add(xNameField, "wrap");
 		add(new Label("Y Axis "), "");
 		add(yNameField, "wrap");
+				
+		add(new Label("Indicators"), "wrap");
+		add(new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone), "wrap");
 		
 		add(plotPropertiesTable, "span, wrap");
 		
@@ -80,6 +87,19 @@ public class DatasetOptionsPane extends MigPane {
 		titleField = new TextField();
 		yNameField = new TextField();
 		xNameField = new TextField();
+		
+        radioButtonMolecules = new RadioButton("Molecules ");
+        radioButtonMetadata = new RadioButton("Metadata ");
+        radioButtonNone = new RadioButton("None ");
+
+        indicatorSourceGroup = new ToggleGroup();
+
+        radioButtonMolecules.setToggleGroup(indicatorSourceGroup);
+        radioButtonMetadata.setToggleGroup(indicatorSourceGroup);
+        radioButtonNone.setToggleGroup(indicatorSourceGroup);
+        
+        //Default Indicator setting
+        radioButtonMolecules.setSelected(true);
 		
 		plotPropertiesTable = new TableView<PlotSeries>();
 		
@@ -310,6 +330,18 @@ public class DatasetOptionsPane extends MigPane {
 	
 	public void setSubPlot(SubPlot subPlot) {
 		this.subPlot = subPlot;
+	}
+	
+	public boolean isMoleculeIndicators() {
+		return indicatorSourceGroup.getSelectedToggle().equals(radioButtonMolecules);
+	}
+	
+	public boolean isMetadataIndicators() {
+		return indicatorSourceGroup.getSelectedToggle().equals(radioButtonMetadata);
+	}
+	
+	public boolean isNoneIndicators() {
+		return indicatorSourceGroup.getSelectedToggle().equals(radioButtonNone);
 	}
 }
 

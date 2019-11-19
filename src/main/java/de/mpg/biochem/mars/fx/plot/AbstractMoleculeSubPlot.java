@@ -20,14 +20,20 @@ import de.gsi.chart.plugins.YRangeIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Utils;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsRecord;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.PositionOfInterest;
 import de.mpg.biochem.mars.util.RegionOfInterest;
@@ -41,9 +47,12 @@ import javafx.scene.Cursor;
 public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends AbstractSubPlot implements MoleculeSubPane {
 	
 	protected M molecule;
+	protected PlotPane plotPane;
 	
 	public AbstractMoleculeSubPlot(PlotPane plotPane, String plotTitle) {
 		super(plotPane, plotTitle);
+		
+		this.plotPane = plotPane;
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
@@ -55,7 +64,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 						e.consume();
 				   }
 			   } 
-			});
+		});
 	}
 	//For the moment we make a copy...
 	//maybe long-term we should no make a copy to improve performance.
@@ -109,14 +118,26 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		getChart().getDatasets().add(dataset);	
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void addIndicators(Set<String> xAxisList, Set<String> yAxisList) {
-		ArrayList<String> regionNames = new ArrayList<>(molecule.getRegionNames());
+		
+		MarsRecord record;
+		
+		if (this.getDatasetOptionsPane().isMoleculeIndicators())
+			record = molecule;
+		else if (this.getDatasetOptionsPane().isMetadataIndicators()) {
+			//if (((AbstractMoleculePlotPane<Molecule, SubPlot>)plotPane).getArchive() != null)
+			record = ((AbstractMoleculePlotPane<Molecule, SubPlot>)plotPane).getArchive().getImageMetadata(molecule.getImageMetadataUID());
+		} else
+			return;
+			
+		ArrayList<String> regionNames = new ArrayList<>(record.getRegionNames());
 		
 		String newStyleSheet = "";
 		
 		for (int index=0; index<regionNames.size(); index++) {
 			String regionName = regionNames.get(index);
-			RegionOfInterest roi = molecule.getRegion(regionName);
+			RegionOfInterest roi = record.getRegion(regionName);
 			
 			if (xAxisList.contains(roi.getColumn())) {
 				XRangeIndicator xRangeIndicator = new XRangeIndicator(this.xAxis, roi.getStart(), roi.getEnd(), roi.getName());
@@ -151,10 +172,10 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			}
 		}
 		
-		ArrayList<String> positionNames = new ArrayList<>(molecule.getPositionNames());
+		ArrayList<String> positionNames = new ArrayList<>(record.getPositionNames());
 		for (int index=0; index<positionNames.size(); index++) {
 			String positionName = positionNames.get(index);
-			PositionOfInterest poi = molecule.getPosition(positionName);
+			PositionOfInterest poi = record.getPosition(positionName);
 			
 			if (xAxisList.contains(poi.getColumn())) {
 				XValueIndicator xValueIndicator = new XValueIndicator(this.xAxis, poi.getPosition(), poi.getName());

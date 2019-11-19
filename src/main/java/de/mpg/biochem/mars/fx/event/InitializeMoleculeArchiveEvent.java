@@ -12,14 +12,11 @@ public class InitializeMoleculeArchiveEvent extends MoleculeArchiveEvent {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	private final MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 
 	public static final EventType<MoleculeArchiveEvent> INITIALIZE_MOLECULE_ARCHIVE = new EventType<>(MOLECULE_ARCHIVE_EVENT, "INITIALIZE_MOLECULE_ARCHIVE");
 
     public InitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-        super(INITIALIZE_MOLECULE_ARCHIVE);
-        this.archive = archive;
+        super(INITIALIZE_MOLECULE_ARCHIVE, archive);
     }
 
     @Override

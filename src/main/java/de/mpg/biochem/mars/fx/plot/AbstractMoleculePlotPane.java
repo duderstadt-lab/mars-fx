@@ -5,6 +5,8 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE;
 
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.Zoomer;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
@@ -14,7 +16,10 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionPlugin;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
+import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
@@ -27,6 +32,8 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	
 	protected BooleanProperty regionSelected;
 	protected BooleanProperty positionSelected;
+	
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMoleculePlotPane() {
 		super();
@@ -44,6 +51,15 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				   	}
 			   };
 		});
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
+					archive = e.getArchive();
+			   		e.consume();
+			   	}
+			} 
+        });
 	}
 	
 	@Override
@@ -70,6 +86,10 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		addTool(positionSelectionCursor);
 		*/
 		
+	}
+	
+	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	@Override

@@ -2,6 +2,8 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
 
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
@@ -63,8 +65,17 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 				   		plotPane.fireEvent(new UpdatePlotAreaEvent());
 				   		e.consume();
 				   	}
-			   };
+			   }
 		});
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
+			   		plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
+			   		e.consume();
+			   	}
+			} 
+        });
 	}
 	
 	public void loadSegmentTables() {

@@ -220,11 +220,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				updateMenus(((MoleculeArchiveTab)newValue).getMenus());
     				if (oldValue == commentsTab) {
-    					commentsTab.fireEvent(new MoleculeArchiveSavingEvent());
+    					commentsTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
     				} else if (oldValue == imageMetadataTab) {
-    					imageMetadataTab.fireEvent(new MoleculeArchiveSavingEvent());
+    					imageMetadataTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
     				} else if (oldValue == moleculesTab) {
-    					moleculesTab.fireEvent(new MoleculeArchiveSavingEvent());
+    					moleculesTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
     				}
     			}
     		});
@@ -294,7 +294,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
     public void save() {
     	 if (!lockArchive) {
-    		 fireEvent(new MoleculeArchiveSavingEvent());
+    		 fireEvent(new MoleculeArchiveSavingEvent(archive));
     		 moleculesTab.saveCurrentRecord();
     		 imageMetadataTab.saveCurrentRecord();
         	 try {
@@ -315,7 +315,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         	 } catch (IOException e1) {
 				e1.printStackTrace();
 			 }
-        	 fireEvent(new MoleculeArchiveSavedEvent());
+        	 fireEvent(new MoleculeArchiveSavedEvent(archive));
     	 }
     }
     
@@ -352,9 +352,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
 		if (file != null) {
-			fireEvent(new MoleculeArchiveSavingEvent());
+			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			archive.saveAs(file);
-			fireEvent(new MoleculeArchiveSavedEvent());
+			fireEvent(new MoleculeArchiveSavedEvent(archive));
 			return true;
 		}
 		return false;
@@ -397,9 +397,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
 		if (virtualDirectory != null) {	
-			fireEvent(new MoleculeArchiveSavingEvent());
+			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			archive.saveAsVirtualStore(virtualDirectory);
-			fireEvent(new MoleculeArchiveSavedEvent());
+			fireEvent(new MoleculeArchiveSavedEvent(archive));
 		}
 	}
 	
@@ -413,16 +413,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
     public void lockArchive() {
     	lockArchive = true;
-    	fireEvent(new MoleculeArchiveLockingEvent());
+    	fireEvent(new MoleculeArchiveLockingEvent(archive));
 		//We move to the dashboard Tab
     	tabsContainer.getSelectionModel().select(0);
-    	fireEvent(new MoleculeArchiveLockedEvent());
+    	fireEvent(new MoleculeArchiveLockedEvent(archive));
     }
     
     public void unlockArchive() {
-    	fireEvent(new MoleculeArchiveUnlockingEvent());
+    	fireEvent(new MoleculeArchiveUnlockingEvent(archive));
 		lockArchive = false;
-		fireEvent(new MoleculeArchiveUnlockedEvent());
+		fireEvent(new MoleculeArchiveUnlockedEvent(archive));
     }
 
     public void fireEvent(Event event) {
