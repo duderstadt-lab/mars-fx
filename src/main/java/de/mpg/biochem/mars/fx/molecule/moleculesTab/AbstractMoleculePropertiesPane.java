@@ -49,8 +49,8 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	
 	protected MoleculeGeneralTabController moleculeGeneralTabController;
 	protected MoleculePropertiesTable moleculePropertiesTable;
-	protected RegionOfInterestTable regionOfInterestTable;
-	protected PositionOfInterestTable positionOfInterestTable;
+	protected MoleculeRegionOfInterestTable regionOfInterestTable;
+	protected MoleculePositionOfInterestTable positionOfInterestTable;
 	
 	protected M molecule;
 	
@@ -85,6 +85,8 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         		archive = newArchive;
         		moleculeGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		moleculePropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         	}
         });
         
@@ -153,7 +155,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         propertiesTab.setContent(propertiesTabContainer);
         
         //Build regions Tab
-        regionOfInterestTable = new RegionOfInterestTable();
+        regionOfInterestTable = new MoleculeRegionOfInterestTable();
        	
     	BorderPane regionsTabPane = new BorderPane();
     	regionsTabPane.setMaxWidth(tabWidth);
@@ -178,7 +180,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         regionsTab.setContent(regionsTabContainer);
         
         //Build positions Tab
-        positionOfInterestTable = new PositionOfInterestTable();
+        positionOfInterestTable = new MoleculePositionOfInterestTable();
        	
     	BorderPane positionTabPane = new BorderPane();
     	positionTabPane.setMaxWidth(tabWidth);

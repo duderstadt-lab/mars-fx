@@ -20,7 +20,7 @@ import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
-import de.mpg.biochem.mars.fx.event.MarsImageMetadataEvent;
+import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -85,7 +85,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		
 		notesTextArea.setPromptText("none");
 		
-		getNode().addEventHandler(MarsImageMetadataEvent.MARS_IMAGE_METADATA_EVENT, this);
+		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
         	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
@@ -111,7 +111,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	}
 
 	@Override
-	public void onMarsImageMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
 		if (chipsListener == null) {
 			chipsListener = new ListChangeListener<String>() {
 				@Override
@@ -153,7 +153,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	}
 
 	@Override
-	public void handle(MarsImageMetadataEvent event) {
+	public void handle(MetadataEvent event) {
 		event.invokeHandler(this);
 		event.consume();
 	}

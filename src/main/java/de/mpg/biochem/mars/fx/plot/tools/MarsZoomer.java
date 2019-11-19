@@ -69,6 +69,7 @@ import javafx.util.Duration;
  * @author Grzegorz Kruk
  * @author rstein - adapted to XYChartPane, corrected some features (mouse zoom
  *         events outside canvas, auto-ranging on zoom-out, scrolling, toolbar)
+ * @author Karl Duderstadt - small edits to remove top toolbar
  */
 public class MarsZoomer extends ChartPlugin {
     private static final String FONT_AWESOME = "FontAwesome";
@@ -236,6 +237,7 @@ public class MarsZoomer extends ChartPlugin {
         super();
         setAxisMode(zoomMode);
         setAnimated(animated);
+        setSliderVisible(true);
         setDragCursor(Cursor.CROSSHAIR);
 
         zoomRectangle.setManaged(false);
@@ -243,7 +245,7 @@ public class MarsZoomer extends ChartPlugin {
         getChartChildren().add(zoomRectangle);
         registerMouseHandlers();
 
-        /*
+      
         chartProperty().addListener((change, o, n) -> {
             if (o != null) {
                 o.getToolBar().getChildren().remove(zoomButtons);
@@ -263,7 +265,6 @@ public class MarsZoomer extends ChartPlugin {
 
             }
         });
-        */
     }
 
     /**

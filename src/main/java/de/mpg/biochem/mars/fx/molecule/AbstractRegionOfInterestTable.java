@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.molecule;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
@@ -8,12 +8,14 @@ import com.jfoenix.controls.JFXColorPicker;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.event.IndicatorChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import javafx.scene.paint.Color;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
+import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.PositionOfInterest;
-import de.mpg.biochem.mars.molecule.RegionOfInterest;
+import de.mpg.biochem.mars.util.PositionOfInterest;
+import de.mpg.biochem.mars.util.RegionOfInterest;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -30,21 +32,17 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class RegionOfInterestTable implements MoleculeSubPane {
+public abstract class AbstractRegionOfInterestTable {
     
-	private Molecule molecule;
+	protected MarsRecord record;
 	
-	private BorderPane rootPane;
+	protected BorderPane rootPane;
 	
-    private CustomTextField addRegionNameField;
-    private TableView<RegionOfInterest> regionTable;
-    private ObservableList<RegionOfInterest> regionRowList = FXCollections.observableArrayList();
+    protected CustomTextField addRegionNameField;
+    protected TableView<RegionOfInterest> regionTable;
+    protected ObservableList<RegionOfInterest> regionRowList = FXCollections.observableArrayList();
 
-    public RegionOfInterestTable() {        
-        initialize();
-    }
-
-    private void initialize() {
+    public AbstractRegionOfInterestTable() {        
     	regionTable = new TableView<RegionOfInterest>();
     	addRegionNameField = new CustomTextField();
     	
@@ -76,9 +74,9 @@ public class RegionOfInterestTable implements MoleculeSubPane {
         		
                 setGraphic(removeButton);
                 removeButton.setOnAction(e -> {
-        			molecule.removeRegion(pRow.getName());
+        			record.removeRegion(pRow.getName());
         			loadData();
-        			getNode().fireEvent(new IndicatorChangedEvent(molecule));
+        			fireIndicatorChangedEvent();
         		});
             }
         });
@@ -100,7 +98,7 @@ public class RegionOfInterestTable implements MoleculeSubPane {
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
-        	columns.getItems().addAll(molecule.getDataTable().getColumnHeadings());
+        	columns.getItems().addAll(record.getDataTable().getColumnHeadings());
             columns.getSelectionModel().select(cellData.getValue().getColumn());
             
             columns.getSelectionModel().selectedItemProperty().addListener(
@@ -217,7 +215,7 @@ public class RegionOfInterestTable implements MoleculeSubPane {
 		addButton.setOnAction(e -> {
 			if (!addRegionNameField.getText().equals("")) {
 				RegionOfInterest regionOfInterest = new RegionOfInterest(addRegionNameField.getText());
-				molecule.putRegion(regionOfInterest);
+				record.putRegion(regionOfInterest);
 				loadData();
 			}
 		});
@@ -241,7 +239,7 @@ public class RegionOfInterestTable implements MoleculeSubPane {
         rootPane.setBottom(addRegionNameField);
         BorderPane.setMargin(addRegionNameField, insets);
         
-        getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+        addEventHandlers();
     }
     
     public Node getNode() {
@@ -249,23 +247,10 @@ public class RegionOfInterestTable implements MoleculeSubPane {
     }
     
     public void loadData() {
-    	regionRowList.setAll(molecule.getRegionNames().stream().map(name -> molecule.getRegion(name)).collect(Collectors.toList()));
+    	regionRowList.setAll(record.getRegionNames().stream().map(name -> record.getRegion(name)).collect(Collectors.toList()));
 	}
     
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
-
-	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		this.molecule = molecule;
-    	loadData();
-	}
+    protected abstract void fireIndicatorChangedEvent();
+    
+    protected abstract void addEventHandlers();
 }

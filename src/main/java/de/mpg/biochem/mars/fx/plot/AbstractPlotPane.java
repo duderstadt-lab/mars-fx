@@ -224,7 +224,6 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		subplot.getYAxis().widthProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				//System.out.println("calculated width " + subplot.getYAxis().calculateWidth() + " actual width " + newValue.doubleValue());
 				updatePlotWidths();
 			}
 	      });

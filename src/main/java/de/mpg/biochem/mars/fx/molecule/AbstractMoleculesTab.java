@@ -101,6 +101,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	@SuppressWarnings("unchecked")
 	protected Node buildMoleculeTableIndex() {
 		moleculeIndexTable = new TableView<MoleculeIndexRow>();
+		moleculeIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");// -fx-selection-bar-non-focused: salmon;");
     	
         TableColumn<MoleculeIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
         rowIndexCol.setCellValueFactory(molIndexRow ->

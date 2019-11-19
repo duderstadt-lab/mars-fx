@@ -1,18 +1,23 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.molecule;
+
+import java.util.stream.Collectors;
+
 import org.controlsfx.control.textfield.CustomTextField;
 
 import com.jfoenix.controls.JFXColorPicker;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.IndicatorChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.PositionOfInterest;
-import de.mpg.biochem.mars.molecule.RegionOfInterest;
+import de.mpg.biochem.mars.util.PositionOfInterest;
+import de.mpg.biochem.mars.util.RegionOfInterest;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,21 +34,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-public class PositionOfInterestTable implements MoleculeSubPane {
+public abstract class AbstractPositionOfInterestTable {
     
-	private Molecule molecule;
+	protected MarsRecord record;
 	
-	private BorderPane rootPane;
+	protected BorderPane rootPane;
 	
-    private CustomTextField addPositionField;
-    private TableView<PositionOfInterest> positionTable;
-    private ObservableList<PositionOfInterest> positionRowList = FXCollections.observableArrayList();
+    protected CustomTextField addPositionField;
+    protected TableView<PositionOfInterest> positionTable;
+    protected ObservableList<PositionOfInterest> positionRowList = FXCollections.observableArrayList();
 
-    public PositionOfInterestTable() {        
-        initialize();
-    }
-
-    private void initialize() {
+    public AbstractPositionOfInterestTable() {        
     	positionTable = new TableView<PositionOfInterest>();
     	addPositionField = new CustomTextField();
     	
@@ -75,9 +76,9 @@ public class PositionOfInterestTable implements MoleculeSubPane {
         		
                 setGraphic(removeButton);
                 removeButton.setOnAction(e -> {
-                	molecule.removePosition(pRow.getName());
+                	record.removePosition(pRow.getName());
         			loadData();
-        			getNode().fireEvent(new IndicatorChangedEvent(molecule));
+        			fireIndicatorChangedEvent();
         		});
             }
         });
@@ -99,7 +100,7 @@ public class PositionOfInterestTable implements MoleculeSubPane {
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
-        	columns.getItems().addAll(molecule.getDataTable().getColumnHeadings());
+        	columns.getItems().addAll(record.getDataTable().getColumnHeadings());
             columns.getSelectionModel().select(cellData.getValue().getColumn());
             
             columns.getSelectionModel().selectedItemProperty().addListener(
@@ -176,7 +177,7 @@ public class PositionOfInterestTable implements MoleculeSubPane {
 		addButton.setOnAction(e -> {
 			if (!addPositionField.getText().equals("")) {
 				PositionOfInterest positionOfInterest = new PositionOfInterest(addPositionField.getText());
-				molecule.putPosition(positionOfInterest);
+				record.putPosition(positionOfInterest);
 				loadData();
 			}
 		});
@@ -200,35 +201,18 @@ public class PositionOfInterestTable implements MoleculeSubPane {
         rootPane.setBottom(addPositionField);
         BorderPane.setMargin(addPositionField, insets);
         
-        getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+        addEventHandlers();
     }
     
     public Node getNode() {
     	return rootPane;
     }
-    
+
     public void loadData() {
-    	positionRowList.clear();
-
-    	for (String name : molecule.getPositionNames()) {
-        	positionRowList.add(molecule.getPosition(name));
-        }
+    	positionRowList.setAll(record.getPositionNames().stream().map(name -> record.getPosition(name)).collect(Collectors.toList()));
 	}
     
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
-
-	@Override
-	public void fireEvent(Event event) {
-		getNode().fireEvent(event);
-	}
-
-	@Override
-	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		this.molecule = molecule;
-    	loadData();
-	}
+    protected abstract void fireIndicatorChangedEvent();
+    
+    protected abstract void addEventHandlers();
 }

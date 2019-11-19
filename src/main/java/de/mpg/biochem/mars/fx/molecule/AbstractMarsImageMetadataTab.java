@@ -23,7 +23,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MarsImageMetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 
@@ -103,8 +103,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
                 	marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
-                	metadataCenterPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
-                	metadataPropertiesPane.getNode().fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+                	metadataCenterPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+                	metadataPropertiesPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
             		Platform.runLater(() -> {
             			metaIndexTable.requestFocus();
             		});
@@ -218,8 +218,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
         	
         	//Update center pane and properties pane.
-        	metadataCenterPane.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
-        	metadataPropertiesPane.fireEvent(new MarsImageMetadataSelectionChangedEvent(marsImageMetadata));
+        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
 			Platform.runLater(() -> {
 				//metaIndexTable.requestFocus();
 				metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());

@@ -3,7 +3,7 @@ package de.mpg.biochem.mars.fx.event;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.EventType;
 
-public class IndicatorChangedEvent extends MoleculeEvent {
+public class MoleculeIndicatorChangedEvent extends MoleculeEvent {
 	
 	/**
 	 * 
@@ -14,7 +14,7 @@ public class IndicatorChangedEvent extends MoleculeEvent {
 
     private final Molecule molecule;
 
-    public IndicatorChangedEvent(Molecule molecule) {
+    public MoleculeIndicatorChangedEvent(Molecule molecule) {
         super(INDICATOR_CHANGED);
         this.molecule = molecule;
     }
