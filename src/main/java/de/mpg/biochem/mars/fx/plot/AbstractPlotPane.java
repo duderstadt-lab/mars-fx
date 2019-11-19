@@ -4,6 +4,7 @@ import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.Panner;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.plugins.DataPointTooltip;
 
 import javafx.scene.Cursor;
@@ -40,7 +41,6 @@ import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.tbee.javafx.scene.layout.fxml.MigPane;
-import javafx.util.StringConverter;
 
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ChangeListener;

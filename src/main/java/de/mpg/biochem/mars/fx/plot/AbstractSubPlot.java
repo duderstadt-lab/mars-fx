@@ -18,8 +18,19 @@ import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.chart.ui.css.StylishBooleanProperty;
+import de.gsi.chart.ui.css.StylishObjectProperty;
+
+import de.gsi.chart.ui.geometry.Side;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableObjectProperty;
+import javafx.css.StyleableProperty;
+
+import javafx.beans.property.ObjectProperty;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
@@ -27,7 +38,10 @@ import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.MarsTable;
+import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.css.CssMetaData;
+import javafx.css.StyleableObjectProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -60,23 +74,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		xAxis = createAxis();
 		yAxis = createAxis();
-		
-		/*
-		AxisLabelFormatter defaultConverter = yAxis.getAxisLabelFormatter();
-		StringConverter<Number> modifiedConverter = new StringConverter<Number>() {
-		    @Override
-		    public String toString(Number object) {
-		        // N.B. added spaces before/after as work-around
-		        return " " + defaultConverter.toString(object) + " ";
-		    }
-
-		    @Override
-		    public Number fromString(String string) {
-		        return defaultConverter.fromString(string.trim());
-		    }
-		};
-		yAxis.setTickLabelFormatter(modifiedConverter);
-		*/
 		
 		chartPane = new XYChart(xAxis, yAxis);
 		chartPane.setAnimated(false);
@@ -166,8 +163,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 	@Override
 	public void removeTools() {
 		for (ChartPlugin plugin : chartPane.getPlugins())
-			if (!(plugin instanceof AbstractValueIndicator))
+			if (!(plugin instanceof AbstractValueIndicator)) {
 				chartPane.getPlugins().remove(plugin);
+				plugin.setChart(getChart());
+			}
 		chartPane.setCursor(Cursor.DEFAULT);
 	}
 	
