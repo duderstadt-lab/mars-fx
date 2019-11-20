@@ -94,7 +94,6 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         	@Override
         	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
         		archive = newArchive;
-        		
         		metadataGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));

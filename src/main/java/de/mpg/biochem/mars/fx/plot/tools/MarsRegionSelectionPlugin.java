@@ -9,7 +9,8 @@ import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
-import de.mpg.biochem.mars.fx.plot.event.NewRegionAddedEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.util.RegionOfInterest;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -300,12 +301,19 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
             double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
             
-            RegionOfInterest roi = new RegionOfInterest("Region 1");
+            RegionOfInterest roi = new RegionOfInterest("Region");
             roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
             roi.setStart(dataMin);
             roi.setEnd(dataMax);
             
-            getChart().fireEvent(new NewRegionAddedEvent(roi));
+            //We add the region to the metadata if those indicators are selected.
+            //Otherwise we add it for molecule
+            //If None is selected we add nothing.
+            if (datasetOptionsPane.isMetadataIndicators())
+            	getChart().fireEvent(new NewMetadataRegionEvent(roi));
+            else if (datasetOptionsPane.isMoleculeIndicators())
+            	getChart().fireEvent(new NewMoleculeRegionEvent(roi));
+            
         }
         regionStartPoint = regionEndPoint = null;
         uninstallCursor();

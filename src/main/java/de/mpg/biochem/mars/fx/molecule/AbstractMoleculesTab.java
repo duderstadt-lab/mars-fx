@@ -7,9 +7,12 @@ import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataEvent;
+import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
@@ -34,7 +37,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-import de.mpg.biochem.mars.fx.plot.event.NewRegionAddedEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -79,20 +83,40 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
 			   @Override 
 			   public void handle(PlotEvent e) { 
-				   	if (e.getEventType().getName().equals("NEW_REGION_ADDED")) {
-				   		molecule.putRegion(((NewRegionAddedEvent) e).getRegion());
+				   	if (e.getEventType().getName().equals("NEW_MOLECULE_REGION")) {
+				   		molecule.putRegion(((NewMoleculeRegionEvent) e).getRegion());
 				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		e.consume();
+				   	} else if (e.getEventType().getName().equals("NEW_METADATA_REGION")) {
+				   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+				   		metaData.putRegion(((NewMetadataRegionEvent) e).getRegion());
+				   		
+				   		//Here we save the record in case we are working virtually
+				   		archive.putImageMetadata(metaData);
+				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		//Remove this consume if we want to catch events in archive frame and redirect them to the metadata pane.
 				   		e.consume();
 				   	}
 			   };
         });
 		getNode().addEventFilter(MoleculeEvent.MOLECULE_EVENT, new EventHandler<MoleculeEvent>() { 
-			   @Override 
+			   @SuppressWarnings("unchecked")
+			@Override 
 			   public void handle(MoleculeEvent e) { 
 				   if (e.getEventType().getName().equals("INDICATOR_CHANGED")) {
 				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
 				   		e.consume();
+				   } else if (e.getEventType().getName().equals("REFRESH_MOLECULE_EVENT")) {
+					   //Reload molecule due to changes in the virtual store copy on the disk..
+					    molecule = (M) archive.get(molecule.getUID());
+				    	
+					    moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+				    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+						Platform.runLater(() -> {
+							moleculeIndexTable.requestFocus();
+						});
+						e.consume();
 				   }
 			   };
 		});
@@ -136,6 +160,9 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         
         moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
             (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
+            	//Need to save the current record when we change in the case the virtual storage.
+            	saveCurrentRecord();
+            	
                 if (newMoleculeIndexRow != null) {
                 	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
                 	
@@ -205,6 +232,10 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     		archive.put(molecule);
     }
 	
+	public Molecule getSelectedMolecule() {
+		return molecule;
+	}
+	
     @Override
 	public Node getNode() {
 		return rootPane;
@@ -219,11 +250,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	
-    	moleculeRowList.clear();
-
-    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
-        	moleculeRowList.add(new MoleculeIndexRow(index));
-        }
     	moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	onMoleculeArchiveUnlockingEvent();
@@ -270,18 +296,21 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeArchiveUnlockingEvent() {
+		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
+	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
+	        	moleculeRowList.add(new MoleculeIndexRow(index));
+	        }
+	    	
     		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
     		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
-        	
-    		//Update center pane and properties pane.
-        	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-        	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-    		Platform.runLater(() -> {
-    			moleculeIndexTable.requestFocus();
-    			//moleculeIndexTable.getSelectionModel().select(moleculeIndexTable.getSelectionModel().selectedItemProperty().get());
-    		});
+	    	
+	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     	}
+		Platform.runLater(() -> {
+			moleculeIndexTable.requestFocus();
+		});
 	}
 
 	@Override

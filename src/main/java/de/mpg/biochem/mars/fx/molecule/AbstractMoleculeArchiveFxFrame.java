@@ -83,14 +83,22 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockingEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.util.*;
 
 import de.mpg.biochem.mars.molecule.*;
@@ -198,6 +206,19 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         stackPane.getChildren().add(tabsContainer);
         borderPane.setCenter(stackPane);
         
+        //Let's catch Plot events and pass them to the metadata panel if needed
+        //For now we should just make sure it updates on tab change.
+        /*
+        getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
+			   @Override 
+			   public void handle(PlotEvent e) { 
+				   	if (e.getEventType().getName().equals("NEW_METADATA_REGION")) {
+				   		moleculePropertiesPane.fireEvent(new MetadataSelectionChangedEvent(molecule));
+				   		e.consume();
+				   	}
+			   };
+     	});
+        */
         Scene scene = new Scene(borderPane);
 
         return scene;
@@ -213,7 +234,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         imageMetadataTab = createImageMetadataTab();
         moleculesTab = createMoleculesTab();
 
-        //fire save events for tabs as they are left.
+        //fire save events for tabs as they are left and update events for new tabs
         tabsContainer.getSelectionModel().selectedItemProperty().addListener(
     		new ChangeListener<Tab>() {
     			@Override
@@ -226,6 +247,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     				} else if (oldValue == moleculesTab) {
     					moleculesTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
     				}
+    				
+	    			if (newValue == imageMetadataTab) {
+						imageMetadataTab.fireEvent(new RefreshMetadataEvent());
+					} else if (newValue == moleculesTab) {
+						moleculesTab.fireEvent(new RefreshMoleculeEvent());
+					}
     			}
     		});
         
@@ -401,6 +428,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			archive.saveAsVirtualStore(virtualDirectory);
 			fireEvent(new MoleculeArchiveSavedEvent(archive));
 		}
+	}
+	
+	public Node getNode() {
+		return borderPane;
 	}
 	
 	public abstract I createImageMetadataTab();

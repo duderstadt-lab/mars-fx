@@ -89,6 +89,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
         	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        		System.out.println("Setting archive in general tab");
         		archive = newArchive;
         	}
         });
@@ -143,7 +144,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		if (marsImageMetadata.getTags().size() > 0)
 			chipView.getChips().addAll(marsImageMetadata.getTags());
 		chipView.getChips().addListener(chipsListener);
-		
+
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
 		

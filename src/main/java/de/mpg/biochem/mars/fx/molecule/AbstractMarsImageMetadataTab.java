@@ -13,6 +13,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -23,9 +24,12 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 
 public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
 	
@@ -67,6 +71,26 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		rootPane.setDividerPositions(0.15f, 0.85f);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
+		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, new EventHandler<MetadataEvent>() { 
+			@SuppressWarnings("unchecked")
+			@Override
+			public void handle(MetadataEvent e) {
+				if (e.getEventType().getName().equals("REFRESH_METADATA_EVENT")) {
+					//We reload the record from the archive.. If virtual this will reload from disk...
+					marsImageMetadata = (I) archive.getImageMetadata(marsImageMetadata.getUID());
+		        	
+		        	//Update center pane and properties pane.
+		        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+		        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+					Platform.runLater(() -> {
+						metaIndexTable.requestFocus();
+						//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
+					});
+					e.consume();
+				}
+			}
+		});
+		
 		
 		setContent(rootPane);
 	}
@@ -157,15 +181,15 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     	if (marsImageMetadata != null)
     		archive.putImageMetadata(marsImageMetadata);
     }
+    
+    public MarsImageMetadata getSelectedMetadata() {
+    	return marsImageMetadata;
+    }
 
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
-    	
-    	metaRowList.clear();
-    	for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
-        	metaRowList.add(new MetaIndexRow(index));
-        }
+
     	metadataCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	metadataPropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	onMoleculeArchiveUnlockingEvent();
@@ -213,18 +237,23 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeArchiveUnlockingEvent() {
-		if (archive.getNumberOfImageMetadataRecords() > 0) {
+    	metaRowList.clear();
+    	if (archive.getNumberOfImageMetadataRecords() > 0) {
+    		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
+    			metaRowList.add(new MetaIndexRow(index));
+    		}
+		
     		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
     		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
         	
         	//Update center pane and properties pane.
         	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
         	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
-			Platform.runLater(() -> {
-				//metaIndexTable.requestFocus();
-				metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
-			});
     	}
+		Platform.runLater(() -> {
+			metaIndexTable.requestFocus();
+			//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
+		});
 	}
 
 	@Override

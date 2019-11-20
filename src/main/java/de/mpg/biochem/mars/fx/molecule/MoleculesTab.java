@@ -5,4 +5,5 @@ import de.mpg.biochem.mars.molecule.Molecule;
 
 public interface MoleculesTab<C extends MoleculeSubPane, O extends MoleculeSubPane> extends MoleculeArchiveTab {
 	public void saveCurrentRecord();
+	public Molecule getSelectedMolecule();
 }

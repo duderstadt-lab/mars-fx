@@ -85,8 +85,24 @@ public abstract class AbstractRegionOfInterestTable {
         regionTable.getColumns().add(deleteColumn);
 
         TableColumn<RegionOfInterest, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(event -> { 
+        	String newRegionName = event.getNewValue();
+        	if (!record.hasRegion(newRegionName)) {
+        		RegionOfInterest roi = event.getRowValue();
+        		String oldName = roi.getName();
+        		record.removeRegion(oldName);
+        		
+        		roi.setName(newRegionName);
+        		record.putRegion(roi);
+        	} else {
+        		((RegionOfInterest) event.getTableView().getItems()
+        	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
+        		regionTable.refresh();
+        	}
+        });
         nameColumn.setCellValueFactory(regionOfInterest ->
-        	new ReadOnlyObjectWrapper<>(regionOfInterest.getValue().getName())
+                new ReadOnlyObjectWrapper<>(regionOfInterest.getValue().getName())
         );
         nameColumn.setSortable(false);
         nameColumn.setPrefWidth(100);

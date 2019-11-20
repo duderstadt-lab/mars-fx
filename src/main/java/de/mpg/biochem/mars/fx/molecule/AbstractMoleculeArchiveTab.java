@@ -64,6 +64,10 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
 	
 	public abstract Node getNode();
 	
+	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+		return this.archive;
+	}
+	
 	//Override any events below that should trigger a specific response.
 	
 	@Override
