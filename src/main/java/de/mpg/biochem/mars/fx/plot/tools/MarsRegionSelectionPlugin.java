@@ -1,51 +1,29 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import org.controlsfx.control.RangeSlider;
-import org.controlsfx.glyphfont.Glyph;
-
 import de.gsi.chart.plugins.*;
-import de.gsi.chart.Chart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.Axes;
 import de.gsi.chart.plugins.ChartPlugin;
-import de.mpg.biochem.mars.molecule.MarsRecord;
+import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
+import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
+import de.mpg.biochem.mars.fx.plot.event.NewRegionAddedEvent;
 import de.mpg.biochem.mars.util.RegionOfInterest;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
-import javafx.animation.Timeline;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Button;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
+import de.gsi.chart.XYChart;
 
 /**
  * Region along X or Y axis.
@@ -55,29 +33,17 @@ import javafx.util.Duration;
  * shows a rectangle determining the region once mouse button is
  * released.</li>
  * 
- * 
- * 
- * <li>region-out - triggered on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED}
- * event that is accepted by {@link #getregionOutMouseFilter() region-out filter}.
- * It restores the previous ranges on both axis.</li>
- * <li>region-origin - triggered on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED}
- * event that is accepted by {@link #getregionOriginMouseFilter() region-origin
- * filter}. It restores the initial ranges on both axis as it was at the moment
- * of the first region-in operation.</li>
- * </ul>
- * <p>
- * CSS class name of the region rectangle: {@value #STYLE_CLASS_ZOOM_RECT}.
- * </p>
- *
  * @author Karl Duderstadt
  */
-public class MarsRegionSelectionPlugin extends ChartPlugin {
+public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPlugin {
     /**
      * Name of the CCS class of the region rectangle.
      */
     public static final String STYLE_CLASS_REGION_RECT = "chart-zoom-rect";
     private static final int REGION_RECT_MIN_SIZE = 5;
     //private static final int FONT_SIZE = 20;
+    
+    private DatasetOptionsPane datasetOptionsPane;
 
     /**
      * Default region mouse filter passing on left mouse button (only).
@@ -316,6 +282,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin {
             final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
             final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
             
+            /*
             for (Axis axis : getChart().getAxes()) {
                 double dataMin;
                 double dataMax;
@@ -327,11 +294,18 @@ public class MarsRegionSelectionPlugin extends ChartPlugin {
                     dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
                 }
                 System.out.println("min " + dataMin + " max " + dataMax);
-                
-                //Need to fire an event that somehow passes the start and ending locations
-                //Needs to use the dataoptions panel though
             }
+            */
+            Axis axis = ((XYChart) getChart()).getXAxis();
+            double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
+            double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
             
+            RegionOfInterest roi = new RegionOfInterest("Region 1");
+            roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+            roi.setStart(dataMin);
+            roi.setEnd(dataMax);
+            
+            getChart().fireEvent(new NewRegionAddedEvent(roi));
         }
         regionStartPoint = regionEndPoint = null;
         uninstallCursor();
@@ -351,4 +325,9 @@ public class MarsRegionSelectionPlugin extends ChartPlugin {
     private boolean regionSelectionOngoing() {
         return regionStartPoint != null;
     }
+
+	@Override
+	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
+		this.datasetOptionsPane = datasetOptionsPane;
+	}
 }

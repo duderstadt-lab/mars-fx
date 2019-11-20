@@ -34,6 +34,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
+import de.mpg.biochem.mars.fx.plot.event.NewRegionAddedEvent;
+
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
 	protected C moleculeCenterPane;
@@ -78,6 +80,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			   @Override 
 			   public void handle(PlotEvent e) { 
 				   	if (e.getEventType().getName().equals("NEW_REGION_ADDED")) {
+				   		molecule.putRegion(((NewRegionAddedEvent) e).getRegion());
 				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
 				   		e.consume();
