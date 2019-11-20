@@ -210,7 +210,7 @@ public class DatasetOptionsPane extends MigPane {
         plotPropertiesTable.setItems(plotSeriesList);
 		
 		addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "0.9em"));
 		addButton.setCenterShape(true);
 		addButton.setStyle(
                 "-fx-background-radius: 5em; " +
@@ -229,7 +229,7 @@ public class DatasetOptionsPane extends MigPane {
 			}
 		});
 
-		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.0em");
+		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.1em");
 		updateButton = new Button();
 		updateButton.setGraphic(syncIcon);
 		updateButton.setCenterShape(true);

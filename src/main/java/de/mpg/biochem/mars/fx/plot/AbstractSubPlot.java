@@ -2,8 +2,11 @@ package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINE_CHART;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -167,12 +170,12 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	@Override
 	public void removeTools() {
-		for (ChartPlugin plugin : chartPane.getPlugins())
-			if (!(plugin instanceof AbstractValueIndicator)) {
-				if (plugin instanceof MarsZoomer)
-					((MarsZoomer) plugin).removeSliderListeners(chartPane);
-				chartPane.getPlugins().remove(plugin);
-			}
+		chartPane.getPlugins().stream().filter(plugin -> plugin instanceof MarsZoomer)
+			.forEach(plugin -> ((MarsZoomer) plugin).removeSliderListeners(chartPane));
+		
+		List<ChartPlugin> plugins = chartPane.getPlugins().stream()
+				.filter(plugin -> !(plugin instanceof AbstractValueIndicator)).collect(Collectors.toList());
+		chartPane.getPlugins().removeAll(plugins);
 		chartPane.setCursor(Cursor.DEFAULT);
 	}
 	
