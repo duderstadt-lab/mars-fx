@@ -26,6 +26,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -177,7 +178,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			PositionOfInterest poi = record.getPosition(positionName);
 			
 			if (xAxisList.contains(poi.getColumn())) {
-				XValueIndicator xValueIndicator = new XValueIndicator(this.xAxis, poi.getPosition(), poi.getName());
+				MarsXValueIndicator xValueIndicator = new MarsXValueIndicator(this.xAxis, poi.getPosition(), poi.getName(), datasetOptionsPane);
 				xValueIndicator.setLabelPosition(0.2);
 				
 				Color color = Color.web(poi.getColor());

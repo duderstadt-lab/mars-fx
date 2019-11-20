@@ -20,6 +20,8 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.PositionOfInterest;
+import de.mpg.biochem.mars.util.RegionOfInterest;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -37,10 +39,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
-import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMoleculePositionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.*;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -85,35 +84,43 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
 			   @Override 
 			   public void handle(PlotEvent e) { 
-				   	if (e.getEventType().getName().equals("NEW_MOLECULE_REGION")) {
-				   		molecule.putRegion(((NewMoleculeRegionEvent) e).getRegion());
-				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
-				   		e.consume();
-				   	} else if (e.getEventType().getName().equals("NEW_METADATA_REGION")) {
-				   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
-				   		metaData.putRegion(((NewMetadataRegionEvent) e).getRegion());
-				   		
-				   		//Here we save the record in case we are working virtually
-				   		archive.putImageMetadata(metaData);
-				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
-				   		//Remove this consume if we want to catch events in archive frame and redirect them to the metadata pane.
-				   		e.consume();
-				   	} else if (e.getEventType().getName().equals("NEW_MOLECULE_POSITION")) {
-				   		molecule.putPosition(((NewMoleculePositionEvent) e).getPosition());
-				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
-				   		e.consume();
-				   	} else if (e.getEventType().getName().equals("NEW_METADATA_POSITION")) {
-				   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
-				   		metaData.putPosition(((NewMetadataPositionEvent) e).getPosition());
-				   		
-				   		//Here we save the record in case we are working virtually
-				   		archive.putImageMetadata(metaData);
-				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
-				   		//Remove this consume if we want to catch events in archive frame and redirect them to the metadata pane.
-				   		e.consume();
+				   	switch (e.getEventType().getName()) {
+					   	case "NEW_MOLECULE_REGION":
+					   		molecule.putRegion(((NewMoleculeRegionEvent) e).getRegion());
+					   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+					   		break;
+					   	case "UPDATE_MOLECULE_REGION":
+					   		updateMoleculeRegion(e);
+					   		break;
+					   	case "NEW_METADATA_REGION":
+					   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+					   		metaData.putRegion(((NewMetadataRegionEvent) e).getRegion());
+					   		archive.putImageMetadata(metaData);
+					   		break;
+					   	case "UPDATE_METADATA_REGION":
+					   		updateMetadataRegion(e);
+					   		break;
+					   	case "NEW_MOLECULE_POSITION":
+					   		molecule.putPosition(((NewMoleculePositionEvent) e).getPosition());
+					   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+					   		break;
+					   	case "UPDATE_MOLECULE_POSITION":
+					   		updateMoleculePosition(e);
+					   		break;
+					   	case "NEW_METADATA_POSITION":
+					   		MarsImageMetadata metaData2 = archive.getImageMetadata(molecule.getImageMetadataUID());
+					   		metaData2.putPosition(((NewMetadataPositionEvent) e).getPosition());					   		
+					   		//Here we save the record in case we are working virtually
+					   		archive.putImageMetadata(metaData2);
+					   		break;
+					   	case "UPDATE_METADATA_POSITION:":
+					   		updateMetadataPosition(e);
+					   	default:
+					   		return;
 				   	}
+				   	moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+			   		//Remove this consume if we want to catch events in archive frame and redirect them to the metadata pane.
+			   		e.consume();
 			   };
         });
 		getNode().addEventFilter(MoleculeEvent.MOLECULE_EVENT, new EventHandler<MoleculeEvent>() { 
@@ -138,6 +145,38 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		});
 		
 		setContent(rootPane);
+	}
+	
+	private void updateMoleculeRegion(final PlotEvent e) {
+		RegionOfInterest newRoi = ((UpdateMoleculeRegionEvent) e).getRegion();
+   		RegionOfInterest oldRoi = molecule.getRegion(newRoi.getName());
+   		oldRoi.setStart(newRoi.getStart());
+   		oldRoi.setEnd(newRoi.getEnd());
+   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	}
+	
+	private void updateMetadataRegion(final PlotEvent e) {
+		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		RegionOfInterest newRoi = ((NewMetadataRegionEvent) e).getRegion();
+   		RegionOfInterest oldRoi = metaData.getRegion(newRoi.getName());
+   		oldRoi.setStart(newRoi.getStart());
+   		oldRoi.setEnd(newRoi.getEnd());
+   		archive.putImageMetadata(metaData);
+	}
+	
+	private void updateMoleculePosition(final PlotEvent e) {
+   		PositionOfInterest newPoi = ((UpdateMoleculePositionEvent) e).getPosition();
+   		PositionOfInterest oldPoi = molecule.getPosition(newPoi.getName());
+   		oldPoi.setPosition(newPoi.getPosition());
+   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	}
+	
+	private void updateMetadataPosition(final PlotEvent e) {
+		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		PositionOfInterest newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
+		PositionOfInterest oldPoi = metaData.getPosition(newPoi.getName());
+   		oldPoi.setPosition(newPoi.getPosition());
+   		archive.putImageMetadata(metaData);
 	}
 	
 	@SuppressWarnings("unchecked")
