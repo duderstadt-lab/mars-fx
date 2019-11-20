@@ -39,6 +39,8 @@ import javafx.scene.layout.Region;
 
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculePositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -91,6 +93,20 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 				   	} else if (e.getEventType().getName().equals("NEW_METADATA_REGION")) {
 				   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
 				   		metaData.putRegion(((NewMetadataRegionEvent) e).getRegion());
+				   		
+				   		//Here we save the record in case we are working virtually
+				   		archive.putImageMetadata(metaData);
+				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		//Remove this consume if we want to catch events in archive frame and redirect them to the metadata pane.
+				   		e.consume();
+				   	} else if (e.getEventType().getName().equals("NEW_MOLECULE_POSITION")) {
+				   		molecule.putPosition(((NewMoleculePositionEvent) e).getPosition());
+				   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
+				   		e.consume();
+				   	} else if (e.getEventType().getName().equals("NEW_METADATA_POSITION")) {
+				   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+				   		metaData.putPosition(((NewMetadataPositionEvent) e).getPosition());
 				   		
 				   		//Here we save the record in case we are working virtually
 				   		archive.putImageMetadata(metaData);

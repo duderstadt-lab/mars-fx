@@ -87,8 +87,24 @@ public abstract class AbstractPositionOfInterestTable {
         positionTable.getColumns().add(deleteColumn);
 
         TableColumn<PositionOfInterest, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellValueFactory(positionOfInterest ->
-        	new ReadOnlyObjectWrapper<>(positionOfInterest.getValue().getName())
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(event -> { 
+        	String newPositionName = event.getNewValue();
+        	if (!record.hasPosition(newPositionName)) {
+        		PositionOfInterest poi = event.getRowValue();
+        		String oldName = poi.getName();
+        		record.removePosition(oldName);
+        		
+        		poi.setName(newPositionName);
+        		record.putPosition(poi);
+        	} else {
+        		((PositionOfInterest) event.getTableView().getItems()
+        	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
+        		positionTable.refresh();
+        	}
+        });
+        nameColumn.setCellValueFactory(regionOfInterest ->
+                new ReadOnlyObjectWrapper<>(regionOfInterest.getValue().getName())
         );
         nameColumn.setSortable(false);
         nameColumn.setPrefWidth(100);

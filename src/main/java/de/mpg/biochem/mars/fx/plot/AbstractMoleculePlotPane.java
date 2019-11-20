@@ -12,6 +12,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
+import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionPlugin;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
@@ -75,16 +76,14 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				null, regionSelected);
 		addTool(regionSelectionCursor);
 		
-		/*
 		positionSelected = new SimpleBooleanProperty();
 		Action positionSelectionCursor = new Action("position", "Shortcut+P", de.jensd.fx.glyphs.octicons.OctIcon.MILESTONE, 
 				e -> setTool(positionSelected, () -> {
-					MarsRegionSelectionPlugin tool = new MarsRegionSelectionPlugin();
+					MarsPositionSelectionPlugin tool = new MarsPositionSelectionPlugin();
 					return tool;
 				}, Cursor.DEFAULT),
 				null, positionSelected);
 		addTool(positionSelectionCursor);
-		*/
 		
 	}
 	
