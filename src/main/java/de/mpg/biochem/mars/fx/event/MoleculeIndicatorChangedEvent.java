@@ -20,7 +20,6 @@ public class MoleculeIndicatorChangedEvent extends MoleculeEvent {
     }
 
     @Override
-    public void invokeHandler(MoleculeEventHandler handler) {
-        //handler.onMoleculeSelectionChangedEvent(molecule);
-    }
+    public void invokeHandler(MoleculeEventHandler handler) {}
 }
+

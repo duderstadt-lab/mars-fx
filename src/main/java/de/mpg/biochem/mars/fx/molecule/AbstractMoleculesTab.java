@@ -86,32 +86,25 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			   public void handle(PlotEvent e) { 
 				   	switch (e.getEventType().getName()) {
 					   	case "NEW_MOLECULE_REGION":
-					   		molecule.putRegion(((NewMoleculeRegionEvent) e).getRegion());
-					   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+					   		newMoleculeRegion(e);
 					   		break;
 					   	case "UPDATE_MOLECULE_REGION":
 					   		updateMoleculeRegion(e);
 					   		break;
 					   	case "NEW_METADATA_REGION":
-					   		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
-					   		metaData.putRegion(((NewMetadataRegionEvent) e).getRegion());
-					   		archive.putImageMetadata(metaData);
+					   		newMetadataRegion(e);
 					   		break;
 					   	case "UPDATE_METADATA_REGION":
 					   		updateMetadataRegion(e);
 					   		break;
 					   	case "NEW_MOLECULE_POSITION":
-					   		molecule.putPosition(((NewMoleculePositionEvent) e).getPosition());
-					   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+					   		newMoleculePosition(e);
 					   		break;
 					   	case "UPDATE_MOLECULE_POSITION":
 					   		updateMoleculePosition(e);
 					   		break;
 					   	case "NEW_METADATA_POSITION":
-					   		MarsImageMetadata metaData2 = archive.getImageMetadata(molecule.getImageMetadataUID());
-					   		metaData2.putPosition(((NewMetadataPositionEvent) e).getPosition());					   		
-					   		//Here we save the record in case we are working virtually
-					   		archive.putImageMetadata(metaData2);
+					   		newMetadataPosition(e);
 					   		break;
 					   	case "UPDATE_METADATA_POSITION:":
 					   		updateMetadataPosition(e);
@@ -145,6 +138,60 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		});
 		
 		setContent(rootPane);
+	}
+	
+	private void newMoleculeRegion(final PlotEvent e) {
+		int num = 1;
+		String name = "Region 1";
+		while (molecule.hasRegion(name)) {
+			num++;
+			name = "Region " + num;
+		}
+		RegionOfInterest roi = ((NewMoleculeRegionEvent) e).getRegion();
+		roi.setName(name);
+		molecule.putRegion(roi);
+   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	}
+	
+	private void newMetadataRegion(final PlotEvent e) {
+		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		int num = 1;
+		String name = "Region 1";
+		while (metaData.hasRegion(name)) {
+			num++;
+			name = "Region " + num;
+		}
+		RegionOfInterest roi = ((NewMetadataRegionEvent) e).getRegion();
+		roi.setName(name);
+		metaData.putRegion(roi);
+		archive.putImageMetadata(metaData);
+	}
+	
+	private void newMoleculePosition(final PlotEvent e) {
+		int num = 1;
+		String name = "Position 1";
+		while (molecule.hasPosition(name)) {
+			num++;
+			name = "Position " + num;
+		}
+		PositionOfInterest poi = ((NewMoleculePositionEvent) e).getPosition();
+		poi.setName(name);
+		molecule.putPosition(poi);
+   		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	}
+	
+	private void newMetadataPosition(final PlotEvent e) {
+		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		int num = 1;
+		String name = "Position 1";
+		while (metaData.hasPosition(name)) {
+			num++;
+			name = "Position " + num;
+		}
+		PositionOfInterest poi = ((NewMetadataPositionEvent) e).getPosition();
+		poi.setName(name);
+		metaData.putPosition(poi);
+		archive.putImageMetadata(metaData);
 	}
 	
 	private void updateMoleculeRegion(final PlotEvent e) {

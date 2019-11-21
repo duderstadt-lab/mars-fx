@@ -9,7 +9,6 @@ import com.jfoenix.controls.JFXColorPicker;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
@@ -97,6 +96,7 @@ public abstract class AbstractPositionOfInterestTable {
         		
         		poi.setName(newPositionName);
         		record.putPosition(poi);
+        		fireIndicatorChangedEvent();
         	} else {
         		((PositionOfInterest) event.getTableView().getItems()
         	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
@@ -123,6 +123,7 @@ public abstract class AbstractPositionOfInterestTable {
                     (observable, oldColumn, newColumn) -> {
                         if (newColumn != null) {
                         	cellData.getValue().setColumn(newColumn);
+                        	fireIndicatorChangedEvent();
                         }
                 });
             
@@ -138,6 +139,7 @@ public abstract class AbstractPositionOfInterestTable {
         	try {
     			double num = Double.valueOf(event.getNewValue());
     			event.getRowValue().setPosition(num);
+    			fireIndicatorChangedEvent();
     		} catch (NumberFormatException e) {
     			//Do nothing for the moment...
     		}
@@ -168,6 +170,7 @@ public abstract class AbstractPositionOfInterestTable {
         	colorPicker.setOnAction(action -> {
 			     Color c = colorPicker.getValue();
 			     cellData.getValue().setColor(c.toString());
+			     fireIndicatorChangedEvent();
 			 });
         	
         	return new ReadOnlyObjectWrapper<>(colorPicker);

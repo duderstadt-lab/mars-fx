@@ -23,3 +23,4 @@ public class MetadataIndicatorChangedEvent extends MetadataEvent {
     public void invokeHandler(MetadataEventHandler handler) {
     }
 }
+

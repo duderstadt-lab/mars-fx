@@ -10,6 +10,7 @@ import de.mpg.biochem.mars.fx.plot.event.UpdateMetadataPositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMoleculePositionEvent;
 import de.mpg.biochem.mars.util.PositionOfInterest;
 import de.mpg.biochem.mars.util.RegionOfInterest;
+import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
 /**
@@ -43,10 +44,20 @@ public class MarsXValueIndicator extends XValueIndicator implements MarsPlotPlug
         super(axis, value, text);
         
         this.datasetOptionsPane = datasetOptionsPane;
+     
+        pickLine.setOnMouseClicked(this::handleMouseClickedEvent);
+        triangle.setOnMouseClicked(this::handleMouseClickedEvent);
+        label.setOnMouseClicked(this::handleMouseClickedEvent);
         
         pickLine.setOnMouseReleased(this::handleMouseReleaseEvent);
         triangle.setOnMouseReleased(this::handleMouseReleaseEvent);
         label.setOnMouseReleased(this::handleMouseReleaseEvent);
+    }
+    
+    protected void handleMouseClickedEvent(final MouseEvent mouseEvent) {
+        //Need to make sure to consume mouse click events if it is just a reposition event
+        //Otherwise a new position is added each time, a position is moved
+        mouseEvent.consume();
     }
     
     protected void handleMouseReleaseEvent(final MouseEvent mouseEvent) {

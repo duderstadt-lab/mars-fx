@@ -229,7 +229,7 @@ public class DatasetOptionsPane extends MigPane {
 			}
 		});
 
-		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.1em");
+		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.0em");
 		updateButton = new Button();
 		updateButton.setGraphic(syncIcon);
 		updateButton.setCenterShape(true);
