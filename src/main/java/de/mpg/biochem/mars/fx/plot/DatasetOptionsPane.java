@@ -24,6 +24,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import de.gsi.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -36,13 +37,16 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Text;
 
-import org.tbee.javafx.scene.layout.fxml.MigPane;
+//import org.tbee.javafx.scene.layout.fxml.MigPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.BorderPane;
 
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-public class DatasetOptionsPane extends MigPane {
+public class DatasetOptionsPane extends VBox {
 	private TextField titleField, xNameField, yNameField;
 	private Button addButton, updateButton;
 	private RadioButton radioButtonMolecules, radioButtonMetadata, radioButtonNone;
@@ -63,24 +67,37 @@ public class DatasetOptionsPane extends MigPane {
 		
 		trackingGroup = new ToggleGroup();
 		
-		setLayout("insets dialog");
+		setPadding(new Insets(10));
 		
 		initComponents();
 		
-		add(new Label("Title "), "");
-		add(titleField, "wrap");
-		add(new Label("X Axis "), "");
-		add(xNameField, "wrap");
-		add(new Label("Y Axis "), "");
-		add(yNameField, "wrap");
-				
-		add(new Label("Indicators"), "wrap");
-		add(new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone), "wrap");
+		VBox labels = new VBox();
+		labels.setSpacing(10);
+		labels.getChildren().add(new Label("Title "));
+		labels.getChildren().add(new Label("X Axis "));
+		labels.getChildren().add(new Label("Y Axis "));
 		
-		add(plotPropertiesTable, "span, wrap");
+		VBox fields = new VBox();
+		fields.setSpacing(10);
+		fields.getChildren().add(titleField);
+		fields.getChildren().add(xNameField);
+		fields.getChildren().add(yNameField);
 		
-		add(addButton, "");
-		add(updateButton, "right");
+		FlowPane flow = new FlowPane();
+		flow.getChildren().add(labels);
+		flow.getChildren().add(fields);
+		
+		getChildren().add(flow);
+		getChildren().add(new Label("Indicators"));
+		getChildren().add(new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone));
+		
+		getChildren().add(plotPropertiesTable);
+		
+		BorderPane bottomButtons = new BorderPane();
+		bottomButtons.setLeft(addButton);
+		bottomButtons.setRight(updateButton);
+		
+		getChildren().add(bottomButtons);
 	}
 	
 	private void initComponents() {

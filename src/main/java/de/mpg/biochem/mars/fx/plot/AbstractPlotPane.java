@@ -40,7 +40,6 @@ import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
-import org.tbee.javafx.scene.layout.fxml.MigPane;
 
 import javafx.beans.value.ObservableValue;
 import javafx.beans.value.ChangeListener;
@@ -280,9 +279,9 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return this;
 	}
 	
-	class PlotOptionsPane extends MigPane  {
+	class PlotOptionsPane extends BorderPane  {
 		public PlotOptionsPane() {
-			setLayout("insets dialog");
+			
 		}
 	}
 }

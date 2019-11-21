@@ -106,57 +106,30 @@ public class OptionsDialog
 	}
 
 	private void load() {
-		generalOptionsPane.load();
-		editorOptionsPane.load();
 		markdownOptionsPane.load();
-		stylesheetsOptionsPane.load();
 	}
 
 	private void save() {
-		generalOptionsPane.save();
-		editorOptionsPane.save();
 		markdownOptionsPane.save();
-		stylesheetsOptionsPane.save();
 	}
 
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		tabPane = new TabPane();
 		generalTab = new Tab();
-		generalOptionsPane = new GeneralOptionsPane();
 		editorTab = new Tab();
-		editorOptionsPane = new EditorOptionsPane();
 		markdownTab = new Tab();
 		markdownOptionsPane = new MarkdownOptionsPane();
 		stylesheetsTab = new Tab();
-		stylesheetsOptionsPane = new StylesheetsOptionsPane();
 
 		//======== tabPane ========
 		{
 			tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-			//======== generalTab ========
-			{
-				generalTab.setText(Messages.get("OptionsDialog.generalTab.text"));
-				generalTab.setContent(generalOptionsPane);
-			}
-
-			//======== editorTab ========
-			{
-				editorTab.setText(Messages.get("OptionsDialog.editorTab.text"));
-				editorTab.setContent(editorOptionsPane);
-			}
-
 			//======== markdownTab ========
 			{
 				markdownTab.setText(Messages.get("OptionsDialog.markdownTab.text"));
 				markdownTab.setContent(markdownOptionsPane);
-			}
-
-			//======== stylesheetsTab ========
-			{
-				stylesheetsTab.setText(Messages.get("OptionsDialog.stylesheetsTab.text"));
-				stylesheetsTab.setContent(stylesheetsOptionsPane);
 			}
 
 			tabPane.getTabs().addAll(generalTab, editorTab, markdownTab, stylesheetsTab);
@@ -167,12 +140,9 @@ public class OptionsDialog
 	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
 	private TabPane tabPane;
 	private Tab generalTab;
-	private GeneralOptionsPane generalOptionsPane;
 	private Tab editorTab;
-	private EditorOptionsPane editorOptionsPane;
 	private Tab markdownTab;
 	private MarkdownOptionsPane markdownOptionsPane;
 	private Tab stylesheetsTab;
-	private StylesheetsOptionsPane stylesheetsOptionsPane;
 	// JFormDesigner - End of variables declaration  //GEN-END:variables
 }

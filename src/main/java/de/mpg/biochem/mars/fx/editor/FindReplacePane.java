@@ -64,11 +64,14 @@ import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.Range;
 import de.mpg.biochem.mars.fx.util.Utils;
 
-import org.tbee.javafx.scene.layout.fxml.MigPane;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 
 import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 
 /**
  * @author Karl Tauber
@@ -525,7 +528,7 @@ class FindReplacePane
 
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		pane = new MigPane();
+		pane = new VBox();
 		findField = new CustomTextField();
 		previousButton = new Button();
 		nextButton = new Button();
@@ -533,7 +536,7 @@ class FindReplacePane
 		regexButton = new ToggleButton();
 		findInfoLabel = new Label();
 		closeButton = new Button();
-		replacePane = new MigPane();
+		replacePane = new FlowPane();
 		replaceField = new CustomTextField();
 		replaceButton = new Button();
 		replaceAllButton = new Button();
@@ -542,61 +545,69 @@ class FindReplacePane
 
 		//======== pane ========
 		{
-			pane.setLayout("insets 0,hidemode 3");
-			pane.setCols("[shrink 0,fill][fill]0[fill][pref:n,fill]1px[pref:n,fill][grow,fill][fill]");
-			pane.setRows("[fill]0[]");
+			//pane.setLayout("insets 0,hidemode 3");
+			//pane.setCols("[shrink 0,fill][fill]0[fill][pref:n,fill]1px[pref:n,fill][grow,fill][fill]");
+			//pane.setRows("[fill]0[]");
 
+			BorderPane search = new BorderPane();
+			
+			FlowPane searchBoxSide = new FlowPane();
+			
 			//---- findField ----
 			findField.setPromptText(Messages.get("FindReplacePane.findField.promptText"));
 			findField.setPrefColumnCount(15);
-			pane.add(findField, "cell 0 0");
+			searchBoxSide.getChildren().add(findField);
 
 			//---- previousButton ----
 			previousButton.setFocusTraversable(false);
-			pane.add(previousButton, "cell 1 0");
+			searchBoxSide.getChildren().add(previousButton);
 
 			//---- nextButton ----
 			nextButton.setFocusTraversable(false);
-			pane.add(nextButton, "cell 2 0");
+			searchBoxSide.getChildren().add(nextButton);
 
 			//---- matchCaseButton ----
 			matchCaseButton.setText("Aa");
 			matchCaseButton.setFocusTraversable(false);
-			pane.add(matchCaseButton, "cell 3 0");
+			searchBoxSide.getChildren().add(matchCaseButton);
 
 			//---- regexButton ----
 			regexButton.setText(".*");
 			regexButton.setFocusTraversable(false);
-			pane.add(regexButton, "cell 4 0");
-			pane.add(findInfoLabel, "cell 5 0");
+			searchBoxSide.getChildren().add(regexButton);
+			searchBoxSide.getChildren().add(findInfoLabel);
 
+			search.setLeft(searchBoxSide);
+			
 			//---- closeButton ----
 			closeButton.setFocusTraversable(false);
-			pane.add(closeButton, "cell 6 0");
+			search.setRight(closeButton);
+			
+			pane.getChildren().add(search);
 
 			//======== replacePane ========
 			{
-				replacePane.setLayout("insets rel 0 0 0");
-				replacePane.setCols("[shrink 0,fill][pref:n,fill][pref:n,fill][grow,fill]");
-				replacePane.setRows("[]");
+				//replacePane.setLayout("insets rel 0 0 0");
+				//replacePane.setCols("[shrink 0,fill][pref:n,fill][pref:n,fill][grow,fill]");
+				//replacePane.setRows("[]");
 
 				//---- replaceField ----
 				replaceField.setPromptText(Messages.get("FindReplacePane.replaceField.promptText"));
 				replaceField.setPrefColumnCount(15);
-				replacePane.add(replaceField, "cell 0 0");
+				replacePane.getChildren().add(replaceField);
 
 				//---- replaceButton ----
 				replaceButton.setText(Messages.get("FindReplacePane.replaceButton.text"));
 				replaceButton.setFocusTraversable(false);
-				replacePane.add(replaceButton, "cell 1 0");
+				replacePane.getChildren().add(replaceButton);
 
 				//---- replaceAllButton ----
 				replaceAllButton.setText(Messages.get("FindReplacePane.replaceAllButton.text"));
 				replaceAllButton.setFocusTraversable(false);
-				replacePane.add(replaceAllButton, "cell 2 0");
-				replacePane.add(replaceInfoLabel, "cell 3 0");
+				replacePane.getChildren().add(replaceAllButton);
+				replacePane.getChildren().add(replaceInfoLabel);
 			}
-			pane.add(replacePane, "cell 0 1 7 1");
+			pane.getChildren().add(replacePane);
 		}
 
 		//---- nOfHitCountLabel ----
@@ -605,7 +616,7 @@ class FindReplacePane
 	}
 
 	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-	private MigPane pane;
+	private VBox pane;
 	private CustomTextField findField;
 	private Button previousButton;
 	private Button nextButton;
@@ -613,7 +624,7 @@ class FindReplacePane
 	private ToggleButton regexButton;
 	private Label findInfoLabel;
 	private Button closeButton;
-	private MigPane replacePane;
+	private FlowPane replacePane;
 	private CustomTextField replaceField;
 	private Button replaceButton;
 	private Button replaceAllButton;

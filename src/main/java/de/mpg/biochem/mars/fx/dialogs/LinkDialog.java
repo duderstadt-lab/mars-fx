@@ -43,7 +43,9 @@ import de.mpg.biochem.mars.fx.controls.BrowseFileButton;
 import de.mpg.biochem.mars.fx.controls.EscapeTextField;
 import de.mpg.biochem.mars.fx.util.Utils;
 
-import org.tbee.javafx.scene.layout.fxml.MigPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
 
 /**
  * Dialog to enter a markdown link.
@@ -104,7 +106,7 @@ public class LinkDialog
 
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
-		pane = new MigPane();
+		pane = new VBox();
 		Label urlLabel = new Label();
 		urlField = new EscapeTextField();
 		linkBrowseDirectoyButton = new BrowseDirectoryButton();
@@ -118,50 +120,62 @@ public class LinkDialog
 
 		//======== pane ========
 		{
-			pane.setCols("[shrink 0,fill][400,grow,fill]");
-			pane.setRows("[][][][]");
+			//pane.setCols("[shrink 0,fill][400,grow,fill]");
+			//pane.setRows("[][][][]");
 
 			//---- urlLabel ----
+			FlowPane urlBox = new FlowPane();
 			urlLabel.setText(Messages.get("LinkDialog.urlLabel.text"));
-			pane.add(urlLabel, "cell 0 0");
+			urlBox.getChildren().add(urlLabel);
 
 			//---- urlField ----
 			urlField.setEscapeCharacters("()");
 			urlField.setText("http://yourlink.com");
 			urlField.setPromptText("http://yourlink.com");
-			pane.add(urlField, "cell 1 0");
+			urlBox.getChildren().add(urlField);
 
 			//---- linkBrowseDirectoyButton ----
 			linkBrowseDirectoyButton.setFocusTraversable(false);
-			pane.add(linkBrowseDirectoyButton, "cell 1 0,alignx center,growx 0");
+			urlBox.getChildren().add(linkBrowseDirectoyButton);
 
 			//---- linkBrowseFileButton ----
 			linkBrowseFileButton.setFocusTraversable(false);
-			pane.add(linkBrowseFileButton, "cell 1 0,alignx center,growx 0");
+			urlBox.getChildren().add(linkBrowseFileButton);
+			
+			pane.getChildren().add(urlBox);
+			
+			FlowPane textBox = new FlowPane();
 
 			//---- textLabel ----
 			textLabel.setText(Messages.get("LinkDialog.textLabel.text"));
-			pane.add(textLabel, "cell 0 1");
+			textBox.getChildren().add(textLabel);
 
 			//---- textField ----
 			textField.setEscapeCharacters("[]");
-			pane.add(textField, "cell 1 1");
+			textBox.getChildren().add(textField);
+			
+			pane.getChildren().add(textBox);
+			
+			FlowPane titleBox = new FlowPane();
 
 			//---- titleLabel ----
 			titleLabel.setText(Messages.get("LinkDialog.titleLabel.text"));
-			pane.add(titleLabel, "cell 0 2");
-			pane.add(titleField, "cell 1 2");
+			titleBox.getChildren().add(titleLabel);
+			titleBox.getChildren().add(titleField);
+			
+			pane.getChildren().add(titleBox);
 
+			FlowPane previewBox = new FlowPane();
 			//---- previewLabel ----
 			previewLabel.setText(Messages.get("LinkDialog.previewLabel.text"));
-			pane.add(previewLabel, "cell 0 3");
-			pane.add(previewField, "cell 1 3");
+			previewBox.getChildren().add(previewLabel);
+			previewBox.getChildren().add(previewField);
 		}
 		// JFormDesigner - End of component initialization  //GEN-END:initComponents
 	}
 
 	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
-	private MigPane pane;
+	private VBox pane;
 	private EscapeTextField urlField;
 	private BrowseDirectoryButton linkBrowseDirectoyButton;
 	private BrowseFileButton linkBrowseFileButton;

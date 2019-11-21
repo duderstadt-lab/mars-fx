@@ -33,16 +33,14 @@ import javafx.scene.text.Font;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 
-import org.tbee.javafx.scene.layout.fxml.MigPane;
+import javafx.scene.layout.FlowPane;
 
 /**
  * Markdown options pane
  *
  * @author Karl Tauber
  */
-class MarkdownOptionsPane
-	extends MigPane
-{
+class MarkdownOptionsPane extends FlowPane {
 	MarkdownOptionsPane() {
 		initComponents();
 
@@ -71,19 +69,16 @@ class MarkdownOptionsPane
 		markdownExtensionsPane = new MarkdownExtensionsPane();
 
 		//======== this ========
-		setLayout("insets dialog");
-		setCols("[][grow,fill]");
-		setRows("[]para[][grow,fill]");
 
 		//---- markdownRendererLabel ----
 		markdownRendererLabel.setText(Messages.get("MarkdownOptionsPane.markdownRendererLabel.text"));
-		add(markdownRendererLabel, "cell 0 0");
-		add(markdownRendererChoiceBox, "cell 1 0,alignx left,growx 0");
+		getChildren().add(markdownRendererLabel);
+		getChildren().add(markdownRendererChoiceBox);
 
 		//---- markdownExtensionsLabel ----
 		markdownExtensionsLabel.setText(Messages.get("MarkdownOptionsPane.markdownExtensionsLabel.text"));
-		add(markdownExtensionsLabel, "cell 0 1 2 1");
-		add(markdownExtensionsPane, "pad 0 indent 0 0,cell 0 2 2 1");
+		getChildren().add(markdownExtensionsLabel);
+		getChildren().add(markdownExtensionsPane);
 		// JFormDesigner - End of component initialization  //GEN-END:initComponents
 	}
 

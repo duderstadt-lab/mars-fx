@@ -321,11 +321,6 @@
 			<version>1.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>com.miglayout</groupId>
-			<artifactId>miglayout-javafx</artifactId>
-			<version>5.2</version>
-		</dependency>
-		<dependency>
 			<groupId>de.gsi.chart</groupId>
 			<artifactId>chartfx-chart</artifactId>
 			<version>8.1.0</version>

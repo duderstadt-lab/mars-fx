@@ -32,7 +32,8 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import org.controlsfx.control.ToggleSwitch;
-import org.tbee.javafx.scene.layout.fxml.MigPane;
+
+import javafx.scene.layout.BorderPane;
 
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 
@@ -41,9 +42,7 @@ import de.mpg.biochem.mars.fx.options.Options.RendererType;
  *
  * @author Karl Tauber
  */
-public class MarkdownExtensionsPane
-	extends MigPane
-{
+public class MarkdownExtensionsPane extends BorderPane {
 	private static class Ext {
 		final String id;
 		final String displayName;
@@ -63,7 +62,7 @@ public class MarkdownExtensionsPane
 	}
 
 	public MarkdownExtensionsPane(boolean popover) {
-		setLayout(popover ? "insets dialog" : "insets 0");
+		//setLayout(popover ? "insets dialog" : "insets 0");
 
 		// get IDs of all available extensions
 		String[] ids = MarkdownExtensions.ids();
@@ -93,7 +92,7 @@ public class MarkdownExtensionsPane
 			if (!popover && !available)
 				ext.toggleSwitch.setDisable(true);
 
-			add(ext.toggleSwitch, "grow, wrap");
+			setCenter(ext.toggleSwitch);
 		}
 
 		// listener that updates toggle switch selection and option property
