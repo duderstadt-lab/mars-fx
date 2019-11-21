@@ -26,6 +26,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -74,6 +75,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	
 	@FXML
 	private JFXTextArea notesTextArea;
+	
+	private TextArea chipsTextArea;
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
@@ -133,6 +136,20 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			    }
 			};
 		}
+		/*
+		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		chipView.setSkin(skin);
+   
+		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
+			if (node instanceof TextArea) {
+				//((TextArea) node).cancelEdit();
+				
+				chipsTextArea = ((TextArea) node);
+				//if (((TextArea) node).isFocused())
+				//	System.out.println("Focused");
+			}
+		}
+		*/
     }
 	
 	@FXML
@@ -184,20 +201,5 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(molecule.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
-
-		
-		//JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
-		//chipView.setSkin(skin);
-	     /*   
-		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
-			if (node instanceof TextArea) {
-				//((TextArea) node).cancelEdit();
-				
-				//((TextArea) node).setEditable(false);
-				if (((TextArea) node).isFocused())
-					System.out.println("Focused");
-			}
-		}
-		*/
 	}
 }
