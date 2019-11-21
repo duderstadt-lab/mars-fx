@@ -49,7 +49,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	protected M molecule;
 	
 	protected CustomTextField filterField;
-	protected Label nOfHitCountLabel;
     protected TableView<MoleculeIndexRow> moleculeIndexTable;
     protected ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
@@ -228,6 +227,8 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	
 	@SuppressWarnings("unchecked")
 	protected Node buildMoleculeTableIndex() {
+        BorderPane borderPane = new BorderPane();
+		
 		moleculeIndexTable = new TableView<MoleculeIndexRow>();
 		moleculeIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");// -fx-selection-bar-non-focused: salmon;");
     	
@@ -278,12 +279,8 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         });
 
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
-        
         filterField = new CustomTextField();
-        nOfHitCountLabel = new Label();
-        
         filterField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
-        filterField.setRight(nOfHitCountLabel);
         filterField.getStyleClass().add("find");
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
         	//If we don't clear the selection while we are searching the table will
@@ -307,17 +304,20 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
                 }
                 return false;
             });
-            nOfHitCountLabel.setText(filterField.getText().isEmpty() ? "" : "" + filteredData.size());
+            
+            if (filterField.getText().isEmpty()) {
+            	filterField.setRight(new Label(""));
+            } else {
+            	filterField.setRight(new Label(filteredData.size() + " "));
+            }
         });
         
         moleculeIndexTable.setItems(filteredData);
         
-        
         filterField.setStyle(
                 "-fx-background-radius: 2em; "
         );
-
-        BorderPane borderPane = new BorderPane();
+        
         Insets insets = new Insets(5);
        
         borderPane.setTop(filterField);
