@@ -106,7 +106,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 					   	case "NEW_METADATA_POSITION":
 					   		newMetadataPosition(e);
 					   		break;
-					   	case "UPDATE_METADATA_POSITION:":
+					   	case "UPDATE_METADATA_POSITION":
 					   		updateMetadataPosition(e);
 					   	default:
 					   		return;

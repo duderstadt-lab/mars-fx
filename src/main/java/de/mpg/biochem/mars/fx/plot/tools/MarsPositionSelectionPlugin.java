@@ -7,6 +7,7 @@ import de.gsi.chart.plugins.*;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.ui.HiddenSidesPane;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
@@ -176,7 +177,22 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
         chart.setCursor(Cursor.CROSSHAIR);
     }
 
-    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {	
+    	//System.out.println("source: " + mouseEvent.getSource());
+    	//Now sure why but sometimes this is fired...
+    	// and these are null.. For the moment we add this work around
+    	if (getChart() == null)
+    		return true;
+    	else if (getChart().getCanvas() == null)
+    		return true;
+    	
+    	//This will prevent creation of a new position during drag events.
+    	//drag events always originate from the Scene...
+    	if (!(mouseEvent.getSource() instanceof HiddenSidesPane)) {
+    		//System.out.println("Event not from HiddenSidesPane");
+    		return false;
+    	}
+    	
         final Canvas canvas = getChart().getCanvas();
         // listen to only events within the canvas
         final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());

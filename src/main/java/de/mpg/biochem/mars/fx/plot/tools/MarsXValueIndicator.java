@@ -57,6 +57,7 @@ public class MarsXValueIndicator extends XValueIndicator implements MarsPlotPlug
     protected void handleMouseClickedEvent(final MouseEvent mouseEvent) {
         //Need to make sure to consume mouse click events if it is just a reposition event
         //Otherwise a new position is added each time, a position is moved
+    	//System.out.println("Consuming click event");
         mouseEvent.consume();
     }
     
