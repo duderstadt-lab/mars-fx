@@ -136,10 +136,11 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			    }
 			};
 		}
-		/*
-		JFXChipViewSkin<String> skin = new JFXChipViewSkin<>(chipView);
+		
+		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
    
+		/*
 		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
 			if (node instanceof TextArea) {
 				//((TextArea) node).cancelEdit();
