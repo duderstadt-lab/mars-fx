@@ -433,9 +433,13 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
     final class MarsFakeFocusTextArea extends TextArea {
         @Override
         public void requestFocus() {
-            if (getSkinnable() != null) {
-                getSkinnable().requestFocus();
-            }
+        	//For the  moment we disable this to prevent it from stealing the focus when switching between molecules.
+        	
+        	//System.out.println("Requesting focus");
+            //if (getSkinnable() != null) {
+            	//System.out.println("Skinnable trying to seal focus");
+                //getSkinnable().requestFocus();
+            //}
         }
 
         public void setFakeFocus(boolean b) {

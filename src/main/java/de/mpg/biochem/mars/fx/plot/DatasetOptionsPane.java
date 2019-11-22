@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import javafx.scene.layout.HBox;
-
+import javafx.scene.layout.RowConstraints;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
@@ -37,10 +37,14 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Text;
 
+import javafx.scene.Node;
+
 //import org.tbee.javafx.scene.layout.fxml.MigPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
 
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
@@ -67,29 +71,49 @@ public class DatasetOptionsPane extends VBox {
 		
 		trackingGroup = new ToggleGroup();
 		
-		setPadding(new Insets(10));
+		setPadding(new Insets(15, 20, 15, 20));
+		setSpacing(5);
 		
 		initComponents();
 		
-		VBox labels = new VBox();
-		labels.setSpacing(10);
-		labels.getChildren().add(new Label("Title "));
-		labels.getChildren().add(new Label("X Axis "));
-		labels.getChildren().add(new Label("Y Axis "));
+		GridPane gridpane = new GridPane();
 		
-		VBox fields = new VBox();
-		fields.setSpacing(10);
-		fields.getChildren().add(titleField);
-		fields.getChildren().add(xNameField);
-		fields.getChildren().add(yNameField);
+		//For reference...
+		//Insets(double top, double right, double bottom, double left)
 		
-		FlowPane flow = new FlowPane();
-		flow.getChildren().add(labels);
-		flow.getChildren().add(fields);
+		Label title = new Label("Title  ");
+		gridpane.add(title, 0, 0);
+		GridPane.setMargin(title, new Insets(0, 0, 10, 0));
 		
-		getChildren().add(flow);
-		getChildren().add(new Label("Indicators"));
-		getChildren().add(new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone));
+		Label xAxisLabel = new Label("X Axis ");
+		gridpane.add(xAxisLabel, 0, 1);
+		GridPane.setMargin(xAxisLabel, new Insets(0, 0, 10, 0));
+		
+		Label yAxisLabel = new Label("Y Axis ");
+		gridpane.add(yAxisLabel, 0, 2);
+		GridPane.setMargin(yAxisLabel, new Insets(0, 0, 10, 0));
+		
+		gridpane.add(titleField, 1, 0);
+		GridPane.setMargin(titleField, new Insets(0, 0, 10, 0));
+		
+		gridpane.add(xNameField, 1, 1);
+		GridPane.setMargin(xNameField, new Insets(0, 0, 10, 0));
+		
+		gridpane.add(yNameField, 1, 2);
+		GridPane.setMargin(yNameField, new Insets(0, 0, 10, 0));
+		
+		//add(Node child, int columnIndex, int rowIndex, int colspan, int rowspan)
+		Label indicatorLabel = new Label("Indicators");
+		gridpane.add(indicatorLabel, 0, 3, 2, 1);
+		GridPane.setMargin(indicatorLabel, new Insets(0, 0, 10, 0));
+		
+		HBox radioButtons = new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone);
+		gridpane.add(radioButtons, 0, 4, 2, 1);
+		GridPane.setMargin(radioButtons, new Insets(0, 0, 10, 0));
+		
+		gridpane.getColumnConstraints().add(new ColumnConstraints(60)); // column 0 is 100 wide
+		
+		getChildren().add(gridpane);
 		
 		getChildren().add(plotPropertiesTable);
 		
