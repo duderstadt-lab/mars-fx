@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.util;
 
 import com.jfoenix.skins.JFXAutoCompletePopupSkin;
 import com.jfoenix.controls.JFXAutoCompletePopup;

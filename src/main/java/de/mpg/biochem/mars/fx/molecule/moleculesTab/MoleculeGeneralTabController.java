@@ -22,6 +22,7 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;

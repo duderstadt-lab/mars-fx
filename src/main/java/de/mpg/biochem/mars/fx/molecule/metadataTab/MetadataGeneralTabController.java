@@ -23,6 +23,7 @@ import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -138,6 +139,9 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		}
 		
 		UIDLabel.setText(marsImageMetadata.getUID());
+		
+		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
+		chipView.setSkin(skin);
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
