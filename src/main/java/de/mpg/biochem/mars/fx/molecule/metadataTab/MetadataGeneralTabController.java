@@ -75,6 +75,8 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
 	
+	private MarsImageMetadata marsImageMetadata;
+	
 	@FXML
     public void initialize() {
 		Region microscopeIcon = new Region();
@@ -94,6 +96,32 @@ public class MetadataGeneralTabController implements MetadataSubPane {
         		archive = newArchive;
         	}
         });
+		
+		chipsListener = new ListChangeListener<String>() {
+			@Override
+			public void onChanged(Change<? extends String> c) {
+				if (marsImageMetadata == null)
+					return;
+				
+				while (c.next()) {
+		             if (c.wasRemoved()) {
+		            	 marsImageMetadata.removeTag(c.getRemoved().get(0));
+		             } else if (c.wasAdded()) {
+		            	 marsImageMetadata.addTag(c.getAddedSubList().get(0));
+		             }
+				}
+			}
+		};
+	
+		notesListener = new ChangeListener<String>() {
+		    @Override
+		    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+		        marsImageMetadata.setNotes(notesTextArea.getText());
+		    }
+		};
+		
+		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
+		chipView.setSkin(skin);
     }
 	
 	@FXML
@@ -114,34 +142,9 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
-		if (chipsListener == null) {
-			chipsListener = new ListChangeListener<String>() {
-				@Override
-				public void onChanged(Change<? extends String> c) {
-					while (c.next()) {
-			             if (c.wasRemoved()) {
-			                 marsImageMetadata.removeTag(c.getRemoved().get(0));
-			             } else if (c.wasAdded()) {
-			            	 marsImageMetadata.addTag(c.getAddedSubList().get(0));
-			             }
-					}
-				}
-			};
-		}
-		
-		if (notesListener == null) {
-			notesListener = new ChangeListener<String>() {
-			    @Override
-			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-			        marsImageMetadata.setNotes(notesTextArea.getText());
-			    }
-			};
-		}
+		this.marsImageMetadata = marsImageMetadata;
 		
 		UIDLabel.setText(marsImageMetadata.getUID());
-		
-		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
-		chipView.setSkin(skin);
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();

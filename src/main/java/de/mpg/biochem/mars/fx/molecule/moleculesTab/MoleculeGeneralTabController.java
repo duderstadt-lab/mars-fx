@@ -77,8 +77,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	@FXML
 	private JFXTextArea notesTextArea;
 	
-	private TextArea chipsTextArea;
-	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
 	private ListChangeListener<String> chipsListener;

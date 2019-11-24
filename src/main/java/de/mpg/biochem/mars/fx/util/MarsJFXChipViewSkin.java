@@ -435,11 +435,13 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
         public void requestFocus() {
         	//For the  moment we disable this to prevent it from stealing the focus when switching between molecules.
         	
+        	//Seems to be causing other problems... Need to find a different way to work about this..
+        	
         	//System.out.println("Requesting focus");
-            //if (getSkinnable() != null) {
+            if (getSkinnable() != null) {
             	//System.out.println("Skinnable trying to seal focus");
-                //getSkinnable().requestFocus();
-            //}
+                getSkinnable().requestFocus();
+            }
         }
 
         public void setFakeFocus(boolean b) {
