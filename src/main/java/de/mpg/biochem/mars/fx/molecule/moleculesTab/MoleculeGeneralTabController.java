@@ -139,18 +139,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		
 		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
-   
-		/*
-		for (Node node : ((FlowPane) ((ScrollPane) skin.getChildren().get(0)).getContent()).getChildren()) {
-			if (node instanceof TextArea) {
-				//((TextArea) node).cancelEdit();
-				
-				chipsTextArea = ((TextArea) node);
-				//if (((TextArea) node).isFocused())
-				//	System.out.println("Focused");
-			}
-		}
-		*/
     }
 	
 	@FXML

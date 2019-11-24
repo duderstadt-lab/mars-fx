@@ -70,6 +70,7 @@ import java.net.URL;
 import java.util.ArrayList;
 
 import org.apache.commons.io.FilenameUtils;
+import org.controlsfx.control.MaskerPane;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
 import org.scijava.widget.FileWidget;
@@ -77,13 +78,10 @@ import org.scijava.widget.FileWidget;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
@@ -104,7 +102,7 @@ import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.molecule.*;
 
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
-		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> {
+		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> implements MoleculeArchiveWindow, MoleculeArchiveEventHandler {
 	
 	@Parameter
     protected MoleculeArchiveService moleculeArchiveService;
@@ -118,6 +116,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	protected String title;
 	protected JFXPanel fxPanel;
 
+	protected StackPane maskerStackPane;
+	protected MaskerPane masker;
+	
 	protected BorderPane borderPane;
 	protected StackPane stackPane;
     protected JFXTabPane tabsContainer;
@@ -140,6 +141,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
 		this.moleculeArchiveService = moleculeArchiveService;
+		
+		archive.setWindow(this);
 	}
 
 	/**
@@ -180,13 +183,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	public void initFX(JFXPanel fxPanel) {	
 		Scene scene = buildScene();
 		this.fxPanel.setScene(scene);
+		
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
+		
 		frame.setSize(800, 600);
 		frame.setVisible(true);
 	}
 	
 	protected Scene buildScene() {
 		borderPane = new BorderPane();
-    	borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+    	//borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+    	
+    	masker = new MaskerPane();
+    	masker.setVisible(false);
+    	
+    	maskerStackPane = new StackPane();
+    	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+    	maskerStackPane.getChildren().add(borderPane);
+    	maskerStackPane.getChildren().add(masker);
     	
     	tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(128.0);
@@ -219,7 +233,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			   };
      	});
         */
-        Scene scene = new Scene(borderPane);
+        Scene scene = new Scene(maskerStackPane);
 
         return scene;
 	}
@@ -279,7 +293,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				fileCloseAction);
 
 		menuBar = new MenuBar(fileMenu);
-		
 		borderPane.setTop(menuBar);
 	}
 	
@@ -321,6 +334,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
     public void save() {
     	 if (!lockArchive) {
+    		 lock();
     		 fireEvent(new MoleculeArchiveSavingEvent(archive));
     		 moleculesTab.saveCurrentRecord();
     		 imageMetadataTab.saveCurrentRecord();
@@ -343,11 +357,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				e1.printStackTrace();
 			 }
         	 fireEvent(new MoleculeArchiveSavedEvent(archive));
+        	 unlock();
     	 }
     }
     
     public void saveCopy() {
     	if (!lockArchive) {
+    		lock();
     	    String fileName = archive.getName();
     	    if (fileName.endsWith(".store"))
     	    	fileName = fileName.substring(0, fileName.length() - 5);
@@ -361,6 +377,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	    } catch (IOException e1) {
 				e1.printStackTrace();
 			}
+    	    unlock();
     	}
     }
     
@@ -389,6 +406,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     public void saveVirtualStoreCopy() {
     	 if (!lockArchive) {
+    		lock();
     		moleculesTab.saveCurrentRecord();
     		imageMetadataTab.saveCurrentRecord();
  		 	
@@ -403,9 +421,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			try {
 				saveAsVirtualStore(new File(name));
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			unlock();
     	 }
     }
     
@@ -431,7 +449,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
 	
 	public Node getNode() {
-		return borderPane;
+		return maskerStackPane;
 	}
 	
 	public abstract I createImageMetadataTab();
@@ -442,18 +460,32 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		return dashboardTab;
 	}
 	
-    public void lockArchive() {
-    	lockArchive = true;
-    	fireEvent(new MoleculeArchiveLockingEvent(archive));
-		//We move to the dashboard Tab
-    	tabsContainer.getSelectionModel().select(0);
-    	fireEvent(new MoleculeArchiveLockedEvent(archive));
+    public void lock() {
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+		    	fireEvent(new MoleculeArchiveLockingEvent(archive));
+				masker.setVisible(true);
+		    	lockArchive = true;
+		    	fireEvent(new MoleculeArchiveLockedEvent(archive));
+			}
+    	});
     }
     
-    public void unlockArchive() {
-    	fireEvent(new MoleculeArchiveUnlockingEvent(archive));
-		lockArchive = false;
-		fireEvent(new MoleculeArchiveUnlockedEvent(archive));
+    public void unlock() {
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+		    	fireEvent(new MoleculeArchiveUnlockingEvent(archive));
+				lockArchive = false;
+				masker.setVisible(false);
+				fireEvent(new MoleculeArchiveUnlockedEvent(archive));
+			}
+    	});
+    }
+    
+    public void update() {
+    	fireEvent(new MoleculeArchiveUnlockedEvent(archive));
     }
 
     public void fireEvent(Event event) {
@@ -463,4 +495,49 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         commentsTab.fireEvent(event);
         settingsTab.fireEvent(event);
     }
+
+	@Override
+	public void handle(MoleculeArchiveEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onInitializeMoleculeArchiveEvent(
+			MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveLockingEvent() {
+    	masker.setVisible(true);
+	}
+
+	@Override
+	public void onMoleculeArchiveLockedEvent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockingEvent() {
+    	masker.setVisible(false);
+	}
+
+	@Override
+	public void onMoleculeArchiveUnlockedEvent() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMoleculeArchiveSavingEvent() {
+		lock();
+	}
+
+	@Override
+	public void onMoleculeArchiveSavedEvent() {
+		unlock();
+	}
 }
