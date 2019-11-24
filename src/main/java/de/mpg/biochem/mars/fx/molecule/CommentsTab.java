@@ -34,6 +34,7 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 
 import de.mpg.biochem.mars.fx.*;
 import de.mpg.biochem.mars.fx.editor.SmartEdit;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
@@ -84,6 +85,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		Utils.fixSpaceAfterDeadKey(scene);
 		
 		//Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
+		
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		
 		setContent(borderPane);
 	}

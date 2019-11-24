@@ -147,7 +147,6 @@ class WebViewPreview
 			+ renderer.getHtml(false)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
 			+ "<script>" + anchorFixer() + "</script>\n"
-			
 			+ "<script> (function () {"
 		    + "document.addEventListener(\"DOMContentLoaded\", function () {\n"
 		    + "var mathElems = document.getElementsByClassName(\"katex\");\n"
