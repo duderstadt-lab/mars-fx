@@ -128,6 +128,7 @@ class WebViewPreview
 			+ "<html>\n"
 			+ "<head>\n"
 			+ "<link rel=\"stylesheet\" href=\"" + getClass().getResource("markdownpad-github.css") + "\">\n"
+			+ "<link rel=\"stylesheet\" href=\"" + getClass().getResource("katex.min.css") + "\">\n"
 			+ "<style>\n"
 			+ Utils.defaultIfEmpty(Options.getAdditionalCSS(), "") + "\n"
 			+ ".mwfx-editor-selection {\n"
@@ -136,6 +137,8 @@ class WebViewPreview
 			+ "  background-color: rgb(253, 247, 241);\n"
 			+ "}\n"
 			+ "</style>\n"
+			+ "<script src=\"" + getClass().getResource("katex.min.js") + "\"></script>\n"	
+			+ "<script src=\"" + getClass().getResource("mermaid.min.js") + "\"></script>\n"	
 			+ "<script src=\"" + getClass().getResource("preview.js") + "\"></script>\n"
 			+ prismSyntaxHighlighting(context.getMarkdownAST())
 			+ base
@@ -144,6 +147,18 @@ class WebViewPreview
 			+ renderer.getHtml(false)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
 			+ "<script>" + anchorFixer() + "</script>\n"
+			
+			+ "<script> (function () {"
+		    + "document.addEventListener(\"DOMContentLoaded\", function () {\n"
+		    + "var mathElems = document.getElementsByClassName(\"katex\");\n"
+		    + "var elems = [];\n"
+		    + "for (const i in mathElems) {if (mathElems.hasOwnProperty(i)) elems.push(mathElems[i]);}\n"
+		    + "elems.forEach(elem => {\n"
+		    + "katex.render(elem.textContent, elem, { throwOnError: false, displayMode: elem.nodeName !== \'SPAN\', });\n"
+		    + "});\n"
+		    + "});\n"
+		    + "})();\n"
+		    + "</script>\n"
 			+ "</body>\n"
 			+ "</html>");
 	}

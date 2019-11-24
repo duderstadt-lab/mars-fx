@@ -52,14 +52,12 @@ public class MarkdownExtensions
 		ResourceBundle bundle = ResourceBundle.getBundle("de.mpg.biochem.mars.fx.MarkdownExtensions");
 		for (String key : bundle.keySet()) {
 			String value = bundle.getString(key);
-			if (key.startsWith("commonmark.ext."))
-				commonmarkExtClasses.put(key.substring("commonmark.ext.".length()), value);
-			else if (key.startsWith("flexmark.ext."))
+			if (key.startsWith("flexmark.ext."))
 				flexmarkExtClasses.put(key.substring("flexmark.ext.".length()), value);
 		}
 
 		HashSet<String> ids = new HashSet<>();
-		ids.addAll(commonmarkExtClasses.keySet());
+		//ids.addAll(commonmarkExtClasses.keySet());
 		ids.addAll(flexmarkExtClasses.keySet());
 		for (String id : ids)
 			displayNames.put(id, Messages.get("MarkdownExtensionsPane.ext." + id));
@@ -75,7 +73,7 @@ public class MarkdownExtensions
 
 	public static boolean isAvailable(RendererType rendererType, String id) {
 		switch (rendererType) {
-			case CommonMark:	return commonmarkExtClasses.containsKey(id);
+			//case CommonMark:	return commonmarkExtClasses.containsKey(id);
 			case FlexMark:		return flexmarkExtClasses.containsKey(id);
 			default:			return false;
 		}

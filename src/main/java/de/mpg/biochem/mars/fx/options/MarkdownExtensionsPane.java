@@ -33,7 +33,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import org.controlsfx.control.ToggleSwitch;
 
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 
@@ -42,7 +42,7 @@ import de.mpg.biochem.mars.fx.options.Options.RendererType;
  *
  * @author Karl Tauber
  */
-public class MarkdownExtensionsPane extends BorderPane {
+public class MarkdownExtensionsPane extends VBox {
 	private static class Ext {
 		final String id;
 		final String displayName;
@@ -92,7 +92,7 @@ public class MarkdownExtensionsPane extends BorderPane {
 			if (!popover && !available)
 				ext.toggleSwitch.setDisable(true);
 
-			setCenter(ext.toggleSwitch);
+			getChildren().add(ext.toggleSwitch);
 		}
 
 		// listener that updates toggle switch selection and option property
