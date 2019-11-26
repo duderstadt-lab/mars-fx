@@ -12,6 +12,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
 import javafx.scene.control.ScrollPane;
@@ -77,6 +78,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		MarsTableView metaTable = new MarsTableView(marsImageMetadata.getDataTable());
 		
 		//Prevents drawing exception causing by region larger than the screen size or some max width...
+		/*
 		double maxWidth = 8000;
 		double totalWidth = 0;
 		for (TableColumn<ObservableList<Object>, ?> col : metaTable.getColumns()) {
@@ -89,8 +91,12 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 				col.setPrefWidth(colWidth);
 			}
 		}
-		
-		dataTableContainer.setCenter(new ScrollPane(metaTable));
+		*/
+		//prevent drawing exception of table not fitting on screen..
+		//Still the last column is not easily accessed.
+		metaTable.getColumns().add(new TableColumn<>("       "));
+		metaTable.setPrefWidth(1000);
+		dataTableContainer.setCenter(metaTable);
 	}
 	
 	protected void loadLog() {
