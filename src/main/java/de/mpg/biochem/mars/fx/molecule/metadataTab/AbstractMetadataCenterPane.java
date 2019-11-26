@@ -76,22 +76,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 	
 	protected void loadDataTable() {
 		MarsTableView metaTable = new MarsTableView(marsImageMetadata.getDataTable());
-		
-		//Prevents drawing exception causing by region larger than the screen size or some max width...
-		/*
-		double maxWidth = 8000;
-		double totalWidth = 0;
-		for (TableColumn<ObservableList<Object>, ?> col : metaTable.getColumns()) {
-			totalWidth += col.getPrefWidth();
-		}
-		
-		if (totalWidth > maxWidth) {
-			double colWidth = maxWidth/metaTable.getColumns().size();
-			for (TableColumn<ObservableList<Object>, ?> col : metaTable.getColumns()) {
-				col.setPrefWidth(colWidth);
-			}
-		}
-		*/
+
 		//prevent drawing exception of table not fitting on screen..
 		//Still the last column is not easily accessed.
 		metaTable.getColumns().add(new TableColumn<>("       "));

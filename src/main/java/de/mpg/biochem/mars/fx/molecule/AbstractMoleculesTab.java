@@ -1,11 +1,14 @@
 package de.mpg.biochem.mars.fx.molecule;
 
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
+
 import java.util.ArrayList;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
@@ -13,15 +16,19 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
+import de.mpg.biochem.mars.fx.util.Action;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.PositionOfInterest;
 import de.mpg.biochem.mars.util.RegionOfInterest;
+import ij.gui.GenericDialog;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -40,6 +47,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 
 import de.mpg.biochem.mars.fx.plot.event.*;
+import javax.swing.SwingUtilities;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -53,12 +61,18 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     protected ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
 	protected FilteredList<MoleculeIndexRow> filteredData;
+	
+	protected ArrayList<Menu> menus;
+	
+	protected MarsBdvFrame<?> marsBdvFrame;
 
 	public AbstractMoleculesTab() {
 		super();
 		
 		Region moleculeIcon = new Region();
         moleculeIcon.getStyleClass().add("moleculeIcon");
+        
+        initializeMenus();
         
         setIcon(moleculeIcon);
 		
@@ -137,6 +151,41 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		});
 		
 		setContent(rootPane);
+	}
+	
+	protected void initializeMenus() {
+		menus = new ArrayList<Menu>();
+		 
+		Action showVideoAction = new Action("Show Video", "Shortcut+V", null,
+			e -> {
+		        SwingUtilities.invokeLater(new Runnable() {
+		            @Override
+		            public void run() {
+		            	if (marsBdvFrame == null) {
+			            	GenericDialog dialog = new GenericDialog("Mars Bdv view");
+			     			dialog.addStringField("x_parameter", "roi_x", 25);
+			     			dialog.addStringField("y_parameter", "roi_y", 25);
+			          		dialog.showDialog();
+			          		
+			          		if (dialog.wasCanceled())
+			          			return;
+			          		
+			          		String xParameter = dialog.getNextString();
+			          		String yParameter = dialog.getNextString();
+			          		
+			            	if (archive != null && molecule != null) {
+			            		marsBdvFrame = new MarsBdvFrame(archive, molecule, xParameter, yParameter);
+			            		
+			            	}
+		            	}
+		            }
+		        });
+			}); 
+		
+		Menu toolsMenu = ActionUtils.createMenu("Tools",
+				showVideoAction);
+		
+		menus.add(toolsMenu);
 	}
 	
 	private void newMoleculeRegion(final PlotEvent e) {
@@ -230,7 +279,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         BorderPane borderPane = new BorderPane();
 		
 		moleculeIndexTable = new TableView<MoleculeIndexRow>();
-		moleculeIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");// -fx-selection-bar-non-focused: salmon;");
+		moleculeIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");
     	
         TableColumn<MoleculeIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
         rowIndexCol.setCellValueFactory(molIndexRow ->
@@ -272,6 +321,16 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
                 	//Update center pane and properties pane.
                 	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
                 	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+                	if (this.marsBdvFrame != null) {
+                		SwingUtilities.invokeLater(new Runnable() {
+        		            @Override
+        		            public void run() {
+    		            		if (molecule != null)
+    		            			marsBdvFrame.setMolecule(molecule);
+        		            }
+        		        });
+                	}
+                		
             		Platform.runLater(() -> {
             			moleculeIndexTable.requestFocus();
             		});
@@ -358,7 +417,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     
     @Override
 	public ArrayList<Menu> getMenus() {
-		return new ArrayList<Menu>();
+		return menus;
 	}
 	
 	public abstract C createMoleculeCenterPane();

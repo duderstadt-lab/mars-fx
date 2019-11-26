@@ -157,7 +157,7 @@ public class BdvViewTable implements MetadataEventHandler {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
-				File pathToXml = fileChooser.showSaveDialog(getNode().getScene().getWindow());
+				File pathToXml = fileChooser.showOpenDialog(getNode().getScene().getWindow());
 				
 				if (pathToXml != null) {
 					bdvSource.setPathToXml(pathToXml.getAbsolutePath());

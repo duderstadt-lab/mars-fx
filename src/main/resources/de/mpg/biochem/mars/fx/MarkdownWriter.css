@@ -180,7 +180,10 @@
 	-fx-opacity: 1.0;
 }
 
-
+/*---- TableView ----*/
+.table-view {
+	-fx-selection-bar: #c3c3c3;
+}
 /*---- scroll bars ----*/
 
 .scroll-bar {
@@ -189,24 +192,24 @@
 }
 
 /* make horizontal increment/decrement buttons square */
-.scroll-bar:horizontal > .increment-button, 
+.scroll-bar:horizontal > .increment-button,
 .scroll-bar:horizontal > .decrement-button {
 	-fx-padding: 0.25em 0.416667em; /* 3 5 */
 	-fx-background-insets: 0;
 }
 
 /* make vertical increment/decrement buttons square */
-.scroll-bar:vertical > .increment-button, 
+.scroll-bar:vertical > .increment-button,
 .scroll-bar:vertical > .decrement-button {
 	-fx-padding: 0.416667em 0.25em; /* 5 3 */
 	-fx-background-insets: 0;
 }
 
-.scroll-bar > .increment-button:hover, 
+.scroll-bar > .increment-button:hover,
 .scroll-bar > .decrement-button:hover {
 	-fx-background-color: #ddd;
 }
-.scroll-bar > .increment-button:pressed, 
+.scroll-bar > .increment-button:pressed,
 .scroll-bar > .decrement-button:pressed {
 	-fx-background-color: #bbb;
 }
