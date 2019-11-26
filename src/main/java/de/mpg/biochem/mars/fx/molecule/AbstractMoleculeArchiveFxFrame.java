@@ -498,8 +498,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
 	@Override
 	public void handle(MoleculeArchiveEvent event) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
