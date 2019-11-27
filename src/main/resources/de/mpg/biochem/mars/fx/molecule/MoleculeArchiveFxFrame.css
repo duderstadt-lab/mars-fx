@@ -35,6 +35,11 @@
     -jfx-rippler-fill: -fx-focus-color;
 }
 
+/*---- TableView ----*/
+.table-view {
+	-fx-selection-bar: #c3c3c3;
+}
+
 .tab-selected-line {
     -fx-background-color: -fx-focus-color;
 }
@@ -44,7 +49,7 @@
  * Custom Icons                                                                *
  *                                                                             *
  ******************************************************************************/
- 
+
 .microscopeIcon {
     -icon-paint: black;
     -fx-background-color: -icon-paint;

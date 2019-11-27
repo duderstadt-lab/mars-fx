@@ -279,7 +279,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         BorderPane borderPane = new BorderPane();
 		
 		moleculeIndexTable = new TableView<MoleculeIndexRow>();
-		moleculeIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");
     	
         TableColumn<MoleculeIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
         rowIndexCol.setCellValueFactory(molIndexRow ->

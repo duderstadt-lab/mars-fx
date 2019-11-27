@@ -98,7 +98,6 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@SuppressWarnings("unchecked")
 	protected Node buildMetadataTableIndex() {
     	metaIndexTable = new TableView<MetaIndexRow>();
-    	metaIndexTable.setStyle("-fx-selection-bar: #c3c3c3;");
     	
         TableColumn<MetaIndexRow, Integer> rowIndexCol = new TableColumn<>("Index");
         rowIndexCol.setCellValueFactory(metaIndexRow ->

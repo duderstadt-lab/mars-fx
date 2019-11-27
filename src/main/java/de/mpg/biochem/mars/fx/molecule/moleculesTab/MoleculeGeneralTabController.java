@@ -84,6 +84,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	
 	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	private Molecule molecule;
+	private MarsJFXChipViewSkin<String> skin;
 	
 	@FXML
     public void initialize() {
@@ -136,7 +137,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			};
 		}
 		
-		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
+		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
     }
 	
@@ -174,6 +175,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = molecule;
 		
+		skin.setUpdatingChips(true);
+		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getImageMetadataUID());
 		
@@ -181,13 +184,21 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		chipView.getChips().clear();
 		if (molecule.getTags().size() > 0)
 			chipView.getChips().addAll(molecule.getTags());
-		chipView.getChips().addListener(chipsListener);
 		
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		chipView.getChips().addListener(chipsListener);
 		
 		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(molecule.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				skin.setUpdatingChips(false);
+			}
+		});
+		
 	}
 }

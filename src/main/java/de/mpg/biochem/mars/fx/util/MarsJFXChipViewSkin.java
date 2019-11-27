@@ -286,7 +286,10 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
         text.applyCss();
         return text.getLayoutBounds().getWidth();
     }
-
+    
+    public void setUpdatingChips(boolean updatingChips) {
+    	editor.setUpdatingChips(updatingChips);
+    }
 
     private class CustomFlowPane extends FlowPane {
         double initOffset = 8;
@@ -431,16 +434,19 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
     }
 
     final class MarsFakeFocusTextArea extends TextArea {
+    	private boolean updatingChips = false;
+    	
         @Override
         public void requestFocus() {
         	//For the  moment we disable this to prevent it from stealing the focus when switching between molecules.
+        	//Bit of an ugly fix here to prevent stealing of focus during updates...
         	
-        	//Seems to be causing other problems... Need to find a different way to work about this..
+        	//Not sure this even helps that much...
         	
-        	//System.out.println("Requesting focus");
-            if (getSkinnable() != null) {
-            	//System.out.println("Skinnable trying to seal focus");
-                getSkinnable().requestFocus();
+        	//Needs further testing and a different solution...
+        	//Maybe just using setFakeFocus would do the trick?...
+            if (getSkinnable() != null && !updatingChips) {
+               getSkinnable().requestFocus();
             }
         }
 
@@ -457,6 +463,14 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
                 default:
                     return super.queryAccessibleAttribute(attribute, parameters);
             }
+        }
+        
+        public void setUpdatingChips(boolean updatingChips) {
+        	this.updatingChips = updatingChips;
+        }
+        
+        public boolean getUpdateChips() {
+        	return updatingChips;
         }
     }
 
