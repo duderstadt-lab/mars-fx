@@ -293,6 +293,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				fileCloseAction);
 
 		menuBar = new MenuBar(fileMenu);
+		menuBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		borderPane.setTop(menuBar);
 	}
 	

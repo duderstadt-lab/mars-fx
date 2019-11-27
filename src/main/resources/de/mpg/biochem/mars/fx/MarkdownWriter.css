@@ -32,6 +32,25 @@
 	-fx-background-insets: 0 0 0 0, 0 0 1 0;
 }
 
+.menu-bar > .container > .menu-button:hover > .label,
+.menu-bar > .container > .menu-button:focused > .label,
+.menu-bar > .container > .menu-button:showing > .label {
+    -fx-text-fill: white;
+}
+
+.menu-bar > .container > .menu-button:hover,
+.menu-bar > .container > .menu-button:focused,
+.menu-bar > .container > .menu-button:showing {
+   -fx-background-color : #0096c9;
+}
+
+.menu-item:focused, .menu-item:hovered {
+    -fx-background-color: #0096c9;
+}
+
+.menu-item:focused .label, .menu-item:hovered .label {
+    -fx-text-fill: white;
+}
 
 /*---- toolbar ----*/
 
