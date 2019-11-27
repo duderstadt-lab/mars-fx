@@ -429,16 +429,18 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
 
     public void fireEvent(Event event) {
+    	//getNode().fireEvent(event);
     	dashboardTab.fireEvent(event);
         imageMetadataTab.fireEvent(event);
         moleculesTab.fireEvent(event);
         commentsTab.fireEvent(event);
         settingsTab.fireEvent(event);
     }
-
-	@Override
+    
+    @Override
 	public void handle(MoleculeArchiveEvent event) {
-	}
+    	event.invokeHandler(this);
+    }
 
 	@Override
 	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
