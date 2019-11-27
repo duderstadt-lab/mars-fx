@@ -161,22 +161,19 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		        SwingUtilities.invokeLater(new Runnable() {
 		            @Override
 		            public void run() {
-		            	if (marsBdvFrame == null) {
-			            	GenericDialog dialog = new GenericDialog("Mars Bdv view");
-			     			dialog.addStringField("x_parameter", "roi_x", 25);
-			     			dialog.addStringField("y_parameter", "roi_y", 25);
-			          		dialog.showDialog();
-			          		
-			          		if (dialog.wasCanceled())
-			          			return;
-			          		
-			          		String xParameter = dialog.getNextString();
-			          		String yParameter = dialog.getNextString();
-			          		
-			            	if (archive != null && molecule != null) {
-			            		marsBdvFrame = new MarsBdvFrame(archive, molecule, xParameter, yParameter);
-			            		
-			            	}
+		            	GenericDialog dialog = new GenericDialog("Mars Bdv view");
+		     			dialog.addStringField("x_parameter", "roi_x", 25);
+		     			dialog.addStringField("y_parameter", "roi_y", 25);
+		          		dialog.showDialog();
+		          		
+		          		if (dialog.wasCanceled())
+		          			return;
+		          		
+		          		String xParameter = dialog.getNextString();
+		          		String yParameter = dialog.getNextString();
+		          		
+		            	if (archive != null && molecule != null) {
+		            		marsBdvFrame = new MarsBdvFrame(archive, molecule, xParameter, yParameter);
 		            	}
 		            }
 		        });
