@@ -279,9 +279,9 @@
 
 .find-replace {
 	-fx-padding: 0.25em;
-	-fx-background-color: -mwfx-tab-background;
+	-fx-background-color: derive(-fx-background,25%);
 	-fx-border-color: -fx-outer-border;
-	-fx-border-width: 1 0 0 0;
+	-fx-border-width: 1 0 1 0;
 }
 
 .find-replace .text-field:error {

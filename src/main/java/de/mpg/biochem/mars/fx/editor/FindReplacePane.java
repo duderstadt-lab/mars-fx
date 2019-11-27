@@ -500,8 +500,15 @@ class FindReplacePane
 	}
 
 	void show(boolean replace, boolean findSelection) {
-		if (replace)
+		if (replace) {
 			replacePane.setVisible(true);
+			if (!pane.getChildren().contains(replacePane)) 
+				pane.getChildren().add(replacePane);
+		} else {
+			replacePane.setVisible(false);
+			if (pane.getChildren().contains(replacePane))
+				pane.getChildren().remove(replacePane);
+		}
 
 		boolean oldVisible = visible.get();
 		visible.set(true);
@@ -529,6 +536,8 @@ class FindReplacePane
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
 		pane = new VBox();
+		//pane.setStyle("-fx-background-color: #efefef");
+		//pane.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
 		findField = new CustomTextField();
 		previousButton = new Button();
 		nextButton = new Button();
@@ -607,7 +616,7 @@ class FindReplacePane
 				replacePane.getChildren().add(replaceAllButton);
 				replacePane.getChildren().add(replaceInfoLabel);
 			}
-			pane.getChildren().add(replacePane);
+			//pane.getChildren().add(replacePane);
 		}
 
 		//---- nOfHitCountLabel ----

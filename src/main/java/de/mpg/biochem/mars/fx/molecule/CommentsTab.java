@@ -46,7 +46,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	private BorderPane borderPane;
 	
-	private Scene scene;
 	private Node extensionsButton;
 	private ToolBar nonEditToolBar;
 	private ToolBar editToolBar;
@@ -78,11 +77,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	initializeToolBars();
     	
     	borderPane.setTop(nonEditToolBar);
-    	
-		scene = new Scene(borderPane);
-		scene.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
+
+		borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		
-		Utils.fixSpaceAfterDeadKey(scene);
+		//Utils.fixSpaceAfterDeadKey(scene);
 		
 		//Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
 		
@@ -362,7 +360,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 			alert.setTitle(title);
 			alert.setHeaderText(null);
 			alert.setContentText(MessageFormat.format(contentTextFormat, contentTextArgs));
-			alert.initOwner(scene.getWindow());
+			alert.initOwner(getNode().getScene().getWindow());
 			return alert;
 		}
 

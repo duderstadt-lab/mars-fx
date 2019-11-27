@@ -51,6 +51,9 @@ public abstract class AbstractMetadataCenterPane<I extends MarsImageMetadata> im
 		logTab = new Tab();
 		logTab.setText("Log");
 		logContainer = new BorderPane();
+		logContainer.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
+		//logContainer.setStyle(".find-replace { -fx-border-width: 0 0 1 0; }");
+
 		logTab.setContent(logContainer);
 		
 		logPane = new LogPane();
