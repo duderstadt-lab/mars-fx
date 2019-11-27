@@ -12,11 +12,8 @@ public interface MoleculeArchiveEventHandler extends EventHandler<MoleculeArchiv
 	
 	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive);
 	
-	public void onMoleculeArchiveLockingEvent();
-    public void onMoleculeArchiveLockedEvent();
-    
-    public void onMoleculeArchiveUnlockingEvent();
-    public void onMoleculeArchiveUnlockedEvent();
+    public void onMoleculeArchiveLockEvent();
+    public void onMoleculeArchiveUnlockEvent();
     
     public void onMoleculeArchiveSavingEvent();
     public void onMoleculeArchiveSavedEvent();

@@ -69,18 +69,12 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
 	}
 	
 	//Override any events below that should trigger a specific response.
-	
-	@Override
-	public void onMoleculeArchiveLockingEvent() {}
 
 	@Override
-	public void onMoleculeArchiveLockedEvent() {}
+	public void onMoleculeArchiveLockEvent() {}
 
 	@Override
-	public void onMoleculeArchiveUnlockingEvent() {}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent() {}
+	public void onMoleculeArchiveUnlockEvent() {}
 
 	@Override
 	public void onMoleculeArchiveSavingEvent() {}

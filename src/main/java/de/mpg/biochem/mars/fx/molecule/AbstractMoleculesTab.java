@@ -2,6 +2,7 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import org.controlsfx.control.textfield.CustomTextField;
@@ -13,6 +14,9 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
@@ -48,6 +52,8 @@ import javafx.scene.layout.Region;
 
 import de.mpg.biochem.mars.fx.plot.event.*;
 import javax.swing.SwingUtilities;
+
+import javafx.concurrent.Task;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -179,8 +185,35 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		        });
 			}); 
 		
+		
+		
+		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
+				e -> {
+					fireEvent(new MoleculeArchiveLockEvent(archive));
+					Task<Void> task = new Task<Void>() {
+	    	            @Override
+	    	            public Void call() throws Exception {
+	    	            	try {
+	    						archive.rebuildIndexes();
+	    					} catch (IOException e1) {
+	    						e1.printStackTrace();
+	    					}
+		    	           	 
+	    	                return null;
+	    	            }
+	    	        };
+
+	    	        task.setOnSucceeded(event -> {
+	    	        	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+	    	        });
+
+	    	        new Thread(task).run();
+					
+				});
+		
 		Menu toolsMenu = ActionUtils.createMenu("Tools",
-				showVideoAction);
+				showVideoAction,
+				rebuildIndexesAction);
 		
 		menus.add(toolsMenu);
 	}
@@ -408,7 +441,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     	
     	moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
-    	onMoleculeArchiveUnlockingEvent();
+    	onMoleculeArchiveUnlockEvent();
     }
     
     @Override
@@ -445,13 +478,13 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     }
 
 	@Override
-	public void onMoleculeArchiveLockingEvent() {
+	public void onMoleculeArchiveLockEvent() {
 		saveCurrentRecord();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMoleculeArchiveUnlockingEvent() {
+	public void onMoleculeArchiveUnlockEvent() {
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
@@ -471,6 +504,8 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 
 	@Override
 	public void onMoleculeArchiveSavingEvent() {
-		saveCurrentRecord();
+		//The archive is always locked when saving and that saves the current record...
+		//We don't need to do it twice.
+		//saveCurrentRecord();
 	}
 }

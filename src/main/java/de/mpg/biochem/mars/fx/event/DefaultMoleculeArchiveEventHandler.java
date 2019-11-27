@@ -20,16 +20,10 @@ public abstract class DefaultMoleculeArchiveEventHandler implements MoleculeArch
 	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {}
 
 	@Override
-	public void onMoleculeArchiveLockingEvent() {}
+	public void onMoleculeArchiveLockEvent() {}
 
 	@Override
-	public void onMoleculeArchiveLockedEvent() {}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent() {}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent() {}
+	public void onMoleculeArchiveUnlockEvent() {}
 
 	@Override
 	public void onMoleculeArchiveSavingEvent() {}

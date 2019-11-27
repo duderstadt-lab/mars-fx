@@ -6,22 +6,22 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class MoleculeArchiveLockedEvent extends MoleculeArchiveEvent {
+public class MoleculeArchiveLockEvent extends MoleculeArchiveEvent {
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_LOCKED = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_LOCKED");
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_LOCK = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_LOCK");
 
-    public MoleculeArchiveLockedEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-        super(MOLECULE_ARCHIVE_LOCKED, archive);
+    public MoleculeArchiveLockEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+        super(MOLECULE_ARCHIVE_LOCK, archive);
     }
 
     @Override
     public void invokeHandler(MoleculeArchiveEventHandler handler) {
-        handler.onMoleculeArchiveLockedEvent();
+        handler.onMoleculeArchiveLockEvent();
     }
 
 }

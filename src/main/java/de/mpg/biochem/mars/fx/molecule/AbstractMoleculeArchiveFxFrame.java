@@ -19,16 +19,10 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import de.mpg.biochem.mars.table.MarsTable;
-import de.mpg.biochem.mars.table.MarsTableService;
 import ij.WindowManager;
 
 import com.jfoenix.controls.JFXTabPane;
 
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -44,36 +38,15 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SingleSelectionModel;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.ScrollEvent;
+
+import javafx.concurrent.Task;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
-
-import org.apache.commons.io.FilenameUtils;
 import org.controlsfx.control.MaskerPane;
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
-import org.scijava.widget.FileWidget;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
@@ -82,12 +55,10 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEventHandler;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockedEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockingEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockedEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockingEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
@@ -219,20 +190,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         stackPane = new StackPane();
         stackPane.getChildren().add(tabsContainer);
         borderPane.setCenter(stackPane);
-        
-        //Let's catch Plot events and pass them to the metadata panel if needed
-        //For now we should just make sure it updates on tab change.
-        /*
-        getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
-			   @Override 
-			   public void handle(PlotEvent e) { 
-				   	if (e.getEventType().getName().equals("NEW_METADATA_REGION")) {
-				   		moleculePropertiesPane.fireEvent(new MetadataSelectionChangedEvent(molecule));
-				   		e.consume();
-				   	}
-			   };
-     	});
-        */
+
         Scene scene = new Scene(maskerStackPane);
 
         return scene;
@@ -283,7 +241,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
-		Action fileCloseAction = new Action("close", null, null, e -> handleClose());
+		Action fileCloseAction = new Action("close", null, null, e -> close());
 		
 		Menu fileMenu = ActionUtils.createMenu("File",
 				fileSaveAction,
@@ -291,7 +249,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				fileSaveVirtualStoreAction,
 				null,
 				fileCloseAction);
-
+		
 		menuBar = new MenuBar(fileMenu);
 		menuBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		borderPane.setTop(menuBar);
@@ -327,38 +285,36 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			menuBar.getMenus().add(menu);
     	}
     }
-    
-    private void handleClose() {
-    	archive.getWindow().close();
-    	save();
-    }
 
     public void save() {
     	 if (!lockArchive) {
-    		 lock();
-    		 fireEvent(new MoleculeArchiveSavingEvent(archive));
-    		 moleculesTab.saveCurrentRecord();
-    		 imageMetadataTab.saveCurrentRecord();
-        	 try {
-	 			 if (archive.getFile() != null) {
-	 				 if(archive.getFile().getName().equals(archive.getName())) {
-	 				 	try {
-							archive.save();
-						} catch (IOException e1) {
-							e1.printStackTrace();
-						}
-	 				 } else {
-	 				    //the archive name has changed... so let's check with the user about the new name...
-						saveAs(archive.getFile());
-	 				 }
-	 			 } else {
-	 				saveAs(new File(archive.getName()));
-	 			 }
-        	 } catch (IOException e1) {
-				e1.printStackTrace();
-			 }
-        	 fireEvent(new MoleculeArchiveSavedEvent(archive));
-        	 unlock();
+           	 try {
+   	 			 if (archive.getFile() != null) {
+   	 				 if(archive.getFile().getName().equals(archive.getName())) {
+ 		    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
+   	 		    		Task<Void> task = new Task<Void>() {
+	   	     	            @Override
+	   	     	            public Void call() throws Exception {
+	   	     	            	archive.save();	 
+	   	     	                return null;
+	   	     	            }
+	   	     	        };
+	
+	   	     	        task.setOnSucceeded(event -> {
+   				           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+	   	     	        });
+	
+	   	     	        new Thread(task).run();
+   	 				 } else {
+   	 				    //the archive name has changed... so let's check with the user about the new name...
+   						saveAs(archive.getFile());
+   	 				 }
+   	 			 } else {
+   	 				saveAs(new File(archive.getName()));
+   	 			 }
+           	 } catch (IOException e1) {
+   				e1.printStackTrace();
+   			 }
     	 }
     }
     
@@ -390,9 +346,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		}
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
-		//FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(exporter.getExtensionDescription(),
-		//		exporter.getExtensionFilters());
-		//fileChooser.getExtensionFilters().add(extFilter);
 
 		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
@@ -407,10 +360,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     public void saveVirtualStoreCopy() {
     	 if (!lockArchive) {
-    		lock();
-    		moleculesTab.saveCurrentRecord();
-    		imageMetadataTab.saveCurrentRecord();
- 		 	
  		 	String name = archive.getName();
  		 	
  		 	if (name.endsWith(".yama")) {
@@ -424,7 +373,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-			unlock();
     	 }
     }
     
@@ -436,9 +384,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		}
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
-		//FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(exporter.getExtensionDescription(),
-		//		exporter.getExtensionFilters());
-		//fileChooser.getExtensionFilters().add(extFilter);
 
 		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
@@ -465,10 +410,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-		    	fireEvent(new MoleculeArchiveLockingEvent(archive));
-				masker.setVisible(true);
-		    	lockArchive = true;
-		    	fireEvent(new MoleculeArchiveLockedEvent(archive));
+		    	fireEvent(new MoleculeArchiveLockEvent(archive));
 			}
     	});
     }
@@ -477,16 +419,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-		    	fireEvent(new MoleculeArchiveUnlockingEvent(archive));
-				lockArchive = false;
-				masker.setVisible(false);
-				fireEvent(new MoleculeArchiveUnlockedEvent(archive));
+		    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 			}
     	});
     }
     
     public void update() {
-    	fireEvent(new MoleculeArchiveUnlockedEvent(archive));
+    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
     }
 
     public void fireEvent(Event event) {
@@ -502,31 +441,19 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
 
 	@Override
-	public void onInitializeMoleculeArchiveEvent(
-			MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-		// TODO Auto-generated method stub
-		
+	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 	}
 
 	@Override
-	public void onMoleculeArchiveLockingEvent() {
-    	masker.setVisible(true);
+	public void onMoleculeArchiveLockEvent() {
+		masker.setVisible(true);
+    	lockArchive = true;
 	}
 
 	@Override
-	public void onMoleculeArchiveLockedEvent() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockingEvent() {
-    	masker.setVisible(false);
-	}
-
-	@Override
-	public void onMoleculeArchiveUnlockedEvent() {
-		// TODO Auto-generated method stub
+	public void onMoleculeArchiveUnlockEvent() {
+		lockArchive = false;
+		masker.setVisible(false);
 	}
 
 	@Override

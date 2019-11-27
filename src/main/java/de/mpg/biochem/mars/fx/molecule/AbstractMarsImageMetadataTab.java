@@ -192,7 +192,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 
     	metadataCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
     	metadataPropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
-    	onMoleculeArchiveUnlockingEvent();
+    	onMoleculeArchiveUnlockEvent();
     }
 	
 	@Override
@@ -230,13 +230,13 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     }
 
 	@Override
-	public void onMoleculeArchiveLockingEvent() {
+	public void onMoleculeArchiveLockEvent() {
 		saveCurrentRecord();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMoleculeArchiveUnlockingEvent() {
+	public void onMoleculeArchiveUnlockEvent() {
     	metaRowList.clear();
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
     		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
