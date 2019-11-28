@@ -15,8 +15,18 @@ public class MoleculeArchiveLockEvent extends MoleculeArchiveEvent {
 
 	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_LOCK = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_LOCK");
 
-    public MoleculeArchiveLockEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+	public String message;
+	
+    public MoleculeArchiveLockEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, String message) {
         super(MOLECULE_ARCHIVE_LOCK, archive);
+        if (message != null)
+        	this.message = message;
+        else
+        	this.message = "Please Wait...";
+    }
+    
+    public String getMessage() {
+    	return message;
     }
 
     @Override

@@ -410,7 +410,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-		    	fireEvent(new MoleculeArchiveLockEvent(archive));
+		    	fireEvent(new MoleculeArchiveLockEvent(archive, null));
 			}
     	});
     }
@@ -429,7 +429,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
 
     public void fireEvent(Event event) {
-    	//getNode().fireEvent(event);
     	dashboardTab.fireEvent(event);
         imageMetadataTab.fireEvent(event);
         moleculesTab.fireEvent(event);

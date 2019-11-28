@@ -185,37 +185,39 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		        });
 			}); 
 		
-		
-		
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
-				e -> {
-					fireEvent(new MoleculeArchiveLockEvent(archive));
-					Task<Void> task = new Task<Void>() {
-	    	            @Override
-	    	            public Void call() throws Exception {
-	    	            	try {
-	    						archive.rebuildIndexes();
-	    					} catch (IOException e1) {
-	    						e1.printStackTrace();
-	    					}
-		    	           	 
-	    	                return null;
-	    	            }
-	    	        };
-
-	    	        task.setOnSucceeded(event -> {
-	    	        	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-	    	        });
-
-	    	        new Thread(task).run();
-					
-				});
+			e -> {
+				runTask(() -> {
+    	            	try {
+    						archive.rebuildIndexes();
+    					} catch (IOException e1) {
+    						e1.printStackTrace();
+    					}
+    	            }, "Rebuilding Indexes...");					
+			});
 		
 		Menu toolsMenu = ActionUtils.createMenu("Tools",
 				showVideoAction,
 				rebuildIndexesAction);
 		
 		menus.add(toolsMenu);
+	}
+	
+	private void runTask(Runnable process, String message) {
+		fireEvent(new MoleculeArchiveLockEvent(archive, message));
+		Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() throws Exception {
+            	process.run();
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+        	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+        });
+
+        new Thread(task).start();
 	}
 	
 	private void newMoleculeRegion(final PlotEvent e) {
