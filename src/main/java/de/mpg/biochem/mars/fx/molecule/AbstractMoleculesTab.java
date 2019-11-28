@@ -54,6 +54,7 @@ import de.mpg.biochem.mars.fx.plot.event.*;
 import javax.swing.SwingUtilities;
 
 import javafx.concurrent.Task;
+import javafx.beans.value.ChangeListener;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -69,6 +70,8 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	protected FilteredList<MoleculeIndexRow> filteredData;
 	
 	protected MarsBdvFrame<?> marsBdvFrame;
+	
+	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
 
 	public AbstractMoleculesTab() {
 		super();
@@ -276,32 +279,35 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         metaUIDColumn.setSortable(false);
         moleculeIndexTable.getColumns().add(metaUIDColumn);
         
-        moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(
-            (observable, oldMoleculeIndexRow, newMoleculeIndexRow) -> {
-            	//Need to save the current record when we change in the case the virtual storage.
-            	saveCurrentRecord();
-            	
-                if (newMoleculeIndexRow != null) {
-                	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
-                	
-                	//Update center pane and properties pane.
-                	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-                	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-                	if (this.marsBdvFrame != null) {
-                		SwingUtilities.invokeLater(new Runnable() {
-        		            @Override
-        		            public void run() {
-    		            		if (molecule != null)
-    		            			marsBdvFrame.setMolecule(molecule);
-        		            }
-        		        });
-                	}
-                		
-            		Platform.runLater(() -> {
-            			moleculeIndexTable.requestFocus();
-            		});
-                }
-        });
+        moleculeIndexTableListener = new ChangeListener<MoleculeIndexRow> () {
+        	public void changed(ObservableValue<? extends MoleculeIndexRow> observable, MoleculeIndexRow oldMoleculeIndexRow, MoleculeIndexRow newMoleculeIndexRow) {
+	        	//Need to save the current record when we change in the case the virtual storage.
+	        	saveCurrentRecord();
+	        	
+	            if (newMoleculeIndexRow != null) {
+	            	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
+	            	
+	            	//Update center pane and properties pane.
+	            	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	            	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	            	if (this.marsBdvFrame != null) {
+	            		SwingUtilities.invokeLater(new Runnable() {
+	    		            @Override
+	    		            public void run() {
+			            		if (molecule != null)
+			            			marsBdvFrame.setMolecule(molecule);
+	    		            }
+	    		        });
+	            	}
+	            		
+	        		Platform.runLater(() -> {
+	        			moleculeIndexTable.requestFocus();
+	        		});
+	            }
+        	}
+        };
+        
+        moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(moleculeIndexTableListener);
 
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         filterField = new CustomTextField();
@@ -433,11 +439,17 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	        	moleculeRowList.add(new MoleculeIndexRow(index));
 	        }
 	    	
+	    	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
+	    	
     		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
     		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
+    		
+    		moleculeIndexTable.getSelectionModel().select(0);
 	    	
 	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	    	
+	    	moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(moleculeIndexTableListener);
     	}
 		Platform.runLater(() -> {
 			moleculeIndexTable.requestFocus();

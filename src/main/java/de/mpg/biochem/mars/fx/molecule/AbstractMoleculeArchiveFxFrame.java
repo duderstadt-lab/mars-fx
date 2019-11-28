@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule;
 
+import static java.util.stream.Collectors.toList;
+
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
@@ -53,6 +55,7 @@ import org.controlsfx.control.MaskerPane;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dialogs.DeleteMoleculesDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -96,8 +99,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected BorderPane borderPane;
     protected JFXTabPane tabsContainer;
-    
-    protected boolean lockArchive = false;
     
 	protected MenuBar menuBar;
 	
@@ -279,6 +280,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			            }
 			        });
 				}); 
+		
+		Action deleteMoleculesAction = new Action("Delete Molecules", "Shortcut+D", null, e -> deleteMolecules());
 			
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
 			e -> {
@@ -292,16 +295,53 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			});
 			
 		toolsMenu = ActionUtils.createMenu("Tools",
+					deleteMoleculesAction,
+					null,
 					showVideoAction,
+					null,
 					rebuildIndexesAction);
 		
 		menuBar = new MenuBar(fileMenu, toolsMenu);
 		borderPane.setTop(menuBar);
 	}
 	
+	private void deleteMolecules() {
+			DeleteMoleculesDialog dialog = new DeleteMoleculesDialog(getNode().getScene().getWindow());
+
+			dialog.showAndWait().ifPresent(result -> {
+				runTask(() -> {
+					System.out.println(archive.getNumberOfMolecules());
+					ArrayList<String> deleteUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> {
+		        	 	if (result.removeWithNoTags() && archive.get(UID).getTags().size() == 0) {
+		        	 		return true;
+		        	 	}
+		        	 
+		 				boolean hasTag = false;
+		 				String[] tagList = result.getTagList();
+		 				for (int i=0; i<result.getTagList().length; i++) {
+		 		        	for (String tag : archive.get(UID).getTags()) {
+		 		        		if (tagList[i].equals(tag)) {
+		 		        			hasTag = true;
+		 		        		}
+		 		        	}
+		 		        }
+		 				return hasTag;
+		 			}).collect(toList());
+		             
+		             for (String UID : deleteUIDs) {
+		            	 System.out.println(UID);
+		            	 archive.remove(UID);
+		             }
+		             System.out.println(archive.getNumberOfMolecules());
+				}, "Deleting Molecules...");
+			});
+	}
+	
 	private void runTask(Runnable process, String message) {
 		masker.setText(message);
-		fireEvent(new MoleculeArchiveLockEvent(archive));
+		masker.setProgress(-1);
+		masker.setVisible(true);
+    	fireEvent(new MoleculeArchiveLockEvent(archive));
 		Task<Void> task = new Task<Void>() {
             @Override
             public Void call() throws Exception {
@@ -310,8 +350,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
             }
         };
 
-        task.setOnSucceeded(event -> {
+        task.setOnSucceeded(event -> { 
         	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+			masker.setVisible(false);
+			System.out.println(archive.getNumberOfMolecules());
         });
 
         new Thread(task).start();
@@ -350,55 +392,51 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
 
     public void save() {
-    	 if (!lockArchive) {
-           	 try {
-   	 			 if (archive.getFile() != null) {
-   	 				 if(archive.getFile().getName().equals(archive.getName())) {
- 		    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
-   	 		    		Task<Void> task = new Task<Void>() {
-	   	     	            @Override
-	   	     	            public Void call() throws Exception {
-	   	     	            	archive.save();	 
-	   	     	                return null;
-	   	     	            }
-	   	     	        };
+	   	 try {
+			 if (archive.getFile() != null) {
+				 if(archive.getFile().getName().equals(archive.getName())) {
+	    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
+		    		Task<Void> task = new Task<Void>() {
+	     	            @Override
+	     	            public Void call() throws Exception {
+	     	            	archive.save();	 
+	     	                return null;
+	     	            }
+	     	        };
 	
-	   	     	        task.setOnSucceeded(event -> {
-   				           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	   	     	        });
+	     	        task.setOnSucceeded(event -> {
+			           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+	     	        });
 	
-	   	     	        new Thread(task).run();
-   	 				 } else {
-   	 				    //the archive name has changed... so let's check with the user about the new name...
-   						saveAs(archive.getFile());
-   	 				 }
-   	 			 } else {
-   	 				saveAs(new File(archive.getName()));
-   	 			 }
-           	 } catch (IOException e1) {
-   				e1.printStackTrace();
-   			 }
-    	 }
+	     	        new Thread(task).run();
+				 } else {
+				    //the archive name has changed... so let's check with the user about the new name...
+					saveAs(archive.getFile());
+				 }
+			 } else {
+				saveAs(new File(archive.getName()));
+			 }
+	   	 } catch (IOException e1) {
+			e1.printStackTrace();
+		 }
     }
     
     public void saveCopy() {
-    	if (!lockArchive) {
-    		lock();
-    	    String fileName = archive.getName();
-    	    if (fileName.endsWith(".store"))
-    	    	fileName = fileName.substring(0, fileName.length() - 5);
-    	    
-    	    try {
- 				if (archive.getFile() != null) {
-					saveAs(new File(archive.getFile().getParentFile(), fileName));
- 				} else {
- 					saveAs(new File(System.getProperty("user.home"), fileName));
- 				}
-    	    } catch (IOException e1) {
-				e1.printStackTrace();
+		lock();
+	    String fileName = archive.getName();
+	    if (fileName.endsWith(".store"))
+	    	fileName = fileName.substring(0, fileName.length() - 5);
+	    
+	    try {
+			if (archive.getFile() != null) {
+				saveAs(new File(archive.getFile().getParentFile(), fileName));
+			} else {
+				saveAs(new File(System.getProperty("user.home"), fileName));
 			}
-    	    unlock();
-    	}
+	    } catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	    unlock();
     }
     
 	private boolean saveAs(File saveAsFile) throws IOException {
@@ -422,21 +460,19 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
     
     public void saveVirtualStoreCopy() {
-    	 if (!lockArchive) {
- 		 	String name = archive.getName();
- 		 	
- 		 	if (name.endsWith(".yama")) {
- 		 		name += ".store";
- 		 	} else if (!name.endsWith(".yama.store")) {
-     		 	name += ".yama.store";
-     		}
- 		 
-			try {
-				saveAsVirtualStore(new File(name));
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-    	 }
+	 	String name = archive.getName();
+	 	
+	 	if (name.endsWith(".yama")) {
+	 		name += ".store";
+	 	} else if (!name.endsWith(".yama.store")) {
+ 		 	name += ".yama.store";
+ 		}
+	 
+		try {
+			saveAsVirtualStore(new File(name));
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
     }
     
 	private void saveAsVirtualStore(File saveAsFile) throws IOException {
@@ -482,7 +518,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				masker.setText(message);
 				masker.setProgress(-1);
 				masker.setVisible(true);
-		    	lockArchive = true;
 		    	fireEvent(new MoleculeArchiveLockEvent(archive));
 			}
     	});
@@ -494,7 +529,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			public void run() {
 				masker.setProgress(-1);
 				masker.setVisible(true);
-		    	lockArchive = true;
 		    	fireEvent(new MoleculeArchiveLockEvent(archive));
 			}
     	});
@@ -527,7 +561,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			@Override
 			public void run() {
 		    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-				lockArchive = false;
 				masker.setVisible(false);
 			}
     	});
