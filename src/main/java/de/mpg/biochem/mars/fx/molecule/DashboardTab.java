@@ -28,6 +28,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	}
     
 	public ArrayList<Menu> getMenus() {
-		return new ArrayList<Menu>();
+		return null;
 	}
 }

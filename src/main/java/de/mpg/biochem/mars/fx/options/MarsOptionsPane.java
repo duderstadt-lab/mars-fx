@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.options;
 
 import java.util.ArrayList;
 
@@ -16,43 +16,31 @@ import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
 
-public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
-	
+public class MarsOptionsPane {
 	private JFXToggleButton smileEncodingButton;
 	
 	private BorderPane rootPane;
 	
-	public SettingsTab() {
-		super();
-		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
+	public MarsOptionsPane() {
+		//setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
 		
 		smileEncodingButton = new JFXToggleButton();
 		rootPane = new BorderPane();
 		rootPane.setCenter(smileEncodingButton);
 		
-		setContent(rootPane);
+		//setContent(rootPane);
 	}
 	
 	public void handleToggleSmileEncoding() {
 		if (smileEncodingButton.isSelected()) {
-			archive.setSMILEOutputEncoding();
+			//archive.setSMILEOutputEncoding();
 		} else {
-			archive.unsetSMILEOutputEncoding();
+			//archive.unsetSMILEOutputEncoding();
 		}
 	}
 	
 	public Node getNode() {
 		return this.rootPane;
 	}
-	
-	public ArrayList<Menu> getMenus() {
-		return new ArrayList<Menu>();
-	}
 
-	@Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-    	super.onInitializeMoleculeArchiveEvent(archive);
-		
-		smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
-	}
 }

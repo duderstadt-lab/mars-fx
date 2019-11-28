@@ -18,6 +18,10 @@ public class MoleculeSelectionChangedEvent extends MoleculeEvent {
         super(MOLECULE_SELECTION_CHANGED);
         this.molecule = molecule;
     }
+    
+    public Molecule getMolecule() {
+    	return molecule;
+    }
 
     @Override
     public void invokeHandler(MoleculeEventHandler handler) {

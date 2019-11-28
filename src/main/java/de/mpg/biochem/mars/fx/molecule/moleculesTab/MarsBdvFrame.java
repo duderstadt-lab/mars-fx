@@ -356,6 +356,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		this.yParameter = yParameter;
 	}
 	
+	public JFrame getFrame() {
+		return frame;
+	}
+	
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}

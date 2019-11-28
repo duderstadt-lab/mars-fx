@@ -26,7 +26,7 @@
  */
 
 /*---- menubar ----*/
-
+/*
 .menu-bar {
 	-fx-background-color: -fx-outer-border, white;
 	-fx-background-insets: 0 0 0 0, 0 0 1 0;
@@ -51,7 +51,7 @@
 .menu-item:focused .label, .menu-item:hovered .label {
     -fx-text-fill: white;
 }
-
+*/
 /*---- toolbar ----*/
 
 .tool-bar {

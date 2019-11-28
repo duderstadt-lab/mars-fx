@@ -68,8 +68,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     
 	protected FilteredList<MoleculeIndexRow> filteredData;
 	
-	protected ArrayList<Menu> menus;
-	
 	protected MarsBdvFrame<?> marsBdvFrame;
 
 	public AbstractMoleculesTab() {
@@ -77,8 +75,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		
 		Region moleculeIcon = new Region();
         moleculeIcon.getStyleClass().add("moleculeIcon");
-        
-        initializeMenus();
         
         setIcon(moleculeIcon);
 		
@@ -157,67 +153,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		});
 		
 		setContent(rootPane);
-	}
-	
-	protected void initializeMenus() {
-		menus = new ArrayList<Menu>();
-		 
-		Action showVideoAction = new Action("Show Video", "Shortcut+V", null,
-			e -> {
-		        SwingUtilities.invokeLater(new Runnable() {
-		            @Override
-		            public void run() {
-		            	GenericDialog dialog = new GenericDialog("Mars Bdv view");
-		     			dialog.addStringField("x_parameter", "roi_x", 25);
-		     			dialog.addStringField("y_parameter", "roi_y", 25);
-		          		dialog.showDialog();
-		          		
-		          		if (dialog.wasCanceled())
-		          			return;
-		          		
-		          		String xParameter = dialog.getNextString();
-		          		String yParameter = dialog.getNextString();
-		          		
-		            	if (archive != null && molecule != null) {
-		            		marsBdvFrame = new MarsBdvFrame(archive, molecule, xParameter, yParameter);
-		            	}
-		            }
-		        });
-			}); 
-		
-		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
-			e -> {
-				runTask(() -> {
-    	            	try {
-    						archive.rebuildIndexes();
-    					} catch (IOException e1) {
-    						e1.printStackTrace();
-    					}
-    	            }, "Rebuilding Indexes...");					
-			});
-		
-		Menu toolsMenu = ActionUtils.createMenu("Tools",
-				showVideoAction,
-				rebuildIndexesAction);
-		
-		menus.add(toolsMenu);
-	}
-	
-	private void runTask(Runnable process, String message) {
-		fireEvent(new MoleculeArchiveLockEvent(archive, message));
-		Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
-            	process.run();
-                return null;
-            }
-        };
-
-        task.setOnSucceeded(event -> {
-        	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-        });
-
-        new Thread(task).start();
 	}
 	
 	private void newMoleculeRegion(final PlotEvent e) {
@@ -448,7 +383,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     
     @Override
 	public ArrayList<Menu> getMenus() {
-		return menus;
+		return null;
 	}
 	
 	public abstract C createMoleculeCenterPane();

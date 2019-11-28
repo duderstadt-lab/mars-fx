@@ -532,6 +532,10 @@ class FindReplacePane
 		clearHits();
 		textArea.requestFocus();
 	}
+	
+	public void closable(boolean closable) {
+		this.closable = closable;
+	}
 
 	private void initComponents() {
 		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
@@ -590,7 +594,8 @@ class FindReplacePane
 			
 			//---- closeButton ----
 			closeButton.setFocusTraversable(false);
-			search.setRight(closeButton);
+			if (closable)
+				search.setRight(closeButton);
 			
 			pane.getChildren().add(search);
 
@@ -640,4 +645,6 @@ class FindReplacePane
 	private Label replaceInfoLabel;
 	private Label nOfHitCountLabel;
 	// JFormDesigner - End of variables declaration  //GEN-END:variables
+	
+	private boolean closable = true;
 }

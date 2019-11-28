@@ -114,6 +114,7 @@ public class LogPane
 		findReplacePane = new FindReplacePane(textArea);
 		findHitsChangeListener = this::findHitsChanged;
 		findReplacePane.addListener(findHitsChangeListener);
+		findReplacePane.closable(false);
 		
 		borderPane.setTop(findReplacePane.getNode());
 
