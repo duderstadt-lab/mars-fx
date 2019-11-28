@@ -10,6 +10,8 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -27,6 +29,7 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculesTab.MoleculeIndexRow;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
@@ -45,6 +48,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	protected ObservableList<MetaIndexRow> metaRowList = FXCollections.observableArrayList();
     
 	protected FilteredList<MetaIndexRow> filteredData;
+	
+	protected ChangeListener<MetaIndexRow> metaIndexTableListener;
 
 	public AbstractMarsImageMetadataTab() {
 		super();
@@ -121,9 +126,12 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
         TagsColumn.setSortable(false);
         metaIndexTable.getColumns().add(TagsColumn);
         
-        metaIndexTable.getSelectionModel().selectedItemProperty().addListener(
-            (observable, oldMetaIndexRow, newMetaIndexRow) -> {
-                if (newMetaIndexRow != null) {
+        metaIndexTableListener = new ChangeListener<MetaIndexRow> () {
+        	public void changed(ObservableValue<? extends MetaIndexRow> observable, MetaIndexRow oldMetaIndexRow, MetaIndexRow newMetaIndexRow) {
+        		//Need to save the current record when we change in the case the virtual storage.
+	        	saveCurrentRecord();
+        		
+        		if (newMetaIndexRow != null) {
                 	marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
@@ -133,7 +141,10 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
             			metaIndexTable.requestFocus();
             		});
                 }
-        });
+        	}
+        };
+        
+        metaIndexTable.getSelectionModel().selectedItemProperty().addListener(metaIndexTableListener);
         
         filteredData = new FilteredList<>(metaRowList, p -> true);
         
@@ -237,6 +248,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeArchiveUnlockEvent() {
+		metaIndexTable.getSelectionModel().selectedItemProperty().removeListener(metaIndexTableListener);
     	metaRowList.clear();
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
     		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
@@ -245,15 +257,14 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		
     		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
     		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
-        	
-        	//Update center pane and properties pane.
+    		metaIndexTable.getSelectionModel().select(0);
         	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
         	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
     	}
 		Platform.runLater(() -> {
 			metaIndexTable.requestFocus();
-			//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
 		});
+		metaIndexTable.getSelectionModel().selectedItemProperty().addListener(metaIndexTableListener);
 	}
 
 	@Override

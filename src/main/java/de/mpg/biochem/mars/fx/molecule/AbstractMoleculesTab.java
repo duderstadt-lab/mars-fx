@@ -55,6 +55,7 @@ import javax.swing.SwingUtilities;
 
 import javafx.concurrent.Task;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 
 public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
@@ -92,7 +93,6 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		splitItems.add(moleculeCenterPane.getNode());
 		
 		moleculePropertiesPane = createMoleculePropertiesPane();
-		//moleculePropertiesPane.getNode().maxWidth(220);
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
@@ -290,7 +290,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	            	//Update center pane and properties pane.
 	            	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	            	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-	            	if (this.marsBdvFrame != null) {
+	            	if (marsBdvFrame != null) {
 	            		SwingUtilities.invokeLater(new Runnable() {
 	    		            @Override
 	    		            public void run() {
@@ -433,27 +433,24 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeArchiveUnlockEvent() {
+    	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
 	        	moleculeRowList.add(new MoleculeIndexRow(index));
 	        }
 	    	
-	    	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
-	    	
     		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
     		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
-    		
     		moleculeIndexTable.getSelectionModel().select(0);
-	    	
 	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-	    	
-	    	moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(moleculeIndexTableListener);
     	}
+		
 		Platform.runLater(() -> {
 			moleculeIndexTable.requestFocus();
 		});
+		moleculeIndexTable.getSelectionModel().selectedItemProperty().addListener(moleculeIndexTableListener);
 	}
 
 	@Override
