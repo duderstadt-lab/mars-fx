@@ -136,7 +136,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
         });
 		getNode().addEventFilter(MoleculeEvent.MOLECULE_EVENT, new EventHandler<MoleculeEvent>() { 
 			   @SuppressWarnings("unchecked")
-			@Override 
+			   @Override 
 			   public void handle(MoleculeEvent e) { 
 				   if (e.getEventType().getName().equals("INDICATOR_CHANGED")) {
 				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());

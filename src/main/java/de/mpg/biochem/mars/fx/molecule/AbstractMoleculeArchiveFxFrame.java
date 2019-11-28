@@ -50,12 +50,15 @@ import javafx.concurrent.Task;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.fx.dialogs.DeleteMoleculesDialog;
+import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -78,6 +81,7 @@ import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.util.*;
 
 import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.table.MarsTable;
 
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> implements MoleculeArchiveWindow {
@@ -149,9 +153,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				//Stage primaryStage = new Stage();
-				//primaryStage.setScene(buildScene());
-		        //primaryStage.show();
 				initFX(fxPanel);
 			}
 		});
@@ -197,7 +198,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         return scene;
 	}
 	
-	private void buildTabs() {
+	protected void buildTabs() {
 		dashboardTab = new DashboardTab();
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
 
@@ -282,7 +283,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				}); 
 		
 		Action deleteMoleculesAction = new Action("Delete Molecules", "Shortcut+D", null, e -> deleteMolecules());
+		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", "Shortcut+T", null, e -> deleteMoleculeTags());
+		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", "Shortcut+P", null, e -> deleteMoleculeParameters());
 			
+		Action mergeMoleculesAction = new Action("Merge Molecules", "Shortcut+M", null, e -> mergeMolecules());
+		
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
 			e -> {
 				runTask(() -> {
@@ -296,6 +301,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			
 		toolsMenu = ActionUtils.createMenu("Tools",
 					deleteMoleculesAction,
+					deleteMoleculeTagsAction,
+					deleteMoleculeParametersAction,
+					mergeMoleculesAction,
 					null,
 					showVideoAction,
 					null,
@@ -305,39 +313,136 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		borderPane.setTop(menuBar);
 	}
 	
-	private void deleteMolecules() {
-			DeleteMoleculesDialog dialog = new DeleteMoleculesDialog(getNode().getScene().getWindow());
+	protected void deleteMolecules() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.getProperties().getTagSet(), "Delete Molecules", "Delete molecules with tags:", "Delete molecules with no tags");
 
-			dialog.showAndWait().ifPresent(result -> {
-				runTask(() -> {
-					System.out.println(archive.getNumberOfMolecules());
-					ArrayList<String> deleteUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> {
-		        	 	if (result.removeWithNoTags() && archive.get(UID).getTags().size() == 0) {
-		        	 		return true;
-		        	 	}
-		        	 
-		 				boolean hasTag = false;
-		 				String[] tagList = result.getTagList();
-		 				for (int i=0; i<result.getTagList().length; i++) {
-		 		        	for (String tag : archive.get(UID).getTags()) {
-		 		        		if (tagList[i].equals(tag)) {
-		 		        			hasTag = true;
-		 		        		}
-		 		        	}
-		 		        }
-		 				return hasTag;
-		 			}).collect(toList());
-		             
-		             for (String UID : deleteUIDs) {
-		            	 System.out.println(UID);
-		            	 archive.remove(UID);
-		             }
-		             System.out.println(archive.getNumberOfMolecules());
-				}, "Deleting Molecules...");
-			});
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				ArrayList<String> deleteUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> {
+	        	 	if (result.removeAll() && archive.get(UID).getTags().size() == 0) {
+	        	 		return true;
+	        	 	}
+	        	 
+	 				boolean hasTag = false;
+	 				List<String> tagList = result.getList();
+	 				for (int i=0; i<tagList.size(); i++) {
+	 		        	for (String tag : archive.get(UID).getTags()) {
+	 		        		if (tagList.get(i).equals(tag)) {
+	 		        			hasTag = true;
+	 		        		}
+	 		        	}
+	 		        }
+	 				return hasTag;
+	 			}).collect(toList());
+	             
+	             for (String UID : deleteUIDs) {
+	            	 archive.remove(UID);
+	             }
+			}, "Deleting Molecules...");
+		});
 	}
 	
-	private void runTask(Runnable process, String message) {
+	protected void deleteMoleculeTags() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.getProperties().getTagSet(), "Delete Molecule Tags", "Delete molecule tags:", "Delete all tags");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				List<String> tagList = result.getList();
+	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+	            		Molecule molecule = archive.get(UID);
+	            	 	if (result.removeAll()) {
+	            	 		molecule.removeAllTags();
+	            	 	} else {
+	     		        	for (int i=0;i<tagList.size();i++) {
+	     		        		molecule.removeTag(tagList.get(i));
+	     		        	}
+	            	 	}
+	            	 	archive.put(molecule);
+	     			});
+			}, "Deleting Molecule Tags...");
+		});
+	}
+	
+	protected void deleteMoleculeParameters() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.getProperties().getParameterSet(), "Delete Molecule Parameters", "Delete molecule parameters:", "Delete all parameters");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				List<String> parameterList = result.getList();
+	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+	            		Molecule molecule = archive.get(UID);
+	            	 	if (result.removeAll()) {
+	            	 		molecule.removeAllParameters();
+	            	 	} else {
+	            	 		for (int i=0;i<parameterList.size();i++) {
+	     		        		molecule.removeTag(parameterList.get(i));
+	     		        	}
+	            	 	}
+	            	 	archive.put(molecule);
+	     			});
+			}, "Deleting Molecule Parameters...");
+		});
+	}
+	
+	protected void mergeMolecules() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.getProperties().getTagSet(), "Merge Molecules", "Merge molecules with tag:");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				String tag = result.getList().get(0);
+	     		 
+	     		ArrayList<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
+             
+	     		if (mergeUIDs.size() < 2) 
+	     			return;
+	     		
+	     		String mergeNote = "Merged " + mergeUIDs.size() + " molecules \n";
+	     		
+	     		MarsTable mergedDataTable = archive.get(mergeUIDs.get(0)).getDataTable();
+	     		
+	     		HashSet<Double> sliceNumbers = new HashSet<Double>();
+	     		
+	     		//First add all current slices to set
+	     		for (int row=0;row<mergedDataTable.getRowCount();row++) {
+            		sliceNumbers.add(mergedDataTable.getValue("slice", row));
+            	}
+	     		
+	     		mergeNote += mergeUIDs.get(0).substring(0, 5) + " : slices " + mergedDataTable.getValue("slice", 0) + " " + mergedDataTable.getValue("slice", mergedDataTable.getRowCount()-1) + "\n";
+	     		
+	            for (int i = 1; i < mergeUIDs.size() ; i++) {
+	            	MarsTable nextDataTable = archive.get(mergeUIDs.get(i)).getDataTable();
+	            	
+	            	for (int row=0;row<nextDataTable.getRowCount();row++) {
+	            		if (!sliceNumbers.contains(nextDataTable.getValue("slice", row))) {
+	            			mergedDataTable.appendRow();
+	            			int mergeLastRow = mergedDataTable.getRowCount() - 1;
+	            			
+	            			for (int col=0;col<mergedDataTable.getColumnCount();col++) {
+	            				String column = mergedDataTable.getColumnHeader(col);
+	    	            		mergedDataTable.setValue(column, mergeLastRow, nextDataTable.getValue(column, row));
+	    	            	}
+	            			
+	            			sliceNumbers.add(nextDataTable.getValue("slice", row));
+	            		}
+	            	}
+	            	mergeNote += mergeUIDs.get(i).substring(0, 5) + " : slices " + nextDataTable.getValue("slice", 0) + " " + nextDataTable.getValue("slice", nextDataTable.getRowCount()-1) + "\n";
+	            	
+	            	archive.remove(mergeUIDs.get(i));
+	            }
+	            
+	            //sort by slice
+	            mergedDataTable.sort(true, "slice");
+	            
+	            archive.get(mergeUIDs.get(0)).setNotes(archive.get(mergeUIDs.get(0)).getNotes() + "\n" + mergeNote);
+			}, "Merging Molecules...");
+		});
+	}
+	
+	protected void runTask(Runnable process, String message) {
 		masker.setText(message);
 		masker.setProgress(-1);
 		masker.setVisible(true);
