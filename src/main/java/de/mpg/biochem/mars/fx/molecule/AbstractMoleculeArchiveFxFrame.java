@@ -95,7 +95,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	protected MaskerPane masker;
 	
 	protected BorderPane borderPane;
-	//protected StackPane stackPane;
     protected JFXTabPane tabsContainer;
     
     protected boolean lockArchive = false;
@@ -108,7 +107,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     protected I imageMetadataTab;
     protected M moleculesTab;
     
-    protected MarsBdvFrame marsBdvFrame;
+    protected MarsBdvFrame<?> marsBdvFrame;
 
     protected double tabWidth = 60.0;
     
@@ -161,27 +160,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	public void initFX(JFXPanel fxPanel) {	
 		Scene scene = buildScene();
 		this.fxPanel.setScene(scene);
-		
-		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, new EventHandler<MoleculeEvent>() { 
-			   @SuppressWarnings("unchecked")
-			   @Override 
-			   public void handle(MoleculeEvent e) { 
-				   System.out.println("molecule event");
-				   if (e.getEventType().getName().equals("MOLECULE_SELECTION_CHANGED") && marsBdvFrame != null) {
-					   System.out.println("updating MarsBdvFrame");
-					   
-					   Molecule molecule = ((MoleculeSelectionChangedEvent)e).getMolecule();
-					   SwingUtilities.invokeLater(new Runnable() {
-				            @Override
-				            public void run() {
-				            	if (archive != null && molecule != null) {
-				            		marsBdvFrame.setMolecule(molecule);
-				            	}
-				            }
-				        });
-				   } 
-			   };
-		});
 		
 		frame.setSize(800, 600);
 		frame.setVisible(true);
@@ -296,6 +274,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			            		        marsBdvFrame = null;
 			            		    }
 			            		});
+			            		moleculesTab.setMarsBdvFrame(marsBdvFrame);
 			            	}
 			            }
 			        });

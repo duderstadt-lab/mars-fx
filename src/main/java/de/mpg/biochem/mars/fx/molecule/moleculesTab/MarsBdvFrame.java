@@ -108,7 +108,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private JTextField scaleField;
 	private JCheckBox autoUpdate;
 	private JCheckBox cacheTimepoints;
-	private JCheckBox cacheBlocking;
 	
 	private HashMap<String, ArrayList<SpimDataMinimal>> bdvSources;
 	
@@ -174,7 +173,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		autoUpdate = new JCheckBox("Auto update", true);
 		cacheTimepoints = new JCheckBox("Cache timepoints", false);
-		cacheBlocking = new JCheckBox("Blocking", false);
 		
 		optionsPane.add(new JLabel("Zoom "));
 		
@@ -188,7 +186,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		//START Cache testing
 		optionsPane.add(cacheTimepoints);
-		optionsPane.add(cacheBlocking);
 		Bdv.options().screenScales(screenScales);
 		Bdv.options().targetRenderNanos(1_000_000_000);
 		screenScaleTransforms = new AffineTransform3D[ screenScales.length ];
@@ -413,11 +410,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			checkResize();
 			final List< SourceState< ? > > sourceStates = viewerState.getSources();
 			
-			CacheHints hints = null;
-			if (this.cacheBlocking.isSelected())
-				hints = new CacheHints( LoadingStrategy.BLOCKING, 0, false );
-			else 
-				hints = new CacheHints( LoadingStrategy.VOLATILE, 0, false );
+			CacheHints hints = new CacheHints( LoadingStrategy.VOLATILE, 0, false );
 				
 			for (int sourceIndex=0;sourceIndex<sourceStates.size();sourceIndex++) {
 				

@@ -385,6 +385,11 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	public ArrayList<Menu> getMenus() {
 		return null;
 	}
+    
+    @Override
+    public void setMarsBdvFrame(MarsBdvFrame<?> marsBdvFrame) {
+    	this.marsBdvFrame = marsBdvFrame;
+    }
 	
 	public abstract C createMoleculeCenterPane();
 	
