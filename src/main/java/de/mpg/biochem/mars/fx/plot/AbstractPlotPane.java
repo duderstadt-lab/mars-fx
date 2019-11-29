@@ -229,7 +229,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		}
 		
 		//Ensures autoranging is turned off when zoom, pan etc are used
-		//Then all linked plots moved together. Otherwise, one plot can lock the movenment of another..
+		//Then all linked plots moved together. Otherwise, one plot can lock the movement of another..
 		subplot.getChart().getCanvas().setOnMousePressed(new EventHandler<MouseEvent>() {
 		    @Override
 		    public void handle(MouseEvent me) {

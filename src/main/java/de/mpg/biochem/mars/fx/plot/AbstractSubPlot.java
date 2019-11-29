@@ -63,8 +63,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	protected PlotPane plotPane;
 	
-	//protected  renderer;
-	
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
@@ -154,6 +152,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
 		addIndicators(xAxisList, yAxisList);
+		
+		resetXYZoom();
 	}
 	
 	@Override
