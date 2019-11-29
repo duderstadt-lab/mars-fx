@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.controlsfx.control.textfield.CustomTextField;
+import javafx.beans.property.ObjectProperty;
+
+import javafx.scene.layout.StackPane;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -26,6 +29,7 @@ import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -33,6 +37,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.PositionOfInterest;
 import de.mpg.biochem.mars.util.RegionOfInterest;
 import ij.gui.GenericDialog;
+import impl.org.controlsfx.skin.CustomTextFieldSkin;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -65,6 +70,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	protected M molecule;
 	
 	protected CustomTextField filterField;
+	protected CustomTextFieldSkin filterFieldSkin;
     protected TableView<MoleculeIndexRow> moleculeIndexTable;
     protected ObservableList<MoleculeIndexRow> moleculeRowList = FXCollections.observableArrayList();
     
@@ -311,13 +317,22 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 
         filteredData = new FilteredList<>(moleculeRowList, p -> true);
         filterField = new CustomTextField();
+        filterFieldSkin = new CustomTextFieldSkin(filterField) {
+            @Override public ObjectProperty<Node> leftProperty() {
+                return filterField.leftProperty();
+            }
+            
+            @Override public ObjectProperty<Node> rightProperty() {
+                return filterField.rightProperty();
+            }
+        };
+        filterField.setSkin(filterFieldSkin);
         filterField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
-        filterField.getStyleClass().add("find");
+        filterField.getStyleClass().add("find");        
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
         	//If we don't clear the selection while we are searching the table will
         	//steal the focus after every letter we type.
         	moleculeIndexTable.getSelectionModel().clearSelection();
-        	
             filteredData.setPredicate(molIndexRow -> {
                 // If filter text is empty, display everything.
                 if (newValue == null || newValue.isEmpty()) {
@@ -336,8 +351,17 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
                 return false;
             });
             
+            //Super hacky way of ensuring the textfield can resize when not selected with no text.
             if (filterField.getText().isEmpty()) {
-            	filterField.setRight(new Label(""));
+            	//filterField.setRight(null);
+            	Node nodeToRemove = null;
+            	for (Node node : filterFieldSkin.getChildren()) {
+            		if (node instanceof StackPane)
+            			if (((StackPane) node).getStyleClass().get(0).equals("right-pane"))
+            				nodeToRemove = node;
+            	}
+            	if (nodeToRemove != null)
+            		filterFieldSkin.getChildren().remove(nodeToRemove);
             } else {
             	filterField.setRight(new Label(filteredData.size() + " "));
             }
