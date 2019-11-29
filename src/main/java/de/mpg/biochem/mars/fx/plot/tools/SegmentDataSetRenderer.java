@@ -326,19 +326,14 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
     protected static void drawScatter(final GraphicsContext gc, final CachedDataPoints localCachedPoints, Color color, double width) {
         gc.save();
         
-        gc.setLineWidth(width);
         gc.setFill(color);
-        gc.setStroke(color);
+        //gc.setStroke(color);
         
-        //gc.setLineDashes(dashPattern);
-        //gc.setFont(font);
-
-        for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
-            final double x1 = localCachedPoints.xValues[i];
-            final double x2 = localCachedPoints.xValues[i + 1];
-            final double y1 = localCachedPoints.yValues[i];
-            final double y2 = localCachedPoints.yValues[i + 1];
-            gc.strokeLine(x1, y1, x2, y2);
+        final Marker pointMarker = DefaultMarker.CIRCLE;
+        for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
+            final double x = localCachedPoints.xValues[i];
+            final double y = localCachedPoints.yValues[i];
+            pointMarker.draw(gc, x, y, width);
         }
 
         gc.restore();

@@ -63,7 +63,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	protected MetadataRegionOfInterestTable regionOfInterestTable;
 	protected MetadataPositionOfInterestTable positionOfInterestTable;
 	
-	protected double tabWidth = 60.0;
+	protected double tabWidth = 50.0;
 	protected int lastSelectedTabIndex = 0;
 	
 	protected I marsImageMetadata;
@@ -171,7 +171,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
        	
     	BorderPane regionsTabPane = new BorderPane();
     	regionsTabPane.setMaxWidth(tabWidth);
-    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE, "1.1em"));
+    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT, "1.1em"));
 
     	regionsTab = new Tab();
     	regionsTab.setText("");

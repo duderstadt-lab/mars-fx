@@ -56,7 +56,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	
 	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
-    private double tabWidth = 60.0;
+    private double tabWidth = 50.0;
     public static int lastSelectedTabIndex = 0;
 	
 	public AbstractMoleculePropertiesPane() {
@@ -159,7 +159,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
        	
     	BorderPane regionsTabPane = new BorderPane();
     	regionsTabPane.setMaxWidth(tabWidth);
-    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE, "1.1em"));
+    	regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT, "1.1em"));
 
     	regionsTab = new Tab();
     	regionsTab.setText("");
