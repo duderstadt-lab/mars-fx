@@ -39,9 +39,11 @@ import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 
 import org.controlsfx.control.PopOver;
+import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Insets;
 import javafx.beans.value.ChangeListener;
 
 import javafx.beans.property.DoubleProperty;
@@ -61,6 +63,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected VBox chartsPane;
 	
 	protected static StyleSheetUpdater styleSheetUpdater;
+	
+	protected BooleanProperty gridlines = new SimpleBooleanProperty();
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
@@ -85,6 +89,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		tools = new ArrayList<Action>();
 		chartsPane = new VBox();
 		setCenter(chartsPane);
+		
+		gridlines.setValue(true);
 		
 		buildTools();
 		setTop(createToolBar());
@@ -143,7 +149,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		//settings
 		propertiesButton = ActionUtils.createToolBarButton(new Action("settings", "Shortcut+S", COG, e -> {
 			PopOver popOver = new PopOver();
-			popOver.setTitle("Dataset");
+			popOver.setTitle("Plot Settings");
 			popOver.setHeaderAlwaysVisible(true);
 			popOver.setAutoHide(false);
 			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
@@ -199,6 +205,9 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
+		
+		subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
+		subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
 		
 		for (SubPlot otherSubPlot : charts) {
 			
@@ -279,9 +288,16 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return this;
 	}
 	
-	class PlotOptionsPane extends BorderPane  {
+	class PlotOptionsPane extends VBox  {
 		public PlotOptionsPane() {
-			
+			BorderPane borderPane = new BorderPane();
+			ToggleSwitch gridlineSwitch = new ToggleSwitch();
+			gridlineSwitch.selectedProperty().bindBidirectional(gridlines);
+			borderPane.setLeft(new Label("Gridlines"));
+			borderPane.setRight(gridlineSwitch);
+			getChildren().add(borderPane);
+			this.setPrefWidth(200);
+			this.setPadding(new Insets(10, 10, 10, 10));
 		}
 	}
 }

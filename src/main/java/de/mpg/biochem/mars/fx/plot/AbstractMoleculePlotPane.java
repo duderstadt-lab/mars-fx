@@ -1,7 +1,7 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
 
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.Zoomer;
@@ -68,7 +68,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		super.buildTools();
 		
 		regionSelected = new SimpleBooleanProperty();
-		Action regionSelectionCursor = new Action("region", "Shortcut+R", SQUARE, 
+		Action regionSelectionCursor = new Action("region", "Shortcut+R", SQUARE_ALT, 
 				e -> setTool(regionSelected, () -> {
 					MarsRegionSelectionPlugin tool = new MarsRegionSelectionPlugin(AxisMode.X);
 					return tool;

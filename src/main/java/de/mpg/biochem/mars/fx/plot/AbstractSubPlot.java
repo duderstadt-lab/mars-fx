@@ -52,6 +52,8 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.util.StringConverter;
 
+import javafx.scene.paint.Color;
+
 public abstract class AbstractSubPlot implements SubPlot {
 	protected MarsNumericAxis xAxis, yAxis;
 	protected XYChart chartPane;
@@ -97,13 +99,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		chartPane.getRenderers().setAll(renderer);
 		
-		//chartPane.setHorizontalGridLinesVisible(false);
-		//chartPane.setVerticalGridLinesVisible(false);
-		
-		//User style sheets !
-		
-		chartPane.getGridRenderer().getVerticalMajorGrid().setStyle("-fx-stroke: rgb(237, 14, 14);");
-		chartPane.getGridRenderer().getHorizontalMajorGrid().setStyle("-fx-stroke: #ed0e0e;");
+		chartPane.getGridRenderer().getHorizontalMajorGrid().setStroke(chartPane.getGridRenderer().getHorizontalMajorGrid().getStroke());
+		chartPane.getGridRenderer().getVerticalMajorGrid().setStroke(chartPane.getGridRenderer().getVerticalMajorGrid().getStroke());
 	}
 	
 	protected DatasetOptionsPane createDatasetOptionsPane() {
