@@ -43,6 +43,7 @@ import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import javafx.beans.value.ObservableValue;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.beans.value.ChangeListener;
 
@@ -226,6 +227,18 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot.getXAxis().minProperty());
 			}
 		}
+		
+		//Ensures autoranging is turned off when zoom, pan etc are used
+		//Then all linked plots moved together. Otherwise, one plot can lock the movenment of another..
+		subplot.getChart().getCanvas().setOnMousePressed(new EventHandler<MouseEvent>() {
+		    @Override
+		    public void handle(MouseEvent me) {
+		      for (SubPlot subPlot : charts) {
+		    	  subPlot.getXAxis().setAutoRanging(false);
+		    	  subPlot.getYAxis().setAutoRanging(false);
+		      }
+		    }
+		  });
 			
 		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot.getDatasetOptionsButton());
 		
