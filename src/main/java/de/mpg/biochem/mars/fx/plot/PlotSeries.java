@@ -75,7 +75,6 @@ public class PlotSeries {
 			
 			xColumnField.getSelectionModel().select(xColumn);
 			yColumnField.getSelectionModel().select(yColumn);
-			lineStyle.getSelectionModel().select(0);
 		}
 		
 		void initComponents() {
@@ -98,7 +97,7 @@ public class PlotSeries {
 			xColumnField.getItems().addAll(columnHeadings);
 			yColumnField.getItems().addAll(columnHeadings);
 			
-			lineStyle.getItems().addAll("", "26 4 8 4", "4 4");
+			lineStyle.getItems().addAll(" ", "8 8", "4 4", "2 2", "26 4 8 4");
 			Callback<ListView<String>, ListCell<String>> cellFactory = new Callback<ListView<String>, ListCell<String>>() {
 		        @Override 
 		        public ListCell<String> call(ListView<String> p) {
@@ -113,7 +112,7 @@ public class PlotSeries {
 	                    protected void updateItem(String style, boolean empty) {
 	                        super.updateItem(style, empty);
 	                        if(style != null && !empty) {
-	                        	if (!style.equals(""))
+	                        	if (!style.equals(" "))
 	                            	line.setStyle("-fx-stroke-dash-array: " + style + ";");
 	                            setGraphic(line);
 	                        }
@@ -139,6 +138,7 @@ public class PlotSeries {
 		
 		void setDefaults() {
 			typeField.getSelectionModel().select("Line");
+			lineStyle.getSelectionModel().select(" ");
 			colorField.setValue(Color.BLACK);
 			segmentColorField.setValue(Color.RED);
 		}

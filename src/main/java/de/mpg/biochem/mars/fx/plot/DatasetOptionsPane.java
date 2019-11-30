@@ -194,13 +194,6 @@ public class DatasetOptionsPane extends VBox {
 		typeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(typeColumn);
         typeColumn.setStyle("-fx-alignment: CENTER;");
-        
-        TableColumn<PlotSeries, ComboBox<String>> lineStyleColumn = new TableColumn<>("Style");
-        lineStyleColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().lineStyle()));
-        lineStyleColumn.setMinWidth(100);
-        lineStyleColumn.setSortable(false);
-        plotPropertiesTable.getColumns().add(lineStyleColumn);
-        lineStyleColumn.setStyle("-fx-alignment: CENTER;");
 		
 		TableColumn<PlotSeries, ComboBox<String>> xValuesColumn = new TableColumn<>("X Values");
         xValuesColumn.setMinWidth(100);
@@ -217,6 +210,13 @@ public class DatasetOptionsPane extends VBox {
 
         yValuesColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(yValuesColumn);
+        
+        TableColumn<PlotSeries, ComboBox<String>> lineStyleColumn = new TableColumn<>("Style");
+        lineStyleColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().lineStyle()));
+        lineStyleColumn.setMinWidth(100);
+        lineStyleColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(lineStyleColumn);
+        lineStyleColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getColorField()));
