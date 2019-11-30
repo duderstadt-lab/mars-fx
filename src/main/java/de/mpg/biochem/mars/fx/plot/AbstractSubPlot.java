@@ -158,8 +158,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
 		addIndicators(xAxisList, yAxisList);
-		
-		resetXYZoom();
 	}
 	
 	@Override

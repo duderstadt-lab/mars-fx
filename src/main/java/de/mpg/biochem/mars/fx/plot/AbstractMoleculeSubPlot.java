@@ -82,7 +82,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		if (plotSeries.drawSegments() && molecule.hasSegmentsTable(plotSeries.getXColumn(), plotSeries.getYColumn())) {
 			double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
 			
-			MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn, plotSeries.getSegmentsColor(), segmentWidth);
+			MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn, plotSeries.getSegmentsColor(), segmentWidth, "");
 			
 			MarsTable segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
 			
@@ -104,7 +104,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
 		
-		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth);
+		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
 		
 		for (int row=0;row<getDataTable().getRowCount();row++) {
 			double x = getDataTable().getValue(xColumn, row);

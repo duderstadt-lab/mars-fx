@@ -102,7 +102,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
-		rootPane.setDividerPositions(0.15f, 0.85f);
+		rootPane.setDividerPositions(0.15f, 0.87f);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		getNode().addEventFilter(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 

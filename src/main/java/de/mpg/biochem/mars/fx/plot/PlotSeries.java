@@ -36,8 +36,17 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.paint.Color;
 
+import javafx.util.Callback;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ListCell;
+import javafx.scene.Group;
+import javafx.scene.shape.Line;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.shape.Rectangle;
+
 public class PlotSeries {
 		private ComboBox<String> yColumnField, xColumnField, typeField;
+		private ComboBox<String> lineStyle;
 		private JFXColorPicker colorField, segmentColorField;
 		private JFXTextField widthField, segmentsWidthField;
 		private JFXCheckBox drawSegmentsColumn;
@@ -66,6 +75,7 @@ public class PlotSeries {
 			
 			xColumnField.getSelectionModel().select(xColumn);
 			yColumnField.getSelectionModel().select(yColumn);
+			lineStyle.getSelectionModel().select(0);
 		}
 		
 		void initComponents() {
@@ -73,6 +83,7 @@ public class PlotSeries {
 			typeField = new ComboBox<>();
 			xColumnField = new ComboBox<>();
 			yColumnField = new ComboBox<>();
+			lineStyle = new ComboBox<>();
 			colorField = new JFXColorPicker();
 			widthField = new JFXTextField();
 
@@ -86,6 +97,32 @@ public class PlotSeries {
 			
 			xColumnField.getItems().addAll(columnHeadings);
 			yColumnField.getItems().addAll(columnHeadings);
+			
+			lineStyle.getItems().addAll("", "26 4 8 4", "4 4");
+			Callback<ListView<String>, ListCell<String>> cellFactory = new Callback<ListView<String>, ListCell<String>>() {
+		        @Override 
+		        public ListCell<String> call(ListView<String> p) {
+		            return new ListCell<String>() {
+	                    private final Line line;
+	                    { 
+	                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY); 
+	                        line = new Line(0, 20, 60, 20);
+	                    }
+
+	                    @Override 
+	                    protected void updateItem(String style, boolean empty) {
+	                        super.updateItem(style, empty);
+	                        if(style != null && !empty) {
+	                        	if (!style.equals(""))
+	                            	line.setStyle("-fx-stroke-dash-array: " + style + ";");
+	                            setGraphic(line);
+	                        }
+	                    }
+	                };
+		        }
+		    };
+			lineStyle.setCellFactory(cellFactory);
+			lineStyle.setButtonCell(cellFactory.call(null));
 			
 			colorField.setPrefWidth(50);
 			
@@ -108,6 +145,14 @@ public class PlotSeries {
 		
 		public ComboBox<String> getTypeField() {
 			return typeField;
+		}
+		
+		public ComboBox<String> lineStyle() {
+			return lineStyle;
+		}
+		
+		public String getLineStyle() {
+			return lineStyle.getSelectionModel().getSelectedItem();
 		}
 		
 		public JFXColorPicker getColorField() {

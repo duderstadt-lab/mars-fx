@@ -117,10 +117,12 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             
             Color color = Color.BLACK;
             double width = 1;
+            String lineStyle = "";
             
             if (dataSet instanceof MarsDoubleDataSet) {
             	color = ((MarsDoubleDataSet) dataSet).getColor();
             	width = ((MarsDoubleDataSet) dataSet).getWidth();
+            	lineStyle = ((MarsDoubleDataSet) dataSet).getLineStyle();
             }
             
             int indexMin;
@@ -218,7 +220,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             	if (dataSet.getStyle().equals("Scatter"))
             		drawScatter(gc, localCachedPoints, color, width);
                 else
-                	drawPolyLine(gc, localCachedPoints, color, width);
+                	drawPolyLine(gc, localCachedPoints, color, width, getDashPattern(lineStyle));
             	
             	stopStamp = ProcessingProfiler.getTimeStamp();
 
@@ -302,14 +304,16 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.restore();
     }
     
-    protected static void drawPolyLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints, Color color, double width) {
+    protected static void drawPolyLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints, Color color, double width, double[] dashPattern) {
         gc.save();
         
         gc.setLineWidth(width);
         gc.setFill(color);
         gc.setStroke(color);
         
-        //gc.setLineDashes(dashPattern);
+        if (dashPattern != null) {
+        	gc.setLineDashes(dashPattern);
+        }
         //gc.setFont(font);
 
         for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
@@ -321,6 +325,26 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         }
 
         gc.restore();
+    }
+    
+    protected double[] getDashPattern(String lineStyle) {
+    	if (lineStyle == null) {
+            return null;
+        }
+
+        try {
+            final String[] splitValues = lineStyle.split(" ");
+            if (splitValues == null || splitValues.length == 0) {
+                return null;
+            }
+            final double[] retArray = new double[splitValues.length];
+            for (int i = 0; i < splitValues.length; i++) {
+                retArray[i] = Double.parseDouble(splitValues[i]);
+            }
+            return retArray;
+        } catch (final NumberFormatException ex) {
+            return null;
+        }
     }
     
     protected static void drawScatter(final GraphicsContext gc, final CachedDataPoints localCachedPoints, Color color, double width) {

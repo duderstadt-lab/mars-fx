@@ -33,7 +33,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
 		
-		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth);
+		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
 		
 		for (int row=0;row<getDataTable().getRowCount();row++) {
 			double x = getDataTable().getValue(xColumn, row);

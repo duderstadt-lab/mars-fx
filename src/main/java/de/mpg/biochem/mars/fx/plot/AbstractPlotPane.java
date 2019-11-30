@@ -141,14 +141,23 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		toolBar = new ToolBar(toolButtons);
 		toolBar.getItems().add(new Separator());
 
-		Action resetXYZoom = new Action("Reset Zoom", "Shortcut+R", EXPAND, e -> {
+		Action resetXYZoom = new Action("Reset Zoom", null, EXPAND, e -> {
 			for (SubPlot subPlot : charts)
 				subPlot.resetXYZoom();
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
+		Action reloadAction = new Action("Reload", null, REFRESH, e -> {
+			for (SubPlot subPlot : charts) {
+				subPlot.update();
+				subPlot.resetXYZoom();
+			}
+		});
+
+		toolBar.getItems().add(ActionUtils.createToolBarButton(reloadAction));
+		
 		//settings
-		propertiesButton = ActionUtils.createToolBarButton(new Action("settings", "Shortcut+S", COG, e -> {
+		propertiesButton = ActionUtils.createToolBarButton(new Action("Settings", "Shortcut+S", COG, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle("Plot Settings");
 			popOver.setHeaderAlwaysVisible(true);
@@ -164,7 +173,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
 		
-		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action("Add Subplot", "Shortcut+P", PLUS, e -> addChart()), "0.6em");
+		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action("Add Subplot", null, PLUS, e -> addChart()), "0.6em");
 		addSubPlot.setStyle(
                 "-fx-background-radius: 5em; " +
                 "-fx-min-width: 13px; " +
@@ -172,7 +181,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
                 "-fx-max-width: 13px; " +
                 "-fx-max-height: 13px;"
         );
-		ButtonBase removeSubPlot = ActionUtils.createToolBarButton(new Action("Remove Subplot", "Shortcut+M", MINUS, e -> removeChart()), "0.6em");
+		ButtonBase removeSubPlot = ActionUtils.createToolBarButton(new Action("Remove Subplot", null, MINUS, e -> removeChart()), "0.6em");
 		removeSubPlot.setStyle(
                 "-fx-background-radius: 5em; " +
                 "-fx-min-width: 13px; " +

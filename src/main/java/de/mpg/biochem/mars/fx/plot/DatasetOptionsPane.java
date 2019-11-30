@@ -1,8 +1,6 @@
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -196,6 +194,13 @@ public class DatasetOptionsPane extends VBox {
 		typeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(typeColumn);
         typeColumn.setStyle("-fx-alignment: CENTER;");
+        
+        TableColumn<PlotSeries, ComboBox<String>> lineStyleColumn = new TableColumn<>("Style");
+        lineStyleColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().lineStyle()));
+        lineStyleColumn.setMinWidth(100);
+        lineStyleColumn.setSortable(false);
+        plotPropertiesTable.getColumns().add(lineStyleColumn);
+        lineStyleColumn.setStyle("-fx-alignment: CENTER;");
 		
 		TableColumn<PlotSeries, ComboBox<String>> xValuesColumn = new TableColumn<>("X Values");
         xValuesColumn.setMinWidth(100);
@@ -251,7 +256,7 @@ public class DatasetOptionsPane extends VBox {
         plotPropertiesTable.setItems(plotSeriesList);
 		
 		addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "0.9em"));
+		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
 		addButton.setStyle(
                 "-fx-background-radius: 5em; " +
@@ -270,7 +275,7 @@ public class DatasetOptionsPane extends VBox {
 			}
 		});
 
-		Text syncIcon = OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.SYNC, "1.0em");
+		Text syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
 		updateButton = new Button();
 		updateButton.setGraphic(syncIcon);
 		updateButton.setCenterShape(true);
@@ -283,6 +288,7 @@ public class DatasetOptionsPane extends VBox {
         );
 		updateButton.setOnMouseClicked(e -> {
 		     subPlot.update();
+		     subPlot.resetXYZoom();
 		});
 		
 		/*

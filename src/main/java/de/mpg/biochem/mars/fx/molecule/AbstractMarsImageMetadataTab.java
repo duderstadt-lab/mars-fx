@@ -73,7 +73,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(metadataPropertiesPane.getNode());
 		
-		rootPane.setDividerPositions(0.15f, 0.85f);
+		rootPane.setDividerPositions(0.15f, 0.87f);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, new EventHandler<MetadataEvent>() { 
