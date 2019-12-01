@@ -111,6 +111,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     protected I imageMetadataTab;
     protected M moleculesTab;
+    protected SettingsTab settingsTab;
     
     protected MarsBdvFrame<?> marsBdvFrame;
 
@@ -203,6 +204,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
 
         commentsTab = new CommentsTab();
+        settingsTab = new SettingsTab();
         
         imageMetadataTab = createImageMetadataTab();
         moleculesTab = createMoleculesTab();
@@ -233,6 +235,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         tabsContainer.getTabs().add((Tab)imageMetadataTab);
         tabsContainer.getTabs().add((Tab)moleculesTab);
         tabsContainer.getTabs().add(commentsTab);
+        tabsContainer.getTabs().add(settingsTab);
         
         fireEvent(new InitializeMoleculeArchiveEvent(archive));
     }
@@ -252,7 +255,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				fileCloseAction);
 		
 		//Build tools menu
-		Action showVideoAction = new Action("Show Video", "Shortcut+V", null,
+		Action showVideoAction = new Action("Show Video", null, null,
 				e -> {
 			        SwingUtilities.invokeLater(new Runnable() {
 			            @Override
@@ -282,13 +285,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			        });
 				}); 
 		
-		Action deleteMoleculesAction = new Action("Delete Molecules", "Shortcut+D", null, e -> deleteMolecules());
-		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", "Shortcut+T", null, e -> deleteMoleculeTags());
-		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", "Shortcut+P", null, e -> deleteMoleculeParameters());
+		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
+		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
+		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
 			
-		Action mergeMoleculesAction = new Action("Merge Molecules", "Shortcut+M", null, e -> mergeMolecules());
+		Action mergeMoleculesAction = new Action("Merge Molecules", null, null, e -> mergeMolecules());
 		
-		Action rebuildIndexesAction = new Action("Rebuild Indexes", "Shortcut+R", null,
+		Action rebuildIndexesAction = new Action("Rebuild Indexes", null, null,
 			e -> {
 				runTask(() -> {
     	            	try {
@@ -680,5 +683,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         imageMetadataTab.fireEvent(event);
         moleculesTab.fireEvent(event);
         commentsTab.fireEvent(event);
+        settingsTab.fireEvent(event);
     }
 }
