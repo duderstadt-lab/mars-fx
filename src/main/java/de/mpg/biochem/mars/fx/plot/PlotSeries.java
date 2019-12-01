@@ -97,7 +97,8 @@ public class PlotSeries {
 			xColumnField.getItems().addAll(columnHeadings);
 			yColumnField.getItems().addAll(columnHeadings);
 			
-			lineStyle.getItems().addAll(" ", "8 8", "4 4", "2 2", "26 4 8 4");
+			lineStyle.getItems().addAll(" ", "20 20", "12 12", "8 8", "4 4", 
+					"20 5", "26 4 8 4", "15 3 3 3", "20 3 3 3 3 3 3 3", "12 3 3");
 			Callback<ListView<String>, ListCell<String>> cellFactory = new Callback<ListView<String>, ListCell<String>>() {
 		        @Override 
 		        public ListCell<String> call(ListView<String> p) {
