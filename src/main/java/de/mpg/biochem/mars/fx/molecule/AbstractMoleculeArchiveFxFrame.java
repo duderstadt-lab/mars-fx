@@ -503,6 +503,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	   	 try {
 			 if (archive.getFile() != null) {
 				 if(archive.getFile().getName().equals(archive.getName())) {
+					masker.setText("Saving...");
+					masker.setProgress(-1);
+					masker.setVisible(true);
+			    	fireEvent(new MoleculeArchiveLockEvent(archive));
 	    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
 		    		Task<Void> task = new Task<Void>() {
 	     	            @Override
@@ -514,6 +518,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	     	        task.setOnSucceeded(event -> {
 			           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+			           	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+						masker.setVisible(false);
 	     	        });
 	
 	     	        new Thread(task).run();
