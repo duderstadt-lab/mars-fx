@@ -14,6 +14,7 @@ import com.jfoenix.controls.JFXToggleButton;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import de.mpg.biochem.mars.fx.util.HotKeyEntry;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -75,30 +76,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	protected BorderPane buildHotKeyTable() {
 		hotKeyTable = new TableView<HotKeyEntry>();
 		addHotKeyField = new CustomTextField();
-		
-		hotKeyRowList.addListener(new ListChangeListener<HotKeyEntry>() {
-			@Override
-			public void onChanged(Change<? extends HotKeyEntry> c) {
-				while (c.next()) {
-		             if (c.wasRemoved()) {
-		            	 
-		             } else if (c.wasAdded()) {
-		            	 KeyCombination kc = KeyCombination.valueOf(c.getAddedSubList().get(0).getShortcut());
-
-		            	 String keyCombo = c.getAddedSubList().get(0).getShortcut();
-		            	 
-		                 Runnable rn = ()-> {
-		                	 HotKeyEntry hotKeyEntry = hotKeyRowList.stream().filter(h -> h.getShortcut().equals(keyCombo)).findFirst().get();
-		                	 if (hotKeyEntry != null)
-		                		 System.out.println("Add Tag -> " + hotKeyEntry.getTag());
-		                 };
-		                 
-		                 
-		                 getNode().getScene().getAccelerators().put(kc, rn);
-		             }
-				}
-			}
-		});
     	
     	TableColumn<HotKeyEntry, HotKeyEntry> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -140,19 +117,19 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         shortcutColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         shortcutColumn.setOnEditCommit(event -> { 
         	String newShortcut = event.getNewValue();
-        	if (!hotKeyRowList.stream().filter(row -> row.getShortcut().equals(newShortcut)).findFirst().isPresent()) {
-        		//HotKeyEntry hotkey = event.getRowValue();
-        		//String oldShortcut = hotkey.getShortcut();
-        		//String tag = hotkey.getTag();
-        		
-        		//NOT SURE WHAT TO DO HERE... won't it just allow editing...
-        		
-        		//Maybe do nothing...
-        		
-        	} else {
+        	if (hotKeyRowList.stream().filter(row -> row.getShortcut().equals(newShortcut)).findFirst().isPresent()) {
         		((HotKeyEntry) event.getTableView().getItems().get(event.getTablePosition().getRow())).setShortcut(event.getOldValue());
         		hotKeyTable.refresh();
         	}
+        	
+    		//HotKeyEntry hotkey = event.getRowValue();
+    		//String oldShortcut = hotkey.getShortcut();
+    		//String tag = hotkey.getTag();
+    		
+    		//NOT SURE WHAT TO DO HERE... won't it just allow editing...
+    		
+    		//Maybe do nothing...
+
         });
         shortcutColumn.setCellValueFactory(regionOfInterest ->
                 new ReadOnlyObjectWrapper<>(regionOfInterest.getValue().getShortcut())
@@ -165,9 +142,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         
         TableColumn<HotKeyEntry, String> tagColumn = new TableColumn<>("Tag");
         tagColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        //tagColumn.setOnEditCommit(event -> { 
-    	//	event.getRowValue().setTag(event.getNewValue());
-        //});
+        tagColumn.setOnEditCommit(event -> { 
+    		event.getRowValue().setTag(event.getNewValue());
+        });
         tagColumn.setCellValueFactory(hotKey ->
                 new ReadOnlyObjectWrapper<>(String.valueOf(hotKey.getValue().getTag()))
         );
@@ -210,6 +187,11 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         );
 
         BorderPane hotKeyPane = new BorderPane();
+        hotKeyPane.setMinWidth(350);
+        hotKeyPane.setMinHeight(300);
+        hotKeyPane.setMaxWidth(350);
+        hotKeyPane.setMaxHeight(300);
+        
         Insets insets = new Insets(5, 50, 5, 50);
         
         hotKeyPane.setCenter(hotKeyTable);
@@ -217,11 +199,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         
         hotKeyPane.setBottom(addHotKeyField);
         BorderPane.setMargin(addHotKeyField, insets);
-        
-        hotKeyPane.setMinWidth(300);
-        hotKeyPane.setMinHeight(300);
-        hotKeyPane.setMaxWidth(300);
-        hotKeyPane.setMaxHeight(300);
         
         return hotKeyPane;
 	}
@@ -241,63 +218,8 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		//smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
 	}
 	
-	public class HotKeyEntry implements JsonConvertibleRecord {
-		String shortcut;
-		String tag;
-		
-		public HotKeyEntry(String shortcut) {
-			this.shortcut = shortcut;
-			this.tag = "tag";
-		}
-		
-		public HotKeyEntry(String shortcut, String tag) {
-			this.shortcut = shortcut;
-			this.tag = tag;
-		}
-		
-		public HotKeyEntry(JsonParser jParser) throws IOException {
-			fromJSON(jParser);
-		}
-
-		@Override
-		public void toJSON(JsonGenerator jGenerator) throws IOException {
-			jGenerator.writeStartObject();
-			jGenerator.writeStringField("shortcut", shortcut);
-			jGenerator.writeStringField("tag", tag);
-			jGenerator.writeEndObject();
-		}
-
-		@Override
-		public void fromJSON(JsonParser jParser) throws IOException {
-			//Then we move through fields
-	    	while (jParser.nextToken() != JsonToken.END_OBJECT) {
-	    		String fieldname = jParser.getCurrentName();
-	    		if ("shortcut".equals(fieldname)) {
-	    			jParser.nextToken();
-	    			shortcut = jParser.getText();
-	    		}
-	    		if ("tag".equals(fieldname)) {
-	    			jParser.nextToken();
-	    			tag = jParser.getText();
-	    		}
-	    	}
-		}
-		
-		//Getters and Setters
-		public String getShortcut() {
-			return shortcut;
-		}
-		
-		public void setShortcut(String shortcut) {
-			this.shortcut = shortcut;
-		}
-		
-		public String getTag() {
-			return tag;
-		}
-		
-		public void setTag(String tag) {
-			this.tag = tag;
-		}
+	public ObservableList<HotKeyEntry> getHotKeyList() {
+		return hotKeyRowList;
 	}
+	
 }

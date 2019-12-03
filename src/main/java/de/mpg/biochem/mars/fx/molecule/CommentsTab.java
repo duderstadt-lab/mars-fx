@@ -380,7 +380,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {
-		System.out.println("saving on lock event");
+		commentEditor.save();
+	}
+	
+	public void saveComments() {
 		commentEditor.save();
 	}
 

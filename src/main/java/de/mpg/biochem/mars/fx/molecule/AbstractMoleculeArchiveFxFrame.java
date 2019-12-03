@@ -71,6 +71,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
@@ -216,11 +217,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				updateMenus(((MoleculeArchiveTab)newValue).getMenus());
     				if (oldValue == commentsTab) {
-    					commentsTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
+    					commentsTab.saveComments();
     				} else if (oldValue == imageMetadataTab) {
-    					imageMetadataTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
+    					imageMetadataTab.saveCurrentRecord();
     				} else if (oldValue == moleculesTab) {
-    					moleculesTab.fireEvent(new MoleculeArchiveSavingEvent(archive));
+    					moleculesTab.saveCurrentRecord();
+    				} else if (oldValue == settingsTab) {
+    					//Update global accelerators...
+    					for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
+    						Runnable rn = ()-> {
+    							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab) {
+   		                	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
+   		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
+    							}
+   		                 	};
+   		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getKeyCombination(), rn);
+    					}
     				}
     				
 	    			if (newValue == imageMetadataTab) {
@@ -617,9 +629,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	public abstract M createMoleculesTab();
 	
-	public DashboardTab getDashboard() {
-		return dashboardTab;
-	}
+	//public DashboardTab getDashboard() {
+	//	return dashboardTab;
+	//}
 	
 	//Lock, unlock and update event might be called by swing threads
 	//so we use Platform.runLater to ensure they are executed on 

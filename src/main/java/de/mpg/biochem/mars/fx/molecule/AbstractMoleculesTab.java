@@ -148,10 +148,16 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 				   		moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
 				   		e.consume();
 				   } else if (e.getEventType().getName().equals("REFRESH_MOLECULE_EVENT")) {
-					   //Reload molecule due to changes in the virtual store copy on the disk..
+					    //Reload molecule due to changes in the virtual store copy on the disk..
 					    molecule = (M) archive.get(molecule.getUID());
 				    	
 					    moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+				    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+						Platform.runLater(() -> {
+							moleculeIndexTable.requestFocus();
+						});
+						e.consume();
+				   } else if (e.getEventType().getName().equals("REFRESH_MOLECULE_PROPERTIES_EVENT")) {
 				    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 						Platform.runLater(() -> {
 							moleculeIndexTable.requestFocus();
