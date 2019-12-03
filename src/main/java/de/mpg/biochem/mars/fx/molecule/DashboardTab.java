@@ -1,9 +1,6 @@
 package de.mpg.biochem.mars.fx.molecule;
 
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
+import javafx.geometry.Insets;
 import java.util.ArrayList;
 
 import javax.swing.JLabel;
@@ -20,6 +17,7 @@ import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 
 import javafx.scene.control.ScrollPane;
@@ -27,6 +25,12 @@ import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.application.Platform;
+
+import javafx.scene.layout.BorderStroke;
+import javafx.scene.paint.Color;
+import javafx.scene.layout.BorderStrokeStyle;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.BorderWidths;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
     protected ScrollPane scrollPane;
@@ -48,28 +52,34 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	setContent(scrollPane);
     }
     
-    public VBox buildInfoCard() {
+    public BorderPane buildInfoCard() {
+    	BorderPane borderPane = new BorderPane();
     	VBox vbox = new VBox();
-        double width = 200;
-        vbox.setPrefWidth(width);
-        double height = 300;
-        vbox.setPrefHeight(height);
+        double width = 450;
+        borderPane.setMinWidth(width);
+        double height = 150;
+        borderPane.setMinHeight(height);
+        
+        borderPane.setPadding(new Insets(10, 10, 10, 10));
+        vbox.setBorder(new Border(new BorderStroke(Color.BLACK, 
+                BorderStrokeStyle.SOLID, new CornerRadii(20), new BorderWidths(1))));
+        vbox.setPadding(new Insets(20, 20, 20, 20));
+		vbox.setSpacing(5);
     	
-        vbox.getChildren().add(new Label("                                   "));
-        vbox.getChildren().add(new Label("                                   "));
-        vbox.getChildren().add(new Label("Archive Name                       " + archive.getName()));
-        vbox.getChildren().add(new Label("Archive Type                       " + archive.getClass().getName()));
-        vbox.getChildren().add(new Label("Number of Molecules                " + archive.getNumberOfMolecules()));
-        vbox.getChildren().add(new Label("Number of Image Metadata Items     " + archive.getNumberOfImageMetadataRecords()));
-        vbox.getChildren().add(new Label("                                   "));
+        vbox.getChildren().add(new Label(archive.getName()));
+        vbox.getChildren().add(new Label(archive.getClass().getName()));
+        vbox.getChildren().add(new Label(archive.getNumberOfMolecules() + " Molecules"));
+        vbox.getChildren().add(new Label(archive.getNumberOfImageMetadataRecords() + " Metadata"));
         
 		if (archive.isVirtual()) {
-			vbox.getChildren().add(new Label("Working from the virtual memory store: "));
+			vbox.getChildren().add(new Label("Virtual memory store"));
 		} else {
-			vbox.getChildren().add(new Label("This archive is stored in normal memory."));
+			vbox.getChildren().add(new Label("Normal memory"));
 		}
 		
-		return vbox;
+		borderPane.setCenter(vbox);
+		
+		return borderPane;
     }
     
     public Node getNode() {
@@ -83,8 +93,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;
-    	masonryPane.getChildren().add(buildInfoCard());
-    	Platform.runLater(() -> masonryPane.requestLayout());
-    	Platform.runLater(() -> scrollPane.requestLayout());
+    	masonryPane.getChildren().add(buildInfoCard());    
     }
 }
