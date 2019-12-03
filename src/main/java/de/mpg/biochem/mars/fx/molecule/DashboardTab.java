@@ -1,5 +1,8 @@
 package de.mpg.biochem.mars.fx.molecule;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
+
 import javafx.geometry.Insets;
 import java.util.ArrayList;
 
@@ -57,15 +60,20 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	VBox vbox = new VBox();
         double width = 450;
         borderPane.setMinWidth(width);
-        double height = 150;
+        double height = 200;
         borderPane.setMinHeight(height);
         
-        borderPane.setPadding(new Insets(10, 10, 10, 10));
+        borderPane.setPadding(new Insets(15, 15, 15, 15));
         vbox.setBorder(new Border(new BorderStroke(Color.BLACK, 
                 BorderStrokeStyle.SOLID, new CornerRadii(20), new BorderWidths(1))));
         vbox.setPadding(new Insets(20, 20, 20, 20));
 		vbox.setSpacing(5);
-    	
+		
+		BorderPane iconContainer = new BorderPane();
+		iconContainer.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "2em"));
+
+		vbox.getChildren().add(iconContainer);
+		
         vbox.getChildren().add(new Label(archive.getName()));
         vbox.getChildren().add(new Label(archive.getClass().getName()));
         vbox.getChildren().add(new Label(archive.getNumberOfMolecules() + " Molecules"));
