@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 import org.scijava.ui.UIService;
 
 import javafx.application.Platform;
@@ -92,6 +93,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
     @Parameter
     protected UIService uiService;
+    
+    @Parameter
+    protected PrefService prefService;
 
 	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
 	
@@ -124,6 +128,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
+		this.prefService = moleculeArchiveService.getPrefService();
 		this.moleculeArchiveService = moleculeArchiveService;
 		
 		archive.setWindow(this);
@@ -205,7 +210,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
 
         commentsTab = new CommentsTab();
-        settingsTab = new SettingsTab();
+        settingsTab = new SettingsTab(prefService);
         
         imageMetadataTab = createImageMetadataTab();
         moleculesTab = createMoleculesTab();
@@ -223,6 +228,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     				} else if (oldValue == moleculesTab) {
     					moleculesTab.saveCurrentRecord();
     				} else if (oldValue == settingsTab) {
+    					settingsTab.save();
+    					
     					//Update global accelerators...
     					for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
     						Runnable rn = ()-> {
