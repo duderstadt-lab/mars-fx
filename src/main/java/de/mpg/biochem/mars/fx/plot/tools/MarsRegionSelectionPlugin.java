@@ -7,10 +7,12 @@ import de.gsi.chart.plugins.*;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker.DataPoint;
 import de.mpg.biochem.mars.util.RegionOfInterest;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -21,10 +23,17 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
+
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 
 /**
  * Region along X or Y axis.
@@ -45,6 +54,20 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     //private static final int FONT_SIZE = 20;
     
     private DatasetOptionsPane datasetOptionsPane;
+    
+    //Tooltip variables
+    
+    public static final String STYLE_CLASS_LABEL = "chart-datapoint-tooltip-label";
+
+    private static final int LABEL_X_OFFSET = 15;
+    private static final int LABEL_Y_OFFSET = 5;
+
+    private final Label label = new Label();
+    private final Circle circle = new Circle();
+    
+    private Point2D trackingDataPoint;
+
+    private final EventHandler<MouseEvent> trackMouseMoveHandler = this::updateToolTip;
 
     /**
      * Default region mouse filter passing on left mouse button (only).
@@ -91,7 +114,18 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             event.consume();
         }
     };
-
+    
+    private final EventHandler<KeyEvent> keyPressedHandler = event -> {
+            if (event.getCode() == KeyCode.P && trackingDataPoint != null) {
+            	if (regionSelectionOngoing()) {
+            		regionSelectionEnded(trackingDataPoint.getX(), trackingDataPoint.getY());
+            	} else {
+            		regionSelectionStarted(trackingDataPoint.getX(), trackingDataPoint.getY());
+            	}
+                event.consume();
+            }
+    };
+    
     public MarsRegionSelectionPlugin() {
         this(AxisMode.X);
     }
@@ -110,7 +144,12 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         regionRectangle.setManaged(false);
         regionRectangle.getStyleClass().add(STYLE_CLASS_REGION_RECT);
         getChartChildren().add(regionRectangle);
-        registerMouseHandlers();
+        registerEventHandlers();
+        
+        label.getStyleClass().add(MarsDataPointTracker.STYLE_CLASS_LABEL);
+        circle.setRadius(5.0f);
+        circle.setFill(Color.TRANSPARENT);
+        circle.setStroke(Color.RED);
     }
 
     /**
@@ -236,12 +275,26 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         return screenBounds.contains(mouseLoc);
     }
 
-    private void registerMouseHandlers() {
+    private void registerEventHandlers() {
         registerInputEventHandler(MouseEvent.MOUSE_PRESSED, regionSelectionStartHandler);
         registerInputEventHandler(MouseEvent.MOUSE_DRAGGED, regionSelectionDragHandler);
         registerInputEventHandler(MouseEvent.MOUSE_RELEASED, regionSelectionEndHandler);
-        //registerInputEventHandler(MouseEvent.MOUSE_CLICKED, regionOutHandler);
-        //registerInputEventHandler(MouseEvent.MOUSE_CLICKED, regionOriginHandler);
+        
+        //Tracking
+        registerInputEventHandler(MouseEvent.MOUSE_MOVED, trackMouseMoveHandler);
+        
+        //I will manually add this for the moment since the super class doesn't seem to handle
+        //key listeners very well :(
+        chartProperty().addListener((obs, oldChart, newChart) -> {
+            if (oldChart != null) {
+                if (oldChart.getPlotArea().getScene() != null) {
+                	oldChart.getPlotArea().getScene().removeEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
+                }
+            }
+            if (newChart != null) {
+            	newChart.getPlotArea().getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
+            }
+        });
     }
 
     private void uninstallCursor() {
@@ -270,7 +323,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         regionRectangle.setWidth(regionRectWidth);
         regionRectangle.setHeight(regionRectHeight);
     }
-
+    
     private void regionSelectionEnded() {
         regionRectangle.setVisible(false);
         if (regionRectangle.getWidth() > REGION_RECT_MIN_SIZE && regionRectangle.getHeight() > REGION_RECT_MIN_SIZE) {
@@ -278,6 +331,58 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             final double minY = regionRectangle.getY() + regionRectangle.getHeight();
             final double maxX = regionRectangle.getX() + regionRectangle.getWidth();
             final double maxY = regionRectangle.getY();
+
+            // pixel coordinates w.r.t. plot area
+            final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
+            final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
+            
+            /*
+            for (Axis axis : getChart().getAxes()) {
+                double dataMin;
+                double dataMax;
+                if (axis.getSide().isVertical()) {
+                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
+                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
+                } else {
+                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
+                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
+                }
+                System.out.println("min " + dataMin + " max " + dataMax);
+            }
+            */
+            Axis axis = ((XYChart) getChart()).getXAxis();
+            double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
+            double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
+            
+            RegionOfInterest roi = new RegionOfInterest("Region");
+            roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+            roi.setStart(dataMin);
+            roi.setEnd(dataMax);
+            
+            //We add the region to the metadata if those indicators are selected.
+            //Otherwise we add it for molecule
+            //If None is selected we add nothing.
+            if (datasetOptionsPane.isMetadataIndicators())
+            	getChart().fireEvent(new NewMetadataRegionEvent(roi));
+            else if (datasetOptionsPane.isMoleculeIndicators())
+            	getChart().fireEvent(new NewMoleculeRegionEvent(roi));
+            
+        }
+        regionStartPoint = regionEndPoint = null;
+        uninstallCursor();
+    }
+
+    private void regionSelectionEnded(final double xEnd, final double yEnd) {
+        regionRectangle.setVisible(false);
+        double width = Math.abs(xEnd - regionStartPoint.getX());
+        double height = Math.abs(yEnd - regionStartPoint.getY());
+        
+        if (width > REGION_RECT_MIN_SIZE && height > REGION_RECT_MIN_SIZE) {
+            final double minX = (xEnd > regionStartPoint.getX()) ? regionStartPoint.getX() : xEnd;
+            final double maxX = (xEnd > regionStartPoint.getX()) ? xEnd : regionStartPoint.getX();
+            
+            final double minY = (yEnd > regionStartPoint.getY()) ? regionStartPoint.getY() : yEnd;
+            final double maxY = (yEnd > regionStartPoint.getY()) ? yEnd : regionStartPoint.getY();
 
             // pixel coordinates w.r.t. plot area
             final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
@@ -329,6 +434,17 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         regionRectangle.setVisible(true);
         installCursor();
     }
+    
+    private void regionSelectionStarted(double x, double y) {
+        regionStartPoint = new Point2D(x, y);
+
+        regionRectangle.setX(regionStartPoint.getX());
+        regionRectangle.setY(regionStartPoint.getY());
+        regionRectangle.setWidth(0);
+        regionRectangle.setHeight(0);
+        regionRectangle.setVisible(true);
+        installCursor();
+    }
 
     private boolean regionSelectionOngoing() {
         return regionStartPoint != null;
@@ -338,4 +454,202 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
 	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
 		this.datasetOptionsPane = datasetOptionsPane;
 	}
+	
+	private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
+        if (!plotAreaBounds.contains(event.getX(), event.getY())) {
+            return null;
+        }
+
+        final Point2D mouseLocation = getLocationInPlotArea(event);
+
+        Chart chart = getChart();
+        return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
+    }
+
+    private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
+        if (!(chart instanceof XYChart)) {
+            return null;
+        }
+        final XYChart xyChart = (XYChart) chart;
+
+        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
+
+        DataSet dataset = null;
+        if (this.datasetOptionsPane != null) {
+        	String datasetName =  datasetOptionsPane.getTrackingSeries().getYColumn() + " vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
+        	for (DataSet dataS : xyChart.getDatasets())
+        		if (dataS.getName().equals(datasetName))
+        			dataset = dataS;
+        } else {
+        	return null;
+        }
+
+        return findNearestDataPoint(dataset, xValue);
+    }
+
+    /**
+     * Handles series that have data sorted or not sorted with respect to X coordinate.
+     * 
+     * @param dataSet data set
+     * @param searchedX x coordinate
+     * @return return neighouring data points
+     */
+    private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
+        int prevIndex = -1;
+        int nextIndex = -1;
+        double prevX = Double.MIN_VALUE;
+        double nextX = Double.MAX_VALUE;
+
+        final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+        for (int i = 0, size = nDataCount; i < size; i++) {
+            final double currentX = dataSet.get(DataSet.DIM_X, i);
+
+            if (currentX < searchedX) {
+                if (prevX < currentX) {
+                    prevIndex = i;
+                    prevX = currentX;
+                }
+            } else if (nextX > currentX) {
+                nextIndex = i;
+                nextX = currentX;
+            }
+        }
+        final DataPoint prevPoint = prevIndex == -1 ? null
+                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
+                        dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
+        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
+                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
+                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+
+        final double prevDistance = Math.abs(searchedX - prevPoint.x);
+        final double nextDistance = Math.abs(searchedX - nextPoint.x);
+
+        if (prevDistance < nextDistance)
+        	return prevPoint;
+        else 
+        	return nextPoint;
+    }
+    
+    private String formatDataPoint(final DataPoint dataPoint) {
+        return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
+    }
+
+    protected String getDataLabelSafe(final DataSet dataSet, final int index) {
+        String lable = dataSet.getDataLabel(index);
+        if (lable == null) {
+            return getDefaultDataLabel(dataSet, index);
+        }
+        return lable;
+    }
+
+    protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
+        return String.format("%s (%d, %s, %s)", dataSet.getName(), index,
+                Double.toString(dataSet.get(DataSet.DIM_X, index)), Double.toString(dataSet.get(DataSet.DIM_Y, index)));
+    }
+
+    private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
+        label.setText(formatDataPoint(dataPoint));
+        final double width = label.prefWidth(-1);
+        final double height = label.prefHeight(width);
+        
+        final XYChart xyChart = (XYChart) getChart();
+        
+        final double dataPointX = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
+        final double dataPointY = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+
+        double xLocation = dataPointX + MarsRegionSelectionPlugin.LABEL_X_OFFSET;
+        double yLocation = dataPointY - MarsRegionSelectionPlugin.LABEL_Y_OFFSET - height;
+        
+        trackingDataPoint = new Point2D(dataPointX, dataPointY);
+        
+        circle.setCenterX(dataPointX);
+	    circle.setCenterY(dataPointY);
+
+        if (xLocation + width > plotAreaBounds.getMaxX()) {
+            xLocation = dataPointX - MarsRegionSelectionPlugin.LABEL_X_OFFSET - width;
+        }
+        if (yLocation < plotAreaBounds.getMinY()) {
+            yLocation = dataPointY + MarsRegionSelectionPlugin.LABEL_Y_OFFSET;
+        }
+        label.resizeRelocate(xLocation, yLocation, width, height);
+    }
+    /*
+    private Point2D getNearestDataPoint(final MouseEvent event) {
+    	final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+
+        if (!plotAreaBounds.contains(event.getX(), event.getY())) {
+            return null;
+        }
+
+        final Point2D mouseLocation = getLocationInPlotArea(event);
+
+        final XYChart xyChart = (XYChart) getChart();
+        final DataPoint dataPoint = findNearestDataPointWithinPickingDistance(xyChart, mouseLocation);
+
+        final double dataPointX = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
+        final double dataPointY = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+        
+        return new Point2D(dataPointX, dataPointY);
+    }
+    */
+    private void updateToolTip(final MouseEvent event) {
+        final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+        final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+
+        if (dataPoint == null) {
+            getChartChildren().remove(label);
+            getChartChildren().remove(circle);
+            return;
+        }
+        
+        updateLabel(event, plotAreaBounds, dataPoint);
+        if (!getChartChildren().contains(label)) {
+            getChartChildren().add(label);
+            label.requestLayout();
+        }
+        if (!getChartChildren().contains(circle)) {
+            getChartChildren().add(circle);
+        }
+
+        if (regionSelectionOngoing()) {
+        	regionSelectionDragged(event);
+        }
+    }
+
+    protected class DataPoint {
+
+        protected final Chart chart;
+        protected final double x;
+        protected final double y;
+        protected final String label;
+        protected double distanceFromMouse;
+
+        protected DataPoint(final Chart chart, final double x, final double y, final String label) {
+            this.chart = chart;
+            this.x = x;
+            this.y = y;
+            this.label = label;
+        }
+
+        public Chart getChart() {
+            return chart;
+        }
+
+        public double getDistanceFromMouse() {
+            return distanceFromMouse;
+        }
+
+        public String getLabel() {
+            return label;
+        }
+
+        public double getX() {
+            return x;
+        }
+
+        public double getY() {
+            return y;
+        }
+
+    }
 }
