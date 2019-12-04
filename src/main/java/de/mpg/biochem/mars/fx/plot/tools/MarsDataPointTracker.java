@@ -22,7 +22,6 @@ import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Pair;
 
 import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
@@ -38,6 +37,8 @@ import javafx.scene.paint.Color;
  * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic object and can also be overwritten with
  *         another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to
  *         edit/update the custom object based on DataPoint (for the time being private class)
+ *         
+ * @author Karl Duderstadt Added curve tracking based on DatasetOptionsPane
  */
 public class MarsDataPointTracker extends AbstractDataFormattingPlugin implements MarsPlotPlugin {
 
@@ -107,7 +108,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     }
 
     private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
-        DataPoint nearestDataPoint = null;
+        //DataPoint nearestDataPoint = null;
         if (!(chart instanceof XYChart)) {
             return null;
         }
@@ -125,19 +126,18 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         	return null;
         }
 
-        for (final DataPoint dataPoint : findNeighborPoints(dataset, xValue)) {
-            if (getChart().getFirstAxis(Orientation.HORIZONTAL) instanceof Axis) {
-                final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-                final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
-                final Point2D displayPoint = new Point2D(x, y);
-                dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-                //if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
-                if (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse) {
-                	nearestDataPoint = dataPoint;
-                }
-            }
-        }
-        return nearestDataPoint;
+        final DataPoint dataPoint = findNearestDataPoint(dataset, xValue);
+        //if (getChart().getFirstAxis(Orientation.HORIZONTAL) instanceof Axis) {
+        //    final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
+        //    final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+        //    final Point2D displayPoint = new Point2D(x, y);
+       //     dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
+            //if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
+            //if (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse) {
+        //    	nearestDataPoint = dataPoint;
+            //}
+        //}
+        return dataPoint;
     }
 
     /**
@@ -147,9 +147,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
      * @param searchedX x coordinate
      * @return return neighouring data points
      */
-    private List<DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
-    	final List<DataPoint> points = new LinkedList<>();
-    	
+    private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
         int prevIndex = -1;
         int nextIndex = -1;
         double prevX = Double.MIN_VALUE;
@@ -174,12 +172,15 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
                         dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_X, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
-        points.add(prevPoint);
-        points.add(nextPoint);
-        
-        return points;
+        final double prevDistance = Math.abs(searchedX - prevPoint.x);
+        final double nextDistance = Math.abs(searchedX - nextPoint.x);
+
+        if (prevDistance < nextDistance)
+        	return prevPoint;
+        else 
+        	return nextPoint;
     }
     
     private String formatDataPoint(final DataPoint dataPoint) {
@@ -274,8 +275,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
             getChartChildren().remove(circle);
             return;
         }
-        
-        System.out.println("Found nearest datapoint x " + dataPoint.getX() + " y " + dataPoint.getY());
         
         updateLabel(event, plotAreaBounds, dataPoint);
         if (!getChartChildren().contains(label)) {
