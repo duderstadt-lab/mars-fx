@@ -6,10 +6,6 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import javafx.geometry.Insets;
 import java.util.ArrayList;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;

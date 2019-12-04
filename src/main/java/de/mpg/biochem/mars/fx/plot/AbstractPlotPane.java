@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
@@ -99,7 +100,7 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	
 	protected void buildTools() {
 		
-		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, () -> new DataPointTooltip(), Cursor.DEFAULT), 
+		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), 
 				null, trackSelected);
 		addTool(trackCursor);
 		

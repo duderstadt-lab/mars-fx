@@ -648,23 +648,31 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				masker.setText(message);
-				masker.setProgress(-1);
-				masker.setVisible(true);
-		    	fireEvent(new MoleculeArchiveLockEvent(archive));
+				lockFX(message);
 			}
     	});
+	}
+	
+	private void lockFX(String message) {
+		masker.setText(message);
+		masker.setProgress(-1);
+		masker.setVisible(true);
+    	fireEvent(new MoleculeArchiveLockEvent(archive));
 	}
 	
     public void lock() {
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				masker.setProgress(-1);
-				masker.setVisible(true);
-		    	fireEvent(new MoleculeArchiveLockEvent(archive));
+				lockFX();
 			}
     	});
+    }
+    
+    private void lockFX() {
+    	masker.setProgress(-1);
+		masker.setVisible(true);
+    	fireEvent(new MoleculeArchiveLockEvent(archive));
     }
     
     public void updateLockMessage(String message) {
@@ -693,10 +701,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-		    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-				masker.setVisible(false);
+		    	unlockFX();
 			}
     	});
+    }
+    
+    private void unlockFX() {
+    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+		masker.setVisible(false);
     }
     
     public void update() {
