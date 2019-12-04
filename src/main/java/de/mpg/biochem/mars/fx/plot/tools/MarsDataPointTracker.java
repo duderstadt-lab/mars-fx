@@ -61,17 +61,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     private final Circle circle = new Circle();
     private DatasetOptionsPane datasetOptionsPane;
 
-    private final DoubleProperty pickingDistance = new SimpleDoubleProperty(this, "pickingDistance",
-            MarsDataPointTracker.DEFAULT_PICKING_DISTANCE) {
-
-        @Override
-        protected void invalidated() {
-            if (get() <= 0) {
-                throw new IllegalArgumentException("The " + getName() + " must be a positive value");
-            }
-        }
-    };
-
     private final EventHandler<MouseEvent> mouseMoveHandler = this::updateToolTip;
 
     /**
@@ -86,16 +75,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         circle.setStroke(Color.RED);
     }
 
-    /**
-     * Creates a new instance of MarsDataPointTracker class.
-     *
-     * @param pickingDistance the initial value for the {@link #pickingDistanceProperty() pickingDistance} property
-     */
-    public MarsDataPointTracker(final double pickingDistance) {
-        this();
-        setPickingDistance(pickingDistance);
-    }
-
     private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
         if (!plotAreaBounds.contains(event.getX(), event.getY())) {
             return null;
@@ -108,7 +87,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     }
 
     private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
-        //DataPoint nearestDataPoint = null;
         if (!(chart instanceof XYChart)) {
             return null;
         }
@@ -126,18 +104,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         	return null;
         }
 
-        final DataPoint dataPoint = findNearestDataPoint(dataset, xValue);
-        //if (getChart().getFirstAxis(Orientation.HORIZONTAL) instanceof Axis) {
-        //    final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-        //    final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
-        //    final Point2D displayPoint = new Point2D(x, y);
-       //     dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-            //if (displayPoint.distance(mouseLocation) <= getPickingDistance() && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
-            //if (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse) {
-        //    	nearestDataPoint = dataPoint;
-            //}
-        //}
-        return dataPoint;
+        return findNearestDataPoint(dataset, xValue);
     }
 
     /**
@@ -185,15 +152,8 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     
     private String formatDataPoint(final DataPoint dataPoint) {
         return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
-        // return formatData(dataPoint.chart.getYAxis(), dataPoint.x,
-        // dataPoint.y);
     }
 
-    /*
-    protected String formatLabel(DataPoint dataPoint) {
-        return String.format("'%s'\n%s", dataPoint.label, formatDataPoint(dataPoint));
-    }
-*/
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
         String lable = dataSet.getDataLabel(index);
         if (lable == null) {
@@ -205,40 +165,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
         return String.format("%s (%d, %s, %s)", dataSet.getName(), index,
                 Double.toString(dataSet.get(DataSet.DIM_X, index)), Double.toString(dataSet.get(DataSet.DIM_Y, index)));
-    }
-
-    /**
-     * Returns the value of the {@link #pickingDistanceProperty()}.
-     *
-     * @return the current picking distance
-     */
-    public final double getPickingDistance() {
-        return pickingDistanceProperty().get();
-    }
-
-    /**
-     * Distance of the mouse cursor from the data point (expressed in display units) that should trigger showing the
-     * tool tip. By default initialized to {@value #DEFAULT_PICKING_DISTANCE}.
-     *
-     * @return the picking distance property
-     */
-    public final DoubleProperty pickingDistanceProperty() {
-        return pickingDistance;
-    }
-
-    // @SuppressWarnings({ "rawtypes", "unchecked" })
-    // private List<Data<? extends Number, Y>> castXToNumber(final Series
-    // series) {
-    // return series.getData();
-    // }
-
-    /**
-     * Sets the value of {@link #pickingDistanceProperty()}.
-     *
-     * @param distance the new picking distance
-     */
-    public final void setPickingDistance(final double distance) {
-        pickingDistanceProperty().set(distance);
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
