@@ -62,6 +62,7 @@ import java.util.List;
  * 
  * @author Karl Duderstadt
  * Remove backspace delete behavior. Comment out two lines to make it work here...
+ * Make Skinnable request focus only on mouse click to prevent focus stealing...
  */
 public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, MarsJFXChipViewSkin.MarsChipViewBehaviorBase<T>> {
 
@@ -235,13 +236,28 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
         
         editor.promptTextProperty().bind(control.promptTextProperty());
         root.getChildren().add(editor);
-
+        
+        control.setOnMouseClicked(event -> {
+            if (editor != null && getSkinnable() != null) {
+            	editor.setFakeFocus(true);
+                getSkinnable().requestFocus();
+           }
+        });
+        
+        editor.setOnMouseClicked(event -> {
+            if (editor != null && getSkinnable() != null) {
+            	editor.setFakeFocus(true);
+                getSkinnable().requestFocus();
+           }
+        });
+        
         // add control listeners
         control.focusedProperty().addListener((obj, oldVal, newVal) -> {
-            if (editor != null) {
-                editor.setFakeFocus(newVal);
+        	if (editor != null && newVal == false) {
+                editor.setFakeFocus(false);
             }
         });
+        
         control.addEventFilter(KeyEvent.ANY, ke -> {
             if (editor != null) {
                 if (ke.getTarget().equals(editor)) {
@@ -285,10 +301,6 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
         text.setFont(editor.getFont());
         text.applyCss();
         return text.getLayoutBounds().getWidth();
-    }
-    
-    public void setUpdatingChips(boolean updatingChips) {
-    	editor.setUpdatingChips(updatingChips);
     }
 
     private class CustomFlowPane extends FlowPane {
@@ -434,20 +446,12 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
     }
 
     final class MarsFakeFocusTextArea extends TextArea {
-    	private boolean updatingChips = false;
-    	
+
         @Override
         public void requestFocus() {
-        	//For the  moment we disable this to prevent it from stealing the focus when switching between molecules.
-        	//Bit of an ugly fix here to prevent stealing of focus during updates...
-        	
-        	//Not sure this even helps that much...
-        	
-        	//Needs further testing and a different solution...
-        	//Maybe just using setFakeFocus would do the trick?...
-            if (getSkinnable() != null && !updatingChips) {
-               getSkinnable().requestFocus();
-            }
+            //if (getSkinnable() != null) {
+            //     getSkinnable().requestFocus();
+            //}
         }
 
         public void setFakeFocus(boolean b) {
@@ -463,14 +467,6 @@ public class MarsJFXChipViewSkin<T> extends BehaviorSkinBase<JFXChipView<T>, Mar
                 default:
                     return super.queryAccessibleAttribute(attribute, parameters);
             }
-        }
-        
-        public void setUpdatingChips(boolean updatingChips) {
-        	this.updatingChips = updatingChips;
-        }
-        
-        public boolean getUpdateChips() {
-        	return updatingChips;
         }
     }
 

@@ -175,8 +175,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = molecule;
 		
-		skin.setUpdatingChips(true);
-		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getImageMetadataUID());
 		
@@ -191,14 +189,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		
 		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(molecule.getNotes());
-		notesTextArea.textProperty().addListener(notesListener);
-		
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				skin.setUpdatingChips(false);
-			}
-		});
-		
+		notesTextArea.textProperty().addListener(notesListener);		
 	}
 }

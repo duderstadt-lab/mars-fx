@@ -326,7 +326,10 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     
     private void regionSelectionEnded() {
         regionRectangle.setVisible(false);
-        if (regionRectangle.getWidth() > REGION_RECT_MIN_SIZE && regionRectangle.getHeight() > REGION_RECT_MIN_SIZE) {
+        
+        // && regionRectangle.getHeight() > REGION_RECT_MIN_SIZE
+        
+        if (regionRectangle.getWidth() > REGION_RECT_MIN_SIZE) {
             final double minX = regionRectangle.getX();
             final double minY = regionRectangle.getY() + regionRectangle.getHeight();
             final double maxX = regionRectangle.getX() + regionRectangle.getWidth();
@@ -377,7 +380,8 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         double width = Math.abs(xEnd - regionStartPoint.getX());
         double height = Math.abs(yEnd - regionStartPoint.getY());
         
-        if (width > REGION_RECT_MIN_SIZE && height > REGION_RECT_MIN_SIZE) {
+        // && height > REGION_RECT_MIN_SIZE) {
+        if (width > REGION_RECT_MIN_SIZE) {
             final double minX = (xEnd > regionStartPoint.getX()) ? regionStartPoint.getX() : xEnd;
             final double maxX = (xEnd > regionStartPoint.getX()) ? xEnd : regionStartPoint.getX();
             
