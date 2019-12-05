@@ -76,6 +76,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     }
 
     private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
+    	//System.out.println("X " + event.getX() + " Y " + event.getY() + " contains - " + plotAreaBounds.contains(event.getX(), event.getY()));
         if (!plotAreaBounds.contains(event.getX(), event.getY())) {
             return null;
         }
@@ -197,6 +198,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
 
         if (dataPoint == null) {
+        	//System.out.println("dataPoint null removing stuff ");
             getChartChildren().remove(label);
             getChartChildren().remove(circle);
             return;

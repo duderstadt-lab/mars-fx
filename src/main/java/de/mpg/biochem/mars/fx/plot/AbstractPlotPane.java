@@ -26,6 +26,9 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
+
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -50,6 +53,14 @@ import javafx.beans.value.ChangeListener;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+
+import javafx.scene.image.WritableImage;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.transform.Transform;
+import javafx.stage.FileChooser;
+import javax.imageio.ImageIO;
+import javafx.embed.swing.SwingFXUtils;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
@@ -100,23 +111,23 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	
 	protected void buildTools() {
 		
-		Action trackCursor = new Action("Track", "Shortcut+T", CIRCLE_ALT, e -> setTool(trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), 
+		Action trackCursor = new Action("Track", null, CIRCLE_ALT, e -> setTool(trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), 
 				null, trackSelected);
 		addTool(trackCursor);
 		
-		Action zoomXYCursor = new Action("select XY region", "Shortcut+S", ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(false), Cursor.CROSSHAIR),
+		Action zoomXYCursor = new Action("Select XY region", null, ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(false), Cursor.CROSSHAIR),
 				null, zoomXYSelected);
 		addTool(zoomXYCursor);
 		
-		Action zoomXCursor = new Action("select X region", "Shortcut+X", ARROWS_H, e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, false), Cursor.H_RESIZE),
+		Action zoomXCursor = new Action("Select X region", null, ARROWS_H, e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, false), Cursor.H_RESIZE),
 				null, zoomXSelected);
 		addTool(zoomXCursor);
 		
-		Action zoomYCursor = new Action("select Y region", "Shortcut+Y", ARROWS_V, e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, false), Cursor.V_RESIZE),
+		Action zoomYCursor = new Action("Select Y region", null, ARROWS_V, e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, false), Cursor.V_RESIZE),
 				null, zoomYSelected);
 		addTool(zoomYCursor);
 		
-		Action panCursor = new Action("pan", "Shortcut+P", HAND_PAPER_ALT, e -> setTool(panSelected, () -> {
+		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(panSelected, () -> {
 			Panner panner = new Panner();
 			panner.setMouseFilter(PAN_MOUSE_FILTER);
 			return panner;
@@ -156,6 +167,23 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		});
 
 		toolBar.getItems().add(ActionUtils.createToolBarButton(reloadAction));
+		
+		Action saveImageToDisk = new Action("Save image", null, IMAGE, e -> { 
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+			fileChooser.setInitialFileName("snapshot.png");
+			
+			File outputPath = fileChooser.showSaveDialog(getNode().getScene().getWindow());
+			
+			WritableImage snapshot = pixelScaleAwareCanvasSnapshot(chartsPane, 2);
+			
+			try {
+				ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", outputPath);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+		});
+		toolBar.getItems().add(ActionUtils.createToolBarButton(saveImageToDisk));
 		
 		//settings
 		propertiesButton = ActionUtils.createToolBarButton(new Action("Settings", "Shortcut+S", COG, e -> {
@@ -306,6 +334,13 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return styleSheetUpdater;
 	}
 	
+	public static WritableImage pixelScaleAwareCanvasSnapshot(Node node, double pixelScale) {
+	    WritableImage writableImage = new WritableImage((int)Math.rint(pixelScale*node.getBoundsInParent().getWidth()), (int)Math.rint(pixelScale*node.getBoundsInParent().getHeight()));
+	    SnapshotParameters spa = new SnapshotParameters();
+	    spa.setTransform(Transform.scale(pixelScale, pixelScale));
+	    return node.snapshot(spa, writableImage);     
+	}
+
 	@Override
 	public Node getNode() {
 		return this;
