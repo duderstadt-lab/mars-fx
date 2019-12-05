@@ -163,6 +163,9 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 							moleculeIndexTable.requestFocus();
 						});
 						e.consume();
+				   } else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
+					   moleculeIndexTable.refresh();
+					   e.consume();
 				   }
 			   };
 		});

@@ -18,6 +18,10 @@ public class MetadataSelectionChangedEvent extends MetadataEvent {
 	        super(METADATA_SELECTION_CHANGED);
 	        this.marsImageMetadata = marsImageMetadata;
 	    }
+	    
+		public MarsImageMetadata getImageMetadata() {
+			return this.marsImageMetadata;
+		}
 
 	    @Override
 	    public void invokeHandler(MetadataEventHandler handler) {

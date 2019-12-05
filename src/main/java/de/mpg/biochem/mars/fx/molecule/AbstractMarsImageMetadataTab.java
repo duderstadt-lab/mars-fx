@@ -76,7 +76,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 		rootPane.setDividerPositions(0.15f, 0.87f);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
-		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, new EventHandler<MetadataEvent>() { 
+		getNode().addEventFilter(MetadataEvent.METADATA_EVENT, new EventHandler<MetadataEvent>() { 
 			@SuppressWarnings("unchecked")
 			@Override
 			public void handle(MetadataEvent e) {
@@ -92,7 +92,10 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 						//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
 					});
 					e.consume();
-				}
+				} else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
+					metaIndexTable.refresh();
+				    e.consume();
+			    }
 			}
 		});
 		

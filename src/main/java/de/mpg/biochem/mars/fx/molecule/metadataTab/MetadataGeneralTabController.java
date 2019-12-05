@@ -21,8 +21,10 @@ import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
+import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -109,6 +111,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		            	 marsImageMetadata.addTag(c.getAddedSubList().get(0));
 		             }
 				}
+				getNode().fireEvent(new MetadataTagsChangedEvent(marsImageMetadata));
 			}
 		};
 	
@@ -149,10 +152,10 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		chipView.getChips().clear();
 		if (marsImageMetadata.getTags().size() > 0)
 			chipView.getChips().addAll(marsImageMetadata.getTags());
-		chipView.getChips().addListener(chipsListener);
 
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		chipView.getChips().addListener(chipsListener);
 		
 		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(marsImageMetadata.getNotes());

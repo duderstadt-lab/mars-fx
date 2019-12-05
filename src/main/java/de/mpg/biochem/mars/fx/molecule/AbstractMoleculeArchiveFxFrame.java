@@ -61,6 +61,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEventHandler;
@@ -480,7 +481,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         task.setOnSucceeded(event -> { 
         	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 			masker.setVisible(false);
-			System.out.println(archive.getNumberOfMolecules());
         });
 
         new Thread(task).start();
