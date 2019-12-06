@@ -114,20 +114,22 @@ public class MarkdownPreviewPane
 	}
 
 	public void setRendererType(RendererType rendererType) {
-		if (rendererType == null)
-			rendererType = RendererType.CommonMark;
+		rendererType = RendererType.FlexMark;
 
+		/*
+		
 		if (activeRendererType == rendererType)
 			return;
 		activeRendererType = rendererType;
 		activePreview = null;
+		
+		*/
 
-		switch (rendererType) {
-			case FlexMark:		activeRenderer = new FlexmarkPreviewRenderer(); break;
-		}
+		activeRenderer = new FlexmarkPreviewRenderer();
 	}
 
 	public void setType(Type type) {
+		/*
 		Preview preview;
 		switch (type) {
 			case Web:		preview = webViewPreview; break;
@@ -138,8 +140,16 @@ public class MarkdownPreviewPane
 		}
 		if (activePreview == preview)
 			return;
+		
+		preview = webViewPreview;
 
 		activePreview = preview;
+		*/
+		
+		Preview preview = webViewPreview;
+		
+		activePreview = preview;
+		
 		pane.setCenter((preview != null) ? preview.getNode() : null);
 
 		update();
@@ -158,6 +168,18 @@ public class MarkdownPreviewPane
 
 		Platform.runLater(() -> {
 			updateRunLaterPending = false;
+			
+			if (markdownText.get() == null)
+				System.out.println("markdownText.get() null");
+			
+			if (markdownAST.get() == null)
+				System.out.println("markdownAST.get() null");
+			
+			if (path.get() == null)
+				System.out.println("path.get() null");
+			
+			if (activeRenderer == null)
+				System.out.println("activeRenderer null");
 
 			activeRenderer.update(markdownText.get(), markdownAST.get(), path.get());
 			activePreview.update(previewContext, activeRenderer);
