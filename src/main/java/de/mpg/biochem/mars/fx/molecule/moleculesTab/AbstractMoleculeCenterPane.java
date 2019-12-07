@@ -1,6 +1,9 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -20,14 +23,18 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane> implements MoleculeSubPane {
-	private TabPane tabPane;
-	private Tab dataTableTab;
-	private Tab plotTab;
+	protected TabPane tabPane;
+	protected Tab dataTableTab;
+	protected Tab plotTab;
 	
-	private BorderPane dataTableContainer;
-	private P plotPane;
+	protected BorderPane dataTableContainer;
+	protected P plotPane;
 	
-	private M molecule;
+	protected HashSet<ArrayList<String>> segmentTableNames;
+	protected HashSet<String> refreshedTabs;
+	protected HashMap<String, ArrayList<String>> tabNameToSegmentName;
+	
+	protected M molecule;
 	
 	public AbstractMoleculeCenterPane() {
 		tabPane = new TabPane();
@@ -36,7 +43,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		initializeTabs();
 	}
 	
-	private void initializeTabs() {
+	protected void initializeTabs() {
 		dataTableTab = new Tab();		
 		dataTableTab.setText("DataTable");
 		dataTableContainer = new BorderPane();
@@ -57,6 +64,10 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
+		segmentTableNames = new HashSet<ArrayList<String>>();
+		refreshedTabs = new HashSet<String>();
+		tabNameToSegmentName = new HashMap<String, ArrayList<String>>();
+		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
 			   @Override 
@@ -76,8 +87,30 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			   	}
 			} 
         });
+		
+		tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
+            refreshSelectedTab();
+        });
 	}
 	
+	public void refreshSelectedTab() {
+		Tab selectedTab = tabPane.getSelectionModel().selectedItemProperty().get();
+		String tabName = selectedTab.getText();
+		
+		//Tab has already been refreshed
+		if (refreshedTabs.contains(tabName))
+			return;
+		
+		if (selectedTab.equals(dataTableTab)) {
+			dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
+		} else if (selectedTab.equals(plotTab)) {
+			plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else {
+			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
+		}
+		refreshedTabs.add(tabName);
+	}
+	/*
 	public void loadSegmentTables() {
 		//Clear all segment tabs
 		tabPane.getTabs().remove(2, tabPane.getTabs().size());
@@ -92,19 +125,48 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			tabPane.getTabs().add(segmentTableTab);
 		}
 	}
+	*/
+	
+	protected Tab buildSegmentTab(ArrayList<String> segmentTableName) {		
+		String tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
+		tabNameToSegmentName.put(tabName, segmentTableName);
+				
+		Tab segmentTableTab = new Tab(tabName);
+		BorderPane segmentTableContainer = new BorderPane();
+		segmentTableTab.setContent(segmentTableContainer);
+		
+		return segmentTableTab;
+	}
+	
+	protected void updateSegmentTables() {
+		//Build new segment table list
+		HashSet<ArrayList<String>> newSegmentTableNames = new HashSet<ArrayList<String>>();
+		for (ArrayList<String> segmentTableName : molecule.getSegmentTableNames())
+			newSegmentTableNames.add(segmentTableName);
+		
+		//Remove segment table tabs that are not needed 
+		segmentTableNames.stream().filter(segmentTableName -> !newSegmentTableNames.contains(segmentTableName))
+			.forEach(segmentTableName -> tabPane.getTabs().stream().filter(tab -> tab.getText().equals(segmentTableName.get(1) + " vs " + segmentTableName.get(0)))
+			.findFirst()
+			.ifPresent(tabToRemove -> tabPane.getTabs().remove(tabToRemove)));
+		
+		//Add new segment table tabs that are needed
+		newSegmentTableNames.stream().filter(name -> !segmentTableNames.contains(name))
+			.forEach(name -> tabPane.getTabs().add(buildSegmentTab(name)));
+		
+		segmentTableNames = newSegmentTableNames;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
 		
-		//Update DataTable
-		dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
+		//all tabs are now stale
+		refreshedTabs.clear();
 		
-		//Update Plot
-		plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		updateSegmentTables();
 		
-		//Load SegmentTables
-		loadSegmentTables();
+		refreshSelectedTab();
 	}
 	
 	public abstract P createPlotPane();
