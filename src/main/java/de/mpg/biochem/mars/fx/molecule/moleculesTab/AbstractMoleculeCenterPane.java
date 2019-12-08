@@ -112,7 +112,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	}
 
 	protected Tab buildSegmentTab(ArrayList<String> segmentTableName) {		
-		String tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
+		String tabName;
+		if (segmentTableName.get(2).equals(""))
+			tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
+		else 
+			tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
 		tabNameToSegmentName.put(tabName, segmentTableName);
 				
 		Tab segmentTableTab = new Tab(tabName);
