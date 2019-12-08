@@ -110,23 +110,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		}
 		refreshedTabs.add(tabName);
 	}
-	/*
-	public void loadSegmentTables() {
-		//Clear all segment tabs
-		tabPane.getTabs().remove(2, tabPane.getTabs().size());
-		
-		//Load segment tables
-		for (ArrayList<String> segmentTableName : molecule.getSegmentTableNames()) {
-			Tab segmentTableTab = new Tab(segmentTableName.get(1) + " vs " + segmentTableName.get(0));
-			BorderPane segmentTableContainer = new BorderPane();
-			segmentTableTab.setContent(segmentTableContainer);
-			segmentTableContainer.setCenter(new MarsTableView(molecule.getSegmentsTable(segmentTableName)));
-			
-			tabPane.getTabs().add(segmentTableTab);
-		}
-	}
-	*/
-	
+
 	protected Tab buildSegmentTab(ArrayList<String> segmentTableName) {		
 		String tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
 		tabNameToSegmentName.put(tabName, segmentTableName);

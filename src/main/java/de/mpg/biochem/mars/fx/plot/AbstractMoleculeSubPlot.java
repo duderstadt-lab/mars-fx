@@ -78,28 +78,40 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
 			return;
 		
-		//Add segments
-		if (plotSeries.drawSegments() && molecule.hasSegmentsTable(plotSeries.getXColumn(), plotSeries.getYColumn())) {
-			double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
-			
-			MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn, plotSeries.getSegmentsColor(), segmentWidth, "");
-			
-			MarsTable segmentsTable = molecule.getSegmentsTable(xColumn, yColumn);
-			
-			for (int row=0;row<segmentsTable.getRowCount();row++) {
-				double x1 = segmentsTable.getValue("x1", row);
-				double y1 = segmentsTable.getValue("y1", row);
-				double x2 = segmentsTable.getValue("x2", row);
-				double y2 = segmentsTable.getValue("y2", row);
-				
-				if (!Double.isNaN(x1) && !Double.isNaN(y1) && !Double.isNaN(x2) && !Double.isNaN(y2)) {
-					segmentsDataSet.add(x1, y1);
-					segmentsDataSet.add(x2, y2);
-				}
+		//Check if there are any segment table with these columns
+		Set<ArrayList<String>> segmentTableNames = new HashSet<ArrayList<String>>();
+		boolean hasSegmentsTables = false;
+		for (ArrayList<String> names : molecule.getSegmentTableNames()) {
+			if (names.get(0).equals(plotSeries.getXColumn()) && names.get(0).equals(plotSeries.getYColumn())) {
+				hasSegmentsTables = true;
+				segmentTableNames.add(names);
 			}
-			
-			segmentsDataSet.setStyle("Segments");
-			getChart().getDatasets().add(segmentsDataSet);
+		}
+		
+		//Add segments
+		if (plotSeries.drawSegments() && hasSegmentsTables) {
+			for (ArrayList<String> segmentTableName : segmentTableNames) {
+				double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
+				
+				MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn + " - " + segmentTableName.get(2), plotSeries.getSegmentsColor(), segmentWidth, "");
+				
+				MarsTable segmentsTable = molecule.getSegmentsTable(segmentTableName);
+				
+				for (int row=0;row<segmentsTable.getRowCount();row++) {
+					double x1 = segmentsTable.getValue("x1", row);
+					double y1 = segmentsTable.getValue("y1", row);
+					double x2 = segmentsTable.getValue("x2", row);
+					double y2 = segmentsTable.getValue("y2", row);
+					
+					if (!Double.isNaN(x1) && !Double.isNaN(y1) && !Double.isNaN(x2) && !Double.isNaN(y2)) {
+						segmentsDataSet.add(x1, y1);
+						segmentsDataSet.add(x2, y2);
+					}
+				}
+				
+				segmentsDataSet.setStyle("Segments");
+				getChart().getDatasets().add(segmentsDataSet);
+			}
 		}
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
