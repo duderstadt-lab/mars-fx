@@ -349,7 +349,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				ArrayList<String> deleteUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> {
-	        	 	if (result.removeAll() && archive.get(UID).getTags().size() == 0) {
+	        	 	if (result.removeAll() && !archive.moleculeHasTags(UID)) {
 	        	 		return true;
 	        	 	}
 	        	 
@@ -365,9 +365,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	 				return hasTag;
 	 			}).collect(toList());
 	             
-	             for (String UID : deleteUIDs) {
-	            	 archive.remove(UID);
-	             }
+	            for (String UID : deleteUIDs) {
+	            	archive.remove(UID);
+	            }
 			}, "Deleting Molecules...");
 		});
 	}
@@ -430,7 +430,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	     			});
 	            
 	            archive.getProperties().getSegmentTableNames().remove(segmentTableName);
-			}, "Deleting segments tables...");
+			}, "Deleting Segments Tables...");
 		});
 	}
 	
