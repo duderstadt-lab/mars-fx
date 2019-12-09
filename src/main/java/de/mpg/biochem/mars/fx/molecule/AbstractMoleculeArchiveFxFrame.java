@@ -546,10 +546,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	   	 try {
 			 if (archive.getFile() != null) {
 				 if(archive.getFile().getName().equals(archive.getName())) {
-					masker.setText("Saving...");
-					masker.setProgress(-1);
-					masker.setVisible(true);
-			    	fireEvent(new MoleculeArchiveLockEvent(archive));
+					lockFX("Saving...");
 	    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
 		    		Task<Void> task = new Task<Void>() {
 	     	            @Override
@@ -561,8 +558,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	     	        task.setOnSucceeded(event -> {
 			           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-			           	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-						masker.setVisible(false);
+			           	unlockFX();
 	     	        });
 	
 	     	        new Thread(task).run();
@@ -579,7 +575,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
     
     public void saveCopy() {
-		lock();
+		lockFX("Saving a copy...");
 	    String fileName = archive.getName();
 	    if (fileName.endsWith(".store"))
 	    	fileName = fileName.substring(0, fileName.length() - 5);
@@ -593,7 +589,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	    } catch (IOException e1) {
 			e1.printStackTrace();
 		}
-	    unlock();
+	    unlockFX();
     }
     
 	private boolean saveAs(File saveAsFile) throws IOException {
