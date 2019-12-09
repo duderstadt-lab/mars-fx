@@ -3,8 +3,6 @@
 .tab-pane {
 	-mwfx-tab-background: derive(-fx-background,25%);
 	-mwfx-tab-active: #f47806;
-
-    -fx-tab-max-width: 10em;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab {

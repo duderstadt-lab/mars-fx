@@ -134,7 +134,14 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		//Remove segment table tabs that are not needed 
 		segmentTableNames.stream().filter(segmentTableName -> !newSegmentTableNames.contains(segmentTableName))
-			.forEach(segmentTableName -> tabPane.getTabs().stream().filter(tab -> tab.getText().equals(segmentTableName.get(1) + " vs " + segmentTableName.get(0)))
+			.forEach(segmentTableName -> tabPane.getTabs().stream().filter(tab -> {
+				String tabName;
+				if (segmentTableName.get(2).equals(""))
+					tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
+				else 
+					tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
+				return tab.getText().equals(tabName);
+			})
 			.findFirst()
 			.ifPresent(tabToRemove -> tabPane.getTabs().remove(tabToRemove)));
 		

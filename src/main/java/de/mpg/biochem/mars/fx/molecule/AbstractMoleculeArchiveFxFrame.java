@@ -53,6 +53,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.controlsfx.control.MaskerPane;
 
@@ -60,6 +61,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
+import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
@@ -124,6 +126,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     protected double tabWidth = 60.0;
     
     protected Menu fileMenu, toolsMenu;
+    
+    protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
 	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
 		this.title = archive.getName();
@@ -308,7 +312,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
 		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
 		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
-			
+		Action deleteSegmentTablesAction = new Action("Delete Segment Tables", null, null, e -> deleteSegmentTables());
+		
 		Action mergeMoleculesAction = new Action("Merge Molecules", null, null, e -> mergeMolecules());
 		
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", null, null,
@@ -326,6 +331,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 					deleteMoleculesAction,
 					deleteMoleculeTagsAction,
 					deleteMoleculeParametersAction,
+					deleteSegmentTablesAction,
 					mergeMoleculesAction,
 					null,
 					showVideoAction,
@@ -407,6 +413,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	            	 	archive.put(molecule);
 	     			});
 			}, "Deleting Molecule Parameters...");
+		});
+	}
+	
+	protected void deleteSegmentTables() {
+		SegmentTableSelectionDialog dialog = new SegmentTableSelectionDialog(getNode().getScene().getWindow(), 
+				archive.getProperties().getSegmentTableNames(), "Delete segments table");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				ArrayList<String> segmentTableName = result.getSegmentTableName();
+	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+	            		Molecule molecule = archive.get(UID);
+	            	 	molecule.removeSegmentsTable(segmentTableName);
+	            	 	archive.put(molecule);
+	     			});
+	            
+	            archive.getProperties().getSegmentTableNames().remove(segmentTableName);
+			}, "Deleting segments tables...");
 		});
 	}
 	
@@ -651,6 +675,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				lockFX(message);
 			}
     	});
+		
+		//Make sure we block the calling (swing) thread until
+		//the archive has actually been locked...
+		while (!archiveLocked.get()) {}
 	}
 	
 	private void lockFX(String message) {
@@ -658,6 +686,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		masker.setProgress(-1);
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
+    	archiveLocked.set(true);
 	}
 	
     public void lock() {
@@ -673,6 +702,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	masker.setProgress(-1);
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
+    	archiveLocked.set(true);
     }
     
     public void updateLockMessage(String message) {
@@ -709,6 +739,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     private void unlockFX() {
     	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 		masker.setVisible(false);
+		archiveLocked.set(false);
+		masker.setText("Please Wait...");
     }
     
     public void update() {
