@@ -603,8 +603,21 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		
 		if (file != null) {
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
-			archive.saveAs(file);
-			fireEvent(new MoleculeArchiveSavedEvent(archive));
+			Task<Void> task = new Task<Void>() {
+ 	            @Override
+ 	            public Void call() throws Exception {
+ 	            	archive.saveAs(file);	 
+ 	                return null;
+ 	            }
+ 	        };
+
+ 	        task.setOnSucceeded(event -> {
+	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+	           	unlockFX();
+ 	        });
+
+ 	        new Thread(task).run();
+
 			return true;
 		}
 		return false;
@@ -640,9 +653,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		if (virtualDirectory != null) {	
 			lockFX("Saving Virtual Store Copy...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
-			archive.saveAsVirtualStore(virtualDirectory);
-			fireEvent(new MoleculeArchiveSavedEvent(archive));
-			unlockFX();
+			Task<Void> task = new Task<Void>() {
+ 	            @Override
+ 	            public Void call() throws Exception {
+ 	            	archive.saveAsVirtualStore(virtualDirectory);	 
+ 	                return null;
+ 	            }
+ 	        };
+
+ 	        task.setOnSucceeded(event -> {
+	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+	           	unlockFX();
+ 	        });
+			
+ 	       new Thread(task).run();
 		}
 	}
 	
