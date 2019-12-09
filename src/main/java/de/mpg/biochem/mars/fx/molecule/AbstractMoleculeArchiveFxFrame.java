@@ -644,11 +644,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
 		if (virtualDirectory != null) {	
-			lock();
+			lockFX("Saving Virtual Store Copy...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			archive.saveAsVirtualStore(virtualDirectory);
 			fireEvent(new MoleculeArchiveSavedEvent(archive));
-			unlock();
+			unlockFX();
 		}
 	}
 	
