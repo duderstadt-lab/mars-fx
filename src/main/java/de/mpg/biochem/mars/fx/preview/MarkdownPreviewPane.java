@@ -168,18 +168,6 @@ public class MarkdownPreviewPane
 
 		Platform.runLater(() -> {
 			updateRunLaterPending = false;
-			
-			if (markdownText.get() == null)
-				System.out.println("markdownText.get() null");
-			
-			if (markdownAST.get() == null)
-				System.out.println("markdownAST.get() null");
-			
-			if (path.get() == null)
-				System.out.println("path.get() null");
-			
-			if (activeRenderer == null)
-				System.out.println("activeRenderer null");
 
 			activeRenderer.update(markdownText.get(), markdownAST.get(), path.get());
 			activePreview.update(previewContext, activeRenderer);
