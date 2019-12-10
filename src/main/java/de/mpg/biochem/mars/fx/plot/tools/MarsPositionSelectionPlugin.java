@@ -14,8 +14,8 @@ import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculePositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -217,7 +217,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
         Axis axis = ((XYChart) getChart()).getXAxis();
         double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
         
-        PositionOfInterest poi = new PositionOfInterest("Position");
+        MarsPosition poi = new MarsPosition("Position");
         poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
         poi.setPosition(xPosition);
         

@@ -14,8 +14,8 @@ import javafx.scene.paint.Color;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -39,22 +39,22 @@ public abstract class AbstractRegionOfInterestTable {
 	protected BorderPane rootPane;
 	
     protected CustomTextField addRegionNameField;
-    protected TableView<RegionOfInterest> regionTable;
-    protected ObservableList<RegionOfInterest> regionRowList = FXCollections.observableArrayList();
+    protected TableView<MarsRegion> regionTable;
+    protected ObservableList<MarsRegion> regionRowList = FXCollections.observableArrayList();
 
     public AbstractRegionOfInterestTable() {        
-    	regionTable = new TableView<RegionOfInterest>();
+    	regionTable = new TableView<MarsRegion>();
     	addRegionNameField = new CustomTextField();
     	
-    	TableColumn<RegionOfInterest, RegionOfInterest> deleteColumn = new TableColumn<>();
+    	TableColumn<MarsRegion, MarsRegion> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
     	deleteColumn.setMinWidth(30);
     	deleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-    	deleteColumn.setCellFactory(param -> new TableCell<RegionOfInterest, RegionOfInterest>() {
+    	deleteColumn.setCellFactory(param -> new TableCell<MarsRegion, MarsRegion>() {
             private final Button removeButton = new Button();
 
             @Override
-            protected void updateItem(RegionOfInterest pRow, boolean empty) {
+            protected void updateItem(MarsRegion pRow, boolean empty) {
                 super.updateItem(pRow, empty);
 
                 if (pRow == null) {
@@ -84,19 +84,19 @@ public abstract class AbstractRegionOfInterestTable {
     	deleteColumn.setSortable(false);
         regionTable.getColumns().add(deleteColumn);
 
-        TableColumn<RegionOfInterest, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<MarsRegion, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setOnEditCommit(event -> { 
         	String newRegionName = event.getNewValue();
         	if (!record.hasRegion(newRegionName)) {
-        		RegionOfInterest roi = event.getRowValue();
+        		MarsRegion roi = event.getRowValue();
         		String oldName = roi.getName();
         		record.removeRegion(oldName);
         		
         		roi.setName(newRegionName);
         		record.putRegion(roi);
         	} else {
-        		((RegionOfInterest) event.getTableView().getItems()
+        		((MarsRegion) event.getTableView().getItems()
         	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
         		regionTable.refresh();
         	}
@@ -110,7 +110,7 @@ public abstract class AbstractRegionOfInterestTable {
         nameColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         regionTable.getColumns().add(nameColumn);
         
-        TableColumn<RegionOfInterest, ComboBox<String>> columnColumn = new TableColumn<>("Column");
+        TableColumn<MarsRegion, ComboBox<String>> columnColumn = new TableColumn<>("Column");
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
@@ -130,7 +130,7 @@ public abstract class AbstractRegionOfInterestTable {
         columnColumn.setSortable(false);
         regionTable.getColumns().add(columnColumn);
         
-        TableColumn<RegionOfInterest, String> startColumn = new TableColumn<>("Start");
+        TableColumn<MarsRegion, String> startColumn = new TableColumn<>("Start");
         startColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         startColumn.setOnEditCommit(event -> { 
         	try {
@@ -150,7 +150,7 @@ public abstract class AbstractRegionOfInterestTable {
         startColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         regionTable.getColumns().add(startColumn);
         
-        TableColumn<RegionOfInterest, String> endColumn = new TableColumn<>("End");
+        TableColumn<MarsRegion, String> endColumn = new TableColumn<>("End");
         endColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         endColumn.setOnEditCommit(event -> { 
         	try {
@@ -170,7 +170,7 @@ public abstract class AbstractRegionOfInterestTable {
         endColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         regionTable.getColumns().add(endColumn);
         
-        TableColumn<RegionOfInterest, JFXColorPicker> colorColumn = new TableColumn<>("Color");
+        TableColumn<MarsRegion, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> {
         	JFXColorPicker colorPicker = new JFXColorPicker();
         	Color color = Color.web("rgba(50,50,50,0.2)");
@@ -195,7 +195,7 @@ public abstract class AbstractRegionOfInterestTable {
         colorColumn.setStyle("-fx-alignment: CENTER;");
         regionTable.getColumns().add(colorColumn);
         
-        TableColumn<RegionOfInterest, String> opacityColumn = new TableColumn<>("Opacity");
+        TableColumn<MarsRegion, String> opacityColumn = new TableColumn<>("Opacity");
         opacityColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         opacityColumn.setOnEditCommit(event -> { 
         	try {
@@ -230,7 +230,7 @@ public abstract class AbstractRegionOfInterestTable {
         );
 		addButton.setOnAction(e -> {
 			if (!addRegionNameField.getText().equals("")) {
-				RegionOfInterest regionOfInterest = new RegionOfInterest(addRegionNameField.getText());
+				MarsRegion regionOfInterest = new MarsRegion(addRegionNameField.getText());
 				record.putRegion(regionOfInterest);
 				loadData();
 			}

@@ -34,8 +34,8 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import ij.gui.GenericDialog;
 import impl.org.controlsfx.skin.CustomTextFieldSkin;
 import javafx.application.Platform;
@@ -180,7 +180,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			num++;
 			name = "Region " + num;
 		}
-		RegionOfInterest roi = ((NewMoleculeRegionEvent) e).getRegion();
+		MarsRegion roi = ((NewMoleculeRegionEvent) e).getRegion();
 		roi.setName(name);
 		molecule.putRegion(roi);
    		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
@@ -194,7 +194,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			num++;
 			name = "Region " + num;
 		}
-		RegionOfInterest roi = ((NewMetadataRegionEvent) e).getRegion();
+		MarsRegion roi = ((NewMetadataRegionEvent) e).getRegion();
 		roi.setName(name);
 		metaData.putRegion(roi);
 		archive.putImageMetadata(metaData);
@@ -207,7 +207,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			num++;
 			name = "Position " + num;
 		}
-		PositionOfInterest poi = ((NewMoleculePositionEvent) e).getPosition();
+		MarsPosition poi = ((NewMoleculePositionEvent) e).getPosition();
 		poi.setName(name);
 		molecule.putPosition(poi);
    		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
@@ -221,15 +221,15 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			num++;
 			name = "Position " + num;
 		}
-		PositionOfInterest poi = ((NewMetadataPositionEvent) e).getPosition();
+		MarsPosition poi = ((NewMetadataPositionEvent) e).getPosition();
 		poi.setName(name);
 		metaData.putPosition(poi);
 		archive.putImageMetadata(metaData);
 	}
 	
 	private void updateMoleculeRegion(final PlotEvent e) {
-		RegionOfInterest newRoi = ((UpdateMoleculeRegionEvent) e).getRegion();
-   		RegionOfInterest oldRoi = molecule.getRegion(newRoi.getName());
+		MarsRegion newRoi = ((UpdateMoleculeRegionEvent) e).getRegion();
+   		MarsRegion oldRoi = molecule.getRegion(newRoi.getName());
    		oldRoi.setStart(newRoi.getStart());
    		oldRoi.setEnd(newRoi.getEnd());
    		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
@@ -237,24 +237,24 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 	
 	private void updateMetadataRegion(final PlotEvent e) {
 		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
-		RegionOfInterest newRoi = ((NewMetadataRegionEvent) e).getRegion();
-   		RegionOfInterest oldRoi = metaData.getRegion(newRoi.getName());
+		MarsRegion newRoi = ((NewMetadataRegionEvent) e).getRegion();
+   		MarsRegion oldRoi = metaData.getRegion(newRoi.getName());
    		oldRoi.setStart(newRoi.getStart());
    		oldRoi.setEnd(newRoi.getEnd());
    		archive.putImageMetadata(metaData);
 	}
 	
 	private void updateMoleculePosition(final PlotEvent e) {
-   		PositionOfInterest newPoi = ((UpdateMoleculePositionEvent) e).getPosition();
-   		PositionOfInterest oldPoi = molecule.getPosition(newPoi.getName());
+   		MarsPosition newPoi = ((UpdateMoleculePositionEvent) e).getPosition();
+   		MarsPosition oldPoi = molecule.getPosition(newPoi.getName());
    		oldPoi.setPosition(newPoi.getPosition());
    		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	}
 	
 	private void updateMetadataPosition(final PlotEvent e) {
 		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
-		PositionOfInterest newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
-		PositionOfInterest oldPoi = metaData.getPosition(newPoi.getName());
+		MarsPosition newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
+		MarsPosition oldPoi = metaData.getPosition(newPoi.getName());
    		oldPoi.setPosition(newPoi.getPosition());
    		archive.putImageMetadata(metaData);
 	}

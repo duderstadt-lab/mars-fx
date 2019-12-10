@@ -15,8 +15,8 @@ import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,22 +40,22 @@ public abstract class AbstractPositionOfInterestTable {
 	protected BorderPane rootPane;
 	
     protected CustomTextField addPositionField;
-    protected TableView<PositionOfInterest> positionTable;
-    protected ObservableList<PositionOfInterest> positionRowList = FXCollections.observableArrayList();
+    protected TableView<MarsPosition> positionTable;
+    protected ObservableList<MarsPosition> positionRowList = FXCollections.observableArrayList();
 
     public AbstractPositionOfInterestTable() {        
-    	positionTable = new TableView<PositionOfInterest>();
+    	positionTable = new TableView<MarsPosition>();
     	addPositionField = new CustomTextField();
     	
-    	TableColumn<PositionOfInterest, PositionOfInterest> deleteColumn = new TableColumn<>();
+    	TableColumn<MarsPosition, MarsPosition> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
     	deleteColumn.setMinWidth(30);
     	deleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-    	deleteColumn.setCellFactory(param -> new TableCell<PositionOfInterest, PositionOfInterest>() {
+    	deleteColumn.setCellFactory(param -> new TableCell<MarsPosition, MarsPosition>() {
             private final Button removeButton = new Button();
 
             @Override
-            protected void updateItem(PositionOfInterest pRow, boolean empty) {
+            protected void updateItem(MarsPosition pRow, boolean empty) {
                 super.updateItem(pRow, empty);
 
                 if (pRow == null) {
@@ -85,12 +85,12 @@ public abstract class AbstractPositionOfInterestTable {
     	deleteColumn.setSortable(false);
         positionTable.getColumns().add(deleteColumn);
 
-        TableColumn<PositionOfInterest, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<MarsPosition, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         nameColumn.setOnEditCommit(event -> { 
         	String newPositionName = event.getNewValue();
         	if (!record.hasPosition(newPositionName)) {
-        		PositionOfInterest poi = event.getRowValue();
+        		MarsPosition poi = event.getRowValue();
         		String oldName = poi.getName();
         		record.removePosition(oldName);
         		
@@ -98,7 +98,7 @@ public abstract class AbstractPositionOfInterestTable {
         		record.putPosition(poi);
         		fireIndicatorChangedEvent();
         	} else {
-        		((PositionOfInterest) event.getTableView().getItems()
+        		((MarsPosition) event.getTableView().getItems()
         	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
         		positionTable.refresh();
         	}
@@ -112,7 +112,7 @@ public abstract class AbstractPositionOfInterestTable {
         nameColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         positionTable.getColumns().add(nameColumn);
 
-        TableColumn<PositionOfInterest, ComboBox<String>> columnColumn = new TableColumn<>("Column");
+        TableColumn<MarsPosition, ComboBox<String>> columnColumn = new TableColumn<>("Column");
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
@@ -133,7 +133,7 @@ public abstract class AbstractPositionOfInterestTable {
         columnColumn.setSortable(false);
         positionTable.getColumns().add(columnColumn);
         
-        TableColumn<PositionOfInterest, String> positionColumn = new TableColumn<>("Position");
+        TableColumn<MarsPosition, String> positionColumn = new TableColumn<>("Position");
         positionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         positionColumn.setOnEditCommit(event -> { 
         	try {
@@ -154,7 +154,7 @@ public abstract class AbstractPositionOfInterestTable {
         positionColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         positionTable.getColumns().add(positionColumn);
         
-        TableColumn<PositionOfInterest, JFXColorPicker> colorColumn = new TableColumn<>("Color");
+        TableColumn<MarsPosition, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> {
         	JFXColorPicker colorPicker = new JFXColorPicker();
         	Color color = Color.web("rgba(50,50,50,0.2)");
@@ -195,7 +195,7 @@ public abstract class AbstractPositionOfInterestTable {
         );
 		addButton.setOnAction(e -> {
 			if (!addPositionField.getText().equals("")) {
-				PositionOfInterest positionOfInterest = new PositionOfInterest(addPositionField.getText());
+				MarsPosition positionOfInterest = new MarsPosition(addPositionField.getText());
 				record.putPosition(positionOfInterest);
 				loadData();
 			}

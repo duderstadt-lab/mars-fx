@@ -8,8 +8,8 @@ import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMetadataPositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMoleculePositionEvent;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
@@ -62,7 +62,7 @@ public class MarsXValueIndicator extends XValueIndicator implements MarsPlotPlug
     }
     
     protected void handleMouseReleaseEvent(final MouseEvent mouseEvent) {
-        PositionOfInterest poi = new PositionOfInterest(getText());
+        MarsPosition poi = new MarsPosition(getText());
         poi.setPosition(valueProperty().doubleValue());
         
         if (datasetOptionsPane.isMetadataIndicators())

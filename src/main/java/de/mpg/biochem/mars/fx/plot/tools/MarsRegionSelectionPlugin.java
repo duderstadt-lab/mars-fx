@@ -13,7 +13,7 @@ import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker.DataPoint;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -357,7 +357,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
             double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
             
-            RegionOfInterest roi = new RegionOfInterest("Region");
+            MarsRegion roi = new MarsRegion("Region");
             roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
             roi.setStart(dataMin);
             roi.setEnd(dataMax);
@@ -410,7 +410,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
             double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
             
-            RegionOfInterest roi = new RegionOfInterest("Region");
+            MarsRegion roi = new MarsRegion("Region");
             roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
             roi.setStart(dataMin);
             roi.setEnd(dataMax);

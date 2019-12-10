@@ -36,8 +36,8 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
-import de.mpg.biochem.mars.util.PositionOfInterest;
-import de.mpg.biochem.mars.util.RegionOfInterest;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -149,7 +149,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		for (int index=0; index<regionNames.size(); index++) {
 			String regionName = regionNames.get(index);
-			RegionOfInterest roi = record.getRegion(regionName);
+			MarsRegion roi = record.getRegion(regionName);
 			
 			if (xAxisList.contains(roi.getColumn())) {
 				XRangeIndicator xRangeIndicator = new XRangeIndicator(this.xAxis, roi.getStart(), roi.getEnd(), roi.getName());
@@ -187,7 +187,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		ArrayList<String> positionNames = new ArrayList<>(record.getPositionNames());
 		for (int index=0; index<positionNames.size(); index++) {
 			String positionName = positionNames.get(index);
-			PositionOfInterest poi = record.getPosition(positionName);
+			MarsPosition poi = record.getPosition(positionName);
 			
 			if (xAxisList.contains(poi.getColumn())) {
 				MarsXValueIndicator xValueIndicator = new MarsXValueIndicator(this.xAxis, poi.getPosition(), poi.getName(), datasetOptionsPane);
