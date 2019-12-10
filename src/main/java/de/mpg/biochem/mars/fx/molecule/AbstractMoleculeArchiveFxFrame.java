@@ -573,10 +573,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
     
     public void saveCopy() {
-		lockFX("Saving a copy...");
 	    String fileName = archive.getName();
 	    if (fileName.endsWith(".store"))
-	    	fileName = fileName.substring(0, fileName.length() - 5);
+	    	fileName = fileName.substring(0, fileName.length() - 6);
 	    
 	    try {
 			if (archive.getFile() != null) {
@@ -587,7 +586,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	    } catch (IOException e1) {
 			e1.printStackTrace();
 		}
-	    unlockFX();
     }
     
 	private boolean saveAs(File saveAsFile) throws IOException {
@@ -600,9 +598,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
-		
+
 		if (file != null) {
+			lockFX("Saving...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
+
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
@@ -714,6 +714,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 				lockFX();
 			}
     	});
+    	
+    	//Make sure we block the calling (swing) thread until
+		//the archive has actually been locked...
+		while (!archiveLocked.get()) {}
     }
     
     private void lockFX() {
@@ -752,6 +756,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		    	unlockFX();
 			}
     	});
+    	
+    	//Make sure we block the calling (swing) thread until
+		//the archive has actually been unlocked...
+		while (!archiveLocked.get()) {}
     }
     
     private void unlockFX() {
