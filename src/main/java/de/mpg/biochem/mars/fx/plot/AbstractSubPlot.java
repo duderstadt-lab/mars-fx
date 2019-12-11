@@ -189,20 +189,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane.getYAxis().setName(yAxisLabel);
 	}
 	
-	public void resetXYZoom() {
-		if (getPlotSeriesList().size() == 0)
-			return;
-		
-		//Make sure the columns have been picked otherwise do nothing...
-		for (int i=0; i < getPlotSeriesList().size(); i++) {
-			if (getPlotSeriesList().get(i).getXColumn() == null || getPlotSeriesList().get(i).getYColumn() == null)
-				return;
-		}
-
-		xAxis.setAutoRanging(true);
-		yAxis.setAutoRanging(true);
-	}
-	
 	public MarsNumericAxis getXAxis() {
 		return xAxis;
 	}

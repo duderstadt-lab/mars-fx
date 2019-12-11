@@ -288,7 +288,6 @@ public class DatasetOptionsPane extends VBox {
         );
 		updateButton.setOnMouseClicked(e -> {
 		     subPlot.update();
-		     subPlot.resetXYZoom();
 		});
 		
 		/*

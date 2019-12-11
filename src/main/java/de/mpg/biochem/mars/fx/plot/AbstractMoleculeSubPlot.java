@@ -248,7 +248,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			if (plugin instanceof MarsMoleculePlotPlugin)
 				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();
-		resetXYZoom();
 	}
 
 	@Override

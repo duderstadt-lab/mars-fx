@@ -112,6 +112,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 			chartsPane.getChildren().add(subPlot.getNode());
 		}
+		resetXYZoom();
 	}
 
 	@Override

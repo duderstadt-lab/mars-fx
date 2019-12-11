@@ -62,6 +62,8 @@ import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
 import javafx.embed.swing.SwingFXUtils;
 
+import javafx.scene.control.TextField;
+
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
@@ -78,6 +80,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected static StyleSheetUpdater styleSheetUpdater;
 	
 	protected BooleanProperty gridlines = new SimpleBooleanProperty();
+	protected BooleanProperty fixXBounds = new SimpleBooleanProperty();
+	protected BooleanProperty fixYBounds = new SimpleBooleanProperty();
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
@@ -104,6 +108,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		setCenter(chartsPane);
 		
 		gridlines.setValue(true);
+		fixXBounds.setValue(false);
+		fixYBounds.setValue(false);
 		
 		buildTools();
 		setTop(createToolBar());
@@ -154,16 +160,14 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		toolBar.getItems().add(new Separator());
 
 		Action resetXYZoom = new Action("Reset Zoom", null, EXPAND, e -> {
-			for (SubPlot subPlot : charts)
-				subPlot.resetXYZoom();
+			resetXYZoom();
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
 		Action reloadAction = new Action("Reload", null, REFRESH, e -> {
-			for (SubPlot subPlot : charts) {
+			for (SubPlot subPlot : charts)
 				subPlot.update();
-				subPlot.resetXYZoom();
-			}
+			resetXYZoom();
 		});
 
 		toolBar.getItems().add(ActionUtils.createToolBarButton(reloadAction));
@@ -192,6 +196,13 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			popOver.setHeaderAlwaysVisible(true);
 			popOver.setAutoHide(false);
 			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
+			
+			//Retrieve x and y bounds from first chart
+			plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
+			plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
+			plotOptionsPane.setYMin(charts.get(0).getChart().getYAxis().getMin());
+			plotOptionsPane.setYMax(charts.get(0).getChart().getYAxis().getMax());
+			
 			popOver.setContentNode(plotOptionsPane);
 			popOver.show(propertiesButton);				
 		}));
@@ -234,6 +245,33 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 			} else {
 				subPlot.removeTools();
 			}
+		}
+	}
+	
+	public void resetXYZoom() {
+		for (SubPlot subPlot : charts) {
+			if (subPlot.getPlotSeriesList().size() == 0)
+				continue;
+			
+			//Make sure the columns have been picked otherwise do nothing...
+			for (int i=0; i < subPlot.getPlotSeriesList().size(); i++) {
+				if (subPlot.getPlotSeriesList().get(i).getXColumn() == null || subPlot.getPlotSeriesList().get(i).getYColumn() == null)
+					return;
+			}
+	
+			if (fixXBounds.get()) {
+				subPlot.getChart().getXAxis().setAutoRanging(false);
+				subPlot.getChart().getXAxis().setMin(plotOptionsPane.getXMin());
+				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
+			} else
+				subPlot.getChart().getXAxis().setAutoRanging(true);
+			
+			if (fixYBounds.get()) {
+				subPlot.getChart().getYAxis().setAutoRanging(false);
+				subPlot.getChart().getYAxis().setMin(plotOptionsPane.getYMin());
+				subPlot.getChart().getYAxis().setMax(plotOptionsPane.getYMax());
+			} else 
+				subPlot.getChart().getYAxis().setAutoRanging(true);
 		}
 	}
 	
@@ -346,16 +384,101 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return this;
 	}
 	
+	public BooleanProperty fixXBoundsProperty() {
+		return fixXBounds;
+	}
+	
+	public BooleanProperty fixYBoundsProperty() {
+		return fixYBounds;
+	}
+	
 	class PlotOptionsPane extends VBox  {
+		private TextField xMinTextField, yMinTextField, xMaxTextField, yMaxTextField;
+		
 		public PlotOptionsPane() {
-			BorderPane borderPane = new BorderPane();
+			//gridlines control
+			BorderPane gridBorderPane = new BorderPane();
 			ToggleSwitch gridlineSwitch = new ToggleSwitch();
 			gridlineSwitch.selectedProperty().bindBidirectional(gridlines);
-			borderPane.setLeft(new Label("Gridlines"));
-			borderPane.setRight(gridlineSwitch);
-			getChildren().add(borderPane);
-			this.setPrefWidth(200);
+			gridBorderPane.setLeft(new Label("Gridlines"));
+			gridBorderPane.setRight(gridlineSwitch);
+			getChildren().add(gridBorderPane);
+			
+			//X Bounds
+			BorderPane fixXBoundsBorderPane = new BorderPane();
+			ToggleSwitch fixXBoundsSwitch = new ToggleSwitch();
+			fixXBoundsSwitch.selectedProperty().bindBidirectional(fixXBounds);
+			fixXBoundsBorderPane.setLeft(new Label("Fix X Bounds"));
+			fixXBoundsBorderPane.setRight(fixXBoundsSwitch);
+			getChildren().add(fixXBoundsBorderPane);
+			
+			BorderPane xMinBorderPane = new BorderPane();
+			xMinTextField = new TextField();
+			xMinBorderPane.setLeft(new Label("X Min"));
+			xMinBorderPane.setRight(xMinTextField);
+			getChildren().add(xMinBorderPane);
+			
+			BorderPane xMaxBorderPane = new BorderPane();
+			xMaxTextField = new TextField();
+			xMaxBorderPane.setLeft(new Label("X Max"));
+			xMaxBorderPane.setRight(xMaxTextField);
+			getChildren().add(xMaxBorderPane);
+			
+			//Y Bounds
+			BorderPane fixYBoundsborderPane = new BorderPane();
+			ToggleSwitch fixYBoundsSwitch = new ToggleSwitch();
+			fixYBoundsSwitch.selectedProperty().bindBidirectional(fixYBounds);
+			fixYBoundsborderPane.setLeft(new Label("Fix Y Bounds"));
+			fixYBoundsborderPane.setRight(fixYBoundsSwitch);
+			getChildren().add(fixYBoundsborderPane);
+			
+			BorderPane yMinBorderPane = new BorderPane();
+			yMinTextField = new TextField();
+			yMinBorderPane.setLeft(new Label("Y Min"));
+			yMinBorderPane.setRight(yMinTextField);
+			getChildren().add(yMinBorderPane);
+			
+			BorderPane yMaxBorderPane = new BorderPane();
+			yMaxTextField = new TextField();
+			yMaxBorderPane.setLeft(new Label("Y Max"));
+			yMaxBorderPane.setRight(yMaxTextField);
+			getChildren().add(yMaxBorderPane);
+			
+			this.setPrefWidth(250);
+			this.setSpacing(5);
 			this.setPadding(new Insets(10, 10, 10, 10));
+		}
+		
+		void setXMin(double xMin) {
+			xMinTextField.setText(String.valueOf(xMin));
+		}
+		
+		double getXMin() {
+			return Double.valueOf(xMinTextField.getText());
+		}
+		
+		void setXMax(double xMax) {
+			xMaxTextField.setText(String.valueOf(xMax));
+		}
+		
+		double getXMax() {
+			return Double.valueOf(xMaxTextField.getText());
+		}
+		
+		void setYMin(double yMin) {
+			yMinTextField.setText(String.valueOf(yMin));
+		}
+		
+		double getYMin() {
+			return Double.valueOf(yMinTextField.getText());
+		}
+		
+		void setYMax(double yMax) {
+			yMaxTextField.setText(String.valueOf(yMax));
+		}
+		
+		double getYMax() {
+			return Double.valueOf(yMaxTextField.getText());
 		}
 	}
 }

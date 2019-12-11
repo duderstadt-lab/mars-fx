@@ -8,17 +8,18 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
 public interface SubPlot {
-	public void resetXYZoom();
 	public MarsNumericAxis getXAxis();
 	public void setXLabel(String xAxisLabel);
 	public MarsNumericAxis getYAxis();
 	public void setYLabel(String yAxisLabel);
 	public DatasetOptionsPane getDatasetOptionsPane();
+	public ObservableList<PlotSeries> getPlotSeriesList();
 	public JFXBadge getDatasetOptionsButton();
 	public void setTool(ChartPlugin plugin, Cursor cursor);
 	public void removeTools();
