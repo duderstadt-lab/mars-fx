@@ -521,7 +521,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
 	
 	public void close() {
-		moleculeArchiveService.removeArchive(archive.getName());
+		if (moleculeArchiveService.contains(archive.getName()))
+			moleculeArchiveService.removeArchive(archive);
 
 		if (!uiService.isHeadless())
 			WindowManager.removeWindow(frame);
@@ -579,16 +580,61 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	    
 	    try {
 			if (archive.getFile() != null) {
-				saveAs(new File(archive.getFile().getParentFile(), fileName));
+				saveAsCopy(new File(archive.getFile().getParentFile(), fileName));
 			} else {
-				saveAs(new File(System.getProperty("user.home"), fileName));
+				saveAsCopy(new File(System.getProperty("user.home"), fileName));
 			}
 	    } catch (IOException e1) {
 			e1.printStackTrace();
 		}
     }
     
-	private boolean saveAs(File saveAsFile) throws IOException {
+    private boolean saveAs(File saveAsFile) throws IOException {
+		FileChooser fileChooser = new FileChooser();
+		
+		if (saveAsFile == null) {
+			saveAsFile = new File(System.getProperty("user.home"));
+		}
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		fileChooser.setInitialFileName(saveAsFile.getName());
+
+		File newFile = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
+
+		if (newFile != null) {
+			lockFX("Saving...");
+			fireEvent(new MoleculeArchiveSavingEvent(archive));
+
+			Task<Void> task = new Task<Void>() {
+ 	            @Override
+ 	            public Void call() throws Exception {
+ 	            	archive.saveAs(newFile);	 
+ 	                return null;
+ 	            }
+ 	        };
+
+ 	        task.setOnSucceeded(event -> {
+	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
+	           	
+	           	if (moleculeArchiveService.contains(archive.getName()))
+					moleculeArchiveService.removeArchive(archive);
+	           	
+				archive.setFile(newFile);
+				archive.setName(newFile.getName());
+				frame.setTitle(newFile.getName());
+				
+				moleculeArchiveService.addArchive(archive);
+	           	
+	           	unlockFX();
+ 	        });
+
+ 	        new Thread(task).run();
+ 	        
+ 	        return true;
+		}
+		return false;
+	}
+    
+	private boolean saveAsCopy(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
 		if (saveAsFile == null) {
@@ -617,8 +663,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
  	        });
 
  	        new Thread(task).run();
-
-			return true;
+ 	        
+ 	        return true;
 		}
 		return false;
 	}
