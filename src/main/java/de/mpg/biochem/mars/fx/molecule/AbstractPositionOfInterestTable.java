@@ -25,12 +25,17 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Line;
+import javafx.util.Callback;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 public abstract class AbstractPositionOfInterestTable {
@@ -179,6 +184,27 @@ public abstract class AbstractPositionOfInterestTable {
         colorColumn.setSortable(false);
         colorColumn.setStyle("-fx-alignment: CENTER;");
         positionTable.getColumns().add(colorColumn);
+        
+        TableColumn<MarsPosition, String> strokeColumn = new TableColumn<>("Stroke");
+        strokeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        strokeColumn.setOnEditCommit(event -> { 
+        	try {
+    			double num = Double.valueOf(event.getNewValue());
+    			event.getRowValue().setStroke(num);
+    			fireIndicatorChangedEvent();
+    		} catch (NumberFormatException e) {
+    			//Do nothing for the moment...
+    		}
+        });
+        strokeColumn.setCellValueFactory(positionOfInterest ->
+                new ReadOnlyObjectWrapper<>(String.valueOf(positionOfInterest.getValue().getStroke()))
+        );
+        strokeColumn.setSortable(false);
+        strokeColumn.setPrefWidth(100);
+        strokeColumn.setMinWidth(100);
+        strokeColumn.setEditable(true);
+        strokeColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
+        positionTable.getColumns().add(strokeColumn);
         
         positionTable.setItems(positionRowList);
         positionTable.setEditable(true);

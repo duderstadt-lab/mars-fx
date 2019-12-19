@@ -194,8 +194,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 				xValueIndicator.setLabelPosition(0.2);
 				
 				Color color = Color.web(poi.getColor());
-				newStyleSheet += String.format(".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); }", 
-						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
+				newStyleSheet += String.format(".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
+				
+				newStyleSheet += String.format(".x-value-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
 				
 				getChart().getPlugins().add(xValueIndicator);
 			}
@@ -205,8 +208,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 				yValueIndicator.setLabelPosition(0.2);
 				
 				Color color = Color.web(poi.getColor());
-				newStyleSheet += String.format(".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); }", 
-						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity());
+				newStyleSheet += String.format(".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
+				
+				newStyleSheet += String.format(".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
+						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
 				
 				getChart().getPlugins().add(yValueIndicator);
 			}

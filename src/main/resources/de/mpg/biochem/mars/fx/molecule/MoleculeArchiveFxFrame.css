@@ -44,6 +44,10 @@
     -fx-background-color: -fx-focus-color;
 }
 
+.text-field {
+    -fx-accent: black;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Custom Icons                                                                *
