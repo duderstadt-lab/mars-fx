@@ -112,7 +112,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		
-		setContent(borderPane);
+		getTab().setContent(borderPane);
 	}
     
 	static private Preferences getPrefsRoot() {
@@ -415,4 +415,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void onMoleculeArchiveSavingEvent() {}
+
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
+	}
 }

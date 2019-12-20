@@ -117,7 +117,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		
-		setContent(rootPane);
+		getTab().setContent(rootPane);
 	}
 	
 	protected BorderPane buildHotKeyTable() {
@@ -286,5 +286,11 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	public ObservableList<HotKeyEntry> getHotKeyList() {
 		return hotKeyRowList;
+	}
+
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
 	}
 }

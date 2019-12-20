@@ -29,6 +29,7 @@ package de.mpg.biochem.mars.fx.molecule;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -40,8 +41,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculeArchiveTab extends Tab implements MoleculeArchiveTab {
+public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertibleRecord implements MoleculeArchiveTab {
 
+	protected Tab tab;
     protected double tabWidth = 60.0;
     
     protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
@@ -57,9 +59,10 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
     
     public AbstractMoleculeArchiveTab() {
     	super();
-        setText("");
-        setOnSelectionChanged(replaceBackgroundColorHandler);
-        closableProperty().set(false);
+    	tab = new Tab();
+    	tab.setText("");
+    	tab.setOnSelectionChanged(replaceBackgroundColorHandler);
+    	tab.closableProperty().set(false);
     }
 	
 	protected void setIcon(Node icon) {
@@ -67,7 +70,7 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
         tabPane.setRotate(90.0);
         tabPane.setMaxWidth(tabWidth);
         tabPane.setCenter(icon);
-        setGraphic(tabPane);
+        tab.setGraphic(tabPane);
 	}
     
     public abstract ArrayList<Menu> getMenus();
@@ -89,6 +92,10 @@ public abstract class AbstractMoleculeArchiveTab extends Tab implements Molecule
 	}
 	
 	public abstract Node getNode();
+	
+	public Tab getTab() {
+		return tab;
+	}
 	
 	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
 		return this.archive;

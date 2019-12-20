@@ -29,10 +29,13 @@ package de.mpg.biochem.mars.fx.molecule;
 import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
+import javafx.scene.control.Tab;
 
-public interface MoleculeArchiveTab extends MoleculeArchiveEventHandler {
+public interface MoleculeArchiveTab extends MoleculeArchiveEventHandler, JsonConvertibleRecord {
 	public ArrayList<Menu> getMenus();
 	public Node getNode();
+	public Tab getTab();
 }

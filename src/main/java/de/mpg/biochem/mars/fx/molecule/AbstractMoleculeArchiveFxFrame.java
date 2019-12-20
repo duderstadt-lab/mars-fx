@@ -226,7 +226,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         tabsContainer.setTabMinHeight(tabWidth);
         tabsContainer.setTabMaxHeight(tabWidth);
         tabsContainer.setRotateGraphic(true);
-    	
+
         buildMenuBar();
         buildTabs();
         
@@ -238,7 +238,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void buildTabs() {
 		dashboardTab = new DashboardTab();
-        dashboardTab.setStyle("-fx-background-color: -fx-focus-color;");
+        dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
 
         commentsTab = new CommentsTab();
         settingsTab = new SettingsTab(prefService);
@@ -251,14 +251,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     		new ChangeListener<Tab>() {
     			@Override
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-    				updateMenus(((MoleculeArchiveTab)newValue).getMenus());
-    				if (oldValue == commentsTab) {
+    				if (oldValue == commentsTab.getTab()) {
     					commentsTab.saveComments();
-    				} else if (oldValue == imageMetadataTab) {
+    				} else if (oldValue == imageMetadataTab.getTab()) {
     					imageMetadataTab.saveCurrentRecord();
-    				} else if (oldValue == moleculesTab) {
+    				} else if (oldValue == moleculesTab.getTab()) {
     					moleculesTab.saveCurrentRecord();
-    				} else if (oldValue == settingsTab) {
+    				} else if (oldValue == settingsTab.getTab()) {
     					settingsTab.save();
     					
     					//Update global accelerators...
@@ -273,19 +272,27 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     					}
     				}
     				
-	    			if (newValue == imageMetadataTab) {
+	    			if (newValue == imageMetadataTab.getTab()) {
+	    				updateMenus(imageMetadataTab.getMenus());
 						imageMetadataTab.fireEvent(new RefreshMetadataEvent());
-					} else if (newValue == moleculesTab) {
+					} else if (newValue == moleculesTab.getTab()) {
+						updateMenus(moleculesTab.getMenus());
 						moleculesTab.fireEvent(new RefreshMoleculeEvent());
+					} else if (newValue == commentsTab.getTab()) {
+						updateMenus(commentsTab.getMenus());
+					} else if (newValue == settingsTab.getTab()) {
+						updateMenus(settingsTab.getMenus());
+					} else if (newValue == dashboardTab.getTab()) {
+						updateMenus(dashboardTab.getMenus());
 					}
     			}
     		});
         
-        tabsContainer.getTabs().add(dashboardTab);
-        tabsContainer.getTabs().add((Tab)imageMetadataTab);
-        tabsContainer.getTabs().add((Tab)moleculesTab);
-        tabsContainer.getTabs().add(commentsTab);
-        tabsContainer.getTabs().add(settingsTab);
+          tabsContainer.getTabs().add(dashboardTab.getTab());
+          tabsContainer.getTabs().add(imageMetadataTab.getTab());
+          tabsContainer.getTabs().add(moleculesTab.getTab());
+          tabsContainer.getTabs().add(commentsTab.getTab());
+          tabsContainer.getTabs().add(settingsTab.getTab());
         
         fireEvent(new InitializeMoleculeArchiveEvent(archive));
     }
@@ -843,6 +850,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     public void update() {
     	unlock();
+    }
+    
+    protected void saveState(File stateFile) {
+    	//Will write fields for each tab
+    	//and let the tab internally define the settings to save...
+    	//But first will write some global settings
+    	
+    }
+    
+    protected void loadState(File stateFile) {
+    	
     }
 
     public void fireEvent(Event event) {

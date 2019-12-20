@@ -88,7 +88,7 @@ import javafx.concurrent.Task;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public  abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
+public abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;
 	protected C moleculeCenterPane;
 	protected O moleculePropertiesPane;
@@ -196,7 +196,7 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
 			   };
 		});
 		
-		setContent(rootPane);
+		getTab().setContent(rootPane);
 	}
 	
 	private void newMoleculeRegion(final PlotEvent e) {
@@ -455,6 +455,12 @@ public  abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecu
     public void setMarsBdvFrame(MarsBdvFrame<?> marsBdvFrame) {
     	this.marsBdvFrame = marsBdvFrame;
     }
+    
+    @Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	public abstract C createMoleculeCenterPane();
 	

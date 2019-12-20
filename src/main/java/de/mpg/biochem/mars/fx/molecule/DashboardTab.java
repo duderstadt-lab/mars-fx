@@ -74,7 +74,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
         
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
         
-    	setContent(scrollPane);
+    	getTab().setContent(scrollPane);
     }
     
     public BorderPane buildInfoCard() {
@@ -125,4 +125,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	this.archive = archive;
     	masonryPane.getChildren().add(buildInfoCard());    
     }
+
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
+	}
 }

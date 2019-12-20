@@ -125,8 +125,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 			}
 		});
 		
-		
-		setContent(rootPane);
+		getTab().setContent(rootPane);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -243,6 +242,12 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@Override
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
+	}
+	
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	public abstract C createMetadataCenterPane();
