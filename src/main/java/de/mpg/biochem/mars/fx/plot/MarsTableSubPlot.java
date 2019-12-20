@@ -73,19 +73,21 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 
 	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub
-		
+		// TODO Auto-generated method stub	
 	}
 
 	@Override
 	public void removeIndicators() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public void addIndicators(Set<String> AxisList, Set<String> yAxisList) {
 		// TODO Auto-generated method stub
-		
+	}
+
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
 	}
 }

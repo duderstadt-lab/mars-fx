@@ -369,7 +369,7 @@ public class DatasetOptionsPane extends VBox {
 	
 	public XYChart getTrackingChart() {
 		for (PlotSeries series : getPlotSeriesList()) {
-			if (series.trackChart())
+			if (series.track())
 				return series.getChart();
 		}
 		
@@ -378,7 +378,7 @@ public class DatasetOptionsPane extends VBox {
 	
 	public PlotSeries getTrackingSeries() {
 		for (PlotSeries series : getPlotSeriesList())
-			if (series.trackChart())
+			if (series.track())
 				return series;
 
 		return null;

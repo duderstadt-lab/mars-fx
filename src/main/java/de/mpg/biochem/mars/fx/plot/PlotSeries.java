@@ -180,7 +180,7 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 			return chartTracking;
 		}
 		
-		public boolean trackChart() {
+		public boolean track() {
 			return chartTracking.isSelected();
 		}
 		
@@ -242,8 +242,42 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 
 		@Override
 		protected void createIOMaps() {
+			outputMap.put("Track", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeBooleanField("Track", track()), IOException.class));
+			outputMap.put("Type", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("Type", getType()), IOException.class));
 			outputMap.put("xColumn", MarsUtil.catchConsumerException(jGenerator ->
 			jGenerator.writeStringField("xColumn", getXColumn()), IOException.class));
+			outputMap.put("yColumn", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("yColumn", getYColumn()), IOException.class));
+			outputMap.put("Style", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("Style", getLineStyle()), IOException.class));
+			outputMap.put("Color", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("Color", getColor().toString()), IOException.class));
+			outputMap.put("Stroke", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("Stroke", getWidth()), IOException.class));
+			outputMap.put("ShowSegments", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeBooleanField("ShowSegments", drawSegments()), IOException.class));
+			outputMap.put("SegmentColor", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("SegmentColor", getSegmentsColor().toString()), IOException.class));
+			outputMap.put("SegmentStroke", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("SegmentStroke", getSegmentsWidth()), IOException.class));
+			
+			inputMap.put("Track", MarsUtil.catchConsumerException(jParser -> {
+				getTrackingButton().setSelected(jParser.getBooleanValue());
+			}, IOException.class));
+			inputMap.put("Type", MarsUtil.catchConsumerException(jParser -> {
+				typeField.getSelectionModel().select(jParser.getText());
+			}, IOException.class));
+			inputMap.put("xColumn", MarsUtil.catchConsumerException(jParser -> {
+				xColumnField().getSelectionModel().select(jParser.getText());
+			}, IOException.class));
+			inputMap.put("yColumn", MarsUtil.catchConsumerException(jParser -> {
+				yColumnField().getSelectionModel().select(jParser.getText());
+			}, IOException.class));
+			inputMap.put("Style", MarsUtil.catchConsumerException(jParser -> {
+				lineStyle().getSelectionModel().select(jParser.getText());
+			}, IOException.class));
 		}
 }
 

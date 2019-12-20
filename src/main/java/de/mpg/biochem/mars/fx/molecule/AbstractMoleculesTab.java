@@ -56,6 +56,7 @@ import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -462,7 +463,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	protected void createIOMaps() {
 		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeFieldName("CenterPane");
-			moleculeCenterPane.toJSON(jGenerator);
+			if (moleculeCenterPane instanceof JsonConvertibleRecord)
+				((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
 		}, IOException.class));
 	}
 	

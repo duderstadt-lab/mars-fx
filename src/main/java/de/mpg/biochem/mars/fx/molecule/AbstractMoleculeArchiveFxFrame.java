@@ -166,8 +166,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     protected M moleculesTab;
     protected SettingsTab settingsTab;
     
-    protected static JsonFactory jfactory = new JsonFactory();
-    
+    protected static JsonFactory jfactory;
+	
     protected Set<MoleculeArchiveTab> tabSet;
     
     protected MarsBdvFrame<?> marsBdvFrame;
@@ -249,6 +249,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         tabsContainer.setTabMinHeight(tabWidth);
         tabsContainer.setTabMaxHeight(tabWidth);
         tabsContainer.setRotateGraphic(true);
+        
+        if (jfactory == null)
+        	jfactory = new JsonFactory();
 
         buildMenuBar();
         buildTabs();
@@ -882,8 +885,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	//Output Map
 		//outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator ->
 		//	jGenerator.writeStringField("Window", UID), IOException.class));
-    	
-    	
+
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			outputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jGenerator -> {
 				jGenerator.writeFieldName(moleculeArchiveTab.getName());
