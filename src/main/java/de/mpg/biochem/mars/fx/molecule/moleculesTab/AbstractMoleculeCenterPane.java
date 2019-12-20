@@ -26,6 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,10 +37,13 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
+import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -48,7 +52,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane> implements MoleculeSubPane {
+public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane> extends AbstractJsonConvertibleRecord implements MoleculeSubPane {
 	protected TabPane tabPane;
 	protected Tab dataTableTab;
 	protected Tab plotTab;
@@ -188,6 +192,18 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		updateSegmentTables();
 		
 		refreshSelectedTab();
+	}
+	
+	@Override
+	protected void createIOMaps() {
+		ArrayList<SubPlot> subplots = plotPane.getCharts();
+
+		outputMap.put("SubPlots", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeArrayFieldStart("SubPlots");
+			for (SubPlot subplot : subplots)
+				subplot.toJSON(jGenerator);
+			jGenerator.writeEndArray();
+		}, IOException.class));
 	}
 	
 	public abstract P createPlotPane();

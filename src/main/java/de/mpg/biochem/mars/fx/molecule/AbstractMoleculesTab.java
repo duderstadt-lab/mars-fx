@@ -62,6 +62,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
+import de.mpg.biochem.mars.util.MarsUtil;
 import ij.gui.GenericDialog;
 import impl.org.controlsfx.skin.CustomTextFieldSkin;
 import javafx.application.Platform;
@@ -456,10 +457,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	this.marsBdvFrame = marsBdvFrame;
     }
     
-    @Override
+
+	@Override
 	protected void createIOMaps() {
-		// TODO Auto-generated method stub
-		
+		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("CenterPane");
+			moleculeCenterPane.toJSON(jGenerator);
+		}, IOException.class));
 	}
 	
 	public abstract C createMoleculeCenterPane();
@@ -523,5 +527,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		//The archive is always locked when saving and that saves the current record...
 		//We don't need to do it twice.
 		//saveCurrentRecord();
+	}
+	
+	@Override
+	public String getName() {
+		return "MoleculesTab";
 	}
 }

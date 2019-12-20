@@ -421,4 +421,9 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public String getName() {
+		return "CommentsTab";
+	}
 }

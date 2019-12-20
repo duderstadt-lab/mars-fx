@@ -34,12 +34,13 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
-public interface SubPlot {
+public interface SubPlot extends JsonConvertibleRecord {
 	public MarsNumericAxis getXAxis();
 	public void setXLabel(String xAxisLabel);
 	public MarsNumericAxis getYAxis();

@@ -33,6 +33,8 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -52,6 +54,13 @@ import javafx.scene.layout.StackPane;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.format.DataFormatDetector;
+import com.fasterxml.jackson.core.format.DataFormatMatcher;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.jfoenix.controls.JFXTabPane;
 
 import javafx.beans.value.ChangeListener;
@@ -75,10 +84,18 @@ import javafx.stage.FileChooser;
 
 import javafx.concurrent.Task;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.controlsfx.control.MaskerPane;
@@ -113,9 +130,11 @@ import de.mpg.biochem.mars.fx.util.*;
 
 import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsPosition;
+import de.mpg.biochem.mars.util.MarsUtil;
 
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
-		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> implements MoleculeArchiveWindow {
+		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
 	
 	@Parameter
     protected MoleculeArchiveService moleculeArchiveService;
@@ -146,6 +165,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     protected I imageMetadataTab;
     protected M moleculesTab;
     protected SettingsTab settingsTab;
+    
+    protected static JsonFactory jfactory = new JsonFactory();
+    
+    protected Set<MoleculeArchiveTab> tabSet;
     
     protected MarsBdvFrame<?> marsBdvFrame;
 
@@ -230,6 +253,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         buildMenuBar();
         buildTabs();
         
+        //Now add tabs to container
+        tabSet.forEach(maTab -> tabsContainer.getTabs().add(maTab.getTab()));
+        
+        fireEvent(new InitializeMoleculeArchiveEvent(archive));
+        
         borderPane.setCenter(tabsContainer);
         Scene scene = new Scene(maskerStackPane);
 
@@ -237,20 +265,31 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	}
 	
 	protected void buildTabs() {
+		tabSet = new LinkedHashSet<MoleculeArchiveTab>();
+		
 		dashboardTab = new DashboardTab();
         dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
+        tabSet.add(dashboardTab);
 
-        commentsTab = new CommentsTab();
-        settingsTab = new SettingsTab(prefService);
-        
         imageMetadataTab = createImageMetadataTab();
+        tabSet.add(imageMetadataTab);
+        
         moleculesTab = createMoleculesTab();
+        tabSet.add(moleculesTab);
+        
+        commentsTab = new CommentsTab();
+        tabSet.add(commentsTab);
+        
+        settingsTab = new SettingsTab(prefService);
+        tabSet.add(settingsTab);
 
         //fire save events for tabs as they are left and update events for new tabs
         tabsContainer.getSelectionModel().selectedItemProperty().addListener(
     		new ChangeListener<Tab>() {
     			@Override
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+    				tabSet.stream().filter(maTab -> newValue == maTab.getTab()).findFirst().ifPresent(maTab -> updateMenus(maTab.getMenus()));
+    					
     				if (oldValue == commentsTab.getTab()) {
     					commentsTab.saveComments();
     				} else if (oldValue == imageMetadataTab.getTab()) {
@@ -273,28 +312,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     				}
     				
 	    			if (newValue == imageMetadataTab.getTab()) {
-	    				updateMenus(imageMetadataTab.getMenus());
 						imageMetadataTab.fireEvent(new RefreshMetadataEvent());
 					} else if (newValue == moleculesTab.getTab()) {
-						updateMenus(moleculesTab.getMenus());
 						moleculesTab.fireEvent(new RefreshMoleculeEvent());
-					} else if (newValue == commentsTab.getTab()) {
-						updateMenus(commentsTab.getMenus());
-					} else if (newValue == settingsTab.getTab()) {
-						updateMenus(settingsTab.getMenus());
-					} else if (newValue == dashboardTab.getTab()) {
-						updateMenus(dashboardTab.getMenus());
-					}
+					} 
     			}
     		});
-        
-          tabsContainer.getTabs().add(dashboardTab.getTab());
-          tabsContainer.getTabs().add(imageMetadataTab.getTab());
-          tabsContainer.getTabs().add(moleculesTab.getTab());
-          tabsContainer.getTabs().add(commentsTab.getTab());
-          tabsContainer.getTabs().add(settingsTab.getTab());
-        
-        fireEvent(new InitializeMoleculeArchiveEvent(archive));
     }
 	
 	protected void buildMenuBar() {
@@ -584,6 +607,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	     	            @Override
 	     	            public Void call() throws Exception {
 	     	            	archive.save();	 
+	     	            	saveState();
 	     	                return null;
 	     	            }
 	     	        };
@@ -852,15 +876,51 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	unlock();
     }
     
-    protected void saveState(File stateFile) {
-    	//Will write fields for each tab
-    	//and let the tab internally define the settings to save...
-    	//But first will write some global settings
+    //Creates settings input and output maps to save the current state of the program.
+    @Override
+	protected void createIOMaps() {
+    	//Output Map
+		//outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator ->
+		//	jGenerator.writeStringField("Window", UID), IOException.class));
     	
+    	
+		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
+			outputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jGenerator -> {
+				jGenerator.writeFieldName(moleculeArchiveTab.getName());
+				moleculeArchiveTab.toJSON(jGenerator);
+			}, IOException.class));
+		}
+		
+		//Input Map
+		//inputMap.put("Window", MarsUtil.catchConsumerException(jParser -> {
+	    //    window = jParser.getText();
+		//}, IOException.class));
+		
+		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
+			inputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jParser -> {
+				moleculeArchiveTab.fromJSON(jParser);
+		 	}, IOException.class));
+		}
+	}
+    
+    protected void saveState() throws IOException {
+		File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(stateFile));
+		JsonGenerator jGenerator = jfactory.createGenerator(stream);
+		jGenerator.useDefaultPrettyPrinter();
+		toJSON(jGenerator);
+		jGenerator.close();
+		stream.flush();
+		stream.close();
     }
     
-    protected void loadState(File stateFile) {
-    	
+    protected void loadState() throws IOException {
+    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
+		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
+	    JsonParser jParser = jfactory.createParser(inputStream);
+	    fromJSON(jParser);
+		jParser.close();
+		inputStream.close();
     }
 
     public void fireEvent(Event event) {

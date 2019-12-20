@@ -38,4 +38,5 @@ public interface MoleculeArchiveTab extends MoleculeArchiveEventHandler, JsonCon
 	public ArrayList<Menu> getMenus();
 	public Node getNode();
 	public Tab getTab();
+	public String getName();
 }

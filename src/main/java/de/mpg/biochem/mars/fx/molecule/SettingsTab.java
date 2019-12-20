@@ -293,4 +293,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public String getName() {
+		return "SettingsTab";
+	}
 }

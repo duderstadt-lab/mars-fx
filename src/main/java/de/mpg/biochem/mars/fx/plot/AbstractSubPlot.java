@@ -68,6 +68,7 @@ import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.table.MarsTable;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
@@ -80,7 +81,7 @@ import javafx.util.StringConverter;
 
 import javafx.scene.paint.Color;
 
-public abstract class AbstractSubPlot implements SubPlot {
+public abstract class AbstractSubPlot extends AbstractJsonConvertibleRecord implements SubPlot {
 	protected MarsNumericAxis xAxis, yAxis;
 	protected XYChart chartPane;
 	

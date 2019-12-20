@@ -27,6 +27,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +66,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -264,6 +266,18 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	public void handle(MoleculeEvent event) {
 		event.invokeHandler(this);
 		event.consume();
+	}
+	
+	@Override
+	protected void createIOMaps() {
+		outputMap.put("PlotSeries", MarsUtil.catchConsumerException(jGenerator -> {
+			if (getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
+				jGenerator.writeArrayFieldStart("PlotSeries");
+				for (PlotSeries plotSeries : getDatasetOptionsPane().getPlotSeriesList()) 
+					plotSeries.toJSON(jGenerator);
+				jGenerator.writeEndArray();
+			}
+	 	}, IOException.class));
 	}
 
 	@Override

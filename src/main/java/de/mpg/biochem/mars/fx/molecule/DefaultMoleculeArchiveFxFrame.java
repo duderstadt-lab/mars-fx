@@ -46,4 +46,5 @@ public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFram
 	public DefaultMoleculesTab createMoleculesTab() {
 		return new DefaultMoleculesTab();
 	}
+
 }

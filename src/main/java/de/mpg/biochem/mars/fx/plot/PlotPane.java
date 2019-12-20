@@ -26,6 +26,8 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import java.util.ArrayList;
+
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -37,5 +39,6 @@ import javafx.scene.Node;
 public interface PlotPane {
 	public StyleSheetUpdater getStyleSheetUpdater();
 	public Node getNode();
+	public ArrayList<SubPlot> getCharts();
 	public void fireEvent(Event event);
 }

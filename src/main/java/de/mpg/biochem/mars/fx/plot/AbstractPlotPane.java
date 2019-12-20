@@ -410,6 +410,11 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 		return this;
 	}
 	
+	@Override
+	public ArrayList<SubPlot> getCharts() {
+		return charts;
+	}
+	
 	public BooleanProperty fixXBoundsProperty() {
 		return fixXBounds;
 	}

@@ -305,4 +305,9 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	public void onMoleculeArchiveSavingEvent() {
 		saveCurrentRecord();
 	}
+	
+	@Override
+	public String getName() {
+		return "ImageMetadataTab";
+	}
 }

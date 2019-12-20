@@ -26,11 +26,15 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import java.io.IOException;
+
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsUtil;
 import de.gsi.chart.XYChart;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
@@ -44,7 +48,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.shape.Rectangle;
 
-public class PlotSeries {
+public class PlotSeries extends AbstractJsonConvertibleRecord {
 		private ComboBox<String> yColumnField, xColumnField, typeField;
 		private ComboBox<String> lineStyle;
 		private JFXColorPicker colorField, segmentColorField;
@@ -234,6 +238,12 @@ public class PlotSeries {
 		
 		public MarsTable getDataTable() {
 			return dataTable;
+		}
+
+		@Override
+		protected void createIOMaps() {
+			outputMap.put("xColumn", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("xColumn", getXColumn()), IOException.class));
 		}
 }
 
