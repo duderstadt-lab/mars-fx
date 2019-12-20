@@ -35,8 +35,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.text.Font;
-import de.mpg.biochem.mars.fx.settings.ProjectManager;
-import de.mpg.biochem.mars.fx.settings.ProjectSettings;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.PrefsEnumProperty;
 import de.mpg.biochem.mars.fx.util.PrefsIntegerProperty;
@@ -129,29 +127,7 @@ public class Options
 
 		additionalCSS.setPreferences(options);
 	}
-
-
-	private static Preferences getProjectOptions(File project) {
-		if (project != null) {
-			Preferences projectOptions = ProjectSettings.get(project).getOptions();
-			if (projectOptions != null)
-				return projectOptions;
-		}
-
-		return globalOptions;
-	}
 	
-
-	static boolean isStoreInProject() {
-		return options != globalOptions;
-	}
-
-	static void storeInProject(boolean enable) {
-		ProjectSettings projectSettings = ProjectSettings.get(ProjectManager.getActiveProject());
-		projectSettings.enableOptions(enable);
-		set(enable ? projectSettings.getOptions() : globalOptions);
-	}
-
 	/**
 	 * Check whether font family is null or invalid (family not available on system)
 	 * and search for an available family.

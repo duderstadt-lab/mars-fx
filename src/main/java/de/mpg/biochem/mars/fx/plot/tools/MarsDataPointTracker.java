@@ -4,21 +4,14 @@ package de.mpg.biochem.mars.fx.plot.tools;
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-import java.util.LinkedList;
-import java.util.List;
-
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
 import de.gsi.chart.plugins.AbstractDataFormattingPlugin;
 import de.gsi.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
-import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;

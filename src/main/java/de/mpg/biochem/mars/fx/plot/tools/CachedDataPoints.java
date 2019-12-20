@@ -1,6 +1,5 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
-
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 

@@ -48,6 +48,7 @@ import javafx.scene.control.Label;
  * </ul>
  *
  * @author R.J. Steinhagen
+ * @author Karl Duderstadt - many changes to all for segment plotting and custom styling.
  */
 public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParameter<SegmentDataSetRenderer>
         implements Renderer {

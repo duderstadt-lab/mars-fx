@@ -45,6 +45,7 @@ import javafx.scene.paint.Color;
 
 /**
  * @author Karl Tauber
+ * @author Karl Duderstadt
  */
 public class Utils
 {

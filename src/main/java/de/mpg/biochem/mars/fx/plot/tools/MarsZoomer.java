@@ -70,6 +70,8 @@ import javafx.util.Duration;
  * @author Grzegorz Kruk
  * @author rstein - adapted to XYChartPane, corrected some features (mouse zoom events outside canvas, auto-ranging on
  *         zoom-out, scrolling, toolbar)
+ * @author Karl Duderstadt - many small updates and changes. Including allowing removal of slider listeners to prevent
+ * NullPointer exception.
  */
 public class MarsZoomer extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(MarsZoomer.class);
