@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
@@ -43,10 +44,10 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ListCell;
-import javafx.scene.Group;
 import javafx.scene.shape.Line;
 import javafx.scene.control.ContentDisplay;
-import javafx.scene.shape.Rectangle;
+
+import com.fasterxml.jackson.core.JsonParser;
 
 public class PlotSeries extends AbstractJsonConvertibleRecord {
 		private ComboBox<String> yColumnField, xColumnField, typeField;
@@ -56,24 +57,20 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 		private JFXCheckBox drawSegmentsColumn;
 		private RadioButton chartTracking;
 		
-		private MarsTable dataTable;
-		
 		private XYChart chart;
 		
-		private String[] columnHeadings;
+		private Set<String> columnHeadings;
 
 		protected static String[] types = {"Line","Scatter"};
 		
-		public PlotSeries(MarsTable dataTable) {
-			this.dataTable = dataTable;
-			this.columnHeadings = dataTable.getColumnHeadings();
+		public PlotSeries(Set<String> columnHeadings) {
+			this.columnHeadings = columnHeadings;
 			initComponents();
 			load();
 		}
 
-		public PlotSeries(MarsTable dataTable, String xColumn, String yColumn) {
-			this.dataTable = dataTable;
-			this.columnHeadings = dataTable.getColumnHeadings();
+		public PlotSeries(Set<String> columnHeadings, String xColumn, String yColumn) {
+			this.columnHeadings = columnHeadings;
 			initComponents();
 			load();
 			
@@ -235,10 +232,6 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 		public Color getSegmentsColor() {
 			return segmentColorField.getValue();
 		}
-		
-		public MarsTable getDataTable() {
-			return dataTable;
-		}
 
 		@Override
 		protected void createIOMaps() {
@@ -258,10 +251,10 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 			jGenerator.writeStringField("Stroke", getWidth()), IOException.class));
 			outputMap.put("ShowSegments", MarsUtil.catchConsumerException(jGenerator ->
 			jGenerator.writeBooleanField("ShowSegments", drawSegments()), IOException.class));
-			outputMap.put("SegmentColor", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("SegmentColor", getSegmentsColor().toString()), IOException.class));
-			outputMap.put("SegmentStroke", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("SegmentStroke", getSegmentsWidth()), IOException.class));
+			outputMap.put("SegmentsColor", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("SegmentsColor", getSegmentsColor().toString()), IOException.class));
+			outputMap.put("SegmentsStroke", MarsUtil.catchConsumerException(jGenerator ->
+			jGenerator.writeStringField("SegmentsStroke", getSegmentsWidth()), IOException.class));
 			
 			inputMap.put("Track", MarsUtil.catchConsumerException(jParser -> {
 				getTrackingButton().setSelected(jParser.getBooleanValue());
@@ -270,13 +263,32 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 				typeField.getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("xColumn", MarsUtil.catchConsumerException(jParser -> {
+				//Do I need to add the selection in case the first records
+				//table doesn't have it?
 				xColumnField().getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("yColumn", MarsUtil.catchConsumerException(jParser -> {
+				//Do I need to add the selection in case the first records
+				//table doesn't have it?
 				yColumnField().getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("Style", MarsUtil.catchConsumerException(jParser -> {
 				lineStyle().getSelectionModel().select(jParser.getText());
+			}, IOException.class));
+			inputMap.put("Color", MarsUtil.catchConsumerException(jParser -> {
+				getColorField().setValue(Color.web(jParser.getText()));
+			}, IOException.class));
+			inputMap.put("Stroke", MarsUtil.catchConsumerException(jParser -> {
+				getWidthField().setText(jParser.getText());
+			}, IOException.class));
+			inputMap.put("ShowSegments", MarsUtil.catchConsumerException(jParser -> {
+				getDrawSegmentsField().setSelected(jParser.getBooleanValue());
+			}, IOException.class));
+			inputMap.put("SegmentsColor", MarsUtil.catchConsumerException(jParser -> {
+				getSegmentsColorField().setValue(Color.web(jParser.getText()));
+			}, IOException.class));
+			inputMap.put("SegmentsStroke", MarsUtil.catchConsumerException(jParser -> {
+				getSegmentsWidthField().setText(jParser.getText());
 			}, IOException.class));
 		}
 }

@@ -40,7 +40,7 @@ import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 
-public interface SubPlot extends JsonConvertibleRecord {
+public interface SubPlot {
 	public MarsNumericAxis getXAxis();
 	public void setXLabel(String xAxisLabel);
 	public MarsNumericAxis getYAxis();

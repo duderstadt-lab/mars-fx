@@ -26,6 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
@@ -38,7 +39,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 	public MarsTableSubPlot(PlotPane plotPane, String plotTitle, MarsTable table) {
 		super(plotPane, plotTitle);
 		this.table = table;
-		getDatasetOptionsPane().setTable(table);
+		getDatasetOptionsPane().setColumns(new HashSet<String>(table.getColumnHeadingList()));
 		update();
 	}
 	
@@ -83,11 +84,6 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 
 	@Override
 	public void addIndicators(Set<String> AxisList, Set<String> yAxisList) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	protected void createIOMaps() {
 		// TODO Auto-generated method stub
 	}
 }

@@ -32,6 +32,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.controlsfx.control.textfield.CustomTextField;
+
+import com.fasterxml.jackson.core.JsonToken;
+
 import javafx.beans.property.ObjectProperty;
 
 import javafx.scene.layout.StackPane;
@@ -82,7 +85,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.plot.event.*;
 import javax.swing.SwingUtilities;
 
@@ -464,8 +467,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeFieldName("CenterPane");
 			if (moleculeCenterPane instanceof JsonConvertibleRecord)
-				((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
+			((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
 		}, IOException.class));
+		
+		inputMap.put("CenterPane", MarsUtil.catchConsumerException(jParser -> {
+			if (moleculeCenterPane instanceof JsonConvertibleRecord)
+				((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
+	 	}, IOException.class));
 	}
 	
 	public abstract C createMoleculeCenterPane();

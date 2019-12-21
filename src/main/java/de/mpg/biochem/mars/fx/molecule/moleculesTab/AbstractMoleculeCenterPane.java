@@ -32,17 +32,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonToken;
+
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.util.MarsRegion;
 import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -196,14 +201,14 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	@Override
 	protected void createIOMaps() {
-		ArrayList<SubPlot> subplots = plotPane.getCharts();
-
-		outputMap.put("SubPlots", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeArrayFieldStart("SubPlots");
-			for (SubPlot subplot : subplots)
-				subplot.toJSON(jGenerator);
-			jGenerator.writeEndArray();
+		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("PlotPane");
+			plotPane.toJSON(jGenerator);
 		}, IOException.class));
+		
+		inputMap.put("PlotPane", MarsUtil.catchConsumerException(jParser -> {
+			plotPane.fromJSON(jParser);
+	 	}, IOException.class));
 	}
 	
 	public abstract P createPlotPane();

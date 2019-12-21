@@ -30,6 +30,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
@@ -84,14 +85,16 @@ public class DatasetOptionsPane extends VBox {
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
-	private MarsTable table;
 	private final ToggleGroup trackingGroup;
 	
 	private SubPlot subPlot;
+	
+	private Set<String> columns;
 
-	public DatasetOptionsPane(MarsTable table, SubPlot subPlot) {
-		this.table = table;
+	public DatasetOptionsPane(Set<String> columns, SubPlot subPlot) {
 		this.subPlot = subPlot;
+		
+		this.columns = columns;
 		
 		trackingGroup = new ToggleGroup();
 		
@@ -292,8 +295,8 @@ public class DatasetOptionsPane extends VBox {
                 "-fx-max-height: 20px;"
         );
 		addButton.setOnAction(e -> {
-			if (table != null) {
-				PlotSeries defaultPlotSeries = new PlotSeries(table);
+			if (columns != null) {
+				PlotSeries defaultPlotSeries = new PlotSeries(columns);
 				defaultPlotSeries.getTrackingButton().setToggleGroup(trackingGroup);
 				if (plotSeriesList.size() < 1)
 					defaultPlotSeries.getTrackingButton().selectedProperty().set(true);
@@ -349,19 +352,19 @@ public class DatasetOptionsPane extends VBox {
 		*/
 	}
 	
-	public void setTable(MarsTable table) {
-		this.table = table;
+	public void setColumns(Set<String> columns) {
+		this.columns = columns;
 		
 		for (PlotSeries propertiesRow : plotSeriesList) {
 			String xSelection = propertiesRow.xColumnField().getSelectionModel().getSelectedItem();
 			propertiesRow.xColumnField().getItems().clear();
-			propertiesRow.xColumnField().getItems().addAll(table.getColumnHeadings());
+			propertiesRow.xColumnField().getItems().addAll(columns);
 			if (xSelection != null)
 				propertiesRow.xColumnField().getSelectionModel().select(xSelection);
 			
 			String ySelection = propertiesRow.yColumnField().getSelectionModel().getSelectedItem();
 			propertiesRow.yColumnField().getItems().clear();
-			propertiesRow.yColumnField().getItems().addAll(table.getColumnHeadings());
+			propertiesRow.yColumnField().getItems().addAll(columns);
 			if (ySelection != null)
 				propertiesRow.yColumnField().getSelectionModel().select(ySelection);
 		}

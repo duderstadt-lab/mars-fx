@@ -29,6 +29,13 @@ package de.mpg.biochem.mars.fx.plot;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
+import com.fasterxml.jackson.core.JsonToken;
+
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.Zoomer;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
@@ -47,6 +54,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
@@ -83,6 +91,8 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 					archive = e.getArchive();
+					for (SubPlot subplot : charts)
+						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
 			   		e.consume();
 			   	}
 			} 
@@ -118,8 +128,44 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	}
 	
 	@Override
-	public Node getNode() {
-		return this;
+	protected void createIOMaps() {
+		outputMap.put("NumberSubPlots", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeNumberField("NumberSubPlots", charts.size());
+		}, IOException.class));
+		
+		outputMap.put("SubPlots", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeArrayFieldStart("SubPlots");
+			for (SubPlot subplot : charts) {
+				if (subplot.getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
+					jGenerator.writeStartArray();
+					for (PlotSeries plotSeries : subplot.getDatasetOptionsPane().getPlotSeriesList()) 
+						plotSeries.toJSON(jGenerator);
+					jGenerator.writeEndArray();
+				}
+			}
+			jGenerator.writeEndArray();
+		}, IOException.class));
+		
+		inputMap.put("NumberSubPlots", MarsUtil.catchConsumerException(jParser -> {
+	        int numberSubPlots = jParser.getNumberValue().intValue();
+	        int subPlotIndex = 1;
+	        while (subPlotIndex < numberSubPlots) {
+	        	addChart();
+	        	subPlotIndex++;
+	        }
+		}, IOException.class));
+		
+		inputMap.put("SubPlots", MarsUtil.catchConsumerException(jParser -> {
+			int subPlotIndex = 0;
+			while (jParser.nextToken() != JsonToken.END_ARRAY) {
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					PlotSeries series = new PlotSeries(getColumnNames());
+					series.fromJSON(jParser);
+					charts.get(subPlotIndex).getPlotSeriesList().add(series);
+		    	}
+				subPlotIndex++;
+	    	}
+	 	}, IOException.class));
 	}
 
 	@Override
@@ -147,6 +193,14 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		if (molecule != null)
 			subplot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		addChart(subplot);
+	}
+	
+	@Override
+	public Set<String> getColumnNames() {
+		if (archive != null)
+			return archive.getProperties().getColumnSet();
+		else 
+			return new HashSet<String>();
 	}
 	
 	public abstract S createSubPlot();

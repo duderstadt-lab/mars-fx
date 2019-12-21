@@ -263,6 +263,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         
         borderPane.setCenter(tabsContainer);
         Scene scene = new Scene(maskerStackPane);
+        
+        try {
+			loadState();
+		} catch (IOException e) {
+			//TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
         return scene;
 	}

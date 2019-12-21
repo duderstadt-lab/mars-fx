@@ -35,6 +35,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonToken;
+
 import javafx.scene.paint.Color;
 
 import de.gsi.chart.XYChart;
@@ -79,6 +81,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	protected M molecule;
 	protected PlotPane plotPane;
 	
+	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	
 	public AbstractMoleculeSubPlot(PlotPane plotPane, String plotTitle) {
 		super(plotPane, plotTitle);
 		
@@ -97,8 +101,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		});
 	}
 	//For the moment we make a copy...
-	//maybe long-term we should no make a copy to improve performance.
-	//But that might require a bit change in how things are store so....
+	//maybe long-term we should not make a copy to improve performance.
+	//But that might require a bit of a change in how things are store so....
 	
 	public void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
@@ -240,8 +244,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 				newStyleSheet += String.format(".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}", 
 						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
 				
-				newStyleSheet += String.format(".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
-						index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
+				//newStyleSheet += String.format(".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n", 
+				//		index, Math.round(color.getRed()*255), Math.round(color.getGreen()*255), Math.round(color.getBlue()*255), color.getOpacity(), poi.getStroke());
 				
 				getChart().getPlugins().add(yValueIndicator);
 			}
@@ -267,18 +271,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		event.invokeHandler(this);
 		event.consume();
 	}
-	
-	@Override
-	protected void createIOMaps() {
-		outputMap.put("PlotSeries", MarsUtil.catchConsumerException(jGenerator -> {
-			if (getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
-				jGenerator.writeArrayFieldStart("PlotSeries");
-				for (PlotSeries plotSeries : getDatasetOptionsPane().getPlotSeriesList()) 
-					plotSeries.toJSON(jGenerator);
-				jGenerator.writeEndArray();
-			}
-	 	}, IOException.class));
-	}
 
 	@Override
 	public void fireEvent(Event event) {
@@ -290,7 +282,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
 		removeIndicators();
-		getDatasetOptionsPane().setTable(molecule.getDataTable());
 		for (ChartPlugin plugin : getChart().getPlugins())
 			if (plugin instanceof MarsMoleculePlotPlugin)
 				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);

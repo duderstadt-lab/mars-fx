@@ -81,7 +81,7 @@ import javafx.util.StringConverter;
 
 import javafx.scene.paint.Color;
 
-public abstract class AbstractSubPlot extends AbstractJsonConvertibleRecord implements SubPlot {
+public abstract class AbstractSubPlot implements SubPlot {
 	protected MarsNumericAxis xAxis, yAxis;
 	protected XYChart chartPane;
 	
@@ -93,7 +93,7 @@ public abstract class AbstractSubPlot extends AbstractJsonConvertibleRecord impl
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
-		datasetOptionsPane = createDatasetOptionsPane();
+		datasetOptionsPane = createDatasetOptionsPane(plotPane.getColumnNames());
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle(plotTitle);
@@ -134,8 +134,8 @@ public abstract class AbstractSubPlot extends AbstractJsonConvertibleRecord impl
 		chartPane.getGridRenderer().getVerticalMajorGrid().setStroke(chartPane.getGridRenderer().getVerticalMajorGrid().getStroke());
 	}
 	
-	protected DatasetOptionsPane createDatasetOptionsPane() {
-		return new DatasetOptionsPane(getDataTable(), this);
+	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
+		return new DatasetOptionsPane(columns, this);
 	}
 	
 	protected MarsNumericAxis createAxis() {

@@ -27,18 +27,17 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.event.Event;
 import javafx.scene.Node;
 
-public interface PlotPane {
+public interface PlotPane extends JsonConvertibleRecord {
 	public StyleSheetUpdater getStyleSheetUpdater();
 	public Node getNode();
 	public ArrayList<SubPlot> getCharts();
+	public Set<String> getColumnNames();
 	public void fireEvent(Event event);
 }

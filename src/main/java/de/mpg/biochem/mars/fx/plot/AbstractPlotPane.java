@@ -67,12 +67,14 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.beans.value.ChangeListener;
@@ -92,7 +94,7 @@ import javafx.scene.control.TextField;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
+public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord implements PlotPane {
 	
 	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
 		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
@@ -100,6 +102,8 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	protected ArrayList<SubPlot> charts;
 	protected ArrayList<Action> tools;
 	protected ToolBar toolBar;
+	
+	protected BorderPane rootBorderPane;
 	
 	protected VBox chartsPane;
 	
@@ -126,19 +130,21 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 	public AbstractPlotPane() {
 		if (styleSheetUpdater == null)
 			styleSheetUpdater = new StyleSheetUpdater();
+		
+		rootBorderPane = new BorderPane();
 
 		plotOptionsPane = new PlotOptionsPane();
 		charts = new ArrayList<SubPlot>();
 		tools = new ArrayList<Action>();
 		chartsPane = new VBox();
-		setCenter(chartsPane);
+		rootBorderPane.setCenter(chartsPane);
 		
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
 		fixYBounds.setValue(false);
 		
 		buildTools();
-		setTop(createToolBar());
+		rootBorderPane.setTop(createToolBar());
 	}
 	
 	protected void buildTools() {
@@ -407,7 +413,12 @@ public abstract class AbstractPlotPane extends BorderPane implements PlotPane {
 
 	@Override
 	public Node getNode() {
-		return this;
+		return rootBorderPane;
+	}
+	
+	@Override
+	public void fireEvent(Event event) {
+		getNode().fireEvent(event);
 	}
 	
 	@Override
