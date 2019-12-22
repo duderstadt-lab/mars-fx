@@ -925,6 +925,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     protected void loadState() throws IOException {
     	File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
+    	if (!stateFile.exists())
+    		return;
 		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
 	    JsonParser jParser = jfactory.createParser(inputStream);
 	    fromJSON(jParser);

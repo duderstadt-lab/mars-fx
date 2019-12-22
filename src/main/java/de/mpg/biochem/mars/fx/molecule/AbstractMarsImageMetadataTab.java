@@ -283,15 +283,21 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	@Override
 	public void onMoleculeArchiveUnlockEvent() {
 		metaIndexTable.getSelectionModel().selectedItemProperty().removeListener(metaIndexTableListener);
+    	String currentUID = "";
+    	if (metaIndexTable.getItems().size() > 0)
+    		currentUID = metaIndexTable.getSelectionModel().getSelectedItem().getUID();
     	metaRowList.clear();
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
+    		int newIndex = 0;
     		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
-    			metaRowList.add(new MetaIndexRow(index));
+    			MetaIndexRow row = new MetaIndexRow(index);
+    			metaRowList.add(row);
+	        	if (row.getUID().equals(currentUID))
+	        		newIndex = index;
     		}
 		
-    		MetaIndexRow newMetaIndexRow = new MetaIndexRow(0);
-    		marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
-    		metaIndexTable.getSelectionModel().select(0);
+    		marsImageMetadata = (I) archive.getImageMetadata(newIndex);
+    		metaIndexTable.getSelectionModel().select(newIndex);
         	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
         	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
     	}

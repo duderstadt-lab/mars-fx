@@ -513,15 +513,21 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	@Override
 	public void onMoleculeArchiveUnlockEvent() {
     	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
+    	String currentUID = "";
+    	if (moleculeIndexTable.getItems().size() > 0)
+    		currentUID = moleculeIndexTable.getSelectionModel().getSelectedItem().getUID();
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
+			int newIndex = 0;
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
-	        	moleculeRowList.add(new MoleculeIndexRow(index));
+	    		MoleculeIndexRow row = new MoleculeIndexRow(index);
+	        	moleculeRowList.add(row);
+	        	if (row.getUID().equals(currentUID))
+	        		newIndex = index;
 	        }
 	    	
-    		MoleculeIndexRow newMoleculeIndexRow = new MoleculeIndexRow(0);
-    		molecule = (M) archive.get(newMoleculeIndexRow.getUID());
-    		moleculeIndexTable.getSelectionModel().select(0);
+    		molecule = (M) archive.get(newIndex);
+    		moleculeIndexTable.getSelectionModel().select(newIndex);
 	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     	}

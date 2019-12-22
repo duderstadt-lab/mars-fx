@@ -395,8 +395,20 @@ public class DatasetOptionsPane extends VBox {
 		return titleField.getText();
 	}
 	
+	public void setTitle(String title) {
+		titleField.setText(title);
+	}
+	
 	public String getXAxisName() {
 		return xNameField.getText();
+	}
+	
+	public void setXAxisName(String name) {
+		xNameField.setText(name);
+	}
+
+	public void setYAxisName(String name) {
+		yNameField.setText(name);
 	}
 	
 	public String getYAxisName() {
@@ -405,6 +417,26 @@ public class DatasetOptionsPane extends VBox {
 	
 	public void setSubPlot(SubPlot subPlot) {
 		this.subPlot = subPlot;
+	}
+	
+	public String getSelectedIndicator() {
+		if (isMoleculeIndicators())
+			return "Molecules";
+		else if (isMetadataIndicators())
+			return "Metadata";
+		else if (isNoneIndicators())
+			return "None";
+		
+		return "";
+	}
+	
+	public void setSelectedIndicator(String name) {
+		if (name.equals("Molecules"))
+			indicatorSourceGroup.selectToggle(radioButtonMolecules);
+		else if (name.equals("Metadata"))
+			indicatorSourceGroup.selectToggle(radioButtonMetadata);
+		else if (name.equals("None"))
+			indicatorSourceGroup.selectToggle(radioButtonNone);
 	}
 	
 	public boolean isMoleculeIndicators() {
