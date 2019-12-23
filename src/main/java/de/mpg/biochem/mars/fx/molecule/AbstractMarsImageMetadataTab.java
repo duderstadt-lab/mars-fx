@@ -26,6 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -34,6 +35,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -248,6 +250,15 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
 		
+		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
+	        String moleculeSelectionUID = jParser.getText();
+	    	for (int index = 0; index < filteredData.size(); index++) {
+	    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+	    			metaIndexTable.getSelectionModel().select(index);
+	    			metaIndexTable.scrollTo(index);
+	    		}
+	    	}
+		}, IOException.class));
 	}
 	
 	public abstract C createMetadataCenterPane();
@@ -288,16 +299,20 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     		currentUID = metaIndexTable.getSelectionModel().getSelectedItem().getUID();
     	metaRowList.clear();
     	if (archive.getNumberOfImageMetadataRecords() > 0) {
-    		int newIndex = 0;
     		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
     			MetaIndexRow row = new MetaIndexRow(index);
     			metaRowList.add(row);
-	        	if (row.getUID().equals(currentUID))
-	        		newIndex = index;
     		}
+    		
+    		int newIndex = 0;
+	    	for (int index = 0; index < filteredData.size(); index++) {
+	    		if (filteredData.get(index).getUID().equals(currentUID))
+	    			newIndex = index;
+	    	}
 		
-    		marsImageMetadata = (I) archive.getImageMetadata(newIndex);
+    		
     		metaIndexTable.getSelectionModel().select(newIndex);
+    		marsImageMetadata = (I) archive.getImageMetadata(metaIndexTable.getSelectionModel().getSelectedItem().getUID());
         	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
         	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
     	}

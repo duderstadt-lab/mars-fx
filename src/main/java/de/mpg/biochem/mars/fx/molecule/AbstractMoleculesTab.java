@@ -464,12 +464,23 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 	@Override
 	protected void createIOMaps() {
+		outputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jGenerator ->
+		jGenerator.writeStringField("MoleculeSelectionUID", molecule.getUID()), IOException.class));
 		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeFieldName("CenterPane");
 			if (moleculeCenterPane instanceof JsonConvertibleRecord)
 			((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
 		}, IOException.class));
 		
+		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
+	        String moleculeSelectionUID = jParser.getText();
+	    	for (int index = 0; index < filteredData.size(); index++) {
+	    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+	    			moleculeIndexTable.getSelectionModel().select(index);
+	    			moleculeIndexTable.scrollTo(index);
+	    		}
+	    	}
+		}, IOException.class));
 		inputMap.put("CenterPane", MarsUtil.catchConsumerException(jParser -> {
 			if (moleculeCenterPane instanceof JsonConvertibleRecord)
 				((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
@@ -514,20 +525,23 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public void onMoleculeArchiveUnlockEvent() {
     	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
     	String currentUID = "";
-    	if (moleculeIndexTable.getItems().size() > 0)
+    	if (moleculeIndexTable.getSelectionModel().getSelectedItem() != null)
     		currentUID = moleculeIndexTable.getSelectionModel().getSelectedItem().getUID();
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
-			int newIndex = 0;
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
 	    		MoleculeIndexRow row = new MoleculeIndexRow(index);
 	        	moleculeRowList.add(row);
-	        	if (row.getUID().equals(currentUID))
-	        		newIndex = index;
 	        }
 	    	
-    		molecule = (M) archive.get(newIndex);
+	    	int newIndex = 0;
+	    	for (int index = 0; index < filteredData.size(); index++) {
+	    		if (filteredData.get(index).getUID().equals(currentUID))
+	    			newIndex = index;
+	    	}
+
     		moleculeIndexTable.getSelectionModel().select(newIndex);
+    		molecule = (M) archive.get(moleculeIndexTable.getSelectionModel().getSelectedItem().getUID());
 	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
     	}
