@@ -765,6 +765,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		
 		if (virtualDirectory != null) {	
 			lockFX("Saving Virtual Store Copy...");
+			
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			Task<Void> task = new Task<Void>() {
  	            @Override
@@ -924,6 +925,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
     
     protected void loadState() throws IOException {
+    	if (archive.getFile() == null)
+    		return;
+    	
     	File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
     	if (!stateFile.exists())
     		return;

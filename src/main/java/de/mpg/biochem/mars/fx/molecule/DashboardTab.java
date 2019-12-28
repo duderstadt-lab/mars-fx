@@ -29,11 +29,16 @@ package de.mpg.biochem.mars.fx.molecule;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
+import javafx.geometry.VPos;
+
 import java.util.ArrayList;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.ArchivePropertiesWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.DashboardWidget;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -50,80 +55,78 @@ import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
 import javafx.scene.layout.VBox;
 import javafx.application.Platform;
-
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.paint.Color;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.BorderWidths;
 
+import javafx.scene.layout.FlowPane;
+
 public class DashboardTab extends AbstractMoleculeArchiveTab {
     protected ScrollPane scrollPane;
     
-    protected JFXMasonryPane masonryPane;
+    protected FlowPane flowPane;
+    
+    protected ObservableList<DashboardWidget> widgets = FXCollections.observableArrayList();
 	
     public DashboardTab() {
     	super();
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
-    	masonryPane = new JFXMasonryPane();
+    	flowPane = new FlowPane();
     	scrollPane = new ScrollPane();
     	
-    	scrollPane.setContent(masonryPane);
-        JFXScrollPane.smoothScrolling(scrollPane);
+    	flowPane.setPadding(new Insets(10, 10, 10, 10));
+    	
+    	flowPane.setVgap(10);
+    	flowPane.setHgap(10);
+    	
+    	flowPane.setColumnHalignment(HPos.LEFT);
+    	flowPane.setRowValignment(VPos.TOP);
+    	
+    	scrollPane.setContent(flowPane);
+    	
+    	scrollPane.setFitToWidth(true);
         
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
         
     	getTab().setContent(scrollPane);
     }
     
-    public BorderPane buildInfoCard() {
-    	BorderPane borderPane = new BorderPane();
-    	VBox vbox = new VBox();
-        double width = 450;
-        borderPane.setMinWidth(width);
-        double height = 200;
-        borderPane.setMinHeight(height);
-        
-        borderPane.setPadding(new Insets(15, 15, 15, 15));
-        vbox.setBorder(new Border(new BorderStroke(Color.BLACK, 
-                BorderStrokeStyle.SOLID, new CornerRadii(20), new BorderWidths(1))));
-        vbox.setPadding(new Insets(20, 20, 20, 20));
-		vbox.setSpacing(5);
-		
-		BorderPane iconContainer = new BorderPane();
-		iconContainer.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "2em"));
-
-		vbox.getChildren().add(iconContainer);
-		
-        vbox.getChildren().add(new Label(archive.getName()));
-        vbox.getChildren().add(new Label(archive.getClass().getName()));
-        vbox.getChildren().add(new Label(archive.getNumberOfMolecules() + " Molecules"));
-        vbox.getChildren().add(new Label(archive.getNumberOfImageMetadataRecords() + " Metadata"));
-        
-		if (archive.isVirtual()) {
-			vbox.getChildren().add(new Label("Virtual memory store"));
-		} else {
-			vbox.getChildren().add(new Label("Normal memory"));
-		}
-		
-		borderPane.setCenter(vbox);
-		
-		return borderPane;
-    }
-    
     public Node getNode() {
-		return scrollPane;
+		return flowPane;
 	}
     
 	public ArrayList<Menu> getMenus() {
 		return null;
 	}
 	
+	public ObservableList<DashboardWidget> getWidgets() {
+		return widgets;
+	}
+	
+	public void addWidget(DashboardWidget widget) {
+		widgets.add(widget);
+		flowPane.getChildren().add(widget.getNode());
+	}
+	
+	public void removeWidget(DashboardWidget widget) {
+		widgets.remove(widget);
+		flowPane.getChildren().remove(widget.getNode());
+	}
+	
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;
-    	masonryPane.getChildren().add(buildInfoCard());    
+    	
+    	ArchivePropertiesWidget propertiesWidget = new ArchivePropertiesWidget(archive, this);
+    	flowPane.getChildren().add(propertiesWidget.getNode());    
+    	
+    	ArchivePropertiesWidget propertiesWidget2 = new ArchivePropertiesWidget(archive, this);
+    	flowPane.getChildren().add(propertiesWidget2.getNode());    
     }
 
 	@Override

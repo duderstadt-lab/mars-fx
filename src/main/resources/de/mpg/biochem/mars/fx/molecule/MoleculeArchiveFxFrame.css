@@ -48,6 +48,34 @@
     -fx-accent: black;
 }
 
+/* set default fill of svg path */
+.icon-button .button-icon {
+    -fx-stroke: #888888;
+}
+
+/* set default fill of svg path */
+.icon-button:focused {
+    -fx-background-color: lightblue;
+    -fx-background-radius: 0;
+}
+
+/* remove default button style & set size */
+.icon-button {
+    -fx-background-color: transparent, transparent, transparent, transparent, transparent;
+    -fx-pref-height: 20;
+    -fx-pref-width: 20;
+    -fx-min-height: 20;
+    -fx-min-width: 20;
+    -fx-max-height: 20;
+    -fx-max-width: 20;
+}
+
+/* modify svg path fill for hovered/pressed button */
+.icon-button:pressed .button-icon,
+.icon-button:hover .button-icon {
+    -fx-stroke: #444444;
+}
+
 /*******************************************************************************
  *                                                                             *
  * Custom Icons                                                                *

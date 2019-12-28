@@ -248,7 +248,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
 	
 	@Override
 	protected void createIOMaps() {
-		// TODO Auto-generated method stub
+		outputMap.put("SearchField", MarsUtil.catchConsumerException(jGenerator ->
+		jGenerator.writeStringField("SearchField", filterField.getText()), IOException.class));
 		
 		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
 	        String moleculeSelectionUID = jParser.getText();

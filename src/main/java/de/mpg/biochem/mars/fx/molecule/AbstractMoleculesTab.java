@@ -85,11 +85,9 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.plot.event.*;
 import javax.swing.SwingUtilities;
 
-import javafx.concurrent.Task;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
@@ -464,6 +462,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 	@Override
 	protected void createIOMaps() {
+		outputMap.put("SearchField", MarsUtil.catchConsumerException(jGenerator ->
+		jGenerator.writeStringField("SearchField", filterField.getText()), IOException.class));
 		outputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jGenerator ->
 		jGenerator.writeStringField("MoleculeSelectionUID", molecule.getUID()), IOException.class));
 		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
@@ -472,6 +472,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 			((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
 		}, IOException.class));
 		
+		inputMap.put("SearchField", MarsUtil.catchConsumerException(jParser ->
+			filterField.setText(jParser.getText()), IOException.class));
 		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
 	        String moleculeSelectionUID = jParser.getText();
 	    	for (int index = 0; index < filteredData.size(); index++) {
