@@ -58,12 +58,14 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         barChart = new XYChart(xAxis, yAxis);
         barChart.setAnimated(false);
         barChart.getRenderers().clear();
-        //final SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
         final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
         renderer.setPolyLineStyle(LineStyle.NONE);
         renderer.setDrawBars(true);
         renderer.setBarWidthPercentage(70);
         renderer.setDrawMarker(false);
+        
+        //Make sure this is set to false. Otherwise second to last points seems to be lost :(...
+        renderer.pointReductionProperty().set(false);
         barChart.getRenderers().add(renderer);
         barChart.legendVisibleProperty().set(false);
         barChart.horizontalGridLinesVisibleProperty().set(false);
@@ -98,19 +100,20 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 		
 		final List<String> categories = new ArrayList<>();
         
-        HashMap<String, Integer> tagFrequency = new HashMap<String, Integer>();
+        HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
         
         archive.getMoleculeUIDs().stream().forEach(UID -> {
         	Molecule molecule = archive.get(UID);
-        	for (String tag : molecule.getTags())
-        		if (tagFrequency.containsKey(tag))
+        	for (String tag : molecule.getTags()) {
+        		if (tagFrequency.containsKey(tag)) {
         			tagFrequency.put(tag, tagFrequency.get(tag) + 1);
-    			else 
-    				tagFrequency.put(tag, 1);
+        		} else 
+    				tagFrequency.put(tag, 1.0);
+        	}
         });
         
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        dataSet.setStyle("Bar");
+        dataSet.setStyle("Line");
         
         int index = 0;
         for (String tag : tagFrequency.keySet()) {
@@ -118,7 +121,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         	dataSet.add(index, tagFrequency.get(tag));
         	index++;
         }
-   
+        
         xAxis.setCategories(categories);
         
         barChart.getDatasets().add(dataSet);

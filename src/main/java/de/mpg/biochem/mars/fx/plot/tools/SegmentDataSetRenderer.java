@@ -211,16 +211,27 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                     localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
                             indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
                 }
+                
                 stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
 
                 // invoke data reduction algorithm
                 localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
                         getMinRequiredReductionSize());
-            	
+                
             	if (dataSet.getStyle().equals("Scatter"))
             		drawScatter(gc, localCachedPoints, color, width);
                 else
                 	drawPolyLine(gc, localCachedPoints, color, width, getDashPattern(lineStyle));
+            	
+            	
+            	//Drop in for testing
+            	System.out.println("dataset size " + dataSet.getDataCount());
+            	for (int i=0; i<dataSet.getDataCount();i++)
+            		System.out.println("dataset x " + dataSet.get(0, i) + " y " + dataSet.get(1, i));
+            	
+            	System.out.println("Cache size " + localCachedPoints.actualDataCount);
+            	for (int i=0; i<localCachedPoints.actualDataCount;i++)
+            		System.out.println("cache x " + localCachedPoints.xValues[i] + " y " + localCachedPoints.yValues[i]);
             	
             	if (dataSet.getStyle().equals("Bar"))
             		drawBars(gc, localCachedPoints);

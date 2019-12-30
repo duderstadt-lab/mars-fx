@@ -125,7 +125,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	scrollPane = new ScrollPane();
     	scrollPane.setContent(widgetPane);
     	scrollPane.setFitToWidth(true);
-    	JFXScrollPane.smoothScrolling(scrollPane);
+    	//JFXScrollPane.smoothScrolling(scrollPane);
     	borderPane.setCenter(scrollPane);
     	
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
