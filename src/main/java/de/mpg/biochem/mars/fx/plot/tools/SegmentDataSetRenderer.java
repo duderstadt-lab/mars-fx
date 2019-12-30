@@ -110,7 +110,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         final double xMax = xAxis.getValueForDisplay(xAxisWidth);
 
         ProcessingProfiler.getTimeDiff(start, "init");
-
+        
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
         	final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
@@ -156,8 +156,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 	indexMax = dataSet.getDataCount();
                 }
 
-            	final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(),
-                        true);
+            	final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax, dataSet.getDataCount(), true);
 
             	// compute local screen coordinates
                 final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
@@ -223,11 +222,14 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 else
                 	drawPolyLine(gc, localCachedPoints, color, width, getDashPattern(lineStyle));
             	
+            	if (dataSet.getStyle().equals("Bar"))
+            		drawBars(gc, localCachedPoints);
+            	
             	stopStamp = ProcessingProfiler.getTimeStamp();
 
                 localCachedPoints.release();
                 ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
-            }         
+            }
         } // end of 'dataSetIndex' loop
         	
         ProcessingProfiler.getTimeDiff(start);

@@ -2,7 +2,9 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
+import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -10,14 +12,13 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
 import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.BorderWidths;
-import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	
@@ -44,8 +45,15 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 		} else {
 			vbox.getChildren().add(new Label("Normal memory"));
 		}
+		vbox.setPrefSize(250, 250);
 		
-		rootPane.setCenter(vbox);
+		Tab chartTab = new Tab();
+		
+		getTabPane().getTabs().add(chartTab);
+		
+        chartTab.setContent(vbox);
+        
+        rootPane.setPrefSize(250, 250);
 	}
 
 	@Override
@@ -61,6 +69,11 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public GlyphIcons getIcon() {
+		return INFO_CIRCLE;
 	}
 
 }

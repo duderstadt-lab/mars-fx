@@ -26,49 +26,46 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-import javafx.geometry.HPos;
 import javafx.geometry.Insets;
-import javafx.geometry.VPos;
 
 import java.util.ArrayList;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.ArchivePropertiesWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.CategoryChartWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.DashboardWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
+import de.mpg.biochem.mars.fx.util.Action;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToolBar;
+
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
-import javafx.scene.layout.VBox;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.layout.BorderStroke;
-import javafx.scene.paint.Color;
-import javafx.scene.layout.BorderStrokeStyle;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.BorderWidths;
 
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
-    protected ScrollPane scrollPane;
-    
-    protected FlowPane flowPane;
+	private BorderPane borderPane;
+	
+    private ScrollPane scrollPane;
+    private JFXMasonryPane widgetPane;
+    private ToolBar toolbar;
     
     protected ObservableList<DashboardWidget> widgets = FXCollections.observableArrayList();
 	
@@ -76,29 +73,73 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	super();
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
-    	flowPane = new FlowPane();
+    	borderPane = new BorderPane();
+    	
+    	Action archivePropertiesWidget = new Action("Properties", null, INFO_CIRCLE,
+				e -> {
+					ArchivePropertiesWidget propertiesWidget = new ArchivePropertiesWidget(archive, this);
+			    	addWidget(propertiesWidget);
+				});
+    	
+    	Action tagFrequencyWidget = new Action("Tag frequency", null, TAG,
+				e -> {
+			    	addWidget(new TagFrequencyWidget(archive, this));
+				});
+    	
+    	Action categoryChartWidget = new Action("Category Chart", null, BAR_CHART,
+				e -> {
+			    	addWidget(new CategoryChartWidget(archive, this));
+				});
+    	
+    	Action removeAllWidgets = new Action("Remove all", null, BOMB,
+				e -> {
+					widgets.clear();
+					widgetPane.getChildren().clear();
+				});
+    	
+    	Action reloadWidgets = new Action("Reload", null, REFRESH,
+				e -> {
+					for (DashboardWidget widget : widgets)
+						widget.load();
+				});
+    	
+    	toolbar = ActionUtils.createToolBar(
+    			archivePropertiesWidget, 
+    			tagFrequencyWidget,
+    			categoryChartWidget);
+    	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
+    	
+    	
+    	// horizontal spacer
+		Region spacer = new Region();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		toolbar.getItems().add(spacer);
+		
+    	toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets), ActionUtils.createToolBarButton(reloadWidgets));
+    	
+    	borderPane.setTop(toolbar);
+    	  	
+    	widgetPane = new JFXMasonryPane();
+    	widgetPane.setPadding(new Insets(10, 10, 10, 10));
+    	
     	scrollPane = new ScrollPane();
-    	
-    	flowPane.setPadding(new Insets(10, 10, 10, 10));
-    	
-    	flowPane.setVgap(10);
-    	flowPane.setHgap(10);
-    	
-    	flowPane.setColumnHalignment(HPos.LEFT);
-    	flowPane.setRowValignment(VPos.TOP);
-    	
-    	scrollPane.setContent(flowPane);
-    	
+    	scrollPane.setContent(widgetPane);
     	scrollPane.setFitToWidth(true);
-        
+    	JFXScrollPane.smoothScrolling(scrollPane);
+    	borderPane.setCenter(scrollPane);
+    	
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
         
-    	getTab().setContent(scrollPane);
+    	getTab().setContent(borderPane);
     }
     
     public Node getNode() {
-		return flowPane;
+		return borderPane;
 	}
+    
+    public JFXMasonryPane getWidgetPane() {
+    	return widgetPane;
+    }
     
 	public ArrayList<Menu> getMenus() {
 		return null;
@@ -110,23 +151,17 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	
 	public void addWidget(DashboardWidget widget) {
 		widgets.add(widget);
-		flowPane.getChildren().add(widget.getNode());
+		widgetPane.getChildren().add(widget.getNode());
 	}
 	
 	public void removeWidget(DashboardWidget widget) {
 		widgets.remove(widget);
-		flowPane.getChildren().remove(widget.getNode());
+		widgetPane.getChildren().remove(widget.getNode());
 	}
 	
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
-    	this.archive = archive;
-    	
-    	ArchivePropertiesWidget propertiesWidget = new ArchivePropertiesWidget(archive, this);
-    	flowPane.getChildren().add(propertiesWidget.getNode());    
-    	
-    	ArchivePropertiesWidget propertiesWidget2 = new ArchivePropertiesWidget(archive, this);
-    	flowPane.getChildren().add(propertiesWidget2.getNode());    
+    	this.archive = archive;  
     }
 
 	@Override

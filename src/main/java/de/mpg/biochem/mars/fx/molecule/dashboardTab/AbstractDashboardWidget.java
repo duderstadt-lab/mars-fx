@@ -1,6 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
@@ -26,17 +27,31 @@ import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import de.jensd.fx.glyphs.GlyphIcons;
+import javafx.scene.layout.AnchorPane;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.stage.Stage;
+
 public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements DashboardWidget {
 	
-	protected BorderPane rootPane;
+	protected final BorderPane rootPane;
+	protected final AnchorPane anchorPane;
+	protected final TabPane tabs;
 
-	private static final int RESIZE_REGION = 5;
-	private double y, x;
-	private boolean initHeight, initWidth;
-	private boolean dragX, dragY;
+	protected static final int RESIZE_REGION = 5;
+	protected double MINIMUM_WIDTH = 250;
+	protected double MINIMUM_HEIGHT = 250;
+	protected double y, x;
+	protected boolean initHeight, initWidth;
+	protected boolean dragX, dragY;
 	
 	protected DashboardTab parent;
-	protected Button closeButton;
+	protected Button closeButton, loadButton;
 	
 	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
@@ -44,19 +59,81 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		this.archive = archive;
 		this.parent = parent;
 		rootPane = new BorderPane();
-		rootPane.setBorder(new Border(new BorderStroke(Color.BLACK, 
+		anchorPane = new AnchorPane();
+		tabs = new TabPane();
+		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
+		tabs.setStyle("");
+		tabs.getStylesheets().clear();
+		tabs.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/WidgetTabPane.css");
+
+        AnchorPane.setTopAnchor(tabs, 0.0);
+        AnchorPane.setLeftAnchor(tabs, 0.0);
+        AnchorPane.setRightAnchor(tabs, 0.0);
+        AnchorPane.setBottomAnchor(tabs, 0.0);
+
+        rootPane.setBorder(new Border(new BorderStroke(Color.BLACK, 
                 BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
 
-		Text syncIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
+		Text closeIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
 		closeButton = new Button();
 		closeButton.setPickOnBounds(true);
-		closeButton.setGraphic(syncIcon);
+		closeButton.setGraphic(closeIcon);
 		closeButton.getStyleClass().add("icon-button");
 		closeButton.setAlignment(Pos.CENTER);
 		closeButton.setOnMouseClicked(e -> {
 		     close();
 		});	
-		rootPane.setTop(closeButton);
+        AnchorPane.setTopAnchor(closeButton, 5.0);
+        AnchorPane.setLeftAnchor(closeButton, 5.0);
+        closeButton.setPrefWidth(20);
+        closeButton.setPrefHeight(20);
+		
+		Text syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
+		loadButton = new Button();
+		loadButton.setGraphic(syncIcon);
+		loadButton.setCenterShape(true);
+		loadButton.getStyleClass().add("icon-button");
+		loadButton.setOnMouseClicked(e -> {
+		     load();
+		});
+		AnchorPane.setTopAnchor(loadButton, 5.0);
+        AnchorPane.setRightAnchor(loadButton, 5.0);
+        loadButton.setPrefWidth(20);
+        loadButton.setPrefHeight(20);
+        
+        anchorPane.getChildren().addAll(tabs, closeButton, loadButton);
+		
+		/*
+		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.setByAngle(0);
+		rt.setByAngle(360);
+	    rt.setCycleCount(Animation.INDEFINITE);
+	     
+		updateLabel.setOnMouseClicked(e -> {
+		     //rt.play();
+		     Task<Void> spin = new Task<Void>() {
+	            @Override
+	            protected Void call() throws Exception {
+	    		     rt.setByAngle(360);
+	    		     rt.setCycleCount(10000);
+	    		     rt.play();
+	                return null;
+	            }
+	         };
+	         spin.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
+	            @Override
+	            public void handle(WorkerStateEvent event) {
+	            	
+	            }
+	         });
+	          new Thread(spin).start();
+	          
+	        
+		     subPlot.update();
+	         //rt.stop();
+		});
+		*/
 	
 		rootPane.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
@@ -82,6 +159,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				mouseReleased(event);
 			}
 		});
+		
+		rootPane.setCenter(anchorPane);
 	}
 
 	protected void mouseReleased(MouseEvent event) {
@@ -107,47 +186,43 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 
 	protected void mouseDragged(MouseEvent event) {
-		System.out.println(toString());
 		if (!dragX && !dragY) {
 			return;
 		}
-		System.out.println("valid");
 		if (dragY) {
 			double mousey = event.getY();
 			double newHeight = rootPane.getMinHeight() + (mousey - y);
-			rootPane.setMinHeight(newHeight);
-			rootPane.setMaxHeight(newHeight);
-			y = mousey;
+			if (newHeight > MINIMUM_HEIGHT) {
+				rootPane.setMinHeight(newHeight);
+				rootPane.setMaxHeight(newHeight);
+				y = mousey;
+			}
 		}
 
 		if (dragX) {
 			double mousex = event.getX();
 			double newWidth = rootPane.getMinWidth() + (mousex - x);
-			rootPane.setMinWidth(newWidth);
-			rootPane.setMaxWidth(newWidth);
-			x = mousex;
+			if (newWidth > MINIMUM_WIDTH) {
+				rootPane.setMinWidth(newWidth);
+				rootPane.setMaxWidth(newWidth);
+				x = mousex;
+			}
 		}
+		
+		parent.getWidgetPane().clearLayout();
+		parent.getWidgetPane().layout();
 	}
 
 	protected void mousePressed(MouseEvent event) {
-		//Bounds boundsInScreen = rootPane.localToScreen(rootPane.getBoundsInLocal());
-		//System.out.println("min x " + boundsInScreen.getMinX() + " min y " 
-		//		+ boundsInScreen.getMinY() + " max x " + boundsInScreen.getMaxX() + " max y " + boundsInScreen.getMaxY());
-		//System.out.println("mouse x " + event.getScreenX() + " mouse y " + event.getScreenY());
-		
-		//if (!boundsInScreen.contains(event.getScreenX(), event.getScreenY()))
-		//	return;
-		
 		if (isInDraggableX(event))
 			dragX = true;
 		else if(isInDraggableY(event))
 			dragY = true;
 		else
 			return;
-		
-		//Are these really needed?
-		
+
 		if (!initHeight) {
+			//MINIMUM_HEIGHT = rootPane.getHeight();
 			rootPane.setMinHeight(rootPane.getHeight());
 			rootPane.setMaxHeight(rootPane.getHeight());
 			initHeight = true;
@@ -156,6 +231,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		y = event.getY();
 
 		if (!initWidth) {
+			//MINIMUM_WIDTH = rootPane.getWidth();
 			rootPane.setMinWidth(rootPane.getWidth());
 			rootPane.setMaxWidth(rootPane.getWidth());
 			initWidth = true;
@@ -163,10 +239,16 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 		x = event.getX();
 	}
+	
+	public abstract GlyphIcons getIcon();
 
 	@Override
 	public Node getNode() {
 		return rootPane;
+	}
+	
+	public TabPane getTabPane() {
+		return tabs;
 	}
 	
 	@Override
