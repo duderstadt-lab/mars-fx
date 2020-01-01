@@ -9,6 +9,7 @@ import de.jensd.fx.glyphs.GlyphIcons;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -23,6 +24,7 @@ import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.utils.DecimalStringConverter;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import javafx.geometry.Insets;
@@ -54,6 +56,9 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         yAxis.setName("Molecules");
         yAxis.setMinorTickVisible(false);
         yAxis.setForceZeroInRange(true);
+        yAxis.setAutoRanging(true);
+        yAxis.setAutoRangeRounding(false);
+        //yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
 
         barChart = new XYChart(xAxis, yAxis);
         barChart.setAnimated(false);
@@ -113,7 +118,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         });
         
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        dataSet.setStyle("Line");
+        dataSet.setStyle("strokeColor:#add8e6;fillColor:#add8e6;strokeWidth=0;");
         
         int index = 0;
         for (String tag : tagFrequency.keySet()) {

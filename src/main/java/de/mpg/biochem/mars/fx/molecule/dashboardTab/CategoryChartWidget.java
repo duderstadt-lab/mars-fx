@@ -5,10 +5,13 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
+
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -35,11 +38,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.scijava.Context;
+import org.scijava.script.ScriptLanguage;
+import org.scijava.ui.swing.script.EditorPane;
+import javafx.embed.swing.SwingNode;
+import javafx.application.Application;
+import javax.swing.SwingUtilities;
+
+import org.scijava.script.ScriptLanguage;
+import org.scijava.script.ScriptService;
+
 public class CategoryChartWidget extends AbstractDashboardWidget {
 	
-	final XYChart barChart;
-	final MarsCategoryAxis xAxis;
-	final MarsNumericAxis yAxis;
+	protected final XYChart barChart;
+	protected final MarsCategoryAxis xAxis;
+	protected final MarsNumericAxis yAxis;
+	protected final LanguageSettableEditorPane editorpane;
 
 	public CategoryChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
 			DashboardTab parent) {
@@ -86,40 +100,60 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         chartPane.setCenter(stack);
         chartTab.setContent(chartPane);
         
+        //Script Pane
+        Tab scriptTab = new Tab();
+        scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
+        editorpane = new LanguageSettableEditorPane();
+        Context context = archive.getMoleculeArchiveService().getContext();
+        ScriptService scriptService = context.getService(ScriptService.class);
+		ScriptLanguage lang = scriptService.getLanguageByName("Groovy");
+		
+		context.inject(editorpane);
+        
+        editorpane.setLanguage(lang);
+        final SwingNode swingNode = new SwingNode();
+        createSwingContent(swingNode);
+        
+        scriptTab.setContent(swingNode);
+        
+        getTabPane().getTabs().add(scriptTab);
+        
         rootPane.setMinSize(250, 250);
         rootPane.setMaxSize(250, 250);
 	}
+	
+	private void createSwingContent(final SwingNode swingNode) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                swingNode.setContent(editorpane);
+            }
+        });
+    }
 
 	@Override
 	public void load() {
-		barChart.getDatasets().clear();
+		//final List<String> categories = new ArrayList<>();
 		
-		final List<String> categories = new ArrayList<>();
-        
-        HashMap<String, Integer> tagFrequency = new HashMap<String, Integer>();
-        
-        archive.getMoleculeUIDs().stream().forEach(UID -> {
-        	Molecule molecule = archive.get(UID);
-        	for (String tag : molecule.getTags())
-        		if (tagFrequency.containsKey(tag))
-        			tagFrequency.put(tag, tagFrequency.get(tag) + 1);
-    			else 
-    				tagFrequency.put(tag, 1);
-        });
+		//First we need to retrieve the script text and run it
+		//Then we need to get the outputs.
+		//We also need to inject the archive as an input.
+		
+		/*
+		barChart.getDatasets().clear();
         
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
         dataSet.setStyle("Bar");
         
-        int index = 0;
-        for (String tag : tagFrequency.keySet()) {
-        	categories.add(tag);
-        	dataSet.add(index, tagFrequency.get(tag));
+        for (int index=0;index < values.length; index++) {
+        	dataSet.add(index, values[index]);
         	index++;
         }
    
         xAxis.setCategories(categories);
         
         barChart.getDatasets().add(dataSet);
+        */
 	}
 
 	@Override
@@ -135,7 +169,7 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 
 	@Override
 	public GlyphIcons getIcon() {
-		return TAG;
+		return BAR_CHART;
 	}
 
 }

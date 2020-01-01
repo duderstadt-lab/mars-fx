@@ -215,6 +215,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
                 stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
 
                 // invoke data reduction algorithm
+                //Seems to always remove the second to last point in all plots why ???? What should be do???
                 localCachedPoints.reduce(rendererDataReducerProperty().get(), isReducePoints(),
                         getMinRequiredReductionSize());
                 
@@ -222,16 +223,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             		drawScatter(gc, localCachedPoints, color, width);
                 else
                 	drawPolyLine(gc, localCachedPoints, color, width, getDashPattern(lineStyle));
-            	
-            	
-            	//Drop in for testing
-            	System.out.println("dataset size " + dataSet.getDataCount());
-            	for (int i=0; i<dataSet.getDataCount();i++)
-            		System.out.println("dataset x " + dataSet.get(0, i) + " y " + dataSet.get(1, i));
-            	
-            	System.out.println("Cache size " + localCachedPoints.actualDataCount);
-            	for (int i=0; i<localCachedPoints.actualDataCount;i++)
-            		System.out.println("cache x " + localCachedPoints.xValues[i] + " y " + localCachedPoints.yValues[i]);
             	
             	if (dataSet.getStyle().equals("Bar"))
             		drawBars(gc, localCachedPoints);

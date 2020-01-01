@@ -53,7 +53,8 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 		
         chartTab.setContent(vbox);
         
-        rootPane.setPrefSize(250, 250);
+        rootPane.setMinSize(250, 250);
+        rootPane.setMaxSize(250, 250);
 	}
 
 	@Override

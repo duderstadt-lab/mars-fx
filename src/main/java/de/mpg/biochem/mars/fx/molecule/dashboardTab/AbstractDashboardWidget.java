@@ -39,11 +39,10 @@ import javafx.stage.Stage;
 
 public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements DashboardWidget {
 	
-	protected final BorderPane rootPane;
-	protected final AnchorPane anchorPane;
+	protected final AnchorPane rootPane;
 	protected final TabPane tabs;
 
-	protected static final int RESIZE_REGION = 5;
+	protected static final int RESIZE_REGION = 2;
 	protected double MINIMUM_WIDTH = 250;
 	protected double MINIMUM_HEIGHT = 250;
 	protected double y, x;
@@ -58,8 +57,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	public AbstractDashboardWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
 		this.archive = archive;
 		this.parent = parent;
-		rootPane = new BorderPane();
-		anchorPane = new AnchorPane();
+		rootPane = new AnchorPane();
 		tabs = new TabPane();
 		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabs.setStyle("");
@@ -70,6 +68,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
         AnchorPane.setLeftAnchor(tabs, 0.0);
         AnchorPane.setRightAnchor(tabs, 0.0);
         AnchorPane.setBottomAnchor(tabs, 0.0);
+        
+        tabs.setBorder(new Border(new BorderStroke(Color.TRANSPARENT, 
+                BorderStrokeStyle.NONE, new CornerRadii(5), new BorderWidths(1))));
 
         rootPane.setBorder(new Border(new BorderStroke(Color.BLACK, 
                 BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
@@ -101,7 +102,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
         loadButton.setPrefWidth(20);
         loadButton.setPrefHeight(20);
         
-        anchorPane.getChildren().addAll(tabs, closeButton, loadButton);
+        rootPane.getChildren().addAll(tabs, closeButton, loadButton);
 		
 		/*
 		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
@@ -159,8 +160,6 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				mouseReleased(event);
 			}
 		});
-		
-		rootPane.setCenter(anchorPane);
 	}
 
 	protected void mouseReleased(MouseEvent event) {

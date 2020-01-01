@@ -325,6 +325,10 @@
 			<artifactId>chartfx-chart</artifactId>
 			<version>8.1.1</version>
 		</dependency>
+		<dependency>
+			<groupId>org.scijava</groupId>
+			<artifactId>script-editor</artifactId>
+		</dependency>
 	</dependencies>
 	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
 </project>
