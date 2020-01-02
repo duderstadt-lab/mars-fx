@@ -162,7 +162,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	           @Override
 	           protected Void call() throws Exception {
 	           	   loading.set(true);
-	           	   build();
+	           	   if (!build())
+	           		   loading.set(false);
 	               return null;
 	           }
 	        };
@@ -271,7 +272,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	//Run in separate thread typically
 	//Make sure to put any code that updates UI
 	//In runLater blocks.
-	protected abstract void build();
+	protected abstract boolean build();
 
 	@Override
 	public Node getNode() {

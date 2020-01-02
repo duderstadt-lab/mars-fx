@@ -6,6 +6,7 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -50,6 +52,7 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 
 import org.scijava.Context;
+import org.scijava.log.LogService;
 import org.scijava.module.ModuleException;
 import org.scijava.script.ScriptLanguage;
 import org.scijava.ui.swing.script.EditorPane;
@@ -75,6 +78,7 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 
 	protected ScriptService scriptService;
 	protected ModuleService moduleService;
+	protected LogService log;
 	protected Context context;
 	protected ScriptLanguage lang;
 	protected TextArea textarea;
@@ -87,6 +91,12 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 	public CategoryChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
 			DashboardTab parent) {
 		super(archive, parent);
+		
+		//Retrieve context and establish local pointers to services.
+		context = archive.getMoleculeArchiveService().getContext();
+	    scriptService = context.getService(ScriptService.class);
+	    lang = scriptService.getLanguageByName("Groovy");
+		moduleService = context.getService(ModuleService.class);
 		
         xAxis = new MarsCategoryAxis("Tag");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
@@ -114,9 +124,9 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         barChart.horizontalGridLinesVisibleProperty().set(false);
         barChart.verticalGridLinesVisibleProperty().set(false);
 
-        barChart.getPlugins().add(new EditAxis());
-        final Zoomer zoomer = new Zoomer();
-        barChart.getPlugins().add(zoomer);
+        //barChart.getPlugins().add(new EditAxis());
+        //final Zoomer zoomer = new Zoomer();
+        //barChart.getPlugins().add(zoomer);
 
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
@@ -139,31 +149,22 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         Tab scriptTab = new Tab();
         scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
         editorpane = new LanguageSettableEditorPane();
-        context = archive.getMoleculeArchiveService().getContext();
-        scriptService = context.getService(ScriptService.class);
-		lang = scriptService.getLanguageByName("Groovy");
-		moduleService = context.getService(ModuleService.class);
-		
+
 		context.inject(editorpane);
         
         editorpane.setLanguage(lang);
         final SwingNode swingNode = new SwingNode();
         createSwingContent(swingNode);
-        
+    
         scriptTab.setContent(swingNode);
         
         getTabPane().getTabs().add(scriptTab);
         
         textarea = new TextArea();
         textarea.setEditable(false);
-        //textarea.setWrapText(true);
-        
-        ScrollPane scroll = new ScrollPane(textarea);
-        scroll.setFitToWidth(true);
-        scroll.setFitToHeight(true);
   
         BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(scroll);
+        borderPane.setCenter(textarea);
         borderPane.setPrefSize(250, 250);
         
         Tab logTab = new Tab();
@@ -182,8 +183,9 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         });
     }
 
+	@SuppressWarnings("resource")
 	@Override
-	protected void build() {
+	protected boolean build() {
 		Reader reader = new StringReader(editorpane.getText());
 		
 		ScriptInfo scriptInfo = new ScriptInfo(context, "script.groovy", reader);
@@ -194,8 +196,8 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 			module = scriptInfo.createModule();
 			context.inject(module);
 		} catch (ModuleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error(e);
+			return false;
 		}
 		
 		Console console = new Console(textarea);
@@ -209,7 +211,8 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 			module.setErrorWriter(writer);
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			log.error(e1);
+			return false;
 		}
 		
 		module.setInput("archive", archive);
@@ -217,14 +220,12 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 		try {
 			moduleService.run(module, false).get();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			return false;
 		}
 		
-		//System.out.println(module.getOutputs().keySet());
+		Set<String> outputNames = module.getOutputs().keySet();
 		
 		//switch statement on keySet ???
 		
@@ -232,9 +233,12 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 		Double[] yValues = (Double[]) module.getOutput("yValues");
 		String yLabel = (String) module.getOutput("yLabel");
 		String xLabel = (String) module.getOutput("xLabel");
+		String fillColor = (String) module.getOutput("fillColor");
+		//String strokeColor = (String) module.getOutput("strokeColor");
+		//String strokeWidth = (String) module.getOutput("strokeWidth");
 		
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        dataSet.setStyle("strokeColor:#add8e6;fillColor:#add8e6;strokeWidth=0;");
+        dataSet.setStyle("fillColor:" + fillColor + ";");
         
         List<String> categories = new ArrayList<String>();
         
@@ -254,6 +258,7 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 			    barChart.getDatasets().add(dataSet);
 			}
     	});
+        return true;
 	}
 
 	@Override
@@ -282,7 +287,8 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 
         @Override
         public void write(int i) throws IOException {
-            output.appendText(String.valueOf((char) i));
+        	javafx.application.Platform.runLater( () -> output.appendText(String.valueOf((char) i)) );
+            
         }
     }
 }

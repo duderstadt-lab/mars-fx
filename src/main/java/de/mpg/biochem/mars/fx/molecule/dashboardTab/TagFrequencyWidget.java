@@ -101,7 +101,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 	}
 
 	@Override
-	protected void build() {
+	protected boolean build() {
 		final List<String> categories = new ArrayList<>();
         
         HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
@@ -134,6 +134,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 			    barChart.getDatasets().add(dataSet);
 			}
     	});
+        return true;
 	}
 
 	@Override

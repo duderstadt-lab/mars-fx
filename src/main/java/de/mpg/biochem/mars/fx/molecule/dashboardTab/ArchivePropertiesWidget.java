@@ -68,7 +68,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	}
 	
 	@Override
-	protected void build() {
+	protected boolean build() {
 	    Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -83,6 +83,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 				}
 			}
     	});
+	    return true;
 	}
 
 	@Override

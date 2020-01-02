@@ -16,9 +16,9 @@ public class XYChartWidget extends AbstractDashboardWidget {
 	}
 
 	@Override
-	protected void build() {
+	protected boolean build() {
 		// TODO Auto-generated method stub
-		
+		return true;
 	}
 
 	@Override
