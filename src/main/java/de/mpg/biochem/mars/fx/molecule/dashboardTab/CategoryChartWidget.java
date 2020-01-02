@@ -17,6 +17,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.table.MarsTable;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
@@ -58,6 +59,8 @@ import javafx.application.Platform;
 
 import javax.swing.SwingUtilities;
 import javafx.scene.control.ScrollPane;
+
+import javax.swing.JScrollPane;
 
 import org.scijava.script.ScriptHeaderService;
 import org.scijava.script.ScriptInfo;
@@ -153,10 +156,14 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         
         textarea = new TextArea();
         textarea.setEditable(false);
-        textarea.setWrapText(true);
+        //textarea.setWrapText(true);
+        
+        ScrollPane scroll = new ScrollPane(textarea);
+        scroll.setFitToWidth(true);
+        scroll.setFitToHeight(true);
   
         BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(textarea);
+        borderPane.setCenter(scroll);
         borderPane.setPrefSize(250, 250);
         
         Tab logTab = new Tab();
@@ -169,7 +176,8 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                swingNode.setContent(editorpane);
+            	JScrollPane scroll = new JScrollPane(editorpane);
+                swingNode.setContent(scroll);
             }
         });
     }
@@ -207,7 +215,7 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 		module.setInput("archive", archive);
 		
 		try {
-			moduleService.run(module, true).get();
+			moduleService.run(module, false).get();
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -216,25 +224,31 @@ public class CategoryChartWidget extends AbstractDashboardWidget {
 			e.printStackTrace();
 		}
 		
-		String[] categoriesArray = (String[]) module.getOutput("categories");
-		Double[] yValues = (Double[]) module.getOutput("yValues");
+		//System.out.println(module.getOutputs().keySet());
 		
-		System.out.println(categoriesArray[0] + " " + yValues[0]);
+		//switch statement on keySet ???
+		
+		String[] xValues = (String[]) module.getOutput("xValues");
+		Double[] yValues = (Double[]) module.getOutput("yValues");
+		String yLabel = (String) module.getOutput("yLabel");
+		String xLabel = (String) module.getOutput("xLabel");
 		
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        dataSet.setStyle("Bar");
+        dataSet.setStyle("strokeColor:#add8e6;fillColor:#add8e6;strokeWidth=0;");
         
         List<String> categories = new ArrayList<String>();
         
-        for (int index=0;index < yValues.length; index++) {
-        	dataSet.add(index, yValues[index].doubleValue());
-        	categories.add(categoriesArray[index]);
-        	index++;
+        for (int row=0;row < xValues.length; row++) {
+        	dataSet.add(row, yValues[row].doubleValue());
+        	categories.add(xValues[row]);
         }
    
         Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
+				xAxis.setName(xLabel);
+				yAxis.setName(yLabel);
+				
 				xAxis.setCategories(categories);
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);

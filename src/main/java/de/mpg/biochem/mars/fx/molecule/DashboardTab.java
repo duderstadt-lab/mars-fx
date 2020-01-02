@@ -86,10 +86,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 			    	addWidget(new TagFrequencyWidget(archive, this));
 				});
     	
-    	//Action categoryChartWidget = new Action("Category Chart", null, BAR_CHART,
-		//		e -> {
-		//	    	addWidget(new CategoryChartWidget(archive, this));
-		//		});
+    	Action categoryChartWidget = new Action("Category Chart", null, BAR_CHART,
+				e -> {
+			    	addWidget(new CategoryChartWidget(archive, this));
+				});
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
@@ -107,8 +107,8 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	toolbar = ActionUtils.createToolBar(
     			archivePropertiesWidget, 
-    			tagFrequencyWidget);
-    			//categoryChartWidget);
+    			tagFrequencyWidget,
+    			categoryChartWidget);
     	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
     	

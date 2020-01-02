@@ -28,11 +28,14 @@ package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonToken;
 
@@ -234,11 +237,11 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	}
 	
 	@Override
-	public Set<String> getColumnNames() {
+	public ArrayList<String> getColumnNames() {
 		if (archive != null)
-			return archive.getProperties().getColumnSet();
+			return (ArrayList<String>) archive.getProperties().getColumnSet().stream().sorted().collect(toList());
 		else 
-			return new HashSet<String>();
+			return new ArrayList<String>();
 	}
 	
 	public abstract S createSubPlot();

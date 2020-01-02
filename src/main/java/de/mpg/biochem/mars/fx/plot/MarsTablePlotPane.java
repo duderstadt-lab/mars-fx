@@ -26,8 +26,11 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 import de.mpg.biochem.mars.table.MarsTable;
 
@@ -52,7 +55,7 @@ public class MarsTablePlotPane extends AbstractPlotPane {
 	}
 
 	@Override
-	public Set<String> getColumnNames() {
-		return new HashSet<String>(table.getColumnHeadingList());
+	public ArrayList<String> getColumnNames() {
+		return (ArrayList<String>) table.getColumnHeadingList().stream().sorted().collect(toList());
 	}
 }

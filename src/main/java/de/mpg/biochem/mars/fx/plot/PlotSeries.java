@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Set;
 
 import com.jfoenix.controls.JFXCheckBox;
@@ -59,17 +60,17 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 		
 		private XYChart chart;
 		
-		private Set<String> columnHeadings;
+		private ArrayList<String> columnHeadings;
 
 		protected static String[] types = {"Line","Scatter"};
 		
-		public PlotSeries(Set<String> columnHeadings) {
+		public PlotSeries(ArrayList<String> columnHeadings) {
 			this.columnHeadings = columnHeadings;
 			initComponents();
 			load();
 		}
 
-		public PlotSeries(Set<String> columnHeadings, String xColumn, String yColumn) {
+		public PlotSeries(ArrayList<String> columnHeadings, String xColumn, String yColumn) {
 			this.columnHeadings = columnHeadings;
 			initComponents();
 			load();

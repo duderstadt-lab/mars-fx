@@ -38,6 +38,6 @@ public interface PlotPane extends JsonConvertibleRecord {
 	public StyleSheetUpdater getStyleSheetUpdater();
 	public Node getNode();
 	public ArrayList<SubPlot> getCharts();
-	public Set<String> getColumnNames();
+	public ArrayList<String> getColumnNames();
 	public void fireEvent(Event event);
 }

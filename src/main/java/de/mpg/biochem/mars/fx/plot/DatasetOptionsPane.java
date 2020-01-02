@@ -27,10 +27,13 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
+import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.RowConstraints;
@@ -89,12 +92,12 @@ public class DatasetOptionsPane extends VBox {
 	
 	private SubPlot subPlot;
 	
-	private Set<String> columns;
+	private ArrayList<String> columns;
 
 	public DatasetOptionsPane(Set<String> columns, SubPlot subPlot) {
 		this.subPlot = subPlot;
 		
-		this.columns = columns;
+		this.columns = (ArrayList<String>)columns.stream().sorted().collect(toList());
 		
 		trackingGroup = new ToggleGroup();
 		
@@ -353,7 +356,7 @@ public class DatasetOptionsPane extends VBox {
 	}
 	
 	public void setColumns(Set<String> columns) {
-		this.columns = columns;
+		this.columns = (ArrayList<String>)columns.stream().sorted().collect(toList());
 		
 		for (PlotSeries propertiesRow : plotSeriesList) {
 			String xSelection = propertiesRow.xColumnField().getSelectionModel().getSelectedItem();

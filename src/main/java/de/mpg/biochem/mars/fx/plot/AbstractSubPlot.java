@@ -93,7 +93,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
 		
-		datasetOptionsPane = createDatasetOptionsPane(plotPane.getColumnNames());
+		datasetOptionsPane = createDatasetOptionsPane(new HashSet<String>(plotPane.getColumnNames()));
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			PopOver popOver = new PopOver();
 			popOver.setTitle(plotTitle);
