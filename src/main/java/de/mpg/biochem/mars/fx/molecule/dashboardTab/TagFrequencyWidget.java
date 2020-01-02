@@ -27,6 +27,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.utils.DecimalStringConverter;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.testdata.spi.RandomDataGenerator;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Tab;
@@ -49,7 +50,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 			DashboardTab parent) {
 		super(archive, parent);
 		
-		final StackPane root = new StackPane();
+		//final StackPane root = new StackPane();
         xAxis = new MarsCategoryAxis("Tag");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         yAxis = new MarsNumericAxis();
@@ -80,7 +81,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         final Zoomer zoomer = new Zoomer();
         barChart.getPlugins().add(zoomer);
 
-        root.getChildren().add(barChart);
+        //root.getChildren().add(barChart);
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(barChart);
@@ -100,9 +101,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 	}
 
 	@Override
-	public void load() {
-		barChart.getDatasets().clear();
-		
+	protected void build() {
 		final List<String> categories = new ArrayList<>();
         
         HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
@@ -127,9 +126,14 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
         	index++;
         }
         
-        xAxis.setCategories(categories);
-        
-        barChart.getDatasets().add(dataSet);
+        Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				xAxis.setCategories(categories);
+			    barChart.getDatasets().clear();
+			    barChart.getDatasets().add(dataSet);
+			}
+    	});
 	}
 
 	@Override
@@ -140,12 +144,10 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
 	public GlyphIcons getIcon() {
 		return TAG;
 	}
-
 }

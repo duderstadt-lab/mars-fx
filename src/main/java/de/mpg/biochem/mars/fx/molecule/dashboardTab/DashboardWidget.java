@@ -11,6 +11,8 @@ public interface DashboardWidget extends JsonConvertibleRecord {
 	public void setParent(DashboardTab parent);
 	public DashboardTab getParent();
 	public void load();
+	public boolean isLoading();
+	public void interrupt();
 	public void close();
 	public GlyphIcons getIcon();
 	public String getName();

@@ -7,16 +7,16 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class ChartWidget extends AbstractDashboardWidget {
+public class XYChartWidget extends AbstractDashboardWidget {
 
-	public ChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
+	public XYChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
 			DashboardTab parent) {
 		super(archive, parent);
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
-	public void load() {
+	protected void build() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -38,5 +38,4 @@ public class ChartWidget extends AbstractDashboardWidget {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

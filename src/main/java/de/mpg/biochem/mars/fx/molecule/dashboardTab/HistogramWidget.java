@@ -16,7 +16,7 @@ public class HistogramWidget extends AbstractDashboardWidget {
 	}
 
 	@Override
-	public void load() {
+	protected void build() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -38,5 +38,4 @@ public class HistogramWidget extends AbstractDashboardWidget {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }

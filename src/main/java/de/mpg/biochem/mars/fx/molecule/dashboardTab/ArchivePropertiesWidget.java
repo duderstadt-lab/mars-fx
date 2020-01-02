@@ -10,6 +10,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -22,8 +23,16 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	
+	private Label archiveName = new Label();
+	private Label className = new Label();
+	private Label moleculeNumber = new Label();
+	private Label metadataNumber = new Label();
+	private Label memorySetting = new Label();
+	
 	public ArchivePropertiesWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
 		super(archive, parent);
+		
+		build();
 		
     	VBox vbox = new VBox();
         
@@ -35,16 +44,12 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 
 		vbox.getChildren().add(iconContainer);
 		
-        vbox.getChildren().add(new Label(archive.getName()));
-        vbox.getChildren().add(new Label(archive.getClass().getName()));
-        vbox.getChildren().add(new Label(archive.getNumberOfMolecules() + " Molecules"));
-        vbox.getChildren().add(new Label(archive.getNumberOfImageMetadataRecords() + " Metadata"));
-        
-		if (archive.isVirtual()) {
-			vbox.getChildren().add(new Label("Virtual memory store"));
-		} else {
-			vbox.getChildren().add(new Label("Normal memory"));
-		}
+        vbox.getChildren().add(archiveName);
+        vbox.getChildren().add(className);
+        vbox.getChildren().add(moleculeNumber);
+        vbox.getChildren().add(metadataNumber);
+        vbox.getChildren().add(memorySetting);
+
 		vbox.setPrefSize(250, 250);
 		
 		Tab chartTab = new Tab();
@@ -63,8 +68,21 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	}
 	
 	@Override
-	public void load() {
-
+	protected void build() {
+	    Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				archiveName.setText(archive.getName());
+				className.setText(archive.getClass().getName());
+				moleculeNumber.setText(archive.getNumberOfMolecules() + " Molecules");
+				metadataNumber.setText(archive.getNumberOfImageMetadataRecords() + " Metadata");
+				if (archive.isVirtual()) {
+					memorySetting.setText("Virtual memory store");
+				} else {
+					memorySetting.setText("Normal memory");
+				}
+			}
+    	});
 	}
 
 	@Override
@@ -76,5 +94,4 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 	public GlyphIcons getIcon() {
 		return INFO_CIRCLE;
 	}
-
 }

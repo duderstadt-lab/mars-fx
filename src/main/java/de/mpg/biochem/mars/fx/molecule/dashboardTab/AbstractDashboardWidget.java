@@ -3,7 +3,10 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -30,7 +33,13 @@ import javafx.scene.text.Text;
 import de.jensd.fx.glyphs.GlyphIcons;
 import javafx.scene.layout.AnchorPane;
 
+import javafx.animation.RotateTransition;
+import javafx.util.Duration;
+import javafx.animation.Interpolator;
+import javafx.animation.Animation;
+
 import javafx.application.Application;
+import javafx.concurrent.Task;
 import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -41,6 +50,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	protected final AnchorPane rootPane;
 	protected final TabPane tabs;
+	protected Task<Void> task;
 
 	protected static final int RESIZE_REGION = 2;
 	protected double MINIMUM_WIDTH = 250;
@@ -48,6 +58,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected double y, x;
 	protected boolean initHeight, initWidth;
 	protected boolean dragX, dragY;
+	protected AtomicBoolean loading = new AtomicBoolean(false);
+	protected RotateTransition rt;
 	
 	protected DashboardTab parent;
 	protected Button closeButton, loadButton;
@@ -94,8 +106,15 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		loadButton.setGraphic(syncIcon);
 		loadButton.setCenterShape(true);
 		loadButton.getStyleClass().add("icon-button");
+		
+		rt = new RotateTransition(Duration.millis(500), loadButton);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.setByAngle(0);
+		rt.setByAngle(360);
+	    rt.setCycleCount(Animation.INDEFINITE);
+		
 		loadButton.setOnMouseClicked(e -> {
-		     load();
+			load();
 		});
 		AnchorPane.setTopAnchor(loadButton, 5.0);
         AnchorPane.setRightAnchor(loadButton, 5.0);
@@ -103,38 +122,6 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
         loadButton.setPrefHeight(20);
         
         rootPane.getChildren().addAll(tabs, closeButton, loadButton);
-		
-		/*
-		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
-		rt.setInterpolator(Interpolator.LINEAR);
-		rt.setByAngle(0);
-		rt.setByAngle(360);
-	    rt.setCycleCount(Animation.INDEFINITE);
-	     
-		updateLabel.setOnMouseClicked(e -> {
-		     //rt.play();
-		     Task<Void> spin = new Task<Void>() {
-	            @Override
-	            protected Void call() throws Exception {
-	    		     rt.setByAngle(360);
-	    		     rt.setCycleCount(10000);
-	    		     rt.play();
-	                return null;
-	            }
-	         };
-	         spin.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-	            @Override
-	            public void handle(WorkerStateEvent event) {
-	            	
-	            }
-	         });
-	          new Thread(spin).start();
-	          
-	        
-		     subPlot.update();
-	         //rt.stop();
-		});
-		*/
 	
 		rootPane.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
@@ -160,6 +147,46 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				mouseReleased(event);
 			}
 		});
+	}
+	
+	public boolean isLoading() {
+		return loading.get();
+	}
+	
+	public void load() {
+		if (loading.get())
+			interrupt();
+		else {
+			rt.play();
+		     task = new Task<Void>() {
+	           @Override
+	           protected Void call() throws Exception {
+	           	   loading.set(true);
+	           	   build();
+	               return null;
+	           }
+	        };
+	        
+	        task.setOnSucceeded(event -> { 
+	       	 loading.set(false);
+	       	 rt.stop();
+		      });
+	        
+	        task.setOnCancelled(event -> {
+	       	 loading.set(false);
+	       	 rt.stop();
+	        });
+	        
+	        new Thread(task).start();
+		}
+	}
+	
+	public void interrupt() {
+		if (isLoading()) {
+			task.cancel(true);
+			loading.set(false);
+			rt.stop();
+		}
 	}
 
 	protected void mouseReleased(MouseEvent event) {
@@ -240,6 +267,11 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 	
 	public abstract GlyphIcons getIcon();
+	
+	//Run in separate thread typically
+	//Make sure to put any code that updates UI
+	//In runLater blocks.
+	protected abstract void build();
 
 	@Override
 	public Node getNode() {
@@ -262,6 +294,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	@Override
 	public void close() {
+		interrupt();
 		if (parent != null)
 			parent.removeWidget(this);
 	}
