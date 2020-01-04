@@ -111,7 +111,7 @@
 .categoriesIcon {
   -icon-paint: black;
   -fx-background-color: -icon-paint;
-  -size: 24;
+  -size: 16;
   -fx-min-height: -size;
   -fx-min-width: -size;
   -fx-max-height: -size;
@@ -123,11 +123,35 @@
 .barchartIcon {
   -icon-paint: black;
   -fx-background-color: -icon-paint;
-  -size: 24;
+  -size: 16;
   -fx-min-height: -size;
   -fx-min-width: -size;
   -fx-max-height: -size;
   -fx-max-width: -size;
 
   -fx-shape: "M5,9.2H8V19H5ZM10.6,5h2.8V19H10.6Zm5.6,8H19v6H16.2Z";
+}
+
+.xychartIcon {
+  -icon-paint: black;
+  -fx-background-color: -icon-paint;
+  -size: 16;
+  -fx-min-height: -size;
+  -fx-min-width: -size;
+  -fx-max-height: -size;
+  -fx-max-width: -size;
+
+  -fx-shape: "M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z";
+}
+
+.bubbleIcon {
+  -icon-paint: black;
+  -fx-background-color: -icon-paint;
+  -size: 16;
+  -fx-min-height: -size;
+  -fx-min-width: -size;
+  -fx-max-height: -size;
+  -fx-max-width: -size;
+
+  -fx-shape: "M7.2,11.2A3.2,3.2,0,1,1,4,14.4,3.2,3.2,0,0,1,7.2,11.2ZM14.8,16a2,2,0,1,1-2,2A2,2,0,0,1,14.8,16Zm.4-12a4.8,4.8,0,1,1-4.8,4.8A4.8,4.8,0,0,1,15.2,4Z";
 }

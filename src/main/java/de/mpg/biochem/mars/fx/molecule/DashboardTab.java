@@ -36,7 +36,7 @@ import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.ArchivePropertiesWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.CategoryChartWidget;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.DashboardWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -69,7 +69,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private JFXMasonryPane widgetPane;
     private ToolBar toolbar;
     
-    protected ObservableList<DashboardWidget> widgets = FXCollections.observableArrayList();
+    protected ObservableList<MarsDashboardWidget> widgets = FXCollections.observableArrayList();
 	
     public DashboardTab() {
     	super();
@@ -96,7 +96,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
-					for (DashboardWidget widget : widgets)
+					for (MarsDashboardWidget widget : widgets)
 						widget.interrupt();
 					widgets.clear();
 					widgetPane.getChildren().clear();
@@ -104,7 +104,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
-					for (DashboardWidget widget : widgets)
+					for (MarsDashboardWidget widget : widgets)
 						widget.load();
 				});
     	
@@ -146,16 +146,16 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 		return null;
 	}
 	
-	public ObservableList<DashboardWidget> getWidgets() {
+	public ObservableList<MarsDashboardWidget> getWidgets() {
 		return widgets;
 	}
 	
-	public void addWidget(DashboardWidget widget) {
+	public void addWidget(MarsDashboardWidget widget) {
 		widgets.add(widget);
 		widgetPane.getChildren().add(widget.getNode());
 	}
 	
-	public void removeWidget(DashboardWidget widget) {
+	public void removeWidget(MarsDashboardWidget widget) {
 		widgets.remove(widget);
 		widgetPane.getChildren().remove(widget.getNode());
 	}

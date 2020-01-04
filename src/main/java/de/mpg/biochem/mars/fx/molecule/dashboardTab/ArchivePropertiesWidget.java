@@ -1,8 +1,6 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -12,15 +10,19 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.layout.Border;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-public class ArchivePropertiesWidget extends AbstractDashboardWidget {
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+import org.scijava.Cancelable;
+import org.scijava.ItemIO;
+import org.scijava.plugin.Parameter;
+
+@Plugin( type = ArchivePropertiesWidget.class, name = "ArchivePropertiesWidget" )
+public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();
@@ -79,6 +81,12 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 			}
     	});
 	    return true;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

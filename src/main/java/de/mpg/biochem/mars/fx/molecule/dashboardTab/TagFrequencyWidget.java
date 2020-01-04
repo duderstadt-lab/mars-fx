@@ -41,7 +41,11 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
-public class TagFrequencyWidget extends AbstractDashboardWidget {
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+
+@Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
+public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
 	
 	final XYChart barChart;
 	final MarsCategoryAxis xAxis;
@@ -131,6 +135,12 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 			}
     	});
         return true;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

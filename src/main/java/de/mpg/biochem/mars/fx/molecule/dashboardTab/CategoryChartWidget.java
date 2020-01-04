@@ -77,7 +77,14 @@ import org.scijava.module.ModuleService;
 import javafx.scene.control.TextArea;
 import javafx.scene.Node;
 
-public class CategoryChartWidget extends AbstractScriptableWidget {
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+import org.scijava.Cancelable;
+import org.scijava.ItemIO;
+import org.scijava.plugin.Parameter;
+
+@Plugin( type = CategoryChartWidget.class, name = "CategoryChartWidget" )
+public class CategoryChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin {
 	
 	protected final XYChart barChart;
 	protected final MarsCategoryAxis xAxis;
@@ -172,10 +179,11 @@ public class CategoryChartWidget extends AbstractScriptableWidget {
     	});
         return true;
 	}
-
+	
 	@Override
-	public String getName() {
-		return "bar graph";
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
+import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -14,10 +16,10 @@ import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
-@Plugin( type = XYChartWidget.class, name = "XYChartWidget" )
-public class XYChartWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
+@Plugin( type = BubbleChartWidget.class, name = "BubbleChartWidget" )
+public class BubbleChartWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
 
-	public XYChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
+	public BubbleChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
 			DashboardTab parent) {
 		super(archive, parent);
 		// TODO Auto-generated constructor stub
@@ -27,6 +29,12 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 	protected boolean build() {
 		// TODO Auto-generated method stub
 		return true;
+	}
+	
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
@@ -43,13 +51,7 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 
 	public static Node getIcon() {
 		Region xychartIcon = new Region();
-		xychartIcon.getStyleClass().add("xychartIcon");
+		xychartIcon.getStyleClass().add("bubblechartIcon");
 		return xychartIcon;
-	}
-
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
 	}
 }

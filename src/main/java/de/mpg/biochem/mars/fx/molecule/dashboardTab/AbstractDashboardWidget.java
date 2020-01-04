@@ -1,3 +1,4 @@
+
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
@@ -48,7 +49,7 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.stage.Stage;
 
-public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements DashboardWidget {
+public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements MarsDashboardWidget {
 	
 	protected final AnchorPane rootPane;
 	protected final TabPane tabs;
