@@ -402,6 +402,9 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     }
 
     private void regionSelectionEnded(final double xEnd, final double yEnd) {
+    	if (datasetOptionsPane.getTrackingSeries() == null)
+    		return;
+    	
         regionRectangle.setVisible(false);
         double width = Math.abs(xEnd - regionStartPoint.getX());
         double height = Math.abs(yEnd - regionStartPoint.getY());

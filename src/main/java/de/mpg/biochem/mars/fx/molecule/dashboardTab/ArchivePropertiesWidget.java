@@ -1,7 +1,5 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
@@ -12,6 +10,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Border;
@@ -52,11 +51,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 
 		vbox.setPrefSize(250, 250);
 		
-		Tab chartTab = new Tab();
-		
-		getTabPane().getTabs().add(chartTab);
-		
-        chartTab.setContent(vbox);
+        setContent(vbox);
         
         rootPane.setMinSize(250, 250);
         rootPane.setMaxSize(250, 250);
@@ -91,8 +86,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
-	public GlyphIcons getIcon() {
-		return INFO_CIRCLE;
+	public static Node getIcon() {
+		return (Node) FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.2em");
 	}
 }

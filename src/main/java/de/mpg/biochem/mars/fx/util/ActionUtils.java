@@ -27,6 +27,9 @@
 
 package de.mpg.biochem.mars.fx.util;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
@@ -38,7 +41,11 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
+
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TAG;
+
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
 
 /**
  * Action utilities
@@ -79,6 +86,16 @@ public class ActionUtils
 	public static ToolBar createToolBar(Action... actions) {
 		return new ToolBar(createToolBarButtons(actions));
 	}
+	
+	public static ToolBar createToolBar(ButtonBase... buttonbase) {
+		Node[] buttons = new Node[buttonbase.length];
+		for (int i = 0; i < buttonbase.length; i++) {
+			buttons[i] = (buttonbase[i] != null)
+					? buttonbase[i]
+					: new Separator();
+		}
+		return new ToolBar(buttons);
+	}
 
 	public static Node[] createToolBarButtons(Action... actions) {
 		Node[] buttons = new Node[actions.length];
@@ -110,6 +127,21 @@ public class ActionUtils
 			button.disableProperty().bind(action.disable);
 		if (action.selected != null)
 			((ToggleButton)button).selectedProperty().bindBidirectional(action.selected);
+		return button;
+	}
+	
+	public static ButtonBase createToolBarButton(String text, Node icon, EventHandler<ActionEvent> action, BooleanProperty selected) {
+		ButtonBase button = (selected != null) ? new ToggleButton() : new Button();
+		button.setGraphic(icon);
+		String tooltip = text;
+		if (tooltip.endsWith("..."))
+			tooltip = tooltip.substring(0, tooltip.length() - 3);
+		button.setTooltip(new Tooltip(tooltip));
+		button.setFocusTraversable(false);
+		if (action != null)
+			button.setOnAction(action);
+		if (selected != null)
+			((ToggleButton)button).selectedProperty().bindBidirectional(selected);
 		return button;
 	}
 }

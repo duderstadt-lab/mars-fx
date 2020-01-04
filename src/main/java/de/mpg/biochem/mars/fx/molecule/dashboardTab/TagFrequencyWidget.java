@@ -30,6 +30,7 @@ import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.BorderPane;
@@ -87,14 +88,9 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 		stack.getChildren().add(barChart);
 		stack.setPrefSize(250, 250);
 		
-		Tab chartTab = new Tab();
-		chartTab.setGraphic(OctIconFactory.get().createIcon(getIcon(), "1.0em"));
-		
-		getTabPane().getTabs().add(chartTab);
-		
         BorderPane chartPane = new BorderPane();
         chartPane.setCenter(stack);
-        chartTab.setContent(chartPane);
+        setContent(chartPane);
         
         rootPane.setMinSize(250, 250);
         rootPane.setMaxSize(250, 250);
@@ -147,8 +143,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget {
 		// TODO Auto-generated method stub
 	}
 
-	@Override
-	public GlyphIcons getIcon() {
-		return TAG;
+	public static Node getIcon() {
+		return (Node) FontAwesomeIconFactory.get().createIcon(TAG, "1.2em");
 	}
 }

@@ -60,6 +60,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import javafx.scene.control.ButtonBase;
+
 public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
 	
@@ -75,21 +77,22 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	borderPane = new BorderPane();
     	
-    	Action archivePropertiesWidget = new Action("Properties", null, INFO_CIRCLE,
+    	ButtonBase archivePropertiesWidget = ActionUtils.createToolBarButton("Properties", ArchivePropertiesWidget.getIcon(),
 				e -> {
 					ArchivePropertiesWidget propertiesWidget = new ArchivePropertiesWidget(archive, this);
 			    	addWidget(propertiesWidget);
-				});
+				}, null);
     	
-    	Action tagFrequencyWidget = new Action("Tag frequency", null, TAG,
+    	
+    	ButtonBase tagFrequencyWidget = ActionUtils.createToolBarButton("Tag frequency", TagFrequencyWidget.getIcon(),
 				e -> {
 			    	addWidget(new TagFrequencyWidget(archive, this));
-				});
+				}, null);
     	
-    	Action categoryChartWidget = new Action("Category Chart", null, BAR_CHART,
+    	ButtonBase categoryChartWidget = ActionUtils.createToolBarButton("Category Chart", CategoryChartWidget.getIcon(),
 				e -> {
 			    	addWidget(new CategoryChartWidget(archive, this));
-				});
+				}, null);
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
@@ -105,10 +108,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 						widget.load();
 				});
     	
-    	toolbar = ActionUtils.createToolBar(
-    			archivePropertiesWidget, 
-    			tagFrequencyWidget,
-    			categoryChartWidget);
+    	toolbar = ActionUtils.createToolBar(archivePropertiesWidget, tagFrequencyWidget, categoryChartWidget);
     	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
     	
@@ -127,7 +127,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	scrollPane = new ScrollPane();
     	scrollPane.setContent(widgetPane);
     	scrollPane.setFitToWidth(true);
-    	//JFXScrollPane.smoothScrolling(scrollPane);
     	borderPane.setCenter(scrollPane);
     	
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
@@ -169,7 +168,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override

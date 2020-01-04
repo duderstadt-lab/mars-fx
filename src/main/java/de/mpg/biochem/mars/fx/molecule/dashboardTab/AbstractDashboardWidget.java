@@ -2,6 +2,7 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUESTION_CIRCLE_ALT;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -31,6 +32,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
 import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.scene.layout.AnchorPane;
 
 import javafx.animation.RotateTransition;
@@ -50,6 +52,10 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	protected final AnchorPane rootPane;
 	protected final TabPane tabs;
+	
+	//This will hold the main widget content
+	//plots or otherwise...
+	protected final Tab contentTab;
 	protected Task<Void> task;
 
 	protected static final int RESIZE_REGION = 2;
@@ -86,6 +92,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
         rootPane.setBorder(new Border(new BorderStroke(Color.BLACK, 
                 BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+        
+        //Add capture image button and resize button...
+        //resize button will open a dialog that allows entering a custom size for the widget...
 
 		Text closeIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
 		closeButton = new Button();
@@ -122,6 +131,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
         loadButton.setPrefHeight(20);
         
         rootPane.getChildren().addAll(tabs, closeButton, loadButton);
+        
+        contentTab = new Tab();
+		getTabPane().getTabs().add(contentTab);
 	
 		rootPane.setOnMousePressed(new EventHandler<MouseEvent>() {
 			@Override
@@ -267,7 +279,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		x = event.getX();
 	}
 	
-	public abstract GlyphIcons getIcon();
+	public static Node getIcon() {
+		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT, "1.0em");
+	}
 	
 	//Run in separate thread typically
 	//Make sure to put any code that updates UI
@@ -277,6 +291,20 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	@Override
 	public Node getNode() {
 		return rootPane;
+	}
+	
+	public void setContent(Node node) {
+		setContent(null, node);
+	}
+	
+	public void setContent(Node icon, Node node) {
+		contentTab.setContent(node);
+		if (icon != null)
+			getContentTab().setGraphic(icon);
+	}
+	
+	protected Tab getContentTab() {
+		return contentTab;
 	}
 	
 	public TabPane getTabPane() {

@@ -6,6 +6,8 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.scene.Node;
+import javafx.scene.layout.Region;
 
 public class HistogramWidget extends AbstractDashboardWidget {
 
@@ -33,9 +35,9 @@ public class HistogramWidget extends AbstractDashboardWidget {
 		
 	}
 
-	@Override
-	public GlyphIcons getIcon() {
-		// TODO Auto-generated method stub
-		return null;
+	public static Node getIcon() {
+		Region barchartIcon = new Region();
+		barchartIcon.getStyleClass().add("barchartIcon");
+		return barchartIcon;
 	}
 }
