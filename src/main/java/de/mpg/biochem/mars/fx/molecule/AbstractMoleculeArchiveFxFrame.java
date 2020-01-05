@@ -312,7 +312,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     					//Update global accelerators...
     					for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
     						Runnable rn = ()-> {
-    							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab) {
+    							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
    		                	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
    		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
     							}
