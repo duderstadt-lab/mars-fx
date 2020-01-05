@@ -139,12 +139,12 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 
 	@SuppressWarnings("resource")
 	@Override
-	protected boolean build() {
-
+	public void run() {
+		running.set(true);
 		Map<String, Object> outputs = runScript();
 		
 		if (outputs == null)
-			return false;
+			return;
 		
 		//switch statement on keySet ???
 		
@@ -177,13 +177,8 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 			    barChart.getDatasets().add(dataSet);
 			}
     	});
-        return true;
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+        rt.stop();
+        running.set(false);
 	}
 
 	@Override

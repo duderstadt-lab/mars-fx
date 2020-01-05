@@ -5,6 +5,9 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUESTION_CIRCLE_ALT;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
@@ -41,13 +44,9 @@ import javafx.util.Duration;
 import javafx.animation.Interpolator;
 import javafx.animation.Animation;
 
-import javafx.application.Application;
-import javafx.concurrent.Task;
-import javafx.scene.Scene;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.stage.Stage;
 
 public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements MarsDashboardWidget {
 	
@@ -57,15 +56,14 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	//This will hold the main widget content
 	//plots or otherwise...
 	protected final Tab contentTab;
-	protected Task<Void> task;
-
+	
 	protected static final int RESIZE_REGION = 2;
 	protected double MINIMUM_WIDTH = 250;
 	protected double MINIMUM_HEIGHT = 250;
 	protected double y, x;
+	protected AtomicBoolean running = new AtomicBoolean(false);
 	protected boolean initHeight, initWidth;
 	protected boolean dragX, dragY;
-	protected AtomicBoolean loading = new AtomicBoolean(false);
 	protected RotateTransition rt;
 	
 	protected DashboardTab parent;
@@ -124,7 +122,10 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	    rt.setCycleCount(Animation.INDEFINITE);
 		
 		loadButton.setOnMouseClicked(e -> {
-			load();
+			if (getParent() != null) {
+				rt.play();
+				getParent().runWidget(this);
+			}
 		});
 		AnchorPane.setTopAnchor(loadButton, 5.0);
         AnchorPane.setRightAnchor(loadButton, 5.0);
@@ -160,47 +161,6 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				mouseReleased(event);
 			}
 		});
-	}
-	
-	public boolean isLoading() {
-		return loading.get();
-	}
-	
-	public void load() {
-		if (loading.get())
-			interrupt();
-		else {
-			rt.play();
-		     task = new Task<Void>() {
-	           @Override
-	           protected Void call() throws Exception {
-	           	   loading.set(true);
-	           	   if (!build())
-	           		   loading.set(false);
-	               return null;
-	           }
-	        };
-	        
-	        task.setOnSucceeded(event -> { 
-	       	 loading.set(false);
-	       	 rt.stop();
-		      });
-	        
-	        task.setOnCancelled(event -> {
-	       	 loading.set(false);
-	       	 rt.stop();
-	        });
-	        
-	        new Thread(task).start();
-		}
-	}
-	
-	public void interrupt() {
-		if (isLoading()) {
-			task.cancel(true);
-			loading.set(false);
-			rt.stop();
-		}
 	}
 
 	protected void mouseReleased(MouseEvent event) {
@@ -280,14 +240,17 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		x = event.getX();
 	}
 	
+	public void spin() {
+		rt.play();
+	}
+	
+	public void stopSpinning() {
+		rt.stop();
+	}
+	
 	public static Node getIcon() {
 		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT, "1.0em");
 	}
-	
-	//Run in separate thread typically
-	//Make sure to put any code that updates UI
-	//In runLater blocks.
-	protected abstract boolean build();
 
 	@Override
 	public Node getNode() {
@@ -324,8 +287,24 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	@Override
 	public void close() {
-		interrupt();
+		cancel();
 		if (parent != null)
 			parent.removeWidget(this);
+	}
+
+	public boolean cancel() {
+		rt.stop();
+		return true;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return running.get();
+	}
+
+	@Override
+	protected void createIOMaps() {
+		// TODO Auto-generated method stub
+		
 	}
 }

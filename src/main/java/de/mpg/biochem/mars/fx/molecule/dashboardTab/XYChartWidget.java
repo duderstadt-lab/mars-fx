@@ -5,6 +5,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
@@ -24,18 +25,6 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 	}
 
 	@Override
-	protected boolean build() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
 		
@@ -49,7 +38,8 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 
 	@Override
 	public void run() {
-		// TODO Auto-generated method stub
-		
+		running.set(true);
+	    rt.stop();
+	    running.set(false);
 	}
 }

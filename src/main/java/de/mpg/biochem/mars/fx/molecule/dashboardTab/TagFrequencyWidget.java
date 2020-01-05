@@ -94,14 +94,15 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 		
         BorderPane chartPane = new BorderPane();
         chartPane.setCenter(stack);
-        setContent(chartPane);
+        setContent(getIcon(), chartPane);
         
         rootPane.setMinSize(250, 250);
         rootPane.setMaxSize(250, 250);
 	}
 
 	@Override
-	protected boolean build() {
+	public void run() {
+		running.set(true);
 		final List<String> categories = new ArrayList<>();
         
         HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
@@ -134,18 +135,8 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 			    barChart.getDatasets().add(dataSet);
 			}
     	});
-        return true;
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getName() {
-		return "Tag frequencies";
+        rt.stop();
+        running.set(false);
 	}
 
 	@Override

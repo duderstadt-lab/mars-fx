@@ -26,24 +26,6 @@ public class BubbleChartWidget extends AbstractDashboardWidget implements MarsDa
 	}
 
 	@Override
-	protected boolean build() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
 		
@@ -53,5 +35,12 @@ public class BubbleChartWidget extends AbstractDashboardWidget implements MarsDa
 		Region xychartIcon = new Region();
 		xychartIcon.getStyleClass().add("bubblechartIcon");
 		return xychartIcon;
+	}
+
+	@Override
+	public void run() {
+		running.set(true);
+	    rt.stop();
+	    running.set(false);
 	}
 }

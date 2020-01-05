@@ -60,6 +60,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 import javafx.scene.control.ButtonBase;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
@@ -68,6 +71,14 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private ScrollPane scrollPane;
     private JFXMasonryPane widgetPane;
     private ToolBar toolbar;
+    
+    private final int MAX_THREADS = 4;
+
+    private final Executor executor = Executors.newFixedThreadPool(MAX_THREADS, runnable -> {
+        Thread t = new Thread(runnable);
+        t.setDaemon(true);
+        return t ;
+    });
     
     protected ObservableList<MarsDashboardWidget> widgets = FXCollections.observableArrayList();
 	
@@ -96,16 +107,19 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
-					for (MarsDashboardWidget widget : widgets)
-						widget.interrupt();
+					widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> widget.cancel());
 					widgets.clear();
 					widgetPane.getChildren().clear();
 				});
     	
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
-					for (MarsDashboardWidget widget : widgets)
-						widget.load();
+					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> {
+						//Make a new Task and run it by adding it to the executor....
+						//Also add a reference of the task to the widget....
+						widget.spin();
+						runWidget(widget);
+					});
 				});
     	
     	toolbar = ActionUtils.createToolBar(archivePropertiesWidget, tagFrequencyWidget, categoryChartWidget);
@@ -132,6 +146,13 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
         
     	getTab().setContent(borderPane);
+    }
+    
+    public void runWidget(MarsDashboardWidget widget) {
+    	//Runn the spinning thing here ? Start it here !!
+    	//This is the javafx thread so it should directly start spinning.
+    	
+    	executor.execute(widget);
     }
     
     public Node getNode() {

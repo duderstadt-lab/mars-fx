@@ -27,24 +27,6 @@ public class HistogramWidget extends AbstractDashboardWidget implements MarsDash
 	}
 
 	@Override
-	protected boolean build() {
-		// TODO Auto-generated method stub
-		return true;
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public String getName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
 		
@@ -54,5 +36,12 @@ public class HistogramWidget extends AbstractDashboardWidget implements MarsDash
 		Region barchartIcon = new Region();
 		barchartIcon.getStyleClass().add("barchartIcon");
 		return barchartIcon;
+	}
+
+	@Override
+	public void run() {
+		running.set(true);
+	    rt.stop();
+	    running.set(false);
 	}
 }

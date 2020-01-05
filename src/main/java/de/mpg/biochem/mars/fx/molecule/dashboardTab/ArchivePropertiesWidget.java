@@ -33,7 +33,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 	public ArchivePropertiesWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
 		super(archive, parent);
 		
-		build();
+		run();
 		
     	VBox vbox = new VBox();
         
@@ -58,14 +58,10 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
         rootPane.setMinSize(250, 250);
         rootPane.setMaxSize(250, 250);
 	}
-
-	@Override
-	public String getName() {
-		return "ArchivePropertiesWidget";
-	}
 	
 	@Override
-	protected boolean build() {
+	public void run() {
+		running.set(true);
 	    Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -80,13 +76,8 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 				}
 			}
     	});
-	    return true;
-	}
-	
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+	    rt.stop();
+	    running.set(false);
 	}
 
 	@Override
