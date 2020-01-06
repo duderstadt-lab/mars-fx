@@ -91,8 +91,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
                     "CategoryChartWidget",
                     "HistogramWidget",
                     "XYChartWidget",
-                    "BubbleChartWidget",
-                    "DefaultWidget"));
+                    "BubbleChartWidget"));
     
     private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
 
