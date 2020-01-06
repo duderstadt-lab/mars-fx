@@ -96,17 +96,11 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 			DashboardTab parent) {
 		super(archive, parent);
 		
-		//Load example script
-        InputStream is = this.getClass().getResourceAsStream("categorychart.groovy");
-        
-        String exampleScript = "";
-        try {
-			exampleScript = IOUtils.toString(is, "UTF-8");
-			is.close();
+		try {
+			loadScript("categorychart.groovy");
 		} catch (IOException e) {
 			e.printStackTrace();
-		} 
-		setScript(exampleScript);
+		}
 		
         xAxis = new MarsCategoryAxis("Tag");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
@@ -154,7 +148,6 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 	@SuppressWarnings("resource")
 	@Override
 	public void run() {
-		running.set(true);
 		Map<String, Object> outputs = runScript();
 		
 		if (outputs == null)
@@ -193,8 +186,6 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 			    xAxis.setAutoRanging(true);
 			}
     	});
-        rt.stop();
-        running.set(false);
 	}
 
 	@Override

@@ -82,9 +82,9 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
         barChart.horizontalGridLinesVisibleProperty().set(false);
         barChart.verticalGridLinesVisibleProperty().set(false);
 
-        barChart.getPlugins().add(new EditAxis());
-        final Zoomer zoomer = new Zoomer();
-        barChart.getPlugins().add(zoomer);
+        //barChart.getPlugins().add(new EditAxis());
+        //final Zoomer zoomer = new Zoomer();
+        //barChart.getPlugins().add(zoomer);
 
         //root.getChildren().add(barChart);
 		StackPane stack = new StackPane();

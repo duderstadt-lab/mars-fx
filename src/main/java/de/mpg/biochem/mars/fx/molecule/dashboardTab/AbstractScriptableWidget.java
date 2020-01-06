@@ -210,11 +210,15 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget {
 		return module.getOutputs();
 	}
 	
-	public void setScript(String text) {
+	public void loadScript(String name) throws IOException{
+		//Load example script
+    	InputStream is = this.getClass().getResourceAsStream(name);
+    	final String scriptExample = IOUtils.toString(is, "UTF-8");
+		is.close();
 		SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-            	editorpane.setText(text);
+            	editorpane.setText(scriptExample);
             }
         });
 	}
