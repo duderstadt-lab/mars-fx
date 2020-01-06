@@ -44,14 +44,17 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 
-public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements MarsDashboardWidget {
+import net.imagej.ops.Initializable;
+import org.scijava.plugin.Parameter;
+
+public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord implements MarsDashboardWidget, Initializable {
 	
-	protected final AnchorPane rootPane;
-	protected final TabPane tabs;
+	protected AnchorPane rootPane;
+	protected TabPane tabs;
 	
 	//This will hold the main widget content
 	//plots or otherwise...
-	protected final Tab contentTab;
+	protected Tab contentTab;
 	
 	protected static final int RESIZE_REGION = 2;
 	protected double MINIMUM_WIDTH = 250;
@@ -61,15 +64,16 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected boolean initHeight, initWidth;
 	protected boolean dragX, dragY;
 	protected RotateTransition rt;
-	
-	protected DashboardTab parent;
 	protected Button closeButton, loadButton;
 	
+	@Parameter
 	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
 	
-	public AbstractDashboardWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
-		this.archive = archive;
-		this.parent = parent;
+	@Parameter
+	protected DashboardTab parent;
+	
+	@Override
+	public void initialize() {
 		rootPane = new AnchorPane();
 		tabs = new TabPane();
 		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
@@ -248,7 +252,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		rt.stop();
 	}
 	
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT, "1.0em");
 	}
 
@@ -273,6 +278,16 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	public TabPane getTabPane() {
 		return tabs;
+	}
+	
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	@Override
+	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	@Override

@@ -33,6 +33,9 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 		return widgets.keySet();
 	}
 
+	//hmm.... I guess achive and Dashboard would need to be parameter inputs for this mechanism to work
+	//then the initialize method would need to be called?
+	
 	/** Creates an animal of the given name. */
 	public MarsDashboardWidget createWidget(final String name) {
 		final PluginInfo<MarsDashboardWidget> info = widgets.get(name);
@@ -42,9 +45,19 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 		}
 
 		// Next, we use the plugin service to create an animal of that kind.
-		final MarsDashboardWidget animal = plugins.createInstance(info);
+		final MarsDashboardWidget widget = plugins.createInstance(info);
 
-		return animal;
+		return widget;
+	}
+	
+	public Class<? extends MarsDashboardWidget> getWidgetClass(final String name) {
+		final PluginInfo<MarsDashboardWidget> info = widgets.get(name);
+		
+		if (info == null) {
+			throw new IllegalArgumentException("No widgets of that name");
+		}
+		
+		return info.getPluginClass();
 	}
 
 	@Override

@@ -44,16 +44,18 @@ import java.util.List;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
-@Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
-public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
-	
-	final XYChart barChart;
-	final MarsCategoryAxis xAxis;
-	final MarsNumericAxis yAxis;
+import net.imagej.ops.Initializable;
 
-	public TagFrequencyWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
-			DashboardTab parent) {
-		super(archive, parent);
+@Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
+public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+	
+	protected XYChart barChart;
+	protected MarsCategoryAxis xAxis;
+	protected MarsNumericAxis yAxis;
+
+	@Override
+	public void initialize() {
+		super.initialize();
 		
 		//final StackPane root = new StackPane();
         xAxis = new MarsCategoryAxis("Tag");
@@ -102,7 +104,6 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 
 	@Override
 	public void run() {
-		running.set(true);
 		final List<String> categories = new ArrayList<>();
         
         HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
@@ -137,8 +138,6 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 			    xAxis.setAutoRanging(true);
 			}
     	});
-        rt.stop();
-        running.set(false);
 	}
 
 	@Override
@@ -146,7 +145,8 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 		// TODO Auto-generated method stub
 	}
 
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		return (Node) FontAwesomeIconFactory.get().createIcon(TAG, "1.2em");
 	}
 }

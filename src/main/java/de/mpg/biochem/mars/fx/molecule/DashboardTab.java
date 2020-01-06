@@ -38,6 +38,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.ArchivePropertiesWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.CategoryChartWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -70,6 +71,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.scene.control.ButtonBase;
 import java.util.List;
+import java.util.*;
+
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.*;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
@@ -77,8 +81,18 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private ScrollPane scrollPane;
     private JFXMasonryPane widgetPane;
     private ToolBar toolbar;
+    private MarsDashboardWidgetService marsDashboardWidgetService;
     
     private final int MAX_THREADS = 4;
+    
+    private final ArrayList<String> widgetToolbarOrder = new ArrayList<String>( 
+            Arrays.asList("ArchivePropertiesWidget", 
+                    "TagFrequencyWidget", 
+                    "CategoryChartWidget",
+                    "HistogramWidget",
+                    "XYChartWidget",
+                    "BubbleChartWidget",
+                    "DefaultWidget"));
     
     private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
 
@@ -96,23 +110,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	borderPane = new BorderPane();
     	
-    	ButtonBase archivePropertiesWidget = ActionUtils.createToolBarButton("Properties", ArchivePropertiesWidget.getIcon(),
-				e -> {
-					ArchivePropertiesWidget propertiesWidget = new ArchivePropertiesWidget(archive, this);
-			    	addWidget(propertiesWidget);
-				}, null);
-    	
-    	
-    	ButtonBase tagFrequencyWidget = ActionUtils.createToolBarButton("Tag frequency", TagFrequencyWidget.getIcon(),
-				e -> {
-			    	addWidget(new TagFrequencyWidget(archive, this));
-				}, null);
-    	
-    	ButtonBase categoryChartWidget = ActionUtils.createToolBarButton("Category Chart", CategoryChartWidget.getIcon(),
-				e -> {
-			    	addWidget(new CategoryChartWidget(archive, this));
-				}, null);
-    	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
 					widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget));
@@ -123,7 +120,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
 					//executor.shutdownNow();
-					System.out.println("size " + activeWidgets.size());
 					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> {
 						//Make a new Task and run it by adding it to the executor....
 						//Also add a reference of the task to the widget....
@@ -132,7 +128,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 					});
 				});
     	
-    	toolbar = ActionUtils.createToolBar(archivePropertiesWidget, tagFrequencyWidget, categoryChartWidget);
+    	toolbar = new ToolBar();//;//, tagFrequencyWidget, categoryChartWidget);
     	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
     	
@@ -164,7 +160,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     }
     
     public void stopWidget(MarsDashboardWidget widget) {
-    	activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst().get().stop();
+    	activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst().ifPresent(activeWidget -> activeWidget.stop());
     	widget.setRunning(false);
     }
     
@@ -197,6 +193,43 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;  
+        marsDashboardWidgetService = archive.getMoleculeArchiveService().getContext().getService(MarsDashboardWidgetService.class);
+    	
+    	//Loop through all available widgets and add them to the toolbar
+    	//use preferred order
+    	Set<String> discoveredWidgets = marsDashboardWidgetService.getWidgetNames();
+    	//widgetToolbarOrder
+    	
+    	ArrayList<Node> widgetButtons = new ArrayList<Node>();
+    	
+    	//Add all the expected widgets in the order defined by widgetToolbarOrder
+    	widgetToolbarOrder.stream().filter(widgetName -> discoveredWidgets.contains(widgetName)).forEach(widgetName ->
+    		widgetButtons.add(createWidgetButton(widgetName)));
+    	
+    	//Now add any newly discovered widgets besides the default set
+    	discoveredWidgets.stream().filter(widgetName -> !widgetToolbarOrder.contains(widgetName)).forEach(widgetName ->
+		widgetButtons.add(createWidgetButton(widgetName)));
+
+    	toolbar.getItems().addAll(0, widgetButtons);
+    }
+    
+    public ButtonBase createWidgetButton(String widgetName) {
+    	//HACK to get the Icon for the toolbar before any widgets have been added to
+		//the Dashboard...
+		//We create a dummy widget just to get the Icon but never use it.
+		//What is the workaround - can't seem to use a static method because that couldn't be in the interface.
+		MarsDashboardWidget dummyWidgetForIcon = marsDashboardWidgetService.createWidget(widgetName);
+		
+		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(),
+				e -> {
+					MarsDashboardWidget widget = marsDashboardWidgetService.createWidget(widgetName);
+					widget.setArchive(archive);
+					widget.setParent(this);
+					widget.initialize();
+			    	addWidget(widget);
+				}, null);
+		
+		return widgetButton;
     }
 
 	@Override

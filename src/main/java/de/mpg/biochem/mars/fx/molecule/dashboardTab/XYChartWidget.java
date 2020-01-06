@@ -15,12 +15,14 @@ import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
-@Plugin( type = XYChartWidget.class, name = "XYChartWidget" )
-public class XYChartWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
+import net.imagej.ops.Initializable;
 
-	public XYChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
-			DashboardTab parent) {
-		super(archive, parent);
+@Plugin( type = XYChartWidget.class, name = "XYChartWidget" )
+public class XYChartWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+
+	@Override
+	public void initialize() {
+		super.initialize();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -30,7 +32,8 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 		
 	}
 
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		Region xychartIcon = new Region();
 		xychartIcon.getStyleClass().add("xychartIcon");
 		return xychartIcon;
@@ -38,8 +41,6 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 
 	@Override
 	public void run() {
-		running.set(true);
-	    rt.stop();
-	    running.set(false);
+
 	}
 }

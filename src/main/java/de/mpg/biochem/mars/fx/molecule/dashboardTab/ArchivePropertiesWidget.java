@@ -20,9 +20,10 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
+import net.imagej.ops.Initializable;
 
 @Plugin( type = ArchivePropertiesWidget.class, name = "ArchivePropertiesWidget" )
-public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
+public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();
@@ -30,8 +31,9 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 	private Label metadataNumber = new Label();
 	private Label memorySetting = new Label();
 	
-	public ArchivePropertiesWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
-		super(archive, parent);
+	@Override
+	public void initialize() {
+		super.initialize();
 		
 		run();
 		
@@ -61,7 +63,6 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 	
 	@Override
 	public void run() {
-		running.set(true);
 	    Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -76,8 +77,6 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 				}
 			}
     	});
-	    rt.stop();
-	    running.set(false);
 	}
 
 	@Override
@@ -85,7 +84,8 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 		// TODO Auto-generated method stub
 	}
 
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		return (Node) FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.2em");
 	}
 }

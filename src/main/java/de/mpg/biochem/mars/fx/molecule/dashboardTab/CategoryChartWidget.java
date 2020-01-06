@@ -88,13 +88,13 @@ import org.scijava.plugin.Parameter;
 @Plugin( type = CategoryChartWidget.class, name = "CategoryChartWidget" )
 public class CategoryChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin {
 	
-	protected final XYChart barChart;
-	protected final MarsCategoryAxis xAxis;
-	protected final MarsNumericAxis yAxis;
+	protected XYChart barChart;
+	protected MarsCategoryAxis xAxis;
+	protected MarsNumericAxis yAxis;
 
-	public CategoryChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
-			DashboardTab parent) {
-		super(archive, parent);
+	@Override
+	public void initialize() {
+		super.initialize();
 		
 		try {
 			loadScript("categorychart.groovy");
@@ -194,7 +194,8 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		
 	}
 	
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		Region categoryIcon = new Region();
 		categoryIcon.getStyleClass().add("categoriesIcon");
 		return categoryIcon;

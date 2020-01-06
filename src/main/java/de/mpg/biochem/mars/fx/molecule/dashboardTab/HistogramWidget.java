@@ -17,12 +17,14 @@ import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
-@Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
-public class HistogramWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin {
+import net.imagej.ops.Initializable;
 
-	public HistogramWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
-			DashboardTab parent) {
-		super(archive, parent);
+@Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
+public class HistogramWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+
+	@Override
+	public void initialize() {
+		super.initialize();
 		// TODO Auto-generated constructor stub
 	}
 
@@ -32,7 +34,8 @@ public class HistogramWidget extends AbstractDashboardWidget implements MarsDash
 		
 	}
 
-	public static Node getIcon() {
+	@Override
+	public Node getIcon() {
 		Region barchartIcon = new Region();
 		barchartIcon.getStyleClass().add("barchartIcon");
 		return barchartIcon;
@@ -40,8 +43,6 @@ public class HistogramWidget extends AbstractDashboardWidget implements MarsDash
 
 	@Override
 	public void run() {
-		running.set(true);
-	    rt.stop();
-	    running.set(false);
+
 	}
 }

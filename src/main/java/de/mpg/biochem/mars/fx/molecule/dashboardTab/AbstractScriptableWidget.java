@@ -53,28 +53,39 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Toggle;
 
-public abstract class AbstractScriptableWidget extends AbstractDashboardWidget {
+import net.imagej.ops.Initializable;
+import org.scijava.plugin.Parameter;
+
+public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
 	
+	@Parameter
 	protected ScriptService scriptService;
+	
+	@Parameter
 	protected ModuleService moduleService;
+	
+	@Parameter
 	protected LogService log;
+	
+	@Parameter
 	protected Context context;
+	
 	protected ScriptLanguage lang;
 	protected TextArea textarea;
-	protected final LanguageSettableEditorPane editorpane;
+	protected LanguageSettableEditorPane editorpane;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
 	
 	protected RTextScrollPane scroll;
 	
-	public AbstractScriptableWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, DashboardTab parent) {
-		super(archive, parent);
-		
+	@Override
+	public void initialize() {
+		super.initialize();
 		//Retrieve context and establish local pointers to services.
-		context = archive.getMoleculeArchiveService().getContext();
-	    scriptService = context.getService(ScriptService.class);
-		moduleService = context.getService(ModuleService.class);
-		log = context.getService(LogService.class);
+		//context = archive.getMoleculeArchiveService().getContext();
+	    //scriptService = context.getService(ScriptService.class);
+		//moduleService = context.getService(ModuleService.class);
+		//log = context.getService(LogService.class);
 		
 		//Script Pane
         Tab scriptTab = new Tab();
