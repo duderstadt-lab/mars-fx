@@ -141,6 +141,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	borderPane.setTop(toolbar);
     	  	
     	widgetPane = new JFXMasonryPane();
+    	widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.BIN_PACKING);
+    	//default below ensure they stay in order
+    	//BIN_PACKING default to fitting them all in...
+    	//widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.MASONRY);
     	widgetPane.setPadding(new Insets(10, 10, 10, 10));
     	
     	scrollPane = new ScrollPane();
