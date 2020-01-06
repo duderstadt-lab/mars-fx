@@ -4,6 +4,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOOK;
 import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -18,6 +19,7 @@ import javafx.application.Platform;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.io.IOUtils;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -80,7 +82,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget {
         editorpane = new LanguageSettableEditorPane();
 
 		context.inject(editorpane);
-        
 		lang = scriptService.getLanguageByName("Groovy");
 		
         final SwingNode swingNode = new SwingNode();
@@ -207,6 +208,15 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget {
 		}
 		
 		return module.getOutputs();
+	}
+	
+	public void setScript(String text) {
+		SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+            	editorpane.setText(text);
+            }
+        });
 	}
 	
 	public static class Console extends OutputStream {

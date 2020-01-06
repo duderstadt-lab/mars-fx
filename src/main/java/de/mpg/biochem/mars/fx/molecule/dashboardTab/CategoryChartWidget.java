@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
@@ -79,6 +80,7 @@ import javafx.scene.Node;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
+import org.apache.commons.io.IOUtils;
 import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
@@ -93,6 +95,18 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 	public CategoryChartWidget(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive,
 			DashboardTab parent) {
 		super(archive, parent);
+		
+		//Load example script
+        InputStream is = this.getClass().getResourceAsStream("categorychart.groovy");
+        
+        String exampleScript = "";
+        try {
+			exampleScript = IOUtils.toString(is, "UTF-8");
+			is.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} 
+		setScript(exampleScript);
 		
         xAxis = new MarsCategoryAxis("Tag");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
@@ -175,6 +189,8 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 				xAxis.setCategories(categories);
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);
+			    
+			    xAxis.setAutoRanging(true);
 			}
     	});
         rt.stop();

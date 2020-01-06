@@ -31,6 +31,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import javafx.geometry.Insets;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -53,6 +54,8 @@ import javafx.scene.control.ToolBar;
 
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
+
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -61,9 +64,12 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.scene.control.ButtonBase;
+import java.util.List;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
@@ -73,8 +79,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private ToolBar toolbar;
     
     private final int MAX_THREADS = 4;
+    
+    private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
 
-    private final Executor executor = Executors.newFixedThreadPool(MAX_THREADS, runnable -> {
+    private final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS, runnable -> {
         Thread t = new Thread(runnable);
         t.setDaemon(true);
         return t ;
@@ -107,13 +115,15 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,
 				e -> {
-					widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> widget.cancel());
+					widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget));
 					widgets.clear();
 					widgetPane.getChildren().clear();
 				});
     	
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
+					//executor.shutdownNow();
+					System.out.println("size " + activeWidgets.size());
 					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> {
 						//Make a new Task and run it by adding it to the executor....
 						//Also add a reference of the task to the widget....
@@ -149,10 +159,13 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     }
     
     public void runWidget(MarsDashboardWidget widget) {
-    	//Runn the spinning thing here ? Start it here !!
-    	//This is the javafx thread so it should directly start spinning.
-    	
-    	executor.execute(widget);
+    	widget.setRunning(true);
+    	executor.execute(new WidgetRunnable(widget));
+    }
+    
+    public void stopWidget(MarsDashboardWidget widget) {
+    	activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst().get().stop();
+    	widget.setRunning(false);
     }
     
     public Node getNode() {
@@ -194,5 +207,44 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	@Override
 	public String getName() {
 		return "DashboardTab";
+	}
+	
+	class WidgetRunnable implements Runnable {
+		
+	    private final MarsDashboardWidget runnable;
+	    
+	    private Thread thread;
+	    private AtomicBoolean canceled = new AtomicBoolean(false);
+
+	    public WidgetRunnable(MarsDashboardWidget runnable) {
+	        this.runnable = runnable;
+	        activeWidgets.add(this);
+	    }
+
+	    @Override
+	    public void run() {
+	    	if (canceled.get())
+	    		return;
+	    	thread = Thread.currentThread();
+	    	runnable.run();
+	        Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					runnable.stopSpinning();
+				}
+			});
+	        activeWidgets.remove(this);
+	    }
+	    
+	    public MarsDashboardWidget getWidget() {
+	    	return runnable;
+	    }
+	    
+	    public void stop() {
+	    	runnable.stopSpinning();
+	    	canceled.set(true);
+	    	if (thread != null)
+	    		thread.interrupt();
+	    }
 	}
 }

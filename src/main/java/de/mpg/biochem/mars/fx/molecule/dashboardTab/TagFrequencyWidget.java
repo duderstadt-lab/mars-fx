@@ -133,6 +133,8 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 				xAxis.setCategories(categories);
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);
+			    
+			    xAxis.setAutoRanging(true);
 			}
     	});
         rt.stop();

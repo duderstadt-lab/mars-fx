@@ -119,8 +119,12 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		
 		loadButton.setOnMouseClicked(e -> {
 			if (getParent() != null) {
-				rt.play();
-				getParent().runWidget(this);
+				if (isRunning()) {
+					getParent().stopWidget(this);
+				} else {
+					rt.play();
+					getParent().runWidget(this);
+				}
 			}
 		});
 		AnchorPane.setTopAnchor(loadButton, 5.0);
@@ -283,19 +287,21 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	
 	@Override
 	public void close() {
-		cancel();
-		if (parent != null)
-			parent.removeWidget(this);
-	}
-
-	public boolean cancel() {
 		rt.stop();
-		return true;
+		if (parent != null) {
+			parent.stopWidget(this);
+			parent.removeWidget(this);
+		}
 	}
 
 	@Override
 	public boolean isRunning() {
 		return running.get();
+	}
+	
+	@Override
+	public void setRunning(boolean running) {
+		this.running.set(running);
 	}
 
 	@Override

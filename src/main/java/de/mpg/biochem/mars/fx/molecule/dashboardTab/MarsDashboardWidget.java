@@ -14,7 +14,7 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord {
 	public void setParent(DashboardTab parent);
 	public DashboardTab getParent();
 	public boolean isRunning();
-	public boolean cancel();
+	public void setRunning(boolean running);
 	public void spin();
 	public void stopSpinning();
 	public void close();
