@@ -40,6 +40,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingNode;
@@ -56,6 +57,22 @@ import javafx.scene.control.Toggle;
 import net.imagej.ops.Initializable;
 import org.scijava.plugin.Parameter;
 
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.reactfx.Subscription;
+
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
 	
 	@Parameter
@@ -71,12 +88,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected Context context;
 	
 	protected ScriptLanguage lang;
-	protected TextArea textarea, scriptTextArea;
-	//protected LanguageSettableEditorPane editorpane;
+	protected TextArea textarea;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
-	
-	//protected RTextScrollPane scroll;
+	protected CodeArea codeArea;
 	
 	@Override
 	public void initialize() {
@@ -88,14 +103,45 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         Tab scriptTab = new Tab();
         scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
 		
-        //SwingNode swingNode = new SwingNode();
-        //createSwingContent(swingNode);
+        codeArea = new CodeArea();
+
+        // add line numbers to the left of area
+        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
+        
+        codeArea.getStylesheets().add("de/mpg/biochem/mars/fx/syntaxhighlighter/java-keywords.css");
+
+        // recompute the syntax highlighting 500 ms after user stops editing area
+        Subscription cleanupWhenNoLongerNeedIt = codeArea
+
+                // plain changes = ignore style changes that are emitted when syntax highlighting is reapplied
+                // multi plain changes = save computation by not rerunning the code multiple times
+                //   when making multiple changes (e.g. renaming a method at multiple parts in file)
+                .multiPlainChanges()
+
+                // do not emit an event until 500 ms have passed since the last emission of previous stream
+                .successionEnds(Duration.ofMillis(500))
+
+                // run the following code block when previous stream emits an event
+                .subscribe(ignore -> codeArea.setStyleSpans(0, JavaSyntaxHighlighter.computeHighlighting(codeArea.getText())));
+
+        // when no longer need syntax highlighting and wish to clean up memory leaks
+        // run: `cleanupWhenNoLongerNeedIt.unsubscribe();`
+
+
+        // auto-indent: insert previous line's indents on enter
+        final Pattern whiteSpace = Pattern.compile( "^\\s+" );
+        codeArea.addEventHandler( KeyEvent.KEY_PRESSED, KE ->
+        {
+            if ( KE.getCode() == KeyCode.ENTER ) {
+            	int caretPosition = codeArea.getCaretPosition();
+            	int currentParagraph = codeArea.getCurrentParagraph();
+                Matcher m0 = whiteSpace.matcher( codeArea.getParagraph( currentParagraph-1 ).getSegments().get( 0 ) );
+                if ( m0.find() ) Platform.runLater( () -> codeArea.insertText( caretPosition, m0.group() ) );
+            }
+        });
     
         BorderPane scriptBorder = new BorderPane();
-        scriptTextArea = new TextArea();
-        scriptBorder.setCenter(scriptTextArea);
-        
-        //scriptBorder.setCenter(swingNode);
+        scriptBorder.setCenter(new VirtualizedScrollPane<>(codeArea));
         
         languageGroup = new ToggleGroup();
         
@@ -114,12 +160,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
             		lang = scriptService.getLanguageByName("Groovy");
             	else if (newToggle == radioButtonPython)
             		lang = scriptService.getLanguageByName("Python");
-            	/*SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                    	editorpane.setLanguage(lang);
-                    }
-            	});*/
             }
         });
         
@@ -145,41 +185,12 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         logTab.setContent(borderPane);
         logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
         getTabPane().getTabs().add(logTab);
-        /*
-        tabs.getSelectionModel().selectedItemProperty().addListener(
-    		new ChangeListener<Tab>() {
-    			@Override
-    			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-    				if (newValue == scriptTab) 
-    					SwingUtilities.invokeLater(new Runnable() {
-    	                    @Override
-    	                    public void run() {
-    	                    	swingNode.autosize();
-    	                    }
-    	            	});
-    			}
-    		});
-    		*/
+
 	}
-	/*
-	private void createSwingContent(final SwingNode swingNode) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-            	editorpane = new LanguageSettableEditorPane();
-        		context.inject(editorpane);
-            	editorpane.setLanguage(lang);
-            	scroll = editorpane.wrappedInScrollbars();
-                swingNode.setContent(scroll);
-            }
-        });
-        
-    }
-	*/
+	
 	@SuppressWarnings("resource")
 	protected Map<String, Object> runScript() {
-		//Reader reader = new StringReader(editorpane.getText());
-		Reader reader = new StringReader(scriptTextArea.getText());
+		Reader reader = new StringReader(codeArea.getText());
 		
 		String scriptName = "script";
 		if (radioButtonGroovy.isSelected()) {
@@ -233,15 +244,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
     	InputStream is = this.getClass().getResourceAsStream(name);
     	final String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();
-		scriptTextArea.setText(scriptExample);
-		/*
-		SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-            	editorpane.setText(scriptExample);
-            }
-        });
-        */
+		codeArea.replaceText(0, 0, scriptExample);
 	}
 	
 	public static class Console extends OutputStream {
@@ -255,7 +258,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         @Override
         public void write(int i) throws IOException {
         	Platform.runLater( () -> output.appendText(String.valueOf((char) i)) );
-            
         }
     }
 }
