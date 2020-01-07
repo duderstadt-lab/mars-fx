@@ -128,10 +128,6 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
         barChart.horizontalGridLinesVisibleProperty().set(false);
         barChart.verticalGridLinesVisibleProperty().set(false);
 
-        //barChart.getPlugins().add(new EditAxis());
-        //final Zoomer zoomer = new Zoomer();
-        //barChart.getPlugins().add(zoomer);
-
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(barChart);
@@ -145,7 +141,6 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
         rootPane.setMaxSize(250, 250);
 	}
 
-	@SuppressWarnings("resource")
 	@Override
 	public void run() {
 		Map<String, Object> outputs = runScript();
@@ -160,8 +155,7 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		String yLabel = (String) outputs.get("yLabel");
 		String xLabel = (String) outputs.get("xLabel");
 		String fillColor = (String)outputs.get("fillColor");
-		//String strokeColor = (String) module.getOutput("strokeColor");
-		//String strokeWidth = (String) module.getOutput("strokeWidth");
+		String title = (String)outputs.get("title");
 		
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
         dataSet.setStyle("fillColor:" + fillColor + ";");
@@ -180,18 +174,13 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 				yAxis.setName(yLabel);
 				
 				xAxis.setCategories(categories);
+				barChart.setTitle(title);
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);
 			    
 			    xAxis.setAutoRanging(true);
 			}
     	});
-	}
-
-	@Override
-	protected void createIOMaps() {
-		// TODO Auto-generated method stub
-		
 	}
 	
 	@Override

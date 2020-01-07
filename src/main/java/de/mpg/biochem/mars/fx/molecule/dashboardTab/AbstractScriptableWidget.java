@@ -71,35 +71,31 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected Context context;
 	
 	protected ScriptLanguage lang;
-	protected TextArea textarea;
-	protected LanguageSettableEditorPane editorpane;
+	protected TextArea textarea, scriptTextArea;
+	//protected LanguageSettableEditorPane editorpane;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
 	
-	protected RTextScrollPane scroll;
+	//protected RTextScrollPane scroll;
 	
 	@Override
 	public void initialize() {
 		super.initialize();
-		//Retrieve context and establish local pointers to services.
-		//context = archive.getMoleculeArchiveService().getContext();
-	    //scriptService = context.getService(ScriptService.class);
-		//moduleService = context.getService(ModuleService.class);
-		//log = context.getService(LogService.class);
+		
+		lang = scriptService.getLanguageByName("Groovy");
 		
 		//Script Pane
         Tab scriptTab = new Tab();
         scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
-        editorpane = new LanguageSettableEditorPane();
-
-		context.inject(editorpane);
-		lang = scriptService.getLanguageByName("Groovy");
 		
-        final SwingNode swingNode = new SwingNode();
-        createSwingContent(swingNode);
+        //SwingNode swingNode = new SwingNode();
+        //createSwingContent(swingNode);
     
         BorderPane scriptBorder = new BorderPane();
-        scriptBorder.setCenter(swingNode);
+        scriptTextArea = new TextArea();
+        scriptBorder.setCenter(scriptTextArea);
+        
+        //scriptBorder.setCenter(swingNode);
         
         languageGroup = new ToggleGroup();
         
@@ -118,12 +114,12 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
             		lang = scriptService.getLanguageByName("Groovy");
             	else if (newToggle == radioButtonPython)
             		lang = scriptService.getLanguageByName("Python");
-            	SwingUtilities.invokeLater(new Runnable() {
+            	/*SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
                     	editorpane.setLanguage(lang);
                     }
-            	});
+            	});*/
             }
         });
         
@@ -131,6 +127,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         hbox.setSpacing(5);
         hbox.setPadding(new Insets(5, 5, 5, 5));
         scriptBorder.setPadding(new Insets(5, 5, 5, 5));
+        scriptBorder.setPrefSize(250, 250);
         scriptBorder.setTop(hbox);
         
         scriptTab.setContent(scriptBorder);
@@ -148,31 +145,41 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         logTab.setContent(borderPane);
         logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
         getTabPane().getTabs().add(logTab);
-        
+        /*
         tabs.getSelectionModel().selectedItemProperty().addListener(
     		new ChangeListener<Tab>() {
     			@Override
     			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
     				if (newValue == scriptTab) 
-    					swingNode.autosize();
+    					SwingUtilities.invokeLater(new Runnable() {
+    	                    @Override
+    	                    public void run() {
+    	                    	swingNode.autosize();
+    	                    }
+    	            	});
     			}
     		});
+    		*/
 	}
-	
+	/*
 	private void createSwingContent(final SwingNode swingNode) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+            	editorpane = new LanguageSettableEditorPane();
+        		context.inject(editorpane);
             	editorpane.setLanguage(lang);
             	scroll = editorpane.wrappedInScrollbars();
                 swingNode.setContent(scroll);
             }
         });
+        
     }
-	
+	*/
 	@SuppressWarnings("resource")
 	protected Map<String, Object> runScript() {
-		Reader reader = new StringReader(editorpane.getText());
+		//Reader reader = new StringReader(editorpane.getText());
+		Reader reader = new StringReader(scriptTextArea.getText());
 		
 		String scriptName = "script";
 		if (radioButtonGroovy.isSelected()) {
@@ -221,17 +228,20 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		return module.getOutputs();
 	}
 	
-	public void loadScript(String name) throws IOException{
+	public void loadScript(String name) throws IOException {
 		//Load example script
     	InputStream is = this.getClass().getResourceAsStream(name);
     	final String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();
+		scriptTextArea.setText(scriptExample);
+		/*
 		SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
             	editorpane.setText(scriptExample);
             }
         });
+        */
 	}
 	
 	public static class Console extends OutputStream {

@@ -2,12 +2,12 @@
 #@OUTPUT String xLabel
 #@OUTPUT String yLabel
 #@OUTPUT String fillColor
-#@OUTPUT String strokeWidth
+#@OUTPUT String title
 #@OUTPUT String[] xValues
 #@OUTPUT Double[] yValues
 
 fillColor = "#add8e6"
-strokeWidth = "0"
+title = "Category Chart"
 xLabel = "Categories"
 yLabel = "Frequency"
 
