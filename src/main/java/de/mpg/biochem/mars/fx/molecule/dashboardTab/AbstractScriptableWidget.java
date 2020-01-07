@@ -68,10 +68,14 @@ import javafx.scene.input.KeyEvent;
 
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.LineNumberFactory;
+import org.fxmisc.richtext.StyledTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.reactfx.Subscription;
+
+import javafx.beans.property.SimpleStringProperty;
 
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
 	
@@ -88,10 +92,11 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected Context context;
 	
 	protected ScriptLanguage lang;
-	protected TextArea textarea;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
 	protected CodeArea codeArea;
+	protected Subscription cleanupWhenNoLongerNeedIt;
+	protected InlineCssTextArea logArea;
 	
 	@Override
 	public void initialize() {
@@ -111,7 +116,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         codeArea.getStylesheets().add("de/mpg/biochem/mars/fx/syntaxhighlighter/java-keywords.css");
 
         // recompute the syntax highlighting 500 ms after user stops editing area
-        Subscription cleanupWhenNoLongerNeedIt = codeArea
+        cleanupWhenNoLongerNeedIt = codeArea
 
                 // plain changes = ignore style changes that are emitted when syntax highlighting is reapplied
                 // multi plain changes = save computation by not rerunning the code multiple times
@@ -173,11 +178,11 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         scriptTab.setContent(scriptBorder);
         getTabPane().getTabs().add(scriptTab);
         
-        textarea = new TextArea();
-        textarea.setEditable(false);
+        logArea = new InlineCssTextArea("");
+        logArea.setEditable(false);
   
         BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(textarea);
+        borderPane.setCenter(new VirtualizedScrollPane<>(logArea));
         borderPane.setPrefSize(250, 250);
         borderPane.setPadding(new Insets(5, 5, 5, 5));
         
@@ -188,7 +193,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 
 	}
 	
-	@SuppressWarnings("resource")
 	protected Map<String, Object> runScript() {
 		Reader reader = new StringReader(codeArea.getText());
 		
@@ -207,11 +211,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			module = scriptInfo.createModule();
 			context.inject(module);
 		} catch (ModuleException e) {
-			log.error(e);
 			return null;
 		}
 		
-		Console console = new Console(textarea);
+		Console console = new Console(logArea);
         PrintStream ps = new PrintStream(console, true);
         
         Writer writer;
@@ -221,8 +224,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			module.setOutputWriter(writer);
 			module.setErrorWriter(writer);
 		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			log.error(e1);
 			return null;
 		}
 		
@@ -247,17 +248,23 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		codeArea.replaceText(0, 0, scriptExample);
 	}
 	
-	public static class Console extends OutputStream {
+	@Override
+	public void close() {
+		super.close();
+		cleanupWhenNoLongerNeedIt.unsubscribe();
+	}
+	
+	class Console extends OutputStream {
 
-        private TextArea output;
+        private InlineCssTextArea logarea;
 
-        public Console(TextArea ta) {
-            this.output = ta;
+        public Console(InlineCssTextArea logarea) {
+        	this.logarea = logarea;
         }
 
         @Override
         public void write(int i) throws IOException {
-        	Platform.runLater( () -> output.appendText(String.valueOf((char) i)) );
+        	Platform.runLater( () -> logarea.appendText(String.valueOf((char) i)) );
         }
     }
 }

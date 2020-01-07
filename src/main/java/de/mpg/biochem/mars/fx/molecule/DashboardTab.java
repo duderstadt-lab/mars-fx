@@ -83,7 +83,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private ToolBar toolbar;
     private MarsDashboardWidgetService marsDashboardWidgetService;
     
-    private final int MAX_THREADS = 4;
+    private final int MAX_THREADS = 1;
     
     private final ArrayList<String> widgetToolbarOrder = new ArrayList<String>( 
             Arrays.asList("ArchivePropertiesWidget", 
@@ -116,6 +116,9 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 					widgetPane.getChildren().clear();
 				});
     	
+    	Action stopAllWidgets = new Action("Stop all", null, STOP,
+				e -> widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget)));
+    	
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
 					//executor.shutdownNow();
@@ -130,13 +133,14 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	toolbar = new ToolBar();//;//, tagFrequencyWidget, categoryChartWidget);
     	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
-    	
     	// horizontal spacer
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolbar.getItems().add(spacer);
 		
-    	toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets), ActionUtils.createToolBarButton(reloadWidgets));
+    	toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets), 
+    			ActionUtils.createToolBarButton(stopAllWidgets),
+    			ActionUtils.createToolBarButton(reloadWidgets));
     	
     	borderPane.setTop(toolbar);
     	  	
