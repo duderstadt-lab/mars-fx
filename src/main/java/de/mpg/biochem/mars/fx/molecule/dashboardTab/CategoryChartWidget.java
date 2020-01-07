@@ -150,6 +150,12 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		
 		System.out.println("number of outputs " + outputs.size());
 		
+		for (String name : outputs.keySet())
+			if (outputs.get(name) == null) {
+				System.out.println("found a null");
+				return;
+			}
+		
 		//switch statement on keySet ???
 		
 		String[] xValues = (String[]) outputs.get("xValues");

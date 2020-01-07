@@ -122,15 +122,10 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	Action reloadWidgets = new Action("Reload", null, REFRESH,
 				e -> {
 					//executor.shutdownNow();
-					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> {
-						//Make a new Task and run it by adding it to the executor....
-						//Also add a reference of the task to the widget....
-						widget.spin();
-						runWidget(widget);
-					});
+					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> runWidget(widget));
 				});
     	
-    	toolbar = new ToolBar();//;//, tagFrequencyWidget, categoryChartWidget);
+    	toolbar = new ToolBar();
     	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
     	// horizontal spacer
@@ -162,13 +157,11 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     }
     
     public void runWidget(MarsDashboardWidget widget) {
-    	widget.setRunning(true);
     	executor.execute(new WidgetRunnable(widget));
     }
     
     public void stopWidget(MarsDashboardWidget widget) {
     	activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst().ifPresent(activeWidget -> activeWidget.stop());
-    	widget.setRunning(false);
     }
     
     public Node getNode() {
@@ -258,6 +251,8 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 
 	    public WidgetRunnable(MarsDashboardWidget runnable) {
 	        this.runnable = runnable;
+	    	runnable.setRunning(true);
+	    	runnable.spin();
 	        activeWidgets.add(this);
 	    }
 
@@ -274,6 +269,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 				}
 			});
 	        activeWidgets.remove(this);
+	        runnable.setRunning(false);
 	    }
 	    
 	    public MarsDashboardWidget getWidget() {
@@ -281,10 +277,11 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	    }
 	    
 	    public void stop() {
-	    	runnable.stopSpinning();
-	    	canceled.set(true);
 	    	if (thread != null)
 	    		thread.interrupt();
+	    	canceled.set(true);
+	    	runnable.stopSpinning();
+	    	runnable.setRunning(false);
 	    }
 	}
 }
