@@ -148,13 +148,9 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		if (outputs == null)
 			return;
 		
-		System.out.println("number of outputs " + outputs.size());
-		
 		for (String name : outputs.keySet())
-			if (outputs.get(name) == null) {
-				System.out.println("found a null");
+			if (outputs.get(name) == null) 
 				return;
-			}
 		
 		//switch statement on keySet ???
 		

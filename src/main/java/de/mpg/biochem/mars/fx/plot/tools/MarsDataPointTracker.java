@@ -135,6 +135,9 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
                         dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
+        if (nextPoint == null || prevPoint == null)
+        	return null;
+        
         final double prevDistance = Math.abs(searchedX - prevPoint.x);
         final double nextDistance = Math.abs(searchedX - nextPoint.x);
 
@@ -191,7 +194,6 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
 
         if (dataPoint == null) {
-        	//System.out.println("dataPoint null removing stuff ");
             getChartChildren().remove(label);
             getChartChildren().remove(circle);
             return;

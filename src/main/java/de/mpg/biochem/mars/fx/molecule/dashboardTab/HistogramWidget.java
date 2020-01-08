@@ -22,16 +22,12 @@ import net.imagej.ops.Initializable;
 @Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
 public class HistogramWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 
+	
+	
 	@Override
 	public void initialize() {
 		super.initialize();
-		// TODO Auto-generated constructor stub
-	}
 
-	@Override
-	protected void createIOMaps() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

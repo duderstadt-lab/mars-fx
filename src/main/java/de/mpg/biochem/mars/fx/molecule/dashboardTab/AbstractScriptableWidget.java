@@ -16,11 +16,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
 
-import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
-
 import org.apache.commons.io.IOUtils;
-import org.fife.ui.rtextarea.RTextScrollPane;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleException;
@@ -31,23 +27,12 @@ import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
-import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
-import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.util.HotKeyEntry;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.SwingNode;
 import javafx.geometry.Insets;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
 
@@ -58,8 +43,6 @@ import net.imagej.ops.Initializable;
 import org.scijava.plugin.Parameter;
 
 import java.time.Duration;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -70,12 +53,7 @@ import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.LineNumberFactory;
-import org.fxmisc.richtext.StyledTextArea;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.reactfx.Subscription;
-
-import javafx.beans.property.SimpleStringProperty;
 
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
 	
