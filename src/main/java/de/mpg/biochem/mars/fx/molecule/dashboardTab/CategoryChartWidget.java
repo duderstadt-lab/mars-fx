@@ -102,10 +102,10 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 			e.printStackTrace();
 		}
 		
-        xAxis = new MarsCategoryAxis("Tag");
+        xAxis = new MarsCategoryAxis("Categories");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         yAxis = new MarsNumericAxis();
-        yAxis.setName("Molecules");
+        yAxis.setName("Frequency");
         yAxis.setMinorTickVisible(false);
         yAxis.setForceZeroInRange(true);
         yAxis.setAutoRanging(true);

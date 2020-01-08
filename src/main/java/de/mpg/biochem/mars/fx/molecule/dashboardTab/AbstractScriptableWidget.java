@@ -174,6 +174,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected Map<String, Object> runScript() {
 		Reader reader = new StringReader(codeArea.getText());
 		
+		System.out.println(codeArea.getText());
+		
 		String scriptName = "script";
 		if (radioButtonGroovy.isSelected()) {
 			scriptName += ".groovy";

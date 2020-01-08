@@ -33,6 +33,11 @@ public class MarsNumericAxis extends DefaultNumericAxis {
 	public MarsNumericAxis() {
 		super();
 	}
+	
+	public MarsNumericAxis(String name) {
+		super();
+		setName(name);
+	}
 
 	public double calculateWidth() {
 		return computePrefWidth(getHeight());
