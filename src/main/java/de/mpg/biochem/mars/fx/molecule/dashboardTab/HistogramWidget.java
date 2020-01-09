@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.scijava.Cancelable;
@@ -41,12 +42,13 @@ import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
 import net.imagej.ops.Initializable;
+import org.apache.commons.math3.stat.Frequency;
 
 @Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
 public class HistogramWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 
 	protected XYChart histChart;
-	protected DefaultNumericAxis xAxis, yAxis;
+	protected MarsNumericAxis xAxis, yAxis;
 	
 	protected ErrorDataSetRenderer filledHistogramRenderer;
 	protected ErrorDataSetRenderer outlineHistogramRenderer;
@@ -63,12 +65,12 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 			e.printStackTrace();
 		}
 		
-		xAxis = new DefaultNumericAxis("");
+		xAxis = new MarsNumericAxis("");
         //xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         xAxis.minorTickVisibleProperty().set(false);
         xAxis.setAutoRangeRounding(false);
         //xAxis.setAutoRanging(true);
-        yAxis = new DefaultNumericAxis("");
+        yAxis = new MarsNumericAxis("");
         yAxis.setMinorTickVisible(false);
         yAxis.setForceZeroInRange(true);
         yAxis.setAutoRanging(true);
@@ -80,12 +82,12 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
         
         filledHistogramRenderer = new ErrorDataSetRenderer();
         filledHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM_FILLED);
-        filledHistogramRenderer.setErrorType(ErrorStyle.NONE);
+        //filledHistogramRenderer.setErrorType(ErrorStyle.NONE);
         //Make sure this is set to false. Otherwise second to last points seems to be lost :(...
         filledHistogramRenderer.pointReductionProperty().set(false);
         
         outlineHistogramRenderer = new ErrorDataSetRenderer();
-        outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
+        outlineHistogramRenderer.setPolyLineStyle(LineStyle.STAIR_CASE);
         outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
         //outlineHistogramRenderer.setErrorType(ErrorStyle.ERRORBARS);
         outlineHistogramRenderer.pointReductionProperty().set(false);
@@ -133,13 +135,6 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		Double min = (Double)outputs.get("min");
 		Double max = (Double)outputs.get("max");
 		
-		double[] xBins = new double[bins.intValue() + 1];
-		double binWidth = (max.doubleValue() - min.doubleValue())/bins.intValue();
-		xBins[0] = min.doubleValue();
-		
-		for (int bin=1; bin < xBins.length ; bin++)
-			xBins[bin] = bin*binWidth;
-		
 		Set<String> series = new HashSet<String>();
 		for (String outputName : outputs.keySet()) {
 			if(outputName.startsWith("series")) {
@@ -149,7 +144,7 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		}
 		
 		for (String seriesName : series) {
-			Histogram hist = buildDataSet(outputs, seriesName, xBins);
+			Histogram hist = buildDataSet(outputs, seriesName, bins.intValue(), min.doubleValue(), max.doubleValue());
 			
 			Boolean fill = new Boolean(true);
 			if (outputs.containsKey(seriesName + "_" + "fill"))
@@ -178,13 +173,13 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 				filledHistogramRenderer.getDatasets().addAll(filledHistograms);
 				
 				outlineHistogramRenderer.getDatasets().clear();
-				filledHistogramRenderer.getDatasets().addAll(outlineHistograms);
+				outlineHistogramRenderer.getDatasets().addAll(outlineHistograms);
 			}
     	});
 	}
 	
-	protected Histogram buildDataSet(Map<String, Object> outputs, String seriesName, double[] xBins) {
-		Histogram hist = new Histogram(seriesName, xBins);
+	protected Histogram buildDataSet(Map<String, Object> outputs, String seriesName, int bins, double min, double max) {
+		Histogram hist = new Histogram(seriesName, bins, min, max);
 		
 		if (outputs.containsKey(seriesName + "_" + "values")) {
 			Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
@@ -192,15 +187,23 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 				hist.fill(value.doubleValue());
 		}
 		
+		Random r = new Random();
+		
+		for (int i=0; i<100; i++) {
+			hist.fill(r.nextGaussian());
+		}
+		
 		String styleString = "";
-		if (outputs.containsKey(seriesName + "_" + "fillColor"))
-			styleString += "fillColor=" + (String)outputs.get(seriesName + "_" + "fillColor") + "; ";
 		if (outputs.containsKey(seriesName + "_" + "strokeColor"))
 			styleString += "strokeColor=" + (String)outputs.get(seriesName + "_" + "strokeColor") + "; ";
 		if (outputs.containsKey(seriesName + "_" + "strokeWidth"))
 			styleString += "strokeWidth=" + ((Integer)outputs.get(seriesName + "_" + "strokeWidth")).intValue();
 		
     	hist.setStyle(styleString);
+    	
+    	for (int i=0; i < bins;i++) {
+    		System.out.println("X " + hist.getBinCenter(0, i) + " Y " + hist.getBinContent(i));
+    	}
     	
     	return hist;
 	}
