@@ -56,13 +56,14 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	//plots or otherwise...
 	protected Tab contentTab;
 	
-	protected static final int RESIZE_REGION = 2;
+	protected static final int RESIZE_REGION = 5;
 	protected double MINIMUM_WIDTH = 250;
 	protected double MINIMUM_HEIGHT = 250;
 	protected double y, x;
 	protected AtomicBoolean running = new AtomicBoolean(false);
 	protected boolean initHeight, initWidth;
-	protected boolean dragX, dragY;
+	protected boolean dragX = false;
+	protected boolean dragY = false;
 	protected RotateTransition rt;
 	protected Button closeButton, loadButton;
 	
@@ -98,6 +99,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		Text closeIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
 		closeButton = new Button();
 		closeButton.setPickOnBounds(true);
+		closeButton.setCenterShape(true);
 		closeButton.setGraphic(closeIcon);
 		closeButton.getStyleClass().add("icon-button");
 		closeButton.setAlignment(Pos.CENTER);
@@ -114,6 +116,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		loadButton.setGraphic(syncIcon);
 		loadButton.setCenterShape(true);
 		loadButton.getStyleClass().add("icon-button");
+		loadButton.setAlignment(Pos.CENTER);
 		
 		rt = new RotateTransition(Duration.millis(500), loadButton);
 		rt.setInterpolator(Interpolator.LINEAR);
@@ -147,6 +150,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				mousePressed(event);
 			}
 		});
+		
 		rootPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
@@ -154,6 +158,12 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 			}
 		});
 		rootPane.setOnMouseMoved(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent event) {
+				mouseOver(event);
+			}
+		});
+		tabs.setOnMouseMoved(new EventHandler<MouseEvent>() {
 			@Override
 			public void handle(MouseEvent event) {
 				mouseOver(event);
@@ -170,15 +180,17 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected void mouseReleased(MouseEvent event) {
 		dragX = dragY = false;
 		rootPane.setCursor(Cursor.DEFAULT);
+		tabs.setCursor(Cursor.DEFAULT);
 	}
 
 	protected void mouseOver(MouseEvent event) {
-		if (isInDraggableY(event))
+		if (isInDraggableY(event)) {
 				rootPane.setCursor(Cursor.S_RESIZE);
-		else if (isInDraggableX(event))
+		} else if (isInDraggableX(event)) {
 				rootPane.setCursor(Cursor.E_RESIZE);
-		else
+		} else {
 			rootPane.setCursor(Cursor.DEFAULT);
+		}
 	}
 	
 	protected boolean isInDraggableY(MouseEvent event) {
@@ -190,9 +202,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 
 	protected void mouseDragged(MouseEvent event) {
-		if (!dragX && !dragY) {
+		if (!dragX && !dragY)
 			return;
-		}
+		
 		if (dragY) {
 			double mousey = event.getY();
 			double newHeight = rootPane.getMinHeight() + (mousey - y);
@@ -218,15 +230,14 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 
 	protected void mousePressed(MouseEvent event) {
-		if (isInDraggableX(event))
+		if (isInDraggableX(event)) {
 			dragX = true;
-		else if(isInDraggableY(event))
+		} else if(isInDraggableY(event)) {
 			dragY = true;
-		else
+		} else
 			return;
 
 		if (!initHeight) {
-			//MINIMUM_HEIGHT = rootPane.getHeight();
 			rootPane.setMinHeight(rootPane.getHeight());
 			rootPane.setMaxHeight(rootPane.getHeight());
 			initHeight = true;
@@ -235,7 +246,6 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		y = event.getY();
 
 		if (!initWidth) {
-			//MINIMUM_WIDTH = rootPane.getWidth();
 			rootPane.setMinWidth(rootPane.getWidth());
 			rootPane.setMaxWidth(rootPane.getWidth());
 			initWidth = true;
@@ -243,7 +253,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 		x = event.getX();
 	}
-	
+
 	public void spin() {
 		rt.play();
 	}

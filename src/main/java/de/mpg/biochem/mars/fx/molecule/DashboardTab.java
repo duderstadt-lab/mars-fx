@@ -55,6 +55,7 @@ import javafx.scene.control.ToolBar;
 
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
+import javafx.geometry.BoundingBox;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;

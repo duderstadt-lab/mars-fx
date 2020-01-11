@@ -150,7 +150,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         hbox.setSpacing(5);
         hbox.setPadding(new Insets(5, 5, 5, 5));
         scriptBorder.setPadding(new Insets(5, 5, 5, 5));
-        scriptBorder.setPrefSize(250, 250);
+        scriptBorder.setPrefSize(100, 100);
         scriptBorder.setTop(hbox);
         
         scriptTab.setContent(scriptBorder);
@@ -161,7 +161,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
   
         BorderPane borderPane = new BorderPane();
         borderPane.setCenter(new VirtualizedScrollPane<>(logArea));
-        borderPane.setPrefSize(250, 250);
+        borderPane.setPrefSize(100, 100);
         borderPane.setPadding(new Insets(5, 5, 5, 5));
         
         Tab logTab = new Tab();
