@@ -10,6 +10,7 @@ import de.gsi.dataset.spi.Histogram;
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -72,9 +73,12 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
         yAxis.setAutoRangeRounding(false);
 
         bubbleChart = new XYChart(xAxis, yAxis);
-        bubbleChart.getPlugins().add(new DataPointTooltip());
+        //bubbleChart.getPlugins().add(new DataPointTooltip());
+        bubbleChart.getPlugins().add(new MarsDataPointTracker());
         bubbleChart.setAnimated(false);
         bubbleChart.getRenderers().clear();
+        
+        bubbleChart.getPlugins().add(new MarsDataPointTracker());
         
         datasets = new ArrayList<DefaultErrorDataSet>();
         
@@ -84,7 +88,6 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
         renderer.setErrorType(ErrorStyle.NONE);
         renderer.setDrawMarker(true);
         renderer.setAssumeSortedData(false);
-        //renderer.setMarker(DefaultMarker.CIRCLE);
         
         bubbleChart.getRenderers().add(renderer);
         bubbleChart.legendVisibleProperty().set(false);
@@ -121,6 +124,12 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 		String xlabel = (String) outputs.get("xlabel");
 		String title = (String)outputs.get("title");
 		
+		Double xmin = (Double) outputs.get("xmin");
+		Double xmax = (Double) outputs.get("xmax");
+		Double ymin = (Double) outputs.get("ymin");
+		Double ymax = (Double) outputs.get("ymax");
+		
+		
 		Set<String> series = new HashSet<String>();
 		for (String outputName : outputs.keySet()) {
 			if(outputName.startsWith("series")) {
@@ -136,7 +145,14 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			@Override
 			public void run() {
 				xAxis.setName(xlabel);
+				xAxis.setAutoRanging(false);
+				xAxis.setMin(xmin);
+				xAxis.setMax(xmax);
+				
 				yAxis.setName(ylabel);
+				yAxis.setAutoRanging(false);
+				yAxis.setMin(ymin);
+				yAxis.setMax(ymax);
 				
 				bubbleChart.setTitle(title);
 				

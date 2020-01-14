@@ -2,11 +2,20 @@
 #@OUTPUT String xlabel
 #@OUTPUT String ylabel
 #@OUTPUT String title
+#@OUTPUT Double xmin
+#@OUTPUT Double xmax
+#@OUTPUT Double ymin
+#@OUTPUT Double ymax
 
 //Set global outputs
 xlabel = "X"
 ylabel = "Y"
 title = "Bubble chart"
+
+xmin = -2.0
+xmax = 2.0
+ymin = -2.0
+ymax = 2.0
 
 //Series 1 Outputs
 #@OUTPUT Double[] series1_xvalues
