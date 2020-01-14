@@ -35,7 +35,7 @@ import javafx.util.Pair;
  *         another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to
  *         edit/update the custom object based on DataPoint (for the time being private class)
  *         
- * @author Karl Duderstadt Added curve tracking based on DatasetOptionsPane
+ * @author Karl Duderstadt Added curve tracking based on DatasetOptionsPane and small bug fixes.
  */
 
 public class MarsDataPointTracker extends AbstractDataFormattingPlugin implements MarsPlotPlugin {

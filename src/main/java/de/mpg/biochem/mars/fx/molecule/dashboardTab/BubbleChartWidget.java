@@ -165,32 +165,46 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs, String seriesName) {
 		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
 		
-		if (outputs.containsKey(seriesName + "_" + "xvalues") 
-				&& outputs.containsKey(seriesName + "_" + "yvalues")) {
-			Double[] xvalues = (Double[]) outputs.get(seriesName + "_" + "xvalues");
-			Double[] yvalues = (Double[]) outputs.get(seriesName + "_" + "yvalues");
+		int dataPointCount = 0;
+		
+		if (outputs.containsKey(seriesName + "_xvalues") 
+				&& outputs.containsKey(seriesName + "_yvalues")) {
+			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
+			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
+			
+			dataPointCount = xvalues.length;
 			
 			for (int index=0;index<xvalues.length;index++)
 				dataset.add(xvalues[index], yvalues[index]);
 		}
 		
-		if (outputs.containsKey(seriesName + "_" + "label")) {
-			String[] label = (String[]) outputs.get(seriesName + "_" + "label");
+		if (outputs.containsKey(seriesName + "_label")) {
+			String[] label = (String[]) outputs.get(seriesName + "_label");
 			for (int index=0;index<label.length;index++)
 				dataset.addDataLabel(index, label[index]);
 		}
 		
-		String styleString = "";
-		if (outputs.containsKey(seriesName + "_" + "markerColor"))
-			styleString += "markerColor=" + (String)outputs.get(seriesName + "_" + "markerColor") + "; markerType=circle;";
+		String[] styleString = new String[dataPointCount];
+		for (int index=0;index<dataPointCount;index++)
+			styleString[index] = "";
 		
-		if (outputs.containsKey(seriesName + "_" + "size")) {
-			Double[] size = (Double[]) outputs.get(seriesName + "_" + "size");
-			for (int index=0;index<size.length;index++)
-				dataset.addDataStyle(index, "markerSize=" + size[index] + "; " + styleString);
+		if (outputs.containsKey(seriesName + "_color")) {
+			String[] colors = (String[]) outputs.get(seriesName + "_color");
+			for (int index=0;index<dataPointCount;index++)
+				styleString[index] += "markerColor=" + colors[index] + "; ";
+		} else if (outputs.containsKey(seriesName + "_markerColor")) {
+			for (int index=0;index<dataPointCount;index++)
+				styleString[index] += "markerColor=" + (String)outputs.get(seriesName + "_markerColor") + "; ";
 		}
 		
-		//dataset.setStyle("markerType=circle;");
+		if (outputs.containsKey(seriesName + "_size")) {
+			Double[] size = (Double[]) outputs.get(seriesName + "_size");
+			for (int index=0;index<dataPointCount;index++)
+				styleString[index] += "markerSize=" + size[index] + "; ";
+		}
+		
+		for (int index=0;index<dataPointCount;index++)
+			dataset.addDataStyle(index, styleString[index] + "markerType=circle;");
     	
     	return dataset;
 	}
