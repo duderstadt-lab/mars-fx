@@ -75,6 +75,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected CodeArea codeArea;
 	protected Subscription cleanupWhenNoLongerNeedIt;
 	protected InlineCssTextArea logArea;
+	protected Writer writer;
 	
 	@Override
 	public void initialize() {
@@ -172,6 +173,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	}
 	
 	protected Map<String, Object> runScript() {
+		writeToLog(new java.util.Date() + " - Running script... ");
+		
 		Reader reader = new StringReader(codeArea.getText());
 		
 		String scriptName = "script";
@@ -195,7 +198,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		Console console = new Console(logArea);
         PrintStream ps = new PrintStream(console, true);
         
-        Writer writer;
 		try {
 			writer = new OutputStreamWriter(ps,"UTF-8");
 			
@@ -230,6 +232,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	public void close() {
 		super.close();
 		cleanupWhenNoLongerNeedIt.unsubscribe();
+	}
+	
+	protected void writeToLog(String message) {
+		Platform.runLater( () -> logArea.appendText(message + "\n") );
 	}
 	
 	class Console extends OutputStream {
