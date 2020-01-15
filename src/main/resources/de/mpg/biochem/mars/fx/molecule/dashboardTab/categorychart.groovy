@@ -1,23 +1,23 @@
 #@ MoleculeArchive(required=false) archive
-#@OUTPUT String xLabel
-#@OUTPUT String yLabel
-#@OUTPUT String fillColor
+#@OUTPUT String xlabel
+#@OUTPUT String ylabel
+#@OUTPUT String color
 #@OUTPUT String title
-#@OUTPUT String[] xValues
-#@OUTPUT Double[] yValues
+#@OUTPUT String[] xvalues
+#@OUTPUT Double[] yvalues
 
-fillColor = "#add8e6"
+color = "#add8e6"
 title = "Category Chart"
-xLabel = "Categories"
-yLabel = "Frequency"
+xlabel = "Categories"
+ylabel = "Frequency"
 
-xValues = new String[3]
-yValues = new Double[3]
+xvalues = new String[3]
+yvalues = new Double[3]
 
-xValues[0] = "Triangles"
-xValues[1] = "Squares"
-xValues[2] = "Circles"
+xvalues[0] = "Triangles"
+xvalues[1] = "Squares"
+xvalues[2] = "Circles"
 
-yValues[0] = 20
-yValues[1] = 50
-yValues[2] = 30
+yvalues[0] = 20
+yvalues[1] = 50
+yvalues[2] = 30

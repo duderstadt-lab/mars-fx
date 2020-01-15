@@ -118,13 +118,13 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			return;
 		}
 		
-		datasets.clear();
-		
 		for (String field : requiredGlobalFields)
 			if (!outputs.containsKey(field)) {
-				writeToLog("required output " + field + " is missing");
+				writeToLog("required output " + field + " is missing.");
 				return;
 			}
+		
+		datasets.clear();
 		
 		String xlabel = (String) outputs.get("xlabel");
 		String ylabel = (String) outputs.get("ylabel");
@@ -133,33 +133,29 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 		//Check if an x-range was provided
 		final boolean autoXRanging; 
 		if (outputs.containsKey("xmin") && outputs.containsKey("xmax")) {
-			autoXRanging = true;
-		} else if (outputs.containsKey("xmin")) {
-			writeToLog("required output xmax is missing");
 			autoXRanging = false;
+		} else if (outputs.containsKey("xmin")) {
+			writeToLog("required output xmax is missing.");
 			return;
 		} else if (outputs.containsKey("xmax")) {
-			writeToLog("required output xmin is missing");
-			autoXRanging = false;
+			writeToLog("required output xmin is missing.");
 			return;
 		} else {
-			autoXRanging = false;
+			autoXRanging = true;
 		}
 
 		//Check if a y-range was provided
 		final boolean autoYRanging; 
 		if (outputs.containsKey("ymin") && outputs.containsKey("ymax")) {
-			autoYRanging = true;
-		} else if (outputs.containsKey("ymin")) {
-			writeToLog("required output xmax is missing");
 			autoYRanging = false;
+		} else if (outputs.containsKey("ymin")) {
+			writeToLog("required output xmax is missing.");
 			return;
 		} else if (outputs.containsKey("ymax")) {
-			writeToLog("required output xmin is missing");
-			autoYRanging = false;
+			writeToLog("required output xmin is missing.");
 			return;
 		} else {
-			autoYRanging = false;
+			autoYRanging = true;
 		}
 		
 		Set<String> series = new HashSet<String>();
@@ -183,21 +179,21 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			@Override
 			public void run() {
 				xAxis.setName(xlabel);
-				if (!autoXRanging) {
+				if (autoXRanging) {
+					xAxis.setAutoRanging(true);
+				} else {
 					xAxis.setAutoRanging(false);
 					xAxis.setMin((Double) outputs.get("xmin"));
 					xAxis.setMax((Double) outputs.get("xmax"));
-				} else {
-					xAxis.setAutoRanging(true);
 				}
 				
 				yAxis.setName(ylabel);
-				if (!autoYRanging) {
+				if (autoYRanging) {
+					yAxis.setAutoRanging(true);
+				} else {
 					yAxis.setAutoRanging(false);
 					yAxis.setMin((Double) outputs.get("ymin"));
 					yAxis.setMax((Double) outputs.get("ymax"));
-				} else {
-					yAxis.setAutoRanging(true);
 				}
 				
 				bubbleChart.setTitle(title);

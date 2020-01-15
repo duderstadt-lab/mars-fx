@@ -31,6 +31,7 @@ import de.gsi.dataset.spi.Histogram;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,9 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 	protected ErrorDataSetRenderer outlineHistogramRenderer;
 	
 	protected ArrayList<Histogram> outlineHistograms;
+	
+	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(Arrays.asList("xlabel", 
+			"ylabel", "title", "bins", "xmin", "xmax"));
 	
 	@Override
 	public void initialize() {
@@ -111,9 +115,11 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		if (outputs == null)
 			return;
 		
-		for (String name : outputs.keySet())
-			if (outputs.get(name) == null) 
+		for (String field : requiredGlobalFields)
+			if (!outputs.containsKey(field)) {
+				writeToLog("required output " + field + " is missing.");
 				return;
+			}
 		
 		outlineHistograms.clear();
 	
@@ -138,8 +144,14 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 			}
 		}
 		
-		for (String seriesName : series)
-			outlineHistograms.add(buildDataSet(outputs, seriesName, xBins));
+		for (String seriesName : series) {
+			Histogram dataset = buildDataSet(outputs, seriesName, xBins);
+			if (dataset != null)
+				outlineHistograms.add(dataset);
+			else {
+				return;
+			}
+		}
 			
         Platform.runLater(new Runnable() {
 			@Override
@@ -165,6 +177,9 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 			Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
 			for (Double value : values)
 				hist.fill(value.doubleValue());
+		} else {
+			writeToLog("Required field " + seriesName + "_values is missing.");
+			return null;
 		}
 		
 		String styleString = "";
@@ -174,9 +189,6 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 			styleString += "strokeWidth=" + ((Integer)outputs.get(seriesName + "_" + "strokeWidth")).intValue();
 		
     	hist.setStyle(styleString);
-    	
-    	//for (int i=0; i < xBins.length ;i++)
-    	//	System.out.println("X " + hist.getBinCenter(0, i) + " Y " + hist.getBinContent(i));
     	
     	return hist;
 	}

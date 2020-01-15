@@ -91,6 +91,9 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
 	protected MarsNumericAxis yAxis;
+	
+	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(Arrays.asList("xlabel", 
+			"ylabel", "title", "xvalues", "yvalues"));
 
 	@Override
 	public void initialize() {
@@ -148,21 +151,27 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		if (outputs == null)
 			return;
 		
-		for (String name : outputs.keySet())
-			if (outputs.get(name) == null) 
+		for (String field : requiredGlobalFields)
+			if (!outputs.containsKey(field)) {
+				writeToLog("required output " + field + " is missing.");
 				return;
+			}
 		
-		//switch statement on keySet ???
-		
-		String[] xValues = (String[]) outputs.get("xValues");
-		Double[] yValues = (Double[]) outputs.get("yValues");
-		String yLabel = (String) outputs.get("yLabel");
-		String xLabel = (String) outputs.get("xLabel");
-		String fillColor = (String)outputs.get("fillColor");
+		String xLabel = (String) outputs.get("xlabel");
+		String yLabel = (String) outputs.get("ylabel");
 		String title = (String)outputs.get("title");
+		String[] xValues = (String[]) outputs.get("xvalues");
+		Double[] yValues = (Double[]) outputs.get("yvalues");
+		
+		if (xValues.length != yValues.length) {
+			writeToLog("The length of xvalues does not match that of yvalues.");
+			return;
+		}
 		
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        dataSet.setStyle("fillColor:" + fillColor + ";");
+        
+        if (outputs.containsKey("color"))
+        	dataSet.setStyle("fillColor:" + (String)outputs.get("color") + ";");
         
         List<String> categories = new ArrayList<String>();
         
