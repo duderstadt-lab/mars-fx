@@ -46,6 +46,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
@@ -70,6 +71,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.scijava.plugin.Parameter;
+
 import javafx.scene.control.ButtonBase;
 import java.util.List;
 import java.util.*;
@@ -85,6 +88,9 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private MarsDashboardWidgetService marsDashboardWidgetService;
     
     private final int MAX_THREADS = 1;
+    
+    @Parameter
+    private MoleculeArchiveService moleculeArchiveService;
     
     private final ArrayList<String> widgetToolbarOrder = new ArrayList<String>( 
             Arrays.asList("ArchivePropertiesWidget", 
@@ -104,8 +110,11 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     
     protected ObservableList<MarsDashboardWidget> widgets = FXCollections.observableArrayList();
 	
-    public DashboardTab() {
+    public DashboardTab(MoleculeArchiveService moleculeArchiveService) {
     	super();
+    	
+    	this.moleculeArchiveService = moleculeArchiveService;
+    	
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
     	borderPane = new BorderPane();
@@ -194,7 +203,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;  
-        marsDashboardWidgetService = archive.getMoleculeArchiveService().getContext().getService(MarsDashboardWidgetService.class);
+        marsDashboardWidgetService = moleculeArchiveService.getContext().getService(MarsDashboardWidgetService.class);
     	
     	//Loop through all available widgets and add them to the toolbar
     	//use preferred order

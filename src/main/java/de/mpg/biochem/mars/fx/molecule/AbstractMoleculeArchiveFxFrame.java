@@ -277,7 +277,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	protected void buildTabs() {
 		tabSet = new LinkedHashSet<MoleculeArchiveTab>();
 		
-		dashboardTab = new DashboardTab();
+		dashboardTab = new DashboardTab(moleculeArchiveService);
         dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
         tabSet.add(dashboardTab);
 

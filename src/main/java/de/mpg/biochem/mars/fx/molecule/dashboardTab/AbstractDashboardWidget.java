@@ -14,6 +14,7 @@ import de.mpg.biochem.mars.molecule.MarsImageMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.event.EventHandler;
