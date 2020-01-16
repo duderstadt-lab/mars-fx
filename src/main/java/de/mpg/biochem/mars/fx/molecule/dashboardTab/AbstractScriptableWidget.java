@@ -75,7 +75,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected CodeArea codeArea;
 	protected Subscription cleanupWhenNoLongerNeedIt;
 	protected InlineCssTextArea logArea;
-	protected Writer writer;
+
 	
 	@Override
 	public void initialize() {
@@ -195,14 +195,19 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			return null;
 		}
 		
-		Console console = new Console(logArea);
-        PrintStream ps = new PrintStream(console, true);
+		OutputConsole outputConsole = new OutputConsole(logArea);
+        PrintStream outputPS = new PrintStream(outputConsole, true);
+        
+        ErrorConsole errorConsole = new ErrorConsole(logArea);
+        PrintStream errorPS = new PrintStream(errorConsole, true);
         
 		try {
-			writer = new OutputStreamWriter(ps,"UTF-8");
+			Writer outputWriter = new OutputStreamWriter(outputPS,"UTF-8");
+			module.setOutputWriter(outputWriter);
 			
-			module.setOutputWriter(writer);
-			module.setErrorWriter(writer);
+			Writer errorWriter = new OutputStreamWriter(errorPS,"UTF-8");
+			module.setErrorWriter(errorWriter);
+			
 		} catch (UnsupportedEncodingException e1) {
 			return null;
 		}
@@ -216,6 +221,12 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		} catch (ExecutionException e) {
 			return null;
 		}
+		
+		if (errorConsole.errorsFound())
+			return null;
+		
+		outputPS.close();
+		errorPS.close();
 		
 		return module.getOutputs();
 	}
@@ -238,17 +249,37 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		Platform.runLater( () -> logArea.appendText(message + "\n") );
 	}
 	
-	class Console extends OutputStream {
+	class OutputConsole extends OutputStream {
 
         private InlineCssTextArea logarea;
 
-        public Console(InlineCssTextArea logarea) {
+        public OutputConsole(InlineCssTextArea logarea) {
         	this.logarea = logarea;
         }
 
         @Override
         public void write(int i) throws IOException {
         	Platform.runLater( () -> logarea.appendText(String.valueOf((char) i)) );
+        }
+    }
+	
+	class ErrorConsole extends OutputStream {
+
+        private InlineCssTextArea logarea;
+        private boolean errorsFound = false;
+
+        public ErrorConsole(InlineCssTextArea logarea) {
+        	this.logarea = logarea;
+        }
+
+        @Override
+        public void write(int i) throws IOException {
+        	errorsFound = true;
+        	Platform.runLater( () -> logarea.appendText(String.valueOf((char) i)) );
+        }
+        
+        public boolean errorsFound() {
+        	return errorsFound;
         }
     }
 }

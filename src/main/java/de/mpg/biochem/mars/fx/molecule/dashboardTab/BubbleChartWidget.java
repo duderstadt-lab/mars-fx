@@ -31,7 +31,10 @@ import de.gsi.chart.plugins.DataPointTooltip;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -158,13 +161,16 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			autoYRanging = true;
 		}
 		
-		Set<String> series = new HashSet<String>();
+		LinkedHashSet<String> seriesSet = new LinkedHashSet<String>();
 		for (String outputName : outputs.keySet()) {
 			if(outputName.startsWith("series")) {
 				int index = outputName.indexOf("_");
-				series.add(outputName.substring(0, index));
+				seriesSet.add(outputName.substring(0, index));
 			}
 		}
+		
+		List<String> series = new ArrayList<String>(seriesSet);
+		Collections.sort(series);
 		
 		for (String seriesName : series) {
 			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName);
@@ -208,18 +214,21 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
 		
 		int dataPointCount = 0;
-		
+
 		if (outputs.containsKey(seriesName + "_xvalues") 
 				&& outputs.containsKey(seriesName + "_yvalues")) {
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
 			
-			dataPointCount = xvalues.length;
+			if (xvalues == null)
+				System.out.println("xvalues == null");
 			
 			if (xvalues.length == 0) {
 				writeToLog(seriesName + "_xvalues have zero values.");
 				return null;
 			}
+			
+			dataPointCount = xvalues.length;
 			
 			if (xvalues.length != yvalues.length) {
 				writeToLog(seriesName + "_xvalues and " + seriesName + "_yvalues do not have the same dimensions.");
