@@ -458,7 +458,6 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     public void setMarsBdvFrame(MarsBdvFrame<?> marsBdvFrame) {
     	this.marsBdvFrame = marsBdvFrame;
     }
-    
 
 	@Override
 	protected void createIOMaps() {

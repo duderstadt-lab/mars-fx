@@ -27,6 +27,7 @@ import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
 import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -72,10 +73,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected ScriptLanguage lang;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
-	protected CodeArea codeArea;
-	protected Subscription cleanupWhenNoLongerNeedIt;
+	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
-
+	protected MarsScriptEditor editorFactory;
 	
 	@Override
 	public void initialize() {
@@ -87,30 +87,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         Tab scriptTab = new Tab();
         scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
 		
-        codeArea = new CodeArea();
-
-        // add line numbers to the left of area
-        codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
-        
-        codeArea.getStylesheets().add("de/mpg/biochem/mars/fx/syntaxhighlighter/java-keywords.css");
-
-        // recompute the syntax highlighting 500 ms after user stops editing area
-        cleanupWhenNoLongerNeedIt = codeArea
-
-                // plain changes = ignore style changes that are emitted when syntax highlighting is reapplied
-                // multi plain changes = save computation by not rerunning the code multiple times
-                //   when making multiple changes (e.g. renaming a method at multiple parts in file)
-                .multiPlainChanges()
-
-                // do not emit an event until 500 ms have passed since the last emission of previous stream
-                .successionEnds(Duration.ofMillis(500))
-
-                // run the following code block when previous stream emits an event
-                .subscribe(ignore -> codeArea.setStyleSpans(0, JavaSyntaxHighlighter.computeHighlighting(codeArea.getText())));
-
-        // when no longer need syntax highlighting and wish to clean up memory leaks
-        // run: `cleanupWhenNoLongerNeedIt.unsubscribe();`
-
+        codeArea = new MarsScriptEditor();
 
         // auto-indent: insert previous line's indents on enter
         final Pattern whiteSpace = Pattern.compile( "^\\s+" );
@@ -209,6 +186,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			module.setErrorWriter(errorWriter);
 			
 		} catch (UnsupportedEncodingException e1) {
+			outputPS.close();
+			errorPS.close();
 			return null;
 		}
 		
@@ -242,7 +221,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	@Override
 	public void close() {
 		super.close();
-		cleanupWhenNoLongerNeedIt.unsubscribe();
+		editorFactory.cleanup();
 	}
 	
 	protected void writeToLog(String message) {
