@@ -109,8 +109,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
         HashMap<String, Double> tagFrequency = new HashMap<String, Double>();
         
         archive.getMoleculeUIDs().stream().forEach(UID -> {
-        	Molecule molecule = archive.get(UID);
-        	for (String tag : molecule.getTags()) {
+        	for (String tag : archive.moleculeTags(UID)) {
         		if (tagFrequency.containsKey(tag)) {
         			tagFrequency.put(tag, tagFrequency.get(tag) + 1);
         		} else 
@@ -135,7 +134,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);
 			    
-			    xAxis.setAutoRanging(true);
+			    xAxis.layout();
 			}
     	});
 	}
