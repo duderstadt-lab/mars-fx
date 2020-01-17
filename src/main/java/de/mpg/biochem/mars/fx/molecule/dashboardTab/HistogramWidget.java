@@ -8,6 +8,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.spi.Histogram;
 import de.jensd.fx.glyphs.GlyphIcons;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
@@ -27,8 +28,6 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import de.gsi.chart.renderer.ErrorStyle;
 
-import de.gsi.dataset.spi.Histogram;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,7 +42,6 @@ import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
 import net.imagej.ops.Initializable;
-import org.apache.commons.math3.stat.Frequency;
 
 @Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
 public class HistogramWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {

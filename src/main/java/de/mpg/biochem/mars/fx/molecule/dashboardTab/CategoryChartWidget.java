@@ -107,6 +107,7 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		
         xAxis = new MarsCategoryAxis("Categories");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+        
         yAxis = new MarsNumericAxis();
         yAxis.setName("Frequency");
         yAxis.setMinorTickVisible(false);
@@ -191,7 +192,7 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 			    barChart.getDatasets().clear();
 			    barChart.getDatasets().add(dataSet);
 			    
-			    xAxis.setAutoRanging(true);
+			    xAxis.layout();
 			}
     	});
 	}
