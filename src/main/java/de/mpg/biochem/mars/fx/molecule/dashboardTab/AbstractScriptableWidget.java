@@ -75,7 +75,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected ToggleGroup languageGroup;
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
-	protected MarsScriptEditor editorFactory;
 	
 	@Override
 	public void initialize() {
@@ -91,8 +90,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 
         // auto-indent: insert previous line's indents on enter
         final Pattern whiteSpace = Pattern.compile( "^\\s+" );
-        codeArea.addEventHandler( KeyEvent.KEY_PRESSED, KE ->
-        {
+        codeArea.addEventHandler( KeyEvent.KEY_PRESSED, KE -> {
             if ( KE.getCode() == KeyCode.ENTER ) {
             	int caretPosition = codeArea.getCaretPosition();
             	int currentParagraph = codeArea.getCurrentParagraph();
@@ -221,7 +219,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	@Override
 	public void close() {
 		super.close();
-		editorFactory.cleanup();
+		codeArea.cleanup();
 	}
 	
 	protected void writeToLog(String message) {

@@ -57,7 +57,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	//plots or otherwise...
 	protected Tab contentTab;
 	
-	protected static final int RESIZE_REGION = 5;
+	protected static final int RESIZE_REGION = 2;
 	protected double MINIMUM_WIDTH = 250;
 	protected double MINIMUM_HEIGHT = 250;
 	protected double y, x;

@@ -40,6 +40,8 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.PopupWindow;
+import de.mpg.biochem.mars.fx.autocompletion.CompletionItem;
+import de.mpg.biochem.mars.fx.autocompletion.GroovySuggestionGenerator;
 import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import impl.org.controlsfx.skin.AutoCompletePopup;
@@ -58,6 +60,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Popup;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
@@ -141,10 +144,30 @@ public class MarsScriptEditor extends CodeArea {
 
 	    CodeArea editor;
 
-	    AutoCompletePopup<String> popup = new AutoCompletePopup<>();
+	    AutoCompletePopup<CompletionItem> popup = new AutoCompletePopup<>();
+	    
+	    GroovySuggestionGenerator groovySuggestionGenerator;
+	    
+	    String keyword;
 
 	    public InnerController(CodeArea editor) {
 	      this.editor = editor;
+	      
+	      popup.setMinWidth(450);
+	      
+	      popup.setConverter(new StringConverter<CompletionItem>() {
+	          @Override
+	          public String toString(CompletionItem object) {
+	              return object.getShortDescription();
+	          }
+
+	          @Override
+	          public CompletionItem fromString(String string) {
+	              return null;
+	          }
+	      });
+
+	      groovySuggestionGenerator = GroovySuggestionGenerator.getInstance();
 
 	      editor.textProperty().addListener((ob, o, n) -> {
 	        if (editor.isFocused() && popup.isShowing()) {
@@ -158,20 +181,27 @@ public class MarsScriptEditor extends CodeArea {
 	      });
 
 	      popup.setOnSuggestion(sce -> {
-	        completeUserInput(sce.getSuggestion());
+	        completeUserInput(sce.getSuggestion().getCompletionText());
 	        hidePopup();
 	      });
 
 	      editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-	    	  if (shouldSuggest(e))
+	    	  if (shouldSuggest(e)) {
+	    		  if (!popup.isShowing()) {
+	    		  String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)|(\\()|(\\))|(\\{)|(\\})|(\\[)|(\\])");
+	    			if (split.length == 0)
+	    				keyword = "";
+	    			else
+	    				keyword = split[split.length-1].trim();
+	    		  }
+	    		  
 	    		  showPopup();
-	    	  
-	    	  //e.consume();
+	    	  }
 	      });
 	    }
 
 	    public void showPopup() {
-	      Collection<String> suggestions = METHOD_NAMES;//cssSuggestion.getSuggestion(editor.getText(), editor.getCaretPosition(), context);
+	      Collection<CompletionItem> suggestions = groovySuggestionGenerator.getSuggestions(editor.getText(), editor.getCaretPosition(), keyword);
 	      if (suggestions.isEmpty()) {
 	        hidePopup();
 	      } else {
@@ -194,7 +224,7 @@ public class MarsScriptEditor extends CodeArea {
 	    }
 
 	    private void completeUserInput(String suggestion) {
-	      IndexRange range = new IndexRange(10,11);//cssSuggestion.getReplaceRange(editor.getText(), editor.getCaretPosition(), context);
+	      IndexRange range = groovySuggestionGenerator.getReplaceRange(editor.getText(), editor.getCaretPosition());
 	      editor.deleteText(range);
 	      editor.insertText(range.getStart(), suggestion);
 	      editor.moveTo(range.getStart() + suggestion.length());

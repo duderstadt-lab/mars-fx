@@ -107,6 +107,18 @@
 	</repositories>
 		
 	<build>
+	<plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+                    <encoding>UTF-8</encoding>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
+                </configuration>
+      </plugin>
+    </plugins>
 	    <resources>
 	    <resource>
 	      <directory>src/main/resources</directory>
@@ -117,6 +129,8 @@
 	    </resource>
 	  </resources>
 	  </build>
+	  
+	  
 
 	<dependencies>
 		<dependency>
@@ -324,10 +338,6 @@
 			<groupId>de.gsi.chart</groupId>
 			<artifactId>chartfx-chart</artifactId>
 			<version>8.1.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.scijava</groupId>
-			<artifactId>script-editor</artifactId>
 		</dependency>
 	</dependencies>
 	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>

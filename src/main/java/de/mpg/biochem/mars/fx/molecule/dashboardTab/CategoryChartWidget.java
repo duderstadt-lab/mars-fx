@@ -58,7 +58,6 @@ import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleException;
 import org.scijava.script.ScriptLanguage;
-import org.scijava.ui.swing.script.EditorPane;
 import javafx.embed.swing.SwingNode;
 import javafx.application.Application;
 import javafx.application.Platform;
