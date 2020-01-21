@@ -14,6 +14,7 @@ import net.imagej.ops.Initializable;
 
 public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {
 	public Node getNode();
+	public String getName();
 	public void setContent(Node node);
 	public void setContent(Node icon, Node node);
 	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive);

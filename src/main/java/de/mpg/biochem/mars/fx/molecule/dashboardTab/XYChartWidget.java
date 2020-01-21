@@ -43,4 +43,9 @@ public class XYChartWidget extends AbstractDashboardWidget implements MarsDashbo
 	public void run() {
 
 	}
+
+	@Override
+	public String getName() {
+		return "XYChartWidget";
+	}
 }

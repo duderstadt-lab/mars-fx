@@ -5,6 +5,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUESTION_CIRCLE_ALT;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
@@ -15,6 +16,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.event.EventHandler;
@@ -332,7 +334,22 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	@Override
 	protected void createIOMaps() {
-		// TODO Auto-generated method stub
+		outputMap.put("Width", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeNumberField("Width", rootPane.getWidth());
+		}, IOException.class));
+		outputMap.put("Height", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeNumberField("Height", rootPane.getHeight());
+		}, IOException.class));
 		
+		inputMap.put("Width", MarsUtil.catchConsumerException(jParser -> {
+			rootPane.setMinWidth(jParser.getDoubleValue());
+			rootPane.setMaxWidth(jParser.getDoubleValue());
+		}, IOException.class));
+		inputMap.put("Height", MarsUtil.catchConsumerException(jParser -> {
+			rootPane.setMinHeight(jParser.getDoubleValue());
+			rootPane.setMaxHeight(jParser.getDoubleValue());
+		}, IOException.class));
 	}
+	
+	public abstract String getName();
 }

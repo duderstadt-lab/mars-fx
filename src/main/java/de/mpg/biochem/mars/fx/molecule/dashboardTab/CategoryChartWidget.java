@@ -202,4 +202,9 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		categoryIcon.getStyleClass().add("categoriesIcon");
 		return categoryIcon;
 	}
+
+	@Override
+	public String getName() {
+		return "CategoryChartWidget";
+	}
 }

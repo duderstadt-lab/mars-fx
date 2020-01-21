@@ -28,6 +28,7 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import static java.util.stream.Collectors.toList;
 
+import java.awt.Rectangle;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
@@ -792,9 +793,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	public abstract M createMoleculesTab();
 	
-	//public DashboardTab getDashboard() {
-	//	return dashboardTab;
-	//}
+	public DashboardTab getDashboard() {
+		return dashboardTab;
+	}
 	
 	//Lock, unlock and update event might be called by swing threads
 	//so we use Platform.runLater to ensure they are executed on 
@@ -891,9 +892,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     @Override
 	protected void createIOMaps() {
     	//Output Map
-		//outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator ->
-		//	jGenerator.writeStringField("Window", UID), IOException.class));
-
+    	/*
+		outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeObjectFieldStart("Window");
+			jGenerator.writeNumberField("x", frame.getX());
+			jGenerator.writeNumberField("y", frame.getY());
+			jGenerator.writeNumberField("width", frame.getWidth());
+			jGenerator.writeNumberField("height", frame.getHeight());
+			jGenerator.writeEndObject();
+		}, IOException.class));
+*/
+    	
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			outputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jGenerator -> {
 				jGenerator.writeFieldName(moleculeArchiveTab.getName());
@@ -902,9 +911,30 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		}
 		
 		//Input Map
-		//inputMap.put("Window", MarsUtil.catchConsumerException(jParser -> {
-	    //    window = jParser.getText();
-		//}, IOException.class));
+		/*
+		inputMap.put("Window", MarsUtil.catchConsumerException(jParser -> {
+			Rectangle rect = new Rectangle(0, 0, 800, 600);
+			while (jParser.nextToken() != JsonToken.END_OBJECT) {
+				if ("x".equals(jParser.getCurrentName()))
+					rect.x = jParser.getIntValue();
+				if ("y".equals(jParser.getCurrentName()))
+					rect.y = jParser.getIntValue();
+				if ("width".equals(jParser.getCurrentName()))
+					rect.width = jParser.getIntValue();
+				if ("height".equals(jParser.getCurrentName()))
+					rect.height = jParser.getIntValue();
+			}
+			System.out.println("Rectangle " + rect.x + " " + rect.y + " " + rect.width + " " + rect.height);
+			
+			SwingUtilities.invokeLater(new Runnable() {
+			    @Override
+			    public void run() {
+			        frame.setBounds(rect);
+			    }
+			});
+			
+		}, IOException.class));
+		*/
 		
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			inputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jParser -> {

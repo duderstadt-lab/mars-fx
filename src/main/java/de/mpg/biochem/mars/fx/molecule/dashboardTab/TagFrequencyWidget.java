@@ -148,4 +148,9 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 	public Node getIcon() {
 		return (Node) FontAwesomeIconFactory.get().createIcon(TAG, "1.2em");
 	}
+
+	@Override
+	public String getName() {
+		return "TagFrequencyWidget";
+	}
 }

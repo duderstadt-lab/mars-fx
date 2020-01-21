@@ -29,6 +29,7 @@ import org.scijava.script.ScriptService;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
 import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -213,7 +214,32 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
     	InputStream is = this.getClass().getResourceAsStream(name);
     	final String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();
-		codeArea.replaceText(0, 0, scriptExample);
+		codeArea.replaceText(scriptExample);
+	}
+	
+	@Override
+	protected void createIOMaps() {
+		super.createIOMaps();
+		
+		outputMap.put("Language", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeStringField("Language", lang.getLanguageName());
+		}, IOException.class));
+		outputMap.put("Script", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeStringField("Script", codeArea.getText());
+		}, IOException.class));
+		
+		inputMap.put("Language", MarsUtil.catchConsumerException(jParser -> {
+			String language = jParser.getText();
+			if (language.equals("Groovy")) {
+				radioButtonGroovy.setSelected(true);
+			} else if (language.equals("Python")) {
+				radioButtonPython.setSelected(true);
+			}
+			lang = scriptService.getLanguageByName(language);
+		}, IOException.class));
+		inputMap.put("Script", MarsUtil.catchConsumerException(jParser -> {
+			codeArea.replaceText(jParser.getText());
+		}, IOException.class));
 	}
 	
 	@Override

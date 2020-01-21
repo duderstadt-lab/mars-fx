@@ -300,4 +300,9 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 		xychartIcon.getStyleClass().add("bubblechartIcon");
 		return xychartIcon;
 	}
+
+	@Override
+	public String getName() {
+		return "BubbleChartWidget";
+	}
 }

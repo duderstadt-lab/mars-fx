@@ -45,4 +45,9 @@ public class DefaultWidget extends AbstractDashboardWidget implements MarsDashbo
 	@Override
 	public void run() {
 	}
+
+	@Override
+	public String getName() {
+		return "DefaultWidget";
+	}
 }

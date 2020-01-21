@@ -80,12 +80,12 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 	}
 
 	@Override
-	protected void createIOMaps() {
-		// TODO Auto-generated method stub
+	public Node getIcon() {
+		return (Node) FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.2em");
 	}
 
 	@Override
-	public Node getIcon() {
-		return (Node) FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.2em");
+	public String getName() {
+		return "ArchivePropertiesWidget";
 	}
 }

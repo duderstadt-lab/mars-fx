@@ -197,4 +197,9 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		barchartIcon.getStyleClass().add("barchartIcon");
 		return barchartIcon;
 	}
+
+	@Override
+	public String getName() {
+		return "HistogramWidget";
+	}
 }

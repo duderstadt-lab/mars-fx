@@ -40,6 +40,7 @@ import de.mpg.biochem.mars.fx.molecule.dashboardTab.CategoryChartWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.MarsImageMetadata;
@@ -47,6 +48,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
@@ -54,6 +56,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
 
+import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
 import javafx.geometry.BoundingBox;
@@ -75,6 +78,7 @@ import org.scijava.plugin.Parameter;
 
 import javafx.scene.control.ButtonBase;
 import java.util.List;
+import java.io.IOException;
 import java.util.*;
 
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.*;
@@ -244,7 +248,42 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	protected void createIOMaps() {
-		// TODO Auto-generated method stub
+		outputMap.put("Widgets", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeArrayFieldStart("Widgets");
+			for (MarsDashboardWidget widget : widgets) {
+				jGenerator.writeStartObject();
+				jGenerator.writeStringField("Name", widget.getName());
+				jGenerator.writeFieldName("Settings");
+				widget.toJSON(jGenerator);
+				jGenerator.writeEndObject();
+			}
+			jGenerator.writeEndArray();
+		}, IOException.class));
+		
+		inputMap.put("Widgets", MarsUtil.catchConsumerException(jParser -> {
+			while (jParser.nextToken() != JsonToken.END_ARRAY) {
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					MarsDashboardWidget widget = null;
+					
+					if ("Name".equals(jParser.getCurrentName())) {
+			    		jParser.nextToken();
+			    		widget = marsDashboardWidgetService.createWidget(jParser.getText());
+						widget.setArchive(archive);
+						widget.setParent(this);
+						widget.initialize();
+				    	addWidget(widget);
+					}
+					
+					jParser.nextToken();
+					
+					if ("Settings".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						if (widget != null)
+							widget.fromJSON(jParser);
+					}
+				}
+	    	}
+		}, IOException.class));
 	}
 	
 	@Override

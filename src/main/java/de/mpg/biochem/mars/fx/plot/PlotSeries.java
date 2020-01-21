@@ -264,13 +264,11 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 				typeField.getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("xColumn", MarsUtil.catchConsumerException(jParser -> {
-				//Do I need to add the selection in case the first records
-				//table doesn't have it?
+				//Do I need to add the selection in case the column is not present for new datasets.
 				xColumnField().getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("yColumn", MarsUtil.catchConsumerException(jParser -> {
-				//Do I need to add the selection in case the first records
-				//table doesn't have it?
+				//Do I need to add the selection in case the column is not present for new datasets.
 				yColumnField().getSelectionModel().select(jParser.getText());
 			}, IOException.class));
 			inputMap.put("Style", MarsUtil.catchConsumerException(jParser -> {
