@@ -1,6 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -74,6 +75,7 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
         xyChart.getRenderers().clear();
         
         xyChart.getPlugins().add(new MarsDataPointTracker());
+        xyChart.getPlugins().add(new Zoomer());
         
         datasets = new ArrayList<DefaultErrorDataSet>();
         
@@ -210,8 +212,7 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
 			
-			Double[] xvalueserror = null;
-			Double[] yvalueserror = null;
+			Double[] error = null;
 			
 			if (xvalues.length == 0) {
 				writeToLog(seriesName + "_xvalues has zero values.");
@@ -225,43 +226,23 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 				return null;
 			}
 			
-			if (outputs.containsKey(seriesName + "_xvalueserror")) {
-				xvalueserror = (Double[]) outputs.get(seriesName + "_xvalueserror");
+			if (outputs.containsKey(seriesName + "_error")) {
+				error = (Double[]) outputs.get(seriesName + "_error");
 				
-				if (xvalueserror.length == 0) {
-					writeToLog(seriesName + "_xvalueserror has zero values.");
+				if (error.length == 0) {
+					writeToLog(seriesName + "_serror has zero values.");
 					return null;
 				}
 				
-				if (xvalueserror.length != dataPointCount) {
-					writeToLog(seriesName + "_xvalues and " + seriesName + "_xvalueserror do not have the same dimensions.");
-					return null;
-				}
-			}
-			
-			if (outputs.containsKey(seriesName + "_yvalueserror")) {
-				yvalueserror = (Double[]) outputs.get(seriesName + "_yvalueserror");
-				
-				if (yvalueserror.length == 0) {
-					writeToLog(seriesName + "_yvalueserror has zero values.");
-					return null;
-				}
-				
-				if (yvalueserror.length != dataPointCount) {
-					writeToLog(seriesName + "_yvalues and " + seriesName + "_yvalueserror do not have the same dimensions.");
+				if (error.length != dataPointCount) {
+					writeToLog(seriesName + "_yvalues and " + seriesName + "_error do not have the same dimensions.");
 					return null;
 				}
 			}
 			
-			if (xvalueserror != null && yvalueserror != null) {
+			if (error != null) {
 				for (int index=0;index<xvalues.length;index++)
-					dataset.add(xvalues[index], yvalues[index], xvalueserror[index], yvalueserror[index]);
-			} else if (xvalueserror != null) {
-				for (int index=0;index<xvalues.length;index++)
-					dataset.add(xvalues[index], yvalues[index], xvalueserror[index], 0);
-			} else if (yvalueserror != null) {
-				for (int index=0;index<xvalues.length;index++)
-					dataset.add(xvalues[index], yvalues[index], 0, yvalueserror[index]);
+					dataset.add(xvalues[index], yvalues[index], error[index], error[index]);
 			} else {
 				for (int index=0;index<xvalues.length;index++)
 					dataset.add(xvalues[index], yvalues[index]);
@@ -275,10 +256,6 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 			return null;
 		}
 		
-		//Add style area vs just line...
-		
-		//Add Error bars !!!!
-		
 		String styleString = "";
 		
 		if (outputs.containsKey(seriesName + "_strokeColor"))
@@ -286,6 +263,9 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 		
 		if (outputs.containsKey(seriesName + "_fillColor"))
 				styleString += "fillColor=" + (String)outputs.get(seriesName + "_fillColor") + "; ";
+		
+		if (outputs.containsKey(seriesName + "_strokeWidth"))
+			styleString += "strokeWidth=" + ((Integer)outputs.get(seriesName + "_strokeWidth")).intValue();
 		
 		dataset.setStyle(styleString);
     	
