@@ -724,7 +724,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAs(file);	 
+ 	            	archive.saveAs(file);	
+ 	            	saveState(file.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -775,7 +776,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAsVirtualStore(virtualDirectory);	 
+ 	            	archive.saveAsVirtualStore(virtualDirectory);	
+ 	            	saveState(virtualDirectory.getAbsolutePath());
  	                return null;
  	            }
  	        };
