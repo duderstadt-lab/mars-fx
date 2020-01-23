@@ -75,7 +75,8 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
         xyChart.getRenderers().clear();
         
         xyChart.getPlugins().add(new MarsDataPointTracker());
-        xyChart.getPlugins().add(new Zoomer());
+        //Zoomer zoom = new Zoomer();
+        //xyChart.getPlugins().add(zoom);
         
         datasets = new ArrayList<DefaultErrorDataSet>();
         
@@ -230,7 +231,7 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 				error = (Double[]) outputs.get(seriesName + "_error");
 				
 				if (error.length == 0) {
-					writeToLog(seriesName + "_serror has zero values.");
+					writeToLog(seriesName + "_error has zero values.");
 					return null;
 				}
 				
