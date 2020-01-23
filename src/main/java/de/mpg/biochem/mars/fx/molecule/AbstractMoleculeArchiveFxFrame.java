@@ -134,6 +134,8 @@ import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsUtil;
 
+import javax.swing.WindowConstants;
+
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
 	
@@ -167,6 +169,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     protected M moleculesTab;
     protected SettingsTab settingsTab;
     
+    protected boolean windowStateLoaded = false;
+    
     protected static JsonFactory jfactory;
 	
     protected Set<MoleculeArchiveTab> tabSet;
@@ -195,21 +199,23 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	public void init() {
 		frame = new JFrame(title);
 		
+		//frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		frame.addWindowListener(new WindowAdapter() {
-	         public void windowClosing(WindowEvent e) {
-				close();
-	         }
-	    });
+
+			@Override
+			public void windowClosing(WindowEvent windowEvent) {
+				SwingUtilities.invokeLater(() -> {
+					close();
+				});
+			}
+		});
 		
 		this.fxPanel = new JFXPanel();
 		frame.add(this.fxPanel);
 		
 		if (!uiService.isHeadless())
 			WindowManager.addWindow(frame);
-		
-		frame.setSize(800, 600);
-		frame.setVisible(true);
-		
+
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		// Allows multiple runLaters in the same session...
 		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
@@ -267,6 +273,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         
         try {
 			loadState();
+			
+			if (!windowStateLoaded)
+				SwingUtilities.invokeLater(() -> { 
+	    			frame.setSize(800, 600);
+	    			frame.setVisible(true);
+				});
 		} catch (IOException e) {
 			//TODO Auto-generated catch block
 			e.printStackTrace();
@@ -586,18 +598,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	public String getTitle() {
 		return title;
 	}
-	
-	public void close() {
-		if (moleculeArchiveService.contains(archive.getName()))
-			moleculeArchiveService.removeArchive(archive);
-
-		if (!uiService.isHeadless())
-			WindowManager.removeWindow(frame);
-		
-		frame.setVisible(false);
-		if (frame != null)
-			frame.dispose();
-	}
 
 	public void updateMenus(ArrayList<Menu> menus) {	
     	while (menuBar.getMenus().size() > 1)
@@ -619,7 +619,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	     	            @Override
 	     	            public Void call() throws Exception {
 	     	            	archive.save();	 
-	     	            	saveState();
+	     	            	saveState(archive.getFile().getAbsolutePath());
 	     	                return null;
 	     	            }
 	     	        };
@@ -676,7 +676,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAs(newFile);	 
+ 	            	archive.saveAs(newFile);
+ 	            	saveState(newFile.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -689,8 +690,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	           	
 				archive.setFile(newFile);
 				archive.setName(newFile.getName());
-				frame.setTitle(newFile.getName());
-				
+				SwingUtilities.invokeLater(() -> {
+					frame.setTitle(newFile.getName());
+				});
+
 				moleculeArchiveService.addArchive(archive);
 	           	
 	           	unlockFX();
@@ -889,6 +892,18 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	unlock();
     }
     
+    @Override
+    public void close() {
+    	if (moleculeArchiveService.contains(archive.getName()))
+			moleculeArchiveService.removeArchive(archive);
+
+		if (!uiService.isHeadless())
+			WindowManager.removeWindow(frame);
+		
+		//frame.setVisible(true);
+		frame.dispose();
+    }
+    
     //Creates settings input and output maps to save the current state of the program.
     @Override
 	protected void createIOMaps() {
@@ -930,14 +945,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 					rect.height = jParser.getIntValue();
 				}
 			}
-			frame.setBounds(rect);
-			/*
-			SwingUtilities.invokeLater(new Runnable() {
-			    @Override
-			    public void run() {
-			        frame.setBounds(rect.x, rect.y, rect.width, rect.height);
-			    }
-			});*/
+			
+			windowStateLoaded = true;
+			
+			SwingUtilities.invokeLater(() -> { 
+				frame.setBounds(rect);
+				frame.setVisible(true);
+			});
 		}, IOException.class));
 		
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
@@ -947,9 +961,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		}
 	}
     
-    protected void saveState() throws IOException {
-		File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
-		OutputStream stream = new BufferedOutputStream(new FileOutputStream(stateFile));
+    protected void saveState(String path) throws IOException {
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".cfg")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
 		jGenerator.useDefaultPrettyPrinter();
 		toJSON(jGenerator);
@@ -965,6 +978,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
     	if (!stateFile.exists())
     		return;
+    	
 		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
 	    JsonParser jParser = jfactory.createParser(inputStream);
 	    fromJSON(jParser);
