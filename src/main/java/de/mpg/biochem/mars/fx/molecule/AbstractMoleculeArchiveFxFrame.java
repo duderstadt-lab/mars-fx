@@ -207,6 +207,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		if (!uiService.isHeadless())
 			WindowManager.addWindow(frame);
 		
+		frame.setSize(800, 600);
+		frame.setVisible(true);
+		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		// Allows multiple runLaters in the same session...
 		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
@@ -224,9 +227,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	public void initFX(JFXPanel fxPanel) {	
 		Scene scene = buildScene();
 		this.fxPanel.setScene(scene);
-		
-		frame.setSize(800, 600);
-		frame.setVisible(true);
 	}
 	
 	protected Scene buildScene() {
@@ -595,7 +595,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			WindowManager.removeWindow(frame);
 		
 		frame.setVisible(false);
-		frame.dispose();
+		if (frame != null)
+			frame.dispose();
 	}
 
 	public void updateMenus(ArrayList<Menu> menus) {	
@@ -892,7 +893,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     @Override
 	protected void createIOMaps() {
     	//Output Map
-    	/*
 		outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeObjectFieldStart("Window");
 			jGenerator.writeNumberField("x", frame.getX());
@@ -901,7 +901,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			jGenerator.writeNumberField("height", frame.getHeight());
 			jGenerator.writeEndObject();
 		}, IOException.class));
-*/
     	
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			outputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jGenerator -> {
@@ -911,30 +910,35 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		}
 		
 		//Input Map
-		/*
 		inputMap.put("Window", MarsUtil.catchConsumerException(jParser -> {
 			Rectangle rect = new Rectangle(0, 0, 800, 600);
 			while (jParser.nextToken() != JsonToken.END_OBJECT) {
-				if ("x".equals(jParser.getCurrentName()))
+				if ("x".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
 					rect.x = jParser.getIntValue();
-				if ("y".equals(jParser.getCurrentName()))
+				}
+				if ("y".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
 					rect.y = jParser.getIntValue();
-				if ("width".equals(jParser.getCurrentName()))
+				}
+				if ("width".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
 					rect.width = jParser.getIntValue();
-				if ("height".equals(jParser.getCurrentName()))
+				}
+				if ("height".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
 					rect.height = jParser.getIntValue();
+				}
 			}
-			System.out.println("Rectangle " + rect.x + " " + rect.y + " " + rect.width + " " + rect.height);
-			
+			frame.setBounds(rect);
+			/*
 			SwingUtilities.invokeLater(new Runnable() {
 			    @Override
 			    public void run() {
-			        frame.setBounds(rect);
+			        frame.setBounds(rect.x, rect.y, rect.width, rect.height);
 			    }
-			});
-			
+			});*/
 		}, IOException.class));
-		*/
 		
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			inputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jParser -> {
