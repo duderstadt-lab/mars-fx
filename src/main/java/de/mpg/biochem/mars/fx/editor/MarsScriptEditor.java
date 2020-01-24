@@ -188,7 +188,8 @@ public class MarsScriptEditor extends CodeArea {
 	      editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
 	    	  if (shouldSuggest(e)) {
 	    		  if (!popup.isShowing()) {
-	    		  String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)|(\\()|(\\))|(\\{)|(\\})|(\\[)|(\\])");
+	    		  //String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)|(\\()|(\\))|(\\{)|(\\})|(\\[)|(\\])");
+	    		  String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)");
 	    			if (split.length == 0)
 	    				keyword = "";
 	    			else

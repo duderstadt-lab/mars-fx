@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang.ClassUtils;
 
@@ -59,6 +60,9 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
     	addToAutoCompletionClasses(MarsTable.class, "Mars");
     	keywordToClassMap.put("table", MarsTable.class);
     	
+    	addToAutoCompletionClasses(Stream.class, "JDK8");
+    	keywordToClassMap.put("table.rows()", Stream.class);
+    	
     	addToAutoCompletionClasses(SingleMolecule.class, "Mars");
     	keywordToClassMap.put("molecule", SingleMolecule.class);
     	
@@ -73,7 +77,6 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
         allClasses.add(0, clazz);
         
         for (Class c : allClasses) {
-        	//System.out.println(c);
         	Method[] methods = c.getDeclaredMethods();
 	        for (Method method : methods) {
 	        	
@@ -87,7 +90,6 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
 	        				overridden = true;
 	        			else if (Arrays.equals(method.getParameterTypes(), item.getMethod().getParameterTypes())) {
 	        				overridden = true;
-	        				//System.out.println("Matching parameters");
 	        			}
 	        		}
 	        	}
@@ -140,9 +142,6 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
 	        }
         }
         autoCompletionClasses.put(clazz, classItemList);
-        //if (c.getSuperclass() != null && c.getSuperclass() != Object.class) {
-        //	addToAutoCompletionClasses(c.getSuperclass(), library);
-        //}
     }
     
     public Collection<CompletionItem> getSuggestions(String text, int caretPos, String keyword) {

@@ -30,6 +30,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
@@ -86,6 +87,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import de.mpg.biochem.mars.fx.plot.event.*;
+
+import javax.swing.RowFilter;
 import javax.swing.SwingUtilities;
 
 import javafx.beans.value.ChangeListener;
@@ -377,16 +380,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
                     return true;
                 }
                 
-                if (Integer.toString(molIndexRow.getIndex()).contains(newValue)) {
-                    return true;
-                } else if (molIndexRow.getUID().contains(newValue)) {
-                    return true;
-                } else if (molIndexRow.getTags().contains(newValue)) {
-                	return true;
-                } else if (molIndexRow.getImageMetaDataUID().contains(newValue)) {
-                	return true;
-                }
-                return false;
+            	String[] searchList = newValue.split(",");
+            	for (String str : searchList) {
+            		if (!molIndexRow.contains(str.trim()))
+            			return false;
+            	}
+                return true;
             });
             
             //Super hacky way of ensuring the textfield can resize when not selected with no text.
@@ -497,6 +496,20 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	
     	MoleculeIndexRow(int index) {
     		this.index = index;
+    	}
+    	
+    	boolean contains(String str) {
+    		if (Integer.toString(getIndex()).contains(str)) {
+                return true;
+            } else if (getUID().contains(str)) {
+                return true;
+            } else if (getTags().contains(str)) {
+            	return true;
+            } else if (getImageMetaDataUID().contains(str)) {
+            	return true;
+            } else {
+            	return false;
+            }
     	}
     	
     	int getIndex() {
