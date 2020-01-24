@@ -147,7 +147,7 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
     
     public Collection<CompletionItem> getSuggestions(String text, int caretPos, String keyword) {
     	if (!keywordToClassMap.containsKey(keyword))
-    		return new ArrayList();
+    		return Collections.emptyList();
     	
 	    IndexRange replaceRange = getReplaceRange(text, caretPos);
 	    char c = ' ';
