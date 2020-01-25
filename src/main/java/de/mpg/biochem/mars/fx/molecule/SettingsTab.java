@@ -30,6 +30,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.KeyCode;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
@@ -161,7 +164,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
     	hotKeyTable.getColumns().add(deleteColumn);
 
         TableColumn<HotKeyEntry, String> shortcutColumn = new TableColumn<>("Shortcut");
-        shortcutColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        shortcutColumn.setCellFactory(column -> new KeyEditField());
         shortcutColumn.setOnEditCommit(event -> { 
         	String newShortcut = event.getNewValue();
         	if (hotKeyRowList.stream().filter(row -> row.getShortcut().equals(newShortcut)).findFirst().isPresent()) {
@@ -297,5 +300,97 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	@Override
 	public String getName() {
 		return "SettingsTab";
+	}
+	
+	private static class KeyEditField extends TableCell<KeyCombination, KeyCombination> {
+
+	    private TextField field;
+
+	    @Override
+	    public void startEdit() {
+	      super.startEdit();
+	      if (field == null) {
+	        field = createField();
+	      }
+	      field.setText(getString());
+	      setText(null);
+	      setGraphic(field);
+	      field.requestFocus();
+	    }
+
+	    @Override
+	    public void cancelEdit() {
+	      super.cancelEdit();
+	      setText(getString());
+	      setGraphic(null);
+	    }
+
+	    @Override
+	    protected void updateItem(KeyCombination item, boolean empty) {
+	      super.updateItem(item, empty);
+	      if (empty) {
+	        setText(null);
+	        setGraphic(null);
+	      } else {
+	        if (isEditing()) {
+	          setText(null);
+	          setGraphic(field);
+	        } else {
+	          setText(getString());
+	          setGraphic(null);
+	        }
+	      }
+	    }
+
+	    private TextField createField() {
+	      TextField field = new TextField(getString());
+	      field.setEditable(false);
+	      field.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+	        if (e.getCode() == KeyCode.ENTER) {
+	          commit(field.getText());
+	        } else if (e.getCode() == KeyCode.ESCAPE) {
+	          cancelEdit();
+	        } else if (e.getCode() == KeyCode.BACK_SPACE) {
+	          field.setText(null);
+	        } else {
+	          field.setText(convert(e).toString());
+	        }
+	        e.consume();
+	      });
+	      field.focusedProperty().addListener(on(false, () -> commit(field.getText())));
+	      return field;
+	    }
+
+	    public void commit(String text) {
+	      try {
+	        commitEdit(StringUtil.isEmpty(text) ? KeyCombination.NO_MATCH : KeyCombination.valueOf(text));
+	      } catch (Exception ee) {
+	        cancelEdit();
+	      }
+	    }
+
+	    private String convert(KeyEvent e) {
+	      return TaskUtil.firstSuccess(
+	          () -> new KeyCodeCombination(e.getCode(),
+	              e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	              e.isControlDown() || !(e.isAltDown() || e.isShiftDown() || e.isMetaDown()) ? ModifierValue.DOWN : ModifierValue.UP,
+	              e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	              e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	              ModifierValue.UP).toString(),
+	          () -> {
+	            KeyCodeCombination key = new KeyCodeCombination(KeyCode.A,
+	                e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	                e.isControlDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	                e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	                e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
+	                ModifierValue.UP);
+	            String name = key.getName();
+	            return name.substring(0, name.length() - key.getCode().getName().length());
+	          });
+	    }
+
+	    private String getString() {
+	      return getItem() == null ? "" : getItem().toString();
+	    }
 	}
 }
