@@ -330,7 +330,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
    		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
     							}
    		                 	};
-   		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getKeyCombination(), rn);
+   		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
     					}
     				}
     				
@@ -640,6 +640,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	   	 } catch (IOException e1) {
 			e1.printStackTrace();
 		 }
+	   	 settingsTab.save();
     }
     
     public void saveCopy() {

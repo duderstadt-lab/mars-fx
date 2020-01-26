@@ -75,6 +75,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.input.KeyCombination.ModifierValue;
+import javafx.scene.input.KeyEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -90,9 +95,9 @@ import org.scijava.prefs.PrefService;
 
 public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
 	
-	private JFXToggleButton smileEncodingButton;
+	//private JFXToggleButton smileEncodingButton;
 	
-	protected CustomTextField addHotKeyField;
+	//protected CustomTextField addHotKeyField;
     protected TableView<HotKeyEntry> hotKeyTable;
     protected ObservableList<HotKeyEntry> hotKeyRowList = FXCollections.observableArrayList();
     
@@ -113,8 +118,15 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		Text moleculesHeading = new Text("Molecules");
 		moleculesHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
 		
+		Text hotKeySettingsDescription = new Text("Combine shift, control, option (alt), or command with\n"
+				+ "other keys to create tag shortcuts.");
+		hotKeySettingsDescription.setFont(Font.font("Helvetica", FontWeight.NORMAL, 14));
+		
 		rootPane.getChildren().add(moleculesHeading);
 		VBox.setMargin(moleculesHeading, new Insets(15, 15, 15, 15));
+		
+		rootPane.getChildren().add(hotKeySettingsDescription);
+		VBox.setMargin(hotKeySettingsDescription, new Insets(5, 50, 5, 50));
 		
 		rootPane.getChildren().add(buildHotKeyTable());
 		
@@ -125,7 +137,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	protected BorderPane buildHotKeyTable() {
 		hotKeyTable = new TableView<HotKeyEntry>();
-		addHotKeyField = new CustomTextField();
+		//addHotKeyField = new CustomTextField();
     	
     	TableColumn<HotKeyEntry, HotKeyEntry> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -163,27 +175,20 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
     	deleteColumn.setSortable(false);
     	hotKeyTable.getColumns().add(deleteColumn);
 
-        TableColumn<HotKeyEntry, String> shortcutColumn = new TableColumn<>("Shortcut");
+        TableColumn<HotKeyEntry, KeyCombination> shortcutColumn = new TableColumn<>("Shortcut");
         shortcutColumn.setCellFactory(column -> new KeyEditField());
         shortcutColumn.setOnEditCommit(event -> { 
-        	String newShortcut = event.getNewValue();
-        	if (hotKeyRowList.stream().filter(row -> row.getShortcut().equals(newShortcut)).findFirst().isPresent()) {
-        		((HotKeyEntry) event.getTableView().getItems().get(event.getTablePosition().getRow())).setShortcut(event.getOldValue());
-        		hotKeyTable.refresh();
-        	}
-        	
-    		//HotKeyEntry hotkey = event.getRowValue();
-    		//String oldShortcut = hotkey.getShortcut();
-    		//String tag = hotkey.getTag();
-    		
-    		//NOT SURE WHAT TO DO HERE... won't it just allow editing...
-    		
-    		//Maybe do nothing...
-
+        	event.getRowValue().setShortcut(event.getNewValue());
+        	//String newShortcut = event.getNewValue();
+        	//if (hotKeyRowList.stream().filter(row -> row.getShortcut().equals(newShortcut)).findFirst().isPresent()) {
+        	//	((HotKeyEntry) event.getTableView().getItems().get(event.getTablePosition().getRow())).setShortcut(event.getOldValue());
+        	//	hotKeyTable.refresh();
+        	//}
         });
-        shortcutColumn.setCellValueFactory(regionOfInterest ->
-                new ReadOnlyObjectWrapper<>(regionOfInterest.getValue().getShortcut())
+        shortcutColumn.setCellValueFactory(hotKeyEntry ->
+                new ReadOnlyObjectWrapper<>(hotKeyEntry.getValue().getShortcut())
         );
+
         shortcutColumn.setSortable(false);
         shortcutColumn.setPrefWidth(100);
         shortcutColumn.setMinWidth(100);
@@ -199,8 +204,8 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
                 new ReadOnlyObjectWrapper<>(String.valueOf(hotKey.getValue().getTag()))
         );
         tagColumn.setSortable(false);
-        tagColumn.setPrefWidth(100);
-        tagColumn.setMinWidth(100);
+        tagColumn.setPrefWidth(150);
+        tagColumn.setMinWidth(150);
         tagColumn.setEditable(true);
         tagColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         hotKeyTable.getColumns().add(tagColumn);
@@ -219,12 +224,12 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
                 "-fx-max-height: 18px;"
         );
 		addButton.setOnAction(e -> {
-			if (!addHotKeyField.getText().equals("") && !hotKeyRowList.stream().filter(row -> row.getShortcut().equals(addHotKeyField.getText())).findFirst().isPresent()) {
-				HotKeyEntry newHotKey = new HotKeyEntry(addHotKeyField.getText());
-				hotKeyRowList.add(newHotKey);
-			}
+			//if (!addHotKeyField.getText().equals("") && !hotKeyRowList.stream().filter(row -> row.getShortcut().equals(addHotKeyField.getText())).findFirst().isPresent()) {
+			HotKeyEntry newHotKey = new HotKeyEntry(KeyCombination.valueOf("Ctrl+T"), "Tag");
+			hotKeyRowList.add(newHotKey);
+			//}
 		});
-		
+		/*
 		addHotKeyField.textProperty().addListener((observable, oldValue, newValue) -> {
         	if (addHotKeyField.getText().isEmpty()) {
         		addHotKeyField.setRight(new Label(""));
@@ -235,20 +240,21 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		addHotKeyField.setStyle(
                 "-fx-background-radius: 2em; "
         );
-
+		*/
+		
         BorderPane hotKeyPane = new BorderPane();
         hotKeyPane.setMinWidth(350);
-        hotKeyPane.setMinHeight(300);
+        hotKeyPane.setMinHeight(350);
         hotKeyPane.setMaxWidth(350);
-        hotKeyPane.setMaxHeight(300);
+        hotKeyPane.setMaxHeight(350);
         
         Insets insets = new Insets(5, 50, 5, 50);
         
         hotKeyPane.setCenter(hotKeyTable);
         BorderPane.setMargin(hotKeyTable, insets);
         
-        hotKeyPane.setBottom(addHotKeyField);
-        BorderPane.setMargin(addHotKeyField, insets);
+        hotKeyPane.setBottom(addButton);
+        BorderPane.setMargin(addButton, insets);
         
         return hotKeyPane;
 	}
@@ -258,14 +264,19 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 			HashMap<String, String> tagHotKeyList = (HashMap<String, String>)prefService.getMap(SettingsTab.class, "tagHotKeyList");
 			
 			for (String shortcut : tagHotKeyList.keySet()) {
-				hotKeyRowList.add(new HotKeyEntry(shortcut, tagHotKeyList.get(shortcut)));
+				hotKeyRowList.add(new HotKeyEntry(KeyCombination.valueOf(shortcut), tagHotKeyList.get(shortcut)));
 			}
 		}
 	}
 	
 	public void save() {
 		Map<String, String> tagHotKeyList = hotKeyRowList.stream().collect(
-				Collectors.toMap(HotKeyEntry::getShortcut, HotKeyEntry::getTag));
+				Collectors.toMap(HotKeyEntry::getShortcutString, HotKeyEntry::getTag));
+		
+		System.out.println("saving");
+		for (String key : tagHotKeyList.keySet()) {
+			System.out.println(key + " " + tagHotKeyList.get(key));
+		}
 		
 		prefService.remove(SettingsTab.class, "tagHotKeyList");
 		prefService.put(SettingsTab.class, "tagHotKeyList", tagHotKeyList);
@@ -302,7 +313,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		return "SettingsTab";
 	}
 	
-	private static class KeyEditField extends TableCell<KeyCombination, KeyCombination> {
+	private static class KeyEditField extends TableCell<HotKeyEntry, KeyCombination> {
 
 	    private TextField field;
 
@@ -328,6 +339,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	    @Override
 	    protected void updateItem(KeyCombination item, boolean empty) {
 	      super.updateItem(item, empty);
+	      
 	      if (empty) {
 	        setText(null);
 	        setGraphic(null);
@@ -357,36 +369,43 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	        }
 	        e.consume();
 	      });
-	      field.focusedProperty().addListener(on(false, () -> commit(field.getText())));
+	      field.focusedProperty().addListener((obs, wasfocused, focused) -> {
+		      if(!focused) 
+		    	  commit(field.getText());
+		  });
 	      return field;
 	    }
-
+	    
 	    public void commit(String text) {
 	      try {
-	        commitEdit(StringUtil.isEmpty(text) ? KeyCombination.NO_MATCH : KeyCombination.valueOf(text));
+	        commitEdit(text.equals("") ? KeyCombination.NO_MATCH : KeyCombination.valueOf(text));
 	      } catch (Exception ee) {
 	        cancelEdit();
 	      }
 	    }
 
 	    private String convert(KeyEvent e) {
-	      return TaskUtil.firstSuccess(
-	          () -> new KeyCodeCombination(e.getCode(),
-	              e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	              e.isControlDown() || !(e.isAltDown() || e.isShiftDown() || e.isMetaDown()) ? ModifierValue.DOWN : ModifierValue.UP,
-	              e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	              e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	              ModifierValue.UP).toString(),
-	          () -> {
-	            KeyCodeCombination key = new KeyCodeCombination(KeyCode.A,
-	                e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	                e.isControlDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	                e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	                e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
-	                ModifierValue.UP);
-	            String name = key.getName();
-	            return name.substring(0, name.length() - key.getCode().getName().length());
-	          });
+	    	try {
+		    	KeyCodeCombination key1 = new KeyCodeCombination(e.getCode(),
+		              e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		              e.isControlDown() || !(e.isAltDown() || e.isShiftDown() || e.isMetaDown()) ? ModifierValue.DOWN : ModifierValue.UP,
+		              e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		              e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		              ModifierValue.UP);
+		    	
+		    	return key1.toString();
+	    	} catch (Exception exception) {
+	    		KeyCodeCombination key = new KeyCodeCombination(KeyCode.A,
+		                e.isShiftDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		                e.isControlDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		                e.isAltDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		                e.isMetaDown() ? ModifierValue.DOWN : ModifierValue.UP,
+		                ModifierValue.UP);
+
+		            String name = key.getName();
+		           
+		            return name.substring(0, name.length() - key.getCode().getName().length());
+	    	}
 	    }
 
 	    private String getString() {
