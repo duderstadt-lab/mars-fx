@@ -211,6 +211,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			
 			File outputPath = fileChooser.showSaveDialog(getNode().getScene().getWindow());
 			
+			if (outputPath == null)
+				return;
+			
 			WritableImage snapshot = pixelScaleAwareCanvasSnapshot(chartsPane, 2);
 			
 			try {

@@ -243,9 +243,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		*/
 		
         BorderPane hotKeyPane = new BorderPane();
-        hotKeyPane.setMinWidth(350);
+        hotKeyPane.setMinWidth(400);
         hotKeyPane.setMinHeight(350);
-        hotKeyPane.setMaxWidth(350);
+        hotKeyPane.setMaxWidth(400);
         hotKeyPane.setMaxHeight(350);
         
         Insets insets = new Insets(5, 50, 5, 50);
