@@ -97,7 +97,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	//private JFXToggleButton smileEncodingButton;
 	
-	//protected CustomTextField addHotKeyField;
     protected TableView<HotKeyEntry> hotKeyTable;
     protected ObservableList<HotKeyEntry> hotKeyRowList = FXCollections.observableArrayList();
     
@@ -137,7 +136,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	protected BorderPane buildHotKeyTable() {
 		hotKeyTable = new TableView<HotKeyEntry>();
-		//addHotKeyField = new CustomTextField();
     	
     	TableColumn<HotKeyEntry, HotKeyEntry> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -272,11 +270,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	public void save() {
 		Map<String, String> tagHotKeyList = hotKeyRowList.stream().collect(
 				Collectors.toMap(HotKeyEntry::getShortcutString, HotKeyEntry::getTag));
-		
-		System.out.println("saving");
-		for (String key : tagHotKeyList.keySet()) {
-			System.out.println(key + " " + tagHotKeyList.get(key));
-		}
 		
 		prefService.remove(SettingsTab.class, "tagHotKeyList");
 		prefService.put(SettingsTab.class, "tagHotKeyList", tagHotKeyList);
