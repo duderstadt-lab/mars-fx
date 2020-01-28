@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.JsonToken;
 
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
@@ -118,6 +119,9 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 			   		plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
+			   		e.consume();
+			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
+			   		plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
 			   		e.consume();
 			   	}
 			} 

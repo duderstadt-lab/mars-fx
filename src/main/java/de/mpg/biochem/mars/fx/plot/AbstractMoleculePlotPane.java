@@ -97,6 +97,10 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 					for (SubPlot subplot : charts)
 						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
 			   		e.consume();
+			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
+			   		for (SubPlot subplot : charts)
+						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
+			   		e.consume();
 			   	}
 			} 
         });
