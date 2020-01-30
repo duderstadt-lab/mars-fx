@@ -152,10 +152,16 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
 	    char c = ' ';
 	    int index = caretPos;
 	    while (index > 0) {
-	      c = text.charAt(index);
-	      if (c == ' ' || c == '\t' || c == '\n') {
-	        break;
-	      }
+	     try {
+	    	  c = text.charAt(index);
+		      if (c == ' ' || c == '\t' || c == '\n') {
+		        break;
+		      }
+	     } catch(StringIndexOutOfBoundsException e) {
+	    	 //Do nothing... Just continue.
+	    	 //Sometimes this happens at the very end of the 
+	    	 //codeArea I am not sure why...
+	     }
 	      index--;
 	    }
 	    
