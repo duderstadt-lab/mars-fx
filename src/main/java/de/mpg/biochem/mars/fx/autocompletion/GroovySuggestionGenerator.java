@@ -157,7 +157,7 @@ public class GroovySuggestionGenerator implements SuggestionGenerator {
 		      if (c == ' ' || c == '\t' || c == '\n') {
 		        break;
 		      }
-	     } catch(Exception e) {
+	     } catch(StringIndexOutOfBoundsException e) {
 	    	 //Do nothing... Just continue.
 	    	 //Sometimes this happens at the very end of the 
 	    	 //codeArea I am not sure why...
