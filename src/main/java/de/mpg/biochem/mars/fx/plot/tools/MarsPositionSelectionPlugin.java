@@ -239,6 +239,12 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     		return;
     	
     	positionPoint = new Point2D(event.getX(), event.getY());
+    	
+    	if (getChart() == null)
+    		System.out.println("chart is null");
+    	
+    	if (positionPoint == null)
+    		System.out.println("positionPoint is null");
 
     	// pixel coordinates w.r.t. plot area
         final Point2D positionPlotCoordinate = getChart().toPlotArea(positionPoint.getX(), positionPoint.getY());
