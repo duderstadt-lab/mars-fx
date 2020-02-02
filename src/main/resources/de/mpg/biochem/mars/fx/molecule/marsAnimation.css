@@ -1,0 +1,10 @@
+.atmosphere {
+  height: 200px;
+  width: 200px;
+  border-radius: 100%;
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 10px 0px 12px -2px rgba(255,255,255,.2),
+              inset -70px 0px 50px 0px black,
+              -5px 0px 10px -4px #c07158;
+}
