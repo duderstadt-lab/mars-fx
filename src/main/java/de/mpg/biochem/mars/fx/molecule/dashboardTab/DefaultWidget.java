@@ -19,15 +19,12 @@ public class DefaultWidget extends AbstractDashboardWidget implements MarsDashbo
 	public void initialize() {
 		super.initialize();
 		
-		MarsAnimation marsAnimation = new MarsAnimation();
+		//MarsAnimation marsAnimation = new MarsAnimation();
 		
-		BorderPane borderPane = new BorderPane();
-		borderPane.setCenter(marsAnimation);
-		
-        setContent(getIcon(), borderPane);
+     //   setContent(getIcon(), marsAnimation);
         
-        rootPane.setMinSize(250, 250);
-        rootPane.setMaxSize(250, 250);
+       // rootPane.setMinSize(250, 250);
+        //rootPane.setMaxSize(250, 250);
 	}
 
 	@Override
