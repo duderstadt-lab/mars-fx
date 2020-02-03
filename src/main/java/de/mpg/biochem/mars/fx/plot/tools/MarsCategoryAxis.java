@@ -1,13 +1,16 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
+import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.spi.AxisRange;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.dataset.DataSet;
 
 import javafx.beans.property.ObjectProperty;
@@ -93,7 +96,53 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
         setCategories(categories);
         changeIsLocal = false;
     }
+    
+    
+    //SUPER HACKY drop-in to fix error in chart-fx library related to single bars and 
+    //LOGGER firing..
+    @Override
+    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
+        final List<Double> tickValues = new ArrayList<>();
+        if (isLogAxis) {
+            if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
+                return Arrays.asList(axisRange.getLowerBound());
+            }
+            
+            DefaultAxisTransform linearTransform = new DefaultAxisTransform(this);
+            AxisTransform axisTransform = linearTransform;
+            
+            double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
+            for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
+                                                                                      .getUpperBound();
+                    tickValue = axisTransform.backward(++exp)) {
+                tickValues.add(tickValue);
+            }
 
+            // add minor tick marks to major
+            // tickValues.addAll(calculateMinorTickMarks());
+
+            return tickValues;
+        }
+
+        if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
+            return Arrays.asList(axisRange.getLowerBound());
+        }
+
+        final double firstTick = computeFistMajorTick(axisRange.getLowerBound(), axisRange.getTickUnit());
+        if (firstTick + axisRange.getTickUnit() == firstTick) {
+            return tickValues;
+        }
+        for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
+            tickValues.add(major);
+        }
+        return tickValues;
+    }
+    
+    private static double computeFistMajorTick(final double lowerBound, final double tickUnit) {
+        return Math.ceil(lowerBound / tickUnit) * tickUnit;
+    }
+    //END DROPIN..
+    
     // -------------- CONSTRUCTORS
     // -------------------------------------------------------------------------------------
 

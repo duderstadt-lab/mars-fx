@@ -127,6 +127,11 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
         	index++;
         }
         
+        if (tagFrequency.size() == 1) {
+        	categories.add("");
+        	dataSet.add(index, 0);
+        }
+   
         Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
