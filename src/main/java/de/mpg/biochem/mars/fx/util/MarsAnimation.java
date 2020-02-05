@@ -13,6 +13,12 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import javafx.animation.Timeline;
+import javafx.scene.text.Text;
+import javafx.animation.KeyFrame;
+import javafx.event.EventHandler;
+import javafx.event.ActionEvent;
+
 import javafx.scene.effect.InnerShadow;
 import javafx.scene.effect.BlurType;
 import javafx.scene.paint.RadialGradient;
@@ -20,21 +26,21 @@ import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Stop;
 
 import javafx.scene.effect.DropShadow;
+import javafx.scene.layout.VBox;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.text.Font;
 
 public class MarsAnimation extends BorderPane {
 	
 	private TranslateTransition animation;
 	
+	private Text text;
+	private Timeline timeline;
+	private int hours = 0, mins = 0, secs = 0, millis = 0;
+	
 	public MarsAnimation() {
 		Image image = new Image("de/mpg/biochem/mars/fx/molecule/mars.jpg");
-        //ImagePattern imagePattern = new ImagePattern(image);
-        
-        //rect.setFill(imagePattern);
-		
-		//ISSUES - why is it not smooth...
-		//why is it taking so much of the processor
-		//How to make it nicely scale - or perhaps just fix it but with dimesions like 100 x 100 x
-		//Use a rectangle for that??
 		
 		ImageView imageView1 = new ImageView(image);
 		ImageView imageView2 = new ImageView(image);
@@ -67,11 +73,12 @@ public class MarsAnimation extends BorderPane {
 		DropShadow dropShadow = new DropShadow(BlurType.THREE_PASS_BOX, Color.valueOf("#c07158"), 1, -1, -1, 0);
         dropShadow.setInput(innerShadow);
         
-        Pane pane = new Pane(imageGroup);
+        Pane pane = new Pane();
+        pane.getChildren().add(imageGroup);
         pane.setClip(new Circle(50, 50, 50));
+        pane.setMaxSize(100, 100);
         
         StackPane stack = new StackPane();
-        
         stack.getChildren().add(pane);
         stack.setRotate(25.2);
         stack.setPrefSize(100,  100);
@@ -100,16 +107,70 @@ public class MarsAnimation extends BorderPane {
     	c1.setFill(darkside);
     	stack.getChildren().add(c1);
     	 */
+    	//setPrefSize(150, 100);
 		setCenter(stack);
 		
-		animation.play();
+		text = new Text("0.0");
+		text.setFont(Font.font("Courier", 16));
+		text.setFill(Color.valueOf("#fff"));
+		timeline = new Timeline(new KeyFrame(Duration.millis(1), new EventHandler<ActionEvent>() {
+			@Override
+			public void handle(ActionEvent event) {
+				updateTimer(text);
+			}
+		}));
+		timeline.setCycleCount(Timeline.INDEFINITE);
+		timeline.setAutoReverse(false);
+		
+		//VBox vbox = new VBox();
+		//vbox.setPadding(new Insets(10, 10, 10, 10));
+		//vbox.setAlignment(Pos.CENTER);
+		//vbox.getChildren().add(text);
+		BorderPane.setAlignment(text, Pos.CENTER);
+		BorderPane.setMargin(text, new Insets(5,5,5,5));
+		setBottom(text);
 	}
+	
+	private void updateTimer(Text text) {
+		if (millis == 1000) {
+			secs++;
+			millis = 0;
+		}
+		if (secs == 60) {
+			mins++;
+			secs = 0;
+		}
+		if (mins == 60) {
+			hours++;
+			mins = 0;
+		}
+		if (hours > 0) {
+			text.setText((((hours/10) == 0) ? "0" : "") + hours + ":"
+				+ (((mins/10) == 0) ? "0" : "") + mins + ":"
+				 + (((secs/10) == 0) ? "0" : "") + secs + ":" 
+					+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
+		} else if (mins > 0) {
+			text.setText((((mins/10) == 0) ? "0" : "") + mins + ":"
+					 + (((secs/10) == 0) ? "0" : "") + secs + ":" 
+						+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
+		} else {
+			text.setText((((secs/10) == 0) ? "0" : "") + secs + ":" 
+						+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
+		}
+    }
 	
 	public void play() {
 		animation.play();
+		//Reset timer
+		hours = 0;
+		mins = 0;
+		secs = 0;
+		millis = 0;
+		timeline.play();
 	}
 	
 	public void stop() {
 		animation.stop();
+		timeline.stop();
 	}
 }
