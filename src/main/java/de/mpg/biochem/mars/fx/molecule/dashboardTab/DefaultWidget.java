@@ -4,22 +4,30 @@ import de.jensd.fx.glyphs.GlyphIcons;
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.fx.util.MarsAnimation;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.TranslateTransition;
+import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.layout.Region;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Circle;
+import javafx.util.Duration;
+
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.effect.BlurType;
+import javafx.scene.paint.RadialGradient;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
-
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TAG;
-
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
-import org.scijava.plugin.Parameter;
-
 import net.imagej.ops.Initializable;
 
 @Plugin( type = DefaultWidget.class, name = "DefaultWidget" )
@@ -28,7 +36,6 @@ public class DefaultWidget extends AbstractDashboardWidget implements MarsDashbo
 	@Override
 	public void initialize() {
 		super.initialize();
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override
@@ -44,6 +51,7 @@ public class DefaultWidget extends AbstractDashboardWidget implements MarsDashbo
 
 	@Override
 	public void run() {
+		
 	}
 
 	@Override

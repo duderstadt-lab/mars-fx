@@ -156,6 +156,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
 	protected StackPane maskerStackPane;
 	protected MaskerPane masker;
+	protected MarsAnimation marsSpinning;
 	
 	protected BorderPane borderPane;
     protected JFXTabPane tabsContainer;
@@ -240,6 +241,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	
     	masker = new MaskerPane();
     	masker.setVisible(false);
+    	
+    	marsSpinning = new MarsAnimation();
+    	
+    	masker.setProgressNode(marsSpinning);
     	
     	maskerStackPane = new StackPane();
     	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
@@ -568,7 +573,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void runTask(Runnable process, String message) {
 		masker.setText(message);
-		masker.setProgress(-1);
+		//masker.setProgress(-1);
+		marsSpinning.play();
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
 		Task<Void> task = new Task<Void>() {
@@ -823,7 +829,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	private void lockFX(String message) {
 		masker.setText(message);
-		masker.setProgress(-1);
+		marsSpinning.play();
+		//masker.setProgress(-1);
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
@@ -843,8 +850,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     }
     
     private void lockFX() {
-    	masker.setProgress(-1);
+    	//masker.setProgress(-1);
 		masker.setVisible(true);
+		marsSpinning.play();
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
     }
@@ -887,6 +895,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     private void unlockFX() {
     	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 		masker.setVisible(false);
+		marsSpinning.stop();
 		archiveLocked.set(false);
 		masker.setText("Please Wait...");
     }
