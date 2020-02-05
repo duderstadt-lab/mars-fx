@@ -13,11 +13,13 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
-//import javafx.scene.effect.InnerShadow;
-//import javafx.scene.effect.BlurType;
+import javafx.scene.effect.InnerShadow;
+import javafx.scene.effect.BlurType;
 import javafx.scene.paint.RadialGradient;
 import javafx.scene.paint.CycleMethod;
 import javafx.scene.paint.Stop;
+
+import javafx.scene.effect.DropShadow;
 
 public class MarsAnimation extends BorderPane {
 	
@@ -56,27 +58,14 @@ public class MarsAnimation extends BorderPane {
         animation.setFromX(-200);
         animation.setToX(0);
         
-		//InnerShadow innerShadow1 = new InnerShadow(BlurType.THREE_PASS_BOX, Color.valueOf("rgba(255,255,255,.2)"), 12, -2, 10, 0);
-		//setEffect(innerShadow1);
-        RadialGradient shadePaint0 = new RadialGradient(
-                0, 0, 0.55, 0.5, 0.06, true, CycleMethod.NO_CYCLE,
-                new Stop(1, Color.valueOf("rgba(255,255,255,.2)")),
-                new Stop(0, Color.TRANSPARENT)
-        );
+        //InnerShadow(BlurType blurType, Color color, double radius, double choke, double offsetX, double offsetY)
+		InnerShadow atmosphere = new InnerShadow(BlurType.THREE_PASS_BOX, Color.valueOf("rgba(255,255,255,.2)"), 10, -1, 5, 0); 
+		InnerShadow innerShadow = new InnerShadow(BlurType.GAUSSIAN, Color.valueOf("black"), 25, 0, -35, 10);	
+		innerShadow.setInput(atmosphere);
 		
-		Circle c0 = new Circle(50, 50, 50);
-		c0.setFill(shadePaint0);
-        
-		//InnerShadow innerShadow2 = new InnerShadow(BlurType.THREE_PASS_BOX, Color.valueOf("black"), 50, 0, -70, 0);
-		//RadialGradient(double focusAngle, double focusDistance, double centerX, double centerY, double radius, boolean proportional, ...
-        RadialGradient shadePaint = new RadialGradient(
-                0, 0, 0, 0.5, 0.5, true, CycleMethod.NO_CYCLE,
-                new Stop(1, Color.BLACK),
-                new Stop(0, Color.TRANSPARENT)
-        );
-		
-		Circle c1 = new Circle(50, 50, 50);
-		c1.setFill(shadePaint);		
+		//DropShadow(BlurType blurType, Color color, double radius, double spread, double offsetX, double offsetY)
+		DropShadow dropShadow = new DropShadow(BlurType.THREE_PASS_BOX, Color.valueOf("#c07158"), 1, -1, -1, 0);
+        dropShadow.setInput(innerShadow);
         
         Pane pane = new Pane(imageGroup);
         pane.setClip(new Circle(50, 50, 50));
@@ -86,9 +75,31 @@ public class MarsAnimation extends BorderPane {
         stack.getChildren().add(pane);
         stack.setRotate(25.2);
         stack.setPrefSize(100,  100);
-        stack.getChildren().add(c0);
-        stack.getChildren().add(c1);
+        stack.setEffect(dropShadow);
 
+        //radial-gradient(circle at 30% 50%, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 65%);
+        
+        //RadialGradient( focusAngle, focusDistance, centerX, centerY, radius, proportional,CycleMethod cycleMethod, Stop... stops)
+        RadialGradient shadePaint = new RadialGradient(
+                0, 0, 0.3, 0.65, 0.25, true, CycleMethod.NO_CYCLE,
+                new Stop(1, Color.valueOf("rgba(100,100,100,0.3)")),
+                new Stop(0, Color.valueOf("rgba(100,100,100,0.1)"))
+        );
+    	
+    	Circle c0 = new Circle(50, 50, 50);
+    	c0.setFill(shadePaint);
+    	stack.getChildren().add(c0);
+    	/*
+    	RadialGradient darkside = new RadialGradient(
+                0, 0, 0.15, 0.5, 0.6, true, CycleMethod.NO_CYCLE,
+                new Stop(1, Color.valueOf("rgba(0,0,0,0.4)")),
+                new Stop(0, Color.valueOf("rgba(0,0,0,0.1)"))
+        );
+    	
+    	Circle c1 = new Circle(50, 50, 50);
+    	c1.setFill(darkside);
+    	stack.getChildren().add(c1);
+    	 */
 		setCenter(stack);
 		
 		animation.play();

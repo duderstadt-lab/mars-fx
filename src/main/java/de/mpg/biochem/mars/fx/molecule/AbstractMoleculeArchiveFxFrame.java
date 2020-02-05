@@ -245,6 +245,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	marsSpinning = new MarsAnimation();
     	
     	masker.setProgressNode(marsSpinning);
+    	
     	maskerStackPane = new StackPane();
     	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
     	maskerStackPane.getChildren().add(borderPane);
