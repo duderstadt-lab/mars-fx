@@ -31,11 +31,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.text.Font;
 
+import java.text.DecimalFormat;
+import java.math.RoundingMode;
+
 public class MarsAnimation extends BorderPane {
 	
 	private TranslateTransition animation;
-	
-	private Text text;
+	private double progress = -1;
 	private Timeline timeline;
 	private int hours = 0, mins = 0, secs = 0, millis = 0;
 	
@@ -83,8 +85,6 @@ public class MarsAnimation extends BorderPane {
         stack.setRotate(25.2);
         stack.setPrefSize(100,  100);
         stack.setEffect(dropShadow);
-
-        //radial-gradient(circle at 30% 50%, rgba(255,255,255,.2) 0%, rgba(255,255,255,0) 65%);
         
         //RadialGradient( focusAngle, focusDistance, centerX, centerY, radius, proportional,CycleMethod cycleMethod, Stop... stops)
         RadialGradient shadePaint = new RadialGradient(
@@ -96,39 +96,38 @@ public class MarsAnimation extends BorderPane {
     	Circle c0 = new Circle(50, 50, 50);
     	c0.setFill(shadePaint);
     	stack.getChildren().add(c0);
-    	/*
-    	RadialGradient darkside = new RadialGradient(
-                0, 0, 0.15, 0.5, 0.6, true, CycleMethod.NO_CYCLE,
-                new Stop(1, Color.valueOf("rgba(0,0,0,0.4)")),
-                new Stop(0, Color.valueOf("rgba(0,0,0,0.1)"))
-        );
-    	
-    	Circle c1 = new Circle(50, 50, 50);
-    	c1.setFill(darkside);
-    	stack.getChildren().add(c1);
-    	 */
-    	//setPrefSize(150, 100);
+
+    	setPrefSize(125, 100);
 		setCenter(stack);
 		
-		text = new Text("0.0");
-		text.setFont(Font.font("Courier", 16));
-		text.setFill(Color.valueOf("#fff"));
+		Text timerLabel = new Text("0.0");
+		timerLabel.setFont(Font.font("Courier", 14));
+		timerLabel.setFill(Color.valueOf("#fff"));
+		
+		Text progressLabel = new Text("");
+		progressLabel.setFont(Font.font("Courier", 14));
+		progressLabel.setFill(Color.valueOf("#fff"));
+		
 		timeline = new Timeline(new KeyFrame(Duration.millis(1), new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				updateTimer(text);
+				updateTimer(timerLabel);
+				updateProgress(progressLabel);
 			}
 		}));
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.setAutoReverse(false);
 		
-		//VBox vbox = new VBox();
-		//vbox.setPadding(new Insets(10, 10, 10, 10));
-		//vbox.setAlignment(Pos.CENTER);
-		//vbox.getChildren().add(text);
-		BorderPane.setAlignment(text, Pos.CENTER);
-		BorderPane.setMargin(text, new Insets(5,5,5,5));
-		setBottom(text);
+		VBox vbox = new VBox();
+		vbox.setSpacing(5);
+		vbox.setAlignment(Pos.CENTER);
+		vbox.getChildren().add(timerLabel);
+		vbox.getChildren().add(progressLabel);
+
+		setBottom(vbox);
+		//Insets(double top, double right, double bottom, double left)
+		BorderPane.setMargin(vbox, new Insets(10,5,5,5));
+		BorderPane.setAlignment(vbox, Pos.CENTER);
 	}
 	
 	private void updateTimer(Text text) {
@@ -159,6 +158,20 @@ public class MarsAnimation extends BorderPane {
 		}
     }
 	
+	private void updateProgress(Text text) {
+		if (progress >= 0 && progress <= 1) {
+			DecimalFormat df = new DecimalFormat("#.#");
+			df.setRoundingMode(RoundingMode.HALF_UP);
+			String rounded = df.format(progress*100);
+			text.setText(rounded + "%");
+		} else 
+			text.setText("");
+	}
+	
+	public void setProgress(double progress) {
+		this.progress = progress;
+	}
+	
 	public void play() {
 		animation.play();
 		//Reset timer
@@ -166,6 +179,8 @@ public class MarsAnimation extends BorderPane {
 		mins = 0;
 		secs = 0;
 		millis = 0;
+		//Reset progress
+		progress = -1;
 		timeline.play();
 	}
 	

@@ -103,38 +103,24 @@ import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MetadataEvent;
-import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
-import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
-import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.util.*;
 
 import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.table.MarsTable;
-import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsUtil;
-
-import javax.swing.WindowConstants;
 
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
@@ -575,6 +561,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		masker.setText(message);
 		//masker.setProgress(-1);
 		marsSpinning.play();
+		marsSpinning.setProgress(-1);
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
 		Task<Void> task = new Task<Void>() {
@@ -830,6 +817,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	private void lockFX(String message) {
 		masker.setText(message);
 		marsSpinning.play();
+		marsSpinning.setProgress(-1);
 		//masker.setProgress(-1);
 		masker.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
@@ -853,6 +841,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	//masker.setProgress(-1);
 		masker.setVisible(true);
 		marsSpinning.play();
+		marsSpinning.setProgress(-1);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
     }
@@ -868,17 +857,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     //Not really ideal since a Task and updateProgress would be the best
     //But this is the only way for direct interaction through swing threads.
-    public void progress(double progress) {
+    @Override
+    public void setProgress(double progress) {
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				if (masker.isVisible()) {
-					masker.setProgress(progress);
+					//masker.setProgress(progress);
+					marsSpinning.setProgress(progress);
 				}
 			}
     	});
     }
     
+    @Override
     public void unlock() {
     	Platform.runLater(new Runnable() {
 			@Override
@@ -900,6 +892,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		masker.setText("Please Wait...");
     }
     
+    @Override
     public void update() {
     	unlock();
     }
