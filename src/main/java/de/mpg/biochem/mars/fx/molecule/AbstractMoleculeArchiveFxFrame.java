@@ -122,6 +122,9 @@ import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsUtil;
 
+import javafx.scene.control.TextArea;
+import javafx.scene.control.ScrollBar;
+
 public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
 	
@@ -146,6 +149,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected BorderPane borderPane;
     protected JFXTabPane tabsContainer;
+    
+    protected TextArea lockLogArea;
     
 	protected MenuBar menuBar;
 	
@@ -225,6 +230,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	protected Scene buildScene() {
 		borderPane = new BorderPane();
     	
+		lockLogArea = new TextArea();
+		lockLogArea.getStyleClass().add("log-text-area");
+		lockLogArea.setStyle("-fx-font-family: 'Courier'; -fx-font-size: 10pt");
+		lockLogArea.setWrapText(true);
+		lockLogArea.setVisible(false);
+		
     	masker = new MaskerPane();
     	masker.setVisible(false);
     	
@@ -235,6 +246,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	maskerStackPane = new StackPane();
     	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
     	maskerStackPane.getChildren().add(borderPane);
+    	maskerStackPane.getChildren().add(lockLogArea);
     	maskerStackPane.getChildren().add(masker);
     	
     	tabsContainer = new JFXTabPane();
@@ -563,6 +575,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
 		masker.setVisible(true);
+		lockLogArea.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
 		Task<Void> task = new Task<Void>() {
             @Override
@@ -575,6 +588,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         task.setOnSucceeded(event -> { 
         	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 			masker.setVisible(false);
+			lockLogArea.setVisible(false);
         });
 
         new Thread(task).start();
@@ -820,6 +834,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		marsSpinning.setProgress(-1);
 		//masker.setProgress(-1);
 		masker.setVisible(true);
+		lockLogArea.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
 	}
@@ -840,17 +855,33 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     private void lockFX() {
     	//masker.setProgress(-1);
 		masker.setVisible(true);
+		lockLogArea.setVisible(true);
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
     }
     
+    @Override
     public void updateLockMessage(String message) {
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				masker.setText(message);
+			}
+    	});
+    }
+    
+    @Override
+    public void addLogMessage(String message) {
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				lockLogArea.appendText(message + "\n");
+				lockLogArea.setScrollTop(Double.MAX_VALUE);
+				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				if (scroll != null)
+					scroll.setDisable(true);
 			}
     	});
     }
@@ -863,7 +894,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			@Override
 			public void run() {
 				if (masker.isVisible()) {
-					//masker.setProgress(progress);
 					marsSpinning.setProgress(progress);
 				}
 			}
@@ -887,6 +917,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     private void unlockFX() {
     	fireEvent(new MoleculeArchiveUnlockEvent(archive));
 		masker.setVisible(false);
+		lockLogArea.setVisible(false);
 		marsSpinning.stop();
 		archiveLocked.set(false);
 		masker.setText("Please Wait...");

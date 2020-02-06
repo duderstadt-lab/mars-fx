@@ -13,6 +13,28 @@
     -jfx-dark-secondary-color: -fx-focus-color;
 }
 
+.log-text-area {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(0,0,0,0.6);
+}
+
+.log-text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-pane .viewport{
+    -fx-background-color: transparent;
+}
+
+
+.log-text-area .scroll-pane .content{
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-bar:vertical:disabled {
+    -fx-opacity: 0;
+}
+
 /*******************************************************************************
  *                                                                             *
  * JFX Tab Pane                                                                *
