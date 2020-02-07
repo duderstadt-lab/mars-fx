@@ -87,7 +87,7 @@ public class LogPane
 
 	public LogPane() {
 		textArea = new MarkdownTextArea();
-		textArea.setStyle("-fx-font-family: 'Menlo'; -fx-font-size: 10pt");
+		textArea.setStyle("-fx-font-family: 'Courier'; -fx-font-size: 10pt");
 		textArea.setEditable(false);
 		//textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
