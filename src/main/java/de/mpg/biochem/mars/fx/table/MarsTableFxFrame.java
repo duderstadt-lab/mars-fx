@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
@@ -72,7 +73,6 @@ public class MarsTableFxFrame implements MarsTableWindow {
     private JFrame frame;
     protected String title;
 
-    
 	private MarsTable table;
 	
 	private TabPane tabPane;
@@ -101,10 +101,14 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		frame = new JFrame(title);
 		
 		frame.addWindowListener(new WindowAdapter() {
-	         public void windowClosing(WindowEvent e) {
-				close();
-	         }
-	    });
+
+			@Override
+			public void windowClosing(WindowEvent windowEvent) {
+				SwingUtilities.invokeLater(() -> {
+					close();
+				});
+			}
+		});
 		
 		this.fxPanel = new JFXPanel();
 		frame.add(this.fxPanel);
@@ -255,7 +259,14 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	}
 	
 	public void close() {
-    	
+		if (marsTableService.contains(table.getName()))
+			marsTableService.removeTable(table);
+
+		if (!uiService.isHeadless())
+			WindowManager.removeWindow(frame);
+		
+		//frame.setVisible(true);
+		frame.dispose();
     }
 
 	@Override
