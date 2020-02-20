@@ -228,9 +228,13 @@ public class BdvViewTable implements MetadataEventHandler {
     			//Do nothing for the moment...
     		}
         });
-    	column.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getAffineTransform3D().get(rowIndex, columnIndex)))
-        );
+    	column.setCellValueFactory(bdvSource -> {
+    		String str = "";
+    		if (bdvSource.getValue().getAffineTransform3D() != null)
+    			str = String.valueOf(bdvSource.getValue().getAffineTransform3D().get(rowIndex, columnIndex));
+    		
+    		return new ReadOnlyObjectWrapper<>(str);
+    	});
     	return column;
     }
     

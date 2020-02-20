@@ -426,7 +426,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void deleteMolecules() {
 		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.getProperties().getTagSet(), "Delete Molecules", "Delete molecules with tags:", "Delete molecules with no tags");
+				archive.properties().getTagSet(), "Delete Molecules", "Delete molecules with tags:", "Delete molecules with no tags");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
@@ -454,7 +454,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void deleteMoleculeTags() {
 		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.getProperties().getTagSet(), "Delete Molecule Tags", "Delete molecule tags:", "Delete all tags");
+				archive.properties().getTagSet(), "Delete Molecule Tags", "Delete molecule tags:", "Delete all tags");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
@@ -476,7 +476,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void deleteMoleculeParameters() {
 		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.getProperties().getParameterSet(), "Delete Molecule Parameters", "Delete molecule parameters:", "Delete all parameters");
+				archive.properties().getParameterSet(), "Delete Molecule Parameters", "Delete molecule parameters:", "Delete all parameters");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
@@ -498,7 +498,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void deleteSegmentTables() {
 		SegmentTableSelectionDialog dialog = new SegmentTableSelectionDialog(getNode().getScene().getWindow(), 
-				archive.getProperties().getSegmentTableNames(), "Delete segments table");
+				archive.properties().getSegmentTableNames(), "Delete segments table");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
@@ -509,14 +509,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	            	 	archive.put(molecule);
 	     			});
 	            
-	            archive.getProperties().getSegmentTableNames().remove(segmentTableName);
+	            archive.properties().getSegmentTableNames().remove(segmentTableName);
 			}, "Deleting Segments Tables...");
 		});
 	}
 	
 	protected void mergeMolecules() {
 		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.getProperties().getTagSet(), "Merge Molecules", "Merge molecules with tag:");
+				archive.properties().getTagSet(), "Merge Molecules", "Merge molecules with tag:");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
