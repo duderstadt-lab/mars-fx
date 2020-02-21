@@ -52,6 +52,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 
@@ -391,6 +392,37 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 			        });
 				}); 
 		
+		Action exportVideoAction = new Action("Export Video", null, null,
+				e -> {
+			        SwingUtilities.invokeLater(new Runnable() {
+			            @Override
+			            public void run() {
+			            	if (marsBdvFrame == null)
+			            		return;
+			            		
+			            	GenericDialog dialog = new GenericDialog("Export BDV to ImageJ");
+			     			dialog.addNumericField("x0", -10, 2);
+			     			dialog.addNumericField("y0", -10, 2);
+			     			dialog.addNumericField("width", 20, 2);
+			     			dialog.addNumericField("height", 60, 2);
+			          		dialog.showDialog();
+			          		
+			          		if (dialog.wasCanceled())
+			          			return;
+			          		
+			          		int x0 = (int)dialog.getNextNumber();
+			          		int y0 = (int)dialog.getNextNumber();
+			          		int width = (int)dialog.getNextNumber();
+			          		int height = (int)dialog.getNextNumber();
+			          		
+			          		ImagePlus ip = marsBdvFrame.exportView(x0, y0, width, height);
+			          		
+			          		//Now Show it!
+			          		ip.show();
+			            }
+			        });
+				}); 
+		
 		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
 		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
 		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
@@ -417,6 +449,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 					mergeMoleculesAction,
 					null,
 					showVideoAction,
+					exportVideoAction,
 					null,
 					rebuildIndexesAction);
 		
