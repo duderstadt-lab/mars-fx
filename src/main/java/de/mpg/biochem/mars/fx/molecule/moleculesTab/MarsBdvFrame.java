@@ -253,6 +253,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 			if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter))
 				goTo(molecule.getParameter(xParameter), molecule.getParameter(yParameter));
+			
+			this.molecule = molecule;
 		 }
 	}
 	
