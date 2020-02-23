@@ -245,7 +245,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	public void setMolecule(Molecule molecule) {
-		if (molecule != null && autoUpdate.isSelected()) {			
+		if (molecule != null && autoUpdate.isSelected()) {	
+			this.molecule = molecule;
 			MarsImageMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
 				metaUID = meta.getUID();
@@ -253,8 +254,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 			if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter))
 				goTo(molecule.getParameter(xParameter), molecule.getParameter(yParameter));
-			
-			this.molecule = molecule;
 		 }
 	}
 	
