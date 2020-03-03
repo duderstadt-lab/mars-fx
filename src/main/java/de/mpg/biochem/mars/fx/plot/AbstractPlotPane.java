@@ -46,12 +46,14 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,6 +80,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.input.KeyCode;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -457,16 +460,40 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			fixXBoundsBorderPane.setRight(fixXBoundsSwitch);
 			getChildren().add(fixXBoundsBorderPane);
 			
+			EventHandler<KeyEvent> handleXFieldEnter = new EventHandler<KeyEvent>() {
+		        @Override
+		        public void handle(KeyEvent ke) {
+		            if (ke.getCode().equals(KeyCode.ENTER)) {
+		            	if (!fixXBounds.get())
+		            		fixXBounds.set(true);
+		            	resetXYZoom();
+		            }
+		        }
+			};
+			
+			EventHandler<KeyEvent> handleYFieldEnter = new EventHandler<KeyEvent>() {
+		        @Override
+		        public void handle(KeyEvent ke) {
+		            if (ke.getCode().equals(KeyCode.ENTER)) {
+		            	if (!fixYBounds.get())
+		            		fixYBounds.set(true);
+		            	resetXYZoom();
+		            }
+		        }
+			};
+			
 			BorderPane xMinBorderPane = new BorderPane();
 			xMinTextField = new TextField();
 			xMinBorderPane.setLeft(new Label("X Min"));
 			xMinBorderPane.setRight(xMinTextField);
+			xMinTextField.setOnKeyPressed(handleXFieldEnter);
 			getChildren().add(xMinBorderPane);
 			
 			BorderPane xMaxBorderPane = new BorderPane();
 			xMaxTextField = new TextField();
 			xMaxBorderPane.setLeft(new Label("X Max"));
 			xMaxBorderPane.setRight(xMaxTextField);
+			xMaxTextField.setOnKeyPressed(handleXFieldEnter);
 			getChildren().add(xMaxBorderPane);
 			
 			//Y Bounds
@@ -481,12 +508,14 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			yMinTextField = new TextField();
 			yMinBorderPane.setLeft(new Label("Y Min"));
 			yMinBorderPane.setRight(yMinTextField);
+			yMinTextField.setOnKeyPressed(handleYFieldEnter);
 			getChildren().add(yMinBorderPane);
 			
 			BorderPane yMaxBorderPane = new BorderPane();
 			yMaxTextField = new TextField();
 			yMaxBorderPane.setLeft(new Label("Y Max"));
 			yMaxBorderPane.setRight(yMaxTextField);
+			yMaxTextField.setOnKeyPressed(handleYFieldEnter);
 			getChildren().add(yMaxBorderPane);
 			
 			this.setPrefWidth(250);
