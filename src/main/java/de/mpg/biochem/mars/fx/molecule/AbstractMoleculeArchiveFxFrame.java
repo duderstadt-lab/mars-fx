@@ -919,6 +919,25 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     	});
     }
     
+    @Override
+    public void logln(String message) {
+		log(message + "\n");
+    }
+    
+    @Override
+    public void log(String message) {
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				lockLogArea.appendText(message);
+				lockLogArea.setScrollTop(Double.MAX_VALUE);
+				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				if (scroll != null)
+					scroll.setDisable(true);
+			}
+    	});
+    }
+    
     //Not really ideal since a Task and updateProgress would be the best
     //But this is the only way for direct interaction through swing threads.
     @Override
