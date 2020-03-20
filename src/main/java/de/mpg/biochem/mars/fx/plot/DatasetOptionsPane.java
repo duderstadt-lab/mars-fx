@@ -319,7 +319,15 @@ public class DatasetOptionsPane extends VBox {
                 "-fx-max-height: 20px;"
         );
 		updateButton.setOnMouseClicked(e -> {
-		     subPlot.update();
+			if (plotSeriesList.size() > 0) {
+				PlotSeries plotSeries = plotSeriesList.get(0);
+				
+				if (xNameField.getText().equals(""))
+					xNameField.setText(plotSeries.getXColumn());
+				if (yNameField.getText().equals(""))
+					yNameField.setText(plotSeries.getYColumn());
+			}
+		    subPlot.update();
 		});
 		
 		/*
