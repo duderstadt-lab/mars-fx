@@ -104,9 +104,9 @@ public class MarsTableFxFrame implements MarsTableWindow {
 
 			@Override
 			public void windowClosing(WindowEvent windowEvent) {
-				SwingUtilities.invokeLater(() -> {
+				//SwingUtilities.invokeLater(() -> {
 					close();
-				});
+				//});
 			}
 		});
 		
@@ -143,8 +143,10 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		
 		this.fxPanel.setScene(scene);
 
-        frame.setSize(600, 600);
-        frame.setVisible(true);
+		SwingUtilities.invokeLater(() -> { 
+			frame.setSize(600, 600);
+	        frame.setVisible(true);
+		});
 	}
 	
 	protected MenuBar buildMenuBar() {
@@ -261,7 +263,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	public void close() {
 		if (marsTableService.contains(table.getName()))
 			marsTableService.removeTable(table);
-
+		
 		if (!uiService.isHeadless())
 			WindowManager.removeWindow(frame);
 		
@@ -271,6 +273,6 @@ public class MarsTableFxFrame implements MarsTableWindow {
 
 	@Override
 	public void update() {
-		//dataTableTab.setContent(new MarsTableView(table));
+		dataTableTab.setContent(new MarsTableView(table));
 	}
 }

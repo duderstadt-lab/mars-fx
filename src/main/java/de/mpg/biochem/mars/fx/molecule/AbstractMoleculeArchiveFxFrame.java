@@ -197,9 +197,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
 			@Override
 			public void windowClosing(WindowEvent windowEvent) {
-				SwingUtilities.invokeLater(() -> {
+				//SwingUtilities.invokeLater(() -> {
 					close();
-				});
+				//});
 			}
 		});
 		
