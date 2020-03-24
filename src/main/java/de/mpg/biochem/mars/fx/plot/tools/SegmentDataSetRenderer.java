@@ -20,7 +20,7 @@ import de.gsi.chart.marker.Marker;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.utils.BezierCurve;
-import de.gsi.chart.renderer.spi.utils.Cache;
+import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
@@ -375,8 +375,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         }
 
         // need to allocate new array :-(
-        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_AREA, n + 2);
-        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_AREA, n + 2);
+        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_AREA, n + 2);
+        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_AREA, n + 2);
 
         final double zero = localCachedPoints.yZero;
         System.arraycopy(localCachedPoints.xValues, 0, newX, 0, n);
@@ -396,8 +396,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.restore();
 
         // release arrays to cache
-        Cache.release(X_DRAW_POLY_LINE_AREA, newX);
-        Cache.release(Y_DRAW_POLY_LINE_AREA, newY);
+        ArrayCache.release(X_DRAW_POLY_LINE_AREA, newX);
+        ArrayCache.release(Y_DRAW_POLY_LINE_AREA, newY);
     }
 
     protected static void drawPolyLineStairCase(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
@@ -407,8 +407,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         }
 
         // need to allocate new array :-(
-        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
-        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
+        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
+        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_STAIR_CASE, 2 * n);
 
         for (int i = 0; i < n - 1; i++) {
             newX[2 * i] = localCachedPoints.xValues[i];
@@ -439,8 +439,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.restore();
 
         // release arrays to cache
-        Cache.release(X_DRAW_POLY_LINE_STAIR_CASE, newX);
-        Cache.release(Y_DRAW_POLY_LINE_STAIR_CASE, newY);
+        ArrayCache.release(X_DRAW_POLY_LINE_STAIR_CASE, newX);
+        ArrayCache.release(Y_DRAW_POLY_LINE_STAIR_CASE, newY);
     }
 
     protected static void drawPolyLineHistogram(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
@@ -450,8 +450,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         }
 
         // need to allocate new array :-(
-        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
-        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -490,8 +490,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.restore();
 
         // release arrays to cache
-        Cache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
-        Cache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
+        ArrayCache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
+        ArrayCache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
     }
 
     protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
@@ -502,8 +502,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         }
 
         // need to allocate new array :-(
-        final double[] newX = Cache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
-        final double[] newY = Cache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newX = ArrayCache.getCachedDoubleArray(X_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
+        final double[] newY = ArrayCache.getCachedDoubleArray(Y_DRAW_POLY_LINE_HISTOGRAM, 2 * (n + 1));
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -536,8 +536,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
         gc.restore();
 
         // release arrays to cache
-        Cache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
-        Cache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
+        ArrayCache.release(X_DRAW_POLY_LINE_HISTOGRAM, newX);
+        ArrayCache.release(Y_DRAW_POLY_LINE_HISTOGRAM, newY);
     }
 
     /**

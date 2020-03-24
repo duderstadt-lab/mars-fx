@@ -17,7 +17,7 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.Axes;
+import de.gsi.chart.axes.Axis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.MouseEventsHelper;
 import de.gsi.chart.plugins.Panner;
@@ -654,7 +654,7 @@ public class MarsZoomer extends ChartPlugin {
             final double offset = prevData - newData;
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+            if (!hasBoundedRange(axis) && allowsShift) {
                 axis.setAutoRanging(false);
                 // shift bounds
                 axis.set(axis.getMin() + offset, axis.getMax() + offset);
@@ -682,7 +682,7 @@ public class MarsZoomer extends ChartPlugin {
             final Side side = axis.getSide();
 
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
-            if (!Axes.hasBoundedRange(axis) && allowsShift) {
+            if (!hasBoundedRange(axis) && allowsShift) {
                 axis.setAutoRanging(false);
             }
         }
@@ -700,6 +700,10 @@ public class MarsZoomer extends ChartPlugin {
      */
     public final BooleanProperty pannerEnabledProperty() {
         return enablePanner;
+    }
+    
+    protected static boolean hasBoundedRange(Axis axis) {
+        return axis.minProperty().isBound() || axis.maxProperty().isBound();
     }
 
     private boolean panOngoing() {
@@ -732,7 +736,7 @@ public class MarsZoomer extends ChartPlugin {
         }
 
         if (isAnimated()) {
-            if (!Axes.hasBoundedRange(axis)) {
+            if (!hasBoundedRange(axis)) {
                 final Timeline xZoomAnimation = new Timeline();
                 xZoomAnimation.getKeyFrames().setAll(
                         new KeyFrame(Duration.ZERO, new KeyValue(axis.minProperty(), axis.getMin()),
@@ -742,7 +746,7 @@ public class MarsZoomer extends ChartPlugin {
                 xZoomAnimation.play();
             }
         } else {
-            if (!Axes.hasBoundedRange(axis)) {
+            if (!hasBoundedRange(axis)) {
                 // only update if this axis is not bound to another (e.g. auto-range) managed axis)
                 axis.set(zoomState.zoomRangeMin, zoomState.zoomRangeMax);
             }
