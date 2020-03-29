@@ -172,7 +172,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		if (this.getDatasetOptionsPane().isMoleculeIndicators())
 			record = molecule;
 		else if (this.getDatasetOptionsPane().isMetadataIndicators()) {
-			record = ((AbstractMoleculePlotPane<Molecule, SubPlot>)plotPane).getArchive().getImageMetadata(molecule.getImageMetadataUID());
+			record = ((AbstractMoleculePlotPane<Molecule, SubPlot>)plotPane).getArchive().getMetadata(molecule.getMetadataUID());
 		} else
 			return;
 			

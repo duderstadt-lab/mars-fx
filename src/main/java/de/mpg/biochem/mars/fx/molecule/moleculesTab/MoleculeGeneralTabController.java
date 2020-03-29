@@ -204,7 +204,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		this.molecule = molecule;
 		
 		UIDLabel.setText(molecule.getUID());
-		metaUIDLabel.setText(molecule.getImageMetadataUID());
+		metaUIDLabel.setText(molecule.getMetadataUID());
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();

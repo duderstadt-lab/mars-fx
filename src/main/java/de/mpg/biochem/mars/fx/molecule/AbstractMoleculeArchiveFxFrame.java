@@ -126,7 +126,7 @@ import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ScrollBar;
 
-public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
+public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
 	
 	@Parameter

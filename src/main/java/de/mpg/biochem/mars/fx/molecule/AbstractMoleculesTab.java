@@ -219,7 +219,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataRegion(final PlotEvent e) {
-		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		int num = 1;
 		String name = "Region 1";
 		while (metaData.hasRegion(name)) {
@@ -229,7 +229,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsRegion roi = ((NewMetadataRegionEvent) e).getRegion();
 		roi.setName(name);
 		metaData.putRegion(roi);
-		archive.putImageMetadata(metaData);
+		archive.putMetadata(metaData);
 	}
 	
 	private void newMoleculePosition(final PlotEvent e) {
@@ -246,7 +246,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataPosition(final PlotEvent e) {
-		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		int num = 1;
 		String name = "Position 1";
 		while (metaData.hasPosition(name)) {
@@ -256,7 +256,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsPosition poi = ((NewMetadataPositionEvent) e).getPosition();
 		poi.setName(name);
 		metaData.putPosition(poi);
-		archive.putImageMetadata(metaData);
+		archive.putMetadata(metaData);
 	}
 	
 	private void updateMoleculeRegion(final PlotEvent e) {
@@ -268,12 +268,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataRegion(final PlotEvent e) {
-		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		MarsRegion newRoi = ((NewMetadataRegionEvent) e).getRegion();
    		MarsRegion oldRoi = metaData.getRegion(newRoi.getName());
    		oldRoi.setStart(newRoi.getStart());
    		oldRoi.setEnd(newRoi.getEnd());
-   		archive.putImageMetadata(metaData);
+   		archive.putMetadata(metaData);
 	}
 	
 	private void updateMoleculePosition(final PlotEvent e) {
@@ -284,11 +284,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataPosition(final PlotEvent e) {
-		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		MarsPosition newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
 		MarsPosition oldPoi = metaData.getPosition(newPoi.getName());
    		oldPoi.setPosition(newPoi.getPosition());
-   		archive.putImageMetadata(metaData);
+   		archive.putMetadata(metaData);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -525,7 +525,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	}
     	
     	String getImageMetaDataUID() {
-    		return archive.getImageMetadataUIDforMolecule(archive.getUIDAtIndex(index));
+    		return archive.getMetadataUIDforMolecule(archive.getUIDAtIndex(index));
     	}
     }
 

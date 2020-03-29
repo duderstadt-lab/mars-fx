@@ -32,14 +32,14 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 
-public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsImageMetadataTab, DefaultMoleculesTab> {
+public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DefaultMoleculesTab> {
 	public DefaultMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
 		super(archive, moleculeArchiveService);
 	}
 
 	@Override
-	public DefaultMarsImageMetadataTab createImageMetadataTab() {
-		return new DefaultMarsImageMetadataTab();
+	public DefaultMarsMetadataTab createImageMetadataTab() {
+		return new DefaultMarsMetadataTab();
 	}
 
 	@Override

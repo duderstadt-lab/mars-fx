@@ -62,13 +62,13 @@ import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 
-public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
+public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsMetadataTab<C,O> {
 	
 	protected SplitPane rootPane;
 	protected C metadataCenterPane;
 	protected O metadataPropertiesPane;
 	
-	protected I marsImageMetadata;
+	protected I marsMetadata;
 	
 	protected CustomTextField filterField;
 	protected Label nOfHitCountLabel;
@@ -79,7 +79,7 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 	
 	protected ChangeListener<MetaIndexRow> metaIndexTableListener;
 
-	public AbstractMarsImageMetadataTab() {
+	public AbstractMarsMetadataTab() {
 		super();
 		
 		Region microscopeIcon = new Region();
@@ -110,11 +110,11 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 			public void handle(MetadataEvent e) {
 				if (e.getEventType().getName().equals("REFRESH_METADATA_EVENT")) {
 					//We reload the record from the archive.. If virtual this will reload from disk...
-					marsImageMetadata = (I) archive.getImageMetadata(marsImageMetadata.getUID());
+					marsMetadata = (I) archive.getMetadata(marsMetadata.getUID());
 		        	
 		        	//Update center pane and properties pane.
-		        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
-		        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+		        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+		        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
 					Platform.runLater(() -> {
 						metaIndexTable.requestFocus();
 						//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
@@ -162,11 +162,11 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 	        	saveCurrentRecord();
         		
         		if (newMetaIndexRow != null) {
-                	marsImageMetadata = (I) archive.getImageMetadata(newMetaIndexRow.getUID());
+                	marsMetadata = (I) archive.getMetadata(newMetaIndexRow.getUID());
                 	
                 	//Update center pane and properties pane.
-                	metadataCenterPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
-                	metadataPropertiesPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+                	metadataCenterPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+                	metadataPropertiesPane.getNode().fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
             		Platform.runLater(() -> {
             			metaIndexTable.requestFocus();
             		});
@@ -219,12 +219,12 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 	}
     
     public void saveCurrentRecord() {
-    	if (marsImageMetadata != null)
-    		archive.putImageMetadata(marsImageMetadata);
+    	if (marsMetadata != null)
+    		archive.putMetadata(marsMetadata);
     }
     
     public MarsMetadata getSelectedMetadata() {
-    	return marsImageMetadata;
+    	return marsMetadata;
     }
 
     @Override
@@ -278,11 +278,11 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
     	}
     	
     	String getUID() {
-    		return archive.getImageMetadataUIDAtIndex(index);
+    		return archive.getMetadataUIDAtIndex(index);
     	}
     	
     	String getTags() {
-    		return archive.getImageMetadataTagList(archive.getImageMetadataUIDAtIndex(index));
+    		return archive.getMetadataTagList(archive.getMetadataUIDAtIndex(index));
     	}
     }
 
@@ -299,8 +299,8 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
     	if (metaIndexTable.getItems().size() > 0)
     		currentUID = metaIndexTable.getSelectionModel().getSelectedItem().getUID();
     	metaRowList.clear();
-    	if (archive.getNumberOfImageMetadataRecords() > 0) {
-    		for (int index = 0; index < archive.getNumberOfImageMetadataRecords(); index++) {
+    	if (archive.getNumberOfMetadata() > 0) {
+    		for (int index = 0; index < archive.getNumberOfMetadata(); index++) {
     			MetaIndexRow row = new MetaIndexRow(index);
     			metaRowList.add(row);
     		}
@@ -313,9 +313,9 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 		
     		
     		metaIndexTable.getSelectionModel().select(newIndex);
-    		marsImageMetadata = (I) archive.getImageMetadata(metaIndexTable.getSelectionModel().getSelectedItem().getUID());
-        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
-        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+    		marsMetadata = (I) archive.getMetadata(metaIndexTable.getSelectionModel().getSelectedItem().getUID());
+        	metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+        	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
     	}
 		Platform.runLater(() -> {
 			metaIndexTable.requestFocus();
@@ -330,6 +330,6 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C ext
 	
 	@Override
 	public String getName() {
-		return "ImageMetadataTab";
+		return "MetadataTab";
 	}
 }

@@ -157,7 +157,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			public void actionPerformed(ActionEvent e) {
 				//Molecule molecule = molPane.getMolecule();
 				if (molecule != null) {			
-					MarsMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+					MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 					if (!metaUID.equals(meta.getUID())) {
 						metaUID = meta.getUID();
 						createView(meta);
@@ -237,7 +237,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	public void load() {
-		MarsMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 		metaUID = meta.getUID();
 		createView(meta);
 		if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter)) 
@@ -247,7 +247,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public void setMolecule(Molecule molecule) {
 		if (molecule != null && autoUpdate.isSelected()) {	
 			this.molecule = molecule;
-			MarsMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
 				metaUID = meta.getUID();
 				createView(meta);
