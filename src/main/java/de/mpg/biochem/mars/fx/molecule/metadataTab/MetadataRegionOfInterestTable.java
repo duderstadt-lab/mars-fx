@@ -30,7 +30,7 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataIndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractRegionOfInterestTable;
 import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
 
@@ -52,14 +52,14 @@ public class MetadataRegionOfInterestTable extends AbstractRegionOfInterestTable
 	}
 
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.record = marsImageMetadata;
     	loadData();
 	}
 
 	@Override
 	protected void fireIndicatorChangedEvent() {
-		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsImageMetadata) record));
+		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsMetadata) record));
 	}
 
 	@Override

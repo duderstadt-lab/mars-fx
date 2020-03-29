@@ -41,7 +41,7 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -80,7 +80,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	
 	protected M molecule;
 	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
     private double tabWidth = 50.0;
     public static int lastSelectedTabIndex = 0;
@@ -107,7 +107,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
         		archive = newArchive;
         		moleculeGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		moleculePropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));

@@ -56,7 +56,7 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	//will use this method automatically..
 	@Override
 	public void view(final UserInterface ui, final Display<?> d) {	
-		MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive = (MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties>)d.get(0);
+		MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive = (MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties>)d.get(0);
 		archive.setName(d.getName());
 
 		d.setName(archive.getName());

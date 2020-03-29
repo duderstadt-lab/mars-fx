@@ -28,9 +28,9 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataCenterPane;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataPropertiesPane;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 
-public class DefaultMarsImageMetadataTab extends AbstractMarsImageMetadataTab<MarsImageMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
+public class DefaultMarsImageMetadataTab extends AbstractMarsImageMetadataTab<MarsMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
 	
 	public DefaultMarsImageMetadataTab() {
 		super();

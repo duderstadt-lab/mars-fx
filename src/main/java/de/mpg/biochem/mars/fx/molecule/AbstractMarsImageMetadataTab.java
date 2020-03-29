@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -62,7 +62,7 @@ import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 
-public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
+public abstract class AbstractMarsImageMetadataTab<I extends MarsMetadata, C extends MetadataSubPane, O extends MetadataSubPane> extends AbstractMoleculeArchiveTab implements MarsImageMetadataTab<C,O> {
 	
 	protected SplitPane rootPane;
 	protected C metadataCenterPane;
@@ -223,12 +223,12 @@ public abstract class AbstractMarsImageMetadataTab<I extends MarsImageMetadata, 
     		archive.putImageMetadata(marsImageMetadata);
     }
     
-    public MarsImageMetadata getSelectedMetadata() {
+    public MarsMetadata getSelectedMetadata() {
     	return marsImageMetadata;
     }
 
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
 
     	metadataCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));

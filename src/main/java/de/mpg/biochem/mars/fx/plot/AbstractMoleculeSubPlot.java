@@ -59,7 +59,7 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Utils;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -81,7 +81,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	protected M molecule;
 	protected PlotPane plotPane;
 	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMoleculeSubPlot(PlotPane plotPane, String plotTitle) {
 		super(plotPane, plotTitle);

@@ -26,9 +26,9 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import de.mpg.biochem.mars.molecule.DefaultMarsImageMetadata;
+import de.mpg.biochem.mars.molecule.DefaultMarsMetadata;
 
-public class DefaultMetadataPropertiesPane extends AbstractMetadataPropertiesPane<DefaultMarsImageMetadata> {
+public class DefaultMetadataPropertiesPane extends AbstractMetadataPropertiesPane<DefaultMarsMetadata> {
 	public DefaultMetadataPropertiesPane() {
 		super();
 	}

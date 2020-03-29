@@ -53,7 +53,7 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionPlugin;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -71,7 +71,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	protected BooleanProperty regionSelected;
 	protected BooleanProperty positionSelected;
 	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMoleculePlotPane() {
 		super();
@@ -130,7 +130,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	

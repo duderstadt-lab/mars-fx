@@ -26,7 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.event;
 
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.event.EventType;
 
 public class RefreshMoleculeEvent extends MoleculeEvent {

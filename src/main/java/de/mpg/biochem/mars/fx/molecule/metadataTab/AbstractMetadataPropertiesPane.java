@@ -46,7 +46,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeRegionOfInterestTable;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculePositionOfInterestTable;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 //import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -68,7 +68,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
-public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata> implements MetadataSubPane {
+public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> implements MetadataSubPane {
 	
 	protected StackPane stackPane;
 	protected JFXTabPane tabsContainer;
@@ -94,7 +94,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	
 	protected I marsImageMetadata;
 	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	public AbstractMetadataPropertiesPane() {
 		stackPane = new StackPane();
@@ -118,7 +118,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
         getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
         		archive = newArchive;
         		metadataGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
@@ -264,7 +264,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsImageMetadata
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.marsImageMetadata = (I) marsImageMetadata;
 
 		Tab selectedTab = tabsContainer.getSelectionModel().selectedItemProperty().get();

@@ -52,7 +52,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -98,12 +98,12 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
-	private MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	private MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
 	
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
 	
-	private MarsImageMetadata marsImageMetadata;
+	private MarsMetadata marsImageMetadata;
 	
 	@FXML
     public void initialize() {
@@ -119,7 +119,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> newArchive) {
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
         		archive = newArchive;
         	}
         });
@@ -169,7 +169,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	}
 
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.marsImageMetadata = marsImageMetadata;
 		
 		UIDLabel.setText(marsImageMetadata.getUID());

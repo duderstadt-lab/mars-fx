@@ -138,7 +138,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     @Parameter
     protected PrefService prefService;
 
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
 	
 	protected JFrame frame;
 	protected String title;
@@ -176,7 +176,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
-	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
+	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
 		this.title = archive.getName();
 		this.archive = archive;
 		this.uiService = moleculeArchiveService.getUIService();
@@ -627,7 +627,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         new Thread(task).start();
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	

@@ -61,7 +61,7 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -219,7 +219,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataRegion(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
 		int num = 1;
 		String name = "Region 1";
 		while (metaData.hasRegion(name)) {
@@ -246,7 +246,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataPosition(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
 		int num = 1;
 		String name = "Position 1";
 		while (metaData.hasPosition(name)) {
@@ -268,7 +268,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataRegion(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
 		MarsRegion newRoi = ((NewMetadataRegionEvent) e).getRegion();
    		MarsRegion oldRoi = metaData.getRegion(newRoi.getName());
    		oldRoi.setStart(newRoi.getStart());
@@ -284,7 +284,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataPosition(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
 		MarsPosition newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
 		MarsPosition oldPoi = metaData.getPosition(newPoi.getName());
    		oldPoi.setPosition(newPoi.getPosition());
@@ -440,7 +440,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     }
 
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	
     	moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));

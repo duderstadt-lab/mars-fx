@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -46,7 +46,7 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
 	protected Tab tab;
     protected double tabWidth = 60.0;
     
-    protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+    protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
         Tab currentTab = (Tab) event.getTarget();
@@ -76,7 +76,7 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
     public abstract ArrayList<Menu> getMenus();
     
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;
     }
 
@@ -97,7 +97,7 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
 		return tab;
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return this.archive;
 	}
 	

@@ -28,7 +28,7 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -43,8 +43,8 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Ini
 	public String getName();
 	public void setContent(Node node);
 	public void setContent(Node icon, Node node);
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive);
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive();
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive);
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive();
 	public void setParent(DashboardTab parent);
 	public DashboardTab getParent();
 	public boolean isRunning();

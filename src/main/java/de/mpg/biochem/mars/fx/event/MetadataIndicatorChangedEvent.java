@@ -26,7 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.event;
 
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.event.EventType;
 
 public class MetadataIndicatorChangedEvent extends MetadataEvent {
@@ -38,14 +38,14 @@ public class MetadataIndicatorChangedEvent extends MetadataEvent {
 
 	public static final EventType<MetadataEvent> INDICATOR_CHANGED = new EventType<>(METADATA_EVENT, "INDICATOR_CHANGED");
 
-	private final MarsImageMetadata marsImageMetadata;
+	private final MarsMetadata marsImageMetadata;
 
-	public MetadataIndicatorChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public MetadataIndicatorChangedEvent(MarsMetadata marsImageMetadata) {
         super(INDICATOR_CHANGED);
         this.marsImageMetadata = marsImageMetadata;
     }
 	
-	public MarsImageMetadata getImageMetadata() {
+	public MarsMetadata getImageMetadata() {
 		return this.marsImageMetadata;
 	}
 
