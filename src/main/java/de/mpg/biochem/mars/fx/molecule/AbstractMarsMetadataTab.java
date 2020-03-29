@@ -299,8 +299,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
     	if (metaIndexTable.getItems().size() > 0)
     		currentUID = metaIndexTable.getSelectionModel().getSelectedItem().getUID();
     	metaRowList.clear();
-    	if (archive.getNumberOfMetadata() > 0) {
-    		for (int index = 0; index < archive.getNumberOfMetadata(); index++) {
+    	if (archive.getNumberOfMetadatas() > 0) {
+    		for (int index = 0; index < archive.getNumberOfMetadatas(); index++) {
     			MetaIndexRow row = new MetaIndexRow(index);
     			metaRowList.add(row);
     		}

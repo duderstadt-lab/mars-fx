@@ -95,7 +95,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 				archiveName.setText(archive.getName());
 				className.setText(archive.getClass().getName());
 				moleculeNumber.setText(archive.getNumberOfMolecules() + " Molecules");
-				metadataNumber.setText(archive.getNumberOfMetadata() + " Metadata");
+				metadataNumber.setText(archive.getNumberOfMetadatas() + " Metadata");
 				if (archive.isVirtual()) {
 					memorySetting.setText("Virtual memory store");
 				} else {
