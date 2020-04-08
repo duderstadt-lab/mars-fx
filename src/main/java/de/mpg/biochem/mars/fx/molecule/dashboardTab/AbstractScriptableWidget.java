@@ -92,6 +92,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected ModuleService moduleService;
 	
 	@Parameter
+	protected MarsDashboardWidgetService marsDashboardWidgetService;
+	
+	@Parameter
 	protected LogService log;
 	
 	@Parameter
@@ -107,7 +110,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	public void initialize() {
 		super.initialize();
 		
-		lang = scriptService.getLanguageByName("Groovy");
+		lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
 		
 		//Script Pane
         Tab scriptTab = new Tab();
@@ -137,7 +140,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
         radioButtonPython = new RadioButton("Python");
         radioButtonPython.setToggleGroup(languageGroup);
         
-        radioButtonGroovy.setSelected(true);
+        if (lang == scriptService.getLanguageByName("Groovy"))
+	        radioButtonGroovy.setSelected(true);
+        else if (lang == scriptService.getLanguageByName("Python"))
+        	radioButtonPython.setSelected(true);
         
         languageGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
             @Override
@@ -237,6 +243,11 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	
 	public void loadScript(String name) throws IOException {
 		//Load example script
+		if (radioButtonGroovy.isSelected()) {
+			name += ".groovy";
+		} else if (radioButtonPython.isSelected()) {
+			name += ".py";
+		}
     	InputStream is = this.getClass().getResourceAsStream(name);
     	final String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();

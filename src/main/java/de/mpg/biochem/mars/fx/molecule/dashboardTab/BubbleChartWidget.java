@@ -89,7 +89,7 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 		super.initialize();
 		
 		try {
-			loadScript("bubblechart.groovy");
+			loadScript("bubblechart");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

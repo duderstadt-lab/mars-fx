@@ -87,7 +87,7 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart.groovy");
+			loadScript("histogramchart");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

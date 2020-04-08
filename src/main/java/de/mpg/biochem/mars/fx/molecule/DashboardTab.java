@@ -55,6 +55,8 @@ import javafx.scene.layout.BorderPane;
 
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
@@ -89,6 +91,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     private ScrollPane scrollPane;
     private JFXMasonryPane widgetPane;
     private ToolBar toolbar;
+    private ComboBox<String> widgetScriptLanguage;
     private MarsDashboardWidgetService marsDashboardWidgetService;
     
     private final int MAX_THREADS = 1;
@@ -146,6 +149,19 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolbar.getItems().add(spacer);
+		
+		// preview renderer type choice box
+		widgetScriptLanguage = new ComboBox<>();
+		widgetScriptLanguage.setFocusTraversable(false);
+		ArrayList<String> languages = new ArrayList<>();
+		languages.add("Groovy");
+		languages.add("Python");
+		widgetScriptLanguage.getItems().addAll(languages);
+		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
+			if (marsDashboardWidgetService != null)
+				marsDashboardWidgetService.setDefaultScriptingLanguage(n);
+		});
+		toolbar.getItems().add(widgetScriptLanguage);
 		
     	toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets), 
     			ActionUtils.createToolBarButton(stopAllWidgets),
@@ -209,6 +225,8 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	this.archive = archive;  
         marsDashboardWidgetService = moleculeArchiveService.getContext().getService(MarsDashboardWidgetService.class);
     	
+        widgetScriptLanguage.getSelectionModel().select(marsDashboardWidgetService.getDefaultScriptingLanguage());
+        
     	//Loop through all available widgets and add them to the toolbar
     	//use preferred order
     	Set<String> discoveredWidgets = marsDashboardWidgetService.getWidgetNames();

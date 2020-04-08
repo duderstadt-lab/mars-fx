@@ -125,7 +125,7 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		super.initialize();
 		
 		try {
-			loadScript("categorychart.groovy");
+			loadScript("categorychart");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

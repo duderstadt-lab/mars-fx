@@ -80,7 +80,7 @@ public class XYChartWidget extends AbstractScriptableWidget implements MarsDashb
 		super.initialize();
 		
 		try {
-			loadScript("xychart.groovy");
+			loadScript("xychart");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

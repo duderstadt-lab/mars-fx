@@ -33,7 +33,7 @@ import org.scijava.command.CommandService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.PluginService;
-
+import org.scijava.prefs.PrefService;
 import org.scijava.plugin.AbstractPTService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.service.Service;
@@ -47,6 +47,9 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 
 	@Parameter
 	private CommandService commands;
+	
+	@Parameter
+	private PrefService prefService;
 	
 	/** Map of each Widget name to its corresponding plugin metadata. */
 	private HashMap<String, PluginInfo<MarsDashboardWidget>> widgets = new HashMap<>();
@@ -84,6 +87,17 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 		}
 		
 		return info.getPluginClass();
+	}
+	
+	public void setDefaultScriptingLanguage(String language) {
+		prefService.put(MarsDashboardWidgetService.class, "DefaultScriptingLanguage", language);
+	}
+	
+	public String getDefaultScriptingLanguage() {
+		if (prefService.get(MarsDashboardWidgetService.class, "DefaultScriptingLanguage") != null)
+			return prefService.get(MarsDashboardWidgetService.class, "DefaultScriptingLanguage");
+		else
+			return "Python";
 	}
 
 	@Override
