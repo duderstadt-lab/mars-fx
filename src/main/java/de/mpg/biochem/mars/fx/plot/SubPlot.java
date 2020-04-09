@@ -35,10 +35,12 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.ToggleButton;
 
 public interface SubPlot {
 	public MarsNumericAxis getXAxis();
@@ -48,6 +50,7 @@ public interface SubPlot {
 	public DatasetOptionsPane getDatasetOptionsPane();
 	public ObservableList<PlotSeries> getPlotSeriesList();
 	public JFXBadge getDatasetOptionsButton();
+	public BooleanProperty getDatasetOptionsSelected();
 	public void setTool(ChartPlugin plugin, Cursor cursor);
 	public void removeTools();
 	public XYChart getChart();

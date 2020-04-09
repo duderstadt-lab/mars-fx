@@ -54,6 +54,8 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.ButtonBase;
 
 import java.io.File;
 import java.io.IOException;
@@ -63,9 +65,6 @@ import java.util.function.Supplier;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
-//import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
-//import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
-//import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
@@ -76,9 +75,11 @@ import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.input.KeyCode;
 
@@ -87,7 +88,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 
 import javafx.scene.image.WritableImage;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
 import javax.imageio.ImageIO;
@@ -107,6 +107,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	protected ToolBar toolBar;
 	
 	protected BorderPane rootBorderPane;
+	protected SplitPane subPlotOptionsSplit;
+	protected ToggleGroup subPlotButtonGroup;
 	
 	protected VBox chartsPane;
 	
@@ -140,7 +142,18 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		charts = new ArrayList<SubPlot>();
 		tools = new ArrayList<Action>();
 		chartsPane = new VBox();
-		rootBorderPane.setCenter(chartsPane);
+		subPlotOptionsSplit = new SplitPane();
+		subPlotOptionsSplit.setOrientation(Orientation.VERTICAL);
+		SplitPane.setResizableWithParent(chartsPane, Boolean.FALSE);
+		subPlotOptionsSplit.getItems().add(chartsPane);
+		rootBorderPane.setCenter(subPlotOptionsSplit);
+		
+		subPlotButtonGroup = new ToggleGroup();
+		subPlotButtonGroup.selectedToggleProperty().addListener((t, o, n) -> {
+			if (n == null) {
+				hideSubPlotOptions();
+			}
+		});
 		
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
@@ -355,6 +368,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		  });
 			
 		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot.getDatasetOptionsButton());
+		((ToggleButton) subplot.getDatasetOptionsButton().getControl()).setToggleGroup(subPlotButtonGroup);
 		
 		subplot.getYAxis().widthProperty().addListener(new ChangeListener<Number>(){
 			@Override
@@ -385,12 +399,26 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	
 	public void removeChart() {
 		if (charts.size() > 1) {
+			((ToggleButton) charts.get(charts.size() - 1).getDatasetOptionsButton().getControl()).setToggleGroup(null);
 			charts.remove(charts.size() - 1);
 			chartsPane.getChildren().remove(chartsPane.getChildren().size() - 1);
 			
 			toolBar.getItems().remove(toolBar.getItems().size() - 2);
 		}
 		updateSubPlotBadges();
+	}
+	
+	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane) {
+		if (subPlotOptionsSplit.getItems().size() > 1)
+			subPlotOptionsSplit.getItems().remove(1);
+
+		SplitPane.setResizableWithParent(datasetOptionsPane, Boolean.FALSE);		
+		subPlotOptionsSplit.getItems().add(datasetOptionsPane);
+	}
+	
+	public void hideSubPlotOptions() {
+		if (subPlotOptionsSplit.getItems().size() > 1)
+			subPlotOptionsSplit.getItems().remove(1);
 	}
 	
 	protected void updateSubPlotBadges() {
