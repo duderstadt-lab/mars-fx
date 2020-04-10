@@ -39,5 +39,7 @@ public interface PlotPane extends JsonConvertibleRecord {
 	public Node getNode();
 	public ArrayList<SubPlot> getCharts();
 	public ArrayList<String> getColumnNames();
+	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane);
+	public void hideSubPlotOptions();
 	public void fireEvent(Event event);
 }

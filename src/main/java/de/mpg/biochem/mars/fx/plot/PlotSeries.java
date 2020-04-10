@@ -97,7 +97,10 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 			typeField.getItems().addAll(types);
 			
 			xColumnField.getItems().addAll(columnHeadings);
+			xColumnField.setPrefWidth(150);
+			
 			yColumnField.getItems().addAll(columnHeadings);
+			yColumnField.setPrefWidth(150);
 			
 			lineStyle.getItems().addAll(" ", "20 20", "12 12", "8 8", "4 4", 
 					"26 4 8 4", "15 3 3 3", "20 3 3 3 3 3 3 3", "12 3 3");
@@ -117,6 +120,8 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 	                        if(style != null && !empty) {
 	                        	if (!style.equals(" "))
 	                            	line.setStyle("-fx-stroke-dash-array: " + style + ";");
+	                        	else 
+	                        		line.setStyle(null);
 	                            setGraphic(line);
 	                        }
 	                    }
@@ -126,15 +131,15 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 			lineStyle.setCellFactory(cellFactory);
 			lineStyle.setButtonCell(cellFactory.call(null));
 			
-			colorField.setPrefWidth(50);
+			//colorField.setPrefWidth(50);
 			
 			widthField.setText("1.0");
-			widthField.setPrefWidth(50);
+			//widthField.setPrefWidth(30);
 			
-			segmentColorField.setPrefWidth(50);
+			//segmentColorField.setPrefWidth(50);
 			
 			segmentsWidthField.setText("1.0");
-			segmentsWidthField.setPrefWidth(50);
+			//segmentsWidthField.setPrefWidth(50);
 			
 			setDefaults();
 		}
