@@ -97,10 +97,10 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 			typeField.getItems().addAll(types);
 			
 			xColumnField.getItems().addAll(columnHeadings);
-			xColumnField.setPrefWidth(Double.MAX_VALUE);
+			xColumnField.setPrefWidth(150);
 			
 			yColumnField.getItems().addAll(columnHeadings);
-			yColumnField.setPrefWidth(Double.MAX_VALUE);
+			yColumnField.setPrefWidth(150);
 			
 			lineStyle.getItems().addAll(" ", "20 20", "12 12", "8 8", "4 4", 
 					"26 4 8 4", "15 3 3 3", "20 3 3 3 3 3 3 3", "12 3 3");
