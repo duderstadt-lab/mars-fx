@@ -32,6 +32,8 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.GlyphIcons;
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;

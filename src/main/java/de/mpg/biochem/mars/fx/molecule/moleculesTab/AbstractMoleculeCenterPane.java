@@ -34,6 +34,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonToken;
 
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
@@ -62,9 +63,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected TabPane tabPane;
 	protected Tab dataTableTab;
 	protected Tab plotTab;
+	protected Tab moleculeDashboardTab;
 	
 	protected BorderPane dataTableContainer;
 	protected P plotPane;
+	protected MoleculeDashboard moleculeDashboardPane;
 	
 	protected HashSet<ArrayList<String>> segmentTableNames;
 	protected HashSet<String> refreshedTabs;
@@ -90,8 +93,15 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		plotPane = createPlotPane();
 		plotTab.setContent(plotPane.getNode());
 		
+		moleculeDashboardTab = new Tab();
+		moleculeDashboardTab.setText("");
+		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		moleculeDashboardPane = createDashboard();
+		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
+		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
+		tabPane.getTabs().add(moleculeDashboardTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		tabPane.setStyle("");
@@ -205,6 +215,9 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	@Override
 	protected void createIOMaps() {
+		
+		//Add IO for MoleculeDashboard...
+		
 		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeFieldName("PlotPane");
 			plotPane.toJSON(jGenerator);
@@ -216,6 +229,10 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	}
 	
 	public abstract P createPlotPane();
+	
+	public MoleculeDashboard createDashboard() {
+		return new MoleculeDashboard();
+	}
 	
 	@Override
 	public Node getNode() {

@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule.dashboardTab;
+package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -55,17 +55,14 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 	private HashMap<String, PluginInfo<MarsDashboardWidget>> widgets = new HashMap<>();
 	
 	/**
-	 * Gets the list of available animals. The names on this list can be passed to
-	 * {@link #createAnimal(String)} to create instances of that animal.
+	 * Gets the list of available widgets. The names on this list can be passed to
+	 * {@link #createWidget(String)} to create instances of that widget.
 	 */
 	public Set<String> getWidgetNames() {
 		return widgets.keySet();
 	}
-
-	//hmm.... I guess achive and Dashboard would need to be parameter inputs for this mechanism to work
-	//then the initialize method would need to be called?
 	
-	/** Creates an animal of the given name. */
+	/** Creates a widget of the given name. */
 	public MarsDashboardWidget createWidget(final String name) {
 		final PluginInfo<MarsDashboardWidget> info = widgets.get(name);
 
@@ -73,7 +70,6 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 			throw new IllegalArgumentException("No widgets of that name");
 		}
 
-		// Next, we use the plugin service to create an animal of that kind.
 		final MarsDashboardWidget widget = plugins.createInstance(info);
 
 		return widget;
