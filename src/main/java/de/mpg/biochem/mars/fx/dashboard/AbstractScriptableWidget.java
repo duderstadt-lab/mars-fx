@@ -203,6 +203,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			return null;
 		}
 		
+		//Can these move into the initialize block...
+		
 		OutputConsole outputConsole = new OutputConsole(logArea);
         PrintStream outputPS = new PrintStream(outputConsole, true);
         
@@ -222,7 +224,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			return null;
 		}
 		
-		module.setInput("archive", archive);
+		setScriptInputs(module);
 		
 		try {
 			moduleService.run(module, false).get();
@@ -241,7 +243,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		return module.getOutputs();
 	}
 	
-	public void loadScript(String name) throws IOException {
+	protected abstract void setScriptInputs(ScriptModule module);
+	
+	protected void loadScript(String name) throws IOException {
 		//Load example script
 		if (radioButtonGroovy.isSelected()) {
 			name += ".groovy";

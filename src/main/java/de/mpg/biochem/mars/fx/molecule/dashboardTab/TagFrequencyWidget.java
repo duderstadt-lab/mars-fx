@@ -75,7 +75,7 @@ import org.scijava.plugin.SciJavaPlugin;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
-public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+public class TagFrequencyWidget extends AbstractMoleculeArchiveDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 	
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;

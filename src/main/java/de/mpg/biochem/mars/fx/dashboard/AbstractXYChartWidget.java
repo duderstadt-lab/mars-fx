@@ -27,14 +27,11 @@
 package de.mpg.biochem.mars.fx.dashboard;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.marker.DefaultMarker;
+import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.Histogram;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
@@ -52,17 +49,13 @@ import javafx.scene.layout.StackPane;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
-import de.gsi.chart.plugins.DataPointTooltip;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.scijava.Cancelable;
 import org.scijava.ItemIO;
@@ -70,12 +63,9 @@ import org.scijava.plugin.Parameter;
 
 import net.imagej.ops.Initializable;
 
-import org.apache.commons.lang3.ArrayUtils;
+public abstract class AbstractXYChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, Initializable {
 
-@Plugin( type = BubbleChartWidget.class, name = "BubbleChartWidget" )
-public class BubbleChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
-
-	protected XYChart bubbleChart;
+	protected XYChart xyChart;
 	protected MarsNumericAxis xAxis, yAxis;
 	
 	protected ErrorDataSetRenderer renderer;
@@ -88,12 +78,6 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 	public void initialize() {
 		super.initialize();
 		
-		try {
-			loadScript("bubblechart");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		xAxis = new MarsNumericAxis("");
         xAxis.minorTickVisibleProperty().set(false);
         xAxis.setAutoRanging(true);
@@ -104,30 +88,32 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
         yAxis.setAutoRanging(true);
         yAxis.setAutoRangeRounding(false);
 
-        bubbleChart = new XYChart(xAxis, yAxis);
-        bubbleChart.getPlugins().add(new MarsDataPointTracker());
-        bubbleChart.setAnimated(false);
-        bubbleChart.getRenderers().clear();
+        xyChart = new XYChart(xAxis, yAxis);
+        xyChart.getPlugins().add(new MarsDataPointTracker());
+        xyChart.setAnimated(false);
+        xyChart.getRenderers().clear();
         
-        bubbleChart.getPlugins().add(new MarsDataPointTracker());
+        xyChart.getPlugins().add(new MarsDataPointTracker());
+        //Zoomer zoom = new Zoomer();
+        //xyChart.getPlugins().add(zoom);
         
         datasets = new ArrayList<DefaultErrorDataSet>();
         
         renderer = new ErrorDataSetRenderer();
         renderer.setMarkerSize(5);
-        renderer.setPolyLineStyle(LineStyle.NONE);
-        renderer.setErrorType(ErrorStyle.NONE);
-        renderer.setDrawMarker(true);
+        renderer.setPolyLineStyle(LineStyle.NORMAL);
+        renderer.setErrorType(ErrorStyle.ERRORBARS);
+        renderer.setDrawMarker(false);
         renderer.setAssumeSortedData(false);
         
-        bubbleChart.getRenderers().add(renderer);
-        bubbleChart.legendVisibleProperty().set(false);
-        bubbleChart.horizontalGridLinesVisibleProperty().set(false);
-        bubbleChart.verticalGridLinesVisibleProperty().set(false);
+        xyChart.getRenderers().add(renderer);
+        xyChart.legendVisibleProperty().set(false);
+        xyChart.horizontalGridLinesVisibleProperty().set(false);
+        xyChart.verticalGridLinesVisibleProperty().set(false);
 
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
-		stack.getChildren().add(bubbleChart);
+		stack.getChildren().add(xyChart);
 		stack.setPrefSize(250, 250);
 
         BorderPane chartPane = new BorderPane();
@@ -228,7 +214,7 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 					yAxis.setMax((Double) outputs.get("ymax"));
 				}
 				
-				bubbleChart.setTitle(title);
+				xyChart.setTitle(title);
 				
 				renderer.getDatasets().clear();
 				renderer.getDatasets().addAll(datasets);
@@ -246,11 +232,10 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
 			
-			if (xvalues == null)
-				System.out.println("xvalues == null");
+			Double[] error = null;
 			
 			if (xvalues.length == 0) {
-				writeToLog(seriesName + "_xvalues have zero values.");
+				writeToLog(seriesName + "_xvalues has zero values.");
 				return null;
 			}
 			
@@ -261,8 +246,28 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 				return null;
 			}
 			
-			for (int index=0;index<xvalues.length;index++)
-				dataset.add(xvalues[index], yvalues[index]);
+			if (outputs.containsKey(seriesName + "_error")) {
+				error = (Double[]) outputs.get(seriesName + "_error");
+				
+				if (error.length == 0) {
+					writeToLog(seriesName + "_error has zero values.");
+					return null;
+				}
+				
+				if (error.length != dataPointCount) {
+					writeToLog(seriesName + "_yvalues and " + seriesName + "_error do not have the same dimensions.");
+					return null;
+				}
+			}
+			
+			if (error != null) {
+				for (int index=0;index<xvalues.length;index++)
+					dataset.add(xvalues[index], yvalues[index], error[index], error[index]);
+			} else {
+				for (int index=0;index<xvalues.length;index++)
+					dataset.add(xvalues[index], yvalues[index]);
+			}
+			
 		} else if (outputs.containsKey(seriesName + "_xvalues")) {
 			writeToLog("required output " + seriesName + "_yvalues"  + " is missing");
 			return null;
@@ -271,51 +276,18 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 			return null;
 		}
 		
-		if (outputs.containsKey(seriesName + "_label")) {
-			String[] label = (String[]) outputs.get(seriesName + "_label");
-			
-			if (dataPointCount != label.length) {
-				writeToLog("The length of " + seriesName + "_label does not match that of " + seriesName + "_xvalues and " + seriesName + "_yvalues.");
-				return null;
-			}
-			
-			for (int index=0;index<label.length;index++)
-				dataset.addDataLabel(index, label[index]);
-		}
+		String styleString = "";
 		
-		String[] styleString = new String[dataPointCount];
-		for (int index=0;index<dataPointCount;index++)
-			styleString[index] = "";
+		if (outputs.containsKey(seriesName + "_strokeColor"))
+				styleString += "strokeColor=" + (String)outputs.get(seriesName + "_strokeColor") + "; ";
 		
-		if (outputs.containsKey(seriesName + "_color")) {
-			String[] color = (String[]) outputs.get(seriesName + "_color");
-			
-			if (dataPointCount != color.length) {
-				writeToLog("The length of " + seriesName + "_color does not match that of " + seriesName + "_xvalues and " + seriesName + "_yvalues.");
-				return null;
-			}
-			
-			for (int index=0;index<dataPointCount;index++)
-				styleString[index] += "markerColor=" + color[index] + "; ";
-		} else if (outputs.containsKey(seriesName + "_markerColor")) {
-			for (int index=0;index<dataPointCount;index++)
-				styleString[index] += "markerColor=" + (String)outputs.get(seriesName + "_markerColor") + "; ";
-		}
+		if (outputs.containsKey(seriesName + "_fillColor"))
+				styleString += "fillColor=" + (String)outputs.get(seriesName + "_fillColor") + "; ";
 		
-		if (outputs.containsKey(seriesName + "_size")) {
-			Double[] size = (Double[]) outputs.get(seriesName + "_size");
-			
-			if (dataPointCount != size.length) {
-				writeToLog("The length of " + seriesName + "_size does not match that of " + seriesName + "_xvalues and " + seriesName + "_yvalues.");
-				return null;
-			}
-			
-			for (int index=0;index<dataPointCount;index++)
-				styleString[index] += "markerSize=" + size[index] + "; ";
-		}
+		if (outputs.containsKey(seriesName + "_strokeWidth"))
+			styleString += "strokeWidth=" + ((Integer)outputs.get(seriesName + "_strokeWidth")).intValue();
 		
-		for (int index=0;index<dataPointCount;index++)
-			dataset.addDataStyle(index, styleString[index] + "markerType=circle;");
+		dataset.setStyle(styleString);
     	
     	return dataset;
 	}
@@ -323,12 +295,7 @@ public class BubbleChartWidget extends AbstractScriptableWidget implements MarsD
 	@Override
 	public Node getIcon() {
 		Region xychartIcon = new Region();
-		xychartIcon.getStyleClass().add("bubblechartIcon");
+		xychartIcon.getStyleClass().add("xychartIcon");
 		return xychartIcon;
-	}
-
-	@Override
-	public String getName() {
-		return "BubbleChartWidget";
 	}
 }

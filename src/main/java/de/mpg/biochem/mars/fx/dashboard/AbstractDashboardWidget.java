@@ -96,10 +96,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected Button closeButton, loadButton;
 	
 	@Parameter
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
-	
-	@Parameter
-	protected DashboardTab parent;
+	protected MarsDashboard parent;
 	
 	@Override
 	public void initialize() {
@@ -319,22 +316,12 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 	
 	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-	
-	@Override
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
-		return archive;
-	}
-	
-	@Override
-	public void setParent(DashboardTab parent) {
+	public void setParent(MarsDashboard parent) {
 		this.parent = parent;
 	}
 	
 	@Override
-	public DashboardTab getParent() {
+	public MarsDashboard getParent() {
 		return this.parent;
 	}
 	

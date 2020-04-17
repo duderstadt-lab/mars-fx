@@ -69,8 +69,7 @@ import org.scijava.plugin.Parameter;
 
 import net.imagej.ops.Initializable;
 
-@Plugin( type = HistogramWidget.class, name = "HistogramWidget" )
-public class HistogramWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+public abstract class AbstractHistogramWidget extends AbstractScriptableWidget implements MarsDashboardWidget, Initializable {
 
 	protected XYChart histChart;
 	protected MarsNumericAxis xAxis, yAxis;
@@ -85,13 +84,7 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-		try {
-			loadScript("histogramchart");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
+
 		xAxis = new MarsNumericAxis("");
         //xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         xAxis.minorTickVisibleProperty().set(false);
@@ -222,10 +215,5 @@ public class HistogramWidget extends AbstractScriptableWidget implements MarsDas
 		Region barchartIcon = new Region();
 		barchartIcon.getStyleClass().add("barchartIcon");
 		return barchartIcon;
-	}
-
-	@Override
-	public String getName() {
-		return "HistogramWidget";
 	}
 }

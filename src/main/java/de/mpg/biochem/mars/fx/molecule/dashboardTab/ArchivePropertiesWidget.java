@@ -51,7 +51,7 @@ import org.scijava.plugin.Parameter;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = ArchivePropertiesWidget.class, name = "ArchivePropertiesWidget" )
-public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+public class ArchivePropertiesWidget extends AbstractMoleculeArchiveDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();

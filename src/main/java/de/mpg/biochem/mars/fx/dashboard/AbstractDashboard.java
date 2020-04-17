@@ -38,10 +38,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
+public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends AbstractJsonConvertibleRecord implements MarsDashboard {
 	
 	@Parameter
-    private MarsDashboardWidgetService marsDashboardWidgetService;
+	protected MarsDashboardWidgetService marsDashboardWidgetService;
 	
 	private BorderPane borderPane;
 	
@@ -51,14 +51,6 @@ public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
     private ComboBox<String> widgetScriptLanguage;
     
     private final int MAX_THREADS = 1;
-    
-    private final ArrayList<String> widgetToolbarOrder = new ArrayList<String>( 
-            Arrays.asList("ArchivePropertiesWidget", 
-                    "TagFrequencyWidget", 
-                    "CategoryChartWidget",
-                    "HistogramWidget",
-                    "XYChartWidget",
-                    "BubbleChartWidget"));
     
     private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
 
@@ -168,10 +160,9 @@ public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
 		
 		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(),
 				e -> {
-					MarsDashboardWidget widget = marsDashboardWidgetService.createWidget(widgetName);
-					widget.setArchive(archive);
-					widget.setParent(this);
-					widget.initialize();
+					MarsDashboardWidget widget = createWidget(widgetName);
+							
+							
 			    	addWidget(widget);
 				}, null);
 		
@@ -189,11 +180,11 @@ public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
     	ArrayList<Node> widgetButtons = new ArrayList<Node>();
     	
     	//Add all the expected widgets in the order defined by widgetToolbarOrder
-    	widgetToolbarOrder.stream().filter(widgetName -> discoveredWidgets.contains(widgetName)).forEach(widgetName ->
+    	getWidgetToolbarOrder().stream().filter(widgetName -> discoveredWidgets.contains(widgetName)).forEach(widgetName ->
     		widgetButtons.add(createWidgetButton(widgetName)));
     	
     	//Now add any newly discovered widgets besides the default set
-    	discoveredWidgets.stream().filter(widgetName -> !widgetToolbarOrder.contains(widgetName)).forEach(widgetName ->
+    	discoveredWidgets.stream().filter(widgetName -> !getWidgetToolbarOrder().contains(widgetName)).forEach(widgetName ->
 		widgetButtons.add(createWidgetButton(widgetName)));
 
     	toolbar.getItems().addAll(0, widgetButtons);
@@ -220,10 +211,7 @@ public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
 					
 					if ("Name".equals(jParser.getCurrentName())) {
 			    		jParser.nextToken();
-			    		widget = marsDashboardWidgetService.createWidget(jParser.getText());
-						widget.setArchive(archive);
-						widget.setParent(this);
-						widget.initialize();
+			    		widget = createWidget(jParser.getText());
 				    	addWidget(widget);
 					}
 					
@@ -238,6 +226,9 @@ public abstract class AbstractDashboard extends AbstractJsonConvertibleRecord {
 	    	}
 		}, IOException.class));
 	}
+	
+	public abstract W createWidget(String widgetName);
+	public abstract ArrayList<String> getWidgetToolbarOrder();
 	
 	class WidgetRunnable implements Runnable {
 		

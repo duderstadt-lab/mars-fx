@@ -61,6 +61,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import net.imagej.ops.Initializable;
 import javafx.scene.layout.AnchorPane;
 
 import java.util.ArrayList;
@@ -110,8 +111,7 @@ import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
-@Plugin( type = CategoryChartWidget.class, name = "CategoryChartWidget" )
-public class CategoryChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin {
+public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, Initializable {
 	
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
@@ -123,12 +123,6 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-		try {
-			loadScript("categorychart");
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		
         xAxis = new MarsCategoryAxis("Categories");
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
@@ -227,10 +221,5 @@ public class CategoryChartWidget extends AbstractScriptableWidget implements Mar
 		Region categoryIcon = new Region();
 		categoryIcon.getStyleClass().add("categoriesIcon");
 		return categoryIcon;
-	}
-
-	@Override
-	public String getName() {
-		return "CategoryChartWidget";
 	}
 }

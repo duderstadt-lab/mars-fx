@@ -43,10 +43,8 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Ini
 	public String getName();
 	public void setContent(Node node);
 	public void setContent(Node icon, Node node);
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive);
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive();
-	public void setParent(DashboardTab parent);
-	public DashboardTab getParent();
+	public void setParent(MarsDashboard parent);
+	public MarsDashboard getParent();
 	public boolean isRunning();
 	public void setRunning(boolean running);
 	public Node getIcon();
