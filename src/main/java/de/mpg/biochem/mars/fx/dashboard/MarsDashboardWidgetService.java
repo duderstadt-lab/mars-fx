@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 import org.scijava.command.CommandService;
@@ -38,6 +39,9 @@ import org.scijava.plugin.AbstractPTService;
 import org.scijava.plugin.PluginInfo;
 import org.scijava.service.Service;
 
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboardWidget;
+import de.mpg.biochem.mars.fx.table.MarsTableDashboardWidget;
 import net.imagej.ImageJService;
 
 @Plugin( type = Service.class )
@@ -60,6 +64,18 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 	 */
 	public Set<String> getWidgetNames() {
 		return widgets.keySet();
+	}
+	
+	public Set<String> getWidgetNames(Class<?> clazz) {
+		HashSet<String> widgetsOfType = new HashSet<String>();
+		
+		for (String name : widgets.keySet()) {
+			final PluginInfo<MarsDashboardWidget> info = widgets.get(name);
+			
+			if (info.getPluginType().equals(clazz))
+				widgetsOfType.add(name);
+		}
+		return widgetsOfType;
 	}
 	
 	/** Creates a widget of the given name. */

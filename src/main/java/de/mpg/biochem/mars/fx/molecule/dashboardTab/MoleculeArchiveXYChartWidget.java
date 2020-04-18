@@ -13,10 +13,11 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.dashboard.AbstractHistogramWidget;
 import de.mpg.biochem.mars.fx.dashboard.AbstractXYChartWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = AbstractXYChartWidget.class, name = "XYChartWidget" )
-public class MoleculeArchiveXYChartWidget extends AbstractHistogramWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "XYChartWidget" )
+public class MoleculeArchiveXYChartWidget extends AbstractXYChartWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;

@@ -15,7 +15,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeArchiveBubbleChartWidget.class, name = "BubbleChartWidget" )
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "BubbleChartWidget" )
 public class MoleculeArchiveBubbleChartWidget extends AbstractBubbleChartWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 
 	@Parameter

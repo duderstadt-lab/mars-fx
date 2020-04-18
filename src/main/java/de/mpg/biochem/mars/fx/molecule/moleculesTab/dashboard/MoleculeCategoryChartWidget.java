@@ -14,7 +14,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.dashboard.AbstractCategoryChartWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeCategoryChartWidget.class, name = "MoleculeCategoryChartWidget" )
+@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeCategoryChartWidget" )
 public class MoleculeCategoryChartWidget extends AbstractCategoryChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
 	protected Molecule molecule;

@@ -26,6 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.plot.DefaultMoleculePlotPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 

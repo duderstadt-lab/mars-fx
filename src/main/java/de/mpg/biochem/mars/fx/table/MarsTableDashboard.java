@@ -4,14 +4,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
+
+import java.util.Set;
 import de.mpg.biochem.mars.table.MarsTable;
 
 public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidget> {
 	
 	protected MarsTable table;
 	
-	public MarsTableDashboard() {
+	public MarsTableDashboard(MarsDashboardWidgetService marsDashboardWidgetService) {
 		super();
+		
+		this.marsDashboardWidgetService = marsDashboardWidgetService;
+		discoverWidgets();
 	}
 	
 	@Override
@@ -38,5 +45,9 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 	
 	public MarsTable getTable() {
 		return table;
+	}
+
+	public Set<String> getWidgetNames() {
+		return marsDashboardWidgetService.getWidgetNames(MarsTableDashboardWidget.class);
 	}
 }

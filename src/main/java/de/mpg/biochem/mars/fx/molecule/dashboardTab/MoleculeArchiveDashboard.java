@@ -2,15 +2,20 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
 
 import org.scijava.plugin.Parameter;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 
 public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveDashboardWidget> {
 	
@@ -18,6 +23,18 @@ public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveD
 	
 	public MoleculeArchiveDashboard() {
 		super();
+		
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
+					archive = e.getArchive();
+			   		marsDashboardWidgetService = archive.getMoleculeArchiveService().getContext().getService(MarsDashboardWidgetService.class);
+			   		discoverWidgets();
+			   		e.consume();
+			   	}
+			} 
+	    });
 	}
 
 	@Override
@@ -39,12 +56,8 @@ public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveD
 	                    "XYChartWidget",
 	                    "BubbleChartWidget"));
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
-		this.archive = archive;
-	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
-		return archive;
+
+	public Set<String> getWidgetNames() {
+		return marsDashboardWidgetService.getWidgetNames(MoleculeArchiveDashboardWidget.class);
 	}
 }

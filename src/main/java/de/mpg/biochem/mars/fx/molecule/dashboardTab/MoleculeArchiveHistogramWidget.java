@@ -12,9 +12,10 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.dashboard.AbstractHistogramWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeArchiveHistogramWidget.class, name = "HistogramWidget" )
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "HistogramWidget" )
 public class MoleculeArchiveHistogramWidget extends AbstractHistogramWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 
 	@Parameter

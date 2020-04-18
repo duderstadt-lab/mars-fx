@@ -26,6 +26,7 @@ import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
@@ -160,22 +161,20 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		
 		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(),
 				e -> {
-					MarsDashboardWidget widget = createWidget(widgetName);
-							
-							
+					MarsDashboardWidget widget = createWidget(widgetName);		
 			    	addWidget(widget);
 				}, null);
 		
 		return widgetButton;
     }
 	
-	public void initialize() {
+	protected void discoverWidgets() {
+		if (marsDashboardWidgetService == null)
+			return;
+		
 		widgetScriptLanguage.getSelectionModel().select(marsDashboardWidgetService.getDefaultScriptingLanguage());
         
-    	//Loop through all available widgets and add them to the toolbar
-    	//use preferred order
-    	Set<String> discoveredWidgets = marsDashboardWidgetService.getWidgetNames();
-    	//widgetToolbarOrder
+    	Set<String> discoveredWidgets = getWidgetNames();
     	
     	ArrayList<Node> widgetButtons = new ArrayList<Node>();
     	
@@ -229,6 +228,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	
 	public abstract W createWidget(String widgetName);
 	public abstract ArrayList<String> getWidgetToolbarOrder();
+	public abstract Set<String> getWidgetNames();
 	
 	class WidgetRunnable implements Runnable {
 		

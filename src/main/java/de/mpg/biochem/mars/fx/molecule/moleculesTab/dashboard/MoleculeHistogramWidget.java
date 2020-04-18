@@ -14,7 +14,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.dashboard.AbstractHistogramWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeHistogramWidget.class, name = "MoleculeHistogramWidget" )
+@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeHistogramWidget" )
 public class MoleculeHistogramWidget extends AbstractHistogramWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
 	protected Molecule molecule;

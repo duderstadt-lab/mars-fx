@@ -24,18 +24,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.dashboard;
+package de.mpg.biochem.mars.fx.molecule.dashboardTab;
+
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.scene.Node;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = DefaultWidget.class, name = "DefaultWidget" )
-public class DefaultWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "DefaultWidget" )
+public class DefaultWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 
 	@Override
 	public void initialize() {
@@ -61,5 +69,17 @@ public class DefaultWidget extends AbstractDashboardWidget implements MarsDashbo
 	@Override
 	public String getName() {
 		return "DefaultWidget";
+	}
+
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

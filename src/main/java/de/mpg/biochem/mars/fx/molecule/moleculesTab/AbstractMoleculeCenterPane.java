@@ -32,9 +32,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.scijava.plugin.Parameter;
+
 import com.fasterxml.jackson.core.JsonToken;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
@@ -68,11 +71,14 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	protected BorderPane dataTableContainer;
 	protected P plotPane;
-	protected MoleculeDashboard moleculeDashboardPane;
+	protected MoleculeDashboard<M> moleculeDashboardPane;
 	
 	protected HashSet<ArrayList<String>> segmentTableNames;
 	protected HashSet<String> refreshedTabs;
 	protected HashMap<String, ArrayList<String>> tabNameToSegmentName;
+	
+	@Parameter
+	protected MarsDashboardWidgetService marsDashboardWidgetService;
 	
 	protected M molecule;
 	
@@ -130,6 +136,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 			   		plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
+			   		moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
 			   		e.consume();
 			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
 			   		plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
@@ -205,6 +212,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
+		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		
 		//all tabs are now stale
 		refreshedTabs.clear();
@@ -231,8 +239,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	public abstract P createPlotPane();
 	
-	public MoleculeDashboard createDashboard() {
-		return new MoleculeDashboard();
+	public MoleculeDashboard<M> createDashboard() {
+		return new MoleculeDashboard<M>();
 	}
 	
 	@Override

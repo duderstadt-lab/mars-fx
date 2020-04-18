@@ -95,11 +95,11 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 					archive = e.getArchive();
 					for (SubPlot subplot : charts)
-						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
+						subplot.getDatasetOptionsPane().setColumns(archive.properties().getColumnSet());
 			   		e.consume();
 			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
 			   		for (SubPlot subplot : charts)
-						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
+						subplot.getDatasetOptionsPane().setColumns(archive.properties().getColumnSet());
 			   		e.consume();
 			   	}
 			} 
@@ -243,7 +243,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	@Override
 	public ArrayList<String> getColumnNames() {
 		if (archive != null)
-			return (ArrayList<String>) archive.getProperties().getColumnSet().stream().sorted().collect(toList());
+			return (ArrayList<String>) archive.properties().getColumnSet().stream().sorted().collect(toList());
 		else 
 			return new ArrayList<String>();
 	}

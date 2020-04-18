@@ -35,6 +35,7 @@ import java.util.Collections;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.*;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboard;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
@@ -84,9 +85,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
 	
 	private MoleculeArchiveDashboard dashboardPane;
-	
-    @Parameter
-    private MoleculeArchiveService moleculeArchiveService;
     
     @Parameter
     private MarsDashboardWidgetService marsDashboardWidgetService;
@@ -94,7 +92,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     public DashboardTab(MoleculeArchiveService moleculeArchiveService) {
     	super();
     	
-    	this.moleculeArchiveService = moleculeArchiveService;
+    	marsDashboardWidgetService = moleculeArchiveService.getContext().getService(MarsDashboardWidgetService.class);
     	
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
@@ -111,6 +109,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     @Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;  
+    	dashboardPane.getNode().fireEvent(new InitializeMoleculeArchiveEvent(archive));
     }
 	
 	@Override

@@ -69,13 +69,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
 import net.imagej.ops.Initializable;
 
-@Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
-public class TagFrequencyWidget extends AbstractMoleculeArchiveDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "TagFrequencyWidget" )
+public class TagFrequencyWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+	
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
@@ -175,6 +179,14 @@ public class TagFrequencyWidget extends AbstractMoleculeArchiveDashboardWidget i
 	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 
 	@Override

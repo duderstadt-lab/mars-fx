@@ -246,13 +246,12 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected abstract void setScriptInputs(ScriptModule module);
 	
 	protected void loadScript(String name) throws IOException {
-		//Load example script
 		if (radioButtonGroovy.isSelected()) {
 			name += ".groovy";
 		} else if (radioButtonPython.isSelected()) {
 			name += ".py";
 		}
-    	InputStream is = this.getClass().getResourceAsStream(name);
+    	InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
     	final String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptExample);

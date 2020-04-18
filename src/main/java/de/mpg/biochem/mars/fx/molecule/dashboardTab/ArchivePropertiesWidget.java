@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
@@ -45,13 +46,14 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = ArchivePropertiesWidget.class, name = "ArchivePropertiesWidget" )
-public class ArchivePropertiesWidget extends AbstractMoleculeArchiveDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "ArchivePropertiesWidget" )
+public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+	
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();
@@ -105,6 +107,14 @@ public class ArchivePropertiesWidget extends AbstractMoleculeArchiveDashboardWid
 				}
 			}
     	});
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 
 	@Override
