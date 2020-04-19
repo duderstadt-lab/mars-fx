@@ -66,6 +66,7 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
+		widgets.forEach(widget -> widget.setMolecule(molecule));
 	}
 
 	public Set<String> getWidgetNames() {

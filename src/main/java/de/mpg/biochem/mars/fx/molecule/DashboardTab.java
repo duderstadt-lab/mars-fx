@@ -56,6 +56,8 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ComboBox;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
@@ -128,9 +130,18 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	}
 
 	@Override
-	protected void createIOMaps() {
-		// TODO Auto-generated method stub
-		
+	public void toJSON(JsonGenerator jGenerator) throws IOException {
+		dashboardPane.toJSON(jGenerator);
 	}
 	
+	@Override
+	public void fromJSON(JsonParser jParser) throws IOException {
+		System.out.println("dashboardPane fromJSON");
+		dashboardPane.fromJSON(jParser);
+	}
+
+	@Override
+	protected void createIOMaps() {
+		// Not needed. All the action is happening inside the dashboardPane.
+	}
 }

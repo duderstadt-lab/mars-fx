@@ -39,7 +39,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends AbstractJsonConvertibleRecord implements MarsDashboard {
+public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends AbstractJsonConvertibleRecord implements MarsDashboard<W> {
 	
 	@Parameter
 	protected MarsDashboardWidgetService marsDashboardWidgetService;
@@ -61,7 +61,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
         return t ;
     });
     
-    protected ObservableList<MarsDashboardWidget> widgets = FXCollections.observableArrayList();
+    protected ObservableList<W> widgets = FXCollections.observableArrayList();
     
     public AbstractDashboard() {
     	borderPane = new BorderPane();
@@ -138,16 +138,16 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
     	return widgetPane;
     }
 	
-	public ObservableList<MarsDashboardWidget> getWidgets() {
+	public ObservableList<W> getWidgets() {
 		return widgets;
 	}
 	
-	public void addWidget(MarsDashboardWidget widget) {
+	public void addWidget(W widget) {
 		widgets.add(widget);
 		widgetPane.getChildren().add(widget.getNode());
 	}
 	
-	public void removeWidget(MarsDashboardWidget widget) {
+	public void removeWidget(W widget) {
 		widgets.remove(widget);
 		widgetPane.getChildren().remove(widget.getNode());
 	}
@@ -161,7 +161,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		
 		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(),
 				e -> {
-					MarsDashboardWidget widget = createWidget(widgetName);		
+					W widget = createWidget(widgetName);		
 			    	addWidget(widget);
 				}, null);
 		
@@ -206,7 +206,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		inputMap.put("Widgets", MarsUtil.catchConsumerException(jParser -> {
 			while (jParser.nextToken() != JsonToken.END_ARRAY) {
 				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					MarsDashboardWidget widget = null;
+					W widget = null;
 					
 					if ("Name".equals(jParser.getCurrentName())) {
 			    		jParser.nextToken();
