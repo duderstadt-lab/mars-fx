@@ -25,7 +25,7 @@ public class MoleculeXYChartWidget extends AbstractHistogramWidget implements Mo
 		super.initialize();
 		
 		try {
-			loadScript("xychart");
+			loadScript("xychart", "#@ Molecule(required=false) molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

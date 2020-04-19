@@ -24,7 +24,7 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart");
+			loadScript("histogramchart", "#@ Molecule(required=false) molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
