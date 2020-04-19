@@ -162,6 +162,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
 		} else if (selectedTab.equals(plotTab)) {
 			plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(moleculeDashboardTab)) {
+			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else {
 			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
 		}
