@@ -298,7 +298,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 	
 	public void setContent(Node node) {
-		setContent(null, node);
+		contentTab.setContent(node);
 	}
 	
 	public void setContent(Node icon, Node node) {

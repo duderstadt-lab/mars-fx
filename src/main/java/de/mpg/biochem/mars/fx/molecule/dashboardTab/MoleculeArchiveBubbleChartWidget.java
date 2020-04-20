@@ -26,7 +26,7 @@ public class MoleculeArchiveBubbleChartWidget extends AbstractBubbleChartWidget 
 		super.initialize();
 		
 		try {
-			loadScript("bubblechart", "#@ MoleculeArchive(required=false) archive\n");
+			loadScript("bubblechart", "#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

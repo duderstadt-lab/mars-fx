@@ -26,7 +26,7 @@ public class MoleculeArchiveCategoryChartWidget extends AbstractCategoryChartWid
 		super.initialize();
 		
 		try {
-			loadScript("categorychart", "#@ MoleculeArchive(required=false) archive\n");
+			loadScript("categorychart", "#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

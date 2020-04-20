@@ -7,17 +7,17 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
+import de.mpg.biochem.mars.fx.dashboard.AbstractScriptableWidget;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.fx.dashboard.AbstractHistogramWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
+import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "HistogramWidget" )
-public class MoleculeArchiveHistogramWidget extends AbstractHistogramWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
-
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "BeakerWidget" )
+public class MoleculeArchiveBeakerWidget extends AbstractBeakerWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+	
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
@@ -26,7 +26,7 @@ public class MoleculeArchiveHistogramWidget extends AbstractHistogramWidget impl
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ MoleculeArchive archive\n");
+			loadScript("beaker", "#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -47,6 +47,6 @@ public class MoleculeArchiveHistogramWidget extends AbstractHistogramWidget impl
 	
 	@Override
 	public String getName() {
-		return "HistogramWidget";
+		return "BeakerWidget";
 	}
 }

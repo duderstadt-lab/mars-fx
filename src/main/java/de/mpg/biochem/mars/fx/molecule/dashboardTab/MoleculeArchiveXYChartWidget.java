@@ -27,7 +27,7 @@ public class MoleculeArchiveXYChartWidget extends AbstractXYChartWidget implemen
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ MoleculeArchive(required=false) archive\n");
+			loadScript("xychart", "#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

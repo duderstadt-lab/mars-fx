@@ -7,15 +7,16 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
+import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.fx.dashboard.AbstractHistogramWidget;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeHistogramWidget" )
-public class MoleculeHistogramWidget extends AbstractHistogramWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBeakerWidget" )
+public class MoleculeBeakerWidget extends AbstractBubbleChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
 	protected Molecule molecule;
 	
@@ -24,7 +25,7 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ Molecule molecule\n");
+			loadScript("beaker", "#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -45,6 +46,6 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 	
 	@Override
 	public String getName() {
-		return "MoleculeHistogramWidget";
+		return "MoleculeBeakerWidget";
 	}
 }

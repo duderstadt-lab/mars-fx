@@ -24,36 +24,48 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule.dashboardTab;
-
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.application.Platform;
 import javafx.scene.Node;
 
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
+import org.scijava.script.ScriptModule;
+
+import javafx.scene.layout.BorderPane;
+
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "DefaultWidget" )
-public class DefaultWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
-
+public abstract class AbstractBeakerWidget extends AbstractScriptableWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+		
+	protected Node node;
+	
 	@Override
 	public void initialize() {
 		super.initialize();
-	}
-
-	@Override
-	protected void createIOMaps() {
-		// TODO Auto-generated method stub
 		
+		node = new BorderPane();
+		
+		setContent(getIcon(), node);
+		
+		rootPane.setMinSize(250, 250);
+        rootPane.setMaxSize(250, 250);
 	}
 
 	@Override
@@ -63,23 +75,23 @@ public class DefaultWidget extends AbstractDashboardWidget implements MoleculeAr
 
 	@Override
 	public void run() {
+		Map<String, Object> outputs = runScript();
 		
-	}
-
-	@Override
-	public String getName() {
-		return "DefaultWidget";
-	}
-
-	@Override
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
-		// TODO Auto-generated method stub
+		if (outputs == null)
+			return;
 		
-	}
-
-	@Override
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
-		// TODO Auto-generated method stub
-		return null;
+		if (!outputs.containsKey("node")) {
+			writeToLog("required output node is missing.");
+			return;
+		}
+		
+		node = (Node)outputs.get("node");
+   
+        Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				setContent(node);
+			}
+    	});
 	}
 }
