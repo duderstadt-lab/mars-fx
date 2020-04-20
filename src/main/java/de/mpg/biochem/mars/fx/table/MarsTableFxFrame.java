@@ -36,6 +36,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
@@ -75,6 +76,9 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	
     @Parameter
     private UIService uiService;
+    
+    @Parameter
+    private Context context;
 
     private JFrame frame;
     protected String title;
@@ -95,12 +99,10 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	private JFXPanel fxPanel;
 	private Scene scene;
 
-	public MarsTableFxFrame(String name, MarsTable table, MarsTableService marsTableService) {
-		this.marsTableService = marsTableService;
-		this.marsDashboardWidgetService = marsTableService.getContext().getService(MarsDashboardWidgetService.class);
+	public MarsTableFxFrame(String name, MarsTable table, final Context context) {
+		context.inject(this);
 		this.table = table;
 		this.title = name;
-		this.uiService = marsTableService.getUIService();
 		table.setWindow(this);
 	}
 
@@ -194,7 +196,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		dashboardTab = new Tab();
 		dashboardTab.setText("");
 		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
-		marsTableDashboardPane = new MarsTableDashboard(marsDashboardWidgetService);
+		marsTableDashboardPane = new MarsTableDashboard(context);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);

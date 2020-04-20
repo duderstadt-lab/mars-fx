@@ -76,6 +76,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import javafx.scene.control.ButtonBase;
@@ -91,14 +92,13 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     @Parameter
     private MarsDashboardWidgetService marsDashboardWidgetService;
 	
-    public DashboardTab(MoleculeArchiveService moleculeArchiveService) {
-    	super();
-    	
-    	marsDashboardWidgetService = moleculeArchiveService.getContext().getService(MarsDashboardWidgetService.class);
-    	
+    public DashboardTab(final Context context) {
+		super(context);
+		
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
     	
-    	dashboardPane = new MoleculeArchiveDashboard();
+    	dashboardPane = new MoleculeArchiveDashboard(context);
+    	moleculeArchiveService.getContext().inject(dashboardPane);
     	
     	borderPane = new BorderPane();
     	borderPane.setCenter(dashboardPane.getNode());

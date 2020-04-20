@@ -12,6 +12,9 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 import java.util.Set;
+
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -22,15 +25,14 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 	
 	protected M molecule;
 	
-	public MoleculeDashboard() {
-		super();
+	public MoleculeDashboard(final Context context) {
+		super(context);
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
 			@Override
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-			   		marsDashboardWidgetService = e.getArchive().getMoleculeArchiveService().getContext().getService(MarsDashboardWidgetService.class);
 			   		discoverWidgets();
 			   		e.consume();
 			   	}

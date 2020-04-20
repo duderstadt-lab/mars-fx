@@ -29,6 +29,8 @@ package de.mpg.biochem.mars.fx.molecule;
 import java.io.IOException;
 import java.util.ArrayList;
 import org.controlsfx.control.textfield.CustomTextField;
+import org.scijava.Context;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
@@ -79,8 +81,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	
 	protected ChangeListener<MetaIndexRow> metaIndexTableListener;
 
-	public AbstractMarsMetadataTab() {
-		super();
+	public AbstractMarsMetadataTab(final Context context) {
+		super(context);
 		
 		Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
@@ -94,10 +96,10 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		SplitPane.setResizableWithParent(metadataTableIndexContainer, Boolean.FALSE);
 		splitItems.add(metadataTableIndexContainer);
 		
-		metadataCenterPane = createMetadataCenterPane();
+		metadataCenterPane = createMetadataCenterPane(context);
 		splitItems.add(metadataCenterPane.getNode());
 		
-		metadataPropertiesPane = createMetadataPropertiesPane();
+		metadataPropertiesPane = createMetadataPropertiesPane(context);
 		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(metadataPropertiesPane.getNode());
 		
@@ -262,9 +264,9 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		}, IOException.class));
 	}
 	
-	public abstract C createMetadataCenterPane();
+	public abstract C createMetadataCenterPane(final Context context);
 	
-	public abstract O createMetadataPropertiesPane();
+	public abstract O createMetadataPropertiesPane(final Context context);
 	
 	protected class MetaIndexRow {
     	private int index;

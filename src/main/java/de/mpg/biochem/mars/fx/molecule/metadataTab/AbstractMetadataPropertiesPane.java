@@ -35,6 +35,8 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import java.net.URL;
 import java.util.ArrayList;
 
+import org.scijava.Context;
+
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -96,7 +98,9 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
-	public AbstractMetadataPropertiesPane() {
+	public AbstractMetadataPropertiesPane(final Context context) {
+		context.inject(this);
+		
 		stackPane = new StackPane();
 		stackPane.prefWidth(220.0);
 		stackPane.prefHeight(220.0);

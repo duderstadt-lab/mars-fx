@@ -8,16 +8,18 @@ import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 
 import java.util.Set;
+
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.table.MarsTable;
 
 public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidget> {
 	
 	protected MarsTable table;
 	
-	public MarsTableDashboard(MarsDashboardWidgetService marsDashboardWidgetService) {
-		super();
+	public MarsTableDashboard(final Context context) {
+		super(context);
 		
-		this.marsDashboardWidgetService = marsDashboardWidgetService;
 		discoverWidgets();
 	}
 	

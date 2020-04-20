@@ -28,12 +28,16 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import java.util.ArrayList;
 
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -46,6 +50,9 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
 	protected Tab tab;
     protected double tabWidth = 60.0;
     
+    @Parameter
+    protected MoleculeArchiveService moleculeArchiveService;
+    
     protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
@@ -57,8 +64,9 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
         }
     };
     
-    public AbstractMoleculeArchiveTab() {
+    public AbstractMoleculeArchiveTab(final Context context) {
     	super();
+    	context.inject(this);
     	tab = new Tab();
     	tab.setText("");
     	tab.setOnSelectionChanged(replaceBackgroundColorHandler);

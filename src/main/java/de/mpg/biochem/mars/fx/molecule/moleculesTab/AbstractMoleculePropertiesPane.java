@@ -32,6 +32,9 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import java.io.IOException;
 import java.net.URL;
 
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -45,6 +48,7 @@ import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.fxml.FXMLLoader;
@@ -80,12 +84,17 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	
 	protected M molecule;
 	
+	@Parameter
+	protected MoleculeArchiveService moleculeArchiveService;
+	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
     private double tabWidth = 50.0;
     public static int lastSelectedTabIndex = 0;
 	
-	public AbstractMoleculePropertiesPane() {
+	public AbstractMoleculePropertiesPane(final Context context) {
+		context.inject(this);
+		
 		rootPane = new StackPane();
 		rootPane.prefWidth(220.0);
 		rootPane.prefHeight(220.0);

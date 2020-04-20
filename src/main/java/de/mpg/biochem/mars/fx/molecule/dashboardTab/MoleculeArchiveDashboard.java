@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
@@ -21,15 +22,14 @@ public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveD
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
-	public MoleculeArchiveDashboard() {
-		super();
+	public MoleculeArchiveDashboard(final Context context) {
+		super(context);
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
 			@Override
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 					archive = e.getArchive();
-			   		marsDashboardWidgetService = archive.getMoleculeArchiveService().getContext().getService(MarsDashboardWidgetService.class);
 			   		discoverWidgets();
 			   		e.consume();
 			   	}

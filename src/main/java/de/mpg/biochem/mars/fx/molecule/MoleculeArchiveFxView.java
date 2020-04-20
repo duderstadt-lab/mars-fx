@@ -28,6 +28,7 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
+import org.scijava.Context;
 
 import org.scijava.display.Display;
 import org.scijava.display.DisplayService;
@@ -49,7 +50,7 @@ import de.mpg.biochem.mars.molecule.*;
 public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive<?,?,?>> implements DisplayViewer<MoleculeArchive<?,?,?>> {
 	
 	@Parameter
-    private MoleculeArchiveService moleculeArchiveService;
+    private Context context;
 	
 	//This method is called to create and display a window
 	//here we override it to make sure that calls like uiService.show( .. for MoleculeArchive 
@@ -61,7 +62,7 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 
 		d.setName(archive.getName());
 
-		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, moleculeArchiveService);
+		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, context);
 		moleculeFrame.init();
 	}
 

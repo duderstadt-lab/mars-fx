@@ -26,10 +26,12 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.molecule.DefaultMarsMetadata;
 
 public class DefaultMetadataPropertiesPane extends AbstractMetadataPropertiesPane<DefaultMarsMetadata> {
-	public DefaultMetadataPropertiesPane() {
-		super();
+	public DefaultMetadataPropertiesPane(final Context context) {
+		super(context);
 	}
 }

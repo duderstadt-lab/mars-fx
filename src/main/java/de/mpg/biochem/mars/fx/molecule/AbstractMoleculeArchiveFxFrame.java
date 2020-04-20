@@ -40,6 +40,7 @@ import java.io.OutputStream;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
@@ -137,6 +138,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     @Parameter
     protected PrefService prefService;
+    
+    @Parameter
+    protected Context context;
 
 	protected MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
 	
@@ -176,12 +180,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
-	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
+	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, final Context context) {
+		super();
+		context.inject(this);
+
 		this.title = archive.getName();
 		this.archive = archive;
-		this.uiService = moleculeArchiveService.getUIService();
-		this.prefService = moleculeArchiveService.getPrefService();
-		this.moleculeArchiveService = moleculeArchiveService;
 		
 		archive.setWindow(this);
 	}
@@ -294,20 +298,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	protected void buildTabs() {
 		tabSet = new LinkedHashSet<MoleculeArchiveTab>();
 		
-		dashboardTab = new DashboardTab(moleculeArchiveService);
+		dashboardTab = new DashboardTab(context);
         dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
         tabSet.add(dashboardTab);
 
-        imageMetadataTab = createImageMetadataTab();
+        imageMetadataTab = createImageMetadataTab(context);
+        moleculeArchiveService.getContext().inject(imageMetadataTab);
         tabSet.add(imageMetadataTab);
         
-        moleculesTab = createMoleculesTab();
+        moleculesTab = createMoleculesTab(context);
+        moleculeArchiveService.getContext().inject(moleculesTab);
         tabSet.add(moleculesTab);
         
-        commentsTab = new CommentsTab();
+        commentsTab = new CommentsTab(context);
+        moleculeArchiveService.getContext().inject(commentsTab);
         tabSet.add(commentsTab);
         
-        settingsTab = new SettingsTab(prefService);
+        settingsTab = new SettingsTab(context);
+        moleculeArchiveService.getContext().inject(settingsTab);
         tabSet.add(settingsTab);
 
         //fire save events for tabs as they are left and update events for new tabs
@@ -836,9 +844,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		return maskerStackPane;
 	}
 	
-	public abstract I createImageMetadataTab();
+	public abstract I createImageMetadataTab(final Context context);
 	
-	public abstract M createMoleculesTab();
+	public abstract M createMoleculesTab(final Context context);
 	
 	public DashboardTab getDashboard() {
 		return dashboardTab;

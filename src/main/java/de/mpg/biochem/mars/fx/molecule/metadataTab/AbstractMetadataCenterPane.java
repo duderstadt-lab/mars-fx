@@ -26,6 +26,8 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
@@ -58,7 +60,8 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> impleme
 	
 	protected I marsImageMetadata;
 	
-	public AbstractMetadataCenterPane() {
+	public AbstractMetadataCenterPane(final Context context) {
+		context.inject(this);
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 		

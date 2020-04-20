@@ -32,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -82,14 +83,13 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	protected M molecule;
 	
-	public AbstractMoleculeCenterPane() {
+	public AbstractMoleculeCenterPane(final Context context) {
+		super();
+		context.inject(this);
+		
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
-		
-		initializeTabs();
-	}
-	
-	protected void initializeTabs() {
+
 		dataTableTab = new Tab();		
 		dataTableTab.setText("DataTable");
 		dataTableContainer = new BorderPane();
@@ -97,13 +97,14 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plotPane = createPlotPane();
+		plotPane = createPlotPane(context);
 		plotTab.setContent(plotPane.getNode());
 		
 		moleculeDashboardTab = new Tab();
 		moleculeDashboardTab.setText("");
 		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
-		moleculeDashboardPane = createDashboard();
+		moleculeDashboardPane = createDashboard(context);
+		marsDashboardWidgetService.getContext().inject(moleculeDashboardPane);
 		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
@@ -244,10 +245,10 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	 	}, IOException.class));
 	}
 	
-	public abstract P createPlotPane();
+	public abstract P createPlotPane(final Context context);
 	
-	public MoleculeDashboard<M> createDashboard() {
-		return new MoleculeDashboard<M>();
+	public MoleculeDashboard<M> createDashboard(final Context context) {
+		return new MoleculeDashboard<M>(context);
 	}
 	
 	@Override

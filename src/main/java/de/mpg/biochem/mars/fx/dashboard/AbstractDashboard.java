@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -63,7 +64,10 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
     
     protected ObservableList<W> widgets = FXCollections.observableArrayList();
     
-    public AbstractDashboard() {
+    public AbstractDashboard(final Context context) {
+    	super();
+    	context.inject(this);
+    	
     	borderPane = new BorderPane();
     	
     	Action removeAllWidgets = new Action("Remove all", null, BOMB,

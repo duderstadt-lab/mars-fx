@@ -57,6 +57,7 @@ import java.util.prefs.Preferences;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
+import org.scijava.Context;
 
 import de.mpg.biochem.mars.fx.*;
 import de.mpg.biochem.mars.fx.editor.SmartEdit;
@@ -81,8 +82,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	
 	private ArrayList<Menu> menus;
 	
-	public CommentsTab() {
-		super();
+	public CommentsTab(final Context context) {
+		super(context);
 		
 		Region bookIcon = new Region();
         bookIcon.getStyleClass().add("bookIcon");

@@ -26,25 +26,26 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 
 public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DefaultMoleculesTab> {
-	public DefaultMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
-		super(archive, moleculeArchiveService);
+	public DefaultMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, final Context context) {
+		super(archive, context);
 	}
 
 	@Override
-	public DefaultMarsMetadataTab createImageMetadataTab() {
-		return new DefaultMarsMetadataTab();
+	public DefaultMarsMetadataTab createImageMetadataTab(final Context context) {
+		return new DefaultMarsMetadataTab(context);
 	}
 
 	@Override
-	public DefaultMoleculesTab createMoleculesTab() {
-		return new DefaultMoleculesTab();
+	public DefaultMoleculesTab createMoleculesTab(final Context context) {
+		return new DefaultMoleculesTab(context);
 	}
 
 }

@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.scijava.Context;
+
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -73,8 +75,9 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
-	public AbstractMoleculePlotPane() {
+	public AbstractMoleculePlotPane(final Context context) {
 		super();
+		context.inject(this);
 
 		addChart();
 		

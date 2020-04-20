@@ -90,6 +90,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 
@@ -105,9 +106,8 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	private VBox rootPane;
 	
-	public SettingsTab(PrefService prefService) {
-		super();
-		this.prefService = prefService;
+	public SettingsTab(final Context context) {
+		super(context);
 		
 		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
 		

@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.controlsfx.control.textfield.CustomTextField;
+import org.scijava.Context;
 
 import com.fasterxml.jackson.core.JsonToken;
 
@@ -107,8 +108,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	
 	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
 
-	public AbstractMoleculesTab() {
-		super();
+	public AbstractMoleculesTab(final Context context) {
+		super(context);
 		
 		Region moleculeIcon = new Region();
         moleculeIcon.getStyleClass().add("moleculeIcon");
@@ -122,10 +123,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		SplitPane.setResizableWithParent(moleculeTableIndexContainer, Boolean.FALSE);
 		splitItems.add(moleculeTableIndexContainer);
 		
-		moleculeCenterPane = createMoleculeCenterPane();
+		moleculeCenterPane = createMoleculeCenterPane(context);
 		splitItems.add(moleculeCenterPane.getNode());
 		
-		moleculePropertiesPane = createMoleculePropertiesPane();
+		moleculePropertiesPane = createMoleculePropertiesPane(context);
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
@@ -482,9 +483,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	 	}, IOException.class));
 	}
 	
-	public abstract C createMoleculeCenterPane();
+	public abstract C createMoleculeCenterPane(final Context context);
 	
-	public abstract O createMoleculePropertiesPane();
+	public abstract O createMoleculePropertiesPane(final Context context);
 	
 	protected class MoleculeIndexRow {
     	private int index;
