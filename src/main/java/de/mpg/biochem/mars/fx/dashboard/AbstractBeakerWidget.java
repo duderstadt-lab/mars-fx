@@ -52,7 +52,7 @@ import javafx.scene.layout.BorderPane;
 
 import net.imagej.ops.Initializable;
 
-public abstract class AbstractBeakerWidget extends AbstractScriptableWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+public abstract class AbstractBeakerWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 		
 	protected Node node;
 	

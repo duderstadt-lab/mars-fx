@@ -2,21 +2,17 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
 import java.io.IOException;
 
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
-import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
-import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
+import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
+
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBeakerWidget" )
-public class MoleculeBeakerWidget extends AbstractBubbleChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
+public class MoleculeBeakerWidget extends AbstractBeakerWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
 	protected Molecule molecule;
 	
