@@ -561,6 +561,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
+				if (result.getList().size() == 0)
+					return;
+				
 				String tag = result.getList().get(0);
 	     		 
 	     		ArrayList<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
@@ -605,7 +608,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            //sort by slice
 	            mergedDataTable.sort(true, "slice");
 	            
-	            archive.get(mergeUIDs.get(0)).setNotes(archive.get(mergeUIDs.get(0)).getNotes() + "\n" + mergeNote);
+	            String previousNotes = "";
+	            if (archive.get(mergeUIDs.get(0)).getNotes() != null)
+	            	previousNotes = archive.get(mergeUIDs.get(0)).getNotes() + "\n";
+	            
+	            archive.get(mergeUIDs.get(0)).setNotes(previousNotes + mergeNote);
 			}, "Merging Molecules...");
 		});
 	}

@@ -535,8 +535,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public void onMoleculeArchiveUnlockEvent() {
     	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
     	String currentUID = "";
-    	if (moleculeIndexTable.getSelectionModel().getSelectedItem() != null)
-    		currentUID = moleculeIndexTable.getSelectionModel().getSelectedItem().getUID();
+    	if (molecule != null)
+    		currentUID = molecule.getUID();
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
