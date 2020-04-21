@@ -553,6 +553,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
+				if (result.getList().size() == 0)
+					return;
+				
 				String tag = result.getList().get(0);
 	     		 
 	     		ArrayList<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
