@@ -49,7 +49,7 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
 import javafx.scene.layout.BorderPane;
-
+import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractBeakerWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {

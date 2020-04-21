@@ -36,6 +36,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.spi.Histogram;
 import de.jensd.fx.glyphs.GlyphIcons;
+import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
@@ -53,6 +54,8 @@ import javafx.scene.layout.StackPane;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import de.gsi.chart.renderer.ErrorStyle;
+
+import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 
 import java.io.IOException;
 import java.util.ArrayList;

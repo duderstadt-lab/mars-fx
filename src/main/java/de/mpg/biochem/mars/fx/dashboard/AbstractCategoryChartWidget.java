@@ -30,7 +30,7 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
+import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
 import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 

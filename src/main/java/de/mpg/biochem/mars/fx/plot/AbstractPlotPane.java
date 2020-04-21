@@ -205,6 +205,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		}
 
 		toolBar = new ToolBar(toolButtons);
+		toolBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		toolBar.getItems().add(new Separator());
 
 		Action resetXYZoom = new Action("Reset Zoom", null, EXPAND, e -> {
