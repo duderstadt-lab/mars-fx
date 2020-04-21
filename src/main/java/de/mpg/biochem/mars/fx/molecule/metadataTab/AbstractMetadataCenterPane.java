@@ -26,26 +26,32 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
+import java.io.IOException;
+import java.util.HashSet;
+
 import org.scijava.Context;
 
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.editor.LogPane;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard.MarsMetadataDashboard;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
-import javafx.collections.ObservableList;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
-import javafx.scene.control.ScrollPane;
-
-public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> implements MetadataSubPane {
+public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends AbstractJsonConvertibleRecord implements MetadataSubPane {
 	
 	protected TabPane tabPane;
 	protected BorderPane dataTableContainer;
@@ -55,20 +61,22 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> impleme
 	protected BorderPane logContainer;
 	protected LogPane logPane;
 	
+	protected Tab marsMetadataDashboardTab;
+	protected MarsMetadataDashboard<I> marsMetadataDashboardPane;
+	
 	protected Tab BdvTab;
 	protected BdvViewTable bdvViewTable;
 	
-	protected I marsImageMetadata;
+	protected HashSet<String> refreshedTabs;
+	
+	protected I marsMetadata;
 	
 	public AbstractMetadataCenterPane(final Context context) {
+		super();
 		context.inject(this);
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
-		
-		initializeTabs();
-	}
-	
-	protected void initializeTabs() {
+
 		dataTableTab = new Tab();		
 		dataTableTab.setText("DataTable");
 		dataTableContainer = new BorderPane();
@@ -91,6 +99,14 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> impleme
 		
 		tabPane.getTabs().add(logTab);
 		
+		marsMetadataDashboardTab = new Tab();
+		marsMetadataDashboardTab.setText("");
+		marsMetadataDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		marsMetadataDashboardPane = new MarsMetadataDashboard<I>(context);
+		marsMetadataDashboardTab.setContent(marsMetadataDashboardPane.getNode());
+		
+		tabPane.getTabs().add(marsMetadataDashboardTab);
+		
 		BdvTab = new Tab();
 		BdvTab.setText("Bdv Views");
 		bdvViewTable = new BdvViewTable();
@@ -103,11 +119,46 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> impleme
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
+		refreshedTabs = new HashSet<String>();
+		
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
+			   		marsMetadataDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
+			   		e.consume();
+			   	}
+			} 
+        });
+		
+		tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
+            refreshSelectedTab();
+        });
+	}
+	
+	public void refreshSelectedTab() {
+		Tab selectedTab = tabPane.getSelectionModel().selectedItemProperty().get();
+		String tabName = selectedTab.getText();
+		
+		//Tab has already been refreshed
+		if (refreshedTabs.contains(tabName))
+			return;
+		
+		if (selectedTab.equals(dataTableTab)) {
+			loadDataTable();
+		} else if (selectedTab.equals(logTab)) {
+			loadLog();
+		} else if (selectedTab.equals(marsMetadataDashboardTab)) {
+			marsMetadataDashboardPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+		} else {
+			
+		}
+		refreshedTabs.add(tabName);
 	}
 	
 	protected void loadDataTable() {
-		MarsTableView metaTable = new MarsTableView(marsImageMetadata.getDataTable());
+		MarsTableView metaTable = new MarsTableView(marsMetadata.getDataTable());
 
 		//prevent drawing exception of table not fitting on screen..
 		//Still the last column is not easily accessed.
@@ -116,18 +167,46 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> impleme
 		dataTableContainer.setCenter(metaTable);
 	}
 	
+	@Override
+	protected void createIOMaps() {
+		outputMap.put("MarsMetadataDashboard", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("MarsMetadataDashboard");
+			marsMetadataDashboardPane.toJSON(jGenerator);
+		}, IOException.class));
+		
+		inputMap.put("MarsMetadataDashboard", MarsUtil.catchConsumerException(jParser -> {
+			marsMetadataDashboardPane.fromJSON(jParser);
+	 	}, IOException.class));
+		
+		/*
+		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("PlotPane");
+			plotPane.toJSON(jGenerator);
+		}, IOException.class));
+		
+		
+		inputMap.put("PlotPane", MarsUtil.catchConsumerException(jParser -> {
+			plotPane.fromJSON(jParser);
+	 	}, IOException.class));
+		
+	 	*/
+	}
+	
 	protected void loadLog() {
-		logPane.setMarkdown(marsImageMetadata.getLog());
+		logPane.setMarkdown(marsMetadata.getLog());
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
-		this.marsImageMetadata = (I) marsImageMetadata;
-		loadDataTable();
-		loadLog();
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsMetadata) {
+		this.marsMetadata = (I) marsMetadata;
+		//all tabs are now stale
+		refreshedTabs.clear();
 		
-		bdvViewTable.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+		refreshSelectedTab();
+		
+		bdvViewTable.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+		marsMetadataDashboardPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
 	}
 	
 	@Override

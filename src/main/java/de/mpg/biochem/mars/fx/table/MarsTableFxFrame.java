@@ -57,6 +57,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
+import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.*;

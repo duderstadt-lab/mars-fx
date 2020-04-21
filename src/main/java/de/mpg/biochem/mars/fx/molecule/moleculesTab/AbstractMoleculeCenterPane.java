@@ -78,9 +78,6 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected HashSet<String> refreshedTabs;
 	protected HashMap<String, ArrayList<String>> tabNameToSegmentName;
 	
-	@Parameter
-	protected MarsDashboardWidgetService marsDashboardWidgetService;
-	
 	protected M molecule;
 	
 	public AbstractMoleculeCenterPane(final Context context) {
@@ -103,8 +100,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		moleculeDashboardTab = new Tab();
 		moleculeDashboardTab.setText("");
 		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
-		moleculeDashboardPane = createDashboard(context);
-		marsDashboardWidgetService.getContext().inject(moleculeDashboardPane);
+		moleculeDashboardPane = new MoleculeDashboard<M>(context);
 		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
@@ -246,10 +242,6 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	}
 	
 	public abstract P createPlotPane(final Context context);
-	
-	public MoleculeDashboard<M> createDashboard(final Context context) {
-		return new MoleculeDashboard<M>(context);
-	}
 	
 	@Override
 	public Node getNode() {

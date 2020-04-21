@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.table;
+package de.mpg.biochem.mars.fx.table.dashboard;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.table;
+package de.mpg.biochem.mars.fx.table.dashboard;
 
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.molecule.Molecule;

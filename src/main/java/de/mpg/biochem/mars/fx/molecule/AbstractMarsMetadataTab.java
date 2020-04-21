@@ -33,6 +33,7 @@ import org.scijava.Context;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -252,8 +253,17 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	protected void createIOMaps() {
 		outputMap.put("SearchField", MarsUtil.catchConsumerException(jGenerator ->
 		jGenerator.writeStringField("SearchField", filterField.getText()), IOException.class));
+		outputMap.put("MarsMetadataSelectionUID", MarsUtil.catchConsumerException(jGenerator ->
+		jGenerator.writeStringField("MarsMetadataSelectionUID", marsMetadata.getUID()), IOException.class));
+		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("CenterPane");
+			if (metadataCenterPane instanceof JsonConvertibleRecord)
+				((JsonConvertibleRecord) metadataCenterPane).toJSON(jGenerator);
+		}, IOException.class));
 		
-		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
+		inputMap.put("SearchField", MarsUtil.catchConsumerException(jParser ->
+			filterField.setText(jParser.getText()), IOException.class));
+		inputMap.put("MarsMetadataSelectionUID", MarsUtil.catchConsumerException(jParser -> {
 	        String moleculeSelectionUID = jParser.getText();
 	    	for (int index = 0; index < filteredData.size(); index++) {
 	    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
@@ -262,6 +272,10 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	    		}
 	    	}
 		}, IOException.class));
+		inputMap.put("CenterPane", MarsUtil.catchConsumerException(jParser -> {
+			if (metadataCenterPane instanceof JsonConvertibleRecord)
+				((JsonConvertibleRecord) metadataCenterPane).fromJSON(jParser);
+	 	}, IOException.class));
 	}
 	
 	public abstract C createMetadataCenterPane(final Context context);

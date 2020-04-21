@@ -41,7 +41,7 @@ import org.scijava.service.Service;
 
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboardWidget;
-import de.mpg.biochem.mars.fx.table.MarsTableDashboardWidget;
+import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboardWidget;
 import net.imagej.ImageJService;
 
 @Plugin( type = Service.class )
