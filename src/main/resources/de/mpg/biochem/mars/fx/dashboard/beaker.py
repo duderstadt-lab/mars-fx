@@ -1,8 +1,7 @@
-#@ MoleculeArchive archive
 #@OUTPUT javafx.scene.Node node
 
-import javafx.scene.control.Label
-import javafx.scene.layout.BorderPane
+from javafx.scene.control import Label
+from javafx.scene.layout import BorderPane
 
 label = Label("Hello Martians")
 borderPane = BorderPane()

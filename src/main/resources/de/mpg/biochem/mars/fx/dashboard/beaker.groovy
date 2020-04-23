@@ -1,4 +1,3 @@
-#@ MoleculeArchive archive
 #@OUTPUT javafx.scene.Node node
 
 import javafx.scene.control.Label
