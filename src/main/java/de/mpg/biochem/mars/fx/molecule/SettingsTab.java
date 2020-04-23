@@ -109,7 +109,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	public SettingsTab(final Context context) {
 		super(context);
 		
-		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
+		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.083em"));
 		
 		//smileEncodingButton = new JFXToggleButton();
 		rootPane = new VBox();

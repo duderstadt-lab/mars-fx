@@ -174,7 +174,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     protected MarsBdvFrame<?> marsBdvFrame;
 
-    protected double tabWidth = 60.0;
+    protected double tabWidth = 50.0;
     
     protected Menu fileMenu, toolsMenu;
     
