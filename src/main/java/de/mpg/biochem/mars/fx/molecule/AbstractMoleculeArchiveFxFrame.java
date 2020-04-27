@@ -306,19 +306,15 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
         tabSet.add(dashboardTab);
 
         imageMetadataTab = createImageMetadataTab(context);
-        moleculeArchiveService.getContext().inject(imageMetadataTab);
         tabSet.add(imageMetadataTab);
         
         moleculesTab = createMoleculesTab(context);
-        moleculeArchiveService.getContext().inject(moleculesTab);
         tabSet.add(moleculesTab);
         
         commentsTab = new CommentsTab(context);
-        moleculeArchiveService.getContext().inject(commentsTab);
         tabSet.add(commentsTab);
         
         settingsTab = new SettingsTab(context);
-        moleculeArchiveService.getContext().inject(settingsTab);
         tabSet.add(settingsTab);
 
         //fire save events for tabs as they are left and update events for new tabs
@@ -360,10 +356,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	
 	protected void buildMenuBar() {
 		//Build file menu
-		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
+		Action fileSaveAction = new Action("Save", "Shortcut+S", FLOPPY_ALT, e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
-		Action fileCloseAction = new Action("close", null, null, e -> close());
+		Action fileCloseAction = new Action("Close", null, null, e -> close());
 		
 		fileMenu = ActionUtils.createMenu("File",
 				fileSaveAction,
