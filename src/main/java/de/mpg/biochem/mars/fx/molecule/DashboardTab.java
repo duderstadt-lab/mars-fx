@@ -98,7 +98,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
     	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"));
     	
     	dashboardPane = new MoleculeArchiveDashboard(context);
-    	moleculeArchiveService.getContext().inject(dashboardPane);
     	
     	borderPane = new BorderPane();
     	borderPane.setCenter(dashboardPane.getNode());
