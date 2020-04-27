@@ -135,7 +135,6 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	
 	@Override
 	public void fromJSON(JsonParser jParser) throws IOException {
-		System.out.println("dashboardPane fromJSON");
 		dashboardPane.fromJSON(jParser);
 	}
 
