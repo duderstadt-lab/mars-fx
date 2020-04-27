@@ -79,7 +79,8 @@ public class Options
 		encoding.init(options, "encoding", null);
 		markdownFileExtensions.init(options, "markdownFileExtensions", DEF_MARKDOWN_FILE_EXTENSIONS);
 		markdownExtensions.init(options, "markdownExtensions");
-		markdownRenderer.init(options, "markdownRenderer", RendererType.FlexMark);
+		//markdownRenderer.init(options, "markdownRenderer", RendererType.FlexMark);
+		markdownRenderer.set(RendererType.FlexMark);
 		showLineNo.init(options, "showLineNo", false);
 		showWhitespace.init(options, "showWhitespace", false);
 		showImagesEmbedded.init(options, "showImagesEmbedded", false);
