@@ -45,7 +45,7 @@ import de.mpg.biochem.mars.fx.options.Options.RendererType;
 public class MarkdownExtensions
 {
 	static final HashMap<String, String> displayNames = new HashMap<>();
-	static final HashMap<String, String> commonmarkExtClasses = new HashMap<>();
+	//static final HashMap<String, String> commonmarkExtClasses = new HashMap<>();
 	static final HashMap<String, String> flexmarkExtClasses = new HashMap<>();
 
 	static {
@@ -57,7 +57,6 @@ public class MarkdownExtensions
 		}
 
 		HashSet<String> ids = new HashSet<>();
-		//ids.addAll(commonmarkExtClasses.keySet());
 		ids.addAll(flexmarkExtClasses.keySet());
 		for (String id : ids)
 			displayNames.put(id, Messages.get("MarkdownExtensionsPane.ext." + id));
@@ -73,7 +72,6 @@ public class MarkdownExtensions
 
 	public static boolean isAvailable(RendererType rendererType, String id) {
 		switch (rendererType) {
-			//case CommonMark:	return commonmarkExtClasses.containsKey(id);
 			case FlexMark:		return flexmarkExtClasses.containsKey(id);
 			default:			return false;
 		}
