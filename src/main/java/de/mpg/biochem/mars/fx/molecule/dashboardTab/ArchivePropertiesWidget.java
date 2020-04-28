@@ -97,7 +97,11 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 			@Override
 			public void run() {
 				archiveName.setText(archive.getName());
-				className.setText(archive.getClass().getName());
+				String archiveType = archive.getClass().getName();
+				int i = archiveType.lastIndexOf('.');
+				if (i > 0)
+				    archiveType = archiveType.substring(i+1);
+				className.setText(archiveType);
 				moleculeNumber.setText(archive.getNumberOfMolecules() + " Molecules");
 				metadataNumber.setText(archive.getNumberOfMetadatas() + " Metadata");
 				if (archive.isVirtual()) {
