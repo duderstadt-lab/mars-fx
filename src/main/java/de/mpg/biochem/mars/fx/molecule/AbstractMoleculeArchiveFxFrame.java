@@ -527,7 +527,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            	 		molecule.removeAllParameters();
 	            	 	} else {
 	            	 		for (int i=0;i<parameterList.size();i++) {
-	     		        		molecule.removeTag(parameterList.get(i));
+	     		        		molecule.removeParameter(parameterList.get(i));
 	     		        	}
 	            	 	}
 	            	 	archive.put(molecule);
