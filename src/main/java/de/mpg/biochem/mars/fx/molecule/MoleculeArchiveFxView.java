@@ -42,7 +42,7 @@ import org.scijava.ui.viewer.DisplayViewer;
 import org.scijava.Priority;
 
 import net.imagej.display.WindowService;
-
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 
 

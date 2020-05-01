@@ -55,7 +55,7 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionPlugin;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.molecule.MarsMetadata;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;

@@ -6,11 +6,10 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
-import de.mpg.biochem.mars.molecule.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
 import net.imagej.ops.Initializable;
-
 import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
 
 @Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataBeakerWidget" )
 public class MarsMetadataBeakerWidget extends AbstractBeakerWidget implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable {

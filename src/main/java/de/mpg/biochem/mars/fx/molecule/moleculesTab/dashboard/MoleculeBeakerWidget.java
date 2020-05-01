@@ -6,10 +6,9 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
-import de.mpg.biochem.mars.molecule.Molecule;
 import net.imagej.ops.Initializable;
-
 import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
+import de.mpg.biochem.mars.molecule.Molecule;
 
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBeakerWidget" )
 public class MoleculeBeakerWidget extends AbstractBeakerWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {

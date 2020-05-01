@@ -33,8 +33,8 @@ import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import javafx.event.Event;
 
 public class MoleculePositionOfInterestTable extends AbstractPositionOfInterestTable implements MoleculeSubPane {

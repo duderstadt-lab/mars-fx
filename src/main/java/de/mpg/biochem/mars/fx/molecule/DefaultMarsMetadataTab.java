@@ -30,7 +30,7 @@ import org.scijava.Context;
 
 import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataCenterPane;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataPropertiesPane;
-import de.mpg.biochem.mars.molecule.MarsMetadata;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 
 public class DefaultMarsMetadataTab extends AbstractMarsMetadataTab<MarsMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
 	

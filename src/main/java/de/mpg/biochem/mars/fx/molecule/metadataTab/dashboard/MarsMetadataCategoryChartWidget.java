@@ -7,11 +7,11 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
-import de.mpg.biochem.mars.molecule.MarsMetadata;
+import de.mpg.biochem.mars.fx.dashboard.AbstractCategoryChartWidget;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.fx.dashboard.AbstractCategoryChartWidget;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataCategoryChartWidget" )

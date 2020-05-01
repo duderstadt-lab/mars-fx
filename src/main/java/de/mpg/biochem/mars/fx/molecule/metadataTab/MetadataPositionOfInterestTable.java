@@ -27,9 +27,9 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataIndicatorChangedEvent;
-import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.event.Event;
 
 public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestTable implements MetadataSubPane {

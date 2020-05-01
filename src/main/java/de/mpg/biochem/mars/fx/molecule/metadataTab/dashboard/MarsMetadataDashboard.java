@@ -7,12 +7,12 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 
 import java.util.Set;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 

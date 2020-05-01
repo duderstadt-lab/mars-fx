@@ -68,6 +68,7 @@ import bdv.viewer.render.Prefetcher;
 import bdv.viewer.state.SourceState;
 import bdv.viewer.state.ViewerState;
 import mpicbg.spim.data.SpimDataException;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
 import net.imglib2.Dimensions;
