@@ -116,6 +116,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
@@ -339,6 +340,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
    		                	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
    		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
+   		                	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
     							}
    		                 	};
    		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
