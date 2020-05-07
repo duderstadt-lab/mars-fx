@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.HashSet;
 
 import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.editor.LogPane;
@@ -48,14 +49,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-import javafx.scene.control.TableColumn;
 import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends AbstractJsonConvertibleRecord implements MetadataSubPane {
 	
 	protected TabPane tabPane;
-	protected BorderPane dataTableContainer;
-	protected Tab dataTableTab;
+	protected BorderPane OMEContainer;
+	protected Tab OMETab;
+	protected MarsOMEView OMEView;
 	
 	protected Tab logTab;
 	protected BorderPane logContainer;
@@ -71,18 +72,23 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 	
 	protected I marsMetadata;
 	
+	@Parameter
+	protected Context context;
+	
 	public AbstractMetadataCenterPane(final Context context) {
 		super();
 		context.inject(this);
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 
-		dataTableTab = new Tab();		
-		dataTableTab.setText("DataTable");
-		dataTableContainer = new BorderPane();
-		dataTableTab.setContent(dataTableContainer);
+		OMETab = new Tab();		
+		OMETab.setText("OME");
+		OMEContainer = new BorderPane();
+		OMEView = new MarsOMEView(context);
+		OMEContainer.setCenter(OMEView.getNode());
+		OMETab.setContent(OMEContainer);
 		
-		tabPane.getTabs().add(dataTableTab);
+		tabPane.getTabs().add(OMETab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		logTab = new Tab();
@@ -117,7 +123,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		tabPane.getStylesheets().clear();
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/metadataTab/MetaTablesPane.css");
 		
-		tabPane.getSelectionModel().select(dataTableTab);
+		tabPane.getSelectionModel().select(OMETab);
 		
 		refreshedTabs = new HashSet<String>();
 		
@@ -145,8 +151,8 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		if (refreshedTabs.contains(tabName))
 			return;
 		
-		if (selectedTab.equals(dataTableTab)) {
-			loadDataTable();
+		if (selectedTab.equals(OMETab)) {
+			loadOMEMetadata();
 		} else if (selectedTab.equals(logTab)) {
 			loadLog();
 		} else if (selectedTab.equals(marsMetadataDashboardTab)) {
@@ -157,14 +163,8 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		refreshedTabs.add(tabName);
 	}
 	
-	protected void loadDataTable() {
-		MarsTableView metaTable = new MarsTableView(marsMetadata.getDataTable());
-
-		//prevent drawing exception of table not fitting on screen..
-		//Still the last column is not easily accessed.
-		metaTable.getColumns().add(new TableColumn<>("       "));
-		metaTable.setPrefWidth(1000);
-		dataTableContainer.setCenter(metaTable);
+	protected void loadOMEMetadata() {
+		OMEView.fill(marsMetadata.getOMEXMLMetadata());
 	}
 	
 	@Override
@@ -177,19 +177,6 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		inputMap.put("MarsMetadataDashboard", MarsUtil.catchConsumerException(jParser -> {
 			marsMetadataDashboardPane.fromJSON(jParser);
 	 	}, IOException.class));
-		
-		/*
-		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeFieldName("PlotPane");
-			plotPane.toJSON(jGenerator);
-		}, IOException.class));
-		
-		
-		inputMap.put("PlotPane", MarsUtil.catchConsumerException(jParser -> {
-			plotPane.fromJSON(jParser);
-	 	}, IOException.class));
-		
-	 	*/
 	}
 	
 	protected void loadLog() {
