@@ -52,20 +52,21 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
-public abstract class AbstractBeakerWidget extends AbstractScriptableWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
-		
+public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
+		implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+
 	protected Node node;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		node = new BorderPane();
-		
+
 		setContent(getIcon(), node);
-		
+
 		rootPane.setMinSize(250, 250);
-        rootPane.setMaxSize(250, 250);
+		rootPane.setMaxSize(250, 250);
 	}
 
 	@Override
@@ -76,22 +77,22 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget impl
 	@Override
 	public void run() {
 		Map<String, Object> outputs = runScript();
-		
+
 		if (outputs == null)
 			return;
-		
+
 		if (!outputs.containsKey("node")) {
 			writeToLog("required output node is missing.");
 			return;
 		}
-		
-		node = (Node)outputs.get("node");
-   
-        Platform.runLater(new Runnable() {
+
+		node = (Node) outputs.get("node");
+
+		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				setContent(node);
 			}
-    	});
+		});
 	}
 }

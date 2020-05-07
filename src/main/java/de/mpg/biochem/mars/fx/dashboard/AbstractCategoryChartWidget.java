@@ -111,111 +111,125 @@ import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 
-public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidget implements MarsDashboardWidget, Initializable {
-	
+public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidget
+		implements MarsDashboardWidget, Initializable {
+
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
 	protected MarsNumericAxis yAxis;
-	
-	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(Arrays.asList("xlabel", 
-			"ylabel", "title", "xvalues", "yvalues"));
+
+	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
+			Arrays.asList("xlabel", "ylabel", "title", "xvalues", "yvalues"));
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-        xAxis = new MarsCategoryAxis("Categories");
-        xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-        
-        yAxis = new MarsNumericAxis();
-        yAxis.setName("Frequency");
-        yAxis.setMinorTickVisible(false);
-        yAxis.setForceZeroInRange(true);
-        yAxis.setAutoRanging(true);
-        yAxis.setAutoRangeRounding(false);
-        //yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
 
-        barChart = new XYChart(xAxis, yAxis);
-        barChart.setAnimated(false);
-        barChart.getRenderers().clear();
-        final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
-        renderer.setPolyLineStyle(LineStyle.NONE);
-        renderer.setDrawBars(true);
-        renderer.setBarWidthPercentage(70);
-        renderer.setDrawMarker(false);
-        
-        //Make sure this is set to false. Otherwise second to last points seems to be lost :(...
-        renderer.pointReductionProperty().set(false);
-        barChart.getRenderers().add(renderer);
-        barChart.legendVisibleProperty().set(false);
-        barChart.horizontalGridLinesVisibleProperty().set(false);
-        barChart.verticalGridLinesVisibleProperty().set(false);
+		xAxis = new MarsCategoryAxis("Categories");
+		xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+
+		yAxis = new MarsNumericAxis();
+		yAxis.setName("Frequency");
+		yAxis.setMinorTickVisible(false);
+		yAxis.setForceZeroInRange(true);
+		yAxis.setAutoRanging(true);
+		yAxis.setAutoRangeRounding(false);
+		// yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
+
+		barChart = new XYChart(xAxis, yAxis);
+		barChart.setAnimated(false);
+		barChart.getRenderers().clear();
+		final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+		renderer.setPolyLineStyle(LineStyle.NONE);
+		renderer.setDrawBars(true);
+		renderer.setBarWidthPercentage(70);
+		renderer.setDrawMarker(false);
+
+		// Make sure this is set to false. Otherwise second to last points seems to be
+		// lost :(...
+		renderer.pointReductionProperty().set(false);
+		barChart.getRenderers().add(renderer);
+		barChart.legendVisibleProperty().set(false);
+		barChart.horizontalGridLinesVisibleProperty().set(false);
+		barChart.verticalGridLinesVisibleProperty().set(false);
 
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(barChart);
 		stack.setPrefSize(100, 100);
 
-        BorderPane chartPane = new BorderPane();
-        chartPane.setCenter(stack);
-        setContent(getIcon(), chartPane);
-        
-        rootPane.setMinSize(250, 250);
-        rootPane.setMaxSize(250, 250);
+		BorderPane chartPane = new BorderPane();
+		chartPane.setCenter(stack);
+		setContent(getIcon(), chartPane);
+
+		rootPane.setMinSize(250, 250);
+		rootPane.setMaxSize(250, 250);
 	}
 
 	@Override
 	public void run() {
 		Map<String, Object> outputs = runScript();
-		
+
 		if (outputs == null)
 			return;
-		
+
 		for (String field : requiredGlobalFields)
 			if (!outputs.containsKey(field)) {
 				writeToLog("required output " + field + " is missing.");
 				return;
 			}
-		
+
 		String xLabel = (String) outputs.get("xlabel");
 		String yLabel = (String) outputs.get("ylabel");
-		String title = (String)outputs.get("title");
+		String title = (String) outputs.get("title");
 		String[] xValues = (String[]) outputs.get("xvalues");
 		Double[] yValues = (Double[]) outputs.get("yvalues");
-		
+
 		if (xValues.length != yValues.length) {
 			writeToLog("The length of xvalues does not match that of yvalues.");
 			return;
 		}
-		
-        final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-        
-        if (outputs.containsKey("color"))
-        	dataSet.setStyle("fillColor:" + (String)outputs.get("color") + ";");
-        
-        List<String> categories = new ArrayList<String>();
-        
-        for (int row=0;row < xValues.length; row++) {
-        	dataSet.add(row, yValues[row].doubleValue());
-        	categories.add(xValues[row]);
-        }
-   
-        Platform.runLater(new Runnable() {
+
+		final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
+
+		if (outputs.containsKey("color"))
+			dataSet.setStyle("fillColor:" + (String) outputs.get("color") + ";");
+
+		List<String> categories = new ArrayList<String>();
+
+		for (int row = 0; row < xValues.length; row++) {
+			dataSet.add(row, yValues[row].doubleValue());
+			categories.add(xValues[row]);
+		}
+
+		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				xAxis.setName(xLabel);
 				yAxis.setName(yLabel);
-				
+				// Check if a y-range was provided
+				if (outputs.containsKey("ymin") && outputs.containsKey("ymax")) {
+					yAxis.setAutoRanging(false);
+					yAxis.setMin((Double) outputs.get("ymin"));
+					yAxis.setMax((Double) outputs.get("ymax"));
+				} else if (outputs.containsKey("ymax")) {
+					yAxis.setAutoRanging(false);
+					yAxis.setMin(0.0);
+					yAxis.setMax((Double) outputs.get("ymax"));
+				} else if (outputs.containsKey("ymin")) {
+					yAxis.setAutoRanging(true);
+				}
+
 				xAxis.setCategories(categories);
 				barChart.setTitle(title);
-			    barChart.getDatasets().clear();
-			    barChart.getDatasets().add(dataSet);
-			    
-			    xAxis.layout();
+				barChart.getDatasets().clear();
+				barChart.getDatasets().add(dataSet);
+
+				xAxis.layout();
 			}
-    	});
+		});
 	}
-	
+
 	@Override
 	public Node getIcon() {
 		Region categoryIcon = new Region();
