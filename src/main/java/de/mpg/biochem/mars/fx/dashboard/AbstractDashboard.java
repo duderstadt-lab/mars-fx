@@ -136,6 +136,10 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	public Node getNode() {
 		return borderPane;
 	}
+	
+	public double getWidth() {
+		return borderPane.getWidth();
+	}
 
 	public JFXMasonryPane getWidgetPane() {
 		return widgetPane;

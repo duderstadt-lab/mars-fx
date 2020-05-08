@@ -245,7 +245,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		if (dragX) {
 			double mousex = event.getX();
 			double newWidth = rootPane.getMinWidth() + (mousex - x);
-			if (newWidth > MINIMUM_WIDTH) {
+			if (newWidth > MINIMUM_WIDTH && newWidth < parent.getWidth() - 20) {
 				rootPane.setMinWidth(newWidth);
 				rootPane.setMaxWidth(newWidth);
 				x = mousex;
