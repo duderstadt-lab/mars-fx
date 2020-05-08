@@ -315,15 +315,23 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getXAxis().setAutoRanging(false);
 				subPlot.getChart().getXAxis().setMin(plotOptionsPane.getXMin());
 				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
-			} else
+			} else {
 				subPlot.getChart().getXAxis().setAutoRanging(true);
+				subPlot.getChart().getXAxis().requestAxisLayout();
+				subPlot.getChart().getXAxis().forceRedraw();
+				subPlot.getChart().getXAxis().forceRedraw();
+			}
 			
 			if (fixYBounds.get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
 				subPlot.getChart().getYAxis().setMin(plotOptionsPane.getYMin());
 				subPlot.getChart().getYAxis().setMax(plotOptionsPane.getYMax());
-			} else 
+			} else {
 				subPlot.getChart().getYAxis().setAutoRanging(true);
+				subPlot.getChart().getYAxis().requestAxisLayout();
+				subPlot.getChart().getYAxis().forceRedraw();
+				subPlot.getChart().getYAxis().forceRedraw();
+			}
 		}
 	}
 	
