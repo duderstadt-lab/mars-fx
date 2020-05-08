@@ -321,7 +321,7 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
             updateScaleAndUnitPrefix();
         }
 
-        axisLabel.setText(axisPrimaryLabel);
-        axisLabel.applyCss();
+        getAxisLabel().setText(axisPrimaryLabel);
+        getAxisLabel().applyCss();
     }
 }
