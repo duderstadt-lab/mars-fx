@@ -26,12 +26,14 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.molecule.Molecule;
 
 public class DefaultMoleculePlotPane extends AbstractMoleculePlotPane<Molecule, DefaultMoleculeSubPlot> {
 	
-	public DefaultMoleculePlotPane() {
-		super();
+	public DefaultMoleculePlotPane(final Context context) {
+		super(context);
 	}
 
 	@Override

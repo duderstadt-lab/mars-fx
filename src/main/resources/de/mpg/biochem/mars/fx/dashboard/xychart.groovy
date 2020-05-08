@@ -1,4 +1,3 @@
-#@ MoleculeArchive(required=false) archive
 #@OUTPUT String xlabel
 #@OUTPUT String ylabel
 #@OUTPUT String title

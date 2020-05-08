@@ -1,5 +1,4 @@
 /*---- main tab pane ----*/
-
 .tab-pane {
 	-mwfx-tab-background: derive(-fx-background,25%);
 	-mwfx-tab-active: #f47806;

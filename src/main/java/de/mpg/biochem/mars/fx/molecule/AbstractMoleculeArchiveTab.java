@@ -28,12 +28,16 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import java.util.ArrayList;
 
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -46,7 +50,10 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
 	protected Tab tab;
     protected double tabWidth = 60.0;
     
-    protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+    @Parameter
+    protected MoleculeArchiveService moleculeArchiveService;
+    
+    protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
         Tab currentTab = (Tab) event.getTarget();
@@ -57,8 +64,9 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
         }
     };
     
-    public AbstractMoleculeArchiveTab() {
+    public AbstractMoleculeArchiveTab(final Context context) {
     	super();
+    	context.inject(this);
     	tab = new Tab();
     	tab.setText("");
     	tab.setOnSelectionChanged(replaceBackgroundColorHandler);
@@ -76,7 +84,7 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
     public abstract ArrayList<Menu> getMenus();
     
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;
     }
 
@@ -97,7 +105,7 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
 		return tab;
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return this.archive;
 	}
 	

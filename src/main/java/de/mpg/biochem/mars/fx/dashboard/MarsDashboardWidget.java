@@ -24,11 +24,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule.dashboardTab;
+package de.mpg.biochem.mars.fx.dashboard;
 
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -40,17 +40,26 @@ import net.imagej.ops.Initializable;
 
 public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {
 	public Node getNode();
+
 	public String getName();
+
 	public void setContent(Node node);
+
 	public void setContent(Node icon, Node node);
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive);
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive();
-	public void setParent(DashboardTab parent);
-	public DashboardTab getParent();
+
+	public void setParent(MarsDashboard parent);
+
+	public MarsDashboard getParent();
+
 	public boolean isRunning();
+
 	public void setRunning(boolean running);
+
 	public Node getIcon();
+
 	public void spin();
+
 	public void stopSpinning();
+
 	public void close();
 }

@@ -33,13 +33,17 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
@@ -80,6 +84,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+//import javafx.scene.image.Image;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.stage.FileChooser;
@@ -111,6 +116,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
@@ -126,7 +132,7 @@ import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ScrollBar;
 
-public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
+public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
 		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
 	
 	@Parameter
@@ -137,8 +143,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     @Parameter
     protected PrefService prefService;
+    
+    @Parameter
+    protected Context context;
 
-	protected MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
 	
 	protected JFrame frame;
 	protected String title;
@@ -170,18 +179,18 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     
     protected MarsBdvFrame<?> marsBdvFrame;
 
-    protected double tabWidth = 60.0;
+    protected double tabWidth = 50.0;
     
     protected Menu fileMenu, toolsMenu;
     
     protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
-	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsImageMetadata,MoleculeArchiveProperties> archive, MoleculeArchiveService moleculeArchiveService) {
+	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive, final Context context) {
+		super();
+		context.inject(this);
+
 		this.title = archive.getName();
 		this.archive = archive;
-		this.uiService = moleculeArchiveService.getUIService();
-		this.prefService = moleculeArchiveService.getPrefService();
-		this.moleculeArchiveService = moleculeArchiveService;
 		
 		archive.setWindow(this);
 	}
@@ -284,7 +293,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	    			frame.setVisible(true);
 				});
 		} catch (IOException e) {
-			//TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -294,20 +302,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	protected void buildTabs() {
 		tabSet = new LinkedHashSet<MoleculeArchiveTab>();
 		
-		dashboardTab = new DashboardTab(moleculeArchiveService);
+		dashboardTab = new DashboardTab(context);
         dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
         tabSet.add(dashboardTab);
 
-        imageMetadataTab = createImageMetadataTab();
+        imageMetadataTab = createImageMetadataTab(context);
         tabSet.add(imageMetadataTab);
         
-        moleculesTab = createMoleculesTab();
+        moleculesTab = createMoleculesTab(context);
         tabSet.add(moleculesTab);
         
-        commentsTab = new CommentsTab();
+        commentsTab = new CommentsTab(context);
         tabSet.add(commentsTab);
         
-        settingsTab = new SettingsTab(prefService);
+        settingsTab = new SettingsTab(context);
         tabSet.add(settingsTab);
 
         //fire save events for tabs as they are left and update events for new tabs
@@ -332,6 +340,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
     							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
    		                	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
    		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
+   		                	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
     							}
    		                 	};
    		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
@@ -349,10 +358,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	
 	protected void buildMenuBar() {
 		//Build file menu
-		Action fileSaveAction = new Action("save", "Shortcut+S", FLOPPY_ALT, e -> save());
+		Action fileSaveAction = new Action("Save", "Shortcut+S", FLOPPY_ALT, e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
-		Action fileCloseAction = new Action("close", null, null, e -> close());
+		Action fileCloseAction = new Action("Close", null, null, e -> close());
 		
 		fileMenu = ActionUtils.createMenu("File",
 				fileSaveAction,
@@ -520,7 +529,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	            	 		molecule.removeAllParameters();
 	            	 	} else {
 	            	 		for (int i=0;i<parameterList.size();i++) {
-	     		        		molecule.removeTag(parameterList.get(i));
+	     		        		molecule.removeParameter(parameterList.get(i));
 	     		        	}
 	            	 	}
 	            	 	archive.put(molecule);
@@ -553,6 +562,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
+				if (result.getList().size() == 0)
+					return;
+				
 				String tag = result.getList().get(0);
 	     		 
 	     		ArrayList<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
@@ -597,7 +609,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 	            //sort by slice
 	            mergedDataTable.sort(true, "slice");
 	            
-	            archive.get(mergeUIDs.get(0)).setNotes(archive.get(mergeUIDs.get(0)).getNotes() + "\n" + mergeNote);
+	            String previousNotes = "";
+	            if (archive.get(mergeUIDs.get(0)).getNotes() != null)
+	            	previousNotes = archive.get(mergeUIDs.get(0)).getNotes() + "\n";
+	            
+	            archive.get(mergeUIDs.get(0)).setNotes(previousNotes + mergeNote);
 			}, "Merging Molecules...");
 		});
 	}
@@ -627,7 +643,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
         new Thread(task).start();
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	
@@ -836,9 +852,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsImageMetadata
 		return maskerStackPane;
 	}
 	
-	public abstract I createImageMetadataTab();
+	public abstract I createImageMetadataTab(final Context context);
 	
-	public abstract M createMoleculesTab();
+	public abstract M createMoleculesTab(final Context context);
 	
 	public DashboardTab getDashboard() {
 		return dashboardTab;

@@ -116,13 +116,13 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private BdvHandlePanel bdv;
 	
 	private String xParameter, yParameter;
-	private MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected Molecule molecule;
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive, Molecule molecule, String xParameter, String yParameter) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive, Molecule molecule, String xParameter, String yParameter) {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.xParameter = xParameter;
@@ -157,7 +157,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			public void actionPerformed(ActionEvent e) {
 				//Molecule molecule = molPane.getMolecule();
 				if (molecule != null) {			
-					MarsImageMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+					MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 					if (!metaUID.equals(meta.getUID())) {
 						metaUID = meta.getUID();
 						createView(meta);
@@ -237,7 +237,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	public void load() {
-		MarsImageMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 		metaUID = meta.getUID();
 		createView(meta);
 		if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter)) 
@@ -247,7 +247,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public void setMolecule(Molecule molecule) {
 		if (molecule != null && autoUpdate.isSelected()) {	
 			this.molecule = molecule;
-			MarsImageMetadata meta = archive.getImageMetadata(molecule.getImageMetadataUID());
+			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
 				metaUID = meta.getUID();
 				createView(meta);
@@ -257,7 +257,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		 }
 	}
 	
-	private void createView(MarsImageMetadata meta) {
+	private void createView(MarsMetadata meta) {
 		if (bdv != null) {
 			frame.setVisible( false );
 			frame.remove(bdv.getViewerPanel());
@@ -315,7 +315,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		return ip;
 	}
 	
-	private ArrayList<SpimDataMinimal> loadNewSources(MarsImageMetadata meta) {
+	private ArrayList<SpimDataMinimal> loadNewSources(MarsMetadata meta) {
 		ArrayList<SpimDataMinimal> spimArray = new ArrayList<SpimDataMinimal>();
 		for (MarsBdvSource source : meta.getBdvSources()) {
 			SpimDataMinimal spimData;
@@ -358,7 +358,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		return frame;
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
 		this.archive = archive;
 	}
 

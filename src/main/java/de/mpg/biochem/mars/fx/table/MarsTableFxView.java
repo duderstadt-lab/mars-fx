@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.table;
 
 import org.scijava.plugin.Parameter;
+import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
@@ -40,7 +41,7 @@ import de.mpg.biochem.mars.table.*;
 public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements DisplayViewer<MarsTable> {
 	
 	@Parameter
-    private MarsTableService marsTableService;
+    private Context context;
 	
 	//This method is called to create and display a window
 	//here we override it to make sure that calls like uiService.show( .. for MarsTable 
@@ -52,7 +53,7 @@ public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements
 		d.setName(results.getName());
 		
 		//We also create a new window since we assume it is a new table...
-		MarsTableFxFrame marsTableFxFrame = new MarsTableFxFrame(results.getName(), results, marsTableService);
+		MarsTableFxFrame marsTableFxFrame = new MarsTableFxFrame(results.getName(), results, context);
 		marsTableFxFrame.init();
 	}
 

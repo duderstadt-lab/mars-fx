@@ -36,6 +36,7 @@ import java.io.IOException;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
+import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
@@ -50,9 +51,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
+import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.*;
@@ -67,8 +72,14 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	@Parameter
     private MarsTableService marsTableService;
 	
+	@Parameter
+	protected MarsDashboardWidgetService marsDashboardWidgetService;
+	
     @Parameter
     private UIService uiService;
+    
+    @Parameter
+    private Context context;
 
     private JFrame frame;
     protected String title;
@@ -78,6 +89,9 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	private TabPane tabPane;
 	private Tab dataTableTab;
 	private Tab plotTab;
+	private Tab dashboardTab;
+	
+	private MarsTableDashboard marsTableDashboardPane;
 	
 	protected MenuBar menuBar;
 	
@@ -86,11 +100,10 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	private JFXPanel fxPanel;
 	private Scene scene;
 
-	public MarsTableFxFrame(String name, MarsTable table, MarsTableService marsTableService) {
-		this.marsTableService = marsTableService;
+	public MarsTableFxFrame(String name, MarsTable table, final Context context) {
+		context.inject(this);
 		this.table = table;
 		this.title = name;
-		this.uiService = marsTableService.getUIService();
 		table.setWindow(this);
 	}
 
@@ -181,12 +194,20 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		MarsTablePlotPane plotPane = new MarsTablePlotPane(table);
 		plotTab.setContent(plotPane.getNode());
 		
+		dashboardTab = new Tab();
+		dashboardTab.setText("");
+		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		marsTableDashboardPane = new MarsTableDashboard(context);
+		dashboardTab.setContent(marsTableDashboardPane.getNode());
+		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
+		tabPane.getTabs().add(dashboardTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/table/TableWindowPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);

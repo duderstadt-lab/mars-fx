@@ -26,22 +26,24 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
+import org.scijava.Context;
+
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculeCenterPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculePropertiesPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 
 public class DefaultMoleculesTab extends AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane> {
-	public DefaultMoleculesTab() {
-		super();
+	public DefaultMoleculesTab(final Context context) {
+		super(context);
 	}
 
 	@Override
-	public DefaultMoleculeCenterPane createMoleculeCenterPane() {
-		return new DefaultMoleculeCenterPane();
+	public DefaultMoleculeCenterPane createMoleculeCenterPane(final Context context) {
+		return new DefaultMoleculeCenterPane(context);
 	}
 
 	@Override
-	public DefaultMoleculePropertiesPane createMoleculePropertiesPane() {
-		return new DefaultMoleculePropertiesPane();
+	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(final Context context) {
+		return new DefaultMoleculePropertiesPane(context);
 	}
 }

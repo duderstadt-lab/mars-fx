@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.controlsfx.control.textfield.CustomTextField;
+import org.scijava.Context;
 
 import com.fasterxml.jackson.core.JsonToken;
 
@@ -52,23 +53,18 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
-import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
 import de.mpg.biochem.mars.util.MarsUtil;
-import ij.gui.GenericDialog;
 import impl.org.controlsfx.skin.CustomTextFieldSkin;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -112,8 +108,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	
 	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
 
-	public AbstractMoleculesTab() {
-		super();
+	public AbstractMoleculesTab(final Context context) {
+		super(context);
 		
 		Region moleculeIcon = new Region();
         moleculeIcon.getStyleClass().add("moleculeIcon");
@@ -127,10 +123,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		SplitPane.setResizableWithParent(moleculeTableIndexContainer, Boolean.FALSE);
 		splitItems.add(moleculeTableIndexContainer);
 		
-		moleculeCenterPane = createMoleculeCenterPane();
+		moleculeCenterPane = createMoleculeCenterPane(context);
 		splitItems.add(moleculeCenterPane.getNode());
 		
-		moleculePropertiesPane = createMoleculePropertiesPane();
+		moleculePropertiesPane = createMoleculePropertiesPane(context);
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
 		splitItems.add(moleculePropertiesPane.getNode());	
 		
@@ -219,7 +215,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataRegion(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		int num = 1;
 		String name = "Region 1";
 		while (metaData.hasRegion(name)) {
@@ -229,7 +225,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsRegion roi = ((NewMetadataRegionEvent) e).getRegion();
 		roi.setName(name);
 		metaData.putRegion(roi);
-		archive.putImageMetadata(metaData);
+		archive.putMetadata(metaData);
 	}
 	
 	private void newMoleculePosition(final PlotEvent e) {
@@ -246,7 +242,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void newMetadataPosition(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		int num = 1;
 		String name = "Position 1";
 		while (metaData.hasPosition(name)) {
@@ -256,7 +252,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsPosition poi = ((NewMetadataPositionEvent) e).getPosition();
 		poi.setName(name);
 		metaData.putPosition(poi);
-		archive.putImageMetadata(metaData);
+		archive.putMetadata(metaData);
 	}
 	
 	private void updateMoleculeRegion(final PlotEvent e) {
@@ -268,12 +264,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataRegion(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		MarsRegion newRoi = ((NewMetadataRegionEvent) e).getRegion();
    		MarsRegion oldRoi = metaData.getRegion(newRoi.getName());
    		oldRoi.setStart(newRoi.getStart());
    		oldRoi.setEnd(newRoi.getEnd());
-   		archive.putImageMetadata(metaData);
+   		archive.putMetadata(metaData);
 	}
 	
 	private void updateMoleculePosition(final PlotEvent e) {
@@ -284,11 +280,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	private void updateMetadataPosition(final PlotEvent e) {
-		MarsImageMetadata metaData = archive.getImageMetadata(molecule.getImageMetadataUID());
+		MarsMetadata metaData = archive.getMetadata(molecule.getMetadataUID());
 		MarsPosition newPoi = ((UpdateMetadataPositionEvent) e).getPosition();
 		MarsPosition oldPoi = metaData.getPosition(newPoi.getName());
    		oldPoi.setPosition(newPoi.getPosition());
-   		archive.putImageMetadata(metaData);
+   		archive.putMetadata(metaData);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -440,7 +436,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     }
 
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	
     	moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
@@ -487,9 +483,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	 	}, IOException.class));
 	}
 	
-	public abstract C createMoleculeCenterPane();
+	public abstract C createMoleculeCenterPane(final Context context);
 	
-	public abstract O createMoleculePropertiesPane();
+	public abstract O createMoleculePropertiesPane(final Context context);
 	
 	protected class MoleculeIndexRow {
     	private int index;
@@ -525,7 +521,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	}
     	
     	String getImageMetaDataUID() {
-    		return archive.getImageMetadataUIDforMolecule(archive.getUIDAtIndex(index));
+    		return archive.getMetadataUIDforMolecule(archive.getUIDAtIndex(index));
     	}
     }
 
@@ -539,8 +535,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public void onMoleculeArchiveUnlockEvent() {
     	moleculeIndexTable.getSelectionModel().selectedItemProperty().removeListener(moleculeIndexTableListener);
     	String currentUID = "";
-    	if (moleculeIndexTable.getSelectionModel().getSelectedItem() != null)
-    		currentUID = moleculeIndexTable.getSelectionModel().getSelectedItem().getUID();
+    	if (molecule != null)
+    		currentUID = molecule.getUID();
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
 	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {

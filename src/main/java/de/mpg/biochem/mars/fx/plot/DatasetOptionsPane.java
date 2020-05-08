@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
+import org.apache.batik.bridge.ViewBox;
+
 import static java.util.stream.Collectors.toList;
 
 import javafx.scene.layout.HBox;
@@ -66,6 +68,7 @@ import javafx.scene.control.ToggleGroup;
 import javafx.scene.text.Text;
 
 import javafx.scene.Node;
+import javafx.scene.layout.Priority;
 
 //import org.tbee.javafx.scene.layout.fxml.MigPane;
 import javafx.scene.layout.VBox;
@@ -106,45 +109,48 @@ public class DatasetOptionsPane extends VBox {
 		
 		initComponents();
 		
-		GridPane gridpane = new GridPane();
+		GridPane gridpane1 = new GridPane();
 		
 		//For reference...
 		//Insets(double top, double right, double bottom, double left)
 		
-		Label title = new Label("Title  ");
-		gridpane.add(title, 0, 0);
-		GridPane.setMargin(title, new Insets(0, 0, 10, 0));
+		Label title = new Label("Title");
+		gridpane1.add(title, 0, 0);
+		GridPane.setMargin(title, new Insets(0, 5, 10, 5));
 		
-		Label xAxisLabel = new Label("X Axis ");
-		gridpane.add(xAxisLabel, 0, 1);
-		GridPane.setMargin(xAxisLabel, new Insets(0, 0, 10, 0));
+		gridpane1.add(titleField, 1, 0);
+		GridPane.setMargin(titleField, new Insets(0, 5, 10, 5));
 		
-		Label yAxisLabel = new Label("Y Axis ");
-		gridpane.add(yAxisLabel, 0, 2);
-		GridPane.setMargin(yAxisLabel, new Insets(0, 0, 10, 0));
+		Label xAxisLabel = new Label("X Axis");
+		gridpane1.add(xAxisLabel, 2, 0);
+		GridPane.setMargin(xAxisLabel, new Insets(0, 5, 10, 5));
 		
-		gridpane.add(titleField, 1, 0);
-		GridPane.setMargin(titleField, new Insets(0, 0, 10, 0));
+		gridpane1.add(xNameField, 3, 0);
+		GridPane.setMargin(xNameField, new Insets(0, 5, 10, 5));
 		
-		gridpane.add(xNameField, 1, 1);
-		GridPane.setMargin(xNameField, new Insets(0, 0, 10, 0));
+		Label yAxisLabel = new Label("Y Axis");
+		gridpane1.add(yAxisLabel, 4, 0);
+		GridPane.setMargin(yAxisLabel, new Insets(0, 5, 10, 5));
 		
-		gridpane.add(yNameField, 1, 2);
-		GridPane.setMargin(yNameField, new Insets(0, 0, 10, 0));
+		gridpane1.add(yNameField, 5, 0);
+		GridPane.setMargin(yNameField, new Insets(0, 5, 10, 5));
+		
+		getChildren().add(gridpane1);
 		
 		//add(Node child, int columnIndex, int rowIndex, int colspan, int rowspan)
+		GridPane gridpane2 = new GridPane();
+		
 		Label indicatorLabel = new Label("Indicators");
-		gridpane.add(indicatorLabel, 0, 3, 2, 1);
-		GridPane.setMargin(indicatorLabel, new Insets(0, 0, 10, 0));
+		gridpane2.add(indicatorLabel, 0, 1);
+		GridPane.setMargin(indicatorLabel, new Insets(0, 5, 10, 5));
 		
 		HBox radioButtons = new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone);
-		gridpane.add(radioButtons, 0, 4, 2, 1);
-		GridPane.setMargin(radioButtons, new Insets(0, 0, 10, 0));
+		gridpane2.add(radioButtons, 1, 1);
+		GridPane.setMargin(radioButtons, new Insets(0, 5, 10, 5));
 		
-		gridpane.getColumnConstraints().add(new ColumnConstraints(60)); // column 0 is 100 wide
+		getChildren().add(gridpane2);
 		
-		getChildren().add(gridpane);
-		
+		VBox.setVgrow(plotPropertiesTable, Priority.ALWAYS);
 		getChildren().add(plotPropertiesTable);
 		
 		BorderPane bottomButtons = new BorderPane();
@@ -159,9 +165,9 @@ public class DatasetOptionsPane extends VBox {
 		yNameField = new TextField();
 		xNameField = new TextField();
 		
-        radioButtonMolecules = new RadioButton("Molecules ");
-        radioButtonMetadata = new RadioButton("Metadata ");
-        radioButtonNone = new RadioButton("None ");
+        radioButtonMolecules = new RadioButton("Molecules");
+        radioButtonMetadata = new RadioButton("Metadata");
+        radioButtonNone = new RadioButton("None");
 
         indicatorSourceGroup = new ToggleGroup();
 
@@ -174,8 +180,8 @@ public class DatasetOptionsPane extends VBox {
 		
 		plotPropertiesTable = new TableView<PlotSeries>();
 		
-		plotPropertiesTable.prefHeightProperty().set(200);
-		plotPropertiesTable.prefWidthProperty().set(500);
+		//plotPropertiesTable.prefHeightProperty().set(4000);
+		//plotPropertiesTable.prefWidthProperty().set(4000);
 		
 		TableColumn<PlotSeries, PlotSeries> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -215,7 +221,7 @@ public class DatasetOptionsPane extends VBox {
     	
     	TableColumn<PlotSeries, RadioButton> trackColumn = new TableColumn<>("Track");
     	trackColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getTrackingButton()));
-    	trackColumn.setMinWidth(50);
+    	trackColumn.setMinWidth(30);
     	trackColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(trackColumn);
         trackColumn.setStyle("-fx-alignment: CENTER;");
@@ -228,7 +234,7 @@ public class DatasetOptionsPane extends VBox {
         typeColumn.setStyle("-fx-alignment: CENTER;");
 		
 		TableColumn<PlotSeries, ComboBox<String>> xValuesColumn = new TableColumn<>("X Values");
-        xValuesColumn.setMinWidth(100);
+        xValuesColumn.setMinWidth(150);
         xValuesColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().xColumnField()));
         xValuesColumn.setStyle("-fx-alignment: CENTER;");
         
@@ -236,7 +242,7 @@ public class DatasetOptionsPane extends VBox {
         plotPropertiesTable.getColumns().add(xValuesColumn);
         
         TableColumn<PlotSeries, ComboBox<String>> yValuesColumn = new TableColumn<>("Y Values");
-        yValuesColumn.setMinWidth(100);
+        yValuesColumn.setMinWidth(150);
         yValuesColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().yColumnField()));
         yValuesColumn.setStyle("-fx-alignment: CENTER;");
 
@@ -252,27 +258,27 @@ public class DatasetOptionsPane extends VBox {
         
         TableColumn<PlotSeries, JFXColorPicker> colorColumn = new TableColumn<>("Color");
         colorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getColorField()));
-        colorColumn.setMinWidth(50);
+        colorColumn.setMinWidth(100);
         colorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(colorColumn);
         colorColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXTextField> strokeColumn = new TableColumn<>("Stroke");
         strokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getWidthField()));
-        strokeColumn.setMinWidth(100);
+        strokeColumn.setMinWidth(30);
         strokeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(strokeColumn);
         strokeColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXCheckBox> drawSegmentsColumn = new TableColumn<>("Segments");
-        drawSegmentsColumn.setMinWidth(50);
+        drawSegmentsColumn.setMinWidth(40);
         drawSegmentsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDrawSegmentsField()));
         drawSegmentsColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(drawSegmentsColumn);
         drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
         
         TableColumn<PlotSeries, JFXColorPicker> segmentsColorColumn = new TableColumn<>("Segment Color");
-        drawSegmentsColumn.setMinWidth(100);
+        segmentsColorColumn.setMinWidth(110);
         segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
         segmentsColorColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsColorColumn);
@@ -280,7 +286,7 @@ public class DatasetOptionsPane extends VBox {
         
         TableColumn<PlotSeries, JFXTextField> segmentsStrokeColumn = new TableColumn<>("Segment Stroke");
         segmentsStrokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsWidthField()));
-        segmentsStrokeColumn.setMinWidth(100);
+        segmentsStrokeColumn.setMinWidth(110);
         segmentsStrokeColumn.setSortable(false);
         plotPropertiesTable.getColumns().add(segmentsStrokeColumn);
         segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");

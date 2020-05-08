@@ -29,7 +29,7 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataIndicatorChangedEvent;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.event.Event;
 
 public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestTable implements MetadataSubPane {
@@ -45,7 +45,7 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 
 	@Override
 	protected void fireIndicatorChangedEvent() {
-		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsImageMetadata) record));
+		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsMetadata) record));
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 	}
 
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.record = marsImageMetadata;
     	loadData();
 	}

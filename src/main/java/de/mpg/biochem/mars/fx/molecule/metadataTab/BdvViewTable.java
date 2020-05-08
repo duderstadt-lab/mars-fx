@@ -35,7 +35,7 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
 import javafx.stage.FileChooser;
 import de.mpg.biochem.mars.molecule.MarsBdvSource;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -54,7 +54,7 @@ import javafx.scene.layout.FlowPane;
 
 public class BdvViewTable implements MetadataEventHandler {
     
-	protected MarsImageMetadata marsImageMetadata;
+	protected MarsMetadata marsImageMetadata;
 	
 	protected BorderPane rootPane;
 	
@@ -269,7 +269,7 @@ public class BdvViewTable implements MetadataEventHandler {
 	}
 
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.marsImageMetadata = marsImageMetadata;
 		loadBdvSources();
 	}

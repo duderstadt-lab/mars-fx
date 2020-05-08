@@ -25,6 +25,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CIRCLE_ALT;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINE_CHART;
 
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 
 import com.jfoenix.controls.JFXBadge;
+import com.jfoenix.controls.JFXColorPicker;
 
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelFormatter;
@@ -52,19 +54,22 @@ import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.chart.ui.css.StylishBooleanProperty;
 import de.gsi.chart.ui.css.StylishObjectProperty;
 
+import javafx.stage.WindowEvent;
+
 import de.gsi.chart.ui.geometry.Side;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.css.StyleableProperty;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
-//import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTooltip;
-//import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
@@ -78,6 +83,9 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.util.StringConverter;
 
+import javafx.scene.input.MouseEvent;
+import javafx.event.Event;
+
 import javafx.scene.paint.Color;
 
 public abstract class AbstractSubPlot implements SubPlot {
@@ -85,6 +93,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 	protected XYChart chartPane;
 	
 	protected JFXBadge datasetOptionsButton;
+	protected BooleanProperty datasetOptionsSelected = new SimpleBooleanProperty();
 	protected DatasetOptionsPane datasetOptionsPane;
 	
 	protected PlotPane plotPane;
@@ -93,15 +102,18 @@ public abstract class AbstractSubPlot implements SubPlot {
 		this.plotPane = plotPane;
 		
 		datasetOptionsPane = createDatasetOptionsPane(new HashSet<String>(plotPane.getColumnNames()));
+		
+		//PopOver popOver = new PopOver();
+		//popOver.setTitle(plotTitle);
+		//popOver.setHeaderAlwaysVisible(true);
+		//popOver.setAutoHide(false);
+		//popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
+		//popOver.setContentNode(datasetOptionsPane);
+		
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
-			PopOver popOver = new PopOver();
-			popOver.setTitle(plotTitle);
-			popOver.setHeaderAlwaysVisible(true);
-			popOver.setAutoHide(false);
-			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
-			popOver.setContentNode(datasetOptionsPane);
-			popOver.show(datasetOptionsButton);
-		})));
+			if (datasetOptionsSelected.get())
+				plotPane.showSubPlotOptions(datasetOptionsPane);
+		}, null, datasetOptionsSelected)));
 		
 		xAxis = createAxis();
 		yAxis = createAxis();
@@ -242,6 +254,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	public JFXBadge getDatasetOptionsButton() {
 		return datasetOptionsButton;
+	}
+	
+	public BooleanProperty getDatasetOptionsSelected() {
+		return datasetOptionsSelected;
 	}
 	
 	public abstract void addDataSet(PlotSeries plotSeries);

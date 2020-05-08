@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.scijava.Context;
+
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -53,7 +55,7 @@ import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionPlugin;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsPositionSelectionTool;
 //import de.mpg.biochem.mars.fx.plot.tools.MarsRegionSelectionTool;
 import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -71,10 +73,11 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	protected BooleanProperty regionSelected;
 	protected BooleanProperty positionSelected;
 	
-	protected MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
-	public AbstractMoleculePlotPane() {
+	public AbstractMoleculePlotPane(final Context context) {
 		super();
+		context.inject(this);
 
 		addChart();
 		
@@ -95,11 +98,11 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 					archive = e.getArchive();
 					for (SubPlot subplot : charts)
-						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
+						subplot.getDatasetOptionsPane().setColumns(archive.properties().getColumnSet());
 			   		e.consume();
 			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
 			   		for (SubPlot subplot : charts)
-						subplot.getDatasetOptionsPane().setColumns(archive.getProperties().getColumnSet());
+						subplot.getDatasetOptionsPane().setColumns(archive.properties().getColumnSet());
 			   		e.consume();
 			   	}
 			} 
@@ -130,7 +133,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		
 	}
 	
-	public MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
 		return archive;
 	}
 	
@@ -243,7 +246,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	@Override
 	public ArrayList<String> getColumnNames() {
 		if (archive != null)
-			return (ArrayList<String>) archive.getProperties().getColumnSet().stream().sorted().collect(toList());
+			return (ArrayList<String>) archive.properties().getColumnSet().stream().sorted().collect(toList());
 		else 
 			return new ArrayList<String>();
 	}

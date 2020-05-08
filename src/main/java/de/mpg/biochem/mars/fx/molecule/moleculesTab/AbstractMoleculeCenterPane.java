@@ -32,13 +32,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
 import com.fasterxml.jackson.core.JsonToken;
 
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.plot.SubPlot;
@@ -62,9 +68,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected TabPane tabPane;
 	protected Tab dataTableTab;
 	protected Tab plotTab;
+	protected Tab moleculeDashboardTab;
 	
 	protected BorderPane dataTableContainer;
 	protected P plotPane;
+	protected MoleculeDashboard<M> moleculeDashboardPane;
 	
 	protected HashSet<ArrayList<String>> segmentTableNames;
 	protected HashSet<String> refreshedTabs;
@@ -72,14 +80,13 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	protected M molecule;
 	
-	public AbstractMoleculeCenterPane() {
+	public AbstractMoleculeCenterPane(final Context context) {
+		super();
+		context.inject(this);
+		
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
-		
-		initializeTabs();
-	}
-	
-	protected void initializeTabs() {
+
 		dataTableTab = new Tab();		
 		dataTableTab.setText("DataTable");
 		dataTableContainer = new BorderPane();
@@ -87,11 +94,18 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plotPane = createPlotPane();
+		plotPane = createPlotPane(context);
 		plotTab.setContent(plotPane.getNode());
+		
+		moleculeDashboardTab = new Tab();
+		moleculeDashboardTab.setText("");
+		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		moleculeDashboardPane = new MoleculeDashboard<M>(context);
+		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
+		tabPane.getTabs().add(moleculeDashboardTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		tabPane.setStyle("");
@@ -119,6 +133,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
 			   		plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
+			   		moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
 			   		e.consume();
 			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
 			   		plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
@@ -144,6 +159,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
 		} else if (selectedTab.equals(plotTab)) {
 			plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(moleculeDashboardTab)) {
+			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else {
 			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
 		}
@@ -194,6 +211,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
+		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		
 		//all tabs are now stale
 		refreshedTabs.clear();
@@ -205,17 +223,25 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	@Override
 	protected void createIOMaps() {
+		
 		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeFieldName("PlotPane");
 			plotPane.toJSON(jGenerator);
+		}, IOException.class));
+		outputMap.put("MoleculeDashboard", MarsUtil.catchConsumerException(jGenerator -> {
+			jGenerator.writeFieldName("MoleculeDashboard");
+			moleculeDashboardPane.toJSON(jGenerator);
 		}, IOException.class));
 		
 		inputMap.put("PlotPane", MarsUtil.catchConsumerException(jParser -> {
 			plotPane.fromJSON(jParser);
 	 	}, IOException.class));
+		inputMap.put("MoleculeDashboard", MarsUtil.catchConsumerException(jParser -> {
+			moleculeDashboardPane.fromJSON(jParser);
+	 	}, IOException.class));
 	}
 	
-	public abstract P createPlotPane();
+	public abstract P createPlotPane(final Context context);
 	
 	@Override
 	public Node getNode() {

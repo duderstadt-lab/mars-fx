@@ -27,8 +27,11 @@
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -43,13 +46,14 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = ArchivePropertiesWidget.class, name = "ArchivePropertiesWidget" )
-public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "ArchivePropertiesWidget" )
+public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+	
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();
@@ -93,9 +97,13 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 			@Override
 			public void run() {
 				archiveName.setText(archive.getName());
-				className.setText(archive.getClass().getName());
+				String archiveType = archive.getClass().getName();
+				int i = archiveType.lastIndexOf('.');
+				if (i > 0)
+				    archiveType = archiveType.substring(i+1);
+				className.setText(archiveType);
 				moleculeNumber.setText(archive.getNumberOfMolecules() + " Molecules");
-				metadataNumber.setText(archive.getNumberOfImageMetadataRecords() + " Metadata");
+				metadataNumber.setText(archive.getNumberOfMetadatas() + " Metadata");
 				if (archive.isVirtual()) {
 					memorySetting.setText("Virtual memory store");
 				} else {
@@ -103,6 +111,14 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
 				}
 			}
     	});
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 
 	@Override

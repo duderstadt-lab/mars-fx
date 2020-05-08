@@ -32,12 +32,14 @@ import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.jensd.fx.glyphs.GlyphIcons;
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -67,13 +69,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
 import net.imagej.ops.Initializable;
 
-@Plugin( type = TagFrequencyWidget.class, name = "TagFrequencyWidget" )
-public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "TagFrequencyWidget" )
+public class TagFrequencyWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+	
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
@@ -173,6 +179,14 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements MarsD
 	@Override
 	protected void createIOMaps() {
 		// TODO Auto-generated method stub
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 
 	@Override

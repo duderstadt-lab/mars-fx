@@ -29,7 +29,7 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import org.controlsfx.control.textfield.CustomTextField;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,7 +46,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 
 public class MetadataPropertiesTable implements MetadataSubPane {
     
-	private MarsImageMetadata marsImageMetadata;
+	private MarsMetadata marsImageMetadata;
 	
 	private BorderPane rootPane;
 	
@@ -214,7 +214,7 @@ public class MetadataPropertiesTable implements MetadataSubPane {
 	}
 
 	@Override
-	public void onMetadataSelectionChangedEvent(MarsImageMetadata marsImageMetadata) {
+	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.marsImageMetadata = marsImageMetadata;
     	loadData();
 	}

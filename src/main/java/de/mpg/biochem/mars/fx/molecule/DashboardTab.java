@@ -34,16 +34,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.*;
+import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.ArchivePropertiesWidget;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.CategoryChartWidget;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidget;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MarsDashboardWidgetService;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboard;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.molecule.MarsImageMetadata;
+import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
@@ -55,7 +53,11 @@ import javafx.scene.layout.BorderPane;
 
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.ComboBox;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
 import com.jfoenix.controls.JFXScrollPane;
@@ -74,6 +76,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import javafx.scene.control.ButtonBase;
@@ -81,256 +84,62 @@ import java.util.List;
 import java.io.IOException;
 import java.util.*;
 
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.*;
-
 public class DashboardTab extends AbstractMoleculeArchiveTab {
 	private BorderPane borderPane;
 	
-    private ScrollPane scrollPane;
-    private JFXMasonryPane widgetPane;
-    private ToolBar toolbar;
-    private MarsDashboardWidgetService marsDashboardWidgetService;
-    
-    private final int MAX_THREADS = 1;
+	private MoleculeArchiveDashboard dashboardPane;
     
     @Parameter
-    private MoleculeArchiveService moleculeArchiveService;
-    
-    private final ArrayList<String> widgetToolbarOrder = new ArrayList<String>( 
-            Arrays.asList("ArchivePropertiesWidget", 
-                    "TagFrequencyWidget", 
-                    "CategoryChartWidget",
-                    "HistogramWidget",
-                    "XYChartWidget",
-                    "BubbleChartWidget"));
-    
-    private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
-
-    private final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS, runnable -> {
-        Thread t = new Thread(runnable);
-        t.setDaemon(true);
-        return t ;
-    });
-    
-    protected ObservableList<MarsDashboardWidget> widgets = FXCollections.observableArrayList();
+    private MarsDashboardWidgetService marsDashboardWidgetService;
 	
-    public DashboardTab(MoleculeArchiveService moleculeArchiveService) {
-    	super();
+    public DashboardTab(final Context context) {
+		super(context);
+		
+    	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"));
     	
-    	this.moleculeArchiveService = moleculeArchiveService;
-    	
-    	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.3em"));
+    	dashboardPane = new MoleculeArchiveDashboard(context);
     	
     	borderPane = new BorderPane();
-    	
-    	Action removeAllWidgets = new Action("Remove all", null, BOMB,
-				e -> {
-					widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget));
-					widgets.clear();
-					widgetPane.getChildren().clear();
-				});
-    	
-    	Action stopAllWidgets = new Action("Stop all", null, STOP,
-				e -> widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget)));
-    	
-    	Action reloadWidgets = new Action("Reload", null, REFRESH,
-				e -> {
-					//executor.shutdownNow();
-					widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> runWidget(widget));
-				});
-    	
-    	toolbar = new ToolBar();
-    	toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
-    	
-    	// horizontal spacer
-		Region spacer = new Region();
-		HBox.setHgrow(spacer, Priority.ALWAYS);
-		toolbar.getItems().add(spacer);
-		
-    	toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets), 
-    			ActionUtils.createToolBarButton(stopAllWidgets),
-    			ActionUtils.createToolBarButton(reloadWidgets));
-    	
-    	borderPane.setTop(toolbar);
-    	  	
-    	widgetPane = new JFXMasonryPane();
-    	widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.BIN_PACKING);
-    	//default below ensure they stay in order
-    	//BIN_PACKING default to fitting them all in...
-    	//widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.MASONRY);
-    	widgetPane.setPadding(new Insets(10, 10, 10, 10));
-    	
-    	scrollPane = new ScrollPane();
-    	scrollPane.setContent(widgetPane);
-    	scrollPane.setFitToWidth(true);
-    	borderPane.setCenter(scrollPane);
+    	borderPane.setCenter(dashboardPane.getNode());
     	
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
         
     	getTab().setContent(borderPane);
     }
-    
-    public void runWidget(MarsDashboardWidget widget) {
-    	executor.execute(new WidgetRunnable(widget));
-    }
-    
-    public void stopWidget(MarsDashboardWidget widget) {
-    	activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst().ifPresent(activeWidget -> activeWidget.stop());
-    }
-    
-    public Node getNode() {
-		return borderPane;
-	}
-    
-    public JFXMasonryPane getWidgetPane() {
-    	return widgetPane;
-    }
-    
-	public ArrayList<Menu> getMenus() {
-		return null;
-	}
-	
-	public ObservableList<MarsDashboardWidget> getWidgets() {
-		return widgets;
-	}
-	
-	public void addWidget(MarsDashboardWidget widget) {
-		widgets.add(widget);
-		widgetPane.getChildren().add(widget.getNode());
-	}
-	
-	public void removeWidget(MarsDashboardWidget widget) {
-		widgets.remove(widget);
-		widgetPane.getChildren().remove(widget.getNode());
-	}
 	
     @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsImageMetadata, MoleculeArchiveProperties> archive) {
+    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	this.archive = archive;  
-        marsDashboardWidgetService = moleculeArchiveService.getContext().getService(MarsDashboardWidgetService.class);
-    	
-    	//Loop through all available widgets and add them to the toolbar
-    	//use preferred order
-    	Set<String> discoveredWidgets = marsDashboardWidgetService.getWidgetNames();
-    	//widgetToolbarOrder
-    	
-    	ArrayList<Node> widgetButtons = new ArrayList<Node>();
-    	
-    	//Add all the expected widgets in the order defined by widgetToolbarOrder
-    	widgetToolbarOrder.stream().filter(widgetName -> discoveredWidgets.contains(widgetName)).forEach(widgetName ->
-    		widgetButtons.add(createWidgetButton(widgetName)));
-    	
-    	//Now add any newly discovered widgets besides the default set
-    	discoveredWidgets.stream().filter(widgetName -> !widgetToolbarOrder.contains(widgetName)).forEach(widgetName ->
-		widgetButtons.add(createWidgetButton(widgetName)));
-
-    	toolbar.getItems().addAll(0, widgetButtons);
+    	dashboardPane.getNode().fireEvent(new InitializeMoleculeArchiveEvent(archive));
     }
-    
-    public ButtonBase createWidgetButton(String widgetName) {
-    	//HACK to get the Icon for the toolbar before any widgets have been added to
-		//the Dashboard...
-		//We create a dummy widget just to get the Icon but never use it.
-		//What is the workaround - can't seem to use a static method because that couldn't be in the interface.
-		MarsDashboardWidget dummyWidgetForIcon = marsDashboardWidgetService.createWidget(widgetName);
-		
-		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(),
-				e -> {
-					MarsDashboardWidget widget = marsDashboardWidgetService.createWidget(widgetName);
-					widget.setArchive(archive);
-					widget.setParent(this);
-					widget.initialize();
-			    	addWidget(widget);
-				}, null);
-		
-		return widgetButton;
-    }
-
-	@Override
-	protected void createIOMaps() {
-		outputMap.put("Widgets", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeArrayFieldStart("Widgets");
-			for (MarsDashboardWidget widget : widgets) {
-				jGenerator.writeStartObject();
-				jGenerator.writeStringField("Name", widget.getName());
-				jGenerator.writeFieldName("Settings");
-				widget.toJSON(jGenerator);
-				jGenerator.writeEndObject();
-			}
-			jGenerator.writeEndArray();
-		}, IOException.class));
-		
-		inputMap.put("Widgets", MarsUtil.catchConsumerException(jParser -> {
-			while (jParser.nextToken() != JsonToken.END_ARRAY) {
-				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					MarsDashboardWidget widget = null;
-					
-					if ("Name".equals(jParser.getCurrentName())) {
-			    		jParser.nextToken();
-			    		widget = marsDashboardWidgetService.createWidget(jParser.getText());
-						widget.setArchive(archive);
-						widget.setParent(this);
-						widget.initialize();
-				    	addWidget(widget);
-					}
-					
-					jParser.nextToken();
-					
-					if ("Settings".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						if (widget != null)
-							widget.fromJSON(jParser);
-					}
-				}
-	    	}
-		}, IOException.class));
-	}
 	
 	@Override
 	public String getName() {
 		return "DashboardTab";
 	}
+
+	@Override
+	public ArrayList<Menu> getMenus() {
+		return null;
+	}
+
+	@Override
+	public Node getNode() {
+		return borderPane;
+	}
+
+	@Override
+	public void toJSON(JsonGenerator jGenerator) throws IOException {
+		dashboardPane.toJSON(jGenerator);
+	}
 	
-	class WidgetRunnable implements Runnable {
-		
-	    private final MarsDashboardWidget runnable;
-	    
-	    private Thread thread;
-	    private AtomicBoolean canceled = new AtomicBoolean(false);
+	@Override
+	public void fromJSON(JsonParser jParser) throws IOException {
+		dashboardPane.fromJSON(jParser);
+	}
 
-	    public WidgetRunnable(MarsDashboardWidget runnable) {
-	        this.runnable = runnable;
-	    	runnable.setRunning(true);
-	    	runnable.spin();
-	        activeWidgets.add(this);
-	    }
-
-	    @Override
-	    public void run() {
-	    	if (canceled.get())
-	    		return;
-	    	thread = Thread.currentThread();
-	    	runnable.run();
-	        Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					runnable.stopSpinning();
-				}
-			});
-	        activeWidgets.remove(this);
-	        runnable.setRunning(false);
-	    }
-	    
-	    public MarsDashboardWidget getWidget() {
-	    	return runnable;
-	    }
-	    
-	    public void stop() {
-	    	if (thread != null)
-	    		thread.interrupt();
-	    	canceled.set(true);
-	    	runnable.stopSpinning();
-	    	runnable.setRunning(false);
-	    }
+	@Override
+	protected void createIOMaps() {
+		// Not needed. All the action is happening inside the dashboardPane.
 	}
 }

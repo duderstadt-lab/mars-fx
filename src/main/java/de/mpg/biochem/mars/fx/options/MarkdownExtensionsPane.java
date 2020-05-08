@@ -72,7 +72,7 @@ public class MarkdownExtensionsPane extends VBox {
 			.map(id -> new Ext(id, MarkdownExtensions.displayName(id)))
 			.sorted((e1, e2) -> e1.displayName.compareTo(e2.displayName))
 			.toArray(Ext[]::new);
-
+		
 		// create toggle switches for all available extensions
 		RendererType rendererType = Options.getMarkdownRenderer();
 		for (Ext ext : extensions) {
@@ -93,6 +93,7 @@ public class MarkdownExtensionsPane extends VBox {
 				ext.toggleSwitch.setDisable(true);
 
 			getChildren().add(ext.toggleSwitch);
+			System.out.println("Adding extension");
 		}
 
 		// listener that updates toggle switch selection and option property
