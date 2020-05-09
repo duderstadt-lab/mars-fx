@@ -33,6 +33,7 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.spi.Histogram;
 import de.jensd.fx.glyphs.GlyphIcons;
@@ -80,7 +81,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 	protected ErrorDataSetRenderer outlineHistogramRenderer;
 
-	protected ArrayList<Histogram> outlineHistograms;
+	protected ArrayList<DefaultErrorDataSet> datasets;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
 			Arrays.asList("xlabel", "ylabel", "title", "bins", "xmin", "xmax"));
@@ -109,7 +110,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
 		outlineHistogramRenderer.pointReductionProperty().set(false);
 
-		outlineHistograms = new ArrayList<Histogram>();
+		datasets = new ArrayList<DefaultErrorDataSet>();
 
 		histChart.getRenderers().add(outlineHistogramRenderer);
 		histChart.legendVisibleProperty().set(false);
@@ -142,7 +143,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				return;
 			}
 
-		outlineHistograms.clear();
+		datasets.clear();
 
 		String ylabel = (String) outputs.get("ylabel");
 		String xlabel = (String) outputs.get("xlabel");
@@ -150,12 +151,6 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		Integer bins = (Integer) outputs.get("bins");
 		Double xmin = (Double) outputs.get("xmin");
 		Double xmax = (Double) outputs.get("xmax");
-
-		double[] xBins = new double[bins.intValue() + 1];
-		xBins[0] = xmin.doubleValue();
-		double binWidth = (xmax.doubleValue() - xmin.doubleValue()) / bins.doubleValue();
-		for (int bin = 0; bin < bins.intValue(); bin++)
-			xBins[bin + 1] = xBins[0] + (bin + 1) * binWidth;
 
 		Set<String> series = new HashSet<String>();
 		for (String outputName : outputs.keySet()) {
@@ -166,9 +161,9 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		}
 
 		for (String seriesName : series) {
-			Histogram dataset = buildDataSet(outputs, seriesName, xBins);
+			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName, bins.intValue(), xmin.doubleValue(), xmax.doubleValue());
 			if (dataset != null)
-				outlineHistograms.add(dataset);
+				datasets.add(dataset);
 			else {
 				return;
 			}
@@ -199,34 +194,55 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				histChart.setTitle(title);
 
 				outlineHistogramRenderer.getDatasets().clear();
-				outlineHistogramRenderer.getDatasets().addAll(outlineHistograms);
+				outlineHistogramRenderer.getDatasets().addAll(datasets);
 			}
 		});
 	}
+	
+	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs, String seriesName, int bins, double minX, double maxX) {
+		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
+		
+		double binWidth = (maxX - minX) / bins;
 
-	protected Histogram buildDataSet(Map<String, Object> outputs, String seriesName, double[] xBins) {
-		Histogram hist = new Histogram(seriesName, xBins);
-
+		double[] yvalues = new double[bins];
+		double[] xvalues = new double[bins];
+		
+		for (int bin=0; bin<bins; bin++) {
+			yvalues[bin] = 0;
+			xvalues[bin] = minX + (0.5 + bin)*binWidth;
+		}
+		
 		if (outputs.containsKey(seriesName + "_" + "values")) {
 			Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
-			for (Double value : values)
-				hist.fill(value.doubleValue());
+
+			for (double value : values) {
+				for (int bin=0; bin<bins; bin++) {
+					if (value >= minX + bin*binWidth && value < minX + (bin + 1)*binWidth) {
+						yvalues[bin]++;
+						break;
+					}
+				}
+			}
 		} else {
 			writeToLog("Required field " + seriesName + "_values is missing.");
 			return null;
 		}
 
+		for (int index = 0; index < yvalues.length; index++)
+			dataset.add(xvalues[index], yvalues[index]);
+		
 		String styleString = "";
 		if (outputs.containsKey(seriesName + "_" + "strokeColor"))
 			styleString += "strokeColor=" + (String) outputs.get(seriesName + "_" + "strokeColor") + "; ";
 		if (outputs.containsKey(seriesName + "_" + "strokeWidth"))
 			styleString += "strokeWidth=" + ((Integer) outputs.get(seriesName + "_" + "strokeWidth")).intValue();
-
-		hist.setStyle(styleString);
-
-		return hist;
+		
+		
+		dataset.setStyle(styleString);
+		
+		return dataset;
 	}
-
+	
 	@Override
 	public Node getIcon() {
 		Region barchartIcon = new Region();
