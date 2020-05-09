@@ -48,6 +48,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -317,10 +318,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
 			} else {
 				subPlot.getChart().getXAxis().setAutoRanging(true);
-				subPlot.getChart().getXAxis().requestAxisLayout();
-				subPlot.getChart().getXAxis().forceRedraw();
-				subPlot.getChart().getXAxis().forceRedraw();
 			}
+			subPlot.getChart().getXAxis().forceRedraw();
 			
 			if (fixYBounds.get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
@@ -328,10 +327,15 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getYAxis().setMax(plotOptionsPane.getYMax());
 			} else {
 				subPlot.getChart().getYAxis().setAutoRanging(true);
-				subPlot.getChart().getYAxis().requestAxisLayout();
-				subPlot.getChart().getYAxis().forceRedraw();
-				subPlot.getChart().getYAxis().forceRedraw();
 			}
+			subPlot.getChart().getYAxis().forceRedraw();
+			
+			subPlot.getChart().requestLayout();
+			
+			//Is this needed??
+			subPlot.getChart().layout();
+			
+			subPlot.getChart().layoutChildren();
 		}
 	}
 	
