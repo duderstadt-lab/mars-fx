@@ -78,6 +78,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
 			Arrays.asList("xlabel", "ylabel", "title"));
+	
+	protected boolean drawErrorBars = false;
 
 	@Override
 	public void initialize() {
@@ -107,9 +109,10 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		renderer = new ErrorDataSetRenderer();
 		renderer.setMarkerSize(5);
 		renderer.setPolyLineStyle(LineStyle.NORMAL);
-		renderer.setErrorType(ErrorStyle.ERRORBARS);
+		renderer.setErrorType(ErrorStyle.NONE);
 		renderer.setDrawMarker(false);
 		renderer.setAssumeSortedData(false);
+		renderer.pointReductionProperty().set(false);
 
 		xyChart.getRenderers().add(renderer);
 		xyChart.legendVisibleProperty().set(false);
@@ -188,7 +191,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 		List<String> series = new ArrayList<String>(seriesSet);
 		Collections.sort(series);
-
+		
+		drawErrorBars = false;
 		for (String seriesName : series) {
 			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName);
 			if (dataset != null)
@@ -220,6 +224,11 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 				}
 
 				xyChart.setTitle(title);
+				
+				if (drawErrorBars)
+					renderer.setErrorType(ErrorStyle.ERRORBARS);
+				else 
+					renderer.setErrorType(ErrorStyle.NONE);
 
 				renderer.getDatasets().clear();
 				renderer.getDatasets().addAll(datasets);
@@ -265,11 +274,12 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			}
 
 			if (error != null) {
+				drawErrorBars = true;
 				for (int index = 0; index < xvalues.length; index++)
 					dataset.add(xvalues[index], yvalues[index], error[index], error[index]);
 			} else {
 				for (int index = 0; index < xvalues.length; index++)
-					dataset.add(xvalues[index], yvalues[index]);
+					dataset.add(xvalues[index], yvalues[index], 0, 0);
 			}
 
 		} else if (outputs.containsKey(seriesName + "_xvalues")) {

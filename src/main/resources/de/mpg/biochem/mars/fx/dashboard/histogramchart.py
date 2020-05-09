@@ -55,4 +55,4 @@ series3_strokeWidth = 2
 series3_values = []
 
 for i in range(999):
-	series2_values.append(Double.valueOf(r.nextGaussian() + 5))
+	series3_values.append(Double.valueOf(r.nextGaussian() + 5))

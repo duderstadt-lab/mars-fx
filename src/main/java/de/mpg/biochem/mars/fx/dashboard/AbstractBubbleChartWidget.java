@@ -114,6 +114,7 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		renderer.setErrorType(ErrorStyle.NONE);
 		renderer.setDrawMarker(true);
 		renderer.setAssumeSortedData(false);
+		renderer.pointReductionProperty().set(false);
 
 		bubbleChart.getRenderers().add(renderer);
 		bubbleChart.legendVisibleProperty().set(false);
@@ -287,12 +288,13 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (dataPointCount != color.length) {
 				writeToLog("The length of " + seriesName + "_color does not match that of " + seriesName
-						+ "_xvalues and " + seriesName + "_yvalues.");
-				return null;
+						+ "_xvalues and " + seriesName + "_yvalues. Will assume single color input.");
+				for (int index = 0; index < dataPointCount; index++)
+					styleString[index] += "markerColor=" + color[0] + "; ";
+			} else {
+				for (int index = 0; index < dataPointCount; index++)
+					styleString[index] += "markerColor=" + color[index] + "; ";
 			}
-
-			for (int index = 0; index < dataPointCount; index++)
-				styleString[index] += "markerColor=" + color[index] + "; ";
 		} else if (outputs.containsKey(seriesName + "_markerColor")) {
 			for (int index = 0; index < dataPointCount; index++)
 				styleString[index] += "markerColor=" + (String) outputs.get(seriesName + "_markerColor") + "; ";
@@ -303,12 +305,16 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (dataPointCount != size.length) {
 				writeToLog("The length of " + seriesName + "_size does not match that of " + seriesName
-						+ "_xvalues and " + seriesName + "_yvalues.");
-				return null;
+						+ "_xvalues and " + seriesName + "_yvalues. Will assume single color input.");
+				for (int index = 0; index < dataPointCount; index++)
+					styleString[index] += "markerSize=" + size[0] + "; ";
+			} else {
+				for (int index = 0; index < dataPointCount; index++)
+					styleString[index] += "markerSize=" + size[index] + "; ";
 			}
-
+		} else if (outputs.containsKey(seriesName + "_markerSize")) {
 			for (int index = 0; index < dataPointCount; index++)
-				styleString[index] += "markerSize=" + size[index] + "; ";
+				styleString[index] += "markerSize=" + (String) outputs.get(seriesName + "_markerSize") + "; ";
 		}
 
 		for (int index = 0; index < dataPointCount; index++)
