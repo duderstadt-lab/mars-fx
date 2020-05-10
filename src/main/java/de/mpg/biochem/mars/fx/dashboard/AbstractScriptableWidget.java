@@ -84,117 +84,118 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.reactfx.Subscription;
 
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
-	
+
 	@Parameter
 	protected ScriptService scriptService;
-	
+
 	@Parameter
 	protected ModuleService moduleService;
-	
+
 	@Parameter
 	protected MarsDashboardWidgetService marsDashboardWidgetService;
-	
+
 	@Parameter
 	protected LogService log;
-	
+
 	@Parameter
 	protected Context context;
-	
+
 	protected ScriptLanguage lang;
 	protected RadioButton radioButtonGroovy, radioButtonPython;
 	protected ToggleGroup languageGroup;
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-		lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
-		
-		//Script Pane
-        Tab scriptTab = new Tab();
-        scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
-		
-        codeArea = new MarsScriptEditor();
 
-        // auto-indent: insert previous line's indents on enter
-        final Pattern whiteSpace = Pattern.compile( "^\\s+" );
-        codeArea.addEventHandler( KeyEvent.KEY_PRESSED, KE -> {
-            if ( KE.getCode() == KeyCode.ENTER ) {
-            	int caretPosition = codeArea.getCaretPosition();
-            	int currentParagraph = codeArea.getCurrentParagraph();
-                Matcher m0 = whiteSpace.matcher( codeArea.getParagraph( currentParagraph-1 ).getSegments().get( 0 ) );
-                if ( m0.find() ) Platform.runLater( () -> codeArea.insertText( caretPosition, m0.group() ) );
-            }
-        });
-    
-        BorderPane scriptBorder = new BorderPane();
-        scriptBorder.setCenter(new VirtualizedScrollPane<>(codeArea));
-        
-        languageGroup = new ToggleGroup();
-        
-        radioButtonGroovy = new RadioButton("Groovy");
-        radioButtonGroovy.setToggleGroup(languageGroup);
-        
-        radioButtonPython = new RadioButton("Python");
-        radioButtonPython.setToggleGroup(languageGroup);
-        
-        if (lang == scriptService.getLanguageByName("Groovy"))
-	        radioButtonGroovy.setSelected(true);
-        else if (lang == scriptService.getLanguageByName("Python"))
-        	radioButtonPython.setSelected(true);
-        
-        languageGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-            @Override
-            public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
-            	if (newToggle == radioButtonGroovy)
-            		lang = scriptService.getLanguageByName("Groovy");
-            	else if (newToggle == radioButtonPython)
-            		lang = scriptService.getLanguageByName("Python");
-            }
-        });
-        
-        HBox hbox = new HBox(radioButtonGroovy, radioButtonPython);
-        hbox.setSpacing(5);
-        hbox.setPadding(new Insets(5, 5, 5, 5));
-        scriptBorder.setPadding(new Insets(5, 5, 5, 5));
-        scriptBorder.setPrefSize(100, 100);
-        scriptBorder.setTop(hbox);
-        
-        scriptTab.setContent(scriptBorder);
-        getTabPane().getTabs().add(scriptTab);
-        
-        logArea = new InlineCssTextArea("");
-        logArea.setEditable(false);
-  
-        BorderPane borderPane = new BorderPane();
-        borderPane.setCenter(new VirtualizedScrollPane<>(logArea));
-        borderPane.setPrefSize(100, 100);
-        borderPane.setPadding(new Insets(5, 5, 5, 5));
-        
-        Tab logTab = new Tab();
-        logTab.setContent(borderPane);
-        logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
-        getTabPane().getTabs().add(logTab);
+		lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
+
+		// Script Pane
+		Tab scriptTab = new Tab();
+		scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
+
+		codeArea = new MarsScriptEditor();
+
+		// auto-indent: insert previous line's indents on enter
+		final Pattern whiteSpace = Pattern.compile("^\\s+");
+		codeArea.addEventHandler(KeyEvent.KEY_PRESSED, KE -> {
+			if (KE.getCode() == KeyCode.ENTER) {
+				int caretPosition = codeArea.getCaretPosition();
+				int currentParagraph = codeArea.getCurrentParagraph();
+				Matcher m0 = whiteSpace.matcher(codeArea.getParagraph(currentParagraph - 1).getSegments().get(0));
+				if (m0.find())
+					Platform.runLater(() -> codeArea.insertText(caretPosition, m0.group()));
+			}
+		});
+
+		BorderPane scriptBorder = new BorderPane();
+		scriptBorder.setCenter(new VirtualizedScrollPane<>(codeArea));
+
+		languageGroup = new ToggleGroup();
+
+		radioButtonGroovy = new RadioButton("Groovy");
+		radioButtonGroovy.setToggleGroup(languageGroup);
+
+		radioButtonPython = new RadioButton("Python");
+		radioButtonPython.setToggleGroup(languageGroup);
+
+		if (lang == scriptService.getLanguageByName("Groovy"))
+			radioButtonGroovy.setSelected(true);
+		else if (lang == scriptService.getLanguageByName("Python"))
+			radioButtonPython.setSelected(true);
+
+		languageGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+			@Override
+			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
+				if (newToggle == radioButtonGroovy)
+					lang = scriptService.getLanguageByName("Groovy");
+				else if (newToggle == radioButtonPython)
+					lang = scriptService.getLanguageByName("Python");
+			}
+		});
+
+		HBox hbox = new HBox(radioButtonGroovy, radioButtonPython);
+		hbox.setSpacing(5);
+		hbox.setPadding(new Insets(5, 5, 5, 5));
+		scriptBorder.setPadding(new Insets(5, 5, 5, 5));
+		scriptBorder.setPrefSize(100, 100);
+		scriptBorder.setTop(hbox);
+
+		scriptTab.setContent(scriptBorder);
+		getTabPane().getTabs().add(scriptTab);
+
+		logArea = new InlineCssTextArea("");
+		logArea.setEditable(false);
+
+		BorderPane borderPane = new BorderPane();
+		borderPane.setCenter(new VirtualizedScrollPane<>(logArea));
+		borderPane.setPrefSize(100, 100);
+		borderPane.setPadding(new Insets(5, 5, 5, 5));
+
+		Tab logTab = new Tab();
+		logTab.setContent(borderPane);
+		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
+		getTabPane().getTabs().add(logTab);
 
 	}
-	
+
 	protected Map<String, Object> runScript() {
 		writeToLog(new java.util.Date() + " - Running script... ");
-		
+
 		Reader reader = new StringReader(codeArea.getText());
-		
+
 		String scriptName = "script";
 		if (radioButtonGroovy.isSelected()) {
 			scriptName += ".groovy";
 		} else if (radioButtonPython.isSelected()) {
 			scriptName += ".py";
 		}
-		
+
 		ScriptInfo scriptInfo = new ScriptInfo(context, scriptName, reader);
 		scriptInfo.setLanguage(lang);
-			
+
 		ScriptModule module = null;
 		try {
 			module = scriptInfo.createModule();
@@ -202,30 +203,30 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		} catch (ModuleException e) {
 			return null;
 		}
-		
-		//Can these move into the initialize block...
-		
+
+		// Can these move into the initialize block...
+
 		OutputConsole outputConsole = new OutputConsole(logArea);
-        PrintStream outputPS = new PrintStream(outputConsole, true);
-        
-        ErrorConsole errorConsole = new ErrorConsole(logArea);
-        PrintStream errorPS = new PrintStream(errorConsole, true);
-        
+		PrintStream outputPS = new PrintStream(outputConsole, true);
+
+		ErrorConsole errorConsole = new ErrorConsole(logArea);
+		PrintStream errorPS = new PrintStream(errorConsole, true);
+
 		try {
-			Writer outputWriter = new OutputStreamWriter(outputPS,"UTF-8");
+			Writer outputWriter = new OutputStreamWriter(outputPS, "UTF-8");
 			module.setOutputWriter(outputWriter);
-			
-			Writer errorWriter = new OutputStreamWriter(errorPS,"UTF-8");
+
+			Writer errorWriter = new OutputStreamWriter(errorPS, "UTF-8");
 			module.setErrorWriter(errorWriter);
-			
+
 		} catch (UnsupportedEncodingException e1) {
 			outputPS.close();
 			errorPS.close();
 			return null;
 		}
-		
+
 		setScriptInputs(module);
-		
+
 		try {
 			moduleService.run(module, false).get();
 		} catch (InterruptedException e) {
@@ -233,53 +234,53 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		} catch (ExecutionException e) {
 			return null;
 		}
-		
+
 		if (errorConsole.errorsFound())
 			return null;
-		
+
 		outputPS.close();
 		errorPS.close();
-		
+
 		return module.getOutputs();
 	}
-	
+
 	protected abstract void setScriptInputs(ScriptModule module);
-	
+
 	protected void loadScript(String name) throws IOException {
 		if (radioButtonGroovy.isSelected()) {
 			name += ".groovy";
 		} else if (radioButtonPython.isSelected()) {
 			name += ".py";
 		}
-    	InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
-    	String scriptExample = IOUtils.toString(is, "UTF-8");
+		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
+		String scriptExample = IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptExample);
 	}
-	
+
 	protected void loadScript(String name, String inputParameters) throws IOException {
 		if (radioButtonGroovy.isSelected()) {
 			name += ".groovy";
 		} else if (radioButtonPython.isSelected()) {
 			name += ".py";
 		}
-    	InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
-    	String scriptTemplate = inputParameters + IOUtils.toString(is, "UTF-8");
+		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
+		String scriptTemplate = inputParameters + IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptTemplate);
 	}
-	
+
 	@Override
 	protected void createIOMaps() {
 		super.createIOMaps();
-		
+
 		outputMap.put("Language", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeStringField("Language", lang.getLanguageName());
 		}, IOException.class));
 		outputMap.put("Script", MarsUtil.catchConsumerException(jGenerator -> {
 			jGenerator.writeStringField("Script", codeArea.getText());
 		}, IOException.class));
-		
+
 		inputMap.put("Language", MarsUtil.catchConsumerException(jParser -> {
 			String language = jParser.getText();
 			if (language.equals("Groovy")) {
@@ -293,48 +294,48 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			codeArea.replaceText(jParser.getText());
 		}, IOException.class));
 	}
-	
+
 	@Override
 	public void close() {
 		super.close();
 		codeArea.cleanup();
 	}
-	
+
 	protected void writeToLog(String message) {
-		Platform.runLater( () -> logArea.appendText(message + "\n") );
+		Platform.runLater(() -> logArea.appendText(message + "\n"));
 	}
-	
+
 	class OutputConsole extends OutputStream {
 
-        private InlineCssTextArea logarea;
+		private InlineCssTextArea logarea;
 
-        public OutputConsole(InlineCssTextArea logarea) {
-        	this.logarea = logarea;
-        }
+		public OutputConsole(InlineCssTextArea logarea) {
+			this.logarea = logarea;
+		}
 
-        @Override
-        public void write(int i) throws IOException {
-        	Platform.runLater( () -> logarea.appendText(String.valueOf((char) i)) );
-        }
-    }
-	
+		@Override
+		public void write(int i) throws IOException {
+			Platform.runLater(() -> logarea.appendText(String.valueOf((char) i)));
+		}
+	}
+
 	class ErrorConsole extends OutputStream {
 
-        private InlineCssTextArea logarea;
-        private boolean errorsFound = false;
+		private InlineCssTextArea logarea;
+		private boolean errorsFound = false;
 
-        public ErrorConsole(InlineCssTextArea logarea) {
-        	this.logarea = logarea;
-        }
+		public ErrorConsole(InlineCssTextArea logarea) {
+			this.logarea = logarea;
+		}
 
-        @Override
-        public void write(int i) throws IOException {
-        	errorsFound = true;
-        	Platform.runLater( () -> logarea.appendText(String.valueOf((char) i)) );
-        }
-        
-        public boolean errorsFound() {
-        	return errorsFound;
-        }
-    }
+		@Override
+		public void write(int i) throws IOException {
+			errorsFound = true;
+			Platform.runLater(() -> logarea.appendText(String.valueOf((char) i)));
+		}
+
+		public boolean errorsFound() {
+			return errorsFound;
+		}
+	}
 }

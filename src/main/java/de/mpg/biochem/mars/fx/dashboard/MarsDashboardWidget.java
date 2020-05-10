@@ -40,15 +40,30 @@ import net.imagej.ops.Initializable;
 
 public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {
 	public Node getNode();
+
 	public String getName();
+
 	public void setContent(Node node);
+
 	public void setContent(Node icon, Node node);
+
 	public void setParent(MarsDashboard parent);
+
 	public MarsDashboard getParent();
+	
+	public double getWidth();
+	
+	public void setWidth(double width);
+
 	public boolean isRunning();
+
 	public void setRunning(boolean running);
+
 	public Node getIcon();
+
 	public void spin();
+
 	public void stopSpinning();
+
 	public void close();
 }
