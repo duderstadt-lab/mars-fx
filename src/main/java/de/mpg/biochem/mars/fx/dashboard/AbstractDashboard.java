@@ -123,7 +123,8 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-				int hCells = (int)((getWidgetPane().getWidth() - 20) / getWidgetPane().getCellWidth());
+				//int hCells = (int)((getWidgetPane().getWidth() - 20) / getWidgetPane().getCellWidth());
+				int hCells = (int)(getWidgetPane().getWidth() / getWidgetPane().getCellWidth());
 				double containerWidth = hCells*getWidgetPane().getCellWidth();
 				
 				boolean outOfBoundsWidget = widgets.stream().filter(widget -> 
