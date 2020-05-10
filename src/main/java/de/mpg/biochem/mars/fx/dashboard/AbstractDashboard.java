@@ -89,7 +89,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		});
 		
 		Action layoutWidgets = new Action("Layout", null, REORDER, e -> {
-			int hCells = (int)(getWidgetPane().getWidth() / getWidgetPane().getCellWidth());
+			int hCells = (int)((getWidgetPane().getWidth() - 10) / getWidgetPane().getCellWidth());
 			double containerWidth = hCells*getWidgetPane().getCellWidth();
 			
 			widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
@@ -131,19 +131,25 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		widgetPane.setCellHeight(50);
 		widgetPane.setPadding(new Insets(10, 10, 10, 10));
 		
-		/*
 		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+				int hCells = (int)((getWidgetPane().getWidth() - 20) / getWidgetPane().getCellWidth());
+				double containerWidth = hCells*getWidgetPane().getCellWidth();
+				
 				boolean outOfBoundsWidget = widgets.stream().filter(widget -> 
 					widget.getWidth() > getWidgetPane().getWidth()).findFirst().isPresent();
 				
 				if (outOfBoundsWidget) {
+					widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
+					widget.setWidth(containerWidth));
 					
+					getWidgetPane().clearLayout();
+					getWidgetPane().layout();
 				}
 			}
 		});
-*/
+
 		scrollPane = new ScrollPane();
 		scrollPane.setContent(widgetPane);
 		scrollPane.setFitToWidth(true);
