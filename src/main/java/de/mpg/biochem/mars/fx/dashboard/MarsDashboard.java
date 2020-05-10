@@ -10,8 +10,6 @@ public interface MarsDashboard<W extends MarsDashboardWidget> {
 
 	public void removeWidget(W widget);
 	
-	public double getWidth();
-	
 	public Node getNode();
 
 	public JFXMasonryPane getWidgetPane();

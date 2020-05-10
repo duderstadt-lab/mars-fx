@@ -50,6 +50,10 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Ini
 	public void setParent(MarsDashboard parent);
 
 	public MarsDashboard getParent();
+	
+	public double getWidth();
+	
+	public void setWidth(double width);
 
 	public boolean isRunning();
 

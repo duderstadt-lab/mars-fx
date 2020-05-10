@@ -3,6 +3,7 @@ package de.mpg.biochem.mars.fx.dashboard;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOMB;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STOP;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REORDER;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ import org.scijava.plugin.Parameter;
 import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
@@ -84,6 +87,17 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 			// executor.shutdownNow();
 			widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> runWidget(widget));
 		});
+		
+		Action layoutWidgets = new Action("Layout", null, REORDER, e -> {
+			int hCells = (int)(getWidgetPane().getWidth() / getWidgetPane().getCellWidth());
+			double containerWidth = hCells*getWidgetPane().getCellWidth();
+			
+			widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
+			widget.setWidth(containerWidth));
+		
+			getWidgetPane().clearLayout();
+			getWidgetPane().layout();
+		});
 
 		toolbar = new ToolBar();
 		toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
@@ -106,18 +120,30 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		});
 		toolbar.getItems().add(widgetScriptLanguage);
 
-		toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets),
+		toolbar.getItems().addAll(ActionUtils.createToolBarButton(layoutWidgets), ActionUtils.createToolBarButton(removeAllWidgets),
 				ActionUtils.createToolBarButton(stopAllWidgets), ActionUtils.createToolBarButton(reloadWidgets));
 
 		borderPane.setTop(toolbar);
 
 		widgetPane = new JFXMasonryPane();
 		widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.BIN_PACKING);
-		// default below ensure they stay in order
-		// BIN_PACKING default to fitting them all in...
-		// widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.MASONRY);
+		widgetPane.setCellWidth(50);
+		widgetPane.setCellHeight(50);
 		widgetPane.setPadding(new Insets(10, 10, 10, 10));
-
+		
+		/*
+		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
+			@Override
+			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+				boolean outOfBoundsWidget = widgets.stream().filter(widget -> 
+					widget.getWidth() > getWidgetPane().getWidth()).findFirst().isPresent();
+				
+				if (outOfBoundsWidget) {
+					
+				}
+			}
+		});
+*/
 		scrollPane = new ScrollPane();
 		scrollPane.setContent(widgetPane);
 		scrollPane.setFitToWidth(true);
@@ -135,10 +161,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 	public Node getNode() {
 		return borderPane;
-	}
-	
-	public double getWidth() {
-		return borderPane.getWidth();
 	}
 
 	public JFXMasonryPane getWidgetPane() {
