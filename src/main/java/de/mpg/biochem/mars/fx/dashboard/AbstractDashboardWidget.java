@@ -254,7 +254,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 			int hCells = (int)((parent.getWidgetPane().getWidth() - 20) / parent.getWidgetPane().getCellWidth());
 			double containerWidth = hCells*parent.getWidgetPane().getCellWidth();
 			
-			if (rootPane.getMinWidth() > containerWidth && rootPane.getMaxWidth() > containerWidth) {
+			if (rootPane.getMinWidth() > containerWidth 
+					&& rootPane.getMaxWidth() > containerWidth 
+					&& rootPane.getMaxHeight() < MINIMUM_WIDTH) {
 				rootPane.setMinWidth(containerWidth);
 				rootPane.setMaxWidth(containerWidth);
 			}
@@ -331,6 +333,9 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 	
 	public void setWidth(double width) {
+		if (width < MINIMUM_WIDTH)
+			return;
+		
 		rootPane.setMinWidth(width);
 		rootPane.setMaxWidth(width);
 	}
