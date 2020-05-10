@@ -231,6 +231,11 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected void mouseDragged(MouseEvent event) {
 		if (!dragX && !dragY)
 			return;
+		
+		Bounds boundsInScene = parent.getNode().localToScene(parent.getNode().getBoundsInLocal());
+		if (!boundsInScene.contains(event.getSceneX(), event.getSceneY())) {
+			return;
+		}
 
 		if (dragY) {
 			double mousey = event.getY();
@@ -244,6 +249,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 		if (dragX) {
 			double mousex = event.getX();
+			
 			double newWidth = rootPane.getMinWidth() + (mousex - x);
 			if (newWidth > MINIMUM_WIDTH) {
 				rootPane.setMinWidth(newWidth);
@@ -255,10 +261,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 			double containerWidth = hCells*parent.getWidgetPane().getCellWidth();
 			
 			if (rootPane.getMinWidth() > containerWidth 
-					&& rootPane.getMaxWidth() > containerWidth 
-					&& rootPane.getMaxHeight() < MINIMUM_WIDTH) {
-				rootPane.setMinWidth(containerWidth);
-				rootPane.setMaxWidth(containerWidth);
+					&& rootPane.getMaxWidth() > containerWidth) {
+				setWidth(containerWidth);
 			}
 			
 		}
