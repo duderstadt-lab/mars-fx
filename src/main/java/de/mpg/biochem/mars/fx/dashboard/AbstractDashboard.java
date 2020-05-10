@@ -87,17 +87,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 			// executor.shutdownNow();
 			widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> runWidget(widget));
 		});
-		
-		Action layoutWidgets = new Action("Layout", null, REORDER, e -> {
-			int hCells = (int)((getWidgetPane().getWidth() - 10) / getWidgetPane().getCellWidth());
-			double containerWidth = hCells*getWidgetPane().getCellWidth();
-			
-			widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
-			widget.setWidth(containerWidth));
-		
-			getWidgetPane().clearLayout();
-			getWidgetPane().layout();
-		});
 
 		toolbar = new ToolBar();
 		toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
@@ -120,7 +109,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		});
 		toolbar.getItems().add(widgetScriptLanguage);
 
-		toolbar.getItems().addAll(ActionUtils.createToolBarButton(layoutWidgets), ActionUtils.createToolBarButton(removeAllWidgets),
+		toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets),
 				ActionUtils.createToolBarButton(stopAllWidgets), ActionUtils.createToolBarButton(reloadWidgets));
 
 		borderPane.setTop(toolbar);
@@ -134,6 +123,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
+				// -20 ??? Needed
 				int hCells = (int)((getWidgetPane().getWidth() - 20) / getWidgetPane().getCellWidth());
 				double containerWidth = hCells*getWidgetPane().getCellWidth();
 				
