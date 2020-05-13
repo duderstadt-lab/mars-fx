@@ -295,6 +295,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+        
+        updateAccelerators();
 
         return scene;
 	}
@@ -333,18 +335,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     					moleculesTab.saveCurrentRecord();
     				} else if (oldValue == settingsTab.getTab()) {
     					settingsTab.save();
-    					
-    					//Update global accelerators...
-    					for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
-    						Runnable rn = ()-> {
-    							if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
-   		                	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
-   		                	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
-   		                	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
-    							}
-   		                 	};
-   		                 	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
-    					}
+    					updateAccelerators();
     				}
     				
 	    			if (newValue == imageMetadataTab.getTab()) {
@@ -355,6 +346,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     			}
     		});
     }
+	
+	protected void updateAccelerators() {
+		//Update global accelerators...
+		for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
+			Runnable rn = ()-> {
+				if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
+           	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
+           	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
+           	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
+				}
+            };
+            	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
+		}
+	}
 	
 	protected void buildMenuBar() {
 		//Build file menu
