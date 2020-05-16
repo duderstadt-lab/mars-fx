@@ -30,6 +30,10 @@ import org.scijava.convert.ConvertService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
+import de.mpg.biochem.mars.metadata.GenericModel;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.metadata.MarsOMEImage;
+import de.mpg.biochem.mars.metadata.MarsOMEPlane;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TableColumn;
@@ -221,44 +225,41 @@ public class MarsOMEView {
 		planeDetailsPane.getChildren().add(planeSplitPane);
 	}
 
-	public void fill(OMEXMLMetadata md) {
-		TreeItem<GenericModel<?>> root = new TreeItem<>();
+	public void fill(MarsMetadata meta) {
+		TreeItem<GenericModel> root = new TreeItem<>();
 		testTree.setRoot(root);
 		testTree.setShowRoot(false);
 
 		// Build and populate the tree
-		for (int i = 0; i < md.getImageCount(); i++) {
-			ImageModel imageModel = new ImageModel(i, md);
-			TreeItem<GenericModel<?>> imageItem = new TreeItem<>(imageModel);
+		for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++) {
+			MarsOMEImage imageModel = meta.getImage(imageIndex);
+			TreeItem<GenericModel> imageItem = new TreeItem<>(imageModel);
 			root.getChildren().add(imageItem);
 
-			for (int j = 0; j < md.getTiffDataCount(i); j++) {
-				TiffDataModel dataModel = new TiffDataModel(i, j, md, imageModel);
-				// md.getTiffDataFirstC(i, j),
-				// md.getTiffDataFirstT(i, j), md.getTiffDataFirstZ(i, j), md.getTiffDataIFD(i,
-				// j));
-				TreeItem<GenericModel<?>> dataItem = new TreeItem<>(dataModel);
-				imageItem.getChildren().add(dataItem);
+			for (int planeIndex = 0; planeIndex < imageModel.getPlaneCount(); planeIndex++) {
+				MarsOMEPlane dataModel = meta.getPlane(imageIndex, planeIndex);
 
+				TreeItem<GenericModel> dataItem = new TreeItem<>(dataModel);
+				imageItem.getChildren().add(dataItem);
 			}
 		}
 
 		// Handle selection in the tree
 		testTree.getSelectionModel().selectedItemProperty()
 				.addListener((ObservableValue obs, Object oldValue, Object newValue) -> {
-					TreeItem<GenericModel<?>> selectedItem = (TreeItem<GenericModel<?>>) newValue;
-					GenericModel<?> model = selectedItem.getValue();
+					TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
+					GenericModel model = selectedItem.getValue();
 
-					if (model instanceof TiffDataModel) {
+					//if (model instanceof TiffDataModel) {
 						// Display informations relative to TiffData
-						populateTiffDataInformations((TiffDataModel) model);
+						populateTiffDataInformations((MarsOMEImage) model);
 
-					}
+					//}
 				});
 
 	}
 
-	private void populateImageInformations(ImageModel model) {
+	private void populateImageInformations(MarsOMEImage model) {
 
 		this.imageTable.getItems().clear();
 
@@ -276,8 +277,8 @@ public class MarsOMEView {
 
 	}
 
-	private void populateTiffDataInformations(TiffDataModel model) {
-		ImageModel imageModel = model.getImageModel();
+	private void populateTiffDataInformations(MarsOMEImage imageModel) {
+		//MarsOMEImage imageModel = model.getImageModel();
 		this.populateImageInformations(imageModel);
 
 		// Populate tiffData
@@ -291,7 +292,7 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(data.getValue().get(1));
 		});
 
-		for (List<String> row : model.getInformationsRow()) {
+		for (List<String> row : imageModel.getInformationsRow()) {
 			this.tiffDataTable.getItems().add(row);
 		}
 	}
