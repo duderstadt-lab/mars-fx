@@ -67,6 +67,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 
 public abstract class AbstractPositionOfInterestTable {
     
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected MarsRecord record;
 	
 	protected BorderPane rootPane;
@@ -148,7 +149,7 @@ public abstract class AbstractPositionOfInterestTable {
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
-        	columns.getItems().addAll(record.getDataTable().getColumnHeadings());
+        	columns.getItems().addAll(archive.properties().getColumnSet());
             columns.getSelectionModel().select(cellData.getValue().getColumn());
             
             columns.getSelectionModel().selectedItemProperty().addListener(

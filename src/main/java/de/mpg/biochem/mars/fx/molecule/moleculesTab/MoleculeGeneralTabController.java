@@ -212,7 +212,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			chipView.getChips().addAll(molecule.getTags());
 		
 		chipView.getSuggestions().clear();
-		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
 		
 		notesTextArea.textProperty().removeListener(notesListener);

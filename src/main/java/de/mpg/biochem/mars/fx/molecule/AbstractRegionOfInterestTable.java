@@ -38,9 +38,12 @@ import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import javafx.scene.paint.Color;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.application.Platform;
@@ -61,6 +64,7 @@ import javafx.scene.control.cell.TextFieldTableCell;
 
 public abstract class AbstractRegionOfInterestTable {
     
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected MarsRecord record;
 	
 	protected BorderPane rootPane;
@@ -141,7 +145,7 @@ public abstract class AbstractRegionOfInterestTable {
         columnColumn.setMinWidth(100);
         columnColumn.setCellValueFactory(cellData -> {
         	ComboBox<String> columns = new ComboBox<String>();
-        	columns.getItems().addAll(record.getDataTable().getColumnHeadings());
+        	columns.getItems().addAll(archive.properties().getColumnSet());
             columns.getSelectionModel().select(cellData.getValue().getColumn());
             
             columns.getSelectionModel().selectedItemProperty().addListener(

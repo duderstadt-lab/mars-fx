@@ -180,7 +180,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 			chipView.getChips().addAll(marsImageMetadata.getTags());
 
 		chipView.getSuggestions().clear();
-		chipView.getSuggestions().addAll(archive.getProperties().getTagSet());
+		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
 		
 		notesTextArea.textProperty().removeListener(notesListener);

@@ -326,16 +326,18 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				//Add transforms to spimData...
 				Map< ViewId, ViewRegistration > registrations = spimData.getViewRegistrations().getViewRegistrations();
 				
-				boolean driftCorrect = false;
-				if (meta.getDataTable().hasColumn(source.getXDriftColumn()) && meta.getDataTable().hasColumn(source.getYDriftColumn())) {
-					driftCorrect = true;
-					System.out.println("found drift columns for " + source.getName());
-				}
+				boolean driftCorrect = true;
+				
+				//boolean driftCorrect = false;
+				//if (meta.getDataTable().hasColumn(source.getXDriftColumn()) && meta.getDataTable().hasColumn(source.getYDriftColumn())) {
+				//	driftCorrect = true;
+				//	System.out.println("found drift columns for " + source.getName());
+				//}
 					
 				for (ViewId id : registrations.keySet()) {
 					if (driftCorrect) {
-						double dX = meta.getDataTable().getValue(source.getXDriftColumn(), id.getTimePointId());
-						double dY = meta.getDataTable().getValue(source.getYDriftColumn(), id.getTimePointId());
+						double dX = meta.getPlane(0, 0, 0, id.getTimePointId()).getXDrift();
+						double dY = meta.getPlane(0, 0, 0, id.getTimePointId()).getYDrift();
 						registrations.get(id).getModel().set(source.getAffineTransform3D(dX, dY));
 					} else
 						registrations.get(id).getModel().set(source.getAffineTransform3D());
