@@ -984,7 +984,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	
     	//Make sure we block the calling (swing) thread until
 		//the archive has actually been unlocked...
-		while (!archiveLocked.get()) {}
+		while (archiveLocked.get()) {}
     }
     
     private void unlockFX() {
