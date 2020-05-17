@@ -152,6 +152,8 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 		barChart.legendVisibleProperty().set(false);
 		barChart.horizontalGridLinesVisibleProperty().set(false);
 		barChart.verticalGridLinesVisibleProperty().set(false);
+		
+		barChart.setTriggerDistance(0);
 
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));

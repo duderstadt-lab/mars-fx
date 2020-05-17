@@ -119,6 +119,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		xyChart.horizontalGridLinesVisibleProperty().set(false);
 		xyChart.verticalGridLinesVisibleProperty().set(false);
 
+		xyChart.setTriggerDistance(0);
+		
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(xyChart);

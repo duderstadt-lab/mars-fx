@@ -119,6 +119,8 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements Molec
         //barChart.getPlugins().add(new EditAxis());
         //final Zoomer zoomer = new Zoomer();
         //barChart.getPlugins().add(zoomer);
+        
+        barChart.setTriggerDistance(0);
 
         //root.getChildren().add(barChart);
 		StackPane stack = new StackPane();
