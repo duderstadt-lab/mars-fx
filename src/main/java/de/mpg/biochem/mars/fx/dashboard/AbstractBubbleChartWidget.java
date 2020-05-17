@@ -120,6 +120,8 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		bubbleChart.legendVisibleProperty().set(false);
 		bubbleChart.horizontalGridLinesVisibleProperty().set(false);
 		bubbleChart.verticalGridLinesVisibleProperty().set(false);
+		
+		bubbleChart.setTriggerDistance(0);
 
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));

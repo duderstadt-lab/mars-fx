@@ -116,7 +116,9 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		histChart.legendVisibleProperty().set(false);
 		histChart.horizontalGridLinesVisibleProperty().set(false);
 		histChart.verticalGridLinesVisibleProperty().set(false);
-
+		
+		histChart.setTriggerDistance(0);
+		
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(histChart);
