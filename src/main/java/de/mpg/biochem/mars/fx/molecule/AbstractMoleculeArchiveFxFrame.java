@@ -870,6 +870,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	//the javafx thread.
 	
 	public void lock(String message) {
+		if (archiveLocked.get())
+    		return;
+		
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -894,6 +897,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 	
     public void lock() {
+    	if (archiveLocked.get())
+    		return;
+    	
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -975,6 +981,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     @Override
     public void unlock() {
+    	if (!archiveLocked.get())
+    		return;
+    	
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -984,7 +993,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	
     	//Make sure we block the calling (swing) thread until
 		//the archive has actually been unlocked...
-		while (!archiveLocked.get()) {}
+		while (archiveLocked.get()) {}
     }
     
     private void unlockFX() {
