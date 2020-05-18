@@ -128,6 +128,8 @@ public class MarsOMEView {
 		planeDetailsPane.prefWidth(320.0);
 		planeDetailsPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
 		
+		splitPane.getItems().add(planeDetailsPane);
+		
 		//Right side vertical splitpane
 		SplitPane planeSplitPane = new SplitPane();
 		planeSplitPane.setDividerPositions(0.4);
@@ -252,7 +254,7 @@ public class MarsOMEView {
 
 					//if (model instanceof TiffDataModel) {
 						// Display informations relative to TiffData
-						populateTiffDataInformations((MarsOMEImage) model);
+						populateTiffDataInformations((MarsOMEPlane) model);
 
 					//}
 				});
@@ -277,8 +279,8 @@ public class MarsOMEView {
 
 	}
 
-	private void populateTiffDataInformations(MarsOMEImage imageModel) {
-		//MarsOMEImage imageModel = model.getImageModel();
+	private void populateTiffDataInformations(MarsOMEPlane plane) {
+		MarsOMEImage imageModel = plane.getImage();
 		this.populateImageInformations(imageModel);
 
 		// Populate tiffData
@@ -292,7 +294,7 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(data.getValue().get(1));
 		});
 
-		for (List<String> row : imageModel.getInformationsRow()) {
+		for (List<String> row : plane.getInformationsRow()) {
 			this.tiffDataTable.getItems().add(row);
 		}
 	}
