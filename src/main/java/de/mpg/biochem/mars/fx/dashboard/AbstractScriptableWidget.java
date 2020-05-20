@@ -274,25 +274,29 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected void createIOMaps() {
 		super.createIOMaps();
 
-		outputMap.put("Language", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeStringField("Language", lang.getLanguageName());
-		}, IOException.class));
-		outputMap.put("Script", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeStringField("Script", codeArea.getText());
-		}, IOException.class));
-
-		inputMap.put("Language", MarsUtil.catchConsumerException(jParser -> {
-			String language = jParser.getText();
-			if (language.equals("Groovy")) {
-				radioButtonGroovy.setSelected(true);
-			} else if (language.equals("Python")) {
-				radioButtonPython.setSelected(true);
-			}
-			lang = scriptService.getLanguageByName(language);
-		}, IOException.class));
-		inputMap.put("Script", MarsUtil.catchConsumerException(jParser -> {
-			codeArea.replaceText(jParser.getText());
-		}, IOException.class));
+		setJsonField("Language", 
+			jGenerator -> {
+				jGenerator.writeStringField("Language", lang.getLanguageName());
+			},
+			jParser -> {
+				String language = jParser.getText();
+				if (language.equals("Groovy")) {
+					radioButtonGroovy.setSelected(true);
+				} else if (language.equals("Python")) {
+					radioButtonPython.setSelected(true);
+				}
+				lang = scriptService.getLanguageByName(language);
+			});
+			
+			
+		setJsonField("Script", 
+			jGenerator -> {
+				jGenerator.writeStringField("Script", codeArea.getText());
+			}, 
+			jParser -> {
+				codeArea.replaceText(jParser.getText());
+			});
+		
 	}
 
 	@Override
