@@ -1025,58 +1025,55 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     //Creates settings input and output maps to save the current state of the program.
     @Override
 	protected void createIOMaps() {
-    	//Output Map
-		outputMap.put("Window", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeObjectFieldStart("Window");
-			jGenerator.writeNumberField("x", frame.getX());
-			jGenerator.writeNumberField("y", frame.getY());
-			jGenerator.writeNumberField("width", frame.getWidth());
-			jGenerator.writeNumberField("height", frame.getHeight());
-			jGenerator.writeEndObject();
-		}, IOException.class));
     	
-		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
-			outputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jGenerator -> {
-				jGenerator.writeFieldName(moleculeArchiveTab.getName());
-				moleculeArchiveTab.toJSON(jGenerator);
-			}, IOException.class));
-		}
-		
-		//Input Map
-		inputMap.put("Window", MarsUtil.catchConsumerException(jParser -> {
-			Rectangle rect = new Rectangle(0, 0, 800, 600);
-			while (jParser.nextToken() != JsonToken.END_OBJECT) {
-				if ("x".equals(jParser.getCurrentName())) {
-					jParser.nextToken();
-					rect.x = jParser.getIntValue();
+		setJsonField("Window", 
+			jGenerator -> {
+				jGenerator.writeObjectFieldStart("Window");
+				jGenerator.writeNumberField("x", frame.getX());
+				jGenerator.writeNumberField("y", frame.getY());
+				jGenerator.writeNumberField("width", frame.getWidth());
+				jGenerator.writeNumberField("height", frame.getHeight());
+				jGenerator.writeEndObject();
+			}, 
+			jParser -> {
+				Rectangle rect = new Rectangle(0, 0, 800, 600);
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					if ("x".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.x = jParser.getIntValue();
+					}
+					if ("y".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.y = jParser.getIntValue();
+					}
+					if ("width".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.width = jParser.getIntValue();
+					}
+					if ("height".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.height = jParser.getIntValue();
+					}
 				}
-				if ("y".equals(jParser.getCurrentName())) {
-					jParser.nextToken();
-					rect.y = jParser.getIntValue();
-				}
-				if ("width".equals(jParser.getCurrentName())) {
-					jParser.nextToken();
-					rect.width = jParser.getIntValue();
-				}
-				if ("height".equals(jParser.getCurrentName())) {
-					jParser.nextToken();
-					rect.height = jParser.getIntValue();
-				}
-			}
-			
-			windowStateLoaded = true;
-			
-			SwingUtilities.invokeLater(() -> { 
-				frame.setBounds(rect);
-				frame.setVisible(true);
+				
+				windowStateLoaded = true;
+				
+				SwingUtilities.invokeLater(() -> { 
+					frame.setBounds(rect);
+					frame.setVisible(true);
+				});
 			});
-		}, IOException.class));
+    	
+		for (MoleculeArchiveTab moleculeArchiveTab : tabSet)
+			setJsonField(moleculeArchiveTab.getName(), 
+				jGenerator -> {
+					jGenerator.writeFieldName(moleculeArchiveTab.getName());
+					moleculeArchiveTab.toJSON(jGenerator);
+				}, 
+				jParser -> {
+					moleculeArchiveTab.fromJSON(jParser);
+			 	});
 		
-		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
-			inputMap.put(moleculeArchiveTab.getName(), MarsUtil.catchConsumerException(jParser -> {
-				moleculeArchiveTab.fromJSON(jParser);
-		 	}, IOException.class));
-		}
 	}
     
     protected void saveState(String path) throws IOException {
