@@ -279,7 +279,6 @@ public class MarsOMEView {
 		MarsOMEImage imageModel = plane.getImage();
 		this.populateImageInformations(imageModel);
 
-		// Populate tiffData
 		this.tiffDataTable.getItems().clear();
 
 		this.tiffDataNameColumn.setCellValueFactory(data -> {
