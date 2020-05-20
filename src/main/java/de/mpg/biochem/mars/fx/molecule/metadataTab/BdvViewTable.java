@@ -174,7 +174,7 @@ public class BdvViewTable implements MetadataEventHandler {
         });
     	driftCorrectColumn.setStyle("-fx-alignment: CENTER;");
     	driftCorrectColumn.setSortable(false);
-    	bdvTable.getColumns().add(deleteColumn);
+    	bdvTable.getColumns().add(driftCorrectColumn);
 
         TableColumn<MarsBdvSource, String> xmlPathColumn = buildEntryFieldColumn("file path (xml)");
         xmlPathColumn.setOnEditCommit(event -> event.getRowValue().setPathToXml(event.getNewValue()));
