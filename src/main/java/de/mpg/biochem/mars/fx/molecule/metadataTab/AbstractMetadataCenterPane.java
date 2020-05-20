@@ -169,14 +169,16 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 	
 	@Override
 	protected void createIOMaps() {
-		outputMap.put("MarsMetadataDashboard", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeFieldName("MarsMetadataDashboard");
-			marsMetadataDashboardPane.toJSON(jGenerator);
-		}, IOException.class));
 		
-		inputMap.put("MarsMetadataDashboard", MarsUtil.catchConsumerException(jParser -> {
-			marsMetadataDashboardPane.fromJSON(jParser);
-	 	}, IOException.class));
+		setJsonField("MarsMetadataDashboard", 
+			jGenerator -> {
+				jGenerator.writeFieldName("MarsMetadataDashboard");
+				marsMetadataDashboardPane.toJSON(jGenerator);
+			}, 
+			jParser -> {
+				marsMetadataDashboardPane.fromJSON(jParser);
+		 	});
+		 	
 	}
 	
 	protected void loadLog() {
