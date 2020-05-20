@@ -30,9 +30,12 @@ import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
+import com.jfoenix.controls.JFXCheckBox;
+
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsBdvSource;
 import javafx.stage.FileChooser;
@@ -142,20 +145,37 @@ public class BdvViewTable implements MetadataEventHandler {
         TableColumn<MarsBdvSource, String> m12Column = buildAffineColumn("m12", 1, 3);
         bdvTable.getColumns().add(m12Column);
         
-        TableColumn<MarsBdvSource, String> xDriftColumn = buildEntryFieldColumn("xDriftColumn");
-        xDriftColumn.setOnEditCommit(event -> event.getRowValue().setXDriftColumn(event.getNewValue()));
-        xDriftColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getXDriftColumn()))
-        );
-        bdvTable.getColumns().add(xDriftColumn);
-        
-        TableColumn<MarsBdvSource, String> yDriftColumn = buildEntryFieldColumn("yDriftColumn");
-        yDriftColumn.setOnEditCommit(event -> event.getRowValue().setYDriftColumn(event.getNewValue()));
-        yDriftColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getYDriftColumn()))
-        );
-        bdvTable.getColumns().add(yDriftColumn);
-        
+        TableColumn<MarsBdvSource, MarsBdvSource> driftCorrectColumn = new TableColumn<>("Drift Correct");
+        driftCorrectColumn.setPrefWidth(40);
+        driftCorrectColumn.setMinWidth(40);
+        driftCorrectColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+        driftCorrectColumn.setCellFactory(param -> new TableCell<MarsBdvSource, MarsBdvSource>() {
+            private final JFXCheckBox checkbox = new JFXCheckBox();
+
+            @Override
+            protected void updateItem(MarsBdvSource pRow, boolean empty) {
+                super.updateItem(pRow, empty);
+
+                if (pRow == null) {
+                    setGraphic(null);
+                    return;
+                }
+                
+                checkbox.setSelected(pRow.getCorrectDrift());
+                
+                setGraphic(checkbox);
+                checkbox.setOnAction(e -> {
+        			if (checkbox.isSelected())
+        				pRow.setCorrectDrift(true);
+        			else 
+        				pRow.setCorrectDrift(false);
+        		});
+            }
+        });
+    	driftCorrectColumn.setStyle("-fx-alignment: CENTER;");
+    	driftCorrectColumn.setSortable(false);
+    	bdvTable.getColumns().add(deleteColumn);
+
         TableColumn<MarsBdvSource, String> xmlPathColumn = buildEntryFieldColumn("file path (xml)");
         xmlPathColumn.setOnEditCommit(event -> event.getRowValue().setPathToXml(event.getNewValue()));
         xmlPathColumn.setCellValueFactory(bdvSource ->
@@ -208,10 +228,6 @@ public class BdvViewTable implements MetadataEventHandler {
         Insets insets = new Insets(5);
         
         rootPane.setCenter(bdvTable);
-        
-        //FlowPane flowPane = new FlowPane();
-        //addBdvSourceNameField.setPrefWidth(200);
-        //flowPane.getChildren().add(addBdvSourceNameField);
         rootPane.setBottom(addBdvSourceNameField);
         BorderPane.setMargin(addBdvSourceNameField, insets);
         
