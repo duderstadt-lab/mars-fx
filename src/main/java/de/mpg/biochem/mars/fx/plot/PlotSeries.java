@@ -241,59 +241,47 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 
 		@Override
 		protected void createIOMaps() {
-			outputMap.put("Track", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeBooleanField("Track", track()), IOException.class));
-			outputMap.put("Type", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("Type", getType()), IOException.class));
-			outputMap.put("xColumn", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("xColumn", getXColumn()), IOException.class));
-			outputMap.put("yColumn", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("yColumn", getYColumn()), IOException.class));
-			outputMap.put("Style", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("Style", getLineStyle()), IOException.class));
-			outputMap.put("Color", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("Color", getColor().toString()), IOException.class));
-			outputMap.put("Stroke", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("Stroke", getWidth()), IOException.class));
-			outputMap.put("ShowSegments", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeBooleanField("ShowSegments", drawSegments()), IOException.class));
-			outputMap.put("SegmentsColor", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("SegmentsColor", getSegmentsColor().toString()), IOException.class));
-			outputMap.put("SegmentsStroke", MarsUtil.catchConsumerException(jGenerator ->
-			jGenerator.writeStringField("SegmentsStroke", getSegmentsWidth()), IOException.class));
 			
-			inputMap.put("Track", MarsUtil.catchConsumerException(jParser -> {
-				getTrackingButton().setSelected(jParser.getBooleanValue());
-			}, IOException.class));
-			inputMap.put("Type", MarsUtil.catchConsumerException(jParser -> {
-				typeField.getSelectionModel().select(jParser.getText());
-			}, IOException.class));
-			inputMap.put("xColumn", MarsUtil.catchConsumerException(jParser -> {
-				//Do I need to add the selection in case the column is not present for new datasets.
-				xColumnField().getSelectionModel().select(jParser.getText());
-			}, IOException.class));
-			inputMap.put("yColumn", MarsUtil.catchConsumerException(jParser -> {
-				//Do I need to add the selection in case the column is not present for new datasets.
-				yColumnField().getSelectionModel().select(jParser.getText());
-			}, IOException.class));
-			inputMap.put("Style", MarsUtil.catchConsumerException(jParser -> {
-				lineStyle().getSelectionModel().select(jParser.getText());
-			}, IOException.class));
-			inputMap.put("Color", MarsUtil.catchConsumerException(jParser -> {
-				getColorField().setValue(Color.web(jParser.getText()));
-			}, IOException.class));
-			inputMap.put("Stroke", MarsUtil.catchConsumerException(jParser -> {
-				getWidthField().setText(jParser.getText());
-			}, IOException.class));
-			inputMap.put("ShowSegments", MarsUtil.catchConsumerException(jParser -> {
-				getDrawSegmentsField().setSelected(jParser.getBooleanValue());
-			}, IOException.class));
-			inputMap.put("SegmentsColor", MarsUtil.catchConsumerException(jParser -> {
-				getSegmentsColorField().setValue(Color.web(jParser.getText()));
-			}, IOException.class));
-			inputMap.put("SegmentsStroke", MarsUtil.catchConsumerException(jParser -> {
-				getSegmentsWidthField().setText(jParser.getText());
-			}, IOException.class));
+			setJsonField("Track", 
+				jGenerator -> jGenerator.writeBooleanField("Track", track()),
+				jParser -> getTrackingButton().setSelected(jParser.getBooleanValue()));
+			
+			setJsonField("Type", 
+				jGenerator -> jGenerator.writeStringField("Type", getType()), 
+				jParser -> typeField.getSelectionModel().select(jParser.getText()));
+				
+			setJsonField("xColumn", 
+				jGenerator -> jGenerator.writeStringField("xColumn", getXColumn()),
+				jParser -> xColumnField().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("yColumn", 
+				jGenerator -> jGenerator.writeStringField("yColumn", getYColumn()),
+				jParser -> yColumnField().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("Style", 
+				jGenerator -> jGenerator.writeStringField("Style", getLineStyle()),
+				jParser -> lineStyle().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("Color", 
+				jGenerator -> jGenerator.writeStringField("Color", getColor().toString()), 
+				jParser -> getColorField().setValue(Color.web(jParser.getText())));
+			
+			setJsonField("Stroke", 
+				jGenerator -> jGenerator.writeStringField("Stroke", getWidth()),
+				jParser -> getWidthField().setText(jParser.getText()));
+			
+			setJsonField("ShowSegments", 
+				jGenerator -> jGenerator.writeBooleanField("ShowSegments", drawSegments()), 
+				jParser -> getDrawSegmentsField().setSelected(jParser.getBooleanValue()));
+			
+			setJsonField("SegmentsColor", 
+				jGenerator -> jGenerator.writeStringField("SegmentsColor", getSegmentsColor().toString()), 
+				jParser -> getSegmentsColorField().setValue(Color.web(jParser.getText())));
+			
+			setJsonField("SegmentsStroke", 
+				jGenerator -> jGenerator.writeStringField("SegmentsStroke", getSegmentsWidth()), 
+				jParser -> getSegmentsWidthField().setText(jParser.getText()));
+
 		}
 }
 
