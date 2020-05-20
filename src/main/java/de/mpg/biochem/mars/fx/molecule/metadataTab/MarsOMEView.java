@@ -250,13 +250,9 @@ public class MarsOMEView {
 		testTree.getSelectionModel().selectedItemProperty()
 				.addListener((ObservableValue obs, Object oldValue, Object newValue) -> {
 					TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
-					GenericModel model = selectedItem.getValue();
-
-					//if (model instanceof TiffDataModel) {
-						// Display informations relative to TiffData
-						populateTiffDataInformations((MarsOMEPlane) model);
-
-					//}
+					
+					if (selectedItem != null && selectedItem.getValue() instanceof MarsOMEPlane)
+						populateTiffDataInformations((MarsOMEPlane) selectedItem.getValue());
 				});
 
 	}
