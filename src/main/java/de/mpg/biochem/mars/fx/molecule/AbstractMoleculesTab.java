@@ -456,31 +456,34 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 	@Override
 	protected void createIOMaps() {
-		outputMap.put("SearchField", MarsUtil.catchConsumerException(jGenerator ->
-		jGenerator.writeStringField("SearchField", filterField.getText()), IOException.class));
-		outputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jGenerator ->
-		jGenerator.writeStringField("MoleculeSelectionUID", molecule.getUID()), IOException.class));
-		outputMap.put("CenterPane", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeFieldName("CenterPane");
-			if (moleculeCenterPane instanceof JsonConvertibleRecord)
-			((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
-		}, IOException.class));
 		
-		inputMap.put("SearchField", MarsUtil.catchConsumerException(jParser ->
-			filterField.setText(jParser.getText()), IOException.class));
-		inputMap.put("MoleculeSelectionUID", MarsUtil.catchConsumerException(jParser -> {
-	        String moleculeSelectionUID = jParser.getText();
-	    	for (int index = 0; index < filteredData.size(); index++) {
-	    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
-	    			moleculeIndexTable.getSelectionModel().select(index);
-	    			moleculeIndexTable.scrollTo(index);
-	    		}
-	    	}
-		}, IOException.class));
-		inputMap.put("CenterPane", MarsUtil.catchConsumerException(jParser -> {
-			if (moleculeCenterPane instanceof JsonConvertibleRecord)
-				((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
-	 	}, IOException.class));
+		setJsonField("SearchField", 
+			jGenerator -> jGenerator.writeStringField("SearchField", filterField.getText()),
+			jParser -> filterField.setText(jParser.getText()));
+		
+		setJsonField("MoleculeSelectionUID", 
+			jGenerator -> jGenerator.writeStringField("MoleculeSelectionUID", molecule.getUID()),
+			jParser -> {
+		        String moleculeSelectionUID = jParser.getText();
+		    	for (int index = 0; index < filteredData.size(); index++) {
+		    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+		    			moleculeIndexTable.getSelectionModel().select(index);
+		    			moleculeIndexTable.scrollTo(index);
+		    		}
+		    	}
+			});
+		
+		setJsonField("CenterPane", 
+			jGenerator -> {
+				jGenerator.writeFieldName("CenterPane");
+				if (moleculeCenterPane instanceof JsonConvertibleRecord)
+				((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
+			}, 
+			jParser -> {
+				if (moleculeCenterPane instanceof JsonConvertibleRecord)
+					((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
+		 	});
+		
 	}
 	
 	public abstract C createMoleculeCenterPane(final Context context);

@@ -224,21 +224,20 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	@Override
 	protected void createIOMaps() {
 		
-		outputMap.put("PlotPane", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeFieldName("PlotPane");
-			plotPane.toJSON(jGenerator);
-		}, IOException.class));
-		outputMap.put("MoleculeDashboard", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeFieldName("MoleculeDashboard");
-			moleculeDashboardPane.toJSON(jGenerator);
-		}, IOException.class));
+		setJsonField("PlotPane", 
+			jGenerator -> {
+				jGenerator.writeFieldName("PlotPane");
+				plotPane.toJSON(jGenerator);
+			},
+			jParser -> plotPane.fromJSON(jParser));
+			
+		setJsonField("MoleculeDashboard", 
+			jGenerator -> {
+				jGenerator.writeFieldName("MoleculeDashboard");
+				moleculeDashboardPane.toJSON(jGenerator);
+			}, 
+			jParser -> moleculeDashboardPane.fromJSON(jParser));
 		
-		inputMap.put("PlotPane", MarsUtil.catchConsumerException(jParser -> {
-			plotPane.fromJSON(jParser);
-	 	}, IOException.class));
-		inputMap.put("MoleculeDashboard", MarsUtil.catchConsumerException(jParser -> {
-			moleculeDashboardPane.fromJSON(jParser);
-	 	}, IOException.class));
 	}
 	
 	public abstract P createPlotPane(final Context context);

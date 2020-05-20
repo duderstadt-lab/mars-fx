@@ -139,81 +139,83 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	
 	@Override
 	protected void createIOMaps() {
-		outputMap.put("NumberSubPlots", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeNumberField("NumberSubPlots", charts.size());
-		}, IOException.class));
 		
-		outputMap.put("SubPlots", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeArrayFieldStart("SubPlots");
-			for (SubPlot subplot : charts) {
-				jGenerator.writeStartObject();
-				if (!subplot.getDatasetOptionsPane().getTitle().equals(""))
-					jGenerator.writeStringField("Title", subplot.getDatasetOptionsPane().getTitle());
-				
-				if (!subplot.getDatasetOptionsPane().getXAxisName().equals(""))
-					jGenerator.writeStringField("xAxisName", subplot.getDatasetOptionsPane().getXAxisName());
-				
-				if (!subplot.getDatasetOptionsPane().getYAxisName().equals(""))
-					jGenerator.writeStringField("yAxisName", subplot.getDatasetOptionsPane().getYAxisName());
-				
-				if (!subplot.getDatasetOptionsPane().getYAxisName().equals(""))
-					jGenerator.writeStringField("Indicators", subplot.getDatasetOptionsPane().getSelectedIndicator());
-				
-				if (subplot.getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
-					jGenerator.writeArrayFieldStart("PlotSeries");
-					for (PlotSeries plotSeries : subplot.getDatasetOptionsPane().getPlotSeriesList()) 
-						plotSeries.toJSON(jGenerator);
-					jGenerator.writeEndArray();
+		setJsonField("NumberSubPlots", 
+			jGenerator -> {
+				jGenerator.writeNumberField("NumberSubPlots", charts.size());
+			}, 
+			jParser -> {
+		        int numberSubPlots = jParser.getNumberValue().intValue();
+		        int subPlotIndex = 1;
+		        while (subPlotIndex < numberSubPlots) {
+		        	addChart();
+		        	subPlotIndex++;
+		        }
+			});
+		
+		setJsonField("SubPlots", 
+			jGenerator -> {
+				jGenerator.writeArrayFieldStart("SubPlots");
+				for (SubPlot subplot : charts) {
+					jGenerator.writeStartObject();
+					if (!subplot.getDatasetOptionsPane().getTitle().equals(""))
+						jGenerator.writeStringField("Title", subplot.getDatasetOptionsPane().getTitle());
+					
+					if (!subplot.getDatasetOptionsPane().getXAxisName().equals(""))
+						jGenerator.writeStringField("xAxisName", subplot.getDatasetOptionsPane().getXAxisName());
+					
+					if (!subplot.getDatasetOptionsPane().getYAxisName().equals(""))
+						jGenerator.writeStringField("yAxisName", subplot.getDatasetOptionsPane().getYAxisName());
+					
+					if (!subplot.getDatasetOptionsPane().getYAxisName().equals(""))
+						jGenerator.writeStringField("Indicators", subplot.getDatasetOptionsPane().getSelectedIndicator());
+					
+					if (subplot.getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
+						jGenerator.writeArrayFieldStart("PlotSeries");
+						for (PlotSeries plotSeries : subplot.getDatasetOptionsPane().getPlotSeriesList()) 
+							plotSeries.toJSON(jGenerator);
+						jGenerator.writeEndArray();
+					}
+					jGenerator.writeEndObject();
 				}
-				jGenerator.writeEndObject();
-			}
-			jGenerator.writeEndArray();
-		}, IOException.class));
+				jGenerator.writeEndArray();
+			}, 
+			jParser -> {
+				int subPlotIndex = 0;
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						if ("Title".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setTitle(jParser.getText());
+						}
+						
+						if ("xAxisName".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setXAxisName(jParser.getText());
+						}
+						
+						if ("yAxisName".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setYAxisName(jParser.getText());
+						}
+						
+						if ("Indicators".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setSelectedIndicator(jParser.getText());
+						}
+						
+						if ("PlotSeries".equals(jParser.getCurrentName())) {
+							while (jParser.nextToken() != JsonToken.END_ARRAY) {
+								PlotSeries series = new PlotSeries(getColumnNames());
+								series.fromJSON(jParser);
+								charts.get(subPlotIndex).getPlotSeriesList().add(series);
+					    	}
+						}
+					}
+					subPlotIndex++;
+		    	}
+		 	});
 		
-		inputMap.put("NumberSubPlots", MarsUtil.catchConsumerException(jParser -> {
-	        int numberSubPlots = jParser.getNumberValue().intValue();
-	        int subPlotIndex = 1;
-	        while (subPlotIndex < numberSubPlots) {
-	        	addChart();
-	        	subPlotIndex++;
-	        }
-		}, IOException.class));
-		
-		inputMap.put("SubPlots", MarsUtil.catchConsumerException(jParser -> {
-			int subPlotIndex = 0;
-			while (jParser.nextToken() != JsonToken.END_ARRAY) {
-				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					if ("Title".equals(jParser.getCurrentName())) {
-			    		jParser.nextToken();
-			    		charts.get(subPlotIndex).getDatasetOptionsPane().setTitle(jParser.getText());
-					}
-					
-					if ("xAxisName".equals(jParser.getCurrentName())) {
-			    		jParser.nextToken();
-			    		charts.get(subPlotIndex).getDatasetOptionsPane().setXAxisName(jParser.getText());
-					}
-					
-					if ("yAxisName".equals(jParser.getCurrentName())) {
-			    		jParser.nextToken();
-			    		charts.get(subPlotIndex).getDatasetOptionsPane().setYAxisName(jParser.getText());
-					}
-					
-					if ("Indicators".equals(jParser.getCurrentName())) {
-			    		jParser.nextToken();
-			    		charts.get(subPlotIndex).getDatasetOptionsPane().setSelectedIndicator(jParser.getText());
-					}
-					
-					if ("PlotSeries".equals(jParser.getCurrentName())) {
-						while (jParser.nextToken() != JsonToken.END_ARRAY) {
-							PlotSeries series = new PlotSeries(getColumnNames());
-							series.fromJSON(jParser);
-							charts.get(subPlotIndex).getPlotSeriesList().add(series);
-				    	}
-					}
-				}
-				subPlotIndex++;
-	    	}
-	 	}, IOException.class));
 	}
 
 	@Override
