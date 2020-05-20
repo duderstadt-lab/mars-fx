@@ -216,39 +216,41 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 	@Override
 	protected void createIOMaps() {
-		outputMap.put("Widgets", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeArrayFieldStart("Widgets");
-			for (MarsDashboardWidget widget : widgets) {
-				jGenerator.writeStartObject();
-				jGenerator.writeStringField("Name", widget.getName());
-				jGenerator.writeFieldName("Settings");
-				widget.toJSON(jGenerator);
-				jGenerator.writeEndObject();
-			}
-			jGenerator.writeEndArray();
-		}, IOException.class));
-
-		inputMap.put("Widgets", MarsUtil.catchConsumerException(jParser -> {
-			while (jParser.nextToken() != JsonToken.END_ARRAY) {
-				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					W widget = null;
-
-					if ("Name".equals(jParser.getCurrentName())) {
+		
+		setJsonField("Widgets", 
+			jGenerator -> {
+				jGenerator.writeArrayFieldStart("Widgets");
+				for (MarsDashboardWidget widget : widgets) {
+					jGenerator.writeStartObject();
+					jGenerator.writeStringField("Name", widget.getName());
+					jGenerator.writeFieldName("Settings");
+					widget.toJSON(jGenerator);
+					jGenerator.writeEndObject();
+				}
+				jGenerator.writeEndArray();
+			}, 
+			jParser -> {
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						W widget = null;
+	
+						if ("Name".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							widget = createWidget(jParser.getText());
+							addWidget(widget);
+						}
+	
 						jParser.nextToken();
-						widget = createWidget(jParser.getText());
-						addWidget(widget);
-					}
-
-					jParser.nextToken();
-
-					if ("Settings".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						if (widget != null)
-							widget.fromJSON(jParser);
+	
+						if ("Settings".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							if (widget != null)
+								widget.fromJSON(jParser);
+						}
 					}
 				}
-			}
-		}, IOException.class));
+			});
+		
 	}
 
 	public abstract W createWidget(String widgetName);

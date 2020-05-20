@@ -376,21 +376,26 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	@Override
 	protected void createIOMaps() {
-		outputMap.put("Width", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeNumberField("Width", rootPane.getWidth());
-		}, IOException.class));
-		outputMap.put("Height", MarsUtil.catchConsumerException(jGenerator -> {
-			jGenerator.writeNumberField("Height", rootPane.getHeight());
-		}, IOException.class));
-
-		inputMap.put("Width", MarsUtil.catchConsumerException(jParser -> {
-			rootPane.setMinWidth(jParser.getDoubleValue());
-			rootPane.setMaxWidth(jParser.getDoubleValue());
-		}, IOException.class));
-		inputMap.put("Height", MarsUtil.catchConsumerException(jParser -> {
-			rootPane.setMinHeight(jParser.getDoubleValue());
-			rootPane.setMaxHeight(jParser.getDoubleValue());
-		}, IOException.class));
+		
+		setJsonField("Width", 
+			jGenerator -> {
+				jGenerator.writeNumberField("Width", rootPane.getWidth());
+			}, 
+			jParser -> {
+				rootPane.setMinWidth(jParser.getDoubleValue());
+				rootPane.setMaxWidth(jParser.getDoubleValue());
+			});
+			
+			
+		setJsonField("Height", 
+			jGenerator -> {
+				jGenerator.writeNumberField("Height", rootPane.getHeight());
+			}, 
+			jParser -> {
+				rootPane.setMinHeight(jParser.getDoubleValue());
+				rootPane.setMaxHeight(jParser.getDoubleValue());
+			});
+		
 	}
 
 	public abstract String getName();
