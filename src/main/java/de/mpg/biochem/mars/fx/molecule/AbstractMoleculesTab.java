@@ -551,7 +551,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	    	}
 
     		moleculeIndexTable.getSelectionModel().select(newIndex);
-    		molecule = (M) archive.get(moleculeIndexTable.getSelectionModel().getSelectedItem().getUID());
+    		if (moleculeIndexTable.getSelectionModel().getSelectedItem() != null)
+    			molecule = (M) archive.get(moleculeIndexTable.getSelectionModel().getSelectedItem().getUID());
+    		else {
+    			moleculeIndexTable.getSelectionModel().select(0);
+    			molecule = (M) archive.get(0);
+    		}
     		moleculeCenterPane.fireEvent(new MoleculeArchiveUnlockEvent(archive));
 	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
