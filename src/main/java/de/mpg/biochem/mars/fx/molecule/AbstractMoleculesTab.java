@@ -547,17 +547,36 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	        	moleculeRowList.add(row);
 	        }
 	    	
+	    	//Manually update filter in case a script changed the tags
+	    	filteredData.setPredicate(molIndexRow -> {
+	    		String newValue = filterField.getText();
+	    		
+                // If filter text is empty, display everything.
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                
+            	String[] searchList = newValue.split(",");
+            	for (String str : searchList) {
+            		if (!molIndexRow.contains(str.trim()))
+            			return false;
+            	}
+                return true;
+            });
+	    	
 	    	int newIndex = 0;
 	    	for (int index = 0; index < filteredData.size(); index++) {
 	    		if (filteredData.get(index).getUID().equals(currentUID))
 	    			newIndex = index;
 	    	}
 
-    		moleculeIndexTable.getSelectionModel().select(newIndex);
-    		molecule = (M) archive.get(moleculeIndexTable.getSelectionModel().getSelectedItem().getUID());
-    		moleculeCenterPane.fireEvent(new MoleculeArchiveUnlockEvent(archive));
-	    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-	    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	    	if (filteredData.size() > 0) {
+	    		moleculeIndexTable.getSelectionModel().select(newIndex);
+	    		molecule = (M) archive.get(moleculeIndexTable.getSelectionModel().getSelectedItem().getUID());
+	    		moleculeCenterPane.fireEvent(new MoleculeArchiveUnlockEvent(archive));
+		    	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		    	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+	    	}
     	}
 		
 		Platform.runLater(() -> {
