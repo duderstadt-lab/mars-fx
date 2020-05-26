@@ -114,7 +114,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		//Check if there are any segment table with these columns
 		Set<ArrayList<String>> segmentTableNames = new HashSet<ArrayList<String>>();
 		boolean hasSegmentsTables = false;
-		for (ArrayList<String> names : molecule.getSegmentTableNames()) {
+		for (ArrayList<String> names : molecule.getSegmentsTableNames()) {
 			if (names.get(0).equals(plotSeries.getXColumn()) && names.get(1).equals(plotSeries.getYColumn())) {
 				hasSegmentsTables = true;
 				segmentTableNames.add(names);
