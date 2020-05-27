@@ -186,7 +186,7 @@ public class MarsAnimation extends BorderPane {
 	
 	private void updateProgress(Text text) {
 		if (progress >= 0 && progress <= 1) {
-			DecimalFormat df = new DecimalFormat("#.#");
+			DecimalFormat df = new DecimalFormat("#.0");
 			df.setRoundingMode(RoundingMode.HALF_UP);
 			String rounded = df.format(progress*100);
 			text.setText(rounded + "%");

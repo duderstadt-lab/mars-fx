@@ -185,7 +185,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected void updateSegmentTables() {
 		//Build new segment table list
 		HashSet<ArrayList<String>> newSegmentTableNames = new HashSet<ArrayList<String>>();
-		for (ArrayList<String> segmentTableName : molecule.getSegmentTableNames())
+		for (ArrayList<String> segmentTableName : molecule.getSegmentsTableNames())
 			newSegmentTableNames.add(segmentTableName);
 		
 		//Remove segment table tabs that are not needed 
