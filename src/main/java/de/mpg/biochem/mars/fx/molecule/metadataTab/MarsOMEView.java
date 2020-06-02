@@ -155,7 +155,6 @@ public class MarsOMEView {
 		AnchorPane.setRightAnchor(vbox, 0.0);
 		AnchorPane.setLeftAnchor(vbox, 0.0);
 		vbox.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-		
 		vbox.getChildren().add(new Label("Image"));
 		
 		Separator separator = new Separator();
@@ -197,12 +196,12 @@ public class MarsOMEView {
 		AnchorPane.setLeftAnchor(vBoxBottom, 0.0);
 		AnchorPane.setRightAnchor(vBoxBottom, 0.0);
 		vBoxBottom.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-		vBoxBottom.getChildren().add(new Label("TiffData"));
+		vBoxBottom.getChildren().add(new Label("Plane"));
 		
 		Separator separator2 = new Separator();
 		separator2.prefWidth(200.0);
 		VBox.setMargin(separator2, new Insets(10.0, 0.0, 10.0, 0.0));
-		vBoxBottom.getChildren().add(separator);
+		vBoxBottom.getChildren().add(separator2);
 		
 		tiffDataTable = new TableView<List<String>>();
 		VBox.setVgrow(tiffDataTable, Priority.ALWAYS);

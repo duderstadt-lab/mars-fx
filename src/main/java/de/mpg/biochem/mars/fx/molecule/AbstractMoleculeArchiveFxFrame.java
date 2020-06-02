@@ -142,9 +142,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected UIService uiService;
     
     @Parameter
-    protected PrefService prefService;
-    
-    @Parameter
     protected Context context;
 
 	protected MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
