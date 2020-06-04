@@ -237,14 +237,10 @@ public class MarsOMEView {
 			TreeItem<GenericModel> imageItem = new TreeItem<>(imageModel);
 			root.getChildren().add(imageItem);
 
-			for (int planeIndex = 0; planeIndex < imageModel.getPlaneCount(); planeIndex++) {
-				if (meta.hasPlane(imageIndex, planeIndex)) {
-					MarsOMEPlane dataModel = meta.getPlane(imageIndex, planeIndex);
-	
-					TreeItem<GenericModel> dataItem = new TreeItem<>(dataModel);
+			imageModel.planes().forEach(plane -> {
+					TreeItem<GenericModel> dataItem = new TreeItem<>(plane);
 					imageItem.getChildren().add(dataItem);
-				}
-			}
+				});
 		}
 
 		// Handle selection in the tree
