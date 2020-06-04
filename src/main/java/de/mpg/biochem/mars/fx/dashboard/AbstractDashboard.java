@@ -170,6 +170,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	public void addWidget(W widget) {
 		widgets.add(widget);
 		widgetPane.getChildren().add(widget.getNode());
+		scrollPane.layout();
 	}
 
 	public void removeWidget(W widget) {
