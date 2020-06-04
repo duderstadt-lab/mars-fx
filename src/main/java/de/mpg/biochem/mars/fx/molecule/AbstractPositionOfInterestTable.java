@@ -33,6 +33,8 @@ import org.controlsfx.control.textfield.CustomTextField;
 import com.jfoenix.controls.JFXColorPicker;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
@@ -273,6 +275,13 @@ public abstract class AbstractPositionOfInterestTable {
         
         rootPane.setBottom(addPositionField);
         BorderPane.setMargin(addPositionField, insets);
+        
+        getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        	}
+        });
         
         addEventHandlers();
     }

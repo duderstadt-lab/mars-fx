@@ -32,6 +32,8 @@ import org.controlsfx.control.textfield.CustomTextField;
 import com.jfoenix.controls.JFXColorPicker;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
@@ -285,6 +287,13 @@ public abstract class AbstractRegionOfInterestTable {
         
         rootPane.setBottom(addRegionNameField);
         BorderPane.setMargin(addRegionNameField, insets);
+        
+        getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
+        	@Override
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
+        		archive = newArchive;
+        	}
+        });
         
         addEventHandlers();
     }
