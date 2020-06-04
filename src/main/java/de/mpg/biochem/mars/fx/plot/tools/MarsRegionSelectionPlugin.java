@@ -121,7 +121,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     private final ObjectProperty<Cursor> dragCursor = new SimpleObjectProperty<>(this, "dragCursor");
 
     private final EventHandler<MouseEvent> regionSelectionStartHandler = event -> {
-        if (getRegionSelectionMouseFilter() == null || getRegionSelectionMouseFilter().test(event)) {
+        if (getRegionSelectionMouseFilter() == null || getRegionSelectionMouseFilter().test(event) && getChart().getDatasets().size() > 0) {
             regionSelectionStarted(event);
             event.consume();
         }
@@ -496,6 +496,10 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         final Point2D mouseLocation = getLocationInPlotArea(event);
 
         Chart chart = getChart();
+        
+        if (chart.getDatasets().size() == 0)
+        	return null;
+        
         return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
     }
 
@@ -528,6 +532,9 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
      * @return return neighouring data points
      */
     private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
+    	if (dataSet == null)
+    		return null;
+    	
         int prevIndex = -1;
         int nextIndex = -1;
         double prevX = Double.MIN_VALUE;
@@ -553,7 +560,10 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
                         dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
-
+        
+        if (prevPoint == null || nextPoint == null)
+        	return null;
+        
         final double prevDistance = Math.abs(searchedX - prevPoint.x);
         final double nextDistance = Math.abs(searchedX - nextPoint.x);
 

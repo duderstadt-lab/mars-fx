@@ -81,6 +81,10 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         final Point2D mouseLocation = getLocationInPlotArea(event);
         
         Chart chart = getChart();
+        
+        if (chart.getDatasets().size() == 0)
+        	return null;
+        
         return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
     }
 
@@ -177,6 +181,9 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
      * @return return neighouring data points
      */
     private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
+    	if (dataSet == null)
+    		return null;
+    	
         int prevIndex = -1;
         int nextIndex = -1;
         double prevX = Double.MIN_VALUE;
