@@ -186,8 +186,8 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     	
         int prevIndex = -1;
         int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
+        double prevX = Double.NEGATIVE_INFINITY;
+        double nextX = Double.POSITIVE_INFINITY;
 
         final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
         for (int i = 0, size = nDataCount; i < size; i++) {
@@ -203,13 +203,14 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
                 nextX = currentX;
             }
         }
+
         final DataPoint prevPoint = prevIndex == -1 ? null
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
                         dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
         final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
                         dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
-
+        
         if (nextPoint == null || prevPoint == null)
         	return null;
         
@@ -223,7 +224,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     }
     
     private String formatDataPoint(final DataPoint dataPoint) {
-        return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
+    	return String.format("x: %.6f\ny: %.6f", dataPoint.x, dataPoint.y);
     }
 
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
@@ -235,8 +236,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     }
 
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index,
-                Double.toString(dataSet.get(DataSet.DIM_X, index)), Double.toString(dataSet.get(DataSet.DIM_Y, index)));
+    	return String.format("%s", dataSet.getName());
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {

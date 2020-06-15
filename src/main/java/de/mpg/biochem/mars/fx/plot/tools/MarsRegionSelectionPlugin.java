@@ -537,8 +537,8 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     	
         int prevIndex = -1;
         int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
+        double prevX = Double.NEGATIVE_INFINITY;
+        double nextX = Double.POSITIVE_INFINITY;
 
         final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
         for (int i = 0, size = nDataCount; i < size; i++) {
@@ -574,7 +574,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     }
     
     private String formatDataPoint(final DataPoint dataPoint) {
-        return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
+    	return String.format("x: %.6f\ny: %.6f", dataPoint.x, dataPoint.y);
     }
 
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
@@ -586,8 +586,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     }
 
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index,
-                Double.toString(dataSet.get(DataSet.DIM_X, index)), Double.toString(dataSet.get(DataSet.DIM_Y, index)));
+    	return String.format("%s", dataSet.getName());
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
