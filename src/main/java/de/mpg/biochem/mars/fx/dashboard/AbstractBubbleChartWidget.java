@@ -31,6 +31,7 @@ import de.gsi.chart.marker.DefaultMarker;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.spi.Histogram;
 import de.jensd.fx.glyphs.GlyphIcons;
@@ -117,7 +118,8 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		renderer.pointReductionProperty().set(false);
 
 		bubbleChart.getRenderers().add(renderer);
-		bubbleChart.legendVisibleProperty().set(false);
+		//bubbleChart.setLegendVisible(false);
+		bubbleChart.setLegend(null);
 		bubbleChart.horizontalGridLinesVisibleProperty().set(false);
 		bubbleChart.verticalGridLinesVisibleProperty().set(false);
 		
@@ -230,6 +232,16 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 				renderer.getDatasets().clear();
 				renderer.getDatasets().addAll(datasets);
+				
+				bubbleChart.getXAxis().forceRedraw();
+				bubbleChart.getYAxis().forceRedraw();
+				
+				bubbleChart.requestLayout();
+				
+				//Is this needed??
+				bubbleChart.layout();
+				
+				bubbleChart.layoutChildren();
 			}
 		});
 	}
