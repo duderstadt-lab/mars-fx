@@ -330,10 +330,10 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			}
 			subPlot.getChart().getYAxis().forceRedraw();
 			
-			subPlot.getChart().requestLayout();
+			//subPlot.getChart().requestLayout();
 			
 			//Is this needed??
-			subPlot.getChart().layout();
+			//subPlot.getChart().layout();
 			
 			subPlot.getChart().layoutChildren();
 		}
@@ -390,6 +390,22 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			}
 	      });
 		
+		subplot.getXAxis().minProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				subplot.getChart().getYAxis().forceRedraw();
+				subplot.getChart().layoutChildren();
+			}
+	      });
+		
+		subplot.getXAxis().maxProperty().addListener(new ChangeListener<Number>(){
+			@Override
+			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+				subplot.getChart().getYAxis().forceRedraw();
+				subplot.getChart().layoutChildren();
+			}
+	      });
+
 		updateSubPlotBadges();
 	}
 	

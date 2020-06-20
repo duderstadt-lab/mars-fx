@@ -117,7 +117,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);		
 		//For the moment lets hide the legend
-		chartPane.setLegendVisible(false);
+		chartPane.setLegend(null);
 		
 		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
 		
