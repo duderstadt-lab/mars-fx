@@ -149,7 +149,7 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 		// lost :(...
 		renderer.pointReductionProperty().set(false);
 		barChart.getRenderers().add(renderer);
-		barChart.legendVisibleProperty().set(false);
+		barChart.setLegend(null);
 		barChart.horizontalGridLinesVisibleProperty().set(false);
 		barChart.verticalGridLinesVisibleProperty().set(false);
 		

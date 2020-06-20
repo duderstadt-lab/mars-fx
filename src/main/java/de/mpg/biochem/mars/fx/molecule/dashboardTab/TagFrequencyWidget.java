@@ -112,7 +112,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements Molec
         //Make sure this is set to false. Otherwise second to last points seems to be lost :(...
         renderer.pointReductionProperty().set(false);
         barChart.getRenderers().add(renderer);
-        barChart.legendVisibleProperty().set(false);
+        barChart.setLegend(null);
         barChart.horizontalGridLinesVisibleProperty().set(false);
         barChart.verticalGridLinesVisibleProperty().set(false);
 

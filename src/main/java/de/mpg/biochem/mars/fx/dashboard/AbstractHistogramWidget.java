@@ -113,7 +113,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		datasets = new ArrayList<DefaultErrorDataSet>();
 
 		histChart.getRenderers().add(outlineHistogramRenderer);
-		histChart.legendVisibleProperty().set(false);
+		histChart.setLegend(null);
 		histChart.horizontalGridLinesVisibleProperty().set(false);
 		histChart.verticalGridLinesVisibleProperty().set(false);
 		

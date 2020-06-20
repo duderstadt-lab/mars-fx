@@ -118,7 +118,6 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		renderer.pointReductionProperty().set(false);
 
 		bubbleChart.getRenderers().add(renderer);
-		//bubbleChart.setLegendVisible(false);
 		bubbleChart.setLegend(null);
 		bubbleChart.horizontalGridLinesVisibleProperty().set(false);
 		bubbleChart.verticalGridLinesVisibleProperty().set(false);
