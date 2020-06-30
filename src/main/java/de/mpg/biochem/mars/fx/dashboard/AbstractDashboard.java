@@ -186,7 +186,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		MarsDashboardWidget dummyWidgetForIcon = marsDashboardWidgetService.createWidget(widgetName);
 
 		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(), e -> {
-			System.out.println("Creating chart widget");
 			W widget = createWidget(widgetName);
 			addWidget(widget);
 		}, null);
