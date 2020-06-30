@@ -122,7 +122,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		StackPane stack = new StackPane();
 		stack.setPadding(new Insets(10, 10, 10, 10));
 		stack.getChildren().add(histChart);
-		stack.setPrefSize(250, 250);
+		stack.setPrefSize(100, 100);
 
 		BorderPane chartPane = new BorderPane();
 		chartPane.setCenter(stack);
