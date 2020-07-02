@@ -197,7 +197,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		dashboardTab = new Tab();
 		dashboardTab.setText("");
 		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
-		marsTableDashboardPane = new MarsTableDashboard(context);
+		marsTableDashboardPane = new MarsTableDashboard(context, table);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
