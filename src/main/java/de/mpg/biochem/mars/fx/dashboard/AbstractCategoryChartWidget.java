@@ -154,15 +154,10 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 		barChart.verticalGridLinesVisibleProperty().set(false);
 		
 		barChart.setTriggerDistance(0);
-
-		StackPane stack = new StackPane();
-		stack.setPadding(new Insets(10, 10, 10, 10));
-		stack.getChildren().add(barChart);
-		stack.setPrefSize(100, 100);
-
-		BorderPane chartPane = new BorderPane();
-		chartPane.setCenter(stack);
-		setContent(getIcon(), chartPane);
+		
+		barChart.setPrefSize(100, 100);
+		barChart.setPadding(new Insets(10, 20, 10, 10));
+		setContent(getIcon(), barChart);
 
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);

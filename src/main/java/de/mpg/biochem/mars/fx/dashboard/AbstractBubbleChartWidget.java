@@ -122,16 +122,11 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		bubbleChart.verticalGridLinesVisibleProperty().set(false);
 		
 		bubbleChart.setTriggerDistance(0);
-
-		StackPane stack = new StackPane();
-		stack.setPadding(new Insets(10, 10, 10, 10));
-		stack.getChildren().add(bubbleChart);
-		stack.setPrefSize(100, 100);
-
-		BorderPane chartPane = new BorderPane();
-		chartPane.setCenter(stack);
-		setContent(getIcon(), chartPane);
-
+		
+		bubbleChart.setPrefSize(100, 100);
+		bubbleChart.setPadding(new Insets(10, 20, 10, 10));
+		setContent(getIcon(), bubbleChart);
+		
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
 	}
