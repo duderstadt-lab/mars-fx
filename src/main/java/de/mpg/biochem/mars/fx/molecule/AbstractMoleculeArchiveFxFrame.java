@@ -1015,10 +1015,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
-		if (frame != null) {
+		if (frame != null)
 			WindowManager.removeWindow(frame);
+		
+		if (frame != null)
 			frame.dispose();
-		}
     }
     
     //Creates settings input and output maps to save the current state of the program.
