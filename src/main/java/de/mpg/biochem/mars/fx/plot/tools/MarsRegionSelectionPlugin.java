@@ -91,7 +91,9 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     private final Label label = new Label();
     private final Circle circle = new Circle();
     
-    private Point2D trackingDataPoint;
+    private Point2D trackingDataPointScreen;
+    private DataPoint currentTrackingDataPoint;
+    private DataPoint trackingDataPointStart, trackingDataPointEnd;
 
     private final EventHandler<MouseEvent> trackMouseMoveHandler = this::updateToolTip;
 
@@ -142,11 +144,11 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     };
     
     private final EventHandler<KeyEvent> keyPressedHandler = event -> {
-            if (event.getCode() == KeyCode.P && trackingDataPoint != null) {
+            if (event.getCode() == KeyCode.P && trackingDataPointScreen != null) {
             	if (regionSelectionOngoing()) {
-            		regionSelectionEnded(trackingDataPoint.getX(), trackingDataPoint.getY());
+            		regionSelectionEnded(trackingDataPointScreen.getX(), trackingDataPointScreen.getY());
             	} else {
-            		regionSelectionStarted(trackingDataPoint.getX(), trackingDataPoint.getY());
+            		regionSelectionStarted(trackingDataPointScreen.getX(), trackingDataPointScreen.getY());
             	}
                 event.consume();
             }
@@ -353,8 +355,6 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     private void regionSelectionEnded() {
         regionRectangle.setVisible(false);
         
-        // && regionRectangle.getHeight() > REGION_RECT_MIN_SIZE
-        
         if (regionRectangle.getWidth() > REGION_RECT_MIN_SIZE) {
             final double minX = regionRectangle.getX();
             final double minY = regionRectangle.getY() + regionRectangle.getHeight();
@@ -365,20 +365,6 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
             final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
             
-            /*
-            for (Axis axis : getChart().getAxes()) {
-                double dataMin;
-                double dataMax;
-                if (axis.getSide().isVertical()) {
-                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
-                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
-                } else {
-                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
-                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
-                }
-                System.out.println("min " + dataMin + " max " + dataMax);
-            }
-            */
             Axis axis = ((XYChart) getChart()).getXAxis();
             double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
             double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
@@ -397,6 +383,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             	getChart().fireEvent(new NewMoleculeRegionEvent(roi));
             
         }
+        trackingDataPointStart = trackingDataPointEnd = null;
         regionStartPoint = regionEndPoint = null;
         uninstallCursor();
     }
@@ -405,45 +392,17 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     	if (datasetOptionsPane.getTrackingSeries() == null)
     		return;
     	
+    	trackingDataPointEnd = this.currentTrackingDataPoint;
+    	
         regionRectangle.setVisible(false);
         double width = Math.abs(xEnd - regionStartPoint.getX());
-        double height = Math.abs(yEnd - regionStartPoint.getY());
-        
-        // && height > REGION_RECT_MIN_SIZE) {
-        if (width > REGION_RECT_MIN_SIZE) {
-            final double minX = (xEnd > regionStartPoint.getX()) ? regionStartPoint.getX() : xEnd;
-            final double maxX = (xEnd > regionStartPoint.getX()) ? xEnd : regionStartPoint.getX();
-            
-            final double minY = (yEnd > regionStartPoint.getY()) ? regionStartPoint.getY() : yEnd;
-            final double maxY = (yEnd > regionStartPoint.getY()) ? yEnd : regionStartPoint.getY();
 
-            // pixel coordinates w.r.t. plot area
-            final Point2D minPlotCoordinate = getChart().toPlotArea(minX, minY);
-            final Point2D maxPlotCoordinate = getChart().toPlotArea(maxX, maxY);
-            
-            /*
-            for (Axis axis : getChart().getAxes()) {
-                double dataMin;
-                double dataMax;
-                if (axis.getSide().isVertical()) {
-                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
-                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
-                } else {
-                    dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
-                    dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
-                }
-                System.out.println("min " + dataMin + " max " + dataMax);
-            }
-            */
-            Axis axis = ((XYChart) getChart()).getXAxis();
-            double dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
-            double dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
-            
+        if (width > REGION_RECT_MIN_SIZE && trackingDataPointStart != null && trackingDataPointEnd != null) {
             MarsRegion roi = new MarsRegion("Region");
             roi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
-            roi.setStart(dataMin);
-            roi.setEnd(dataMax);
-            
+            roi.setStart(trackingDataPointStart.x);
+            roi.setEnd(trackingDataPointEnd.x);
+
             //We add the region to the metadata if those indicators are selected.
             //Otherwise we add it for molecule
             //If None is selected we add nothing.
@@ -451,8 +410,8 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
             	getChart().fireEvent(new NewMetadataRegionEvent(roi));
             else if (datasetOptionsPane.isMoleculeIndicators())
             	getChart().fireEvent(new NewMoleculeRegionEvent(roi));
-            
         }
+        trackingDataPointStart = trackingDataPointEnd = null;
         regionStartPoint = regionEndPoint = null;
         uninstallCursor();
     }
@@ -470,6 +429,8 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     
     private void regionSelectionStarted(double x, double y) {
         regionStartPoint = new Point2D(x, y);
+        
+        trackingDataPointStart = this.currentTrackingDataPoint;
 
         regionRectangle.setX(regionStartPoint.getX());
         regionRectangle.setY(regionStartPoint.getY());
@@ -602,7 +563,8 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
         double xLocation = dataPointX + MarsRegionSelectionPlugin.LABEL_X_OFFSET;
         double yLocation = dataPointY - MarsRegionSelectionPlugin.LABEL_Y_OFFSET - height;
         
-        trackingDataPoint = new Point2D(dataPointX, dataPointY);
+        trackingDataPointScreen = new Point2D(dataPointX, dataPointY);
+        currentTrackingDataPoint = dataPoint;
         
         circle.setCenterX(dataPointX);
 	    circle.setCenterY(dataPointY);
