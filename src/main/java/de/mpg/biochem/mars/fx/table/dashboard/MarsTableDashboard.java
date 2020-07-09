@@ -17,8 +17,9 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 	
 	protected MarsTable table;
 	
-	public MarsTableDashboard(final Context context) {
+	public MarsTableDashboard(final Context context, MarsTable table) {
 		super(context);
+		this.table = table;
 		
 		discoverWidgets();
 	}
@@ -35,10 +36,10 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
 		return new ArrayList<String>( 
-	            Arrays.asList("TableCategoryChartWidget",
-	                    "TableHistogramWidget",
-	                    "TableXYChartWidget",
-	                    "TableBubbleChartWidget"));
+	            Arrays.asList("MarsTableCategoryChartWidget",
+	                    "MarsTableHistogramWidget",
+	                    "MarsTableXYChartWidget",
+	                    "MarsTableBubbleChartWidget"));
 	}
 	
 	public void setTable(MarsTable table) {

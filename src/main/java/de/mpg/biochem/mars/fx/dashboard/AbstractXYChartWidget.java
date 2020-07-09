@@ -121,14 +121,9 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 		xyChart.setTriggerDistance(0);
 		
-		StackPane stack = new StackPane();
-		stack.setPadding(new Insets(10, 10, 10, 10));
-		stack.getChildren().add(xyChart);
-		stack.setPrefSize(250, 250);
-
-		BorderPane chartPane = new BorderPane();
-		chartPane.setCenter(stack);
-		setContent(getIcon(), chartPane);
+		xyChart.setPrefSize(100, 100);
+		xyChart.setPadding(new Insets(10, 20, 10, 10));
+		setContent(getIcon(), xyChart);
 
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
