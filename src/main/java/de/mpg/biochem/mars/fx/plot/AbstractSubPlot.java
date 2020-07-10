@@ -136,6 +136,15 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		chartPane.getGridRenderer().getHorizontalMajorGrid().setStroke(chartPane.getGridRenderer().getHorizontalMajorGrid().getStroke());
 		chartPane.getGridRenderer().getVerticalMajorGrid().setStroke(chartPane.getGridRenderer().getVerticalMajorGrid().getStroke());
+		
+		chartPane.getYAxis().minProperty().addListener((ob, o, n) -> {
+			if (!datasetOptionsPane.fixYBounds().get())
+				datasetOptionsPane.setYMin(n.doubleValue());
+		});
+		chartPane.getYAxis().maxProperty().addListener((ob, o, n) -> {
+			if (!datasetOptionsPane.fixYBounds().get())
+				datasetOptionsPane.setYMax(n.doubleValue());
+		});
 	}
 	
 	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
@@ -187,6 +196,12 @@ public abstract class AbstractSubPlot implements SubPlot {
 			setXLabel(datasetOptionsPane.getXAxisName());
 		if (!datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
+		
+		if (datasetOptionsPane.fixYBounds().get()) {
+			chartPane.getYAxis().setAutoRanging(false);
+			chartPane.getYAxis().setMin(datasetOptionsPane.getYMin());
+			chartPane.getYAxis().setMax(datasetOptionsPane.getYMax());
+		}
 		
 		addIndicators(xAxisList, yAxisList);
 	}
