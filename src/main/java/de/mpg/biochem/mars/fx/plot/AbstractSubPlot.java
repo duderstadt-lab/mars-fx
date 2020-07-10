@@ -103,13 +103,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		datasetOptionsPane = createDatasetOptionsPane(new HashSet<String>(plotPane.getColumnNames()));
 		
-		//PopOver popOver = new PopOver();
-		//popOver.setTitle(plotTitle);
-		//popOver.setHeaderAlwaysVisible(true);
-		//popOver.setAutoHide(false);
-		//popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
-		//popOver.setContentNode(datasetOptionsPane);
-		
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
 			if (datasetOptionsSelected.get())
 				plotPane.showSubPlotOptions(datasetOptionsPane);
@@ -130,7 +123,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
 		reductionAlgorithm.setMinPointPixelDistance(0);
-		
+		renderer.setMinRequiredReductionSize(500);
 		renderer.setDrawMarker(false);
 		
 		chartPane.getRenderers().setAll(renderer);
