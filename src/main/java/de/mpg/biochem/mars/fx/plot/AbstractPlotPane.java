@@ -119,7 +119,6 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	protected BooleanProperty gridlines = new SimpleBooleanProperty();
 	protected BooleanProperty fixXBounds = new SimpleBooleanProperty();
 	protected BooleanProperty reducePoints = new SimpleBooleanProperty();
-	//protected BooleanProperty animateZoom = new SimpleBooleanProperty();
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
@@ -127,10 +126,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	protected BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty panSelected = new SimpleBooleanProperty();
 	
-	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();
-	
-	protected IntegerProperty maxPointsCount = new SimpleIntegerProperty(10_000);
-	
+	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();	
 	protected PlotOptionsPane plotOptionsPane;
 	
 	protected ButtonBase propertiesButton;
@@ -161,7 +157,6 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
 		reducePoints.setValue(true);
-		//animateZoom.setValue(false);
 		
 		buildTools();
 		rootBorderPane.setTop(createToolBar());
@@ -487,14 +482,6 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			gridBorderPane.setLeft(new Label("Gridlines"));
 			gridBorderPane.setRight(gridlineSwitch);
 			getChildren().add(gridBorderPane);
-			
-			//Animate zoom
-			//BorderPane animateBorderPane = new BorderPane();
-			//ToggleSwitch animateSwitch = new ToggleSwitch();
-			//animateSwitch.selectedProperty().bindBidirectional(animateZoom);
-			//animateBorderPane.setLeft(new Label("Animate zoom"));
-			//animateBorderPane.setRight(animateSwitch);
-			//getChildren().add(animateBorderPane);
 			
 			//Data Reducer
 			BorderPane reducerBorderPane = new BorderPane();
