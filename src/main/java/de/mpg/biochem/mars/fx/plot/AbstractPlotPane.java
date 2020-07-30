@@ -43,6 +43,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -66,6 +67,7 @@ import java.util.function.Supplier;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
+import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
@@ -117,7 +119,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	
 	protected BooleanProperty gridlines = new SimpleBooleanProperty();
 	protected BooleanProperty fixXBounds = new SimpleBooleanProperty();
-	protected BooleanProperty fixYBounds = new SimpleBooleanProperty();
+	protected BooleanProperty reducePoints = new SimpleBooleanProperty();
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
@@ -125,10 +127,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	protected BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty panSelected = new SimpleBooleanProperty();
 	
-	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();
-	
-	protected IntegerProperty maxPointsCount = new SimpleIntegerProperty(10_000);
-	
+	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();	
 	protected PlotOptionsPane plotOptionsPane;
 	
 	protected ButtonBase propertiesButton;
@@ -158,7 +157,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
-		fixYBounds.setValue(false);
+		reducePoints.setValue(true);
 		
 		buildTools();
 		rootBorderPane.setTop(createToolBar());
@@ -247,14 +246,14 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			PopOver popOver = new PopOver();
 			popOver.setTitle("Plot Settings");
 			popOver.setHeaderAlwaysVisible(true);
-			popOver.setAutoHide(false);
-			popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
+			popOver.setAutoHide(true);
+			popOver.setDetachable(false);
+			popOver.setCloseButtonEnabled(false);
+			//popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
 			
 			//Retrieve x and y bounds from first chart
 			plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
 			plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
-			plotOptionsPane.setYMin(charts.get(0).getChart().getYAxis().getMin());
-			plotOptionsPane.setYMax(charts.get(0).getChart().getYAxis().getMax());
 			
 			popOver.setContentNode(plotOptionsPane);
 			popOver.show(propertiesButton);				
@@ -316,26 +315,18 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getXAxis().setAutoRanging(false);
 				subPlot.getChart().getXAxis().setMin(plotOptionsPane.getXMin());
 				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
-			} else {
+			} else
 				subPlot.getChart().getXAxis().setAutoRanging(true);
-			}
-			subPlot.getChart().getXAxis().forceRedraw();
 			
-			if (fixYBounds.get()) {
+			if (subPlot.getDatasetOptionsPane().fixYBounds().get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
-				subPlot.getChart().getYAxis().setMin(plotOptionsPane.getYMin());
-				subPlot.getChart().getYAxis().setMax(plotOptionsPane.getYMax());
-			} else {
+				subPlot.getChart().getYAxis().setMin(subPlot.getDatasetOptionsPane().getYMin());
+				subPlot.getChart().getYAxis().setMax(subPlot.getDatasetOptionsPane().getYMax());
+			} else
 				subPlot.getChart().getYAxis().setAutoRanging(true);
-			}
-			subPlot.getChart().getYAxis().forceRedraw();
 			
-			//subPlot.getChart().requestLayout();
-			
-			//Is this needed??
-			//subPlot.getChart().layout();
-			
-			subPlot.getChart().layoutChildren();
+			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
+				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 		}
 	}
 	
@@ -349,6 +340,10 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		
 		subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
 		subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
+		//subplot.getChart().animatedProperty().bind(animateZoom);
+		
+		if (subplot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
+			((SegmentDataSetRenderer) subplot.getChart().getRenderers().get(0)).pointReductionProperty().bind(reducePoints);
 		
 		for (SubPlot otherSubPlot : charts) {
 			
@@ -493,12 +488,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		return fixXBounds;
 	}
 	
-	public BooleanProperty fixYBoundsProperty() {
-		return fixYBounds;
-	}
-	
 	class PlotOptionsPane extends VBox  {
-		private TextField xMinTextField, yMinTextField, xMaxTextField, yMaxTextField;
+		private TextField minReductionTextField, xMinTextField, xMaxTextField;
 		
 		public PlotOptionsPane() {
 			//gridlines control
@@ -508,6 +499,27 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			gridBorderPane.setLeft(new Label("Gridlines"));
 			gridBorderPane.setRight(gridlineSwitch);
 			getChildren().add(gridBorderPane);
+			
+			//Data Reducer
+			BorderPane reducerBorderPane = new BorderPane();
+			ToggleSwitch reducerSwitch = new ToggleSwitch();
+			reducerSwitch.selectedProperty().bindBidirectional(reducePoints);
+			Label pointReducer = new Label("Point reducer");
+			reducerBorderPane.setLeft(pointReducer);
+			reducerBorderPane.setRight(reducerSwitch);
+			getChildren().add(reducerBorderPane);
+			
+			//For reference...
+			//Insets(double top, double right, double bottom, double left)
+			
+			BorderPane minReductionBorderPane = new BorderPane();
+			minReductionTextField = new TextField();
+			minReductionTextField.setText(String.valueOf(500));
+			Label reduceAbove = new Label("Reduce above");
+			BorderPane.setMargin(reduceAbove, new Insets(0, 10, 0, 0));
+			minReductionBorderPane.setLeft(reduceAbove);
+			minReductionBorderPane.setRight(minReductionTextField);
+			getChildren().add(minReductionBorderPane);
 			
 			//X Bounds
 			BorderPane fixXBoundsBorderPane = new BorderPane();
@@ -527,18 +539,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		            }
 		        }
 			};
-			
-			EventHandler<KeyEvent> handleYFieldEnter = new EventHandler<KeyEvent>() {
-		        @Override
-		        public void handle(KeyEvent ke) {
-		            if (ke.getCode().equals(KeyCode.ENTER)) {
-		            	if (!fixYBounds.get())
-		            		fixYBounds.set(true);
-		            	resetXYZoom();
-		            }
-		        }
-			};
-			
+
 			BorderPane xMinBorderPane = new BorderPane();
 			xMinTextField = new TextField();
 			xMinBorderPane.setLeft(new Label("X Min"));
@@ -552,28 +553,6 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			xMaxBorderPane.setRight(xMaxTextField);
 			xMaxTextField.setOnKeyPressed(handleXFieldEnter);
 			getChildren().add(xMaxBorderPane);
-			
-			//Y Bounds
-			BorderPane fixYBoundsborderPane = new BorderPane();
-			ToggleSwitch fixYBoundsSwitch = new ToggleSwitch();
-			fixYBoundsSwitch.selectedProperty().bindBidirectional(fixYBounds);
-			fixYBoundsborderPane.setLeft(new Label("Fix Y Bounds"));
-			fixYBoundsborderPane.setRight(fixYBoundsSwitch);
-			getChildren().add(fixYBoundsborderPane);
-			
-			BorderPane yMinBorderPane = new BorderPane();
-			yMinTextField = new TextField();
-			yMinBorderPane.setLeft(new Label("Y Min"));
-			yMinBorderPane.setRight(yMinTextField);
-			yMinTextField.setOnKeyPressed(handleYFieldEnter);
-			getChildren().add(yMinBorderPane);
-			
-			BorderPane yMaxBorderPane = new BorderPane();
-			yMaxTextField = new TextField();
-			yMaxBorderPane.setLeft(new Label("Y Max"));
-			yMaxBorderPane.setRight(yMaxTextField);
-			yMaxTextField.setOnKeyPressed(handleYFieldEnter);
-			getChildren().add(yMaxBorderPane);
 			
 			this.setPrefWidth(250);
 			this.setSpacing(5);
@@ -596,20 +575,12 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			return Double.valueOf(xMaxTextField.getText());
 		}
 		
-		void setYMin(double yMin) {
-			yMinTextField.setText(String.valueOf(yMin));
+		void setMinRequiredReductionSize(int minRequiredReductionSize) {
+			minReductionTextField.setText(String.valueOf(minRequiredReductionSize));
 		}
 		
-		double getYMin() {
-			return Double.valueOf(yMinTextField.getText());
-		}
-		
-		void setYMax(double yMax) {
-			yMaxTextField.setText(String.valueOf(yMax));
-		}
-		
-		double getYMax() {
-			return Double.valueOf(yMaxTextField.getText());
+		int getMinRequiredReductionSize() {
+			return Integer.valueOf(minReductionTextField.getText());
 		}
 	}
 }

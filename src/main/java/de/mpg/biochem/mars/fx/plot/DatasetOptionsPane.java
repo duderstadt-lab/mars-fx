@@ -34,6 +34,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.batik.bridge.ViewBox;
+import org.controlsfx.control.ToggleSwitch;
 
 import static java.util.stream.Collectors.toList;
 
@@ -50,10 +51,13 @@ import de.mpg.biochem.mars.table.MarsTable;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import de.gsi.chart.XYChart;
 import javafx.scene.control.Button;
@@ -65,6 +69,8 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.text.Text;
 
 import javafx.scene.Node;
@@ -82,10 +88,13 @@ import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 public class DatasetOptionsPane extends VBox {
-	private TextField titleField, xNameField, yNameField;
+	private TextField titleField, xNameField, yNameField, yMinField, yMaxField;
 	private Button addButton, updateButton;
 	private RadioButton radioButtonMolecules, radioButtonMetadata, radioButtonNone;
 	private ToggleGroup indicatorSourceGroup;
+	
+	private ToggleSwitch fixYBoundsSwitch;
+	private BooleanProperty fixYBounds = new SimpleBooleanProperty();
 	
 	private TableView<PlotSeries> plotPropertiesTable;
 	
@@ -137,18 +146,57 @@ public class DatasetOptionsPane extends VBox {
 		
 		getChildren().add(gridpane1);
 		
-		//add(Node child, int columnIndex, int rowIndex, int colspan, int rowspan)
+		//Option to lock Y-range
 		GridPane gridpane2 = new GridPane();
 		
+		Label fixYBoundsLabel = new Label("Fix Y Bounds");
+		gridpane2.add(fixYBoundsLabel, 0, 0);
+		GridPane.setMargin(fixYBoundsLabel, new Insets(0, 5, 10, 5));
+
+		gridpane2.add(fixYBoundsSwitch, 1, 0);
+		GridPane.setMargin(fixYBoundsSwitch, new Insets(0, 5, 10, 5));
+		
+		Label yMinLabel = new Label("Y Min");
+		gridpane2.add(yMinLabel, 2, 0);
+		GridPane.setMargin(yMinLabel, new Insets(0, 5, 10, 5));
+		
+		gridpane2.add(yMinField, 3, 0);
+		GridPane.setMargin(yMinField, new Insets(0, 5, 10, 5));
+		
+		Label yMaxLabel = new Label("Y Max");
+		gridpane2.add(yMaxLabel, 4, 0);
+		GridPane.setMargin(yMaxLabel, new Insets(0, 5, 10, 5));
+		
+		gridpane2.add(yMaxField, 5, 0);
+		GridPane.setMargin(yMaxField, new Insets(0, 5, 10, 5));
+		
+		getChildren().add(gridpane2);
+		
+		EventHandler<KeyEvent> handleYFieldEnter = new EventHandler<KeyEvent>() {
+	        @Override
+	        public void handle(KeyEvent ke) {
+	            if (ke.getCode().equals(KeyCode.ENTER)) {
+	            	if (!fixYBounds.get())
+	            		fixYBounds.set(true);
+	            }
+	        }
+		};
+		
+		yMinField.setOnKeyPressed(handleYFieldEnter);
+		yMaxField.setOnKeyPressed(handleYFieldEnter);
+		
+		//add(Node child, int columnIndex, int rowIndex, int colspan, int rowspan)
+		GridPane gridpane3 = new GridPane();
+		
 		Label indicatorLabel = new Label("Indicators");
-		gridpane2.add(indicatorLabel, 0, 1);
+		gridpane3.add(indicatorLabel, 0, 1);
 		GridPane.setMargin(indicatorLabel, new Insets(0, 5, 10, 5));
 		
 		HBox radioButtons = new HBox(radioButtonMolecules, radioButtonMetadata, radioButtonNone);
-		gridpane2.add(radioButtons, 1, 1);
+		gridpane3.add(radioButtons, 1, 1);
 		GridPane.setMargin(radioButtons, new Insets(0, 5, 10, 5));
 		
-		getChildren().add(gridpane2);
+		getChildren().add(gridpane3);
 		
 		VBox.setVgrow(plotPropertiesTable, Priority.ALWAYS);
 		getChildren().add(plotPropertiesTable);
@@ -165,6 +213,13 @@ public class DatasetOptionsPane extends VBox {
 		yNameField = new TextField();
 		xNameField = new TextField();
 		
+		fixYBoundsSwitch = new ToggleSwitch();
+		fixYBounds.setValue(false);
+		fixYBoundsSwitch.selectedProperty().bindBidirectional(fixYBounds);
+		
+		yMinField = new TextField();
+		yMaxField = new TextField();
+		
         radioButtonMolecules = new RadioButton("Molecules");
         radioButtonMetadata = new RadioButton("Metadata");
         radioButtonNone = new RadioButton("None");
@@ -179,9 +234,6 @@ public class DatasetOptionsPane extends VBox {
         radioButtonMolecules.setSelected(true);
 		
 		plotPropertiesTable = new TableView<PlotSeries>();
-		
-		//plotPropertiesTable.prefHeightProperty().set(4000);
-		//plotPropertiesTable.prefWidthProperty().set(4000);
 		
 		TableColumn<PlotSeries, PlotSeries> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -335,38 +387,6 @@ public class DatasetOptionsPane extends VBox {
 			}
 		    subPlot.update();
 		});
-		
-		/*
-		RotateTransition rt = new RotateTransition(Duration.millis(500), updateLabel);
-		rt.setInterpolator(Interpolator.LINEAR);
-		rt.setByAngle(0);
-		rt.setByAngle(360);
-	    rt.setCycleCount(Animation.INDEFINITE);
-	     
-		updateLabel.setOnMouseClicked(e -> {
-		     //rt.play();
-		     Task<Void> spin = new Task<Void>() {
-	            @Override
-	            protected Void call() throws Exception {
-	    		     rt.setByAngle(360);
-	    		     rt.setCycleCount(10000);
-	    		     rt.play();
-	                return null;
-	            }
-	         };
-	         spin.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-	            @Override
-	            public void handle(WorkerStateEvent event) {
-	            	
-	            }
-	         });
-	          new Thread(spin).start();
-	          
-	        
-		     subPlot.update();
-	         //rt.stop();
-		});
-		*/
 	}
 	
 	public void setColumns(Set<String> columns) {
@@ -432,8 +452,31 @@ public class DatasetOptionsPane extends VBox {
 		return yNameField.getText();
 	}
 	
+	BooleanProperty fixYBounds() {
+		return fixYBounds;
+	}
+	
+	void setYMin(double yMin) {
+		yMinField.setText(String.valueOf(yMin));
+	}
+	
+	double getYMin() {
+		return Double.valueOf(yMinField.getText());
+	}
+	
+	void setYMax(double yMax) {
+		yMaxField.setText(String.valueOf(yMax));
+	}
+	
+	double getYMax() {
+		return Double.valueOf(yMaxField.getText());
+	}
+	
 	public void setSubPlot(SubPlot subPlot) {
 		this.subPlot = subPlot;
+		
+		subPlot.getYAxis().minProperty().addListener((ob, o, n) -> yMinField.setText(String.valueOf(n.doubleValue())));
+		subPlot.getYAxis().maxProperty().addListener((ob, o, n) -> yMaxField.setText(String.valueOf(n.doubleValue())));
 	}
 	
 	public String getSelectedIndicator() {
