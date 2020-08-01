@@ -7,13 +7,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>27.0.1</version>
+		<version>29.1.0</version>
 		<relativePath />
 	</parent>
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.1.0-beta-1-SNAPSHOT</version>
+	<version>0.1.0-beta-2-SNAPSHOT</version>
 
 	<name>mars-fx</name>
 	<url>http://biochem.mpg.de/duderstadt/</url>
@@ -24,7 +24,7 @@
 	</organization>
 	<licenses>
 		<license>
-			<name>BSD-2</name>
+			<name>bsd_2</name>
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
@@ -81,13 +81,13 @@
 
 	<properties>
 		<package-name>de.mpg.biochem.mars</package-name>
-		<license.licenseName>BSD-2</license.licenseName>
+		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-4-SNAPSHOT</mars-core.version>
+		<mars-core.version>1.0.0-beta-5-SNAPSHOT</mars-core.version>
 		<jackson.version>2.6.5</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
