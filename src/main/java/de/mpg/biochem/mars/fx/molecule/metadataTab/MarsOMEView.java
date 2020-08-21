@@ -92,7 +92,7 @@ public class MarsOMEView {
 		
 		//Global SplitPane
 		SplitPane splitPane = new SplitPane();
-		splitPane.setDividerPositions(0.35);
+		splitPane.setDividerPositions(0.4525);
 		splitPane.setLayoutX(206.0);
 		splitPane.setLayoutY(128.0);
 		splitPane.setPrefSize(714.0, 646.0);
@@ -167,14 +167,14 @@ public class MarsOMEView {
 		
 		imageNameColumn = new TableColumn<List<String>, String>();
 		imageNameColumn.setEditable(false);
-		imageNameColumn.setPrefWidth(207.0);
+		imageNameColumn.setPrefWidth(135.0);
 		imageNameColumn.setSortable(false);
 		imageNameColumn.setText("Name ");
 		imageTable.getColumns().add(imageNameColumn);
 		
 		imageValueColumn = new TableColumn<List<String>, String>();
 		imageValueColumn.setEditable(false);
-		imageValueColumn.setPrefWidth(211.0);
+		imageValueColumn.setPrefWidth(135.0);
 		imageValueColumn.setSortable(false);
 		imageValueColumn.setText("Value ");
 		imageTable.getColumns().add(imageValueColumn);
@@ -208,14 +208,14 @@ public class MarsOMEView {
 		
 		tiffDataNameColumn = new TableColumn<List<String>, String>();
 		tiffDataNameColumn.setEditable(false);
-		tiffDataNameColumn.setPrefWidth(207.0);
+		tiffDataNameColumn.setPrefWidth(135.0);
 		tiffDataNameColumn.setSortable(false);
 		tiffDataNameColumn.setText("Name ");
 		tiffDataTable.getColumns().add(tiffDataNameColumn);
 		
 		tiffDataValueColumn = new TableColumn<List<String>, String>();
 		tiffDataValueColumn.setEditable(false);
-		tiffDataValueColumn.setPrefWidth(211.0);
+		tiffDataValueColumn.setPrefWidth(135.0);
 		tiffDataValueColumn.setSortable(false);
 		tiffDataValueColumn.setText("Value ");
 		tiffDataTable.getColumns().add(tiffDataValueColumn);
