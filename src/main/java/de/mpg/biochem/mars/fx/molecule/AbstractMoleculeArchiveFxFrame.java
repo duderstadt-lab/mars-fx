@@ -576,22 +576,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	     		
 	     		String mergeNote = "Merged " + mergeUIDs.size() + " molecules \n";
 	     		
-	     		MarsTable mergedDataTable = archive.get(mergeUIDs.get(0)).getDataTable();
+	     		MarsTable mergedDataTable = archive.get(mergeUIDs.get(0)).getTable();
 	     		
-	     		HashSet<Double> sliceNumbers = new HashSet<Double>();
+	     		HashSet<Double> tNumbers = new HashSet<Double>();
 	     		
-	     		//First add all current slices to set
+	     		//First add all current T to set
 	     		for (int row=0;row<mergedDataTable.getRowCount();row++) {
-            		sliceNumbers.add(mergedDataTable.getValue("slice", row));
+            		tNumbers.add(mergedDataTable.getValue("T", row));
             	}
 	     		
-	     		mergeNote += mergeUIDs.get(0).substring(0, 5) + " : slices " + mergedDataTable.getValue("slice", 0) + " " + mergedDataTable.getValue("slice", mergedDataTable.getRowCount()-1) + "\n";
+	     		mergeNote += mergeUIDs.get(0).substring(0, 5) + " : Ts " + mergedDataTable.getValue("T", 0) + " " + mergedDataTable.getValue("T", mergedDataTable.getRowCount()-1) + "\n";
 	     		
 	            for (int i = 1; i < mergeUIDs.size() ; i++) {
-	            	MarsTable nextDataTable = archive.get(mergeUIDs.get(i)).getDataTable();
+	            	MarsTable nextDataTable = archive.get(mergeUIDs.get(i)).getTable();
 	            	
 	            	for (int row=0;row<nextDataTable.getRowCount();row++) {
-	            		if (!sliceNumbers.contains(nextDataTable.getValue("slice", row))) {
+	            		if (!tNumbers.contains(nextDataTable.getValue("T", row))) {
 	            			mergedDataTable.appendRow();
 	            			int mergeLastRow = mergedDataTable.getRowCount() - 1;
 	            			
@@ -600,16 +600,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    	            		mergedDataTable.setValue(column, mergeLastRow, nextDataTable.getValue(column, row));
 	    	            	}
 	            			
-	            			sliceNumbers.add(nextDataTable.getValue("slice", row));
+	            			tNumbers.add(nextDataTable.getValue("T", row));
 	            		}
 	            	}
-	            	mergeNote += mergeUIDs.get(i).substring(0, 5) + " : slices " + nextDataTable.getValue("slice", 0) + " " + nextDataTable.getValue("slice", nextDataTable.getRowCount()-1) + "\n";
+	            	mergeNote += mergeUIDs.get(i).substring(0, 5) + " : Ts " + nextDataTable.getValue("T", 0) + " " + nextDataTable.getValue("T", nextDataTable.getRowCount()-1) + "\n";
 	            	
 	            	archive.remove(mergeUIDs.get(i));
 	            }
 	            
-	            //sort by slice
-	            mergedDataTable.sort(true, "slice");
+	            //sort by T
+	            mergedDataTable.sort(true, "T");
 	            
 	            String previousNotes = "";
 	            if (archive.get(mergeUIDs.get(0)).getNotes() != null)
