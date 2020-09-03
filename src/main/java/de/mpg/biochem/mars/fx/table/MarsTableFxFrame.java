@@ -294,6 +294,11 @@ public class MarsTableFxFrame implements MarsTableWindow {
 
 	@Override
 	public void update() {
-		dataTableTab.setContent(new MarsTableView(table));
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				dataTableTab.setContent(new MarsTableView(table));
+			}
+    	});
 	}
 }
