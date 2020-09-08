@@ -88,7 +88,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		tabPane.setFocusTraversable(false);
 
 		dataTableTab = new Tab();		
-		dataTableTab.setText("DataTable");
+		dataTableTab.setText("Table");
 		dataTableContainer = new BorderPane();
 		dataTableTab.setContent(dataTableContainer);
 		
@@ -156,7 +156,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			return;
 		
 		if (selectedTab.equals(dataTableTab)) {
-			dataTableContainer.setCenter(new MarsTableView(molecule.getDataTable()));
+			dataTableContainer.setCenter(new MarsTableView(molecule.getTable()));
 		} else if (selectedTab.equals(plotTab)) {
 			plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else if (selectedTab.equals(moleculeDashboardTab)) {
