@@ -71,37 +71,16 @@ import javafx.scene.layout.Region;
 
 public class MoleculeGeneralTabController implements MoleculeSubPane {
 	
-	@FXML
 	private AnchorPane rootPane;
-	
-	@FXML
 	private BorderPane UIDIconContainer;
-	
-	@FXML
 	private JFXTextField UIDLabel;
-	
-	@FXML
 	private JFXButton UIDClippyButton;
-	
-	@FXML
 	private BorderPane metaUIDIconContainer;
-	
-	@FXML
 	private JFXTextField metaUIDLabel;
-	
-	@FXML
 	private JFXButton metaUIDClippyButton;
-	
-	@FXML
-	private Label Tags;
-	
-	@FXML
+	private Label tags;
 	private JFXChipView<String> chipView;
-	
-	@FXML
-	private Label Notes;
-	
-	@FXML
+	private Label notes;
 	private JFXTextArea notesTextArea;
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
@@ -113,21 +92,113 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private Molecule molecule;
 	private MarsJFXChipViewSkin<String> skin;
 	
-	@FXML
-    public void initialize() {
-		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
-		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-		
-		Region microscopeIcon = new Region();
+    public MoleculeGeneralTabController() {
+    	rootPane = new AnchorPane();
+    	rootPane.setPrefHeight(350.0);
+    	rootPane.setPrefWidth(220.0);
+    	rootPane.setMinWidth(220.0);
+    	rootPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
+    	
+    	UIDIconContainer = new BorderPane();
+    	UIDIconContainer.setLayoutX(56.0);
+    	UIDIconContainer.setLayoutY(32.0);
+    	UIDIconContainer.setPrefHeight(55.0);
+    	UIDIconContainer.setPrefWidth(60.0);
+    	AnchorPane.setLeftAnchor(UIDIconContainer, 70.0);
+    	AnchorPane.setTopAnchor(UIDIconContainer, 5.0);
+    	UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
+    	rootPane.getChildren().add(UIDIconContainer);
+    	
+    	UIDLabel = new JFXTextField();
+    	UIDLabel.setLayoutX(39.0);
+        UIDLabel.setLayoutY(78.0);
+        UIDLabel.setPrefHeight(20.0);
+    	UIDLabel.setPrefWidth(180.0);
+    	AnchorPane.setLeftAnchor(UIDLabel, 10.0);
+    	AnchorPane.setTopAnchor(UIDLabel, 60.0);
+    	UIDLabel.setText("UID");
+    	UIDLabel.setEditable(false);
+    	rootPane.getChildren().add(UIDLabel);
+    	
+    	UIDClippyButton = new JFXButton();
+    	UIDClippyButton.setPrefHeight(20.0);
+    	UIDClippyButton.setPrefWidth(20.0);
+    	AnchorPane.setLeftAnchor(UIDClippyButton, 190.0);
+    	AnchorPane.setTopAnchor(UIDClippyButton, 60.0);
+    	UIDClippyButton.setOnAction(e -> {
+    		ClipboardContent content = new ClipboardContent();
+    	    content.putString(UIDLabel.getText());
+    	    clipboard.setContent(content);
+    	});
+    	UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+    	rootPane.getChildren().add(UIDClippyButton);
+    	
+    	metaUIDIconContainer = new BorderPane();
+    	metaUIDIconContainer.setPrefHeight(60.0);
+    	metaUIDIconContainer.setPrefWidth(70.0);
+    	AnchorPane.setLeftAnchor(metaUIDIconContainer, 65.0);
+    	AnchorPane.setTopAnchor(metaUIDIconContainer, 90.0);
+    	Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
 		metaUIDIconContainer.setCenter(microscopeIcon);
-		metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-		
-		UIDLabel.setEditable(false);
-		metaUIDLabel.setEditable(false);
-		
-		notesTextArea.setPromptText("none");
-		
+    	rootPane.getChildren().add(metaUIDIconContainer);
+    	
+    	metaUIDLabel = new JFXTextField();
+    	metaUIDLabel.setPrefHeight(20.0);
+    	metaUIDLabel.setPrefWidth(90.0);
+    	AnchorPane.setLeftAnchor(metaUIDLabel, 55.0);
+    	AnchorPane.setTopAnchor(metaUIDLabel, 150.0);
+    	metaUIDLabel.setText("metaUID");
+    	metaUIDLabel.setEditable(false);
+    	rootPane.getChildren().add(metaUIDLabel);
+    	
+    	metaUIDClippyButton = new JFXButton();
+    	metaUIDClippyButton.setPrefHeight(20.0);
+    	metaUIDClippyButton.setPrefWidth(20.0);
+    	AnchorPane.setLeftAnchor(metaUIDClippyButton, 145.0);
+    	AnchorPane.setTopAnchor(metaUIDClippyButton, 150.0);
+    	metaUIDClippyButton.setOnAction(e -> {
+    		ClipboardContent content = new ClipboardContent();
+    	    content.putString(metaUIDLabel.getText());
+    	    clipboard.setContent(content);
+    	});
+    	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+    	rootPane.getChildren().add(metaUIDClippyButton);
+    	
+    	tags = new Label();
+        AnchorPane.setLeftAnchor(tags, 10.0);
+        AnchorPane.setTopAnchor(tags, 200.0);
+        tags.setText("Tags");
+        rootPane.getChildren().add(tags);
+    	
+    	chipView = new JFXChipView<String>();
+    	chipView.setLayoutY(221.0);
+   	    chipView.setMinHeight(170.0);
+   	    chipView.setPrefHeight(170.0);
+   	    chipView.setPrefWidth(200.0);
+   	    AnchorPane.setLeftAnchor(chipView, 5.0);
+   	    AnchorPane.setRightAnchor(chipView, 5.0);
+   	    AnchorPane.setTopAnchor(chipView, 221.0);
+   	    rootPane.getChildren().add(chipView);
+    	
+    	notes = new Label();
+        AnchorPane.setLeftAnchor(notes, 10.0);
+        AnchorPane.setTopAnchor(notes, 400.0);
+        notes.setText("Notes");
+    	rootPane.getChildren().add(notes);
+    	
+    	notesTextArea = new JFXTextArea();
+    	notesTextArea.setLayoutY(421.0);
+    	notesTextArea.setMinHeight(149.0);
+    	notesTextArea.setPrefHeight(149.0);
+    	notesTextArea.setPrefWidth(190.0);
+    	AnchorPane.setBottomAnchor(notesTextArea, 15.0);
+    	AnchorPane.setLeftAnchor(notesTextArea, 15.0);
+    	AnchorPane.setRightAnchor(notesTextArea, 15.0);
+    	AnchorPane.setTopAnchor(notesTextArea, 431.0);
+    	notesTextArea.setPromptText("none");
+    	rootPane.getChildren().add(notesTextArea);
+    	
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
@@ -168,20 +239,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
     }
-	
-	@FXML
-	private void handleUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(UIDLabel.getText());
-	    clipboard.setContent(content);
-	}
-
-	@FXML
-	private void handleMetaUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(metaUIDLabel.getText());
-	    clipboard.setContent(content);
-	}
 	
     @Override
     public void handle(MoleculeEvent event) {

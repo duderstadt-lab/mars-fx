@@ -139,30 +139,21 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         generalTab.setGraphic(tabPane);
         generalTab.closableProperty().set(false);
         
-        URL resourceURL = getClass().getResource("MoleculeGeneralTab.fxml");
-        
         generalTabContainer = new AnchorPane();
         generalTabContainer.minHeight(0.0);
         generalTabContainer.minWidth(0.0);
         generalTabContainer.prefHeight(250.0);
         generalTabContainer.prefWidth(220.0);
+        
+        AnchorPane.setTopAnchor(generalTabContainer, 0.0);
+        AnchorPane.setBottomAnchor(generalTabContainer, 0.0);
+        AnchorPane.setRightAnchor(generalTabContainer, 0.0);
+        AnchorPane.setLeftAnchor(generalTabContainer, 0.0);
+        
         generalTab.setContent(generalTabContainer);
         
-        try {
-        	FXMLLoader loader = new FXMLLoader();
-	        loader.setLocation(resourceURL);
-            Parent contentView = loader.load();
-            
-            moleculeGeneralTabController = (MoleculeGeneralTabController) loader.getController();
-            generalTabContainer.getChildren().add(contentView);
-            
-            AnchorPane.setTopAnchor(contentView, 0.0);
-            AnchorPane.setBottomAnchor(contentView, 0.0);
-            AnchorPane.setRightAnchor(contentView, 0.0);
-            AnchorPane.setLeftAnchor(contentView, 0.0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        moleculeGeneralTabController = new MoleculeGeneralTabController();
+        generalTabContainer.getChildren().add(moleculeGeneralTabController.getNode());
 
         //Build properties Tab
         moleculePropertiesTable = new MoleculePropertiesTable();
