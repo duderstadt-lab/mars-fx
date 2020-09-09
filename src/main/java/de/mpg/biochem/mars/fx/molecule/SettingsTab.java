@@ -114,7 +114,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		//smileEncodingButton = new JFXToggleButton();
 		rootPane = new VBox();
 			
-		Text moleculesHeading = new Text("Molecules");
+		Text moleculesHeading = new Text("Tag shortcuts");
 		moleculesHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
 		
 		Text hotKeySettingsDescription = new Text("Combine shift, control, option (alt), or command with\n"
