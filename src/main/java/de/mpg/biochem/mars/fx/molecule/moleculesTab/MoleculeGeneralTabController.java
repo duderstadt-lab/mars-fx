@@ -60,6 +60,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.scene.text.TextFlow;
+import javafx.scene.text.Text;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -78,7 +80,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private BorderPane metaUIDIconContainer;
 	private JFXTextField metaUIDLabel;
 	private JFXButton metaUIDClippyButton;
-	private Label channel;
+	private Text cText, cInt;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
@@ -166,10 +168,14 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
     	rootPane.getChildren().add(metaUIDClippyButton);
     	
-    	channel = new Label();
-    	AnchorPane.setLeftAnchor(channel, 55.0);
+    	TextFlow channel = new TextFlow();
+    	AnchorPane.setLeftAnchor(channel, 87.0);
     	AnchorPane.setTopAnchor(channel, 200.0);
-    	channel.setText("");
+    	cText = new Text("");
+    	cText.setStyle("-fx-font-weight:bold");
+    	cInt = new Text("");
+    	cInt.setStyle("-fx-font-weight:normal");
+    	channel.getChildren().addAll(cText, cInt);
     	rootPane.getChildren().add(channel);
     	
     	tags = new Label();
@@ -270,10 +276,13 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getMetadataUID());
 		
-		if (molecule.getChannel() > -1)
-			channel.setText("C " + molecule.getChannel());
-		else
-			channel.setText("");
+		if (molecule.getChannel() > -1) {
+			cText.setText("C ");
+			cInt.setText(String.valueOf(molecule.getChannel()));
+		} else {
+			cText.setText("");
+			cInt.setText("");
+		}
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
