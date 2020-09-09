@@ -88,7 +88,7 @@
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
 		<mars-core.version>1.0.0-beta-5-SNAPSHOT</mars-core.version>
-		<jackson.version>2.6.5</jackson.version>
+		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
 		<org.apache.commons.codec.version>1.8</org.apache.commons.codec.version>
