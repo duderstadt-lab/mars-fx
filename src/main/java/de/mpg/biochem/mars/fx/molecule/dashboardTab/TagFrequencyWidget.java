@@ -63,6 +63,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.text.Text;
+import javafx.util.StringConverter;
+import java.text.DecimalFormat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -98,7 +100,10 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements Molec
         yAxis.setForceZeroInRange(true);
         yAxis.setAutoRanging(true);
         yAxis.setAutoRangeRounding(false);
-        //yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
+        
+        DecimalStringConverter converter = new DecimalStringConverter();
+        converter.setPrecision(0);
+        yAxis.setTickLabelFormatter(converter);
 
         barChart = new XYChart(xAxis, yAxis);
         barChart.setAnimated(false);
