@@ -78,6 +78,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private BorderPane metaUIDIconContainer;
 	private JFXTextField metaUIDLabel;
 	private JFXButton metaUIDClippyButton;
+	private Label channel;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
@@ -165,20 +166,26 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
     	rootPane.getChildren().add(metaUIDClippyButton);
     	
+    	channel = new Label();
+    	AnchorPane.setLeftAnchor(channel, 55.0);
+    	AnchorPane.setTopAnchor(channel, 200.0);
+    	channel.setText("");
+    	rootPane.getChildren().add(channel);
+    	
     	tags = new Label();
         AnchorPane.setLeftAnchor(tags, 10.0);
-        AnchorPane.setTopAnchor(tags, 200.0);
+        AnchorPane.setTopAnchor(tags, 220.0);
         tags.setText("Tags");
         rootPane.getChildren().add(tags);
     	
     	chipView = new JFXChipView<String>();
-    	chipView.setLayoutY(221.0);
+    	chipView.setLayoutY(241.0);
    	    chipView.setMinHeight(170.0);
    	    chipView.setPrefHeight(170.0);
    	    chipView.setPrefWidth(200.0);
    	    AnchorPane.setLeftAnchor(chipView, 5.0);
    	    AnchorPane.setRightAnchor(chipView, 5.0);
-   	    AnchorPane.setTopAnchor(chipView, 221.0);
+   	    AnchorPane.setTopAnchor(chipView, 241.0);
    	    rootPane.getChildren().add(chipView);
     	
     	notes = new Label();
@@ -262,6 +269,11 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getMetadataUID());
+		
+		if (molecule.getChannel() > -1)
+			channel.setText("C " + molecule.getChannel());
+		else
+			channel.setText("");
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
