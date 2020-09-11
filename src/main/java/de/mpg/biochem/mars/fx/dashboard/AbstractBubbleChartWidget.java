@@ -227,14 +227,10 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 				renderer.getDatasets().clear();
 				renderer.getDatasets().addAll(datasets);
 				
-				bubbleChart.getXAxis().forceRedraw();
-				bubbleChart.getYAxis().forceRedraw();
+				xAxis.forceRedraw();
+				yAxis.forceRedraw();
 				
-				bubbleChart.requestLayout();
-				
-				//Is this needed??
 				bubbleChart.layout();
-				
 				bubbleChart.layoutChildren();
 			}
 		});

@@ -100,10 +100,19 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements Molec
         yAxis.setForceZeroInRange(true);
         yAxis.setAutoRanging(true);
         yAxis.setAutoRangeRounding(false);
-        
-        DecimalStringConverter converter = new DecimalStringConverter();
-        converter.setPrecision(0);
-        yAxis.setTickLabelFormatter(converter);
+        yAxis.setTickLabelFormatter(new StringConverter<Number>() {
+        	private final DecimalFormat format = new DecimalFormat("#");
+        	
+            @Override
+            public Number fromString(String string) {
+                return null;
+            }
+
+            @Override
+            public String toString(Number num) {
+                return format.format(num);
+            }
+        });
 
         barChart = new XYChart(xAxis, yAxis);
         barChart.setAnimated(false);

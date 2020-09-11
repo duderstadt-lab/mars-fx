@@ -222,7 +222,11 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 				barChart.getDatasets().clear();
 				barChart.getDatasets().add(dataSet);
 
-				xAxis.layout();
+				xAxis.forceRedraw();
+				yAxis.forceRedraw();
+				
+				barChart.layout();
+				barChart.layoutChildren();
 			}
 		});
 	}
