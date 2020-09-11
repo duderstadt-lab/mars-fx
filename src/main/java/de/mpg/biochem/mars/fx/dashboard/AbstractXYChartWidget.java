@@ -96,7 +96,6 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		yAxis.setAutoRangeRounding(false);
 
 		xyChart = new XYChart(xAxis, yAxis);
-		xyChart.getPlugins().add(new MarsDataPointTracker());
 		xyChart.setAnimated(false);
 		xyChart.getRenderers().clear();
 
@@ -227,8 +226,9 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 				else 
 					renderer.setErrorType(ErrorStyle.NONE);
 
-				renderer.getDatasets().clear();
-				renderer.getDatasets().addAll(datasets);
+				xyChart.getDatasets().clear();
+				xyChart.getDatasets().addAll(datasets);
+				
 				
 				xAxis.forceRedraw();
 				yAxis.forceRedraw();

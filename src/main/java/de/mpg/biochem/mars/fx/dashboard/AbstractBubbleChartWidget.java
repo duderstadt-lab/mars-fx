@@ -101,7 +101,6 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		yAxis.setAutoRangeRounding(false);
 
 		bubbleChart = new XYChart(xAxis, yAxis);
-		bubbleChart.getPlugins().add(new MarsDataPointTracker());
 		bubbleChart.setAnimated(false);
 		bubbleChart.getRenderers().clear();
 
@@ -224,8 +223,8 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 				bubbleChart.setTitle(title);
 
-				renderer.getDatasets().clear();
-				renderer.getDatasets().addAll(datasets);
+				bubbleChart.getDatasets().clear();
+				bubbleChart.getDatasets().addAll(datasets);
 				
 				xAxis.forceRedraw();
 				yAxis.forceRedraw();
