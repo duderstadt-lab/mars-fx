@@ -49,8 +49,6 @@ public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements
 	@Override
 	public void view(final UserInterface ui, final Display<?> d) {
 		MarsTable results = (MarsTable)d.get(0);
-		results.setName(d.getName());
-		d.setName(results.getName());
 		
 		//We also create a new window since we assume it is a new table...
 		MarsTableFxFrame marsTableFxFrame = new MarsTableFxFrame(results.getName(), results, context);

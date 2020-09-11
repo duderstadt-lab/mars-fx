@@ -58,9 +58,6 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	@Override
 	public void view(final UserInterface ui, final Display<?> d) {	
 		MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive = (MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties>)d.get(0);
-		archive.setName(d.getName());
-
-		d.setName(archive.getName());
 
 		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, context);
 		moleculeFrame.init();
