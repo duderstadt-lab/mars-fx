@@ -438,7 +438,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
 		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
 		Action deleteMoleculeRegionsAction = new Action("Delete Molecule Regions", null, null, e -> deleteMoleculeRegions());
-		Action deleteMoleculePositionsAction = new Action("Delete Molecule Regions", null, null, e -> deleteMoleculePositions());
+		Action deleteMoleculePositionsAction = new Action("Delete Molecule Positions", null, null, e -> deleteMoleculePositions());
 		Action deleteSegmentTablesAction = new Action("Delete Segment Tables", null, null, e -> deleteSegmentTables());
 		
 		Action mergeMoleculesAction = new Action("Merge Molecules", null, null, e -> mergeMolecules());
