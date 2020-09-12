@@ -437,6 +437,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
 		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
 		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
+		Action deleteMoleculeRegionsAction = new Action("Delete Molecule Regions", null, null, e -> deleteMoleculeRegions());
+		Action deleteMoleculePositionsAction = new Action("Delete Molecule Regions", null, null, e -> deleteMoleculePositions());
 		Action deleteSegmentTablesAction = new Action("Delete Segment Tables", null, null, e -> deleteSegmentTables());
 		
 		Action mergeMoleculesAction = new Action("Merge Molecules", null, null, e -> mergeMolecules());
@@ -456,6 +458,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					deleteMoleculesAction,
 					deleteMoleculeTagsAction,
 					deleteMoleculeParametersAction,
+					deleteMoleculeRegionsAction,
+					deleteMoleculePositionsAction,
 					deleteSegmentTablesAction,
 					mergeMoleculesAction,
 					null,
@@ -540,9 +544,53 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		});
 	}
 	
+	protected void deleteMoleculeRegions() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.properties().getRegionSet(), "Delete Molecule Regions", "Delete molecule regions:", "Delete all regions");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				List<String> regionList = result.getList();
+	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+	            		Molecule molecule = archive.get(UID);
+	            	 	if (result.removeAll()) {
+	            	 		molecule.removeAllRegions();
+	            	 	} else {
+	            	 		for (int i=0;i<regionList.size();i++) {
+	     		        		molecule.removeRegion(regionList.get(i));
+	     		        	}
+	            	 	}
+	            	 	archive.put(molecule);
+	     			});
+			}, "Deleting Molecule Regions...");
+		});
+	}
+	
+	protected void deleteMoleculePositions() {
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
+				archive.properties().getPositionSet(), "Delete Molecule Positions", "Delete molecule positions:", "Delete all positions");
+
+		dialog.showAndWait().ifPresent(result -> {
+			runTask(() -> {
+				List<String> regionList = result.getList();
+	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+	            		Molecule molecule = archive.get(UID);
+	            	 	if (result.removeAll()) {
+	            	 		molecule.removeAllPositions();
+	            	 	} else {
+	            	 		for (int i=0;i<regionList.size();i++) {
+	     		        		molecule.removePosition(regionList.get(i));
+	     		        	}
+	            	 	}
+	            	 	archive.put(molecule);
+	     			});
+			}, "Deleting Molecule Positions...");
+		});
+	}
+	
 	protected void deleteSegmentTables() {
 		SegmentTableSelectionDialog dialog = new SegmentTableSelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getSegmentTableNames(), "Delete segments table");
+				archive.properties().getSegmentsTableNames(), "Delete segments table");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
@@ -553,7 +601,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            	 	archive.put(molecule);
 	     			});
 	            
-	            archive.properties().getSegmentTableNames().remove(segmentTableName);
+	            archive.properties().getSegmentsTableNames().remove(segmentTableName);
 			}, "Deleting Segments Tables...");
 		});
 	}
