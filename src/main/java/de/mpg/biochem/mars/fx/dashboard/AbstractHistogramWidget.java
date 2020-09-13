@@ -70,6 +70,7 @@ import java.util.Set;
 import org.scijava.Cancelable;
 import org.scijava.ItemIO;
 import org.scijava.plugin.Parameter;
+import java.util.stream.DoubleStream;
 
 import net.imagej.ops.Initializable;
 
@@ -84,7 +85,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	protected ArrayList<DefaultErrorDataSet> datasets;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
-			Arrays.asList("xlabel", "ylabel", "title", "bins", "xmin", "xmax"));
+			Arrays.asList("xlabel", "ylabel", "title", "bins"));
 
 	@Override
 	public void initialize() {
@@ -146,8 +147,6 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		String xlabel = (String) outputs.get("xlabel");
 		String title = (String) outputs.get("title");
 		Integer bins = (Integer) outputs.get("bins");
-		Double xmin = (Double) outputs.get("xmin");
-		Double xmax = (Double) outputs.get("xmax");
 
 		Set<String> series = new HashSet<String>();
 		for (String outputName : outputs.keySet()) {
@@ -156,6 +155,41 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				series.add(outputName.substring(0, index));
 			}
 		}
+		
+		Double xmin = Double.valueOf(0);
+		if (outputs.containsKey("xmin"))
+			xmin = (Double) outputs.get("xmin");
+		else {
+			double tempXmin = Double.MAX_VALUE;
+			for (String seriesName : series)
+				if (outputs.containsKey(seriesName + "_" + "values")) {
+					Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
+					for (int i=0; i< values.length; i++)
+						if (values[i] < tempXmin)
+							tempXmin = values[i];
+						
+				}
+			if (tempXmin != Double.MAX_VALUE)
+			 xmin = Double.valueOf(tempXmin);
+		}
+		
+		Double xmax = Double.valueOf(1);
+		if (outputs.containsKey("xmax"))
+			xmax = (Double) outputs.get("xmax");
+		else {
+			double tempXmax = Double.MIN_VALUE;		
+			for (String seriesName : series)
+				if (outputs.containsKey(seriesName + "_" + "values")) {
+					Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
+					for (int i=0; i< values.length; i++)
+						if (values[i] > tempXmax)
+							tempXmax = values[i];
+						
+				}
+			if (tempXmax != Double.MIN_VALUE)
+			 xmax = Double.valueOf(tempXmax);
+		}
+		
 
 		for (String seriesName : series) {
 			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName, bins.intValue(), xmin.doubleValue(), xmax.doubleValue());
@@ -165,14 +199,17 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				return;
 			}
 		}
+		
+		final double finalXMin = xmin;
+		final double finalXMax = xmax;
 
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
 				xAxis.setName(xlabel);
 				xAxis.setAutoRanging(false);
-				xAxis.setMin(xmin);
-				xAxis.setMax(xmax);
+				xAxis.setMin(finalXMin);
+				xAxis.setMax(finalXMax);
 
 				yAxis.setName(ylabel);
 				// Check if a y-range was provided
