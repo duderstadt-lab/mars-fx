@@ -84,10 +84,19 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
-//import javafx.scene.image.Image;
+import javafx.scene.image.Image;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.stage.FileChooser;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Modality;
+import javafx.scene.control.DialogPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.Priority;
+import javafx.scene.image.ImageView;
+import javafx.scene.control.ButtonType;
 
 import javafx.concurrent.Task;
 
@@ -405,6 +414,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		Action exportVideoAction = new Action("Export Video", null, null,
 				e -> {
+					if (marsBdvFrame == null) {
+						showErrorMessage("There is no BigDataView available for export. "
+								+ "Please configure the BDV settings in the metadata record, "
+								+ "run \"Show Video\" and then try again.");
+						return;
+					}
+					
 			        SwingUtilities.invokeLater(new Runnable() {
 			            @Override
 			            public void run() {
@@ -908,6 +924,21 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	
 	public DashboardTab getDashboard() {
 		return dashboardTab;
+	}
+	
+	protected void showErrorMessage(String message) {
+		Alert alert = new Alert(AlertType.ERROR);
+	    alert.initModality(Modality.WINDOW_MODAL);
+	    alert.initOwner(getNode().getScene().getWindow());
+	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
+	    ImageView imageView = new ImageView(image1);
+	    imageView.setFitWidth(80);
+	    imageView.setFitHeight(80);
+	    alert.setGraphic(imageView);
+	    alert.setHeaderText(null);
+	    alert.setContentText(message);
+
+	    alert.show();
 	}
 	
 	//Lock, unlock and update event might be called by swing threads
