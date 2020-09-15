@@ -186,7 +186,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		tabPane.setFocusTraversable(false);
 		
 		dataTableTab = new Tab();		
-		dataTableTab.setText("DataTable");
+		dataTableTab.setText("Table");
 		dataTableTab.setContent(new MarsTableView(table));
 		
 		plotTab = new Tab();
