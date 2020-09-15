@@ -199,6 +199,11 @@ public abstract class AbstractSubPlot implements SubPlot {
 		}
 		
 		addIndicators(xAxisList, yAxisList);
+		
+		chartPane.getXAxis().forceRedraw();
+		chartPane.getYAxis().forceRedraw();
+		chartPane.layout();
+		chartPane.layoutChildren();
 	}
 	
 	@Override
