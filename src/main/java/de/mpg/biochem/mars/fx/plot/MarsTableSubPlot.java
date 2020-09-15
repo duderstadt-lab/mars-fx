@@ -68,6 +68,11 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 	}
 	
 	@Override
+	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
+		return new DatasetOptionsPane(columns, this, true);
+	}
+	
+	@Override
 	protected MarsTable getDataTable() {
 		return table;
 	}

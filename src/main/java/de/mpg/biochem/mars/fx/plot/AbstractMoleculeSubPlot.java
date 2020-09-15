@@ -252,6 +252,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		getChart().getStylesheets().add(getPlotPane().getStyleSheetUpdater().getStyleSheetURL(newStyleSheet));
 	}
+	
+	@Override
+	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
+		return new DatasetOptionsPane(columns, this);
+	}
 
 	@Override
 	public void removeIndicators() {

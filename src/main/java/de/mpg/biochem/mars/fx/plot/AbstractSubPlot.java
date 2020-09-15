@@ -100,7 +100,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 	
 	public AbstractSubPlot(PlotPane plotPane, String plotTitle) {
 		this.plotPane = plotPane;
-		
 		datasetOptionsPane = createDatasetOptionsPane(new HashSet<String>(plotPane.getColumnNames()));
 		
 		datasetOptionsButton = new JFXBadge(ActionUtils.createToolBarButton(new Action("Dataset", "Shortcut+C", LINE_CHART, e -> {
@@ -145,10 +144,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 			if (!datasetOptionsPane.fixYBounds().get())
 				datasetOptionsPane.setYMax(n.doubleValue());
 		});
-	}
-	
-	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
-		return new DatasetOptionsPane(columns, this);
 	}
 	
 	protected MarsNumericAxis createAxis() {
@@ -275,4 +270,6 @@ public abstract class AbstractSubPlot implements SubPlot {
 	public abstract void removeIndicators();
 	
 	protected abstract MarsTable getDataTable();
+	
+	protected abstract DatasetOptionsPane createDatasetOptionsPane(Set<String> columns);
 }

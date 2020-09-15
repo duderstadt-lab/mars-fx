@@ -100,17 +100,30 @@ public class DatasetOptionsPane extends VBox {
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
-	private final ToggleGroup trackingGroup;
+	private ToggleGroup trackingGroup;
 	
 	private SubPlot subPlot;
 	
 	private ArrayList<String> columns;
+	private boolean marsTableDisplay = false;
+	
+	public DatasetOptionsPane(Set<String> columns, SubPlot subPlot, boolean marsTableDisplay) {
+		this.subPlot = subPlot;
+		this.marsTableDisplay = marsTableDisplay;
+		this.columns = (ArrayList<String>)columns.stream().sorted().collect(toList());
+		
+		buildOptionsPane();
+	}
 
 	public DatasetOptionsPane(Set<String> columns, SubPlot subPlot) {
 		this.subPlot = subPlot;
-		
 		this.columns = (ArrayList<String>)columns.stream().sorted().collect(toList());
+		this.marsTableDisplay = false;
 		
+		buildOptionsPane();
+	}
+	
+	private void buildOptionsPane() {
 		trackingGroup = new ToggleGroup();
 		
 		setPadding(new Insets(15, 20, 15, 20));
@@ -196,7 +209,8 @@ public class DatasetOptionsPane extends VBox {
 		gridpane3.add(radioButtons, 1, 1);
 		GridPane.setMargin(radioButtons, new Insets(0, 5, 10, 5));
 		
-		getChildren().add(gridpane3);
+		if (!marsTableDisplay)
+			getChildren().add(gridpane3);
 		
 		VBox.setVgrow(plotPropertiesTable, Priority.ALWAYS);
 		getChildren().add(plotPropertiesTable);
@@ -322,26 +336,28 @@ public class DatasetOptionsPane extends VBox {
         plotPropertiesTable.getColumns().add(strokeColumn);
         strokeColumn.setStyle("-fx-alignment: CENTER;");
         
-        TableColumn<PlotSeries, JFXCheckBox> drawSegmentsColumn = new TableColumn<>("Segments");
-        drawSegmentsColumn.setMinWidth(40);
-        drawSegmentsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDrawSegmentsField()));
-        drawSegmentsColumn.setSortable(false);
-        plotPropertiesTable.getColumns().add(drawSegmentsColumn);
-        drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
-        
-        TableColumn<PlotSeries, JFXColorPicker> segmentsColorColumn = new TableColumn<>("Segment Color");
-        segmentsColorColumn.setMinWidth(110);
-        segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
-        segmentsColorColumn.setSortable(false);
-        plotPropertiesTable.getColumns().add(segmentsColorColumn);
-        segmentsColorColumn.setStyle("-fx-alignment: CENTER;");
-        
-        TableColumn<PlotSeries, JFXTextField> segmentsStrokeColumn = new TableColumn<>("Segment Stroke");
-        segmentsStrokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsWidthField()));
-        segmentsStrokeColumn.setMinWidth(110);
-        segmentsStrokeColumn.setSortable(false);
-        plotPropertiesTable.getColumns().add(segmentsStrokeColumn);
-        segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");
+        if (!marsTableDisplay) {
+	        TableColumn<PlotSeries, JFXCheckBox> drawSegmentsColumn = new TableColumn<>("Segments");
+	        drawSegmentsColumn.setMinWidth(40);
+	        drawSegmentsColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getDrawSegmentsField()));
+	        drawSegmentsColumn.setSortable(false);
+	        plotPropertiesTable.getColumns().add(drawSegmentsColumn);
+	        drawSegmentsColumn.setStyle("-fx-alignment: CENTER;");
+	        
+	        TableColumn<PlotSeries, JFXColorPicker> segmentsColorColumn = new TableColumn<>("Segment Color");
+	        segmentsColorColumn.setMinWidth(110);
+	        segmentsColorColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsColorField()));
+	        segmentsColorColumn.setSortable(false);
+	        plotPropertiesTable.getColumns().add(segmentsColorColumn);
+	        segmentsColorColumn.setStyle("-fx-alignment: CENTER;");
+	        
+	        TableColumn<PlotSeries, JFXTextField> segmentsStrokeColumn = new TableColumn<>("Segment Stroke");
+	        segmentsStrokeColumn.setCellValueFactory(cellData -> new ReadOnlyObjectWrapper<>(cellData.getValue().getSegmentsWidthField()));
+	        segmentsStrokeColumn.setMinWidth(110);
+	        segmentsStrokeColumn.setSortable(false);
+	        plotPropertiesTable.getColumns().add(segmentsStrokeColumn);
+	        segmentsStrokeColumn.setStyle("-fx-alignment: CENTER;");
+        }
         
         plotPropertiesTable.setItems(plotSeriesList);
 		
