@@ -24,7 +24,7 @@ f * Copyright (c) 2015 Karl Tauber <karl at jformdesigner dot com>
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.editor;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -57,7 +57,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
 
-import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
@@ -81,8 +80,6 @@ public class CommentEditor extends AnchorPane {
 	final PrefsBooleanProperty htmlSourceVisible = new PrefsBooleanProperty();
 	final PrefsBooleanProperty markdownAstVisible = new PrefsBooleanProperty();
 	final PrefsBooleanProperty externalVisible = new PrefsBooleanProperty();
-	
-	private MoleculeArchive<?,?,?> archive;
 
 	public CommentEditor() {
 		@SuppressWarnings("rawtypes")
@@ -265,25 +262,15 @@ public class CommentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 	}
 
-	void setArchive(MoleculeArchive<?,?,?> archive) {
-		this.archive = archive;
-		load();
-	}
-	
-	void load() {
-		if (archive.getComments() == null)
-			archive.setComments("");
-		markdownEditorPane.setMarkdown(archive.getComments());
+	public void setComments(String comments) {
+		markdownEditorPane.setMarkdown(comments);
 		markdownEditorPane.getUndoManager().mark();
 	}
 
-	public void save() {
-		archive.setComments(markdownEditorPane.getMarkdown());
+	public String getComments() {
+		String comments = markdownEditorPane.getMarkdown();
 		markdownEditorPane.getUndoManager().mark();
-	}
-	
-	public ArrayList<Menu> getMenus() {
-		return new ArrayList<Menu>();
+		return comments;
 	}
 }
 
