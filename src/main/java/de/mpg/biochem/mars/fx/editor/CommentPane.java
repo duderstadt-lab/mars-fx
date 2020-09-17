@@ -286,6 +286,7 @@ public class CommentPane {
 		//toolBar.getItems().add(previewRenderer);
 
 		// markdown extensions popover
+		/*
 		String title = Messages.get("MainWindow.MarkdownExtensions");
 		extensionsButton = ActionUtils.createToolBarButton(
 				new Action(title, null, COG, e -> {
@@ -298,7 +299,7 @@ public class CommentPane {
 				}));
 		editToolBar.getItems().add(extensionsButton);
 		editToolBar.getItems().add(new Separator());
-
+*/
 		Action editModeAction2 = new Action("Edit", "Shortcut+E", PENCIL,
 				null, null, commentEditor.editMode);
 		Node editModeButton2 = ActionUtils.createToolBarButton(editModeAction2);
