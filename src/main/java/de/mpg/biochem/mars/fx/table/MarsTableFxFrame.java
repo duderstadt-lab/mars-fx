@@ -51,12 +51,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.editor.CommentPane;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
 import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
@@ -226,6 +230,21 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/table/TableWindowPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
+		
+		tabPane.getSelectionModel().selectedItemProperty().addListener(
+	    		new ChangeListener<Tab>() {
+	    			@Override
+	    			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+	    					
+	    				if (oldValue == commentTab) {
+	    					menuBar.getMenus().removeAll(commentPane.getMenus());
+	    				}
+	    				
+		    			if (newValue == commentTab) {
+		    				menuBar.getMenus().addAll(commentPane.getMenus());
+						} 
+	    			}
+	    		});
 		
 		return tabPane;
 	}

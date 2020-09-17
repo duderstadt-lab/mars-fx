@@ -109,10 +109,10 @@ public class MarkdownEditorPane
 
 		textArea.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, this::showContextMenu);
 		textArea.addEventHandler(MouseEvent.MOUSE_PRESSED, this::hideContextMenu);
-		textArea.setOnDragEntered(this::onDragEntered);
-		textArea.setOnDragExited(this::onDragExited);
-		textArea.setOnDragOver(this::onDragOver);
-		textArea.setOnDragDropped(this::onDragDropped);
+		//textArea.setOnDragEntered(this::onDragEntered);
+		//textArea.setOnDragExited(this::onDragExited);
+		//textArea.setOnDragOver(this::onDragOver);
+		//textArea.setOnDragDropped(this::onDragDropped);
 
 		smartEdit = new SmartEdit(this, textArea);
 

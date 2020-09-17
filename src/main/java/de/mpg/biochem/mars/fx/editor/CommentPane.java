@@ -202,8 +202,9 @@ public class CommentPane {
 				viewPreviewAction,
 				null,
 				viewShowLineNoAction,
-				viewShowWhitespaceAction,
-				viewShowImagesEmbeddedAction);
+				viewShowWhitespaceAction);
+		
+		//,viewShowImagesEmbeddedAction);
 
 		Menu insertMenu = ActionUtils.createMenu("Insert",
 				insertBoldAction,
