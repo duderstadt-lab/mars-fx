@@ -8,6 +8,9 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 import java.util.Set;
 
@@ -18,6 +21,7 @@ import javafx.event.EventHandler;
 
 public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashboard<MarsMetadataDashboardWidget> implements MetadataSubPane {
 	
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected I marsMetadata;
 	
 	public MarsMetadataDashboard(final Context context) {
@@ -28,6 +32,7 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 			@Override
 			public void handle(MoleculeArchiveEvent e) {
 				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
+					archive = e.getArchive();
 			   		discoverWidgets();
 			   		e.consume();
 			   	}
@@ -39,6 +44,7 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 	public MarsMetadataDashboardWidget createWidget(String widgetName) {
 		MarsMetadataDashboardWidget widget = (MarsMetadataDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
 		widget.setMetadata(marsMetadata);
+		widget.setArchive(archive);
 		widget.setParent(this);
 		widget.initialize();
 		return widget;

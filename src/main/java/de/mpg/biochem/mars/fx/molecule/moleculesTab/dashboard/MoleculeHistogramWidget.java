@@ -17,6 +17,7 @@ import net.imagej.ops.Initializable;
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeHistogramWidget" )
 public class MoleculeHistogramWidget extends AbstractHistogramWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected Molecule molecule;
 	
 	@Override
@@ -24,7 +25,7 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ Molecule molecule\n");
+			loadScript("histogramchart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,7 +33,16 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	public void setMolecule(Molecule molecule) {

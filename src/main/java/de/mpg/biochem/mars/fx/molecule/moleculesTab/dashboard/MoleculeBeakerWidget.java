@@ -8,11 +8,15 @@ import org.scijava.script.ScriptModule;
 
 import net.imagej.ops.Initializable;
 import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBeakerWidget" )
 public class MoleculeBeakerWidget extends AbstractBeakerWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected Molecule molecule;
 	
 	@Override
@@ -20,7 +24,7 @@ public class MoleculeBeakerWidget extends AbstractBeakerWidget implements Molecu
 		super.initialize();
 		
 		try {
-			loadScript("beaker", "#@ Molecule molecule\n");
+			loadScript("beaker", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -28,7 +32,16 @@ public class MoleculeBeakerWidget extends AbstractBeakerWidget implements Molecu
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	public void setMolecule(Molecule molecule) {

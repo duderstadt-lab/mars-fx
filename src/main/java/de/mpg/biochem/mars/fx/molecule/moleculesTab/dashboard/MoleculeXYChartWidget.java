@@ -18,6 +18,7 @@ import net.imagej.ops.Initializable;
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeXYChartWidget" )
 public class MoleculeXYChartWidget extends AbstractXYChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected Molecule molecule;
 	
 	@Override
@@ -25,7 +26,7 @@ public class MoleculeXYChartWidget extends AbstractXYChartWidget implements Mole
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ Molecule molecule\n");
+			loadScript("xychart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -33,7 +34,16 @@ public class MoleculeXYChartWidget extends AbstractXYChartWidget implements Mole
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	public void setMolecule(Molecule molecule) {

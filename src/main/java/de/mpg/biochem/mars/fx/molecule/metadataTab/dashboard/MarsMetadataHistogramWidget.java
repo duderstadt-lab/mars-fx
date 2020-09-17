@@ -17,6 +17,7 @@ import net.imagej.ops.Initializable;
 @Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataHistogramWidget" )
 public class MarsMetadataHistogramWidget extends AbstractHistogramWidget implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable {
 
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected MarsMetadata marsMetadata;
 	
 	@Override
@@ -24,7 +25,7 @@ public class MarsMetadataHistogramWidget extends AbstractHistogramWidget impleme
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ MarsMetadata marsMetadata\n");
+			loadScript("histogramchart", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,7 +33,16 @@ public class MarsMetadataHistogramWidget extends AbstractHistogramWidget impleme
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	public void setMetadata(MarsMetadata marsMetadata) {

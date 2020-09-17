@@ -17,6 +17,7 @@ import net.imagej.ops.Initializable;
 @Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeCategoryChartWidget" )
 public class MoleculeCategoryChartWidget extends AbstractCategoryChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
 
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
 	protected Molecule molecule;
 	
 	@Override
@@ -24,7 +25,7 @@ public class MoleculeCategoryChartWidget extends AbstractCategoryChartWidget imp
 		super.initialize();
 		
 		try {
-			loadScript("categorychart", "#@ Molecule molecule\n");
+			loadScript("categorychart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -32,7 +33,16 @@ public class MoleculeCategoryChartWidget extends AbstractCategoryChartWidget imp
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+		return archive;
 	}
 	
 	public void setMolecule(Molecule molecule) {
