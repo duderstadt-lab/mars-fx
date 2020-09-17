@@ -28,10 +28,17 @@ package de.mpg.biochem.mars.fx.table;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
 
+import java.awt.Rectangle;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -40,6 +47,11 @@ import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
@@ -61,16 +73,18 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
+import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveTab;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
 import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.table.*;
 import ij.WindowManager;
 import ij.io.SaveDialog;
 
-public class MarsTableFxFrame implements MarsTableWindow {
+public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements MarsTableWindow {
 
 	@Parameter
 	private LogService log;
@@ -91,6 +105,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
     protected String title;
 
 	private MarsTable table;
+    protected boolean windowStateLoaded = false;
 	
 	private TabPane tabPane;
 	private Tab dataTableTab;
@@ -98,12 +113,16 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	private Tab dashboardTab;
 	private Tab commentTab;
 	
+	private MarsTablePlotPane plotPane;
+	
 	private MarsTableDashboard marsTableDashboardPane;
 	private CommentPane commentPane;
 	
 	protected MenuBar menuBar;
 	
 	protected BorderPane borderPane;
+	
+	protected static JsonFactory jfactory;
 
 	private JFXPanel fxPanel;
 	private Scene scene;
@@ -163,11 +182,21 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		scene = new Scene(borderPane);
 		
 		this.fxPanel.setScene(scene);
+		
+		if (jfactory == null)
+        	jfactory = new JsonFactory();
 
-		SwingUtilities.invokeLater(() -> { 
-			frame.setSize(600, 600);
-	        frame.setVisible(true);
-		});
+		try {
+			loadState();
+			
+			if (!windowStateLoaded)
+				SwingUtilities.invokeLater(() -> { 
+	    			frame.setSize(800, 600);
+	    			frame.setVisible(true);
+				});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	protected MenuBar buildMenuBar() {
@@ -199,7 +228,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		MarsTablePlotPane plotPane = new MarsTablePlotPane(table);
+		plotPane = new MarsTablePlotPane(table);
 		plotTab.setContent(plotPane.getNode());
 		
 		dashboardTab = new Tab();
@@ -265,6 +294,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		if (file != null) {
 			try {
 				table.saveAsYAMT(file.getAbsolutePath());
+				saveState(file.getAbsolutePath());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -287,6 +317,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		if (file != null) {
 			try {
 				table.saveAsCSV(file.getAbsolutePath());
+				saveState(file.getAbsolutePath());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -309,6 +340,7 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		if (file != null) {
 			try {
 				table.saveAsJSON(file.getAbsolutePath());
+				saveState(file.getAbsolutePath());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -324,6 +356,96 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		
 		//frame.setVisible(true);
 		frame.dispose();
+    }
+	
+	//Creates settings input and output maps to save the current state of the program.
+    @Override
+	protected void createIOMaps() {
+    	
+		setJsonField("Window", 
+			jGenerator -> {
+				jGenerator.writeObjectFieldStart("Window");
+				jGenerator.writeNumberField("x", frame.getX());
+				jGenerator.writeNumberField("y", frame.getY());
+				jGenerator.writeNumberField("width", frame.getWidth());
+				jGenerator.writeNumberField("height", frame.getHeight());
+				jGenerator.writeEndObject();
+			}, 
+			jParser -> {
+				Rectangle rect = new Rectangle(0, 0, 800, 600);
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					if ("x".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.x = jParser.getIntValue();
+					}
+					if ("y".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.y = jParser.getIntValue();
+					}
+					if ("width".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.width = jParser.getIntValue();
+					}
+					if ("height".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.height = jParser.getIntValue();
+					}
+				}
+				
+				windowStateLoaded = true;
+				
+				SwingUtilities.invokeLater(() -> { 
+					frame.setBounds(rect);
+					frame.setVisible(true);
+				});
+			});
+    	
+
+			setJsonField("PlotPane", 
+				jGenerator -> {
+					jGenerator.writeFieldName("PlotPane");
+					plotPane.toJSON(jGenerator);
+				},
+				jParser -> plotPane.fromJSON(jParser));
+			
+			
+			setJsonField("MarsTableDashboard", 
+					jGenerator -> {
+						jGenerator.writeFieldName("MarsTableDashboard");
+						marsTableDashboardPane.toJSON(jGenerator);
+					}, 
+					jParser -> marsTableDashboardPane.fromJSON(jParser));
+			
+			setJsonField("Comments", 
+					jGenerator -> {
+						jGenerator.writeStringField("Comments", commentPane.getComments());
+					},
+					jParser -> commentPane.setComments(jParser.getText()));
+	}
+	
+	protected void saveState(String path) throws IOException {
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".cfg")));
+		JsonGenerator jGenerator = jfactory.createGenerator(stream);
+		jGenerator.useDefaultPrettyPrinter();
+		toJSON(jGenerator);
+		jGenerator.close();
+		stream.flush();
+		stream.close();
+    }
+    
+    protected void loadState() throws IOException {
+    	if (table.getFile() == null)
+    		return;
+    	
+    	File stateFile = new File(table.getFile().getAbsolutePath() + ".cfg");
+    	if (!stateFile.exists())
+    		return;
+    	
+		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
+	    JsonParser jParser = jfactory.createParser(inputStream);
+	    fromJSON(jParser);
+		jParser.close();
+		inputStream.close();
     }
 
 	@Override
