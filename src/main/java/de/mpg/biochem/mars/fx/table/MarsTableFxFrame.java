@@ -48,11 +48,13 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
+import de.mpg.biochem.mars.fx.editor.CommentPane;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
@@ -90,8 +92,10 @@ public class MarsTableFxFrame implements MarsTableWindow {
 	private Tab dataTableTab;
 	private Tab plotTab;
 	private Tab dashboardTab;
+	private Tab commentTab;
 	
 	private MarsTableDashboard marsTableDashboardPane;
+	private CommentPane commentPane;
 	
 	protected MenuBar menuBar;
 	
@@ -196,13 +200,24 @@ public class MarsTableFxFrame implements MarsTableWindow {
 		
 		dashboardTab = new Tab();
 		dashboardTab.setText("");
-		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.2em"));
 		marsTableDashboardPane = new MarsTableDashboard(context, table);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
+		
+		commentTab = new Tab();
+		commentTab.setText("");
+		
+		Region bookIcon = new Region();
+        bookIcon.getStyleClass().add("smallBookIcon");
+		
+		commentTab.setGraphic(bookIcon);
+		commentPane = new CommentPane();
+		commentTab.setContent(commentPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(dashboardTab);
+		tabPane.getTabs().add(commentTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		tabPane.setStyle("");
