@@ -13,7 +13,7 @@
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.1.0-beta-2-SNAPSHOT</version>
+	<version>0.1.0-beta-2</version>
 
 	<name>mars-fx</name>
 	<url>http://biochem.mpg.de/duderstadt/</url>
@@ -56,6 +56,12 @@
 		<contributor>
 			<name>Matthias Scherr</name>
 		</contributor>
+		<contributor>
+			<name>Nadia Huisjes</name>
+		</contributor>
+		<contributor>
+			<name>Thomas Retzer</name>
+		</contributor>
 	</contributors>
 
     <mailingLists>
@@ -66,17 +72,18 @@
 	</mailingLists>
 
 	<scm>
-		<connection>scm:git:git://gitlab-laue.biochem.mpg.de/SDMM/mars-fx</connection>
-		<developerConnection>scm:git:git@gitlab-laue.biochem.mpg.de/SDMM/mars-fx.git</developerConnection>
+		<connection>scm:git:git://github.com/duderstadt-lab/mars-fx</connection>
+		<developerConnection>scm:git:git@github.com:duderstadt-lab/mars-fx</developerConnection>
 		<tag>HEAD</tag>
-		<url>git@laue.biochem.mpg.de:SDMM/mars-fx.git</url>
+		<url>https://github.com/duderstadt-lab/mars-fx</url>
 	</scm>
 	<issueManagement>
-		<system>GitLab Issues</system>
-		<url>https://gitlab-laue.biochem.mpg.de/SDMM/mars-fx/issues</url>
+		<system>GitHub Issues</system>
+		<url>https://github.com/duderstadt-lab/mars-fx/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>None</system>
+		<system>Travis CI</system>
+		<url>https://travis-ci.com/duderstadt-lab/mars-fx</url>
 	</ciManagement>
 
 	<properties>
@@ -87,7 +94,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-5-SNAPSHOT</mars-core.version>
+		<mars-core.version>1.0.0-beta-5</mars-core.version>
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
@@ -137,6 +144,16 @@
 			<groupId>de.mpg.biochem</groupId>
 			<artifactId>mars-core</artifactId>
 			<version>${mars-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+			<version>${jackson-dataformat-smile.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.imagej</groupId>
