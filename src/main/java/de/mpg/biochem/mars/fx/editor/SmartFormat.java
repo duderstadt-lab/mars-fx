@@ -35,6 +35,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.BiConsumer;
+
 import javafx.scene.control.IndexRange;
 import javafx.scene.input.KeyEvent;
 import org.fxmisc.richtext.MultiChangeBuilder;
@@ -42,24 +44,29 @@ import org.fxmisc.richtext.MultiChangeBuilder;
 import de.mpg.biochem.mars.fx.addons.SmartFormatAddon;
 import de.mpg.biochem.mars.fx.options.Options;
 
-import com.vladsch.flexmark.ast.Block;
+import com.vladsch.flexmark.util.ast.Block;
 import com.vladsch.flexmark.ast.BlockQuote;
-import com.vladsch.flexmark.ast.DelimitedNode;
+import com.vladsch.flexmark.util.ast.DelimitedNode;
 import com.vladsch.flexmark.ast.HardLineBreak;
 import com.vladsch.flexmark.ast.HtmlBlock;
 import com.vladsch.flexmark.ast.ListItem;
-import com.vladsch.flexmark.ast.Node;
-import com.vladsch.flexmark.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.SoftLineBreak;
 import com.vladsch.flexmark.ast.Text;
-import com.vladsch.flexmark.util.Pair;
+import com.vladsch.flexmark.util.misc.Pair;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
+import com.vladsch.flexmark.util.ast.Visitor;
 
 /**
  * Smart Markdown text formatting methods.
  *
  * @author Karl Tauber
+ * 
+ * Small update for compatability with flexmark 0.62.2
+ * 
+ * @author Karl Duderstadt
  */
 class SmartFormat
 {
@@ -88,12 +95,12 @@ class SmartFormat
 			Node oldMarkdownAST = editor.parseMarkdown(oldMarkdown);
 			NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
 				@Override
-				public void visit(Node node) {
-					if (node instanceof Paragraph || node instanceof HtmlBlock) {
+				 public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+				     if (node instanceof Paragraph || node instanceof HtmlBlock) {
 						oldParagraphs.add(node.getChars());
-					} else
-						visitChildren(node);
-				}
+					} else if (withChildren)
+						processChildren(node, processor);
+				 }
 			};
 			visitor.visit(oldMarkdownAST);
 		}
@@ -126,9 +133,9 @@ class SmartFormat
 
 	/*private*/ List<Pair<Block, String>> formatParagraphs(Node markdownAST, int wrapLength, IndexRange selection, HashSet<BasedSequence> oldParagraphs) {
 		ArrayList<Pair<Block, String>> formattedParagraphs = new ArrayList<>();
-		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {			
 			@Override
-			public void visit(Node node) {
+			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
 				if (node instanceof Paragraph || node instanceof HtmlBlock) {
 					if (selection != null && !isNodeSelected(node, selection))
 						return;
@@ -146,8 +153,8 @@ class SmartFormat
 
 					if (!node.getChars().equals(newText, false))
 						formattedParagraphs.add(new Pair<>((Block) node, newText));
-				} else
-					visitChildren(node);
+				} else if (withChildren)
+					processChildren(node, processor);
 			}
 		};
 		visitor.visit(markdownAST);

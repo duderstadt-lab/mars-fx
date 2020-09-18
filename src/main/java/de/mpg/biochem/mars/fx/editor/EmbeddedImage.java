@@ -47,7 +47,7 @@ import org.fxmisc.richtext.model.ReadOnlyStyledDocument;
 import org.reactfx.util.Either;
 import com.vladsch.flexmark.ast.ImageRef;
 import com.vladsch.flexmark.ast.LinkNodeBase;
-import com.vladsch.flexmark.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
 
 /**
  * @author Karl Tauber
@@ -122,15 +122,16 @@ class EmbeddedImage
 		}
 	}
 
-	static void replaceImageSegments(MarkdownTextArea textArea, com.vladsch.flexmark.ast.Node astRoot, Path basePath) {
+	static void replaceImageSegments(MarkdownTextArea textArea, com.vladsch.flexmark.util.ast.Node astRoot, Path basePath) {
 		// remember current selection (because textArea.replace() changes selection)
 		IndexRange selection = textArea.getSelection();
 
 		// replace first character of image markup with an EmbeddedImage object
 		HashSet<EmbeddedImage> addedImages = new HashSet<>();
+		/*
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
 			@Override
-			public void visit(com.vladsch.flexmark.ast.Node node) {
+			public void visit(com.vladsch.flexmark.util.ast.Node node) {
 				if (node instanceof com.vladsch.flexmark.ast.Image ||
 					node instanceof ImageRef)
 				{
@@ -161,7 +162,8 @@ class EmbeddedImage
 			}
 		};
 		visitor.visit(astRoot);
-
+*/
+		
 		// remove obsolete EmbeddedImage objects
 		removeImageSegments(textArea, image -> !addedImages.contains(image));
 

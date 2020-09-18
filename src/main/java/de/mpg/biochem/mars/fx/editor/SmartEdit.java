@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javafx.application.Platform;
@@ -57,7 +58,7 @@ import com.vladsch.flexmark.ast.AutoLink;
 import com.vladsch.flexmark.ast.BlockQuote;
 import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.ast.Code;
-import com.vladsch.flexmark.ast.DelimitedNode;
+import com.vladsch.flexmark.util.ast.DelimitedNode;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Heading;
@@ -69,8 +70,9 @@ import com.vladsch.flexmark.ast.LinkRef;
 import com.vladsch.flexmark.ast.ListBlock;
 import com.vladsch.flexmark.ast.ListItem;
 import com.vladsch.flexmark.ast.MailLink;
-import com.vladsch.flexmark.ast.Node;
-import com.vladsch.flexmark.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.ast.OrderedListItem;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
@@ -991,11 +993,11 @@ public class SmartEdit
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
 			@SuppressWarnings("unchecked")
 			@Override
-			public void visit(Node node) {
+			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
 				if (isInNode(start, end, node) && predicate.test(start, end, node)) {
 					if (deepest) {
 						int oldNodesSize = nodes.size();
-						visitChildren(node);
+						processChildren(node, processor);
 
 						// add only if no other child was added
 						if (nodes.size() == oldNodesSize)
@@ -1009,7 +1011,7 @@ public class SmartEdit
 						return; // do not visit children
 				}
 
-				visitChildren(node);
+				processChildren(node, processor);
 			}
 		};
 		visitor.visit(markdownAST);

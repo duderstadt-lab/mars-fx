@@ -41,7 +41,7 @@ import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 import de.mpg.biochem.mars.fx.util.Range;
 
-import com.vladsch.flexmark.ast.Node;
+import com.vladsch.flexmark.util.ast.Node;
 
 /**
  * Markdown preview pane.

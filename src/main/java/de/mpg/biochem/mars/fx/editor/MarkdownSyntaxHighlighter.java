@@ -34,19 +34,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.BiConsumer;
+
 import javafx.application.Platform;
 import com.vladsch.flexmark.ast.*;
-import com.vladsch.flexmark.ext.abbreviation.Abbreviation;
-import com.vladsch.flexmark.ext.abbreviation.AbbreviationBlock;
-import com.vladsch.flexmark.ext.aside.AsideBlock;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
-import com.vladsch.flexmark.ext.gfm.tasklist.TaskListItem;
 import com.vladsch.flexmark.ext.tables.TableBlock;
 import com.vladsch.flexmark.ext.tables.TableBody;
 import com.vladsch.flexmark.ext.tables.TableCell;
 import com.vladsch.flexmark.ext.tables.TableHead;
 import com.vladsch.flexmark.ext.tables.TableRow;
-import com.vladsch.flexmark.ext.wikilink.WikiLink;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.VisitHandler;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
 import org.fxmisc.richtext.model.Paragraph;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
@@ -154,7 +155,6 @@ class MarkdownSyntaxHighlighter
 		node2style.put(LinkRef.class, StyleClass.a);
 		node2style.put(AutoLink.class, StyleClass.a);
 		node2style.put(MailLink.class, StyleClass.a);
-		node2style.put(WikiLink.class, StyleClass.a);
 		node2style.put(Image.class, StyleClass.img);
 		node2style.put(ImageRef.class, StyleClass.img);
 		node2style.put(Code.class, StyleClass.code);
@@ -165,14 +165,12 @@ class MarkdownSyntaxHighlighter
 		node2lineStyle.put(IndentedCodeBlock.class, StyleClass.pre);
 		node2style.put(IndentedCodeBlock.class, StyleClass.pre);
 		node2style.put(BlockQuote.class, StyleClass.blockquote);
-		node2style.put(AsideBlock.class, StyleClass.aside);
 
 		// lists
 		node2style.put(BulletList.class, StyleClass.ul);
 		node2style.put(OrderedList.class, StyleClass.ol);
 		node2style.put(BulletListItem.class, StyleClass.li);
 		node2style.put(OrderedListItem.class, StyleClass.li);
-		node2style.put(TaskListItem.class, StyleClass.li);
 
 		// tables
 		node2lineStyle.put(TableBlock.class, StyleClass.table);
@@ -182,8 +180,6 @@ class MarkdownSyntaxHighlighter
 
 		// misc
 		node2style.put(Reference.class, StyleClass.reference);
-		node2style.put(AbbreviationBlock.class, StyleClass.abbrdef);
-		node2style.put(Abbreviation.class, StyleClass.abbr);
 	}
 
 	private static final ServiceLoader<MarkdownSyntaxHighlighterAddon> addons = ServiceLoader.load(MarkdownSyntaxHighlighterAddon.class);
@@ -215,7 +211,6 @@ class MarkdownSyntaxHighlighter
 			new VisitHandler<>(Heading.class, this::visit),
 			new VisitHandler<>(BulletListItem.class, this::visit),
 			new VisitHandler<>(OrderedListItem.class, this::visit),
-			new VisitHandler<>(TaskListItem.class, this::visit),
 			new VisitHandler<>(TableCell.class, this::visit),
 			new VisitHandler<>(FencedCodeBlock.class, this::visit),
 			new VisitHandler<>(HtmlBlock.class, this::visit),
@@ -227,7 +222,7 @@ class MarkdownSyntaxHighlighter
 			new VisitHandler<>(HtmlEntity.class, this::visit))
 		{
 			@Override
-			public void visit(Node node) {
+			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
 				Class<? extends Node> nodeClass = node.getClass();
 
 				StyleClass style = node2style.get(nodeClass);
@@ -238,11 +233,11 @@ class MarkdownSyntaxHighlighter
 				if (lineStyle != null)
 					setLineStyleClass(node, lineStyle);
 
-				VisitHandler<?> handler = myCustomHandlersMap.get(nodeClass);
+				VisitHandler<?> handler = getHandler(nodeClass);
 				if (handler != null)
-					handler.visit(node);
+					processor.accept(node, handler);
 
-				visitChildren(node);
+				processChildren(node, processor);
 			}
 		};
 		visitor.visit(astRoot);
@@ -372,11 +367,6 @@ class MarkdownSyntaxHighlighter
 
 	private void visit(ListItem node) {
 		setStyleClass(node.getOpeningMarker(), StyleClass.liopen);
-	}
-
-	private void visit(TaskListItem node) {
-		setStyleClass(node.getOpeningMarker(), StyleClass.liopen);
-		setStyleClass(node.getMarkerSuffix(), StyleClass.liopentask);
 	}
 
 	private void visit(TableCell node) {

@@ -35,6 +35,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.function.BiConsumer;
+
 import javafx.concurrent.Worker.State;
 import javafx.scene.control.IndexRange;
 import javafx.scene.web.WebView;
@@ -44,8 +46,9 @@ import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Utils;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
-import com.vladsch.flexmark.ast.Node;
-import com.vladsch.flexmark.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 
 /**
  * WebView preview.
@@ -206,7 +209,7 @@ class WebViewPreview
 		ArrayList<String> languages = new ArrayList<>();
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
 			@Override
-			public void visit(Node node) {
+			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
 				if (node instanceof FencedCodeBlock) {
 					String language = ((FencedCodeBlock)node).getInfo().toString();
 					if (language.contains(language))
@@ -218,7 +221,7 @@ class WebViewPreview
 							languages.add(0, language); // dependencies must be loaded first
 					}
 				} else
-					visitChildren(node);
+					processChildren(node, processor);
 			}
 		};
 		visitor.visit(astRoot);
