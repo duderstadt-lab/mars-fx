@@ -62,6 +62,7 @@ import ij.gui.GenericDialog;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.format.DataFormatDetector;
@@ -152,6 +153,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     @Parameter
     protected Context context;
+    
+    @Parameter
+    protected LogService logService;
 
 	protected MoleculeArchive<Molecule,MarsMetadata,MoleculeArchiveProperties> archive;
 	
@@ -299,7 +303,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    			frame.setVisible(true);
 				});
 		} catch (IOException e) {
-			e.printStackTrace();
+			logService.warn("A problem was encountered when loading the cfg file " 
+					+ archive.getFile().getAbsolutePath() + ".cfg" + " containing the mars-fx display settings. "
+					+ "Please check the file to make sure the syntax is correct."
+					+ "Aborting and opening with the default settings.");
 		}
         
         updateAccelerators();

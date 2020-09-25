@@ -99,6 +99,9 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
     private UIService uiService;
     
     @Parameter
+    private LogService logService;
+    
+    @Parameter
     private Context context;
 
     private JFrame frame;
@@ -194,8 +197,11 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	    			frame.setSize(800, 600);
 	    			frame.setVisible(true);
 				});
-		} catch (IOException e) {
-			e.printStackTrace();
+		}  catch (IOException e) {
+			logService.warn("A problem was encountered when loading the cfg file " 
+					+ table.getFile().getAbsolutePath() + ".cfg" + " containing the mars-fx display settings. "
+					+ "Please check the file to make sure the syntax is correct."
+					+ "Aborting and opening with the default settings.");
 		}
 	}
 	
