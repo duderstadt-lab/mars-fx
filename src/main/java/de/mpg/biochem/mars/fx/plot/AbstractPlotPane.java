@@ -317,7 +317,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
 			} else
 				subPlot.getChart().getXAxis().setAutoRanging(true);
-			subPlot.getChart().getXAxis().forceRedraw();
+			//subPlot.getChart().getXAxis().forceRedraw();
 			
 			if (subPlot.getDatasetOptionsPane().fixYBounds().get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
@@ -329,10 +329,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
 				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 			
-			subPlot.getChart().getYAxis().forceRedraw();
-			//subPlot.getChart().requestLayout();
 			subPlot.getChart().layout();
-			subPlot.getChart().layoutChildren();			
 		}
 	}
 	
@@ -394,16 +391,14 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		subplot.getXAxis().minProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				subplot.getChart().getYAxis().forceRedraw();
-				subplot.getChart().layoutChildren();
+				subplot.getChart().layout();
 			}
 	      });
 		
 		subplot.getXAxis().maxProperty().addListener(new ChangeListener<Number>(){
 			@Override
 			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				subplot.getChart().getYAxis().forceRedraw();
-				subplot.getChart().layoutChildren();
+				subplot.getChart().layout();
 			}
 	      });
 
