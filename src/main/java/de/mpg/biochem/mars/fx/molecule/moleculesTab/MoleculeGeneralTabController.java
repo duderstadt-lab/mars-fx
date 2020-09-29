@@ -80,7 +80,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private BorderPane metaUIDIconContainer;
 	private JFXTextField metaUIDLabel;
 	private JFXButton metaUIDClippyButton;
-	private Text cText, cInt;
+	private Text iText, iInt, cText, cInt;
+	private TextFlow imageAndchannel;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
@@ -168,15 +169,19 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
     	rootPane.getChildren().add(metaUIDClippyButton);
     	
-    	TextFlow channel = new TextFlow();
-    	AnchorPane.setLeftAnchor(channel, 87.0);
-    	AnchorPane.setTopAnchor(channel, 200.0);
+    	imageAndchannel = new TextFlow();
+    	AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
+    	AnchorPane.setTopAnchor(imageAndchannel, 200.0);
+    	iText = new Text("");
+    	iText.setStyle("-fx-font-weight:bold");
+    	iInt = new Text("");
+    	iInt.setStyle("-fx-font-weight:normal");
     	cText = new Text("");
     	cText.setStyle("-fx-font-weight:bold");
     	cInt = new Text("");
     	cInt.setStyle("-fx-font-weight:normal");
-    	channel.getChildren().addAll(cText, cInt);
-    	rootPane.getChildren().add(channel);
+    	imageAndchannel.getChildren().addAll(iText, iInt, cText, cInt);
+    	rootPane.getChildren().add(imageAndchannel);
     	
     	tags = new Label();
         AnchorPane.setLeftAnchor(tags, 10.0);
@@ -275,6 +280,14 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getMetadataUID());
+
+		if (molecule.getImage() > -1) {
+			iText.setText("I ");
+			iInt.setText(String.valueOf(molecule.getImage()) + " ");
+		} else {
+			iText.setText("");
+			iInt.setText("");
+		}
 		
 		if (molecule.getChannel() > -1) {
 			cText.setText("C ");
@@ -283,6 +296,11 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			cText.setText("");
 			cInt.setText("");
 		}
+		
+		if (!iText.getText().equals("") && !cText.getText().equals(""))
+			AnchorPane.setLeftAnchor(imageAndchannel, 64.0);
+		else
+			AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();

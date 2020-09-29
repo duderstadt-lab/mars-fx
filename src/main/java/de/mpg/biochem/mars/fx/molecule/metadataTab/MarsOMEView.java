@@ -232,16 +232,16 @@ public class MarsOMEView {
 		testTree.setShowRoot(false);
 
 		// Build and populate the tree
-		for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++) {
-			MarsOMEImage imageModel = meta.getImage(imageIndex);
-			TreeItem<GenericModel> imageItem = new TreeItem<>(imageModel);
+		//for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++) {
+		meta.images().forEach(image -> {
+			TreeItem<GenericModel> imageItem = new TreeItem<>(image);
 			root.getChildren().add(imageItem);
 
-			imageModel.planes().forEach(plane -> {
+			image.planes().forEach(plane -> {
 					TreeItem<GenericModel> dataItem = new TreeItem<>(plane);
 					imageItem.getChildren().add(dataItem);
 				});
-		}
+		});
 
 		// Handle selection in the tree
 		testTree.getSelectionModel().selectedItemProperty()
