@@ -298,7 +298,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		}
 		
 		if (!iText.getText().equals("") && !cText.getText().equals(""))
-			AnchorPane.setLeftAnchor(imageAndchannel, 64.0);
+			AnchorPane.setLeftAnchor(imageAndchannel, 79.0);
 		else
 			AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
 		
