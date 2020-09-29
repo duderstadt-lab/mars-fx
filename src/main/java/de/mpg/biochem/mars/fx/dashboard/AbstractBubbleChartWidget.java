@@ -240,9 +240,6 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
 
-			if (xvalues == null)
-				System.out.println("xvalues == null");
-
 			if (xvalues.length == 0) {
 				writeToLog(seriesName + "_xvalues have zero values.");
 				return null;
