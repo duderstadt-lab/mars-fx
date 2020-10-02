@@ -90,7 +90,7 @@ public class MetadataStringPropertiesTable implements MetadataSubPane {
         		
                 setGraphic(removeButton);
                 removeButton.setOnAction(e -> {
-                	marsImageMetadata.removeParameter(pRow.getName());
+                	marsImageMetadata.removeStringParameter(pRow.getName());
         			loadData();
         		});
             }
