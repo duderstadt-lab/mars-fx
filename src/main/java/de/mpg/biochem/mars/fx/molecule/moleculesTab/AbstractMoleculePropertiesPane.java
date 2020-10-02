@@ -27,6 +27,7 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STICKY_NOTE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
 import java.io.IOException;
@@ -71,6 +72,9 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	protected Tab propertiesTab;
 	protected AnchorPane propertiesTabContainer;
 	
+	protected Tab stringPropertiesTab;
+	protected AnchorPane stringPropertiesTabContainer;
+	
 	protected Tab regionsTab;
 	protected AnchorPane regionsTabContainer;
 	
@@ -78,6 +82,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 	protected AnchorPane positionsTabContainer;
 	
 	protected MoleculeGeneralTabController moleculeGeneralTabController;
+	protected MoleculeStringPropertiesTable moleculeStringPropertiesTable;
 	protected MoleculePropertiesTable moleculePropertiesTable;
 	protected MoleculeRegionOfInterestTable regionOfInterestTable;
 	protected MoleculePositionOfInterestTable positionOfInterestTable;
@@ -120,6 +125,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         		archive = newArchive;
         		moleculeGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		moleculePropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		moleculeStringPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         	}
@@ -189,6 +195,31 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         AnchorPane.setLeftAnchor(moleculePropertiesTable.getNode(), 0.0);
         propertiesTab.setContent(propertiesTabContainer);
         
+        //Build properties Tab
+        moleculeStringPropertiesTable = new MoleculeStringPropertiesTable();
+       	
+    	BorderPane stringPropertiesTabPane = new BorderPane();
+    	stringPropertiesTabPane.setMaxWidth(tabWidth);
+    	stringPropertiesTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(STICKY_NOTE, "1.1em"));
+
+    	stringPropertiesTab = new Tab();
+    	stringPropertiesTab.setText("");
+    	stringPropertiesTab.setGraphic(stringPropertiesTabPane);
+    	stringPropertiesTab.closableProperty().set(false);
+        
+    	stringPropertiesTabContainer = new AnchorPane();
+    	stringPropertiesTabContainer.minHeight(0.0);
+    	stringPropertiesTabContainer.minWidth(0.0);
+    	stringPropertiesTabContainer.prefHeight(250.0);
+    	stringPropertiesTabContainer.prefWidth(220.0);
+        
+    	stringPropertiesTabContainer.getChildren().add(moleculeStringPropertiesTable.getNode());
+        AnchorPane.setTopAnchor(moleculeStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setBottomAnchor(moleculeStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setRightAnchor(moleculeStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setLeftAnchor(moleculeStringPropertiesTable.getNode(), 0.0);
+        stringPropertiesTab.setContent(stringPropertiesTabContainer);
+        
         //Build regions Tab
         regionOfInterestTable = new MoleculeRegionOfInterestTable();
        	
@@ -241,6 +272,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
         
         tabsContainer.getTabs().add(generalTab);
         tabsContainer.getTabs().add(propertiesTab);
+        tabsContainer.getTabs().add(stringPropertiesTab);
         tabsContainer.getTabs().add(regionsTab);
         tabsContainer.getTabs().add(positionsTab);
         
@@ -271,6 +303,8 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule> impleme
 			moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else if (selectedTab.equals(propertiesTab)) {
 			moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
+		} else if (selectedTab.equals(stringPropertiesTab)) {
+			moleculeStringPropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else if (selectedTab.equals(regionsTab)) {
 			regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 		} else if (selectedTab.equals(positionsTab)) {

@@ -13,7 +13,7 @@
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.1.0-beta-1-SNAPSHOT</version>
+	<version>0.1.0-beta-1.1-SNAPSHOT</version>
 
 	<name>mars-fx</name>
 	<url>http://biochem.mpg.de/duderstadt/</url>
@@ -87,7 +87,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-4.1</mars-core.version>
+		<mars-core.version>1.0.0-beta-4.3</mars-core.version>
 		<jackson.version>2.6.5</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>

@@ -29,7 +29,7 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import java.io.IOException;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLIPBOARD;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STICKY_NOTE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 
 import java.net.URL;
@@ -47,6 +47,7 @@ import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeRegionOfInterestTable;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeStringPropertiesTable;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculePositionOfInterestTable;
 import de.mpg.biochem.mars.molecule.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -80,6 +81,9 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
 	protected Tab propertiesTab;
 	protected AnchorPane propertiesTabContainer;
 	
+	protected Tab stringPropertiesTab;
+	protected AnchorPane stringPropertiesTabContainer;
+	
 	protected Tab regionsTab;
 	protected AnchorPane regionsTabContainer;
 	
@@ -88,6 +92,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
 	
 	protected MetadataGeneralTabController metadataGeneralTabController;
 	protected MetadataPropertiesTable metadataPropertiesTable;
+	protected MetadataStringPropertiesTable metadataStringPropertiesTable;
 	protected MetadataRegionOfInterestTable regionOfInterestTable;
 	protected MetadataPositionOfInterestTable positionOfInterestTable;
 	
@@ -126,6 +131,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
         		archive = newArchive;
         		metadataGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
+        		metadataStringPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         	}
@@ -195,6 +201,31 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
         AnchorPane.setRightAnchor(metadataPropertiesTable.getNode(), 0.0);
         AnchorPane.setLeftAnchor(metadataPropertiesTable.getNode(), 0.0);
         propertiesTab.setContent(propertiesTabContainer);
+        
+      //Build properties Tab
+        metadataStringPropertiesTable = new MetadataStringPropertiesTable();
+       	
+    	BorderPane stringPropertiesTabPane = new BorderPane();
+    	stringPropertiesTabPane.setMaxWidth(tabWidth);
+    	stringPropertiesTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(STICKY_NOTE, "1.1em"));
+
+    	stringPropertiesTab = new Tab();
+    	stringPropertiesTab.setText("");
+    	stringPropertiesTab.setGraphic(stringPropertiesTabPane);
+    	stringPropertiesTab.closableProperty().set(false);
+        
+    	stringPropertiesTabContainer = new AnchorPane();
+    	stringPropertiesTabContainer.minHeight(0.0);
+    	stringPropertiesTabContainer.minWidth(0.0);
+    	stringPropertiesTabContainer.prefHeight(250.0);
+    	stringPropertiesTabContainer.prefWidth(220.0);
+        
+    	stringPropertiesTabContainer.getChildren().add(metadataStringPropertiesTable.getNode());
+        AnchorPane.setTopAnchor(metadataStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setBottomAnchor(metadataStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setRightAnchor(metadataStringPropertiesTable.getNode(), 0.0);
+        AnchorPane.setLeftAnchor(metadataStringPropertiesTable.getNode(), 0.0);
+        stringPropertiesTab.setContent(stringPropertiesTabContainer);
 
        //Build regions Tab
         regionOfInterestTable = new MetadataRegionOfInterestTable();
@@ -248,6 +279,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
         
         tabsContainer.getTabs().add(generalTab);
         tabsContainer.getTabs().add(propertiesTab);
+        tabsContainer.getTabs().add(stringPropertiesTab);
         tabsContainer.getTabs().add(regionsTab);
         tabsContainer.getTabs().add(positionsTab);
         
@@ -278,6 +310,8 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
 			metadataGeneralTabController.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
 		} else if (selectedTab.equals(propertiesTab)) {
 			metadataPropertiesTable.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
+		} else if (selectedTab.equals(stringPropertiesTab)) {
+			metadataStringPropertiesTable.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
 		} else if (selectedTab.equals(regionsTab)) {
 			regionOfInterestTable.fireEvent(new MetadataSelectionChangedEvent(marsImageMetadata));
 		} else if (selectedTab.equals(positionsTab)) {
