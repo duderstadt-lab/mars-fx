@@ -54,6 +54,9 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 	private BorderPane rootPane;
 	
     private CustomTextField addParameterField;
+    private Button typeButton;
+    private int buttonType = 0;
+    
     private TableView<ParameterRow> parameterTable;
     private ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
 
@@ -64,6 +67,52 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
     private void initialize() {
     	parameterTable = new TableView<ParameterRow>();
     	addParameterField = new CustomTextField();
+    	
+    	TableColumn<ParameterRow, ParameterRow> typeColumn = new TableColumn<>();
+    	typeColumn.setPrefWidth(30);
+    	typeColumn.setMinWidth(30);
+    	typeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+    	typeColumn.setCellFactory(param -> new TableCell<ParameterRow, ParameterRow>() {
+            private final Label label = new Label();
+
+            @Override
+            protected void updateItem(ParameterRow pRow, boolean empty) {
+                super.updateItem(pRow, empty);
+
+                if (pRow == null) {
+                    label.setGraphic(null);
+                    return;
+                }
+                
+                label.setCenterShape(true);
+                setGraphic(label);
+                /*removeButton.setStyle(
+	                "-fx-background-radius: 5em; " +
+	                "-fx-min-width: 18px; " +
+	                "-fx-min-height: 18px; " +
+	                "-fx-max-width: 18px; " +
+	                "-fx-max-height: 18px;"
+		        );*/
+                
+                switch (pRow.getType()) {
+					case 0:
+						label.setText("1..");
+						label.setGraphic(null);
+						break;
+					case 1:
+						label.setText("Aa");
+						label.setGraphic(null);
+						break;
+					case 2:
+						label.setText("");
+						label.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD, "1.0em"));
+						break;
+				}       		
+            }
+        });
+    	typeColumn.setStyle( "-fx-alignment: CENTER;");
+    	typeColumn.setSortable(false);
+        parameterTable.getColumns().add(typeColumn);
     	
     	TableColumn<ParameterRow, ParameterRow> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -140,8 +189,17 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
                 "-fx-max-height: 18px;"
         );
 		addButton.setOnAction(e -> {
-			if (!addParameterField.getText().equals(""))
-			molecule.setParameter(addParameterField.getText(), Double.NaN);
+			switch (buttonType) {
+				case 0:
+		    		molecule.setParameter(addParameterField.getText(), Double.NaN);
+		    		break;
+				case 1:
+					molecule.setParameter(addParameterField.getText(), "");
+					break;
+				case 2:
+					molecule.setParameter(addParameterField.getText(), false);
+					break;
+			}
 			loadData();
 		});
 		
@@ -155,14 +213,50 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
         addParameterField.setStyle(
                 "-fx-background-radius: 2em; "
         );
+        
+        
+        typeButton = new Button();
+        typeButton.setGraphic(null);
+        typeButton.setCenterShape(true);
+        typeButton.setStyle(
+                "-fx-background-radius: 2em; " +
+                "-fx-min-width: 40px; " +
+                "-fx-min-height: 25px; " +
+                "-fx-max-width: 40px; " +
+                "-fx-max-height: 25px;"
+        );
+        typeButton.setOnAction(e -> {
+        	buttonType++;
+        	if (buttonType > 2)
+        		buttonType = 0;
+        	
+			switch (buttonType) {
+				case 0:
+					typeButton.setText("1..");
+					typeButton.setGraphic(null);
+					break;
+				case 1:
+					typeButton.setText("Aa");
+					typeButton.setGraphic(null);
+					break;
+				case 2:
+					typeButton.setText("");
+					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD, "1.0em"));
+					break;
+			}
+		});
+        
+        BorderPane inputPane = new BorderPane();
+        inputPane.setLeft(typeButton);
+        inputPane.setCenter(addParameterField);
 
         rootPane = new BorderPane();
-        Insets insets = new Insets(5);
-        
         rootPane.setCenter(parameterTable);
+        rootPane.setBottom(inputPane);
         
-        rootPane.setBottom(addParameterField);
-        BorderPane.setMargin(addParameterField, insets);
+        //Insets(double top, double right, double bottom, double left)
+        BorderPane.setMargin(addParameterField, new Insets(5));
+        BorderPane.setMargin(typeButton, new Insets(5));
         
         getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
     }
@@ -175,32 +269,63 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
     	parameterRowList.clear();
 
     	for (String parameter : molecule.getParameters().keySet()) {
-        	parameterRowList.add(new ParameterRow(parameter));
+    		if (molecule.getParameters().get(parameter) instanceof Double) {
+    			parameterRowList.add(new ParameterRow(parameter, 0));
+    		} else if (molecule.getParameters().get(parameter) instanceof String) {
+    			parameterRowList.add(new ParameterRow(parameter, 1));
+    		} else if (molecule.getParameters().get(parameter) instanceof Boolean) {
+    			parameterRowList.add(new ParameterRow(parameter, 2));
+    		}
         }
 	}
     
     private class ParameterRow {
     	private String parameter;
+    	private int type;
     	
-    	ParameterRow(String parameter) {
+    	ParameterRow(String parameter, int type) {
     		this.parameter = parameter;
+    		this.type = type;
     	}
     	
     	public String getName() {
     		return parameter;
     	}
     	
+    	public int getType() {
+    		return type;
+    	}
+    	
     	public String getValue() {
-    		return String.valueOf(molecule.getParameter(parameter));
+    		switch (type) {
+				case 0:
+					return String.valueOf(molecule.getParameter(parameter));
+				case 1:
+					return molecule.getStringParameter(parameter);
+				case 2:
+					return String.valueOf(molecule.getBooleanParameter(parameter));
+				default:
+					return null;
+    		}
     	}
     	
     	public void setValue(String value) {
-    		try {
-    			double num = Double.valueOf(value);
-    			molecule.setParameter(getName(), num);
-    		} catch (NumberFormatException e) {
-    			//Do nothing for the moment...
-    		}
+    		switch (type) {
+				case 0:
+					try {
+		    			double num = Double.valueOf(value);
+		    			molecule.setParameter(getName(), num);
+		    		} catch (NumberFormatException e) {
+		    			//Do nothing for the moment...
+		    		}
+					break;
+				case 1:
+					molecule.setParameter(getName(), value);
+					break;
+				case 2:
+					molecule.setParameter(getName(), Boolean.valueOf(value));
+					break;
+			}
     	}
     }
     
