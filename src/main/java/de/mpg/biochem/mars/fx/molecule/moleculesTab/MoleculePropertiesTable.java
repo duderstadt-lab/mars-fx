@@ -27,6 +27,11 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import org.controlsfx.control.textfield.CustomTextField;
 
+import com.jfoenix.controls.JFXCheckBox;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.input.KeyCode;
+
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -80,7 +85,7 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
                 super.updateItem(pRow, empty);
 
                 if (pRow == null) {
-                    label.setGraphic(null);
+                    setGraphic(null);
                     return;
                 }
                 
@@ -105,7 +110,7 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 						break;
 					case 2:
 						label.setText("");
-						label.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD, "1.0em"));
+						label.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.INDETERMINATE_CHECK_BOX, "1.0em"));
 						break;
 				}       		
             }
@@ -162,12 +167,97 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
         parameterTable.getColumns().add(ParameterColumn);
         
         TableColumn<ParameterRow, String> valueColumn = new TableColumn<>("Value");
-        valueColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        valueColumn.setOnEditCommit(
-                event -> event.getRowValue().setValue(event.getNewValue()));
-        valueColumn.setCellValueFactory(parameterRow ->
-                new ReadOnlyObjectWrapper<>(parameterRow.getValue().getValue())
-        );
+        valueColumn.setCellValueFactory(param -> {
+        	if (param.getValue().getType() == 2)
+        		return new ReadOnlyObjectWrapper<>("");
+        	else
+        		return new ReadOnlyObjectWrapper<>(param.getValue().getValue());
+        });
+        
+        valueColumn.setCellFactory(param -> new TableCell<ParameterRow, String>() {
+            private JFXCheckBox checkbox;
+            private TextField textField;
+            
+            @Override
+            public void commitEdit(String value) {
+            	super.commitEdit(value);            	
+            	getTableView().getItems().get(getIndex()).setValue(value);
+            	loadData();
+            }
+            
+            @Override
+            public void startEdit() {
+                super.startEdit();
+                if (textField == null) {
+                    createTextField();
+                }
+                
+                setGraphic(textField);
+                textField.setText(getItem());
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                textField.selectAll();
+            }
+
+            @Override
+            public void cancelEdit() {
+                super.cancelEdit();
+
+                setText(String.valueOf(getItem()));
+                setContentDisplay(ContentDisplay.TEXT_ONLY);
+            }
+
+            @Override
+            protected void updateItem(String value, boolean empty) {
+                super.updateItem(value, empty);
+
+                if (empty || value == null) {
+                	setText(null);
+                    setGraphic(null);
+                    return;
+                } else {
+                	ParameterRow row = getTableView().getItems().get(getIndex());
+                	
+                	if (isEditing()) {
+                        if (textField != null) {
+                            textField.setText(getItem());
+                        }
+                        setGraphic(textField);
+                        setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+                    } else if (row.getType() == 2) {
+                    	if (checkbox == null)
+                    		checkbox = new JFXCheckBox();
+                		checkbox.setCenterShape(true);
+                		setStyle( "-fx-alignment: CENTER;");
+		                setGraphic(checkbox);
+		                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+		                setEditable(false);
+		                checkbox.setSelected(molecule.getBooleanParameter(row.getName()));
+		                checkbox.setOnAction(e -> {
+		        			molecule.setParameter(row.getName(), checkbox.isSelected());
+		        		});
+                	} else {
+                		setEditable(true);
+                		setStyle( "-fx-alignment: CENTER-LEFT;");
+                		setText(value);
+                		setContentDisplay(ContentDisplay.TEXT_ONLY);
+                		setGraphic(null);
+                		return;
+                	}
+                }
+            }
+            
+            private void createTextField() {
+                textField = new TextField(getItem());
+                textField.setMinWidth(this.getWidth() - this.getGraphicTextGap() * 2);
+                textField.setOnKeyPressed(t -> {
+                    if (t.getCode() == KeyCode.ENTER) {
+                        commitEdit(textField.getText());
+                    } else if (t.getCode() == KeyCode.ESCAPE) {
+                        cancelEdit();
+                    }
+                });
+            }
+        });
         valueColumn.setSortable(false);
         valueColumn.setPrefWidth(100);
         valueColumn.setMinWidth(100);
@@ -216,14 +306,14 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
         
         
         typeButton = new Button();
-        typeButton.setGraphic(null);
+        typeButton.setText("1..");
         typeButton.setCenterShape(true);
         typeButton.setStyle(
                 "-fx-background-radius: 2em; " +
                 "-fx-min-width: 40px; " +
-                "-fx-min-height: 25px; " +
+                "-fx-min-height: 30px; " +
                 "-fx-max-width: 40px; " +
-                "-fx-max-height: 25px;"
+                "-fx-max-height: 30px;"
         );
         typeButton.setOnAction(e -> {
         	buttonType++;
@@ -241,7 +331,7 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 					break;
 				case 2:
 					typeButton.setText("");
-					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD, "1.0em"));
+					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.INDETERMINATE_CHECK_BOX, "1.0em"));
 					break;
 			}
 		});
@@ -316,7 +406,7 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 		    			double num = Double.valueOf(value);
 		    			molecule.setParameter(getName(), num);
 		    		} catch (NumberFormatException e) {
-		    			//Do nothing for the moment...
+		    			molecule.setParameter(getName(), Double.NaN);
 		    		}
 					break;
 				case 1:
@@ -327,6 +417,7 @@ public class MoleculePropertiesTable implements MoleculeSubPane {
 					break;
 			}
     	}
+    	
     }
     
     @Override
