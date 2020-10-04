@@ -49,7 +49,6 @@ import javafx.scene.layout.BorderPane;
 public abstract class AbstractPropertiesTable {
     
 	protected MarsRecord record;
-	
 	protected BorderPane rootPane;
 	
 	protected CustomTextField addParameterField;
@@ -210,14 +209,14 @@ public abstract class AbstractPropertiesTable {
                     	if (checkbox == null)
                     		checkbox = new JFXCheckBox();
                 		checkbox.setCenterShape(true);
+                		checkbox.setSelected(record.getBooleanParameter(row.getName()));
+		                checkbox.setOnAction(e -> {
+		        			record.setParameter(row.getName(), checkbox.isSelected());
+		        		});
                 		setStyle( "-fx-alignment: CENTER;");
 		                setGraphic(checkbox);
 		                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		                setEditable(false);
-		                checkbox.setSelected(record.getBooleanParameter(row.getName()));
-		                checkbox.setOnAction(e -> {
-		        			record.setParameter(row.getName(), checkbox.isSelected());
-		        		});
                 	} else {
                 		setEditable(true);
                 		setStyle( "-fx-alignment: CENTER-LEFT;");
