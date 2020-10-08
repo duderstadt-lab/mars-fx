@@ -295,7 +295,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	@Override
 	protected MarsTable getDataTable() {
 		if (molecule != null) {
-			return molecule.getDataTable();
+			return molecule.getTable();
 		} else 
 			return null;
 	}
