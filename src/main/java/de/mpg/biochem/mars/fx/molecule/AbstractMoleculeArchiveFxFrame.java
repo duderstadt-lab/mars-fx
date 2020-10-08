@@ -1216,9 +1216,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     @Override
 	protected void createIOMaps() {
     	
-		setJsonField("Window", 
+		setJsonField("window", 
 			jGenerator -> {
-				jGenerator.writeObjectFieldStart("Window");
+				jGenerator.writeObjectFieldStart("window");
 				jGenerator.writeNumberField("x", frame.getX());
 				jGenerator.writeNumberField("y", frame.getY());
 				jGenerator.writeNumberField("width", frame.getWidth());
@@ -1263,6 +1263,45 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				jParser -> {
 					moleculeArchiveTab.fromJSON(jParser);
 			 	});
+		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("Window", null, 
+				jParser -> {
+					Rectangle rect = new Rectangle(0, 0, 800, 600);
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						if ("x".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							rect.x = jParser.getIntValue();
+						}
+						if ("y".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							rect.y = jParser.getIntValue();
+						}
+						if ("width".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							rect.width = jParser.getIntValue();
+						}
+						if ("height".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							rect.height = jParser.getIntValue();
+						}
+					}
+					
+					windowStateLoaded = true;
+					
+					SwingUtilities.invokeLater(() -> { 
+						frame.setBounds(rect);
+						frame.setVisible(true);
+					});
+				});
+		
 		
 	}
     

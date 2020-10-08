@@ -252,12 +252,12 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("SearchField", 
-			jGenerator -> jGenerator.writeStringField("SearchField", filterField.getText()),
+		setJsonField("searchField", 
+			jGenerator -> jGenerator.writeStringField("searchField", filterField.getText()),
 			jParser -> filterField.setText(jParser.getText()));		
 		
-		setJsonField("MarsMetadataSelectionUID", 
-			jGenerator -> jGenerator.writeStringField("MarsMetadataSelectionUID", marsMetadata.getUID()),
+		setJsonField("marsMetadataSelectionUID", 
+			jGenerator -> jGenerator.writeStringField("marsMetadataSelectionUID", marsMetadata.getUID()),
 			jParser -> {
 		        String moleculeSelectionUID = jParser.getText();
 		    	for (int index = 0; index < filteredData.size(); index++) {
@@ -268,9 +268,9 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		    	}
 			});
 			
-		setJsonField("CenterPane", 
+		setJsonField("centerPane", 
 			jGenerator -> {
-				jGenerator.writeFieldName("CenterPane");
+				jGenerator.writeFieldName("centerPane");
 				if (metadataCenterPane instanceof JsonConvertibleRecord)
 					((JsonConvertibleRecord) metadataCenterPane).toJSON(jGenerator);
 			}, 
@@ -279,6 +279,34 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 					((JsonConvertibleRecord) metadataCenterPane).fromJSON(jParser);
 		 	});
 		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("SearchField", null, 
+			jParser -> filterField.setText(jParser.getText()));		
+			
+		setJsonField("MarsMetadataSelectionUID", null,
+			jParser -> {
+		        String moleculeSelectionUID = jParser.getText();
+		    	for (int index = 0; index < filteredData.size(); index++) {
+		    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+		    			metaIndexTable.getSelectionModel().select(index);
+		    			metaIndexTable.scrollTo(index);
+		    		}
+		    	}
+			});
+			
+		setJsonField("CenterPane", null, 
+			jParser -> {
+				if (metadataCenterPane instanceof JsonConvertibleRecord)
+					((JsonConvertibleRecord) metadataCenterPane).fromJSON(jParser);
+		 	});
+			
 	}
 	
 	public abstract C createMetadataCenterPane(final Context context);

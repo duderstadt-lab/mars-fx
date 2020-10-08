@@ -218,18 +218,49 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("Widgets", 
+		setJsonField("widgets", 
 			jGenerator -> {
-				jGenerator.writeArrayFieldStart("Widgets");
+				jGenerator.writeArrayFieldStart("widgets");
 				for (MarsDashboardWidget widget : widgets) {
 					jGenerator.writeStartObject();
-					jGenerator.writeStringField("Name", widget.getName());
-					jGenerator.writeFieldName("Settings");
+					jGenerator.writeStringField("name", widget.getName());
+					jGenerator.writeFieldName("settings");
 					widget.toJSON(jGenerator);
 					jGenerator.writeEndObject();
 				}
 				jGenerator.writeEndArray();
 			}, 
+			jParser -> {
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						W widget = null;
+	
+						if ("name".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							widget = createWidget(jParser.getText());
+							addWidget(widget);
+						}
+	
+						jParser.nextToken();
+	
+						if ("settings".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							if (widget != null)
+								widget.fromJSON(jParser);
+						}
+					}
+				}
+			});
+		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("Widgets", null, 
 			jParser -> {
 				while (jParser.nextToken() != JsonToken.END_ARRAY) {
 					while (jParser.nextToken() != JsonToken.END_OBJECT) {
@@ -251,7 +282,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 					}
 				}
 			});
-		
 	}
 
 	public abstract W createWidget(String widgetName);

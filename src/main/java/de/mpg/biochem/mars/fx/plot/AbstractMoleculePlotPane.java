@@ -140,9 +140,9 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("NumberSubPlots", 
+		setJsonField("numberSubPlots", 
 			jGenerator -> {
-				jGenerator.writeNumberField("NumberSubPlots", charts.size());
+				jGenerator.writeNumberField("numberSubPlots", charts.size());
 			}, 
 			jParser -> {
 		        int numberSubPlots = jParser.getNumberValue().intValue();
@@ -153,13 +153,13 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		        }
 			});
 		
-		setJsonField("SubPlots", 
+		setJsonField("subPlots", 
 			jGenerator -> {
-				jGenerator.writeArrayFieldStart("SubPlots");
+				jGenerator.writeArrayFieldStart("subPlots");
 				for (SubPlot subplot : charts) {
 					jGenerator.writeStartObject();
 					if (!subplot.getDatasetOptionsPane().getTitle().equals(""))
-						jGenerator.writeStringField("Title", subplot.getDatasetOptionsPane().getTitle());
+						jGenerator.writeStringField("title", subplot.getDatasetOptionsPane().getTitle());
 					
 					if (!subplot.getDatasetOptionsPane().getXAxisName().equals(""))
 						jGenerator.writeStringField("xAxisName", subplot.getDatasetOptionsPane().getXAxisName());
@@ -168,10 +168,10 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 						jGenerator.writeStringField("yAxisName", subplot.getDatasetOptionsPane().getYAxisName());
 					
 					if (!subplot.getDatasetOptionsPane().getYAxisName().equals(""))
-						jGenerator.writeStringField("Indicators", subplot.getDatasetOptionsPane().getSelectedIndicator());
+						jGenerator.writeStringField("indicators", subplot.getDatasetOptionsPane().getSelectedIndicator());
 					
 					if (subplot.getDatasetOptionsPane().getPlotSeriesList().size() > 0) {
-						jGenerator.writeArrayFieldStart("PlotSeries");
+						jGenerator.writeArrayFieldStart("plotSeries");
 						for (PlotSeries plotSeries : subplot.getDatasetOptionsPane().getPlotSeriesList()) 
 							plotSeries.toJSON(jGenerator);
 						jGenerator.writeEndArray();
@@ -180,6 +180,61 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 				}
 				jGenerator.writeEndArray();
 			}, 
+			jParser -> {
+				int subPlotIndex = 0;
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						if ("title".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setTitle(jParser.getText());
+						}
+						
+						if ("xAxisName".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setXAxisName(jParser.getText());
+						}
+						
+						if ("yAxisName".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setYAxisName(jParser.getText());
+						}
+						
+						if ("indicators".equals(jParser.getCurrentName())) {
+				    		jParser.nextToken();
+				    		charts.get(subPlotIndex).getDatasetOptionsPane().setSelectedIndicator(jParser.getText());
+						}
+						
+						if ("plotSeries".equals(jParser.getCurrentName())) {
+							while (jParser.nextToken() != JsonToken.END_ARRAY) {
+								PlotSeries series = new PlotSeries(getColumnNames());
+								series.fromJSON(jParser);
+								charts.get(subPlotIndex).getPlotSeriesList().add(series);
+					    	}
+						}
+					}
+					subPlotIndex++;
+		    	}
+		 	});
+		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("NumberSubPlots", null, 
+				jParser -> {
+			        int numberSubPlots = jParser.getNumberValue().intValue();
+			        int subPlotIndex = 1;
+			        while (subPlotIndex < numberSubPlots) {
+			        	addChart();
+			        	subPlotIndex++;
+			        }
+				});
+			
+		setJsonField("SubPlots", null, 
 			jParser -> {
 				int subPlotIndex = 0;
 				while (jParser.nextToken() != JsonToken.END_ARRAY) {
@@ -215,7 +270,6 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 					subPlotIndex++;
 		    	}
 		 	});
-		
 	}
 
 	@Override

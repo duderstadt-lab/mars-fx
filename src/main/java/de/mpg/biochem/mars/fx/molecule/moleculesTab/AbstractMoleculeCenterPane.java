@@ -224,20 +224,33 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("PlotPane", 
+		setJsonField("plotPane", 
 			jGenerator -> {
-				jGenerator.writeFieldName("PlotPane");
+				jGenerator.writeFieldName("plotPane");
 				plotPane.toJSON(jGenerator);
 			},
 			jParser -> plotPane.fromJSON(jParser));
 			
-		setJsonField("MoleculeDashboard", 
+		setJsonField("moleculeDashboard", 
 			jGenerator -> {
-				jGenerator.writeFieldName("MoleculeDashboard");
+				jGenerator.writeFieldName("moleculeDashboard");
 				moleculeDashboardPane.toJSON(jGenerator);
 			}, 
 			jParser -> moleculeDashboardPane.fromJSON(jParser));
 		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("PlotPane", null,
+			jParser -> plotPane.fromJSON(jParser));
+				
+		setJsonField("MoleculeDashboard", null, 
+			jParser -> moleculeDashboardPane.fromJSON(jParser));
 	}
 	
 	public abstract P createPlotPane(final Context context);

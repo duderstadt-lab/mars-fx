@@ -287,8 +287,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	importHotKeys();
-    	
-		//smileEncodingButton.setSelected(archive.isSMILEOutputEncoding());
 	}
 	
 	public ObservableList<HotKeyEntry> getHotKeyList() {

@@ -457,12 +457,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("SearchField", 
-			jGenerator -> jGenerator.writeStringField("SearchField", filterField.getText()),
+		setJsonField("searchField", 
+			jGenerator -> jGenerator.writeStringField("searchField", filterField.getText()),
 			jParser -> filterField.setText(jParser.getText()));
 		
-		setJsonField("MoleculeSelectionUID", 
-			jGenerator -> jGenerator.writeStringField("MoleculeSelectionUID", molecule.getUID()),
+		setJsonField("moleculeSelectionUID", 
+			jGenerator -> jGenerator.writeStringField("moleculeSelectionUID", molecule.getUID()),
 			jParser -> {
 		        String moleculeSelectionUID = jParser.getText();
 		    	for (int index = 0; index < filteredData.size(); index++) {
@@ -473,9 +473,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		    	}
 			});
 		
-		setJsonField("CenterPane", 
+		setJsonField("centerPane", 
 			jGenerator -> {
-				jGenerator.writeFieldName("CenterPane");
+				jGenerator.writeFieldName("centerPane");
 				if (moleculeCenterPane instanceof JsonConvertibleRecord)
 				((JsonConvertibleRecord) moleculeCenterPane).toJSON(jGenerator);
 			}, 
@@ -484,6 +484,33 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 					((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
 		 	});
 		
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("SearchField", null,
+				jParser -> filterField.setText(jParser.getText()));
+			
+		setJsonField("MoleculeSelectionUID", null,
+			jParser -> {
+		        String moleculeSelectionUID = jParser.getText();
+		    	for (int index = 0; index < filteredData.size(); index++) {
+		    		if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+		    			moleculeIndexTable.getSelectionModel().select(index);
+		    			moleculeIndexTable.scrollTo(index);
+		    		}
+		    	}
+			});
+		
+		setJsonField("CenterPane", null, 
+			jParser -> {
+				if (moleculeCenterPane instanceof JsonConvertibleRecord)
+					((JsonConvertibleRecord) moleculeCenterPane).fromJSON(jParser);
+		 	});
 	}
 	
 	public abstract C createMoleculeCenterPane(final Context context);

@@ -170,15 +170,23 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 	@Override
 	protected void createIOMaps() {
 		
-		setJsonField("MarsMetadataDashboard", 
+		setJsonField("marsMetadataDashboard", 
 			jGenerator -> {
-				jGenerator.writeFieldName("MarsMetadataDashboard");
+				jGenerator.writeFieldName("marsMetadataDashboard");
 				marsMetadataDashboardPane.toJSON(jGenerator);
 			}, 
-			jParser -> {
-				marsMetadataDashboardPane.fromJSON(jParser);
-		 	});
-		 	
+			jParser -> marsMetadataDashboardPane.fromJSON(jParser));
+		 
+		/*
+		 * 
+		 * The fields below are needed for backwards compatibility.
+		 * 
+		 * Please remove for a future release.
+		 * 
+		 */
+		
+		setJsonField("MarsMetadataDashboard", null, 
+			jParser -> marsMetadataDashboardPane.fromJSON(jParser));
 	}
 	
 	protected void loadLog() {

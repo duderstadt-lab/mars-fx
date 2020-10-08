@@ -242,12 +242,12 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 		@Override
 		protected void createIOMaps() {
 			
-			setJsonField("Track", 
-				jGenerator -> jGenerator.writeBooleanField("Track", track()),
+			setJsonField("track", 
+				jGenerator -> jGenerator.writeBooleanField("track", track()),
 				jParser -> getTrackingButton().setSelected(jParser.getBooleanValue()));
 			
-			setJsonField("Type", 
-				jGenerator -> jGenerator.writeStringField("Type", getType()), 
+			setJsonField("type", 
+				jGenerator -> jGenerator.writeStringField("type", getType()), 
 				jParser -> typeField.getSelectionModel().select(jParser.getText()));
 				
 			setJsonField("xColumn", 
@@ -258,30 +258,68 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 				jGenerator -> jGenerator.writeStringField("yColumn", getYColumn()),
 				jParser -> yColumnField().getSelectionModel().select(jParser.getText()));
 			
-			setJsonField("Style", 
-				jGenerator -> jGenerator.writeStringField("Style", getLineStyle()),
+			setJsonField("style", 
+				jGenerator -> jGenerator.writeStringField("style", getLineStyle()),
 				jParser -> lineStyle().getSelectionModel().select(jParser.getText()));
 			
-			setJsonField("Color", 
-				jGenerator -> jGenerator.writeStringField("Color", getColor().toString()), 
+			setJsonField("color", 
+				jGenerator -> jGenerator.writeStringField("color", getColor().toString()), 
 				jParser -> getColorField().setValue(Color.web(jParser.getText())));
 			
-			setJsonField("Stroke", 
-				jGenerator -> jGenerator.writeStringField("Stroke", getWidth()),
+			setJsonField("stroke", 
+				jGenerator -> jGenerator.writeStringField("stroke", getWidth()),
 				jParser -> getWidthField().setText(jParser.getText()));
 			
-			setJsonField("ShowSegments", 
-				jGenerator -> jGenerator.writeBooleanField("ShowSegments", drawSegments()), 
+			setJsonField("showSegments", 
+				jGenerator -> jGenerator.writeBooleanField("showSegments", drawSegments()), 
 				jParser -> getDrawSegmentsField().setSelected(jParser.getBooleanValue()));
 			
-			setJsonField("SegmentsColor", 
-				jGenerator -> jGenerator.writeStringField("SegmentsColor", getSegmentsColor().toString()), 
+			setJsonField("segmentsColor", 
+				jGenerator -> jGenerator.writeStringField("segmentsColor", getSegmentsColor().toString()), 
 				jParser -> getSegmentsColorField().setValue(Color.web(jParser.getText())));
 			
-			setJsonField("SegmentsStroke", 
-				jGenerator -> jGenerator.writeStringField("SegmentsStroke", getSegmentsWidth()), 
+			setJsonField("segmentsStroke", 
+				jGenerator -> jGenerator.writeStringField("segmentsStroke", getSegmentsWidth()), 
 				jParser -> getSegmentsWidthField().setText(jParser.getText()));
+			
+			/*
+			 * 
+			 * The fields below are needed for backwards compatibility.
+			 * 
+			 * Please remove for a future release.
+			 * 
+			 */
 
+			setJsonField("Track", null,
+					jParser -> getTrackingButton().setSelected(jParser.getBooleanValue()));
+				
+			setJsonField("Type", null, 
+				jParser -> typeField.getSelectionModel().select(jParser.getText()));
+				
+			setJsonField("xColumn", null,
+				jParser -> xColumnField().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("yColumn", null,
+				jParser -> yColumnField().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("Style", null,
+				jParser -> lineStyle().getSelectionModel().select(jParser.getText()));
+			
+			setJsonField("Color", null, 
+				jParser -> getColorField().setValue(Color.web(jParser.getText())));
+			
+			setJsonField("Stroke", null,
+				jParser -> getWidthField().setText(jParser.getText()));
+			
+			setJsonField("ShowSegments", null, 
+				jParser -> getDrawSegmentsField().setSelected(jParser.getBooleanValue()));
+			
+			setJsonField("SegmentsColor", null, 
+				jParser -> getSegmentsColorField().setValue(Color.web(jParser.getText())));
+			
+			setJsonField("SegmentsStroke", null, 
+				jParser -> getSegmentsWidthField().setText(jParser.getText()));
+			
 		}
 }
 
