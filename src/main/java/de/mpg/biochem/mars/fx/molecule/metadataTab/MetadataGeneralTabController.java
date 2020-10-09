@@ -40,7 +40,7 @@ import com.jfoenix.controls.JFXChip;
 
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
-
+import javafx.scene.layout.HBox;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
@@ -61,6 +61,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -69,32 +71,19 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 
 public class MetadataGeneralTabController implements MetadataSubPane {
 
-	@FXML
-	private AnchorPane rootPane;
-	
-	@FXML
+	private ScrollPane rootPane;
+	private VBox vBox;
 	private BorderPane UIDIconContainer;
-	
-	@FXML
 	private JFXTextField UIDLabel;
-	
-	@FXML
 	private JFXButton UIDClippyButton;
-	
-	@FXML
-	private Label Tags;
-	
-	@FXML
+	private Label tags;
 	private JFXChipView<String> chipView;
-	
-	@FXML
-	private Label Notes;
-	
-	@FXML
-	private JFXTextArea notesTextArea;
+	private Label notes;
+	private TextArea notesTextArea;
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
@@ -103,18 +92,70 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
 	
-	private MarsMetadata marsImageMetadata;
+	private MarsMetadata marsMetadata;
 	
-	@FXML
-    public void initialize() {
-		Region microscopeIcon = new Region();
+	private MarsJFXChipViewSkin<String> skin;
+	
+    public MetadataGeneralTabController() {
+    	rootPane = new ScrollPane();
+    	
+    	vBox = new VBox();
+    	vBox.setAlignment(Pos.CENTER);
+    	vBox.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
+    	
+    	UIDIconContainer = new BorderPane();
+    	UIDIconContainer.setPrefHeight(60.0);
+    	UIDIconContainer.setPrefWidth(70.0);
+    	Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
-        UIDIconContainer.setCenter(microscopeIcon);
-        UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+		UIDIconContainer.setCenter(microscopeIcon);
+    	vBox.getChildren().add(UIDIconContainer);
+    	
+    	UIDLabel = new JFXTextField();
+    	UIDLabel.setPrefHeight(20.0);
+    	UIDLabel.setPrefWidth(100.0);
+    	UIDLabel.setText("metaUID");
+    	UIDLabel.setEditable(false);
+    	
+    	UIDClippyButton = new JFXButton();
+    	UIDClippyButton.setPrefHeight(20.0);
+    	UIDClippyButton.setPrefWidth(20.0);
+    	UIDClippyButton.setOnAction(e -> {
+    		ClipboardContent content = new ClipboardContent();
+    	    content.putString(UIDLabel.getText());
+    	    clipboard.setContent(content);
+    	});
+    	UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+    	
+    	HBox hbox = new HBox();
+    	hbox.getChildren().add(UIDLabel);
+    	hbox.getChildren().add(UIDClippyButton);
+    	hbox.setAlignment(Pos.CENTER);
+    	vBox.getChildren().add(hbox);
+    	
+    	tags = new Label();
+        tags.setText("Tags");
+        VBox.setMargin(tags, new Insets(20, 5, 10, 5));
+        vBox.getChildren().add(tags);
 		
-		UIDLabel.setEditable(false);
-		
-		notesTextArea.setPromptText("none");
+		chipView = new JFXChipView<String>();
+    	VBox.setMargin(chipView, new Insets(10, 10, 10, 10));
+    	chipView.setMinHeight(200.0);
+   	    vBox.getChildren().add(chipView);
+    	
+    	notes = new Label();
+        notes.setText("Notes");
+        VBox.setMargin(notes, new Insets(5, 5, 5, 5));
+    	vBox.getChildren().add(notes);
+    	
+    	notesTextArea = new TextArea();
+    	VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
+    	notesTextArea.setMinHeight(150.0);
+    	notesTextArea.setPromptText("none");
+    	vBox.getChildren().add(notesTextArea);
+    	
+    	rootPane.setFitToWidth(true);
+    	rootPane.setContent(vBox);
 		
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
@@ -127,37 +168,35 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		chipsListener = new ListChangeListener<String>() {
 			@Override
 			public void onChanged(Change<? extends String> c) {
-				if (marsImageMetadata == null)
+				if (marsMetadata == null)
 					return;
 				
 				while (c.next()) {
 		             if (c.wasRemoved()) {
-		            	 marsImageMetadata.removeTag(c.getRemoved().get(0));
+		            	 marsMetadata.removeTag(c.getRemoved().get(0));
 		             } else if (c.wasAdded()) {
-		            	 marsImageMetadata.addTag(c.getAddedSubList().get(0));
+		            	 marsMetadata.addTag(c.getAddedSubList().get(0));
 		             }
 				}
-				getNode().fireEvent(new MetadataTagsChangedEvent(marsImageMetadata));
+				getNode().fireEvent(new MetadataTagsChangedEvent(marsMetadata));
 			}
 		};
 	
-		notesListener = new ChangeListener<String>() {
-		    @Override
-		    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-		        marsImageMetadata.setNotes(notesTextArea.getText());
-		    }
-		};
+		if (notesListener == null) {
+			notesListener = new ChangeListener<String>() {
+			    @Override
+			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
+			    	if (marsMetadata == null)
+						return;
+			    	
+			    	marsMetadata.setNotes(notesTextArea.getText());
+			    }
+			};
+		}
 		
-		MarsJFXChipViewSkin<String> skin = new MarsJFXChipViewSkin<>(chipView);
+		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
     }
-	
-	@FXML
-	private void handleUIDClippy() {
-		ClipboardContent content = new ClipboardContent();
-	    content.putString(UIDLabel.getText());
-	    clipboard.setContent(content);
-	}
 
 	public Node getNode() {
 		return rootPane;
@@ -170,21 +209,21 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
-		this.marsImageMetadata = marsImageMetadata;
+		this.marsMetadata = marsImageMetadata;
 		
-		UIDLabel.setText(marsImageMetadata.getUID());
+		UIDLabel.setText(marsMetadata.getUID());
 		
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
-		if (marsImageMetadata.getTags().size() > 0)
-			chipView.getChips().addAll(marsImageMetadata.getTags());
+		if (marsMetadata.getTags().size() > 0)
+			chipView.getChips().addAll(marsMetadata.getTags());
 
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
 		
 		notesTextArea.textProperty().removeListener(notesListener);
-		notesTextArea.setText(marsImageMetadata.getNotes());
+		notesTextArea.setText(marsMetadata.getNotes());
 		notesTextArea.textProperty().addListener(notesListener);
 	}
 

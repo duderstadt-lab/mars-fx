@@ -51,6 +51,7 @@ import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeGeneralTabController;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculePositionOfInterestTable;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -145,30 +146,13 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
         generalTab.setGraphic(tabPane);
         generalTab.closableProperty().set(false);
         
-        URL resourceURL = getClass().getResource("MetadataGeneralTab.fxml");
+        generalTab = new Tab();
+        generalTab.setText("");
+        generalTab.setGraphic(tabPane);
+        generalTab.closableProperty().set(false);
         
-        generalTabContainer = new AnchorPane();
-        generalTabContainer.minHeight(0.0);
-        generalTabContainer.minWidth(0.0);
-        generalTabContainer.prefHeight(250.0);
-        generalTabContainer.prefWidth(220.0);
-        generalTab.setContent(generalTabContainer);
-        
-        try {
-        	FXMLLoader loader = new FXMLLoader();
-	        loader.setLocation(resourceURL);
-            Parent contentView = loader.load();
-            
-            metadataGeneralTabController = (MetadataGeneralTabController) loader.getController();
-            generalTabContainer.getChildren().add(contentView);
-            
-            AnchorPane.setTopAnchor(contentView, 0.0);
-            AnchorPane.setBottomAnchor(contentView, 0.0);
-            AnchorPane.setRightAnchor(contentView, 0.0);
-            AnchorPane.setLeftAnchor(contentView, 0.0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        metadataGeneralTabController = new MetadataGeneralTabController();
+        generalTab.setContent(metadataGeneralTabController.getNode());
         
         //Build properties Tab
         metadataPropertiesTable = new MetadataPropertiesTable();

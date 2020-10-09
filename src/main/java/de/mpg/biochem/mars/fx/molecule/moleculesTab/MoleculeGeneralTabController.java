@@ -60,6 +60,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
 import javafx.scene.Node;
@@ -70,10 +72,15 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+
+import javafx.scene.control.TextArea;
 
 public class MoleculeGeneralTabController implements MoleculeSubPane {
 	
-	private AnchorPane rootPane;
+	private ScrollPane rootPane;
+	private VBox vBox;
 	private BorderPane UIDIconContainer;
 	private JFXTextField UIDLabel;
 	private JFXButton UIDClippyButton;
@@ -85,7 +92,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
-	private JFXTextArea notesTextArea;
+	private TextArea notesTextArea;
+	//private JFXTextArea notesTextArea;
 	
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 	
@@ -97,81 +105,71 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private MarsJFXChipViewSkin<String> skin;
 	
     public MoleculeGeneralTabController() {
-    	rootPane = new AnchorPane();
-    	rootPane.setPrefHeight(350.0);
-    	rootPane.setPrefWidth(220.0);
-    	rootPane.setMinWidth(220.0);
-    	rootPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
+    	rootPane = new ScrollPane();
+    	
+    	vBox = new VBox();
+    	vBox.setAlignment(Pos.CENTER);
+    	vBox.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
     	
     	UIDIconContainer = new BorderPane();
-    	UIDIconContainer.setLayoutX(56.0);
-    	UIDIconContainer.setLayoutY(32.0);
     	UIDIconContainer.setPrefHeight(55.0);
     	UIDIconContainer.setPrefWidth(60.0);
-    	AnchorPane.setLeftAnchor(UIDIconContainer, 70.0);
-    	AnchorPane.setTopAnchor(UIDIconContainer, 5.0);
     	UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
-    	rootPane.getChildren().add(UIDIconContainer);
+    	vBox.getChildren().add(UIDIconContainer);
     	
     	UIDLabel = new JFXTextField();
-    	UIDLabel.setLayoutX(39.0);
-        UIDLabel.setLayoutY(78.0);
         UIDLabel.setPrefHeight(20.0);
     	UIDLabel.setPrefWidth(180.0);
-    	AnchorPane.setLeftAnchor(UIDLabel, 10.0);
-    	AnchorPane.setTopAnchor(UIDLabel, 60.0);
     	UIDLabel.setText("UID");
     	UIDLabel.setEditable(false);
-    	rootPane.getChildren().add(UIDLabel);
     	
     	UIDClippyButton = new JFXButton();
     	UIDClippyButton.setPrefHeight(20.0);
     	UIDClippyButton.setPrefWidth(20.0);
-    	AnchorPane.setLeftAnchor(UIDClippyButton, 190.0);
-    	AnchorPane.setTopAnchor(UIDClippyButton, 60.0);
     	UIDClippyButton.setOnAction(e -> {
     		ClipboardContent content = new ClipboardContent();
     	    content.putString(UIDLabel.getText());
     	    clipboard.setContent(content);
     	});
     	UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-    	rootPane.getChildren().add(UIDClippyButton);
+    	
+    	HBox hbox1 = new HBox();
+    	hbox1.getChildren().add(UIDLabel);
+    	hbox1.getChildren().add(UIDClippyButton);
+    	hbox1.setAlignment(Pos.CENTER);
+    	vBox.getChildren().add(hbox1);
     	
     	metaUIDIconContainer = new BorderPane();
     	metaUIDIconContainer.setPrefHeight(60.0);
     	metaUIDIconContainer.setPrefWidth(70.0);
-    	AnchorPane.setLeftAnchor(metaUIDIconContainer, 65.0);
-    	AnchorPane.setTopAnchor(metaUIDIconContainer, 90.0);
     	Region microscopeIcon = new Region();
         microscopeIcon.getStyleClass().add("microscopeIcon");
 		metaUIDIconContainer.setCenter(microscopeIcon);
-    	rootPane.getChildren().add(metaUIDIconContainer);
+    	vBox.getChildren().add(metaUIDIconContainer);
     	
     	metaUIDLabel = new JFXTextField();
     	metaUIDLabel.setPrefHeight(20.0);
-    	metaUIDLabel.setPrefWidth(90.0);
-    	AnchorPane.setLeftAnchor(metaUIDLabel, 55.0);
-    	AnchorPane.setTopAnchor(metaUIDLabel, 150.0);
+    	metaUIDLabel.setPrefWidth(100.0);
     	metaUIDLabel.setText("metaUID");
     	metaUIDLabel.setEditable(false);
-    	rootPane.getChildren().add(metaUIDLabel);
     	
     	metaUIDClippyButton = new JFXButton();
     	metaUIDClippyButton.setPrefHeight(20.0);
     	metaUIDClippyButton.setPrefWidth(20.0);
-    	AnchorPane.setLeftAnchor(metaUIDClippyButton, 145.0);
-    	AnchorPane.setTopAnchor(metaUIDClippyButton, 150.0);
     	metaUIDClippyButton.setOnAction(e -> {
     		ClipboardContent content = new ClipboardContent();
     	    content.putString(metaUIDLabel.getText());
     	    clipboard.setContent(content);
     	});
     	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-    	rootPane.getChildren().add(metaUIDClippyButton);
+    	
+    	HBox hbox2 = new HBox();
+    	hbox2.getChildren().add(metaUIDLabel);
+    	hbox2.getChildren().add(metaUIDClippyButton);
+    	hbox2.setAlignment(Pos.CENTER);
+    	vBox.getChildren().add(hbox2);
     	
     	imageAndchannel = new TextFlow();
-    	AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
-    	AnchorPane.setTopAnchor(imageAndchannel, 200.0);
     	iText = new Text("");
     	iText.setStyle("-fx-font-weight:bold");
     	iInt = new Text("");
@@ -181,41 +179,32 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	cInt = new Text("");
     	cInt.setStyle("-fx-font-weight:normal");
     	imageAndchannel.getChildren().addAll(iText, iInt, cText, cInt);
-    	rootPane.getChildren().add(imageAndchannel);
+    	VBox.setMargin(imageAndchannel, new Insets(10, 10, 10, 10));
+    	vBox.getChildren().add(imageAndchannel);
     	
     	tags = new Label();
-        AnchorPane.setLeftAnchor(tags, 10.0);
-        AnchorPane.setTopAnchor(tags, 220.0);
         tags.setText("Tags");
-        rootPane.getChildren().add(tags);
+        VBox.setMargin(tags, new Insets(5, 5, 5, 5));
+        vBox.getChildren().add(tags);
     	
     	chipView = new JFXChipView<String>();
-    	chipView.setLayoutY(241.0);
-   	    chipView.setMinHeight(170.0);
-   	    chipView.setPrefHeight(170.0);
-   	    chipView.setPrefWidth(200.0);
-   	    AnchorPane.setLeftAnchor(chipView, 5.0);
-   	    AnchorPane.setRightAnchor(chipView, 5.0);
-   	    AnchorPane.setTopAnchor(chipView, 241.0);
-   	    rootPane.getChildren().add(chipView);
+    	VBox.setMargin(chipView, new Insets(10, 10, 10, 10));
+    	chipView.setMinHeight(250.0);
+   	    vBox.getChildren().add(chipView);
     	
     	notes = new Label();
-        AnchorPane.setLeftAnchor(notes, 10.0);
-        AnchorPane.setTopAnchor(notes, 400.0);
         notes.setText("Notes");
-    	rootPane.getChildren().add(notes);
+        VBox.setMargin(notes, new Insets(5, 5, 5, 5));
+    	vBox.getChildren().add(notes);
     	
-    	notesTextArea = new JFXTextArea();
-    	notesTextArea.setLayoutY(421.0);
-    	notesTextArea.setMinHeight(149.0);
-    	notesTextArea.setPrefHeight(149.0);
-    	notesTextArea.setPrefWidth(190.0);
-    	AnchorPane.setBottomAnchor(notesTextArea, 15.0);
-    	AnchorPane.setLeftAnchor(notesTextArea, 15.0);
-    	AnchorPane.setRightAnchor(notesTextArea, 15.0);
-    	AnchorPane.setTopAnchor(notesTextArea, 431.0);
+    	notesTextArea = new TextArea();
+    	VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
+    	notesTextArea.setMinHeight(150.0);
     	notesTextArea.setPromptText("none");
-    	rootPane.getChildren().add(notesTextArea);
+    	vBox.getChildren().add(notesTextArea);
+    	
+    	rootPane.setFitToWidth(true);
+    	rootPane.setContent(vBox);
     	
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
