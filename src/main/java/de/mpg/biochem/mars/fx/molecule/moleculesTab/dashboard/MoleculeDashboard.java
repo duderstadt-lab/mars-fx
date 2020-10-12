@@ -20,13 +20,14 @@ import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<MoleculeDashboardWidget> implements MoleculeSubPane {
 	
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected M molecule;
 	
 	public MoleculeDashboard(final Context context) {

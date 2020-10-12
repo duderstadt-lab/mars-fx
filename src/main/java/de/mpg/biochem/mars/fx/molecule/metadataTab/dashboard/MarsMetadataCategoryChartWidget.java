@@ -11,13 +11,14 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractCategoryChartWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataCategoryChartWidget" )
 public class MarsMetadataCategoryChartWidget extends AbstractCategoryChartWidget implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable {
 
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected MarsMetadata marsMetadata;
 	
 	@Override
@@ -37,11 +38,11 @@ public class MarsMetadataCategoryChartWidget extends AbstractCategoryChartWidget
 		module.setInput("marsMetadata", marsMetadata);
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 	}
 	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
 		return archive;
 	}
 	

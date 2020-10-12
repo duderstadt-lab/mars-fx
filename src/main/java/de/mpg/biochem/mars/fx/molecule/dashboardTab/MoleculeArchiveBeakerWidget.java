@@ -11,6 +11,7 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractScriptableWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
 import net.imagej.ops.Initializable;
@@ -19,7 +20,7 @@ import net.imagej.ops.Initializable;
 public class MoleculeArchiveBeakerWidget extends AbstractBeakerWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 	
 	@Parameter
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	@Override
 	public void initialize() {
@@ -37,11 +38,11 @@ public class MoleculeArchiveBeakerWidget extends AbstractBeakerWidget implements
 		module.setInput("archive", archive);
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 	}
 	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
 		return archive;
 	}
 	
