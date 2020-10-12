@@ -180,8 +180,11 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	cInt = new Text("");
     	cInt.setStyle("-fx-font-weight:normal");
     	imageAndchannel.getChildren().addAll(iText, iInt, cText, cInt);
-    	VBox.setMargin(imageAndchannel, new Insets(10, 10, 10, 10));
-    	vBox.getChildren().add(imageAndchannel);
+    	HBox hbox3 = new HBox();
+    	hbox3.getChildren().add(imageAndchannel);
+    	hbox3.setAlignment(Pos.CENTER);
+    	HBox.setMargin(imageAndchannel, new Insets(10, 10, 10, 10));
+    	vBox.getChildren().add(hbox3);
     	
     	tags = new Label();
         tags.setText("Tags");
