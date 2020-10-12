@@ -58,6 +58,7 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.beans.property.BooleanProperty;
@@ -73,7 +74,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	protected BooleanProperty regionSelected;
 	protected BooleanProperty positionSelected;
 	
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	public AbstractMoleculePlotPane(final Context context) {
 		super();
@@ -133,7 +134,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		
 	}
 	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
 		return archive;
 	}
 	

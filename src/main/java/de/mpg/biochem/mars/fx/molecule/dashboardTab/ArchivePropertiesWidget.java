@@ -34,6 +34,7 @@ import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -53,7 +54,7 @@ import net.imagej.ops.Initializable;
 public class ArchivePropertiesWidget extends AbstractDashboardWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
 	
 	@Parameter
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	private Label archiveName = new Label();
 	private Label className = new Label();
@@ -113,11 +114,11 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements 
     	});
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 	}
 	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> getArchive() {
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
 		return archive;
 	}
 

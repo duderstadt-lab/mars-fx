@@ -117,13 +117,13 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private BdvHandlePanel bdv;
 	
 	private String xParameter, yParameter;
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected Molecule molecule;
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive, Molecule molecule, String xParameter, String yParameter) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, String xParameter, String yParameter) {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.xParameter = xParameter;
@@ -353,7 +353,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		return frame;
 	}
 	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 	}
 

@@ -63,6 +63,7 @@ import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsPosition;
@@ -80,7 +81,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	protected M molecule;
 	protected PlotPane plotPane;
 	
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	public AbstractMoleculeSubPlot(PlotPane plotPane, String plotTitle) {
 		super(plotPane, plotTitle);

@@ -30,6 +30,7 @@ import javafx.event.EventType;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 public class MoleculeArchiveSavedEvent extends MoleculeArchiveEvent {
@@ -41,7 +42,7 @@ public class MoleculeArchiveSavedEvent extends MoleculeArchiveEvent {
 
 	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVED = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVED");
 
-    public MoleculeArchiveSavedEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {
+    public MoleculeArchiveSavedEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
         super(MOLECULE_ARCHIVE_SAVED, archive);
     }
 

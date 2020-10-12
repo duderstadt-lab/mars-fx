@@ -29,6 +29,7 @@ package de.mpg.biochem.mars.fx.event;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.Event;
 
@@ -43,7 +44,7 @@ public abstract class DefaultMoleculeArchiveEventHandler implements MoleculeArch
 	public void fireEvent(Event event) {}
 
 	@Override
-	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive) {}
+	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {}
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {}

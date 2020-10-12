@@ -53,6 +53,7 @@ import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -100,7 +101,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
 	
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	private MarsJFXChipViewSkin<String> skin;
 	
@@ -209,7 +210,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive) {
         		archive = newArchive;
         	}
         });

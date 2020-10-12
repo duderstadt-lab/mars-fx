@@ -50,6 +50,7 @@ import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeRegionOfInterestTabl
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeGeneralTabController;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculePositionOfInterestTable;
@@ -96,7 +97,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
 	
 	protected I marsImageMetadata;
 	
-	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> archive;
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	public AbstractMetadataPropertiesPane(final Context context) {
 		context.inject(this);
@@ -122,7 +123,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> imp
         getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
         getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
         	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties> newArchive) {
+        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive) {
         		archive = newArchive;
         		metadataGeneralTabController.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
         		metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(newArchive));
