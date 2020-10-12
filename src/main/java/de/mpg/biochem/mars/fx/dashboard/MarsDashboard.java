@@ -1,16 +1,31 @@
 package de.mpg.biochem.mars.fx.dashboard;
 
+import java.util.ArrayList;
+import java.util.Set;
+
 import com.jfoenix.controls.JFXMasonryPane;
+
+import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 public interface MarsDashboard<W extends MarsDashboardWidget> {
-	public void runWidget(W widget);
+	void runWidget(W widget);
 
-	public void stopWidget(W widget);
+	void stopWidget(W widget);
 
-	public void removeWidget(W widget);
+	void removeWidget(W widget);
 	
-	public Node getNode();
+	Node getNode();
+	
+	JFXMasonryPane getWidgetPane();
 
-	public JFXMasonryPane getWidgetPane();
+	ObservableList<W> getWidgets();
+	
+	void addWidget(W widget);
+	
+	W createWidget(String widgetName);
+
+	ArrayList<String> getWidgetToolbarOrder();
+
+	Set<String> getWidgetNames();
 }
