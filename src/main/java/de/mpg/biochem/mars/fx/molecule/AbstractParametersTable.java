@@ -31,6 +31,8 @@ import com.jfoenix.controls.JFXCheckBox;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.molecule.MarsRecord;
@@ -46,7 +48,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractPropertiesTable {
+public abstract class AbstractParametersTable {
     
 	protected MarsRecord record;
 	protected BorderPane rootPane;
@@ -58,13 +60,13 @@ public abstract class AbstractPropertiesTable {
 	protected TableView<ParameterRow> parameterTable;
 	protected ObservableList<ParameterRow> parameterRowList = FXCollections.observableArrayList();
 
-    public AbstractPropertiesTable() {        
+    public AbstractParametersTable() {        
     	parameterTable = new TableView<ParameterRow>();
     	addParameterField = new CustomTextField();
     	
     	TableColumn<ParameterRow, ParameterRow> typeColumn = new TableColumn<>();
-    	typeColumn.setPrefWidth(30);
-    	typeColumn.setMinWidth(30);
+    	typeColumn.setPrefWidth(40);
+    	typeColumn.setMinWidth(40);
     	typeColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
     	typeColumn.setCellFactory(param -> new TableCell<ParameterRow, ParameterRow>() {
             private final Label label = new Label();
@@ -83,7 +85,7 @@ public abstract class AbstractPropertiesTable {
                 
                 switch (pRow.getType()) {
 					case 0:
-						label.setText("1..");
+						label.setText("123");
 						label.setGraphic(null);
 						break;
 					case 1:
@@ -92,7 +94,7 @@ public abstract class AbstractPropertiesTable {
 						break;
 					case 2:
 						label.setText("");
-						label.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.INDETERMINATE_CHECK_BOX, "1.0em"));
+						label.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT, "1.1em"));
 						break;
 				}       		
             }
@@ -208,12 +210,13 @@ public abstract class AbstractPropertiesTable {
                     } else if (row.getType() == 2) {
                     	if (checkbox == null)
                     		checkbox = new JFXCheckBox();
+                    	checkbox.setCheckedColor(Color.valueOf("black"));
                 		checkbox.setCenterShape(true);
                 		checkbox.setSelected(record.getBooleanParameter(row.getName()));
 		                checkbox.setOnAction(e -> {
 		        			record.setParameter(row.getName(), checkbox.isSelected());
 		        		});
-                		setStyle( "-fx-alignment: CENTER;");
+                		setStyle( "-fx-alignment: CENTER-LEFT;");
 		                setGraphic(checkbox);
 		                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		                setEditable(false);
@@ -288,13 +291,13 @@ public abstract class AbstractPropertiesTable {
         
         
         typeButton = new Button();
-        typeButton.setText("1..");
+        typeButton.setText("123");
         typeButton.setCenterShape(true);
         typeButton.setStyle(
                 "-fx-background-radius: 2em; " +
-                "-fx-min-width: 40px; " +
+                "-fx-min-width: 60px; " +
                 "-fx-min-height: 30px; " +
-                "-fx-max-width: 40px; " +
+                "-fx-max-width: 60px; " +
                 "-fx-max-height: 30px;"
         );
         typeButton.setOnAction(e -> {
@@ -304,7 +307,7 @@ public abstract class AbstractPropertiesTable {
         	
 			switch (buttonType) {
 				case 0:
-					typeButton.setText("1..");
+					typeButton.setText("123");
 					typeButton.setGraphic(null);
 					break;
 				case 1:
@@ -313,7 +316,7 @@ public abstract class AbstractPropertiesTable {
 					break;
 				case 2:
 					typeButton.setText("");
-					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.INDETERMINATE_CHECK_BOX, "1.0em"));
+					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT, "1.1em"));
 					break;
 			}
 		});

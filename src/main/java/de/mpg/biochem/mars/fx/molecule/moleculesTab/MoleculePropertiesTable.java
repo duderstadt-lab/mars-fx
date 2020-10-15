@@ -27,11 +27,11 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.molecule.AbstractPropertiesTable;
+import de.mpg.biochem.mars.fx.molecule.AbstractParametersTable;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
 
-public class MoleculePropertiesTable extends AbstractPropertiesTable implements MoleculeSubPane {
+public class MoleculePropertiesTable extends AbstractParametersTable implements MoleculeSubPane {
 
     public MoleculePropertiesTable() {        
         super();

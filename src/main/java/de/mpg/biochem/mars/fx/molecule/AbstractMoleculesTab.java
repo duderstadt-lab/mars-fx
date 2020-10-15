@@ -26,8 +26,6 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
