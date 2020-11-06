@@ -57,4 +57,9 @@ public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,
 			return super.canDisplay(c);
 		}
 	}
+	
+	@Override
+	public boolean isDisplaying(final Object o) {
+		return false;
+	}
 }

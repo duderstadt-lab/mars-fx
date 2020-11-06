@@ -56,5 +56,10 @@ public class MarsTableFxDisplay extends AbstractDisplay<MarsTable> implements Di
 			return super.canDisplay(c);
 		}
 	}
+	
+	@Override
+	public boolean isDisplaying(final Object o) {
+		return false;
+	}
 
 }
