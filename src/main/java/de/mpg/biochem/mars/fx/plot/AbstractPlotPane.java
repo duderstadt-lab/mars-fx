@@ -317,7 +317,6 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
 			} else
 				subPlot.getChart().getXAxis().setAutoRanging(true);
-			//subPlot.getChart().getXAxis().forceRedraw();
 			
 			if (subPlot.getDatasetOptionsPane().fixYBounds().get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
@@ -329,7 +328,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
 				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 			
-			subPlot.getChart().layout();
+			subPlot.getChart().layoutChildren();
 		}
 	}
 	
