@@ -338,6 +338,10 @@ public class CommentPane {
 		});
     }
     
+    public void setEditMode(boolean editmode) {
+    	commentEditor.editMode.set(editmode);
+    }
+    
     public Node getNode() {
     	return borderPane;
     }

@@ -96,6 +96,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	commentPane.setComments(archive.getComments());
 	}
 	
+	public CommentPane getCommentPane() {
+		return commentPane;
+	}
+	
 	public Node getNode() {
 		return commentPane.getNode();
 	}
