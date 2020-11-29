@@ -272,6 +272,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	    			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
 	    					
 	    				if (oldValue == commentTab) {
+	    					commentPane.setEditMode(false);
 	    					menuBar.getMenus().removeAll(commentPane.getMenus());
 	    				}
 	    				
