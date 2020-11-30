@@ -32,10 +32,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -50,52 +47,34 @@ import bdv.SpimSource;
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
 import bdv.tools.InitializeViewerState;
-import bdv.tools.brightness.ConverterSetup;
-import bdv.tools.brightness.MinMaxGroup;
 import bdv.util.Affine3DHelpers;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
 import bdv.util.BdvHandlePanel;
-import bdv.util.BdvStackSource;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
+import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
-import bdv.viewer.render.DefaultMipmapOrdering;
-import bdv.viewer.render.MipmapOrdering;
-import bdv.viewer.render.MipmapOrdering.Level;
-import bdv.viewer.render.MipmapOrdering.MipmapHints;
-import bdv.viewer.render.Prefetcher;
-import bdv.viewer.state.SourceState;
-import bdv.viewer.state.ViewerState;
+import bdv.viewer.ViewerState;
 import mpicbg.spim.data.SpimDataException;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
-import net.imglib2.Dimensions;
 import net.imglib2.Interval;
-import net.imglib2.RandomAccess;
-import net.imglib2.RandomAccessible;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.cache.volatiles.CacheHints;
-import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 import mpicbg.spim.data.registration.*;
 import mpicbg.spim.data.sequence.ViewId;
-import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineRandomAccessible;
-import bdv.img.cache.VolatileCachedCellImg;
 
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
@@ -108,7 +87,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private JTextField scaleField;
 	private JCheckBox autoUpdate;
-	private JCheckBox cacheTimepoints;
 	
 	private HashMap<String, ArrayList<SpimDataMinimal>> bdvSources;
 	
@@ -173,7 +151,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		JPanel optionsPane = new JPanel();
 		
 		autoUpdate = new JCheckBox("Auto update", true);
-		cacheTimepoints = new JCheckBox("Cache timepoints", false);
 		
 		optionsPane.add(new JLabel("Zoom "));
 		
@@ -184,15 +161,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		optionsPane.add(scaleField);
 		optionsPane.add(autoUpdate);
-		
-		//START Cache testing
-		optionsPane.add(cacheTimepoints);
-		Bdv.options().screenScales(screenScales);
-		Bdv.options().targetRenderNanos(1_000_000_000);
-		screenScaleTransforms = new AffineTransform3D[ screenScales.length ];
-		screenImages = new ARGBScreenImage[ screenScales.length ][ 3 ];
-		Bdv.options().numRenderingThreads(8);
-		//END Cache testing
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
 		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
@@ -273,7 +241,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		for (SpimDataMinimal spimData : bdvSources.get(meta.getUID()))
 			BdvFunctions.show( spimData, Bdv.options().addTo( bdv ) );
 		
-		InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewerPanel(), bdv.getSetupAssignments() );
+		InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
@@ -395,76 +363,12 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 1, 3 ) - target[1] + dim.getHeight()/2, 1, 3 );
 		
 		bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( affine );
-
-		if (cacheTimepoints.isSelected()) {
-			ViewerState viewerState = bdv.getBdvHandle().getViewerPanel().getState();
-			
-			//For the moment, we assume all sources have the same number of timepoints
-			int timepoints = bdvSources.get(metaUID).get( 0 ).getSequenceDescription().getTimePoints().size();
-			
-			//Pre-cache timepoints for all sources
-			checkResize();
-			final List< SourceState< ? > > sourceStates = viewerState.getSources();
-			
-			CacheHints hints = new CacheHints( LoadingStrategy.VOLATILE, 0, false );
-				
-			for (int sourceIndex=0;sourceIndex<sourceStates.size();sourceIndex++) {
-				
-				final Source< ? > spimSource = sourceStates.get( sourceIndex ).getSpimSource();
-				
-				final ARGBScreenImage screenImage = screenImages[ 0 ][ 0 ];
-				
-				for ( int t = 0; t < timepoints; t++ ) {
-						prefetch( viewerState, t, spimSource, affine, 0, hints, screenImage );
-				}
-			}
-		}
-	}
-	
-	
-	//Added timepoint input..
-	private static < T > void prefetch(
-			final ViewerState viewerState,
-			final int timepoint,
-			final Source< T > source,
-			final AffineTransform3D screenScaleTransform,
-			final int mipmapIndex,
-			final CacheHints prefetchCacheHints,
-			final Dimensions screenInterval )
-	{
-		final RandomAccessibleInterval< T > img = source.getSource( timepoint, mipmapIndex );
-		
-		final VolatileCachedCellImg< ?, ? > cellImg = ( VolatileCachedCellImg< ?, ? > ) img;
-
-		CacheHints hints = prefetchCacheHints;
-		if ( hints == null )
-		{
-			final CacheHints d = cellImg.getDefaultCacheHints();
-			hints = new CacheHints( LoadingStrategy.VOLATILE, d.getQueuePriority(), false );
-		}
-		cellImg.setCacheHints( hints );
-		final int[] cellDimensions = new int[ 3 ];
-		cellImg.getCellGrid().cellDimensions( cellDimensions );
-		final long[] dimensions = new long[ 3 ];
-		cellImg.dimensions( dimensions );
-		final RandomAccess< ? > cellsRandomAccess = cellImg.getCells().randomAccess();
-
-		final Interpolation interpolation = viewerState.getInterpolation();
-
-		final AffineTransform3D sourceToScreen = new AffineTransform3D();
-		viewerState.getViewerTransform( sourceToScreen );
-		final AffineTransform3D sourceTransform = new AffineTransform3D();
-		source.getSourceTransform( timepoint, mipmapIndex, sourceTransform );
-		sourceToScreen.concatenate( sourceTransform );
-		sourceToScreen.preConcatenate( screenScaleTransform );
-
-		Prefetcher.fetchCells( sourceToScreen, cellDimensions, dimensions, screenInterval, interpolation, cellsRandomAccess );
 	}
 	
 	public void resetView() {
 		ViewerPanel viewer = bdv.getBdvHandle().getViewerPanel();
 		Dimension dim = viewer.getDisplay().getSize();
-		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.getState() );
+		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
 		viewer.setCurrentViewerTransform(viewerTransform);
 	}
 
@@ -487,13 +391,17 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	 * @return proposed initial viewer transform.
 	 */
 	public static AffineTransform3D initTransform( final int viewerWidth, final int viewerHeight, final boolean zoomedIn, final ViewerState state ) {
-		final int cX = viewerWidth / 2;
-		final int cY = viewerHeight / 2;
+		final AffineTransform3D viewerTransform = new AffineTransform3D();
+		final double cX = viewerWidth / 2.0;
+		final double cY = viewerHeight / 2.0;
 
-		final Source< ? > source = state.getSources().get( state.getCurrentSource() ).getSpimSource();
+		final SourceAndConverter< ? > current = state.getCurrentSource();
+		if ( current == null )
+			return viewerTransform;
+		final Source< ? > source = current.getSpimSource();
 		final int timepoint = state.getCurrentTimepoint();
 		if ( !source.isPresent( timepoint ) )
-			return new AffineTransform3D();
+			return viewerTransform;
 
 		final AffineTransform3D sourceTransform = new AffineTransform3D();
 		source.getSourceTransform( timepoint, 0, sourceTransform );
@@ -527,7 +435,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		LinAlgHelpers.scale( translation, -1, translation );
 		LinAlgHelpers.setCol( 3, translation, m );
 
-		final AffineTransform3D viewerTransform = new AffineTransform3D();
 		viewerTransform.set( m );
 
 		// scale
