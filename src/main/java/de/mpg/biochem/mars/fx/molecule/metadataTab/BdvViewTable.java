@@ -35,9 +35,8 @@ import com.jfoenix.controls.JFXCheckBox;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.MarsBdvSource;
 import javafx.stage.FileChooser;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -64,6 +63,9 @@ public class BdvViewTable implements MetadataEventHandler {
     protected CustomTextField addBdvSourceNameField;
     protected TableView<MarsBdvSource> bdvTable;
     protected ObservableList<MarsBdvSource> bdvRowList = FXCollections.observableArrayList();
+    
+    protected Button typeButton;
+    protected int buttonType = 0;
 
     public BdvViewTable() {        
     	bdvTable = new TableView<MarsBdvSource>();
@@ -132,6 +134,17 @@ public class BdvViewTable implements MetadataEventHandler {
         nameColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         bdvTable.getColumns().add(nameColumn);
         
+        TableColumn<MarsBdvSource, String> typeColumn = new TableColumn<>("Type");
+        typeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        typeColumn.setCellValueFactory(bdvSource ->
+                new ReadOnlyObjectWrapper<>((bdvSource.getValue().isN5()) ? "N5" : "HD5")
+        );
+        typeColumn.setSortable(false);
+        typeColumn.setPrefWidth(100);
+        typeColumn.setMinWidth(100);
+        typeColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
+        bdvTable.getColumns().add(typeColumn);
+        
         TableColumn<MarsBdvSource, String> m00Column = buildAffineColumn("m00", 0, 0);
         bdvTable.getColumns().add(m00Column);
         TableColumn<MarsBdvSource, String> m01Column = buildAffineColumn("m01", 0, 1);
@@ -176,12 +189,34 @@ public class BdvViewTable implements MetadataEventHandler {
     	driftCorrectColumn.setSortable(false);
     	bdvTable.getColumns().add(driftCorrectColumn);
 
-        TableColumn<MarsBdvSource, String> xmlPathColumn = buildEntryFieldColumn("file path (xml)");
-        xmlPathColumn.setOnEditCommit(event -> event.getRowValue().setPathToXml(event.getNewValue()));
-        xmlPathColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getPathToXml()))
+    	TableColumn<MarsBdvSource, String> channelColumn = buildEntryFieldColumn("C");
+    	channelColumn.setOnEditCommit(event -> { 
+        	try {
+    			int num = Integer.valueOf(event.getNewValue());
+    			event.getRowValue().setChannel(num);
+    		} catch (NumberFormatException e) {
+    			//Do nothing for the moment...
+    		}
+        });
+    	channelColumn.setCellValueFactory(bdvSource -> {
+    		String str = String.valueOf(bdvSource.getValue().getChannel());
+    		return new ReadOnlyObjectWrapper<>(str);
+    	});
+    	bdvTable.getColumns().add(channelColumn);
+    	
+    	TableColumn<MarsBdvSource, String> datasetColumn = buildEntryFieldColumn("N5 Dataset");
+    	datasetColumn.setOnEditCommit(event -> event.getRowValue().setN5Dataset(event.getNewValue()));
+    	datasetColumn.setCellValueFactory(bdvSource ->
+                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getN5Dataset()))
         );
-        bdvTable.getColumns().add(xmlPathColumn);
+        bdvTable.getColumns().add(datasetColumn);
+    	
+        TableColumn<MarsBdvSource, String> pathColumn = buildEntryFieldColumn("Path");
+        pathColumn.setOnEditCommit(event -> event.getRowValue().setPath(event.getNewValue()));
+        pathColumn.setCellValueFactory(bdvSource ->
+                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getPath()))
+        );
+        bdvTable.getColumns().add(pathColumn);
         
         bdvTable.setItems(bdvRowList);
         bdvTable.setEditable(true);
@@ -203,10 +238,19 @@ public class BdvViewTable implements MetadataEventHandler {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 
-				File pathToXml = fileChooser.showOpenDialog(getNode().getScene().getWindow());
+				File path = fileChooser.showOpenDialog(getNode().getScene().getWindow());
 				
-				if (pathToXml != null) {
-					bdvSource.setPathToXml(pathToXml.getAbsolutePath());
+				if (path != null) {
+					bdvSource.setPath(path.getAbsolutePath());
+
+				switch (this.buttonType) {
+					case 0:
+						bdvSource.setN5(true);
+			    		break;
+					case 1:
+						bdvSource.setHD5(true);
+						break;
+				}
 					marsImageMetadata.putBdvSource(bdvSource);
 					loadBdvSources();
 				}
@@ -223,13 +267,44 @@ public class BdvViewTable implements MetadataEventHandler {
 		addBdvSourceNameField.setStyle(
                 "-fx-background-radius: 2em; "
         );
+		
+		typeButton = new Button();
+        typeButton.setText("N5");
+        typeButton.setCenterShape(true);
+        typeButton.setStyle(
+                "-fx-background-radius: 2em; " +
+                "-fx-min-width: 60px; " +
+                "-fx-min-height: 30px; " +
+                "-fx-max-width: 60px; " +
+                "-fx-max-height: 30px;"
+        );
+        typeButton.setOnAction(e -> {
+        	buttonType++;
+        	if (buttonType > 1)
+        		buttonType = 0;
+        	
+			switch (buttonType) {
+				case 0:
+					typeButton.setText("N5");
+					typeButton.setGraphic(null);
+					break;
+				case 1:
+					typeButton.setText("HD5");
+					typeButton.setGraphic(null);
+					break;
+			}
+		});
+        
+        BorderPane bomttomPane = new BorderPane();
+        bomttomPane.setCenter(addBdvSourceNameField);
+        bomttomPane.setLeft(typeButton);
 
         rootPane = new BorderPane();
         Insets insets = new Insets(5);
         
         rootPane.setCenter(bdvTable);
         rootPane.setBottom(addBdvSourceNameField);
-        BorderPane.setMargin(addBdvSourceNameField, insets);
+        BorderPane.setMargin(bomttomPane, insets);
         
         getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
     }
