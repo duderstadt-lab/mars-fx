@@ -35,8 +35,12 @@ public class MarsN5Source< T extends NumericType< T > > extends AbstractSource< 
 	@Override
 	public RandomAccessibleInterval< T > getSource( final int t, final int level )
 	{
+		RandomAccessibleInterval< T > img = Views.hyperSlice(images[ level ], images[ level ].numDimensions() - 1, t);
 		//For now we assume time is the last axis and reslice accordingly
-		return Views.hyperSlice(images[ level ], images[ level ].numDimensions() - 1, t);
+		if (img.numDimensions() > 2)
+			return img; 
+		else
+			return Views.addDimension( img , 0, 0);
 	}
 
 	@Override
