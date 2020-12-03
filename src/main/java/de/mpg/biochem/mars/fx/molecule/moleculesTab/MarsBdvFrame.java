@@ -98,6 +98,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private AffineTransform3D[] screenScaleTransforms;
 	protected ARGBScreenImage[][] screenImages;
 	
+	private int numTimePoints = 1;
+	
 	private JTextField scaleField;
 	private JCheckBox autoUpdate;
 	
@@ -263,8 +265,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		}
 			
 		for (Source<T> source : bdvSources.get(meta.getUID())) {
-			System.out.println("source " + source.getName());
-			BdvFunctions.show( source, Bdv.options().addTo( bdv ) );
+			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
 		}
 		
 		InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
@@ -333,14 +334,11 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				//Either use numFrames attribute for timepoints or assume T is last dimension.
 				//final int tSize = (attributes.asMap().containsKey("numFrames")) ? Integer.valueOf(attributes.asMap().get("numFrames").toString()) : (int) dimensions[dimensions.length - 1];
 				//final int tSize = (int) dimensions[dimensions.length - 1];
-				
-				System.out.println("numDimensions " + image.numDimensions());
-				for (int dim=0; dim < image.numDimensions(); dim++)
-					System.out.println("dim" + dim + " " + image.dimension(dim));
-				
+
 				int tSize = (int) image.dimension(image.numDimensions() - 1);
 				
-				System.out.println("tSize " + tSize);
+				if (tSize > numTimePoints)
+					numTimePoints = tSize;
 				
 				AffineTransform3D[] transforms = new AffineTransform3D[tSize];
 				
@@ -380,6 +378,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 						} else
 							registrations.get(id).getModel().set(source.getAffineTransform3D());
 					}
+					
+					if (spimData.getSequenceDescription().getTimePoints().size() > numTimePoints)
+						numTimePoints = spimData.getSequenceDescription().getTimePoints().size();
 					
 					sources.add(new SpimSource<T>(spimData, 0, "source"));
 				} catch (SpimDataException e) {
