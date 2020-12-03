@@ -97,6 +97,8 @@ import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineRandomAccessible;
 import bdv.img.cache.VolatileCachedCellImg;
 
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
+
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
