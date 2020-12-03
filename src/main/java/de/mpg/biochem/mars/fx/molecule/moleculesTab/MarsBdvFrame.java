@@ -31,8 +31,10 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -56,13 +58,18 @@ import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.ViewerState;
+import bdv.util.volatiles.SharedQueue;
 import mpicbg.spim.data.SpimDataException;
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
+import net.imglib2.util.Util;
+import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.Volatile;
 import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -76,6 +83,12 @@ import mpicbg.spim.data.sequence.ViewId;
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineRandomAccessible;
 
+import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
+import org.janelia.saalfeldlab.n5.metadata.N5ImagePlusMetadata;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+import org.janelia.saalfeldlab.n5.N5Reader;
+import org.janelia.saalfeldlab.n5.ij.N5Importer;
+
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
@@ -88,7 +101,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private JTextField scaleField;
 	private JCheckBox autoUpdate;
 	
-	private HashMap<String, ArrayList<SpimDataMinimal>> bdvSources;
+	private final SharedQueue sharedQueue;
+	
+	private HashMap<String, List<Source<T>>> bdvSources;
+	private HashMap<String, N5Reader> n5Readers;
 	
 	private String metaUID;
 	
@@ -107,7 +123,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		this.xParameter = xParameter;
 		this.yParameter = yParameter;
 		
-		bdvSources = new HashMap<String, ArrayList<SpimDataMinimal>>();
+		bdvSources = new HashMap<String, List<Source<T>>>();
+		n5Readers = new HashMap<String, N5Reader>();
+		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
 		
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 		
@@ -231,22 +249,30 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			frame.setVisible( false );
 			frame.remove(bdv.getViewerPanel());
 		}
-		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );		
+		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );	
+		
 		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
 		frame.setVisible( true );
 		
-		if (!bdvSources.containsKey(meta.getUID()))
-			bdvSources.put(meta.getUID(), loadNewSources(meta));
-		
-		for (SpimDataMinimal spimData : bdvSources.get(meta.getUID()))
-			BdvFunctions.show( spimData, Bdv.options().addTo( bdv ) );
+		if (!bdvSources.containsKey(meta.getUID())) {
+			try {
+				bdvSources.put(meta.getUID(), loadSources(meta));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+			
+		for (Source<T> source : bdvSources.get(meta.getUID())) {
+			System.out.println("source " + source.getName());
+			BdvFunctions.show( source, Bdv.options().addTo( bdv ) );
+		}
 		
 		InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
 		int numChannels = bdvSources.get(metaUID).size();
-		
+		/*
 		int TOP_left_x0 = (int)molecule.getParameter(xParameter) + x0;
 		int TOP_left_y0 = (int)molecule.getParameter(yParameter) + y0;
 		
@@ -254,9 +280,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		for ( int i = 0; i < numChannels; i++ ) {
 			ArrayList< RandomAccessibleInterval< T > > raiList = new ArrayList< RandomAccessibleInterval< T > >(); 
-			SpimDataMinimal bdvSource = bdvSources.get(metaUID).get(i);
+			Source<T> bdvSource = bdvSources.get(metaUID).get(i);
 			
-			for ( int t = 0; t < bdvSource.getSequenceDescription().getTimePoints().size(); t++ ) {
+			for ( int t = 0; t < bdvSource; t++ ) {
 				//SpimDataMinimal, setup, name
 				SpimSource<T> spimS = new SpimSource<T>( bdvSource, 0, "source" );
 
@@ -280,36 +306,89 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		//image arrays, boolean keep original.
 		ImagePlus ip = ij.plugin.RGBStackMerge.mergeChannels(images, false);
 		ip.setTitle("molecule " + molecule.getUID());
-		
 		return ip;
+		*/
+		return new ImagePlus("my image");
 	}
 	
-	private ArrayList<SpimDataMinimal> loadNewSources(MarsMetadata meta) {
-		ArrayList<SpimDataMinimal> spimArray = new ArrayList<SpimDataMinimal>();
+	private List<Source<T>> loadSources(MarsMetadata meta) throws IOException {
+		List<Source<T>> sources = new ArrayList<Source<T>>();
 		for (MarsBdvSource source : meta.getBdvSources()) {
-			SpimDataMinimal spimData;
-			try {
-				spimData = new XmlIoSpimDataMinimal().load( source.getPathToXml() );
-				
-				//Add transforms to spimData...
-				Map< ViewId, ViewRegistration > registrations = spimData.getViewRegistrations().getViewRegistrations();
-					
-				for (ViewId id : registrations.keySet()) {
-					if (source.getCorrectDrift()) {
-						double dX = meta.getPlane(0, 0, 0, id.getTimePointId()).getXDrift();
-						double dY = meta.getPlane(0, 0, 0, id.getTimePointId()).getYDrift();
-						registrations.get(id).getModel().set(source.getAffineTransform3D(dX, dY));
-					} else
-						registrations.get(id).getModel().set(source.getAffineTransform3D());
+			if (source.isN5()) {
+				N5Reader reader;
+				if (n5Readers.containsKey(source.getPath())) { 
+					reader = n5Readers.get(source.getPath());
+				} else {
+					reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
+					n5Readers.put(source.getPath(), reader);
 				}
 				
-				spimArray.add(spimData);
-			} catch (SpimDataException e) {
-				e.printStackTrace();
+				@SuppressWarnings( "rawtypes" )
+				//final RandomAccessibleInterval image = N5Utils.openVolatile( reader, source.getN5Dataset() );
+				final RandomAccessibleInterval image = N5Utils.open( reader, source.getN5Dataset() );
+				//final DatasetAttributes attributes = reader.getDatasetAttributes(source.getN5Dataset());
+				
+				//final long[] dimensions = attributes.getDimensions();
+
+				//Either use numFrames attribute for timepoints or assume T is last dimension.
+				//final int tSize = (attributes.asMap().containsKey("numFrames")) ? Integer.valueOf(attributes.asMap().get("numFrames").toString()) : (int) dimensions[dimensions.length - 1];
+				//final int tSize = (int) dimensions[dimensions.length - 1];
+				
+				System.out.println("numDimensions " + image.numDimensions());
+				for (int dim=0; dim < image.numDimensions(); dim++)
+					System.out.println("dim" + dim + " " + image.dimension(dim));
+				
+				int tSize = (int) image.dimension(image.numDimensions() - 1);
+				
+				System.out.println("tSize " + tSize);
+				
+				AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+				
+				for (int t = 0; t < tSize; t++) {
+					if (source.getCorrectDrift()) {
+						double dX = meta.getPlane(0, 0, 0, t).getXDrift();
+						double dY = meta.getPlane(0, 0, 0, t).getYDrift();
+						transforms[t] = source.getAffineTransform3D(dX, dY);
+					} else
+						transforms[t] = source.getAffineTransform3D();
+				}
+				
+				@SuppressWarnings( "rawtypes" )
+				final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
+				images[0] = image;
+
+				@SuppressWarnings( "unchecked" )
+				final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
+				
+				sources.add(n5Source);
+				
+				//sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
+				
+			} else {
+				SpimDataMinimal spimData;
+				try {
+					spimData = new XmlIoSpimDataMinimal().load( source.getPath() );
+					
+					//Add transforms to spimData...
+					Map< ViewId, ViewRegistration > registrations = spimData.getViewRegistrations().getViewRegistrations();
+						
+					for (ViewId id : registrations.keySet()) {
+						if (source.getCorrectDrift()) {
+							double dX = meta.getPlane(0, 0, 0, id.getTimePointId()).getXDrift();
+							double dY = meta.getPlane(0, 0, 0, id.getTimePointId()).getYDrift();
+							registrations.get(id).getModel().set(source.getAffineTransform3D(dX, dY));
+						} else
+							registrations.get(id).getModel().set(source.getAffineTransform3D());
+					}
+					
+					sources.add(new SpimSource<T>(spimData, 0, "source"));
+				} catch (SpimDataException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		
-		return spimArray;
+		return sources;
 	}
 	
 	public void setPositionParameters(String xParameter, String yParameter) {

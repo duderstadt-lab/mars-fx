@@ -38,6 +38,7 @@ import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -52,7 +53,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.cell.TextFieldTableCell;
 
-import javafx.scene.layout.FlowPane;
+import javafx.stage.DirectoryChooser;
 
 public class BdvViewTable implements MetadataEventHandler {
     
@@ -235,22 +236,31 @@ public class BdvViewTable implements MetadataEventHandler {
 			if (!addBdvSourceNameField.getText().equals("") && !marsImageMetadata.hasBdvSource(addBdvSourceNameField.getText())) {
 				MarsBdvSource bdvSource = new MarsBdvSource(addBdvSourceNameField.getText());
 				
-				FileChooser fileChooser = new FileChooser();
-				fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-
-				File path = fileChooser.showOpenDialog(getNode().getScene().getWindow());
-				
-				if (path != null) {
-					bdvSource.setPath(path.getAbsolutePath());
-
 				switch (this.buttonType) {
 					case 0:
 						bdvSource.setN5(true);
 			    		break;
 					case 1:
-						bdvSource.setHD5(true);
+						bdvSource.setN5(false);
 						break;
 				}
+				
+				File path;
+				if (bdvSource.isN5()) {
+					DirectoryChooser directoryChooser = new DirectoryChooser();
+					directoryChooser.setTitle("Select N5 directory");
+					directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+					path = directoryChooser.showDialog(getNode().getScene().getWindow());
+				} else {
+					FileChooser fileChooser = new FileChooser();
+					fileChooser.setTitle("Select xml");
+					fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+					fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file", "*.xml"));
+					path = fileChooser.showOpenDialog(getNode().getScene().getWindow());
+				}
+
+				if (path != null) {
+					bdvSource.setPath(path.getAbsolutePath());
 					marsImageMetadata.putBdvSource(bdvSource);
 					loadBdvSources();
 				}
@@ -300,11 +310,11 @@ public class BdvViewTable implements MetadataEventHandler {
         bomttomPane.setLeft(typeButton);
 
         rootPane = new BorderPane();
-        Insets insets = new Insets(5);
-        
         rootPane.setCenter(bdvTable);
-        rootPane.setBottom(addBdvSourceNameField);
-        BorderPane.setMargin(bomttomPane, insets);
+        rootPane.setBottom(bomttomPane);
+        
+        BorderPane.setMargin(addBdvSourceNameField, new Insets(5));
+        BorderPane.setMargin(typeButton, new Insets(5));
         
         getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
     }
