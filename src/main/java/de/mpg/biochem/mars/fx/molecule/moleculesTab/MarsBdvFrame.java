@@ -97,6 +97,8 @@ import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
 
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
+
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
