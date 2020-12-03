@@ -82,9 +82,17 @@ import mpicbg.spim.data.registration.*;
 import mpicbg.spim.data.sequence.ViewId;
 import net.imglib2.realtransform.AffineGet;
 import net.imglib2.realtransform.AffineRandomAccessible;
+import bdv.tools.brightness.ConverterSetup;
+import bdv.viewer.ConverterSetups;
+import net.imglib2.histogram.Histogram1d;
+import net.imglib2.histogram.DiscreteFrequencyDistribution;
+import net.imglib2.histogram.Real1dBinMapper;
+
+import bdv.util.Bounds;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.saalfeldlab.n5.metadata.N5ImagePlusMetadata;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
@@ -264,11 +272,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 		}
 			
-		for (Source<T> source : bdvSources.get(meta.getUID())) {
+		for (Source<T> source : bdvSources.get(meta.getUID()))
 			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
-		}
 		
-		InitializeViewerState.initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
+		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
@@ -536,5 +543,61 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		viewerTransform.set( viewerTransform.get( 0, 3 ) + cX, 0, 3 );
 		viewerTransform.set( viewerTransform.get( 1, 3 ) + cY, 1, 3 );
 		return viewerTransform;
+	}
+	
+	public static void initBrightness( final double cumulativeMinCutoff, final double cumulativeMaxCutoff, final ViewerState state, final ConverterSetups converterSetups )
+	{
+		final SourceAndConverter< ? > current = state.getCurrentSource();
+		if ( current == null )
+			return;
+		final Source< ? > source = current.getSpimSource();
+		final int timepoint = state.getCurrentTimepoint();
+		final Bounds bounds = estimateSourceRange( source, timepoint, cumulativeMinCutoff, cumulativeMaxCutoff );
+		for ( SourceAndConverter< ? > s : state.getSources() )
+		{
+			final ConverterSetup setup = converterSetups.getConverterSetup( s );
+			setup.setDisplayRange( bounds.getMinBound(), bounds.getMaxBound() );
+		}
+	}
+	
+	/**
+	 * @param cumulativeMinCutoff
+	 * 		fraction of pixels that are allowed to be saturated at the lower end of the range.
+	 * @param cumulativeMaxCutoff
+	 * 		fraction of pixels that are allowed to be saturated at the upper end of the range.
+	 */
+	public static Bounds estimateSourceRange( final Source< ? > source, final int timepoint, final double cumulativeMinCutoff, final double cumulativeMaxCutoff )
+	{
+		final Object type = source.getType();
+		if ( type instanceof UnsignedShortType && source.isPresent( timepoint ) )
+		{
+			@SuppressWarnings( "unchecked" )
+			final RandomAccessibleInterval< UnsignedShortType > img = ( RandomAccessibleInterval< UnsignedShortType > ) source.getSource( timepoint, source.getNumMipmapLevels() - 1 );
+			final long z = ( img.min( 2 ) + img.max( 2 ) + 1 ) / 2;
+
+			final int numBins = 6535;
+			final Histogram1d< ? > histogram = new Histogram1d<>( Views.hyperSlice( img, 2, z ), new Real1dBinMapper<>( 0, 65535, numBins, false ) );
+			final DiscreteFrequencyDistribution dfd = histogram.dfd();
+			final long[] bin = new long[] { 0 };
+			double cumulative = 0;
+			int i = 0;
+			for ( ; i < numBins && cumulative < cumulativeMinCutoff; ++i )
+			{
+				bin[ 0 ] = i;
+				cumulative += dfd.relativeFrequency( bin );
+			}
+			final int min = i * 65535 / numBins;
+			for ( ; i < numBins && cumulative < cumulativeMaxCutoff; ++i )
+			{
+				bin[ 0 ] = i;
+				cumulative += dfd.relativeFrequency( bin );
+			}
+			final int max = i * 65535 / numBins;
+			return new Bounds( min, max );
+		}
+		else if ( type instanceof UnsignedByteType )
+			return new Bounds( 0, 255 );
+		else
+			return new Bounds( 0, 65535 );
 	}
 }
