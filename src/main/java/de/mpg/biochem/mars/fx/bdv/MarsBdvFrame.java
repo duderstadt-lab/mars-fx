@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.bdv;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -53,6 +53,7 @@ import bdv.spimdata.XmlIoSpimDataMinimal;
 import bdv.util.Affine3DHelpers;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
 import bdv.util.BdvHandlePanel;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
@@ -438,6 +439,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 
 	public JFrame getFrame() {
 		return frame;
+	}
+	
+	public BdvHandle getBdvHandle() {
+		return bdv;
 	}
 
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {

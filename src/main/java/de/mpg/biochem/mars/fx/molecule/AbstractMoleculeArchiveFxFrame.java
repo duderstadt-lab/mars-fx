@@ -119,6 +119,7 @@ import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
@@ -131,7 +132,6 @@ import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.metadata.MarsMetadata;

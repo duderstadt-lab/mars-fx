@@ -1,4 +1,4 @@
-package de.mpg.biochem.mars.fx.molecule.moleculesTab;
+package de.mpg.biochem.mars.fx.bdv;
 
 import bdv.util.AbstractSource;
 import bdv.util.volatiles.SharedQueue;

@@ -26,7 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 
