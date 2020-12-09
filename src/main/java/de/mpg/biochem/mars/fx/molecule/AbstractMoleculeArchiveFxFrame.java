@@ -411,7 +411,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			          		String yParameter = dialog.getNextString();
 			          		
 			            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
-			            		marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xParameter, yParameter);
+			            		marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xParameter, yParameter, true);
 			            		marsBdvFrame.getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
 			            		    @Override
 			            		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {

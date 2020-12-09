@@ -37,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.ActionMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -45,14 +46,21 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
+import bdv.BigDataViewer;
+import bdv.BigDataViewerActions;
 import bdv.SpimSource;
+import bdv.cache.CacheControl;
+import bdv.export.ProgressWriterConsole;
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
 import bdv.tools.InitializeViewerState;
 import bdv.util.Affine3DHelpers;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
+import bdv.util.BdvHandle;
+import bdv.util.BdvHandleFrame;
 import bdv.util.BdvHandlePanel;
+import bdv.util.BdvOptions;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
@@ -92,6 +100,10 @@ import bdv.util.Bounds;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
@@ -103,7 +115,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
 	
-	//private double[] screenScales = new double[] { 1, 0.75, 0.5, 0.25, 0.125 };
 	private double[] screenScales = new double[] { 1 };
 	private AffineTransform3D[] screenScaleTransforms;
 	protected ARGBScreenImage[][] screenImages;
@@ -118,6 +129,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private HashMap<String, List<Source<T>>> bdvSources;
 	private HashMap<String, N5Reader> n5Readers;
 	
+	private boolean isVolatile = true;
+	
 	private String metaUID;
 	
 	private BdvHandlePanel bdv;
@@ -129,17 +142,18 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, String xParameter, String yParameter) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, String xParameter, String yParameter, boolean isVolatile) {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.xParameter = xParameter;
 		this.yParameter = yParameter;
+		this.isVolatile = isVolatile;
 		
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
 		
-		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+		System.setProperty( "apple.laf.useScreenMenuBar", "false" );
 		
 		frame = new JFrame( archive.getName() + " Bdv" );
 		
@@ -177,7 +191,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 		});
 		buttonPane.add(goTo);
-		
+
 		JPanel optionsPane = new JPanel();
 		
 		autoUpdate = new JCheckBox("Auto update", true);
@@ -193,6 +207,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		optionsPane.add(autoUpdate);
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
+		
 		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
 		
 		JPanel panel = new JPanel(new GridLayout(2, 1));
@@ -200,18 +215,31 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		panel.add(buttonPane);
 		panel.add(optionsPane);
 		
+		final JMenuBar menubar = new JMenuBar();
+		final ActionMap actionMap = bdv.getKeybindings().getConcatenatedActionMap();
+		
+		final JMenu menu = new JMenu( "Help" );
+		final JMenuItem miHelp = new JMenuItem( actionMap.get( BigDataViewerActions.SHOW_HELP ) );
+		miHelp.setText( "Show Help" );
+		menu.add( miHelp );
+		menubar.add(menu);
+		
+		frame.setJMenuBar( menubar );
+		
 		frame.add(panel, BorderLayout.SOUTH);
 		frame.setPreferredSize( new Dimension( 800, 600 ) );
 		frame.pack();
 		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		frame.setVisible( true );
 		
 		load();
 	}
 	
 	protected synchronized boolean checkResize() {
 		
-		final int componentW = bdv.getBdvHandle().getViewerPanel().getDisplay().getWidth();
-		final int componentH = bdv.getBdvHandle().getViewerPanel().getDisplay().getHeight();
+		final int componentW = bdv.getViewerPanel().getDisplay().getWidth();
+		final int componentH = bdv.getViewerPanel().getDisplay().getHeight();
 		if ( screenImages[ 0 ][ 0 ] == null || screenImages[ 0 ][ 0 ].dimension( 0 ) != ( int ) ( componentW * screenScales[ 0 ] ) || screenImages[ 0 ][ 0 ].dimension( 1 ) != ( int ) ( componentH  * screenScales[ 0 ] ) )
 		{
 			for ( int i = 0; i < screenScales.length; ++i )
@@ -257,14 +285,13 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	private void createView(MarsMetadata meta) {
-		if (bdv != null) {
-			frame.setVisible( false );
-			frame.remove(bdv.getViewerPanel());
-		}
-		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );	
-		
-		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
-		frame.setVisible( true );
+		//if (bdv != null) {
+		//	frame.setVisible( false );
+		//	frame.remove(bdv.getViewerPanel());
+		//} else {
+		//	bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );	
+		//	frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
+		//}
 		
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
@@ -280,29 +307,28 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
+	//How can we deal with Volatile views? Somehow use isVolatile here to wait if pixels are not loaded??
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
-		int numChannels = bdvSources.get(metaUID).size();
-		/*
+		int numSources = bdvSources.get(metaUID).size();
+		
 		int TOP_left_x0 = (int)molecule.getParameter(xParameter) + x0;
 		int TOP_left_y0 = (int)molecule.getParameter(yParameter) + y0;
 		
-		ImagePlus[] images = new ImagePlus[numChannels];
+		ImagePlus[] images = new ImagePlus[numSources];
 		
-		for ( int i = 0; i < numChannels; i++ ) {
+		for ( int i = 0; i < numSources; i++ ) {
 			ArrayList< RandomAccessibleInterval< T > > raiList = new ArrayList< RandomAccessibleInterval< T > >(); 
 			Source<T> bdvSource = bdvSources.get(metaUID).get(i);
 			
-			for ( int t = 0; t < bdvSource; t++ ) {
-				//SpimDataMinimal, setup, name
-				SpimSource<T> spimS = new SpimSource<T>( bdvSource, 0, "source" );
+			for ( int t = 0; t < numTimePoints; t++ ) {
 
 				//t, level, interpolation
-				final RealRandomAccessible< T > raiRaw = ( RealRandomAccessible< T > )spimS.getInterpolatedSource( t, 0, Interpolation.NLINEAR );
+				final RealRandomAccessible< T > raiRaw = ( RealRandomAccessible< T > )bdvSource.getInterpolatedSource( t, 0, Interpolation.NLINEAR );
 				
 				//retrieve transform
-				AffineTransform3D affine = bdvSource.getViewRegistrations().getViewRegistration(t, 0).getModel();
+				AffineTransform3D affine = new AffineTransform3D();
+				bdvSource.getSourceTransform(t, 0, affine);
 				final AffineRandomAccessible< T, AffineGet > rai = RealViews.affine( raiRaw, affine );
-				
 				RandomAccessibleInterval< T > view = Views.interval( Views.raster( rai ), new long[] { TOP_left_x0, TOP_left_y0, 0 }, new long[]{ TOP_left_x0 + width, TOP_left_y0 + height, 0 } );
 				
 				raiList.add( view );
@@ -310,15 +336,13 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			RandomAccessibleInterval< T > raiStack = Views.stack( raiList );
 			images[i] = ImageJFunctions.wrap( raiStack, "channel " + i );
 		}
-		if (numChannels == 1)
+		if (numSources == 1)
 			return images[0];
 		
 		//image arrays, boolean keep original.
 		ImagePlus ip = ij.plugin.RGBStackMerge.mergeChannels(images, false);
 		ip.setTitle("molecule " + molecule.getUID());
 		return ip;
-		*/
-		return new ImagePlus("my image");
 	}
 	
 	private List<Source<T>> loadSources(MarsMetadata meta) throws IOException {
@@ -334,12 +358,12 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				}
 				
 				@SuppressWarnings( "rawtypes" )
-				//final RandomAccessibleInterval image = N5Utils.openVolatile( reader, source.getN5Dataset() );
-				final RandomAccessibleInterval image = N5Utils.open( reader, source.getN5Dataset() );
-				//final DatasetAttributes attributes = reader.getDatasetAttributes(source.getN5Dataset());
+				final RandomAccessibleInterval image = (isVolatile) ? 
+						N5Utils.openVolatile( reader, source.getN5Dataset() ) :
+						N5Utils.open( reader, source.getN5Dataset() );
 				
+				//final DatasetAttributes attributes = reader.getDatasetAttributes(source.getN5Dataset());
 				//final long[] dimensions = attributes.getDimensions();
-
 				//Either use numFrames attribute for timepoints or assume T is last dimension.
 				//final int tSize = (attributes.asMap().containsKey("numFrames")) ? Integer.valueOf(attributes.asMap().get("numFrames").toString()) : (int) dimensions[dimensions.length - 1];
 				//final int tSize = (int) dimensions[dimensions.length - 1];
@@ -367,9 +391,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				@SuppressWarnings( "unchecked" )
 				final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
 				
-				sources.add(n5Source);
-				
-				//sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
+				if (isVolatile)
+					sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
+				else
+					sources.add(n5Source);
 				
 			} else {
 				SpimDataMinimal spimData;
@@ -405,11 +430,11 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		this.xParameter = xParameter;
 		this.yParameter = yParameter;
 	}
-	
+
 	public JFrame getFrame() {
 		return frame;
 	}
-	
+
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 	}
@@ -417,7 +442,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public void goTo(double x, double y) {
 		resetView();
 		
-		Dimension dim = bdv.getBdvHandle().getViewerPanel().getDisplay().getSize();
+		Dimension dim = bdv.getViewerPanel().getDisplay().getSize();
 		viewerTransform = bdv.getViewerPanel().getDisplay().getTransformEventHandler().getTransform();
 		AffineTransform3D affine = viewerTransform;
 		
@@ -451,11 +476,11 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 0, 3 ) - target[0] + dim.getWidth()/2, 0, 3 );
 		affine.set( affine.get( 1, 3 ) - target[1] + dim.getHeight()/2, 1, 3 );
 		
-		bdv.getBdvHandle().getViewerPanel().setCurrentViewerTransform( affine );
+		bdv.getViewerPanel().setCurrentViewerTransform( affine );
 	}
 	
 	public void resetView() {
-		ViewerPanel viewer = bdv.getBdvHandle().getViewerPanel();
+		ViewerPanel viewer = bdv.getViewerPanel();
 		Dimension dim = viewer.getDisplay().getSize();
 		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
 		viewer.setCurrentViewerTransform(viewerTransform);
