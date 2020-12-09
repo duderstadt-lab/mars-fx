@@ -46,39 +46,31 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 
-import bdv.BigDataViewer;
 import bdv.BigDataViewerActions;
 import bdv.SpimSource;
-import bdv.cache.CacheControl;
-import bdv.export.ProgressWriterConsole;
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
-import bdv.tools.InitializeViewerState;
 import bdv.util.Affine3DHelpers;
 import bdv.util.Bdv;
 import bdv.util.BdvFunctions;
-import bdv.util.BdvHandle;
-import bdv.util.BdvHandleFrame;
 import bdv.util.BdvHandlePanel;
-import bdv.util.BdvOptions;
 import bdv.viewer.Interpolation;
 import bdv.viewer.Source;
 import bdv.viewer.SourceAndConverter;
 import bdv.viewer.ViewerPanel;
 import bdv.viewer.ViewerState;
+import bdv.tools.HelpDialog;
 import bdv.util.volatiles.SharedQueue;
 import mpicbg.spim.data.SpimDataException;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
+import ij.gui.GenericDialog;
 import net.imglib2.util.Util;
-import net.imagej.axis.Axes;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
-import net.imglib2.Volatile;
-import net.imglib2.display.screenimage.awt.ARGBScreenImage;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
@@ -103,26 +95,21 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.AbstractAction;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
-
-import de.mpg.biochem.mars.metadata.MarsBdvSource;
 
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
 	
-	private double[] screenScales = new double[] { 1 };
-	private AffineTransform3D[] screenScaleTransforms;
-	protected ARGBScreenImage[][] screenImages;
-	
 	private int numTimePoints = 1;
 	
 	private JTextField scaleField;
 	private JCheckBox autoUpdate;
+	private final HelpDialog helpDialog;
 	
 	private final SharedQueue sharedQueue;
 	
@@ -131,7 +118,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private boolean isVolatile = true;
 	
-	private String metaUID;
+	private String metaUID = "";
 	
 	private BdvHandlePanel bdv;
 	
@@ -155,14 +142,34 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		System.setProperty( "apple.laf.useScreenMenuBar", "false" );
 		
+		JPanel panel = new JPanel(new GridLayout(2, 1));
+		panel.add(createButtonsPanel());
+		panel.add(createOptionsPanel());
+
 		frame = new JFrame( archive.getName() + " Bdv" );
+		helpDialog = new HelpDialog(frame);
 		
-		JPanel buttonPane = new JPanel();
+		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
+		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
+		
+		frame.setJMenuBar( createMenuBar() );
+		frame.add(panel, BorderLayout.SOUTH);
+		frame.setPreferredSize( new Dimension( 800, 600 ) );
+		frame.pack();
+		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		setMolecule(molecule);
+		
+		frame.setVisible( true );
+	}
+	
+	private JPanel createButtonsPanel() {
+		final JPanel buttonPane = new JPanel();
 		
 		JButton reload = new JButton("Reload");
 		reload.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				load();
+				setMolecule(molecule);
 			}
 		});
 		buttonPane.add(reload);
@@ -178,7 +185,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		JButton goTo = new JButton("Go to molecule");
 		goTo.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				//Molecule molecule = molPane.getMolecule();
 				if (molecule != null) {			
 					MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 					if (!metaUID.equals(meta.getUID())) {
@@ -191,84 +197,93 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 		});
 		buttonPane.add(goTo);
-
-		JPanel optionsPane = new JPanel();
+		
+		return buttonPane;
+	}
+	
+	private JPanel createOptionsPanel() {
+		final JPanel optionsPanel = new JPanel();
 		
 		autoUpdate = new JCheckBox("Auto update", true);
 		
-		optionsPane.add(new JLabel("Zoom "));
+		optionsPanel.add(new JLabel("Zoom "));
 		
 		scaleField = new JTextField(6);
 		scaleField.setText("10");
 		Dimension dimScaleField = new Dimension(100, 20);
 		scaleField.setMinimumSize(dimScaleField);
 		
-		optionsPane.add(scaleField);
-		optionsPane.add(autoUpdate);
+		optionsPanel.add(scaleField);
+		optionsPanel.add(autoUpdate);
 		
-		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
-		
-		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
-		
-		JPanel panel = new JPanel(new GridLayout(2, 1));
-		
-		panel.add(buttonPane);
-		panel.add(optionsPane);
-		
+		return optionsPanel;
+	}
+	
+	private JMenuBar createMenuBar() {
 		final JMenuBar menubar = new JMenuBar();
 		final ActionMap actionMap = bdv.getKeybindings().getConcatenatedActionMap();
 		
-		final JMenu menu = new JMenu( "Help" );
-		final JMenuItem miHelp = new JMenuItem( actionMap.get( BigDataViewerActions.SHOW_HELP ) );
-		miHelp.setText( "Show Help" );
-		menu.add( miHelp );
-		menubar.add(menu);
-		
-		frame.setJMenuBar( menubar );
-		
-		frame.add(panel, BorderLayout.SOUTH);
-		frame.setPreferredSize( new Dimension( 800, 600 ) );
-		frame.pack();
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		
-		frame.setVisible( true );
-		
-		load();
-	}
-	
-	protected synchronized boolean checkResize() {
-		
-		final int componentW = bdv.getViewerPanel().getDisplay().getWidth();
-		final int componentH = bdv.getViewerPanel().getDisplay().getHeight();
-		if ( screenImages[ 0 ][ 0 ] == null || screenImages[ 0 ][ 0 ].dimension( 0 ) != ( int ) ( componentW * screenScales[ 0 ] ) || screenImages[ 0 ][ 0 ].dimension( 1 ) != ( int ) ( componentH  * screenScales[ 0 ] ) )
-		{
-			for ( int i = 0; i < screenScales.length; ++i )
-			{
-				final double screenToViewerScale = screenScales[ i ];
-				final int w = ( int ) ( screenToViewerScale * componentW );
-				final int h = ( int ) ( screenToViewerScale * componentH );
-				screenImages[ i ][ 0 ] = new ARGBScreenImage( w, h );
-				final AffineTransform3D scale = new AffineTransform3D();
-				final double xScale = ( double ) w / componentW;
-				final double yScale = ( double ) h / componentH;
-				scale.set( xScale, 0, 0 );
-				scale.set( yScale, 1, 1 );
-				scale.set( 0.5 * xScale - 0.5, 0, 3 );
-				scale.set( 0.5 * yScale - 0.5, 1, 3 );
-				screenScaleTransforms[ i ] = scale;
-			}
+		final JMenu fileMenu = new JMenu("File");
+		final JMenuItem exportVideo = new JMenuItem(new AbstractAction("Create movie") {
+		    /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
 
-			return true;
-		}
-		return false;
-	}
-	
-	public void load() {
-		MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
-		metaUID = meta.getUID();
-		createView(meta);
-		if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter)) 
-			goTo(molecule.getParameter(xParameter), molecule.getParameter(yParameter));
+			public void actionPerformed(ActionEvent ae) {
+		    	GenericDialog dialog = new GenericDialog("Create movie fron region");
+				dialog.addNumericField("x0", -10, 2);
+				dialog.addNumericField("y0", -10, 2);
+				dialog.addNumericField("width", 20, 2);
+				dialog.addNumericField("height", 60, 2);
+		  		dialog.showDialog();
+		  		
+		  		if (dialog.wasCanceled())
+		  			return;
+		  		
+		  		int x0 = (int)dialog.getNextNumber();
+		  		int y0 = (int)dialog.getNextNumber();
+		  		int width = (int)dialog.getNextNumber();
+		  		int height = (int)dialog.getNextNumber();
+		  		
+		  		ImagePlus ip = exportView(x0, y0, width, height);
+		  		
+		  		//Now show it!
+		  		ip.show();
+		    }
+		});
+		fileMenu.add(exportVideo);
+		
+		menubar.add(fileMenu);
+		
+		final JMenu settingsMenu = new JMenu( "Settings" );
+		menubar.add( settingsMenu );
+
+		final JMenuItem miBrightness = new JMenuItem( actionMap.get( BigDataViewerActions.BRIGHTNESS_SETTINGS ) );
+		miBrightness.setText( "Brightness & Color" );
+		settingsMenu.add( miBrightness );
+		
+		final JMenuItem miVisibility = new JMenuItem( actionMap.get( BigDataViewerActions.VISIBILITY_AND_GROUPING ) );
+		miVisibility.setText( "Visibility & Grouping" );
+		settingsMenu.add( miVisibility );
+		
+		final JMenu helpMenu = new JMenu( "Help" );
+		menubar.add(helpMenu);
+		
+		final JMenuItem miHelp = new JMenuItem(new AbstractAction("Show Help") {
+		    /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public void actionPerformed(ActionEvent ae) {
+		    	helpDialog.setVisible(true);
+		    }
+		});
+		miHelp.setText( "Show Help" );
+		helpMenu.add( miHelp );
+		
+		return menubar;
 	}
 	
 	public void setMolecule(Molecule molecule) {
@@ -285,14 +300,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	private void createView(MarsMetadata meta) {
-		//if (bdv != null) {
-		//	frame.setVisible( false );
-		//	frame.remove(bdv.getViewerPanel());
-		//} else {
-		//	bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );	
-		//	frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
-		//}
-		
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
 				bdvSources.put(meta.getUID(), loadSources(meta));
@@ -301,10 +308,19 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			}
 		}
 			
+		bdv.getViewerPanel().state().removeSources(bdv.getViewerPanel().state().getSources());
+		
 		for (Source<T> source : bdvSources.get(meta.getUID()))
 			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
 		
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
+	}
+	
+	private void resetView() {
+		ViewerPanel viewer = bdv.getViewerPanel();
+		Dimension dim = viewer.getDisplay().getSize();
+		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
+		viewer.setCurrentViewerTransform(viewerTransform);
 	}
 	
 	//How can we deal with Volatile views? Somehow use isVolatile here to wait if pixels are not loaded??
@@ -361,12 +377,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				final RandomAccessibleInterval image = (isVolatile) ? 
 						N5Utils.openVolatile( reader, source.getN5Dataset() ) :
 						N5Utils.open( reader, source.getN5Dataset() );
-				
-				//final DatasetAttributes attributes = reader.getDatasetAttributes(source.getN5Dataset());
-				//final long[] dimensions = attributes.getDimensions();
-				//Either use numFrames attribute for timepoints or assume T is last dimension.
-				//final int tSize = (attributes.asMap().containsKey("numFrames")) ? Integer.valueOf(attributes.asMap().get("numFrames").toString()) : (int) dimensions[dimensions.length - 1];
-				//final int tSize = (int) dimensions[dimensions.length - 1];
 
 				int tSize = (int) image.dimension(image.numDimensions() - 1);
 				
@@ -425,11 +435,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		return sources;
 	}
-	
-	public void setPositionParameters(String xParameter, String yParameter) {
-		this.xParameter = xParameter;
-		this.yParameter = yParameter;
-	}
 
 	public JFrame getFrame() {
 		return frame;
@@ -477,13 +482,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 1, 3 ) - target[1] + dim.getHeight()/2, 1, 3 );
 		
 		bdv.getViewerPanel().setCurrentViewerTransform( affine );
-	}
-	
-	public void resetView() {
-		ViewerPanel viewer = bdv.getViewerPanel();
-		Dimension dim = viewer.getDisplay().getSize();
-		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
-		viewer.setCurrentViewerTransform(viewerTransform);
 	}
 
 	/**
