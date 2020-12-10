@@ -108,7 +108,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private int numTimePoints = 1;
 	
-	private JTextField scaleField;
+	private JTextField scaleField, radiusField;
 	private JCheckBox autoUpdate;
 	private final HelpDialog helpDialog;
 	
@@ -117,6 +117,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private HashMap<String, List<Source<T>>> bdvSources;
 	private HashMap<String, N5Reader> n5Readers;
 	
+	private final boolean showOverlay;
 	private final boolean useVolatile;
 	private final boolean useProperties;
 	
@@ -128,16 +129,18 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected Molecule molecule;
+	protected MoleculeTrackOverlay overlay;
 	
 	protected AffineTransform3D viewerTransform;
 	
 	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, 
-			String xLocation, String yLocation, boolean useProperties, boolean useVolatile) {
+			String xLocation, String yLocation, boolean useProperties, boolean showOverlay, boolean useVolatile) {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.xLocation = xLocation;
 		this.yLocation = yLocation;
 		this.useProperties = useProperties;
+		this.showOverlay = showOverlay;
 		this.useVolatile = useVolatile;
 		
 		bdvSources = new HashMap<String, List<Source<T>>>();
@@ -210,11 +213,19 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		autoUpdate = new JCheckBox("Auto update", true);
 		
+		optionsPanel.add(new JLabel("Overlay radius "));
+		
+		radiusField = new JTextField(6);
+		radiusField.setText("5");
+		Dimension dimScaleField = new Dimension(100, 20);
+		radiusField.setMinimumSize(dimScaleField);
+		
+		optionsPanel.add(radiusField);
+		
 		optionsPanel.add(new JLabel("Zoom "));
 		
 		scaleField = new JTextField(6);
 		scaleField.setText("10");
-		Dimension dimScaleField = new Dimension(100, 20);
 		scaleField.setMinimumSize(dimScaleField);
 		
 		optionsPanel.add(scaleField);
@@ -303,6 +314,16 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			
 			if (!Double.isNaN(x) && !Double.isNaN(y))
 				goTo(x, y);
+			
+			if (showOverlay && overlay == null) {
+				overlay = new MoleculeTrackOverlay(xLocation, yLocation, useProperties);
+				BdvFunctions.showOverlay(overlay, "Overlay", Bdv.options().addTo(bdv));
+			}
+			
+			if (showOverlay) {
+				overlay.setMolecule(molecule);
+				overlay.setRadius(Double.valueOf(radiusField.getText()));
+			}
 		 }
 	}
 	

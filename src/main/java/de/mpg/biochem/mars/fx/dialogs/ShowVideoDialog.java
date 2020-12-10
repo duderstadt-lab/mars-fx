@@ -74,7 +74,7 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		gridpane.add(usePropertiesSwitch, 1, 3);
 		GridPane.setMargin(usePropertiesSwitch, new Insets(5, 5, 5, 5));
 		
-		Label xPropertyLabel = new Label("X property");
+		Label xPropertyLabel = new Label("X parameter");
 		gridpane.add(xPropertyLabel, 0, 4);
 		GridPane.setMargin(xPropertyLabel, new Insets(5, 5, 5, 5));
 		
@@ -83,7 +83,7 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		gridpane.add(xProperty, 1, 4);
 		GridPane.setMargin(xProperty, new Insets(5, 5, 5, 5));
 		
-		Label yPropertyLabel = new Label("Y property");
+		Label yPropertyLabel = new Label("Y parameter");
 		gridpane.add(yPropertyLabel, 0, 5);
 		GridPane.setMargin(yPropertyLabel, new Insets(5, 5, 5, 5));
 		
@@ -103,12 +103,21 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		gridpane.add(views, 1, 6);
 		GridPane.setMargin(views, new Insets(5, 5, 5, 5));
 		
+		Label overlayLabel = new Label("Show Overlay");
+		gridpane.add(overlayLabel, 0, 7);
+		GridPane.setMargin(overlayLabel, new Insets(5, 5, 5, 5));
+		
+		ToggleSwitch overlaySwitch = new ToggleSwitch();
+		gridpane.add(overlaySwitch, 1, 7);
+		overlaySwitch.setSelected(true);
+		GridPane.setMargin(overlaySwitch, new Insets(5, 5, 5, 5));
+		
 		Label volatileLabel = new Label("N5 volatile view");
-		gridpane.add(volatileLabel, 0, 7);
+		gridpane.add(volatileLabel, 0, 8);
 		GridPane.setMargin(volatileLabel, new Insets(5, 5, 5, 5));
 		
 		ToggleSwitch volatileSwitch = new ToggleSwitch();
-		gridpane.add(volatileSwitch, 1, 7);
+		gridpane.add(volatileSwitch, 1, 8);
 		volatileSwitch.setSelected(true);
 		GridPane.setMargin(volatileSwitch, new Insets(5, 5, 5, 5));
 		
@@ -124,24 +133,26 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 					yProperty.getSelectionModel().getSelectedItem(),
 					usePropertiesSwitch.isSelected(),
 					views.getSelectionModel().getSelectedItem(),
+					overlaySwitch.isSelected(),
 					volatileSwitch.isSelected()) : null;
 		});
 	}
 	
 	public class SelectionResult {
 		public final String xColumn, yColumn, xProperty, yProperty;
-		public final boolean useProperties, useVolatile;
+		public final boolean useProperties, useVolatile, showOverlay;
 		public final int views;
 		
 		public SelectionResult(String xColumn, String yColumn, 
 				String xProperty, String yProperty, 
-				boolean useProperties, int views, boolean useVolatile) {
+				boolean useProperties, int views, boolean showOverlay, boolean useVolatile) {
 			this.xColumn = xColumn;
 			this.yColumn = yColumn;
 			this.xProperty = xProperty;
 			this.yProperty = yProperty;
 			this.useProperties = useProperties;
 			this.views = views;
+			this.showOverlay = showOverlay;
 			this.useVolatile = useVolatile;
 		}
 		
@@ -167,6 +178,10 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		
 		public int getViewNumber() {
 			return views;
+		}
+		
+		public boolean showOverlay() {
+			return showOverlay;
 		}
 		
 		public boolean useVolatile() {

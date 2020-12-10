@@ -445,6 +445,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            @Override
 	            public void run() {
 	            	int views = dialog.getResult().getViewNumber();
+	            	boolean showOverlay = dialog.getResult().showOverlay;
 	          		boolean useVolatile = dialog.getResult().useVolatile;
 	          		boolean useProperties = dialog.getResult().useProperties;
 	          		String xLocation, yLocation;
@@ -460,7 +461,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            		BdvHandle[] handles = new BdvHandle[views];
 	            		marsBdvFrames = new MarsBdvFrame[views];
 	            		for (int i = 0; i < views; i++) {
-	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xLocation, yLocation, useProperties, useVolatile);
+	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xLocation, yLocation, useProperties, showOverlay, useVolatile);
 		            		marsBdvFrames[i] = marsBdvFrame;
 	            			handles[i] = marsBdvFrame.getBdvHandle();
 	            		}
