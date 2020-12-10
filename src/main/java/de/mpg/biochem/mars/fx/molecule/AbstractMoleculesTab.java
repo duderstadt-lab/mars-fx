@@ -103,7 +103,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     
 	protected FilteredList<MoleculeIndexRow> filteredData;
 	
-	protected MarsBdvFrame<?> marsBdvFrame;
+	protected MarsBdvFrame[] marsBdvFrames;
 	
 	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
 
@@ -332,12 +332,14 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	            	//Update center pane and properties pane.
 	            	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	            	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-	            	if (marsBdvFrame != null) {
+	            	if (marsBdvFrames != null) {
 	            		SwingUtilities.invokeLater(new Runnable() {
 	    		            @Override
 	    		            public void run() {
 			            		if (molecule != null)
-			            			marsBdvFrame.setMolecule(molecule);
+			            			for (int i=0; i<marsBdvFrames.length; i++)
+			            				if (marsBdvFrames[i] != null)
+			            					marsBdvFrames[i].setMolecule(molecule);
 	    		            }
 	    		        });
 	            	}
@@ -449,8 +451,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
     
     @Override
-    public void setMarsBdvFrame(MarsBdvFrame<?> marsBdvFrame) {
-    	this.marsBdvFrame = marsBdvFrame;
+    public void setMarsBdvFrames(MarsBdvFrame[] marsBdvFrames) {
+    	this.marsBdvFrames = marsBdvFrames;
     }
 
 	@Override

@@ -70,6 +70,7 @@ import com.fasterxml.jackson.core.format.DataFormatMatcher;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.jfoenix.controls.JFXTabPane;
 
+import bdv.util.BdvHandle;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -120,8 +121,11 @@ import org.controlsfx.control.MaskerPane;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
+import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
+import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
@@ -187,7 +191,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	
     protected Set<MoleculeArchiveTab> tabSet;
     
-    protected MarsBdvFrame<?> marsBdvFrame;
+    protected MarsBdvFrame[] marsBdvFrames;
 
     protected double tabWidth = 50.0;
     
@@ -394,36 +398,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				fileCloseAction);
 		
 		//Build tools menu
-		Action showVideoAction = new Action("Show Video", null, null,
-				e -> {
-			        SwingUtilities.invokeLater(new Runnable() {
-			            @Override
-			            public void run() {
-			            	GenericDialog dialog = new GenericDialog("Mars Bdv view");
-			     			dialog.addStringField("x_parameter", "roi_x", 25);
-			     			dialog.addStringField("y_parameter", "roi_y", 25);
-			          		dialog.showDialog();
-			          		
-			          		if (dialog.wasCanceled())
-			          			return;
-			          		
-			          		String xParameter = dialog.getNextString();
-			          		String yParameter = dialog.getNextString();
-			          		
-			            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
-			            		marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xParameter, yParameter, true);
-			            		marsBdvFrame.getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
-			            		    @Override
-			            		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-			            		        marsBdvFrame = null;
-			            		    }
-			            		});
-			            		moleculesTab.setMarsBdvFrame(marsBdvFrame);
-			            	}
-			            }
-			        });
-				}); 
-		
+		Action showVideoAction = new Action("Show Video", null, null, e -> showVideo()); 
 		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
 		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
 		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
@@ -459,6 +434,64 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		menuBar = new MenuBar(fileMenu, toolsMenu);
 		borderPane.setTop(menuBar);
+	}
+	
+	protected void showVideo() {
+		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow(), 
+				archive.properties().getColumnSet(), archive.properties().getParameterSet());
+
+		dialog.showAndWait().ifPresent(result -> {
+			SwingUtilities.invokeLater(new Runnable() {
+	            @Override
+	            public void run() {
+	            	int views = dialog.getResult().getViewNumber();
+	          		boolean useVolatile = dialog.getResult().useVolatile;
+	          		boolean useProperties = dialog.getResult().useProperties;
+	          		String xLocation, yLocation;
+	          		if (useProperties) {
+	          			xLocation = dialog.getResult().getXProperty();
+	          			yLocation = dialog.getResult().getYProperty();
+	          		} else {
+	          			xLocation = dialog.getResult().getXColumn();
+	          			yLocation = dialog.getResult().getYColumn();
+	          		}
+	          				
+	            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
+	            		BdvHandle[] handles = new BdvHandle[views];
+	            		marsBdvFrames = new MarsBdvFrame[views];
+	            		for (int i = 0; i < views; i++) {
+	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xLocation, yLocation, useProperties, useVolatile);
+		            		marsBdvFrames[i] = marsBdvFrame;
+	            			handles[i] = marsBdvFrame.getBdvHandle();
+	            		}
+	                 
+	            		ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles, true);
+	            		
+	            		for (int i = 0; i < marsBdvFrames.length; i++) {
+		            		marsBdvFrames[i].getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+		            		    @Override
+		            		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+		            		    	super.windowClosing(windowEvent);
+		            		    	for (int i=0; i<marsBdvFrames.length; i++)
+		            		    		if (marsBdvFrames[i] != null) {
+		            		    			marsBdvFrames[i].getFrame().dispose();
+		            		    			marsBdvFrames[i] = null;
+		            		    		}
+		            		    	
+		                            new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
+		                            //windowEvent.getWindow().dispose();
+		            		    }
+		            		});
+	            		}
+	            		
+	            		//sync.setBdvHandleInitialReference( SourceAndConverterServices.getSourceAndConverterDisplayService().getActiveBdv());
+	                    sync.run();
+	            		
+	            		moleculesTab.setMarsBdvFrames(marsBdvFrames);
+	            	}
+	            }
+	        });
+		});
 	}
 	
 	protected void deleteMolecules() {

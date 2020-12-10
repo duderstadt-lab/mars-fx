@@ -117,25 +117,28 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private HashMap<String, List<Source<T>>> bdvSources;
 	private HashMap<String, N5Reader> n5Readers;
 	
-	private boolean isVolatile = true;
+	private final boolean useVolatile;
+	private final boolean useProperties;
 	
 	private String metaUID = "";
 	
 	private BdvHandlePanel bdv;
 	
-	private String xParameter, yParameter;
+	private final String xLocation, yLocation;
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected Molecule molecule;
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, String xParameter, String yParameter, boolean isVolatile) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, 
+			String xLocation, String yLocation, boolean useProperties, boolean useVolatile) {
 		this.archive = archive;
 		this.molecule = molecule;
-		this.xParameter = xParameter;
-		this.yParameter = yParameter;
-		this.isVolatile = isVolatile;
+		this.xLocation = xLocation;
+		this.yLocation = yLocation;
+		this.useProperties = useProperties;
+		this.useVolatile = useVolatile;
 		
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
@@ -192,8 +195,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 						metaUID = meta.getUID();
 						createView(meta);
 					}
-					if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter))
-						goTo(molecule.getParameter(xParameter), molecule.getParameter(yParameter));
+					if (!Double.isNaN(getXLocation()) && !Double.isNaN(getYLocation()))
+						goTo(molecule.getParameter(xLocation), molecule.getParameter(yLocation));
 				 }
 			}
 		});
@@ -295,9 +298,34 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				metaUID = meta.getUID();
 				createView(meta);
 			}
-			if (molecule.hasParameter(xParameter) && molecule.hasParameter(yParameter))
-				goTo(molecule.getParameter(xParameter), molecule.getParameter(yParameter));
+			double x = getXLocation();
+			double y = getYLocation();
+			
+			if (!Double.isNaN(x) && !Double.isNaN(y))
+				goTo(x, y);
 		 }
+	}
+	
+	private double getXLocation() {
+		if (molecule != null) {
+			if (useProperties && molecule.hasParameter(xLocation))
+				return molecule.getParameter(xLocation);
+			else if (molecule.getTable().hasColumn(xLocation))
+				return molecule.getTable().mean(xLocation);
+		}
+			
+		return Double.NaN;
+	}
+	
+	private double getYLocation() {
+		if (molecule != null) {
+			if (useProperties && molecule.hasParameter(yLocation))
+				return molecule.getParameter(yLocation);
+			else if (molecule.getTable().hasColumn(yLocation))
+				return molecule.getTable().mean(yLocation);
+		}
+			
+		return Double.NaN;
 	}
 	
 	private void createView(MarsMetadata meta) {
@@ -328,8 +356,14 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
 		int numSources = bdvSources.get(metaUID).size();
 		
-		int TOP_left_x0 = (int)molecule.getParameter(xParameter) + x0;
-		int TOP_left_y0 = (int)molecule.getParameter(yParameter) + y0;
+		double xCenter = getXLocation();
+		double yCenter = getYLocation();
+		
+		if (Double.isNaN(xCenter) || Double.isNaN(yCenter))
+			return new ImagePlus();
+		
+		int TOP_left_x0 = (int)xCenter + x0;
+		int TOP_left_y0 = (int)yCenter + y0;
 		
 		ImagePlus[] images = new ImagePlus[numSources];
 		
@@ -375,15 +409,22 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				}
 				
 				@SuppressWarnings( "rawtypes" )
-				final RandomAccessibleInterval image = (isVolatile) ? 
+				final RandomAccessibleInterval wholeImage = (useVolatile) ? 
 						N5Utils.openVolatile( reader, source.getN5Dataset() ) :
 						N5Utils.open( reader, source.getN5Dataset() );
+						
+				//wholeImage should be XYT or XYCT. If XYCT, we hyperSlice to get one channel.
+				//XYZCT should also be supported
+				int dims = wholeImage.numDimensions();
+				
+				@SuppressWarnings( "rawtypes" )
+				final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(wholeImage, wholeImage.numDimensions() - 2, source.getChannel()) : wholeImage;
 
 				int tSize = (int) image.dimension(image.numDimensions() - 1);
 				
 				if (tSize > numTimePoints)
 					numTimePoints = tSize;
-				
+
 				AffineTransform3D[] transforms = new AffineTransform3D[tSize];
 				
 				for (int t = 0; t < tSize; t++) {
@@ -402,7 +443,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				@SuppressWarnings( "unchecked" )
 				final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
 				
-				if (isVolatile)
+				if (useVolatile)
 					sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
 				else
 					sources.add(n5Source);
