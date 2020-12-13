@@ -195,7 +195,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				goTo(x, y);
 			
 			if (locationCard.showLocationOverlay() && moleculeLocationOverlay == null) {
-				moleculeLocationOverlay = new MoleculeLocationOverlay(locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
+				moleculeLocationOverlay = new MoleculeLocationOverlay(archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
 				BdvFunctions.showOverlay(moleculeLocationOverlay, "Location", Bdv.options().addTo(bdv));
 			}
 
@@ -204,6 +204,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				moleculeLocationOverlay.setXLocation(locationCard.getXLocation());
 				moleculeLocationOverlay.setYLocation(locationCard.getYLocation());
 				moleculeLocationOverlay.setLabelVisible(locationCard.showLabel());
+				moleculeLocationOverlay.setShowAll(locationCard.showAll());
 				moleculeLocationOverlay.setRadius(locationCard.getRadius());
 				moleculeLocationOverlay.setMolecule(molecule);
 			}

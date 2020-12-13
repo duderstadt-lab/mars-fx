@@ -6,7 +6,11 @@ import java.awt.Graphics2D;
 import java.util.Optional;
 
 import bdv.util.BdvOverlay;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTableRow;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
@@ -15,13 +19,18 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 
 	private String xLocation;
 	private String yLocation;
-	private boolean useParameters;
-	private boolean showLabel;
+	private boolean useParameters = false;
+	private boolean showLabel = false;
+	private boolean showAll = false;
 	
 	private double radius = 5;
 	private Molecule molecule;
 	
-	public MoleculeLocationOverlay(final boolean useProperties, final boolean showLabel, final String xLocation, final String yLocation) {
+	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	public MoleculeLocationOverlay(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+			final boolean useProperties, final boolean showLabel, final String xLocation, final String yLocation) {
+		this.archive = archive;
 		this.xLocation = xLocation;
 		this.yLocation = yLocation;
 		this.useParameters = useProperties;
@@ -30,6 +39,13 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	
 	@Override
 	protected void draw(Graphics2D g) {
+		if (showAll)
+			archive.molecules().forEach(molecule -> drawMolecule(g, molecule));
+		else
+			drawMolecule(g, molecule);
+	}
+	
+	private void drawMolecule(Graphics2D g, Molecule molecule) {
 		if (molecule != null) {
 			if (useParameters && molecule.hasParameter(xLocation) && molecule.hasParameter(yLocation)) {
 				double x = molecule.getParameter(xLocation);
@@ -104,5 +120,9 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	
 	public void setLabelVisible(boolean showLabel) {
 		this.showLabel = showLabel;
+	}
+	
+	public void setShowAll(boolean showAll) {
+		this.showAll = showAll;
 	}
 }

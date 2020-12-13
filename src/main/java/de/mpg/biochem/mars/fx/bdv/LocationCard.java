@@ -23,28 +23,27 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 public class LocationCard extends JPanel {
 
 	private final JTextField magnificationField, radiusField;
-	private final JCheckBox showLocation, showLabel, roverSync;
+	private final JCheckBox showLocation, showLabel, roverSync, showAll;
 	
 	private final JComboBox<String> locationSource, xLocation, yLocation;
 	
 	public LocationCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-		setLayout(new GridLayout(4, 1));
+		setLayout(new GridLayout(0, 2));
 		
 		Set<String> columnNames = archive.properties().getColumnSet();
 		Set<String> parameterNames = archive.properties().getParameterSet();
 		
-		JPanel p1 = new JPanel();
-		p1.add(new JLabel("Source"));
+		add(new JLabel("Source"));
 		locationSource = new JComboBox<>(new String[] {"Table", "Parameters"});
-		p1.add(locationSource);
-		p1.add(new JLabel(" X "));
+		add(locationSource);
+		add(new JLabel("X"));
 		xLocation = new JComboBox<>(columnNames.stream().sorted().collect(toList()).toArray(new String[0]));
 		xLocation.setSelectedItem("x");
-		p1.add(xLocation);
-		p1.add(new JLabel(" Y "));
+		add(xLocation);
+		add(new JLabel("Y"));
 		yLocation = new JComboBox<>(columnNames.stream().sorted().collect(toList()).toArray(new String[0]));
 		yLocation.setSelectedItem("y");
-		p1.add(yLocation);
+		add(yLocation);
 		
 		locationSource.addActionListener(new ActionListener( ) {
 		      public void actionPerformed(ActionEvent e) {
@@ -71,35 +70,30 @@ public class LocationCard extends JPanel {
 			}
 		});
 		
-		JPanel p2 = new JPanel();
 		showLocation = new JCheckBox("show", true);
-		p2.add(showLocation);
+		add(showLocation);
 		showLabel = new JCheckBox("label", true);
-		p2.add(showLabel);
-		roverSync = new JCheckBox("Rover sync", true);
-		p2.add(roverSync);
+		add(showLabel);
+		showAll = new JCheckBox("all", true);
+		add(showAll);
+		roverSync = new JCheckBox("rover sync", true);
+		add(roverSync);
 		
-		JPanel p3 = new JPanel();
-		p3.add(new JLabel("Radius "));
+		add(new JLabel("Radius"));
 		
 		radiusField = new JTextField(6);
 		radiusField.setText("5");
 		Dimension dimScaleField = new Dimension(100, 20);
 		radiusField.setMinimumSize(dimScaleField);
 		
-		p3.add(radiusField);
-		
-		p3.add(new JLabel("Zoom "));
+		add(radiusField);
+		add(new JLabel("Scale factor"));
 		
 		magnificationField = new JTextField(6);
 		magnificationField.setText("10");
 		magnificationField.setMinimumSize(dimScaleField);
 		
-		p3.add(magnificationField);
-		
-		add(p1);
-		add(p2);
-		add(p3);
+		add(magnificationField);
 	}
 	
 	public boolean showLocationOverlay() {
@@ -108,6 +102,10 @@ public class LocationCard extends JPanel {
 	
 	public boolean showLabel() {
 		return showLabel.isSelected();
+	}
+	
+	public boolean showAll() {
+		return showAll.isSelected();
 	}
 	
 	public boolean roverSync() {
