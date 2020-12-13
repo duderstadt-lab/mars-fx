@@ -445,23 +445,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            @Override
 	            public void run() {
 	            	int views = dialog.getResult().getViewNumber();
-	            	boolean showOverlay = dialog.getResult().showOverlay;
 	          		boolean useVolatile = dialog.getResult().useVolatile;
-	          		boolean useProperties = dialog.getResult().useProperties;
-	          		String xLocation, yLocation;
-	          		if (useProperties) {
-	          			xLocation = dialog.getResult().getXProperty();
-	          			yLocation = dialog.getResult().getYProperty();
-	          		} else {
-	          			xLocation = dialog.getResult().getXColumn();
-	          			yLocation = dialog.getResult().getYColumn();
-	          		}
 	          				
 	            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
 	            		BdvHandle[] handles = new BdvHandle[views];
 	            		marsBdvFrames = new MarsBdvFrame[views];
 	            		for (int i = 0; i < views; i++) {
-	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), xLocation, yLocation, useProperties, showOverlay, useVolatile);
+	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile);
 		            		marsBdvFrames[i] = marsBdvFrame;
 	            			handles[i] = marsBdvFrame.getBdvHandle();
 	            		}
@@ -480,12 +470,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		            		    		}
 		            		    	
 		                            new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
-		                            //windowEvent.getWindow().dispose();
 		            		    }
 		            		});
 	            		}
-	            		
-	            		//sync.setBdvHandleInitialReference( SourceAndConverterServices.getSourceAndConverterDisplayService().getActiveBdv());
 	                    sync.run();
 	            		
 	            		moleculesTab.setMarsBdvFrames(marsBdvFrames);

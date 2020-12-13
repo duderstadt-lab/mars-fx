@@ -26,6 +26,8 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.bdv;
 
+import static java.util.stream.Collectors.toList;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -36,15 +38,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.swing.ActionMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import bdv.BigDataViewerActions;
 import bdv.SpimSource;
@@ -68,6 +75,14 @@ import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import net.imglib2.util.Util;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
@@ -93,23 +108,21 @@ import bdv.util.Bounds;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.AbstractAction;
-
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
+import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
+
+import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
+import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
+import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
 
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private final JFrame frame;
 	
 	private int numTimePoints = 1;
-	
-	private JTextField scaleField, radiusField;
-	private JCheckBox autoUpdate;
+
 	private final HelpDialog helpDialog;
 	
 	private final SharedQueue sharedQueue;
@@ -117,50 +130,47 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	private HashMap<String, List<Source<T>>> bdvSources;
 	private HashMap<String, N5Reader> n5Readers;
 	
-	private final boolean showOverlay;
 	private final boolean useVolatile;
-	private final boolean useProperties;
 	
 	private String metaUID = "";
 	
 	private BdvHandlePanel bdv;
 	
-	private final String xLocation, yLocation;
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected Molecule molecule;
-	protected MoleculeTrackOverlay overlay;
+	protected MoleculeLocationOverlay moleculeLocationOverlay;
+	protected MoleculeTrackOverlay moleculeTrackOverlay;
+	protected final LocationCard locationCard;
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, 
-			String xLocation, String yLocation, boolean useProperties, boolean showOverlay, boolean useVolatile) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile) {
 		this.archive = archive;
 		this.molecule = molecule;
-		this.xLocation = xLocation;
-		this.yLocation = yLocation;
-		this.useProperties = useProperties;
-		this.showOverlay = showOverlay;
 		this.useVolatile = useVolatile;
 		
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
 		
-		System.setProperty( "apple.laf.useScreenMenuBar", "false" );
-		
-		JPanel panel = new JPanel(new GridLayout(2, 1));
-		panel.add(createButtonsPanel());
-		panel.add(createOptionsPanel());
+		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		frame = new JFrame( archive.getName() + " Bdv" );
 		helpDialog = new HelpDialog(frame);
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
-		frame.add( bdv.getViewerPanel(), BorderLayout.CENTER );
+		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
+		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
+
+		bdv.getBdvHandle().getCardPanel().addCard("Display", "Display", new NavigationPanel( bdv.getViewerPanel().state(), this), true);
 		
-		frame.setJMenuBar( createMenuBar() );
-		frame.add(panel, BorderLayout.SOUTH);
+		locationCard = new LocationCard(archive);
+		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard, true);
+		bdv.getBdvHandle().getCardPanel().addCard("Tracks", "Tracks", new JPanel(), true);
+		
+		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
+		
 		frame.setPreferredSize( new Dimension( 800, 600 ) );
 		frame.pack();
 		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
@@ -170,139 +180,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		frame.setVisible( true );
 	}
 	
-	private JPanel createButtonsPanel() {
-		final JPanel buttonPane = new JPanel();
-		
-		JButton reload = new JButton("Reload");
-		reload.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				setMolecule(molecule);
-			}
-		});
-		buttonPane.add(reload);
-		
-		JButton resetView = new JButton("Reset view");
-		resetView.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				resetView();
-			}
-		});
-		buttonPane.add(resetView);
-		
-		JButton goTo = new JButton("Go to molecule");
-		goTo.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				if (molecule != null) {			
-					MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
-					if (!metaUID.equals(meta.getUID())) {
-						metaUID = meta.getUID();
-						createView(meta);
-					}
-					if (!Double.isNaN(getXLocation()) && !Double.isNaN(getYLocation()))
-						goTo(molecule.getParameter(xLocation), molecule.getParameter(yLocation));
-				 }
-			}
-		});
-		buttonPane.add(goTo);
-		
-		return buttonPane;
-	}
-	
-	private JPanel createOptionsPanel() {
-		final JPanel optionsPanel = new JPanel();
-		
-		autoUpdate = new JCheckBox("Auto update", true);
-		
-		optionsPanel.add(new JLabel("Overlay radius "));
-		
-		radiusField = new JTextField(6);
-		radiusField.setText("5");
-		Dimension dimScaleField = new Dimension(100, 20);
-		radiusField.setMinimumSize(dimScaleField);
-		
-		optionsPanel.add(radiusField);
-		
-		optionsPanel.add(new JLabel("Zoom "));
-		
-		scaleField = new JTextField(6);
-		scaleField.setText("10");
-		scaleField.setMinimumSize(dimScaleField);
-		
-		optionsPanel.add(scaleField);
-		optionsPanel.add(autoUpdate);
-		
-		return optionsPanel;
-	}
-	
-	private JMenuBar createMenuBar() {
-		final JMenuBar menubar = new JMenuBar();
-		final ActionMap actionMap = bdv.getKeybindings().getConcatenatedActionMap();
-		
-		final JMenu fileMenu = new JMenu("File");
-		final JMenuItem exportVideo = new JMenuItem(new AbstractAction("Create movie") {
-		    /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent ae) {
-		    	GenericDialog dialog = new GenericDialog("Create movie fron region");
-				dialog.addNumericField("x0", -10, 2);
-				dialog.addNumericField("y0", -10, 2);
-				dialog.addNumericField("width", 20, 2);
-				dialog.addNumericField("height", 60, 2);
-		  		dialog.showDialog();
-		  		
-		  		if (dialog.wasCanceled())
-		  			return;
-		  		
-		  		int x0 = (int)dialog.getNextNumber();
-		  		int y0 = (int)dialog.getNextNumber();
-		  		int width = (int)dialog.getNextNumber();
-		  		int height = (int)dialog.getNextNumber();
-		  		
-		  		ImagePlus ip = exportView(x0, y0, width, height);
-		  		
-		  		//Now show it!
-		  		ip.show();
-		    }
-		});
-		fileMenu.add(exportVideo);
-		
-		menubar.add(fileMenu);
-		
-		final JMenu settingsMenu = new JMenu( "Settings" );
-		menubar.add( settingsMenu );
-
-		final JMenuItem miBrightness = new JMenuItem( actionMap.get( BigDataViewerActions.BRIGHTNESS_SETTINGS ) );
-		miBrightness.setText( "Brightness & Color" );
-		settingsMenu.add( miBrightness );
-		
-		final JMenuItem miVisibility = new JMenuItem( actionMap.get( BigDataViewerActions.VISIBILITY_AND_GROUPING ) );
-		miVisibility.setText( "Visibility & Grouping" );
-		settingsMenu.add( miVisibility );
-		
-		final JMenu helpMenu = new JMenu( "Help" );
-		menubar.add(helpMenu);
-		
-		final JMenuItem miHelp = new JMenuItem(new AbstractAction("Show Help") {
-		    /**
-			 * 
-			 */
-			private static final long serialVersionUID = 1L;
-
-			public void actionPerformed(ActionEvent ae) {
-		    	helpDialog.setVisible(true);
-		    }
-		});
-		miHelp.setText( "Show Help" );
-		helpMenu.add( miHelp );
-		
-		return menubar;
-	}
-	
 	public void setMolecule(Molecule molecule) {
-		if (molecule != null && autoUpdate.isSelected()) {	
+		if (molecule != null && locationCard.roverSync()) {	
 			this.molecule = molecule;
 			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
@@ -315,24 +194,28 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			if (!Double.isNaN(x) && !Double.isNaN(y))
 				goTo(x, y);
 			
-			if (showOverlay && overlay == null) {
-				overlay = new MoleculeTrackOverlay(xLocation, yLocation, useProperties);
-				BdvFunctions.showOverlay(overlay, "Overlay", Bdv.options().addTo(bdv));
+			if (locationCard.showLocationOverlay() && moleculeLocationOverlay == null) {
+				moleculeLocationOverlay = new MoleculeLocationOverlay(locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
+				BdvFunctions.showOverlay(moleculeLocationOverlay, "Location", Bdv.options().addTo(bdv));
 			}
-			
-			if (showOverlay) {
-				overlay.setMolecule(molecule);
-				overlay.setRadius(Double.valueOf(radiusField.getText()));
+
+			if (locationCard.showLocationOverlay()) {
+				moleculeLocationOverlay.useParameters(locationCard.useParameters());
+				moleculeLocationOverlay.setXLocation(locationCard.getXLocation());
+				moleculeLocationOverlay.setYLocation(locationCard.getYLocation());
+				moleculeLocationOverlay.setLabelVisible(locationCard.showLabel());
+				moleculeLocationOverlay.setRadius(locationCard.getRadius());
+				moleculeLocationOverlay.setMolecule(molecule);
 			}
 		 }
 	}
 	
 	private double getXLocation() {
 		if (molecule != null) {
-			if (useProperties && molecule.hasParameter(xLocation))
-				return molecule.getParameter(xLocation);
-			else if (molecule.getTable().hasColumn(xLocation))
-				return molecule.getTable().mean(xLocation);
+			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getXLocation()))
+				return molecule.getParameter(locationCard.getXLocation());
+			else if (molecule.getTable().hasColumn(locationCard.getXLocation()))
+				return molecule.getTable().mean(locationCard.getXLocation());
 		}
 			
 		return Double.NaN;
@@ -340,10 +223,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private double getYLocation() {
 		if (molecule != null) {
-			if (useProperties && molecule.hasParameter(yLocation))
-				return molecule.getParameter(yLocation);
-			else if (molecule.getTable().hasColumn(yLocation))
-				return molecule.getTable().mean(yLocation);
+			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getYLocation()))
+				return molecule.getParameter(locationCard.getYLocation());
+			else if (molecule.getTable().hasColumn(locationCard.getYLocation()))
+				return molecule.getTable().mean(locationCard.getYLocation());
 		}
 			
 		return Double.NaN;
@@ -366,7 +249,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
-	private void resetView() {
+	public void resetView() {
 		ViewerPanel viewer = bdv.getViewerPanel();
 		Dimension dim = viewer.getDisplay().getSize();
 		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
@@ -498,6 +381,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		return sources;
 	}
+	
+	public void showHelp(boolean showHelp) {
+		helpDialog.setVisible(showHelp);
+	}
 
 	public JFrame getFrame() {
 		return frame;
@@ -532,7 +419,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 0, 3 ) - target[0], 0, 3 );
 		affine.set( affine.get( 1, 3 ) - target[1], 1, 3 );
 
-		double scale = Double.valueOf(scaleField.getText());
+		double scale = locationCard.getMagnification();
 		
 		//check it was set correctly?
 		

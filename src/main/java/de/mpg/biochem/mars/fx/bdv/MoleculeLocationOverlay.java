@@ -11,41 +11,41 @@ import de.mpg.biochem.mars.table.MarsTableRow;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
-public class MoleculeTrackOverlay extends BdvOverlay {
+public class MoleculeLocationOverlay extends BdvOverlay {
 
-	private String tColumn;
-	private String xColumn;
-	private String yColumn;
+	private String xLocation;
+	private String yLocation;
+	private boolean useParameters;
 	private boolean showLabel;
 	
 	private double radius = 5;
 	private Molecule molecule;
 	
-	public MoleculeTrackOverlay(final boolean showLabel, final String tColumn, final String xColumn, final String yColumn) {
+	public MoleculeLocationOverlay(final boolean useProperties, final boolean showLabel, final String xLocation, final String yLocation) {
+		this.xLocation = xLocation;
+		this.yLocation = yLocation;
+		this.useParameters = useProperties;
 		this.showLabel = showLabel;
-		this.tColumn = tColumn;
-		this.xColumn = xColumn;
-		this.yColumn = yColumn;
 	}
 	
 	@Override
 	protected void draw(Graphics2D g) {
 		if (molecule != null) {
-			if (molecule.getTable().hasColumn(xColumn) && molecule.getTable().hasColumn(yColumn) && molecule.getTable().hasColumn(tColumn)) {
-				Optional<MarsTableRow> currentRow = molecule.getTable().rows().filter(row -> row.getValue(tColumn) == info.getTimePointIndex()).findFirst();
-				if (currentRow.isPresent()) {
-					double x = currentRow.get().getValue(xColumn);
-					double y = currentRow.get().getValue(yColumn);
-					if (!Double.isNaN(x) && !Double.isNaN(y))
-						drawOval(g, x, y);
-				}
+			if (useParameters && molecule.hasParameter(xLocation) && molecule.hasParameter(yLocation)) {
+				double x = molecule.getParameter(xLocation);
+				double y = molecule.getParameter(yLocation);
+				if (!Double.isNaN(x) && !Double.isNaN(y))
+					drawOval(g, x, y);
+			} else if (molecule.getTable().hasColumn(xLocation) && molecule.getTable().hasColumn(yLocation)) {
+				double x = molecule.getTable().mean(xLocation);
+				double y = molecule.getTable().mean(yLocation);
+				if (!Double.isNaN(x) && !Double.isNaN(y))
+					drawOval(g, x, y);
 			}
 		}
 	}
 	
 	private void drawOval(Graphics2D g, double x, double y) {
-		//Color.CYAN.darker()
-
 		g.setColor( getColor() );
 		g.setStroke( new BasicStroke( 2 ) );
 		
@@ -90,16 +90,16 @@ public class MoleculeTrackOverlay extends BdvOverlay {
 		this.radius = radius;
 	}
 	
-	public void setTLocation(String tLocation) {
-		this.tColumn = tLocation;
+	public void useParameters(boolean useParameters) {
+		this.useParameters = useParameters;
 	}
 	
-	public void setXColumn(String xColumn) {
-		this.xColumn = xColumn;
+	public void setXLocation(String xLocation) {
+		this.xLocation = xLocation;
 	}
 	
-	public void setYColumn(String yColumn) {
-		this.yColumn = yColumn;
+	public void setYLocation(String yLocation) {
+		this.yLocation = yLocation;
 	}
 	
 	public void setLabelVisible(boolean showLabel) {
