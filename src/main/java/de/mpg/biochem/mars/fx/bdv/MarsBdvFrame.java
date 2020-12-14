@@ -29,6 +29,7 @@ package de.mpg.biochem.mars.fx.bdv;
 import static java.util.stream.Collectors.toList;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -74,16 +75,8 @@ import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.ImagePlus;
-import ij.gui.GenericDialog;
-import javafx.geometry.HPos;
-import javafx.geometry.Insets;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import net.imglib2.util.Util;
+import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
@@ -94,6 +87,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
+import net.imglib2.IterableInterval;
 import mpicbg.spim.data.registration.*;
 import mpicbg.spim.data.sequence.ViewId;
 import net.imglib2.realtransform.AffineGet;
@@ -107,19 +101,20 @@ import net.imglib2.histogram.Real1dBinMapper;
 import bdv.util.Bounds;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
-import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
 
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
-import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCES_CARD;
+
+import java.util.Random;
 
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
-	private final JFrame frame;
+	protected final JFrame frame;
 	
 	private int numTimePoints = 1;
 
@@ -134,14 +129,21 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private String metaUID = "";
 	
-	private BdvHandlePanel bdv;
+	private Random ran = new Random();
 	
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	protected BdvHandlePanel bdv;
+	
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected Molecule molecule;
-	protected MoleculeLocationOverlay moleculeLocationOverlay;
-	protected MoleculeTrackOverlay moleculeTrackOverlay;
+	
 	protected final LocationCard locationCard;
+	protected MoleculeLocationOverlay moleculeLocationOverlay;
+	
+	protected final TracksCard trackCard;
+	protected MoleculeTrackOverlay moleculeTrackOverlay;
+	
+	protected static HashMap<String, Color> moleculeRainbowColors;
 	
 	protected AffineTransform3D viewerTransform;
 	
@@ -153,7 +155,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
-		
+
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		frame = new JFrame( archive.getName() + " Bdv" );
@@ -167,7 +169,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		locationCard = new LocationCard(archive);
 		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard, true);
-		bdv.getBdvHandle().getCardPanel().addCard("Tracks", "Tracks", new JPanel(), true);
+		
+		trackCard = new TracksCard(archive);
+		bdv.getBdvHandle().getCardPanel().addCard("Track", "Track", trackCard, true);
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
 		
@@ -195,19 +199,43 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				goTo(x, y);
 			
 			if (locationCard.showLocationOverlay() && moleculeLocationOverlay == null) {
-				moleculeLocationOverlay = new MoleculeLocationOverlay(archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
+				moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
 				BdvFunctions.showOverlay(moleculeLocationOverlay, "Location", Bdv.options().addTo(bdv));
 			}
 
-			if (locationCard.showLocationOverlay()) {
+			if (moleculeLocationOverlay != null) {
 				moleculeLocationOverlay.useParameters(locationCard.useParameters());
 				moleculeLocationOverlay.setXLocation(locationCard.getXLocation());
 				moleculeLocationOverlay.setYLocation(locationCard.getYLocation());
 				moleculeLocationOverlay.setLabelVisible(locationCard.showLabel());
 				moleculeLocationOverlay.setShowAll(locationCard.showAll());
-				moleculeLocationOverlay.setRadius(locationCard.getRadius());
-				moleculeLocationOverlay.setMolecule(molecule);
+				moleculeLocationOverlay.setShowCircle(locationCard.showLocationOverlay());
+				moleculeLocationOverlay.setRainbowColor(locationCard.rainbowColor());
+				moleculeLocationOverlay.setRadius(locationCard.getRadius());	
 			}
+			
+			if (locationCard.showLocationOverlay())
+				moleculeLocationOverlay.setMolecule(molecule);
+			
+			if ((trackCard.showCircle() || trackCard.showTrack()) && moleculeTrackOverlay == null) {
+				moleculeTrackOverlay = new MoleculeTrackOverlay(this, archive, trackCard.getXColumn(), trackCard.getYColumn(), trackCard.getTColumn());
+				BdvFunctions.showOverlay(moleculeTrackOverlay, "Track", Bdv.options().addTo(bdv));
+			}
+
+			if (moleculeTrackOverlay != null) {
+				moleculeTrackOverlay.setXColumn(trackCard.getXColumn());
+				moleculeTrackOverlay.setYColumn(trackCard.getYColumn());
+				moleculeTrackOverlay.setTColumn(trackCard.getTColumn());
+				moleculeTrackOverlay.setCircleVisible(trackCard.showCircle());
+				moleculeTrackOverlay.setLabelVisible(trackCard.showLabel());
+				moleculeTrackOverlay.setTrackVisible(trackCard.showTrack());
+				moleculeTrackOverlay.setShowAll(trackCard.showAll());
+				moleculeTrackOverlay.setRainbowColor(trackCard.rainbowColor());
+				moleculeTrackOverlay.setRadius(trackCard.getRadius());
+			}
+			
+			if (trackCard.showCircle() || trackCard.showTrack())
+				moleculeTrackOverlay.setMolecule(molecule);
 		 }
 	}
 	
@@ -257,7 +285,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		viewer.setCurrentViewerTransform(viewerTransform);
 	}
 	
-	//How can we deal with Volatile views? Somehow use isVolatile here to wait if pixels are not loaded??
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
 		int numSources = bdvSources.get(metaUID).size();
 		
@@ -394,9 +421,16 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public BdvHandle getBdvHandle() {
 		return bdv;
 	}
-
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-		this.archive = archive;
+	
+	public synchronized Color getMoleculeColor(String UID) {
+		if (moleculeRainbowColors == null) {
+			moleculeRainbowColors = new HashMap<String, Color>();
+			archive.molecules().forEach(m -> moleculeRainbowColors.put(m.getUID(), new Color(ran.nextFloat(), ran.nextFloat(), ran.nextFloat())));
+		} else if (!moleculeRainbowColors.containsKey(UID)) {
+			moleculeRainbowColors.put(UID, new Color(ran.nextFloat(), ran.nextFloat(), ran.nextFloat()));
+		}
+		
+		return moleculeRainbowColors.get(UID);
 	}
 
 	public void goTo(double x, double y) {
@@ -535,6 +569,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		final Bounds bounds = estimateSourceRange( source, timepoint, cumulativeMinCutoff, cumulativeMaxCutoff );
 		for ( SourceAndConverter< ? > s : state.getSources() )
 		{
+			if (s.getSpimSource().getName().equals("Track") || s.getSpimSource().getName().equals("Location"))
+				continue;
+			
 			final ConverterSetup setup = converterSetups.getConverterSetup( s );
 			setup.setDisplayRange( bounds.getMinBound(), bounds.getMaxBound() );
 		}
@@ -549,7 +586,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	public static Bounds estimateSourceRange( final Source< ? > source, final int timepoint, final double cumulativeMinCutoff, final double cumulativeMaxCutoff )
 	{
 		final Object type = source.getType();
-		if ( type instanceof UnsignedShortType && source.isPresent( timepoint ) )
+
+		if ( (type instanceof UnsignedShortType || type instanceof VolatileUnsignedShortType) && source.isPresent( timepoint ) )
 		{
 			@SuppressWarnings( "unchecked" )
 			final RandomAccessibleInterval< UnsignedShortType > img = ( RandomAccessibleInterval< UnsignedShortType > ) source.getSource( timepoint, source.getNumMipmapLevels() - 1 );
@@ -577,7 +615,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		}
 		else if ( type instanceof UnsignedByteType )
 			return new Bounds( 0, 255 );
-		else
+		else {
 			return new Bounds( 0, 65535 );
+		}
 	}
 }

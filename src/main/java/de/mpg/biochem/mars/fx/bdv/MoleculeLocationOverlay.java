@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Optional;
+import java.util.Random;
 
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -19,52 +20,60 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 
 	private String xLocation;
 	private String yLocation;
+	private boolean showCircle = false;
 	private boolean useParameters = false;
 	private boolean showLabel = false;
 	private boolean showAll = false;
+	private boolean rainbowColor = false;
 	
 	private double radius = 5;
-	private Molecule molecule;
+	private Molecule selectedMolecule;
+	private MarsBdvFrame<?> marsBdvFrame;
 	
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	private final MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
-	public MoleculeLocationOverlay(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+	public MoleculeLocationOverlay(MarsBdvFrame<?> marsBdvFrame, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
 			final boolean useProperties, final boolean showLabel, final String xLocation, final String yLocation) {
 		this.archive = archive;
 		this.xLocation = xLocation;
 		this.yLocation = yLocation;
 		this.useParameters = useProperties;
 		this.showLabel = showLabel;
+		this.marsBdvFrame = marsBdvFrame;
 	}
 	
 	@Override
 	protected void draw(Graphics2D g) {
+		if (!showCircle)
+			return;
+		
 		if (showAll)
 			archive.molecules().forEach(molecule -> drawMolecule(g, molecule));
 		else
-			drawMolecule(g, molecule);
+			drawMolecule(g, selectedMolecule);
 	}
 	
 	private void drawMolecule(Graphics2D g, Molecule molecule) {
 		if (molecule != null) {
+			Color color = (rainbowColor) ? marsBdvFrame.getMoleculeColor(molecule.getUID()) : getColor();
+			g.setColor(color);
+			g.setStroke( new BasicStroke( 2 ) );
+			
 			if (useParameters && molecule.hasParameter(xLocation) && molecule.hasParameter(yLocation)) {
 				double x = molecule.getParameter(xLocation);
 				double y = molecule.getParameter(yLocation);
 				if (!Double.isNaN(x) && !Double.isNaN(y))
-					drawOval(g, x, y);
+					drawOval(g, molecule, x, y);
 			} else if (molecule.getTable().hasColumn(xLocation) && molecule.getTable().hasColumn(yLocation)) {
 				double x = molecule.getTable().mean(xLocation);
 				double y = molecule.getTable().mean(yLocation);
 				if (!Double.isNaN(x) && !Double.isNaN(y))
-					drawOval(g, x, y);
+					drawOval(g, molecule, x, y);
 			}
 		}
 	}
 	
-	private void drawOval(Graphics2D g, double x, double y) {
-		g.setColor( getColor() );
-		g.setStroke( new BasicStroke( 2 ) );
-		
+	private void drawOval(Graphics2D g, Molecule molecule, double x, double y) {
 		AffineTransform2D transform = new AffineTransform2D();
 		getCurrentTransform2D(transform);
 
@@ -91,6 +100,9 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	private Color getColor()
 	{
 		int alpha = (int) info.getDisplayRangeMax();
+		
+		if (alpha > 255 || alpha < 0)
+			alpha = 255;
 
 		final int r = ARGBType.red( info.getColor().get() );
 		final int g = ARGBType.green( info.getColor().get() );
@@ -98,8 +110,8 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 		return new Color( r , g, b, alpha );
 	}
 
-	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
+	public void setMolecule(Molecule selectedMolecule) {
+		this.selectedMolecule = selectedMolecule;
 	}
 	
 	public void setRadius(double radius) {
@@ -124,5 +136,13 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	
 	public void setShowAll(boolean showAll) {
 		this.showAll = showAll;
+	}
+	
+	public void setShowCircle(boolean showCircle) {
+		this.showCircle = showCircle;
+	}
+	
+	public void setRainbowColor(boolean rainbowColor) {
+		this.rainbowColor = rainbowColor;
 	}
 }

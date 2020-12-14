@@ -23,7 +23,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 public class LocationCard extends JPanel {
 
 	private final JTextField magnificationField, radiusField;
-	private final JCheckBox showLocation, showLabel, roverSync, showAll;
+	private final JCheckBox showLocation, showLabel, roverSync, rainbowColor, showAll;
 	
 	private final JComboBox<String> locationSource, xLocation, yLocation;
 	
@@ -70,14 +70,17 @@ public class LocationCard extends JPanel {
 			}
 		});
 		
-		showLocation = new JCheckBox("show", true);
+		showLocation = new JCheckBox("circle", false);
 		add(showLocation);
-		showLabel = new JCheckBox("label", true);
+		showLabel = new JCheckBox("label", false);
 		add(showLabel);
-		showAll = new JCheckBox("all", true);
+		showAll = new JCheckBox("all", false);
 		add(showAll);
 		roverSync = new JCheckBox("rover sync", true);
 		add(roverSync);
+		rainbowColor = new JCheckBox("rainbow", false);
+		add(rainbowColor);
+		add(new JPanel());
 		
 		add(new JLabel("Radius"));
 		
@@ -110,6 +113,10 @@ public class LocationCard extends JPanel {
 	
 	public boolean roverSync() {
 		return roverSync.isSelected();
+	}
+	
+	public boolean rainbowColor() {
+		return rainbowColor.isSelected();
 	}
 	
 	public String getXLocation() {

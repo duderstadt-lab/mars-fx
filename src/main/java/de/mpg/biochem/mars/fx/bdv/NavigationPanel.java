@@ -46,7 +46,7 @@ import static bdv.viewer.ViewerStateChange.INTERPOLATION_CHANGED;
 public class NavigationPanel extends JPanel
 {
 
-	private final NavigationButton moleculeLocation, fullView, exportImagePlus, help;
+	private final NavigationButton moleculeLocation, fullView, autoContrast, exportImagePlus, help;
 
 	public NavigationPanel( final ViewerState state, final MarsBdvFrame<?> marsBdvFrame )
 	{
@@ -60,6 +60,10 @@ public class NavigationPanel extends JPanel
 		fullView = new NavigationButton(
 				new ImageIcon( this.getClass().getResource( "FullView.png" ) ),
 				"Full view");
+		
+		autoContrast = new NavigationButton(
+				new ImageIcon( this.getClass().getResource( "AutoContrast.png" ) ),
+				"Contrast");
 		
 		exportImagePlus = new NavigationButton(
 				new ImageIcon( this.getClass().getResource( "ExportImage.png" ) ),
@@ -99,9 +103,12 @@ public class NavigationPanel extends JPanel
 		});
 		
 		help.addActionListener( e -> marsBdvFrame.showHelp(true));
+		
+		autoContrast.addActionListener( e -> MarsBdvFrame.initBrightness( 0.001, 0.999, marsBdvFrame.bdv.getViewerPanel().state(), marsBdvFrame.bdv.getConverterSetups() ));
 
 		this.add( moleculeLocation );
 		this.add( fullView );
+		this.add( autoContrast );
 		this.add( exportImagePlus );
 		this.add( help );
 	}
