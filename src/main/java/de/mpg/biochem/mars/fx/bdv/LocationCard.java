@@ -76,7 +76,7 @@ public class LocationCard extends JPanel {
 		add(showLabel);
 		showAll = new JCheckBox("all", false);
 		add(showAll);
-		roverSync = new JCheckBox("rover sync", true);
+		roverSync = new JCheckBox("rover sync", false);
 		add(roverSync);
 		rainbowColor = new JCheckBox("rainbow", false);
 		add(rainbowColor);
@@ -99,6 +99,17 @@ public class LocationCard extends JPanel {
 		add(magnificationField);
 	}
 	
+	public void fillMoleculeLocationOverlaySettings(MoleculeLocationOverlay moleculeLocationOverlay) {
+		moleculeLocationOverlay.useParameters(useParameters());
+		moleculeLocationOverlay.setXLocation(getXLocationSource());
+		moleculeLocationOverlay.setYLocation(getYLocationSource());
+		moleculeLocationOverlay.setLabelVisible(showLabel());
+		moleculeLocationOverlay.setShowAll(showAll());
+		moleculeLocationOverlay.setShowCircle(showLocationOverlay());
+		moleculeLocationOverlay.setRainbowColor(rainbowColor());
+		moleculeLocationOverlay.setRadius(getRadius());
+	}
+	
 	public boolean showLocationOverlay() {
 		return showLocation.isSelected();
 	}
@@ -119,11 +130,11 @@ public class LocationCard extends JPanel {
 		return rainbowColor.isSelected();
 	}
 	
-	public String getXLocation() {
+	public String getXLocationSource() {
 		return (String) xLocation.getSelectedItem();
 	}
 	
-	public String getYLocation() {
+	public String getYLocationSource() {
 		return (String) yLocation.getSelectedItem();
 	}
 	

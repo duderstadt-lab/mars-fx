@@ -47,11 +47,11 @@ public class TracksCard extends JPanel {
 		yColumn.setSelectedItem("y");
 		add(yColumn);
 		
-		showTrack = new JCheckBox("track", true);
+		showTrack = new JCheckBox("track", false);
 		add(showTrack);
 		showLabel = new JCheckBox("label", false);
 		add(showLabel);
-		showCircle = new JCheckBox("circle", true);
+		showCircle = new JCheckBox("circle", false);
 		add(showCircle);
 		showAll = new JCheckBox("all", false);
 		add(showAll);
@@ -67,6 +67,18 @@ public class TracksCard extends JPanel {
 		radiusField.setMinimumSize(dimScaleField);
 		
 		add(radiusField);
+	}
+	
+	public void fillMoleculeTrackOverlaySettings(MoleculeTrackOverlay moleculeTrackOverlay) {
+		moleculeTrackOverlay.setXColumn(getXColumn());
+		moleculeTrackOverlay.setYColumn(getYColumn());
+		moleculeTrackOverlay.setTColumn(getTColumn());
+		moleculeTrackOverlay.setCircleVisible(showCircle());
+		moleculeTrackOverlay.setLabelVisible(showLabel());
+		moleculeTrackOverlay.setTrackVisible(showTrack());
+		moleculeTrackOverlay.setShowAll(showAll());
+		moleculeTrackOverlay.setRainbowColor(rainbowColor());
+		moleculeTrackOverlay.setRadius(getRadius());
 	}
 	
 	public boolean showCircle() {

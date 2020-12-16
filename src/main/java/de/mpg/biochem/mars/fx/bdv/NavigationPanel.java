@@ -29,6 +29,7 @@ package de.mpg.biochem.mars.fx.bdv;
 import bdv.viewer.DisplayMode;
 import bdv.viewer.Interpolation;
 import bdv.viewer.ViewerState;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 
@@ -100,6 +101,8 @@ public class NavigationPanel extends JPanel
 	  		
 	  		//Now show it!
 	  		ip.show();
+	  		
+	  		IJ.run(ip, "Enhance Contrast...", "saturated=0.35");
 		});
 		
 		help.addActionListener( e -> marsBdvFrame.showHelp(true));

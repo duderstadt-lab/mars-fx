@@ -74,6 +74,7 @@ import mpicbg.spim.data.SpimDataException;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
+import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.util.Util;
 import net.imglib2.Cursor;
@@ -179,6 +180,17 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		frame.pack();
 		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 		
+		if (molecule != null) {
+			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
+			metaUID = meta.getUID();
+			createView(meta);
+			
+			int xCenter = meta.getImage(0).getSizeX()/2;
+			int yCenter = meta.getImage(0).getSizeY()/2;
+			
+			goTo(xCenter, yCenter);
+		}
+		
 		setMolecule(molecule);
 		
 		frame.setVisible( true );
@@ -199,52 +211,27 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				goTo(x, y);
 			
 			if (locationCard.showLocationOverlay() && moleculeLocationOverlay == null) {
-				moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocation(), locationCard.getYLocation());
+				moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocationSource(), locationCard.getYLocationSource());
 				BdvFunctions.showOverlay(moleculeLocationOverlay, "Location", Bdv.options().addTo(bdv));
 			}
-
-			if (moleculeLocationOverlay != null) {
-				moleculeLocationOverlay.useParameters(locationCard.useParameters());
-				moleculeLocationOverlay.setXLocation(locationCard.getXLocation());
-				moleculeLocationOverlay.setYLocation(locationCard.getYLocation());
-				moleculeLocationOverlay.setLabelVisible(locationCard.showLabel());
-				moleculeLocationOverlay.setShowAll(locationCard.showAll());
-				moleculeLocationOverlay.setShowCircle(locationCard.showLocationOverlay());
-				moleculeLocationOverlay.setRainbowColor(locationCard.rainbowColor());
-				moleculeLocationOverlay.setRadius(locationCard.getRadius());	
-			}
-			
-			if (locationCard.showLocationOverlay())
-				moleculeLocationOverlay.setMolecule(molecule);
+			if (moleculeLocationOverlay != null) locationCard.fillMoleculeLocationOverlaySettings(moleculeLocationOverlay);
+			if (locationCard.showLocationOverlay()) moleculeLocationOverlay.setMolecule(molecule);
 			
 			if ((trackCard.showCircle() || trackCard.showTrack()) && moleculeTrackOverlay == null) {
 				moleculeTrackOverlay = new MoleculeTrackOverlay(this, archive, trackCard.getXColumn(), trackCard.getYColumn(), trackCard.getTColumn());
 				BdvFunctions.showOverlay(moleculeTrackOverlay, "Track", Bdv.options().addTo(bdv));
 			}
-
-			if (moleculeTrackOverlay != null) {
-				moleculeTrackOverlay.setXColumn(trackCard.getXColumn());
-				moleculeTrackOverlay.setYColumn(trackCard.getYColumn());
-				moleculeTrackOverlay.setTColumn(trackCard.getTColumn());
-				moleculeTrackOverlay.setCircleVisible(trackCard.showCircle());
-				moleculeTrackOverlay.setLabelVisible(trackCard.showLabel());
-				moleculeTrackOverlay.setTrackVisible(trackCard.showTrack());
-				moleculeTrackOverlay.setShowAll(trackCard.showAll());
-				moleculeTrackOverlay.setRainbowColor(trackCard.rainbowColor());
-				moleculeTrackOverlay.setRadius(trackCard.getRadius());
-			}
-			
-			if (trackCard.showCircle() || trackCard.showTrack())
-				moleculeTrackOverlay.setMolecule(molecule);
+			if (moleculeTrackOverlay != null) trackCard.fillMoleculeTrackOverlaySettings(moleculeTrackOverlay);
+			if (trackCard.showCircle() || trackCard.showTrack()) moleculeTrackOverlay.setMolecule(molecule);
 		 }
 	}
 	
 	private double getXLocation() {
 		if (molecule != null) {
-			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getXLocation()))
-				return molecule.getParameter(locationCard.getXLocation());
-			else if (molecule.getTable().hasColumn(locationCard.getXLocation()))
-				return molecule.getTable().mean(locationCard.getXLocation());
+			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getXLocationSource()))
+				return molecule.getParameter(locationCard.getXLocationSource());
+			else if (molecule.getTable().hasColumn(locationCard.getXLocationSource()))
+				return molecule.getTable().mean(locationCard.getXLocationSource());
 		}
 			
 		return Double.NaN;
@@ -252,10 +239,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	private double getYLocation() {
 		if (molecule != null) {
-			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getYLocation()))
-				return molecule.getParameter(locationCard.getYLocation());
-			else if (molecule.getTable().hasColumn(locationCard.getYLocation()))
-				return molecule.getTable().mean(locationCard.getYLocation());
+			if (locationCard.useParameters() && molecule.hasParameter(locationCard.getYLocationSource()))
+				return molecule.getParameter(locationCard.getYLocationSource());
+			else if (molecule.getTable().hasColumn(locationCard.getYLocationSource()))
+				return molecule.getTable().mean(locationCard.getYLocationSource());
 		}
 			
 		return Double.NaN;
@@ -400,7 +387,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 					if (spimData.getSequenceDescription().getTimePoints().size() > numTimePoints)
 						numTimePoints = spimData.getSequenceDescription().getTimePoints().size();
 					
-					sources.add(new SpimSource<T>(spimData, 0, "source"));
+					sources.add(new SpimSource<T>(spimData, 0, source.getName()));
 				} catch (SpimDataException e) {
 					e.printStackTrace();
 				}
