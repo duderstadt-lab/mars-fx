@@ -26,6 +26,7 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.plot;
 
+import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisLabelFormatter;
 import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.plugins.ChartPlugin;
@@ -210,6 +211,11 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 
 		Action resetXYZoom = new Action("Reset Zoom", null, EXPAND, e -> {
 			resetXYZoom();
+			
+			//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
+			//Somehow layoutChildren, even in a runLater block doesn't always work
+			//Needs further investigation. This should be removed once a solution is found.
+			resetXYZoom();
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
@@ -313,22 +319,25 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	
 			if (fixXBounds.get()) {
 				subPlot.getChart().getXAxis().setAutoRanging(false);
-				subPlot.getChart().getXAxis().setMin(plotOptionsPane.getXMin());
-				subPlot.getChart().getXAxis().setMax(plotOptionsPane.getXMax());
+				subPlot.getChart().getXAxis().set(plotOptionsPane.getXMin(), plotOptionsPane.getXMax());
 			} else
 				subPlot.getChart().getXAxis().setAutoRanging(true);
 			
 			if (subPlot.getDatasetOptionsPane().fixYBounds().get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
-				subPlot.getChart().getYAxis().setMin(subPlot.getDatasetOptionsPane().getYMin());
-				subPlot.getChart().getYAxis().setMax(subPlot.getDatasetOptionsPane().getYMax());
+				subPlot.getChart().getYAxis().set(subPlot.getDatasetOptionsPane().getYMin(), subPlot.getDatasetOptionsPane().getYMax());
 			} else
 				subPlot.getChart().getYAxis().setAutoRanging(true);
 						
 			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
 				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 			
-			subPlot.getChart().layoutChildren();
+			for (Axis a : subPlot.getChart().getAxes())
+	            a.forceRedraw();
+			
+			//issues with updating here appear to be related to https://github.com/GSI-CS-CO/chart-fx/issues/23
+			//Still the plot area doesn't update together with the axis...
+			Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
 	}
 	
@@ -536,6 +545,11 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		            	if (!fixXBounds.get())
 		            		fixXBounds.set(true);
 		            	resetXYZoom();
+		            	
+		            	//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
+		    			//Somehow layoutChildren, even in a runLater block doesn't always work
+		    			//Needs further investigation. This should be removed once a solution is found.
+		    			resetXYZoom();
 		            }
 		        }
 			};

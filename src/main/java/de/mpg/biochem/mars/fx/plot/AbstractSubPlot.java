@@ -194,8 +194,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		if (datasetOptionsPane.fixYBounds().get()) {
 			chartPane.getYAxis().setAutoRanging(false);
-			chartPane.getYAxis().setMin(datasetOptionsPane.getYMin());
-			chartPane.getYAxis().setMax(datasetOptionsPane.getYMax());
+			chartPane.getYAxis().set(datasetOptionsPane.getYMin(), datasetOptionsPane.getYMax());
 		}
 		
 		addIndicators(xAxisList, yAxisList);
