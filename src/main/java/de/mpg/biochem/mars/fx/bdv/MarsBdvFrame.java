@@ -185,10 +185,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			metaUID = meta.getUID();
 			createView(meta);
 			
-			int xCenter = meta.getImage(0).getSizeX()/2;
-			int yCenter = meta.getImage(0).getSizeY()/2;
-			
-			goTo(xCenter, yCenter);
+			if (meta.getImage(0).getSizeX() != -1 && meta.getImage(0).getSizeY() != -1)
+				goTo(meta.getImage(0).getSizeX()/2, meta.getImage(0).getSizeY()/2);
+			else 
+				goTo(0,0);
 		}
 		
 		setMolecule(molecule);
