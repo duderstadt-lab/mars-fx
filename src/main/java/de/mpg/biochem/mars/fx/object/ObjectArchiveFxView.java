@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.object;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
@@ -44,10 +44,11 @@ import org.scijava.Priority;
 import net.imagej.display.WindowService;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.object.ObjectArchive;
 
 
-@Plugin(type = DisplayViewer.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive<?,?,?,?>> implements DisplayViewer<MoleculeArchive<?,?,?,?>> {
+@Plugin(type = DisplayViewer.class, priority = Priority.HIGH)
+public class ObjectArchiveFxView extends AbstractDisplayViewer<ObjectArchive> implements DisplayViewer<ObjectArchive> {
 	
 	@Parameter
     private Context context;
@@ -59,13 +60,13 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	public void view(final UserInterface ui, final Display<?> d) {	
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive = (MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>)d.get(0);
 
-		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, context);
-		moleculeFrame.init();
+		ObjectArchiveFxFrame objectFrame = new ObjectArchiveFxFrame(archive, context);
+		objectFrame.init();
 	}
 
 	@Override
 	public boolean canView(final Display<?> d) {
-		if (d instanceof MoleculeArchiveFxDisplay) {
+		if (d instanceof ObjectArchiveFxDisplay) {
 			return true;
 		} else {
 			return false;
@@ -73,8 +74,8 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	}
 	
 	@Override
-	public MoleculeArchiveFxDisplay getDisplay() {
-		return (MoleculeArchiveFxDisplay) super.getDisplay();
+	public ObjectArchiveFxDisplay getDisplay() {
+		return (ObjectArchiveFxDisplay) super.getDisplay();
 	}
 
 	@Override

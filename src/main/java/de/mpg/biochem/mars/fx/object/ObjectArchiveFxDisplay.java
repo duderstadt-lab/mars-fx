@@ -24,7 +24,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.object;
 
 import org.scijava.Priority;
 import org.scijava.display.AbstractDisplay;
@@ -32,26 +32,27 @@ import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
 import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.object.ObjectArchive;
 
 /**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
+ * Display for {@link DnaMoleculeArchive}. This ensures that uiService.show() for a DnaMoleculeArchive will automatically be detected and 
  * call the view method in MoleculeArchiveView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
-@Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
+@Plugin(type = Display.class, priority = Priority.HIGH)
+public class ObjectArchiveFxDisplay extends AbstractDisplay<ObjectArchive> implements Display<ObjectArchive> {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public MoleculeArchiveFxDisplay() {
-		super((Class) MoleculeArchive.class);
+	public ObjectArchiveFxDisplay() {
+		super((Class) ObjectArchive.class);
 	}
 
 	// -- Display methods --
 
 	@Override
 	public boolean canDisplay(final Class<?> c) {
-		if (c.equals(MoleculeArchive.class)) {
+		if (c.equals(ObjectArchive.class)) {
 			return true;
 		} else { 
 			return super.canDisplay(c);

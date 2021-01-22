@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, Karl Duderstadt
+ * Copyright (C) 2019, Duderstadt Lab
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -24,42 +24,33 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
-package de.mpg.biochem.mars.fx.molecule;
+package de.mpg.biochem.mars.fx.object;
 
-import org.scijava.Priority;
-import org.scijava.display.AbstractDisplay;
-import org.scijava.display.Display;
-import org.scijava.plugin.Plugin;
+import org.scijava.Context;
 
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculesTab;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculeCenterPane;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculePropertiesPane;
+import de.mpg.biochem.mars.molecule.Molecule;
+import javafx.scene.layout.Region;
 
-/**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
- * call the view method in MoleculeArchiveView to make our custom window with custom menus.
- * 
- * @author Karl Duderstadt
- */
-@Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public MoleculeArchiveFxDisplay() {
-		super((Class) MoleculeArchive.class);
+public class ObjectsTab extends AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane> {
+	public ObjectsTab(final Context context) {
+		super(context);
+		
+		Region objectIcon = new Region();
+		objectIcon.getStyleClass().add("objectIcon");
+        
+        setIcon(objectIcon);
 	}
 
-	// -- Display methods --
+	@Override
+	public DefaultMoleculeCenterPane createMoleculeCenterPane(final Context context) {
+		return new DefaultMoleculeCenterPane(context);
+	}
 
 	@Override
-	public boolean canDisplay(final Class<?> c) {
-		if (c.equals(MoleculeArchive.class)) {
-			return true;
-		} else { 
-			return super.canDisplay(c);
-		}
-	}
-	
-	@Override
-	public boolean isDisplaying(final Object o) {
-		return false;
+	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(final Context context) {
+		return new DefaultMoleculePropertiesPane(context);
 	}
 }

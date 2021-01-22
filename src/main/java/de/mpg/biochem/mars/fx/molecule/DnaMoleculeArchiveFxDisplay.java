@@ -34,24 +34,24 @@ import org.scijava.plugin.Plugin;
 import de.mpg.biochem.mars.molecule.*;
 
 /**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
+ * Display for {@link DnaMoleculeArchive}. This ensures that uiService.show() for a DnaMoleculeArchive will automatically be detected and 
  * call the view method in MoleculeArchiveView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
-@Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
+@Plugin(type = Display.class, priority = Priority.HIGH)
+public class DnaMoleculeArchiveFxDisplay extends AbstractDisplay<DnaMoleculeArchive> implements Display<DnaMoleculeArchive> {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public MoleculeArchiveFxDisplay() {
-		super((Class) MoleculeArchive.class);
+	public DnaMoleculeArchiveFxDisplay() {
+		super((Class) DnaMoleculeArchive.class);
 	}
 
 	// -- Display methods --
 
 	@Override
 	public boolean canDisplay(final Class<?> c) {
-		if (c.equals(MoleculeArchive.class)) {
+		if (c.equals(DnaMoleculeArchive.class)) {
 			return true;
 		} else { 
 			return super.canDisplay(c);

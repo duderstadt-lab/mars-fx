@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (C) 2019, Karl Duderstadt
+ * Copyright (C) 2019, Duderstadt Lab
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -26,40 +26,27 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.molecule;
 
-import org.scijava.Priority;
-import org.scijava.display.AbstractDisplay;
-import org.scijava.display.Display;
-import org.scijava.plugin.Plugin;
+import org.scijava.Context;
 
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-/**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
- * call the view method in MoleculeArchiveView to make our custom window with custom menus.
- * 
- * @author Karl Duderstadt
- */
-@Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public MoleculeArchiveFxDisplay() {
-		super((Class) MoleculeArchive.class);
+public class DnaMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DnaMoleculesTab> {
+	public DnaMoleculeArchiveFxFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, final Context context) {
+		super(archive, context);
 	}
-
-	// -- Display methods --
 
 	@Override
-	public boolean canDisplay(final Class<?> c) {
-		if (c.equals(MoleculeArchive.class)) {
-			return true;
-		} else { 
-			return super.canDisplay(c);
-		}
+	public DefaultMarsMetadataTab createImageMetadataTab(final Context context) {
+		return new DefaultMarsMetadataTab(context);
 	}
-	
+
 	@Override
-	public boolean isDisplaying(final Object o) {
-		return false;
+	public DnaMoleculesTab createMoleculesTab(final Context context) {
+		return new DnaMoleculesTab(context);
 	}
+
 }
