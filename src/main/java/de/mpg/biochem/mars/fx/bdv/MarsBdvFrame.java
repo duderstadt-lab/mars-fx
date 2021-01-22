@@ -117,20 +117,20 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	protected final JFrame frame;
 	
-	private int numTimePoints = 1;
+	protected int numTimePoints = 1;
 
-	private final HelpDialog helpDialog;
+	protected final HelpDialog helpDialog;
 	
-	private final SharedQueue sharedQueue;
+	protected final SharedQueue sharedQueue;
 	
-	private HashMap<String, List<Source<T>>> bdvSources;
-	private HashMap<String, N5Reader> n5Readers;
+	protected HashMap<String, List<Source<T>>> bdvSources;
+	protected HashMap<String, N5Reader> n5Readers;
 	
-	private final boolean useVolatile;
+	protected final boolean useVolatile;
 	
-	private String metaUID = "";
+	protected String metaUID = "";
 	
-	private Random ran = new Random();
+	protected Random ran = new Random();
 	
 	protected BdvHandlePanel bdv;
 	

@@ -307,8 +307,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    			frame.setVisible(true);
 				});
 		} catch (IOException e) {
-			logService.warn("A problem was encountered when loading the cfg file " 
-					+ archive.getFile().getAbsolutePath() + ".cfg" + " containing the mars-fx display settings. "
+			logService.warn("A problem was encountered when loading the rover file " 
+					+ archive.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
 					+ "Please check the file to make sure the syntax is correct."
 					+ "Aborting and opening with the default settings.");
 		}
@@ -1289,7 +1289,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
     
     protected void saveState(String path) throws IOException {
-		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".cfg")));
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
 		jGenerator.useDefaultPrettyPrinter();
 		toJSON(jGenerator);
@@ -1302,7 +1302,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	if (archive.getFile() == null)
     		return;
     	
-    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".cfg");
+    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
     	if (!stateFile.exists())
     		return;
     	
