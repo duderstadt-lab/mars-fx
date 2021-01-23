@@ -120,6 +120,8 @@ import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import de.mpg.biochem.mars.fx.bdv.LocationCard;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
@@ -451,7 +453,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            		BdvHandle[] handles = new BdvHandle[views];
 	            		marsBdvFrames = new MarsBdvFrame[views];
 	            		for (int i = 0; i < views; i++) {
-	            			MarsBdvFrame marsBdvFrame = new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile);
+	            			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(useVolatile);
 		            		marsBdvFrames[i] = marsBdvFrame;
 	            			handles[i] = marsBdvFrame.getBdvHandle();
 	            		}
@@ -1018,6 +1020,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	public abstract I createImageMetadataTab(final Context context);
 	
 	public abstract M createMoleculesTab(final Context context);
+	
+	public abstract MarsBdvFrame createMarsBdvFrame(boolean useVolatile);
 	
 	public DashboardTab getDashboard() {
 		return dashboardTab;

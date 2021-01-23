@@ -14,20 +14,26 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class LocationCard extends JPanel {
+public class LocationCard extends JPanel implements MarsBdvCard {
 
 	private final JTextField magnificationField, radiusField;
 	private final JCheckBox showLocation, showLabel, roverSync, rainbowColor, showAll;
 	
 	private final JComboBox<String> locationSource, xLocation, yLocation;
 	
+	private MoleculeLocationOverlay moleculeLocationOverlay;
+	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	private Molecule molecule;
+	
 	public LocationCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
 		setLayout(new GridLayout(0, 2));
 		
 		Set<String> columnNames = archive.properties().getColumnSet();
@@ -148,5 +154,23 @@ public class LocationCard extends JPanel {
 	
 	public double getRadius() {
 		return Double.valueOf(radiusField.getText());
+	}
+
+	@Override
+	public void setMolecule(Molecule molecule) {
+		this.molecule = molecule;
+	}
+
+	@Override
+	public String getCardName() {
+		return "Location";
+	}
+
+	@Override
+	public BdvOverlay getBdvOverlay() {
+		if (moleculeLocationOverlay == null)
+			moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, useParameters(), showLabel(), getXLocationSource(), getYLocationSource());
+		moleculeLocationOverlay.setMolecule(molecule);
+		return moleculeLocationOverlay;
 	}
 }

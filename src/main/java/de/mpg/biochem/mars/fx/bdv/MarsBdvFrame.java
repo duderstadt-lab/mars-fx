@@ -45,6 +45,7 @@ import javax.swing.ActionMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -123,8 +124,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	protected final SharedQueue sharedQueue;
 	
-	protected HashMap<String, List<Source<T>>> bdvSources;
-	protected HashMap<String, N5Reader> n5Readers;
+	protected Map<String, List<Source<T>>> bdvSources;
+	protected Map<String, N5Reader> n5Readers;
+	protected List<MarsBdvCard> cards;
 	
 	protected final boolean useVolatile;
 	
@@ -138,17 +140,17 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	protected Molecule molecule;
 	
-	protected final LocationCard locationCard;
-	protected MoleculeLocationOverlay moleculeLocationOverlay;
-	
-	protected final TracksCard trackCard;
-	protected MoleculeTrackOverlay moleculeTrackOverlay;
+	protected LocationCard locationCard;
 	
 	protected static HashMap<String, Color> moleculeRainbowColors;
 	
 	protected AffineTransform3D viewerTransform;
 	
 	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile) {
+		this(archive, molecule, useVolatile, new ArrayList<MarsBdvCard>());
+	}
+	
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards) {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.useVolatile = useVolatile;
@@ -171,8 +173,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		locationCard = new LocationCard(archive);
 		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard, true);
 		
-		trackCard = new TracksCard(archive);
-		bdv.getBdvHandle().getCardPanel().addCard("Track", "Track", trackCard, true);
+		//Add custom cards
+		for (MarsBdvCard card : cards)
+			bdv.getBdvHandle().getCardPanel().addCard(card.getCardName(), card.getCardName(), (JComponent) card, true);
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
 		
@@ -210,19 +213,24 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			if (!Double.isNaN(x) && !Double.isNaN(y))
 				goTo(x, y);
 			
-			if (locationCard.showLocationOverlay() && moleculeLocationOverlay == null) {
-				moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, locationCard.useParameters(), locationCard.showLabel(), locationCard.getXLocationSource(), locationCard.getYLocationSource());
-				BdvFunctions.showOverlay(moleculeLocationOverlay, "Location", Bdv.options().addTo(bdv));
+			if (locationCard.showLocationOverlay()) {
+				locationCard.setMolecule(molecule);
+				BdvFunctions.showOverlay(locationCard.getBdvOverlay(), "Location", Bdv.options().addTo(bdv));
 			}
-			if (moleculeLocationOverlay != null) locationCard.fillMoleculeLocationOverlaySettings(moleculeLocationOverlay);
-			if (locationCard.showLocationOverlay()) moleculeLocationOverlay.setMolecule(molecule);
 			
+			for (MarsBdvCard card : cards) {
+				card.setMolecule(molecule);
+				BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
+			}
+			
+			/*
 			if ((trackCard.showCircle() || trackCard.showTrack()) && moleculeTrackOverlay == null) {
 				moleculeTrackOverlay = new MoleculeTrackOverlay(this, archive, trackCard.getXColumn(), trackCard.getYColumn(), trackCard.getTColumn());
 				BdvFunctions.showOverlay(moleculeTrackOverlay, "Track", Bdv.options().addTo(bdv));
 			}
 			if (moleculeTrackOverlay != null) trackCard.fillMoleculeTrackOverlaySettings(moleculeTrackOverlay);
 			if (trackCard.showCircle() || trackCard.showTrack()) moleculeTrackOverlay.setMolecule(molecule);
+			*/
 		 }
 	}
 	

@@ -28,7 +28,6 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	
 	private double radius = 5;
 	private Molecule selectedMolecule;
-	private MarsBdvFrame<?> marsBdvFrame;
 	
 	private final MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
@@ -39,7 +38,6 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 		this.yLocation = yLocation;
 		this.useParameters = useProperties;
 		this.showLabel = showLabel;
-		this.marsBdvFrame = marsBdvFrame;
 	}
 	
 	@Override
@@ -55,6 +53,9 @@ public class MoleculeLocationOverlay extends BdvOverlay {
 	
 	private void drawMolecule(Graphics2D g, Molecule molecule) {
 		if (molecule != null) {
+			
+			//Need to implement that here!!!! Use a static map!!
+			
 			Color color = (rainbowColor) ? marsBdvFrame.getMoleculeColor(molecule.getUID()) : getColor();
 			g.setColor(color);
 			g.setStroke( new BasicStroke( 2 ) );
