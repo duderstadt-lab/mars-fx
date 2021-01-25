@@ -7,4 +7,6 @@ public interface MarsBdvCard {
 	String getCardName();
 	void setMolecule(Molecule molecule);
 	BdvOverlay getBdvOverlay();
+	boolean isActive();
+	void setActive(boolean active);
 }

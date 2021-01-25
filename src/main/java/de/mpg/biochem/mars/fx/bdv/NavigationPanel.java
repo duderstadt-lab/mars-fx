@@ -75,11 +75,11 @@ public class NavigationPanel extends JPanel
 				"Help");
 		
 		moleculeLocation.addActionListener( e -> {
-			if (marsBdvFrame.molecule != null)
-				marsBdvFrame.setMolecule(marsBdvFrame.molecule);
-		} );
+				marsBdvFrame.updateView();
+				marsBdvFrame.updateLocation();
+			});
 		
-		fullView.addActionListener( e -> marsBdvFrame.resetView());
+		fullView.addActionListener( e -> marsBdvFrame.setFullView());
 		
 		exportImagePlus.addActionListener( e -> {
 			GenericDialog dialog = new GenericDialog("Export to ImagePlus");

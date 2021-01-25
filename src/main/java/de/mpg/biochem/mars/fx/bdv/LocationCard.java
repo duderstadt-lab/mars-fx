@@ -32,6 +32,8 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	
+	private boolean active = false;
+	
 	public LocationCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 		setLayout(new GridLayout(0, 2));
@@ -105,7 +107,10 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 		add(magnificationField);
 	}
 	
-	public void fillMoleculeLocationOverlaySettings(MoleculeLocationOverlay moleculeLocationOverlay) {
+	private void updateOverlay() {
+		if (moleculeLocationOverlay == null)
+			moleculeLocationOverlay = new MoleculeLocationOverlay(archive, useParameters(), showLabel(), getXLocationSource(), getYLocationSource());
+		
 		moleculeLocationOverlay.useParameters(useParameters());
 		moleculeLocationOverlay.setXLocation(getXLocationSource());
 		moleculeLocationOverlay.setYLocation(getYLocationSource());
@@ -114,6 +119,8 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 		moleculeLocationOverlay.setShowCircle(showLocationOverlay());
 		moleculeLocationOverlay.setRainbowColor(rainbowColor());
 		moleculeLocationOverlay.setRadius(getRadius());
+		if (molecule != null)
+			moleculeLocationOverlay.setMolecule(molecule);
 	}
 	
 	public boolean showLocationOverlay() {
@@ -159,6 +166,7 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
+		updateOverlay();
 	}
 
 	@Override
@@ -168,9 +176,17 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 
 	@Override
 	public BdvOverlay getBdvOverlay() {
-		if (moleculeLocationOverlay == null)
-			moleculeLocationOverlay = new MoleculeLocationOverlay(archive, useParameters(), showLabel(), getXLocationSource(), getYLocationSource());
-		moleculeLocationOverlay.setMolecule(molecule);
+		updateOverlay();
 		return moleculeLocationOverlay;
+	}
+
+	@Override
+	public boolean isActive() {
+		return active;
+	}
+
+	@Override
+	public void setActive(boolean active) {
+		this.active = active;
 	}
 }

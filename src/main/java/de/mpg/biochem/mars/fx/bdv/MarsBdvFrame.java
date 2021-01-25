@@ -197,32 +197,43 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 	
 	public void setMolecule(Molecule molecule) {
-		if (molecule != null && locationCard.roverSync()) {	
-			this.molecule = molecule;
+		this.molecule = molecule;
+		if (locationCard.roverSync()) {
+			updateView();
+			updateLocation();
+		}
+	}
+	
+	public void updateView() {
+		if (molecule != null) {
 			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
 				metaUID = meta.getUID();
 				createView(meta);
 			}
-			double x = getXLocation();
-			double y = getYLocation();
 			
-			if (!Double.isNaN(x) && !Double.isNaN(y))
-				goTo(x, y);
-			
-			if (locationCard.showLocationOverlay()) {
-				locationCard.setMolecule(molecule);
-				
-				//This should only be called once!! Need a way to prevent addiny the overlay multiple times.
-				
+			locationCard.setMolecule(molecule);
+			if (locationCard.showLocationOverlay() && !locationCard.isActive()) {
 				BdvFunctions.showOverlay(locationCard.getBdvOverlay(), "Location", Bdv.options().addTo(bdv));
+				locationCard.setActive(true);
 			}
 			
 			for (MarsBdvCard card : cards) {
 				card.setMolecule(molecule);
-				BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
+				if (!locationCard.isActive()) {
+					BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
+					locationCard.setActive(true);
+				}
 			}
 		 }
+	}
+	
+	public void updateLocation() {
+		double x = getXLocation();
+		double y = getYLocation();
+	
+		if (!Double.isNaN(x) && !Double.isNaN(y))
+			goTo(x, y);
 	}
 	
 	private double getXLocation() {
@@ -264,7 +275,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
 	}
 	
-	public void resetView() {
+	public void setFullView() {
+		updateView();
 		ViewerPanel viewer = bdv.getViewerPanel();
 		Dimension dim = viewer.getDisplay().getSize();
 		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
@@ -409,7 +421,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	}
 
 	public void goTo(double x, double y) {
-		resetView();
+		setFullView();
 		
 		Dimension dim = bdv.getViewerPanel().getDisplay().getSize();
 		viewerTransform = bdv.getViewerPanel().getDisplay().getTransformEventHandler().getTransform();

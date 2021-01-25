@@ -198,8 +198,8 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	    			frame.setVisible(true);
 				});
 		}  catch (IOException e) {
-			logService.warn("A problem was encountered when loading the cfg file " 
-					+ table.getFile().getAbsolutePath() + ".cfg" + " containing the mars-fx display settings. "
+			logService.warn("A problem was encountered when loading the rover file " 
+					+ table.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
 					+ "Please check the file to make sure the syntax is correct."
 					+ "Aborting and opening with the default settings.");
 		}
@@ -431,7 +431,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	}
 	
 	protected void saveState(String path) throws IOException {
-		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".cfg")));
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
 		jGenerator.useDefaultPrettyPrinter();
 		toJSON(jGenerator);
@@ -444,7 +444,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
     	if (table.getFile() == null)
     		return;
     	
-    	File stateFile = new File(table.getFile().getAbsolutePath() + ".cfg");
+    	File stateFile = new File(table.getFile().getAbsolutePath() + ".rover");
     	if (!stateFile.exists())
     		return;
     	
