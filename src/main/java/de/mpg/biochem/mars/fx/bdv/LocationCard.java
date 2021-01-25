@@ -49,7 +49,7 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	public LocationCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
 		setLayout(new GridLayout(0, 2));
-		
+
 		Set<String> columnNames = archive.properties().getColumnSet();
 		Set<String> parameterNames = archive.properties().getParameterSet();
 		
