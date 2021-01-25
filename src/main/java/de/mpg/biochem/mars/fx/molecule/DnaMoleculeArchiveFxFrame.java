@@ -28,6 +28,7 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Context;
 
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -49,4 +50,8 @@ public class DnaMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<De
 		return new DnaMoleculesTab(context);
 	}
 
+	@Override
+	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile);
+	}
 }

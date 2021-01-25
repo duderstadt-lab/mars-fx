@@ -169,7 +169,7 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	@Override
 	public BdvOverlay getBdvOverlay() {
 		if (moleculeLocationOverlay == null)
-			moleculeLocationOverlay = new MoleculeLocationOverlay(this, archive, useParameters(), showLabel(), getXLocationSource(), getYLocationSource());
+			moleculeLocationOverlay = new MoleculeLocationOverlay(archive, useParameters(), showLabel(), getXLocationSource(), getYLocationSource());
 		moleculeLocationOverlay.setMolecule(molecule);
 		return moleculeLocationOverlay;
 	}

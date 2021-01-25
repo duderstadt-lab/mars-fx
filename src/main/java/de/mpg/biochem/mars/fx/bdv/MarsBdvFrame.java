@@ -132,8 +132,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	protected String metaUID = "";
 	
-	protected Random ran = new Random();
-	
 	protected BdvHandlePanel bdv;
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
@@ -141,8 +139,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	protected Molecule molecule;
 	
 	protected LocationCard locationCard;
-	
-	protected static HashMap<String, Color> moleculeRainbowColors;
 	
 	protected AffineTransform3D viewerTransform;
 	
@@ -154,6 +150,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		this.archive = archive;
 		this.molecule = molecule;
 		this.useVolatile = useVolatile;
+		this.cards = cards;
 		
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
@@ -215,6 +212,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			
 			if (locationCard.showLocationOverlay()) {
 				locationCard.setMolecule(molecule);
+				
+				//This should only be called once!! Need a way to prevent addiny the overlay multiple times.
+				
 				BdvFunctions.showOverlay(locationCard.getBdvOverlay(), "Location", Bdv.options().addTo(bdv));
 			}
 			
@@ -222,15 +222,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 				card.setMolecule(molecule);
 				BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
 			}
-			
-			/*
-			if ((trackCard.showCircle() || trackCard.showTrack()) && moleculeTrackOverlay == null) {
-				moleculeTrackOverlay = new MoleculeTrackOverlay(this, archive, trackCard.getXColumn(), trackCard.getYColumn(), trackCard.getTColumn());
-				BdvFunctions.showOverlay(moleculeTrackOverlay, "Track", Bdv.options().addTo(bdv));
-			}
-			if (moleculeTrackOverlay != null) trackCard.fillMoleculeTrackOverlaySettings(moleculeTrackOverlay);
-			if (trackCard.showCircle() || trackCard.showTrack()) moleculeTrackOverlay.setMolecule(molecule);
-			*/
 		 }
 	}
 	
@@ -415,17 +406,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	
 	public BdvHandle getBdvHandle() {
 		return bdv;
-	}
-	
-	public synchronized Color getMoleculeColor(String UID) {
-		if (moleculeRainbowColors == null) {
-			moleculeRainbowColors = new HashMap<String, Color>();
-			archive.molecules().forEach(m -> moleculeRainbowColors.put(m.getUID(), new Color(ran.nextFloat(), ran.nextFloat(), ran.nextFloat())));
-		} else if (!moleculeRainbowColors.containsKey(UID)) {
-			moleculeRainbowColors.put(UID, new Color(ran.nextFloat(), ran.nextFloat(), ran.nextFloat()));
-		}
-		
-		return moleculeRainbowColors.get(UID);
 	}
 
 	public void goTo(double x, double y) {

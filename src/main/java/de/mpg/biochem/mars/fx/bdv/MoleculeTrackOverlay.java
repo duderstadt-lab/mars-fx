@@ -56,7 +56,7 @@ public class MoleculeTrackOverlay extends BdvOverlay {
 	private void drawMolecule(Graphics2D g, Molecule molecule) {
 		if (molecule != null) {
 			if (molecule.getTable().hasColumn(xColumn) && molecule.getTable().hasColumn(yColumn) && molecule.getTable().hasColumn(tColumn)) {
-				Color color = (rainbowColor) ? marsBdvFrame.getMoleculeColor(molecule.getUID()) : getColor();
+				Color color = getColor();
 				g.setColor(color);
 				g.setStroke( new BasicStroke( 2 ) );
 				
