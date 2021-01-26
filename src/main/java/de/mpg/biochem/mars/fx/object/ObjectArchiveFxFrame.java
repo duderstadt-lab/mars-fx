@@ -26,6 +26,9 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.object;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.scijava.Context;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -33,7 +36,9 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.bdv.ObjectCard;
 import de.mpg.biochem.mars.fx.molecule.*;
 
 public class ObjectArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, ObjectsTab> {
@@ -53,6 +58,8 @@ public class ObjectArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<Default
 
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
-		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile);
+		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
+		cards.add(new ObjectCard(archive));
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile, cards);
 	}
 }

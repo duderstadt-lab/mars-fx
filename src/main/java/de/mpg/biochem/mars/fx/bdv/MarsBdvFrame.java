@@ -171,8 +171,10 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard, true);
 		
 		//Add custom cards
-		for (MarsBdvCard card : cards)
-			bdv.getBdvHandle().getCardPanel().addCard(card.getCardName(), card.getCardName(), (JComponent) card, true);
+		for (MarsBdvCard card : cards) {
+			System.out.println("Adding card");
+			bdv.getBdvHandle().getCardPanel().addCard(card.getCardName(), card.getCardName(), (JPanel) card, true);
+		}
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
 		
