@@ -172,7 +172,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		
 		//Add custom cards
 		for (MarsBdvCard card : cards) {
-			System.out.println("Adding card");
 			bdv.getBdvHandle().getCardPanel().addCard(card.getCardName(), card.getCardName(), (JPanel) card, true);
 		}
 		
@@ -222,9 +221,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 			
 			for (MarsBdvCard card : cards) {
 				card.setMolecule(molecule);
-				if (!locationCard.isActive()) {
+				if (!card.isActive()) {
 					BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
-					locationCard.setActive(true);
+					card.setActive(true);
 				}
 			}
 		 }
