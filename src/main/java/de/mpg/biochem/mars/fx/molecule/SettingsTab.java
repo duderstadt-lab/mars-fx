@@ -190,7 +190,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         );
 
         shortcutColumn.setSortable(false);
-        //shortcutColumn.setPrefWidth(100);
+        //shortcutColumn.setPrefWidth(150);
         //shortcutColumn.setMinWidth(100);
         shortcutColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         hotKeyTable.getColumns().add(shortcutColumn);
