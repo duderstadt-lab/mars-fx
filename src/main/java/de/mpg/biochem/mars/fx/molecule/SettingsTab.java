@@ -137,9 +137,10 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	protected BorderPane buildHotKeyTable() {
 		hotKeyTable = new TableView<HotKeyEntry>();
+		hotKeyTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     	
     	TableColumn<HotKeyEntry, HotKeyEntry> deleteColumn = new TableColumn<>();
-    	deleteColumn.setPrefWidth(30);
+    	deleteColumn.setMaxWidth(30);
     	deleteColumn.setMinWidth(30);
     	deleteColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
     	deleteColumn.setCellFactory(param -> new TableCell<HotKeyEntry, HotKeyEntry>() {
@@ -189,8 +190,8 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
         );
 
         shortcutColumn.setSortable(false);
-        shortcutColumn.setPrefWidth(100);
-        shortcutColumn.setMinWidth(100);
+        //shortcutColumn.setPrefWidth(100);
+        //shortcutColumn.setMinWidth(100);
         shortcutColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         hotKeyTable.getColumns().add(shortcutColumn);
         
@@ -203,8 +204,8 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
                 new ReadOnlyObjectWrapper<>(String.valueOf(hotKey.getValue().getTag()))
         );
         tagColumn.setSortable(false);
-        tagColumn.setPrefWidth(150);
-        tagColumn.setMinWidth(150);
+        //tagColumn.setPrefWidth(150);
+        //tagColumn.setMinWidth(150);
         tagColumn.setEditable(true);
         tagColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         hotKeyTable.getColumns().add(tagColumn);
@@ -242,9 +243,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		*/
 		
         BorderPane hotKeyPane = new BorderPane();
-        hotKeyPane.setMinWidth(400);
-        hotKeyPane.setMinHeight(350);
-        hotKeyPane.setMaxWidth(400);
+        //hotKeyPane.setMinWidth(600);
+        //hotKeyPane.setMinHeight(350);
+        //hotKeyPane.setMaxWidth(600);
         hotKeyPane.setMaxHeight(350);
         
         Insets insets = new Insets(5, 50, 5, 50);
