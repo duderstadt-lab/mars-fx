@@ -28,18 +28,22 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import java.io.File;
 import java.util.stream.Collectors;
 
-import org.controlsfx.control.textfield.CustomTextField;
+import javax.swing.SwingUtilities;
 
-import com.jfoenix.controls.JFXCheckBox;
+import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -47,10 +51,12 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.control.cell.TextFieldTableCell;
 
 import javafx.stage.DirectoryChooser;
@@ -59,18 +65,49 @@ public class BdvViewTable implements MetadataEventHandler {
     
 	protected MarsMetadata marsImageMetadata;
 	
-	protected BorderPane rootPane;
+	protected SplitPane rootPane;
 	
     protected CustomTextField addBdvSourceNameField;
-    protected TableView<MarsBdvSource> bdvTable;
     protected ObservableList<MarsBdvSource> bdvRowList = FXCollections.observableArrayList();
     
     protected Button typeButton;
     protected int buttonType = 0;
+    
+    protected BdvSourceOptionsPane bdvSourceOptionsPane;
+    
+    protected ChangeListener<MarsBdvSource> bdvIndexTableListener;
 
-    public BdvViewTable() {        
-    	bdvTable = new TableView<MarsBdvSource>();
+    public BdvViewTable() {
+    	rootPane = new SplitPane();
+		ObservableList<Node> splitItems = rootPane.getItems();
+		
+		rootPane.setDividerPositions(0.2f, 0.8f);
+		
+		Node bdvTableIndexContainer = buildBdvTableIndex();
+		SplitPane.setResizableWithParent(bdvTableIndexContainer, Boolean.FALSE);
+		splitItems.add(bdvTableIndexContainer);
+
+		bdvSourceOptionsPane = new BdvSourceOptionsPane();
+		SplitPane.setResizableWithParent(bdvSourceOptionsPane, Boolean.FALSE);
+		splitItems.add(bdvSourceOptionsPane);
+		
+        getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
+    }
+    
+    protected BorderPane buildBdvTableIndex() {
+    	TableView<MarsBdvSource> bdvTable = new TableView<MarsBdvSource>();
     	addBdvSourceNameField = new CustomTextField();
+    	
+    	TableColumn<MarsBdvSource, String> typeColumn = new TableColumn<>();
+        typeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        typeColumn.setCellValueFactory(bdvSource ->
+                new ReadOnlyObjectWrapper<>((bdvSource.getValue().isN5()) ? "N5" : "HD5")
+        );
+        typeColumn.setSortable(false);
+        typeColumn.setPrefWidth(40);
+        typeColumn.setMinWidth(40);
+        typeColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
+        bdvTable.getColumns().add(typeColumn);
     	
     	TableColumn<MarsBdvSource, MarsBdvSource> deleteColumn = new TableColumn<>();
     	deleteColumn.setPrefWidth(30);
@@ -135,92 +172,17 @@ public class BdvViewTable implements MetadataEventHandler {
         nameColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
         bdvTable.getColumns().add(nameColumn);
         
-        TableColumn<MarsBdvSource, String> typeColumn = new TableColumn<>("Type");
-        typeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        typeColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>((bdvSource.getValue().isN5()) ? "N5" : "HD5")
-        );
-        typeColumn.setSortable(false);
-        typeColumn.setPrefWidth(100);
-        typeColumn.setMinWidth(100);
-        typeColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
-        bdvTable.getColumns().add(typeColumn);
-        
-        TableColumn<MarsBdvSource, String> m00Column = buildAffineColumn("m00", 0, 0);
-        bdvTable.getColumns().add(m00Column);
-        TableColumn<MarsBdvSource, String> m01Column = buildAffineColumn("m01", 0, 1);
-        bdvTable.getColumns().add(m01Column);
-        TableColumn<MarsBdvSource, String> m02Column = buildAffineColumn("m02", 0, 3);
-        bdvTable.getColumns().add(m02Column);
-        TableColumn<MarsBdvSource, String> m10Column = buildAffineColumn("m10", 1, 0);
-        bdvTable.getColumns().add(m10Column);
-        TableColumn<MarsBdvSource, String> m11Column = buildAffineColumn("m11", 1, 1);
-        bdvTable.getColumns().add(m11Column);
-        TableColumn<MarsBdvSource, String> m12Column = buildAffineColumn("m12", 1, 3);
-        bdvTable.getColumns().add(m12Column);
-        
-        TableColumn<MarsBdvSource, MarsBdvSource> driftCorrectColumn = new TableColumn<>("Drift Correct");
-        driftCorrectColumn.setPrefWidth(40);
-        driftCorrectColumn.setMinWidth(40);
-        driftCorrectColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
-        driftCorrectColumn.setCellFactory(param -> new TableCell<MarsBdvSource, MarsBdvSource>() {
-            private final JFXCheckBox checkbox = new JFXCheckBox();
-
-            @Override
-            protected void updateItem(MarsBdvSource pRow, boolean empty) {
-                super.updateItem(pRow, empty);
-
-                if (pRow == null) {
-                    setGraphic(null);
-                    return;
-                }
-                
-                checkbox.setSelected(pRow.getCorrectDrift());
-                
-                setGraphic(checkbox);
-                checkbox.setOnAction(e -> {
-        			if (checkbox.isSelected())
-        				pRow.setCorrectDrift(true);
-        			else 
-        				pRow.setCorrectDrift(false);
-        		});
-            }
-        });
-    	driftCorrectColumn.setStyle("-fx-alignment: CENTER;");
-    	driftCorrectColumn.setSortable(false);
-    	bdvTable.getColumns().add(driftCorrectColumn);
-
-    	TableColumn<MarsBdvSource, String> channelColumn = buildEntryFieldColumn("C");
-    	channelColumn.setOnEditCommit(event -> { 
-        	try {
-    			int num = Integer.valueOf(event.getNewValue());
-    			event.getRowValue().setChannel(num);
-    		} catch (NumberFormatException e) {
-    			//Do nothing for the moment...
-    		}
-        });
-    	channelColumn.setCellValueFactory(bdvSource -> {
-    		String str = String.valueOf(bdvSource.getValue().getChannel());
-    		return new ReadOnlyObjectWrapper<>(str);
-    	});
-    	bdvTable.getColumns().add(channelColumn);
-    	
-    	TableColumn<MarsBdvSource, String> datasetColumn = buildEntryFieldColumn("N5 Dataset");
-    	datasetColumn.setOnEditCommit(event -> event.getRowValue().setN5Dataset(event.getNewValue()));
-    	datasetColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getN5Dataset()))
-        );
-        bdvTable.getColumns().add(datasetColumn);
-    	
-        TableColumn<MarsBdvSource, String> pathColumn = buildEntryFieldColumn("Path");
-        pathColumn.setOnEditCommit(event -> event.getRowValue().setPath(event.getNewValue()));
-        pathColumn.setCellValueFactory(bdvSource ->
-                new ReadOnlyObjectWrapper<>(String.valueOf(bdvSource.getValue().getPath()))
-        );
-        bdvTable.getColumns().add(pathColumn);
-        
         bdvTable.setItems(bdvRowList);
         bdvTable.setEditable(true);
+        
+        bdvIndexTableListener = new ChangeListener<MarsBdvSource> () {
+        	public void changed(ObservableValue<? extends MarsBdvSource> observable, MarsBdvSource oldMarsBdvSource, MarsBdvSource newMarsBdvSource) {
+	            if (newMarsBdvSource != null)
+	            	bdvSourceOptionsPane.setMarsBdvSource(newMarsBdvSource);
+        	}
+        };
+        
+        bdvTable.getSelectionModel().selectedItemProperty().addListener(bdvIndexTableListener);
 
 		Button addButton = new Button();
 		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
@@ -309,45 +271,14 @@ public class BdvViewTable implements MetadataEventHandler {
         bomttomPane.setCenter(addBdvSourceNameField);
         bomttomPane.setLeft(typeButton);
 
-        rootPane = new BorderPane();
-        rootPane.setCenter(bdvTable);
-        rootPane.setBottom(bomttomPane);
-        
+        BorderPane bdvTableIndex = new BorderPane();
+        bdvTableIndex.setCenter(bdvTable);
+        bdvTableIndex.setBottom(bomttomPane);
+
         BorderPane.setMargin(addBdvSourceNameField, new Insets(5));
         BorderPane.setMargin(typeButton, new Insets(5));
         
-        getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
-    }
-    
-    protected TableColumn<MarsBdvSource, String> buildAffineColumn(String name, int rowIndex, int columnIndex) {
-    	TableColumn<MarsBdvSource, String> column = buildEntryFieldColumn(name);
-    	column.setOnEditCommit(event -> { 
-        	try {
-    			double num = Double.valueOf(event.getNewValue());
-    			event.getRowValue().getAffineTransform3D().set(num, rowIndex, columnIndex);
-    		} catch (NumberFormatException e) {
-    			//Do nothing for the moment...
-    		}
-        });
-    	column.setCellValueFactory(bdvSource -> {
-    		String str = "";
-    		if (bdvSource.getValue().getAffineTransform3D() != null)
-    			str = String.valueOf(bdvSource.getValue().getAffineTransform3D().get(rowIndex, columnIndex));
-    		
-    		return new ReadOnlyObjectWrapper<>(str);
-    	});
-    	return column;
-    }
-    
-    protected TableColumn<MarsBdvSource, String> buildEntryFieldColumn(String name) {
-    	TableColumn<MarsBdvSource, String> column = new TableColumn<>(name);
-        column.setCellFactory(TextFieldTableCell.forTableColumn());
-        column.setSortable(false);
-        column.setPrefWidth(100);
-        column.setMinWidth(100);
-        column.setEditable(true);
-        column.setStyle( "-fx-alignment: CENTER-LEFT;");
-        return column;
+        return bdvTableIndex;
     }
     
     public Node getNode() {
