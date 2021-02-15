@@ -1,5 +1,7 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
+import java.io.File;
+
 import org.controlsfx.control.ToggleSwitch;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import javafx.beans.property.BooleanProperty;
@@ -11,6 +13,10 @@ import javafx.scene.control.TextField;
 
 import javafx.scene.layout.VBox;
 import javafx.scene.layout.GridPane;
+
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.FileChooser.ExtensionFilter;
 
 public class BdvSourceOptionsPane extends VBox {
 	private TextField m00, m01, m02, m10, m11, m12, cField, n5Field, pathField;
@@ -118,6 +124,9 @@ public class BdvSourceOptionsPane extends VBox {
 		driftCorrectSwitch = new ToggleSwitch();
 		driftCorrect.setValue(false);
 		driftCorrectSwitch.selectedProperty().bindBidirectional(driftCorrect);
+		driftCorrect.addListener((observable, oldValue, newValue) -> {
+			marsBdvSource.setCorrectDrift(newValue);
+		});
 		
 		Label driftCorrectLabel = new Label("Drift Correct");
 		gridpane3.add(driftCorrectLabel, 0, 0);
@@ -127,44 +136,70 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(driftCorrectSwitch, new Insets(0, 5, 10, 5));
 		
 		getChildren().add(gridpane3);
-		
+
 		GridPane gridpane4 = new GridPane();
 		
-		Label n5Label = new Label("N5 Dataset");
-		gridpane4.add(n5Label, 4, 0);
-		GridPane.setMargin(n5Label, new Insets(0, 5, 10, 5));
-		
-		n5Field = new TextField();
-		gridpane4.add(n5Field, 5, 0);
-		GridPane.setMargin(n5Field, new Insets(0, 5, 10, 5));
-		
-		Label cLabel = new Label("C");
-		gridpane4.add(cLabel, 2, 0);
-		GridPane.setMargin(cLabel, new Insets(0, 5, 10, 5));
-		
-		cField = new TextField();
-		cField.setPrefWidth(50);
-		cField.setMaxWidth(50);
-		gridpane4.add(cField, 3, 0);
-		GridPane.setMargin(cField, new Insets(0, 5, 10, 5));
-		
-		getChildren().add(gridpane4);
-
-		GridPane gridpane5 = new GridPane();
-		
 		Label filePathLabel = new Label("Path");
-		gridpane5.add(filePathLabel, 0, 0);
+		gridpane4.add(filePathLabel, 0, 0);
 		GridPane.setMargin(filePathLabel, new Insets(0, 5, 10, 5));
 		
 		pathField = new TextField();
 		pathField.setPrefWidth(300);
 		pathField.setMaxWidth(300);
-		gridpane5.add(pathField, 1, 0);
+		gridpane4.add(pathField, 1, 0);
 		GridPane.setMargin(pathField, new Insets(0, 5, 10, 5));
 		
 		pathButton = new Button("Browse");
-		gridpane5.add(pathButton, 2, 0);
+		pathButton.setOnAction(e -> {
+			File path;
+			if (marsBdvSource.isN5()) {
+				DirectoryChooser directoryChooser = new DirectoryChooser();
+				directoryChooser.setTitle("Select N5 directory");
+				directoryChooser.setInitialDirectory(new File(pathField.getText()));
+				path = directoryChooser.showDialog(getScene().getWindow());
+			} else {
+				FileChooser fileChooser = new FileChooser();
+				fileChooser.setTitle("Select xml");
+				fileChooser.setInitialDirectory(new File(pathField.getText()));
+				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file", "*.xml"));
+				path = fileChooser.showOpenDialog(getScene().getWindow());
+			}
+
+			if (path != null) {
+				marsBdvSource.setPath(path.getAbsolutePath());
+				pathField.setText(path.getAbsolutePath());
+			}
+		});
+		gridpane4.add(pathButton, 2, 0);
 		GridPane.setMargin(pathButton, new Insets(0, 5, 10, 5));
+		
+		getChildren().add(gridpane4);
+		
+		GridPane gridpane5 = new GridPane();
+		
+		Label n5Label = new Label("N5 Dataset");
+		gridpane5.add(n5Label, 4, 0);
+		GridPane.setMargin(n5Label, new Insets(0, 5, 10, 5));
+		
+		n5Field = new TextField();
+		n5Field.textProperty().addListener((observable, oldValue, newValue) -> {
+			marsBdvSource.setN5Dataset(n5Field.getText());
+		});
+		gridpane5.add(n5Field, 5, 0);
+		GridPane.setMargin(n5Field, new Insets(0, 5, 10, 5));
+		
+		Label cLabel = new Label("C");
+		gridpane5.add(cLabel, 2, 0);
+		GridPane.setMargin(cLabel, new Insets(0, 5, 10, 5));
+		
+		cField = new TextField();
+		cField.textProperty().addListener((observable, oldValue, newValue) -> {
+			marsBdvSource.setChannel(Integer.valueOf(cField.getText()));
+		});
+		cField.setPrefWidth(50);
+		cField.setMaxWidth(50);
+		gridpane5.add(cField, 3, 0);
+		GridPane.setMargin(cField, new Insets(0, 5, 10, 5));
 		
 		getChildren().add(gridpane5);
 	}
