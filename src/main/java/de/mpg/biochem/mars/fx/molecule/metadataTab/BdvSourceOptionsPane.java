@@ -215,6 +215,7 @@ public class BdvSourceOptionsPane extends VBox {
 		m10.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 0))); 
 		m11.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 1))); 
 		m12.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 3))); 
+		cField.setText(String.valueOf(marsBdvSource.getChannel()));
 		n5Field.setText(marsBdvSource.getN5Dataset());
 		driftCorrect.set(marsBdvSource.getCorrectDrift());
 		pathField.setText(marsBdvSource.getPath());
