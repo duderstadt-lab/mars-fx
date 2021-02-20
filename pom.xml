@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>30.0.0</version>
+		<version>29.2.1</version>
 		<relativePath />
 	</parent>
 
@@ -91,6 +91,15 @@
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.excludes>**/resources/**</license.excludes>
+		<license.excludes>**/addons/**</license.excludes>
+		<license.excludes>**/controls/**</license.excludes>
+		<license.excludes>**/dialogs/ImageDialog**</license.excludes>
+		<license.excludes>**/dialogs/LinkDialog**</license.excludes>
+		<license.excludes>**/editor/**</license.excludes>
+		<license.excludes>**/options/**</license.excludes>
+		<license.excludes>**/preview/**</license.excludes>
+		<license.excludes>**/syntaxhighlighter/SyntaxHighlighter.java</license.excludes>
+		<license.excludes>**/util/**</license.excludes>
 
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
