@@ -90,11 +90,7 @@
 		<package-name>de.mpg.biochem.mars</package-name>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.licenseName>bsd_2</license.licenseName>
-		<license.excludes>
-			<exclude>
-				**/resources/**
-			</exclude>
-		</license.excludes>
+		<license.excludes>(?=**/resources/**)(?=**/addons/**)</license.excludes>
 		
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
