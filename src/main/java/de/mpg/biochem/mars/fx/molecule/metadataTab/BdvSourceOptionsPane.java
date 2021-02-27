@@ -61,8 +61,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
 public class BdvSourceOptionsPane extends VBox {
-	private TextField m00, m01, m02, m10, m11, m12, cField, n5Field, pathField;
-	private Label datasetInfo;
+	private TextField m00, m01, m02, m10, m11, m12, cField, pathField;
+	private Label datasetInfo, n5Dataset;
 	private ToggleSwitch driftCorrectSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private Button pathButton;
@@ -230,7 +230,7 @@ public class BdvSourceOptionsPane extends VBox {
 		            				@Override
 		            				public void run() {
 		            					pathField.setText(selectionDialog.getN5RootPath());
-				            			n5Field.setText(dataSelection.metadata.get(0).getPath());
+				            			n5Dataset.setText(dataSelection.metadata.get(0).getPath());
 		            				}
 		            	    	});
 		            		};
@@ -259,19 +259,15 @@ public class BdvSourceOptionsPane extends VBox {
 		n5OptionsGridpane = new GridPane();
 		
 		Label n5Label = new Label("Dataset");
-		n5OptionsGridpane.add(n5Label, 4, 0);
+		n5OptionsGridpane.add(n5Label, 0, 0);
 		GridPane.setMargin(n5Label, new Insets(0, 5, 10, 5));
 		
-		n5Field = new TextField();
-		n5Field.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.setN5Dataset(n5Field.getText());
-		});
-		n5OptionsGridpane.add(n5Field, 5, 0);
-		GridPane.setMargin(n5Field, new Insets(0, 5, 10, 5));
+		n5Dataset = new Label("");
+		n5OptionsGridpane.add(n5Dataset, 2, 0);
+		GridPane.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
 		
 		Label cLabel = new Label("C");
-		n5OptionsGridpane.add(cLabel, 2, 0);
+		n5OptionsGridpane.add(cLabel, 3, 0);
 		GridPane.setMargin(cLabel, new Insets(0, 5, 10, 5));
 		
 		cField = new TextField();
@@ -286,7 +282,7 @@ public class BdvSourceOptionsPane extends VBox {
 		});
 		cField.setPrefWidth(50);
 		cField.setMaxWidth(50);
-		n5OptionsGridpane.add(cField, 3, 0);
+		n5OptionsGridpane.add(cField, 4, 0);
 		GridPane.setMargin(cField, new Insets(0, 5, 10, 5));
 		
 		getChildren().add(n5OptionsGridpane);
@@ -312,7 +308,7 @@ public class BdvSourceOptionsPane extends VBox {
 			pathField.setText("");
 			
 			cField.setText("0");
-			n5Field.setText("");
+			n5Dataset.setText("");
 			datasetInfo.setText("");
 			
 			for (Node node : getChildren())
@@ -332,15 +328,16 @@ public class BdvSourceOptionsPane extends VBox {
 			pathField.setText(marsBdvSource.getPath());
 			
 			if (marsBdvSource.isN5()) {
-				if (!getChildren().contains(n5OptionsGridpane)) getChildren().add(n5OptionsGridpane);
+				if (!getChildren().contains(n5OptionsGridpane)) getChildren().add(getChildren().size() - 1, n5OptionsGridpane);
 				cField.setText(String.valueOf(marsBdvSource.getChannel()));
-				n5Field.setText(marsBdvSource.getN5Dataset());
+				n5Dataset.setText(marsBdvSource.getN5Dataset());
 				
 				//Dataset information
 				if (marsBdvSource.getProperties().containsKey("info"))
-				datasetInfo.setText("Dimensions " + marsBdvSource.getProperties().get("info"));
+					datasetInfo.setText("Dimensions " + marsBdvSource.getProperties().get("info"));
 			} else {
 				getChildren().remove(n5OptionsGridpane);
+				datasetInfo.setText("");
 			}
 		}
 	}
