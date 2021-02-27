@@ -338,7 +338,7 @@ public class BdvSourceOptionsPane extends VBox {
 				
 				//Dataset information
 				if (marsBdvSource.getProperties().containsKey("info"))
-				datasetInfo.setText(marsBdvSource.getProperties().get("info"));
+				datasetInfo.setText("Dimensions " + marsBdvSource.getProperties().get("info"));
 			} else {
 				getChildren().remove(n5OptionsGridpane);
 			}

@@ -341,7 +341,7 @@ public class BdvViewTable implements MetadataEventHandler {
 	}
     
     public static String getDatasetInfo(DatasetAttributes attributes) {
-		final String dimString = String.join( "x",
+		final String dimString = String.join( " x ",
 				Arrays.stream(attributes.getDimensions())
 					.mapToObj( d -> Long.toString( d ))
 					.collect( Collectors.toList() ) );
