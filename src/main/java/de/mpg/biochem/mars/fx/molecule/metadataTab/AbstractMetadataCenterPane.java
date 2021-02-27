@@ -93,6 +93,12 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		tabPane.getTabs().add(OMETab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
+		BdvTab = new Tab();
+		BdvTab.setText("Bdv Views");
+		bdvViewTable = new BdvViewTable();
+		BdvTab.setContent(bdvViewTable.getNode());
+		tabPane.getTabs().add(BdvTab);
+		
 		logTab = new Tab();
 		logTab.setText("Log");
 		logContainer = new BorderPane();
@@ -114,12 +120,6 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		marsMetadataDashboardTab.setContent(marsMetadataDashboardPane.getNode());
 		
 		tabPane.getTabs().add(marsMetadataDashboardTab);
-		
-		BdvTab = new Tab();
-		BdvTab.setText("Bdv Views");
-		bdvViewTable = new BdvViewTable();
-		BdvTab.setContent(bdvViewTable.getNode());
-		tabPane.getTabs().add(BdvTab);
 		
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
