@@ -54,6 +54,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -245,6 +246,7 @@ public abstract class AbstractPositionOfInterestTable {
 		Button addButton = new Button();
 		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
+		addButton.setCursor(Cursor.DEFAULT);
 		addButton.setStyle(
                 "-fx-background-radius: 5em; " +
                 "-fx-min-width: 18px; " +

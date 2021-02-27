@@ -64,6 +64,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ListChangeListener.Change;
 import javafx.event.Event;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TableCell;
@@ -218,6 +219,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		Button addButton = new Button();
 		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
+		addButton.setCursor(Cursor.DEFAULT);
 		addButton.setStyle(
                 "-fx-background-radius: 5em; " +
                 "-fx-min-width: 18px; " +
