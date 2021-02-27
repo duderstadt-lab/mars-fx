@@ -28,16 +28,27 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import java.io.File;
+import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
 import org.controlsfx.control.textfield.CustomTextField;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
+import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
+import org.janelia.saalfeldlab.n5.metadata.DefaultMetadata;
+import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
+import org.janelia.saalfeldlab.n5.ui.DataSelection;
+import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
+import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.util.EditCell;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.stage.FileChooser;
@@ -60,6 +71,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.util.Callback;
+import javafx.util.converter.DefaultStringConverter;
 
 import javafx.stage.DirectoryChooser;
 
@@ -92,6 +105,7 @@ public class BdvViewTable implements MetadataEventHandler {
 		bdvSourceOptionsPane = new BdvSourceOptionsPane();
 		SplitPane.setResizableWithParent(bdvSourceOptionsPane, Boolean.FALSE);
 		splitItems.add(bdvSourceOptionsPane);
+		bdvSourceOptionsPane.setMarsBdvSource(null);
 		
         getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
     }
@@ -106,6 +120,7 @@ public class BdvViewTable implements MetadataEventHandler {
                 new ReadOnlyObjectWrapper<>((bdvSource.getValue().isN5()) ? "N5" : "HD5")
         );
         typeColumn.setSortable(false);
+        typeColumn.setEditable(false);
         typeColumn.setPrefWidth(40);
         typeColumn.setMinWidth(40);
         typeColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
@@ -149,7 +164,8 @@ public class BdvViewTable implements MetadataEventHandler {
     	bdvTable.getColumns().add(deleteColumn);
 
         TableColumn<MarsBdvSource, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        
+        nameColumn.setCellFactory(column -> EditCell.createStringEditCell());
         nameColumn.setOnEditCommit(event -> { 
         	String newRegionName = event.getNewValue();
         	if (!marsImageMetadata.hasBdvSource(newRegionName)) {
@@ -181,6 +197,8 @@ public class BdvViewTable implements MetadataEventHandler {
         	public void changed(ObservableValue<? extends MarsBdvSource> observable, MarsBdvSource oldMarsBdvSource, MarsBdvSource newMarsBdvSource) {
 	            if (newMarsBdvSource != null)
 	            	bdvSourceOptionsPane.setMarsBdvSource(newMarsBdvSource);
+	            else 
+	            	bdvSourceOptionsPane.setMarsBdvSource(null);
         	}
         };
         
@@ -209,24 +227,55 @@ public class BdvViewTable implements MetadataEventHandler {
 						break;
 				}
 				
-				File path;
 				if (bdvSource.isN5()) {
-					DirectoryChooser directoryChooser = new DirectoryChooser();
-					directoryChooser.setTitle("Select N5 directory");
-					directoryChooser.setInitialDirectory(new File(System.getProperty("user.home")));
-					path = directoryChooser.showDialog(getNode().getScene().getWindow());
+					SwingUtilities.invokeLater(new Runnable() {
+			            @Override
+			            public void run() {
+			            	DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
+								new N5ViewerReaderFun(),
+								new N5BasePathFun(),
+								System.getProperty("user.home"),
+								null, // no group parsers
+								new N5MetadataParser[]{
+									new DefaultMetadata( "", -1 )
+								});
+			            	
+		            			selectionDialog.setVirtualOption( false );
+			            		selectionDialog.setCropOption( false );
+					
+			            		selectionDialog.setTreeRenderer( new N5DatasetTreeCellRenderer( true ) );
+			            		
+			            		//Prevents NullPointerException
+			            		selectionDialog.setContainerPathUpdateCallback( x -> { });
+			            		
+			            		final Consumer< DataSelection > callback = (DataSelection dataSelection) -> {
+			            			Platform.runLater(new Runnable() {
+			            				@Override
+			            				public void run() {
+			            					bdvSource.setPath(selectionDialog.getN5RootPath());
+			            					bdvSource.setN5Dataset(dataSelection.metadata.get(0).getPath());
+			            					bdvSource.setProperty("info", getDatasetInfo(dataSelection.metadata.get(0).getAttributes()));
+			        						marsImageMetadata.putBdvSource(bdvSource);
+			        						loadBdvSources();
+			            				}
+			            	    	});
+			            		};
+			            		
+			            		selectionDialog.run( callback );
+			            }
+			        });
 				} else {
 					FileChooser fileChooser = new FileChooser();
 					fileChooser.setTitle("Select xml");
 					fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
 					fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file", "*.xml"));
-					path = fileChooser.showOpenDialog(getNode().getScene().getWindow());
-				}
-
-				if (path != null) {
-					bdvSource.setPath(path.getAbsolutePath());
-					marsImageMetadata.putBdvSource(bdvSource);
-					loadBdvSources();
+					File path = fileChooser.showOpenDialog(getNode().getScene().getWindow());
+					
+					if (path != null) {
+						bdvSource.setPath(path.getAbsolutePath());
+						marsImageMetadata.putBdvSource(bdvSource);
+						loadBdvSources();
+					}
 				}
 			}
 		});
@@ -290,6 +339,14 @@ public class BdvViewTable implements MetadataEventHandler {
     public void loadBdvSources() {
     	bdvRowList.setAll(marsImageMetadata.getBdvSourceNames().stream().map(name -> marsImageMetadata.getBdvSource(name)).collect(Collectors.toList()));
 	}
+    
+    public static String getDatasetInfo(DatasetAttributes attributes) {
+		final String dimString = String.join( "x",
+				Arrays.stream(attributes.getDimensions())
+					.mapToObj( d -> Long.toString( d ))
+					.collect( Collectors.toList() ) );
+		return  dimString + ", " + attributes.getDataType();
+    }
 
 	@Override
 	public void handle(MetadataEvent event) {

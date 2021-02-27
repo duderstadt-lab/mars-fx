@@ -29,12 +29,26 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
+import java.util.function.Consumer;
+
+import javax.swing.SwingUtilities;
 
 import org.controlsfx.control.ToggleSwitch;
+import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
+import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
+import org.janelia.saalfeldlab.n5.metadata.DefaultMetadata;
+import org.janelia.saalfeldlab.n5.metadata.N5Metadata;
+import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
+import org.janelia.saalfeldlab.n5.ui.DataSelection;
+import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
+import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
+
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -48,10 +62,13 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class BdvSourceOptionsPane extends VBox {
 	private TextField m00, m01, m02, m10, m11, m12, cField, n5Field, pathField;
+	private Label datasetInfo;
 	private ToggleSwitch driftCorrectSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private Button pathButton;
 	private MarsBdvSource marsBdvSource;
+	
+	private GridPane n5OptionsGridpane;
 	
 	public BdvSourceOptionsPane() {
 		setPadding(new Insets(15, 20, 15, 20));
@@ -68,7 +85,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m00 = new TextField();
 		m00.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m00.getText()), 0, 0);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m00.getText()), 0, 0);
 		});
 		m00.setPrefWidth(80);
 		m00.setMaxWidth(80);
@@ -81,7 +99,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m01 = new TextField();
 		m01.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m01.getText()), 0, 1);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m01.getText()), 0, 1);
 		});
 		m01.setPrefWidth(80);
 		m01.setMaxWidth(80);
@@ -94,7 +113,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m02 = new TextField();
 		m02.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m02.getText()), 0, 3);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m02.getText()), 0, 3);
 		});
 		m02.setPrefWidth(80);
 		m02.setMaxWidth(80);
@@ -112,7 +132,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m10 = new TextField();
 		m10.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m10.getText()), 1, 0);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m10.getText()), 1, 0);
 		});
 		m10.setPrefWidth(80);
 		m10.setMaxWidth(80);
@@ -125,7 +146,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m11 = new TextField();
 		m11.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m11.getText()), 1, 1);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m11.getText()), 1, 1);
 		});
 		m11.setPrefWidth(80);
 		m11.setMaxWidth(80);
@@ -138,7 +160,8 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		m12 = new TextField();
 		m12.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.getAffineTransform3D().set(Double.valueOf(m12.getText()), 1, 3);
+			if (marsBdvSource != null)
+				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m12.getText()), 1, 3);
 		});
 		m12.setPrefWidth(80);
 		m12.setMaxWidth(80);
@@ -153,7 +176,8 @@ public class BdvSourceOptionsPane extends VBox {
 		driftCorrect.setValue(false);
 		driftCorrectSwitch.selectedProperty().bindBidirectional(driftCorrect);
 		driftCorrect.addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.setCorrectDrift(newValue);
+			if (marsBdvSource != null)
+				marsBdvSource.setCorrectDrift(newValue);
 		});
 		
 		Label driftCorrectLabel = new Label("Drift Correct");
@@ -179,23 +203,52 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		pathButton = new Button("Browse");
 		pathButton.setOnAction(e -> {
-			File path;
+			final File path = (pathField.getText().trim().equals("")) ? new File(System.getProperty("user.home")) : new File(pathField.getText().trim());
 			if (marsBdvSource.isN5()) {
-				DirectoryChooser directoryChooser = new DirectoryChooser();
-				directoryChooser.setTitle("Select N5 directory");
-				directoryChooser.setInitialDirectory(new File(pathField.getText()));
-				path = directoryChooser.showDialog(getScene().getWindow());
+				SwingUtilities.invokeLater(new Runnable() {
+		            @Override
+		            public void run() {
+		            	DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
+							new N5ViewerReaderFun(),
+							new N5BasePathFun(),
+							path.getAbsolutePath(),
+							null, // no group parsers
+							new N5MetadataParser[]{
+								new DefaultMetadata( "", -1 )
+							});
+		            	
+	            			selectionDialog.setVirtualOption( false );
+		            		selectionDialog.setCropOption( false );
+				
+		            		selectionDialog.setTreeRenderer( new N5DatasetTreeCellRenderer( true ) );
+		            		
+		            		//Prevents NullPointerException
+		            		selectionDialog.setContainerPathUpdateCallback( x -> { });
+		            		
+		            		final Consumer< DataSelection > callback = (DataSelection dataSelection) -> {
+		            			Platform.runLater(new Runnable() {
+		            				@Override
+		            				public void run() {
+		            					pathField.setText(selectionDialog.getN5RootPath());
+				            			n5Field.setText(dataSelection.metadata.get(0).getPath());
+		            				}
+		            	    	});
+		            		};
+		            		
+		            		selectionDialog.run( callback );
+		            }
+		        });
 			} else {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle("Select xml");
 				fileChooser.setInitialDirectory(new File(pathField.getText()));
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file", "*.xml"));
-				path = fileChooser.showOpenDialog(getScene().getWindow());
-			}
-
-			if (path != null) {
-				marsBdvSource.setPath(path.getAbsolutePath());
-				pathField.setText(path.getAbsolutePath());
+				File file = fileChooser.showOpenDialog(getScene().getWindow());
+				
+				if (file != null) {
+					marsBdvSource.setPath(file.getAbsolutePath());
+					pathField.setText(file.getAbsolutePath());
+				}
 			}
 		});
 		gridpane4.add(pathButton, 2, 0);
@@ -203,49 +256,92 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		getChildren().add(gridpane4);
 		
-		GridPane gridpane5 = new GridPane();
+		n5OptionsGridpane = new GridPane();
 		
-		Label n5Label = new Label("N5 Dataset");
-		gridpane5.add(n5Label, 4, 0);
+		Label n5Label = new Label("Dataset");
+		n5OptionsGridpane.add(n5Label, 4, 0);
 		GridPane.setMargin(n5Label, new Insets(0, 5, 10, 5));
 		
 		n5Field = new TextField();
 		n5Field.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.setN5Dataset(n5Field.getText());
+			if (marsBdvSource != null)
+				marsBdvSource.setN5Dataset(n5Field.getText());
 		});
-		gridpane5.add(n5Field, 5, 0);
+		n5OptionsGridpane.add(n5Field, 5, 0);
 		GridPane.setMargin(n5Field, new Insets(0, 5, 10, 5));
 		
 		Label cLabel = new Label("C");
-		gridpane5.add(cLabel, 2, 0);
+		n5OptionsGridpane.add(cLabel, 2, 0);
 		GridPane.setMargin(cLabel, new Insets(0, 5, 10, 5));
 		
 		cField = new TextField();
 		cField.textProperty().addListener((observable, oldValue, newValue) -> {
-			marsBdvSource.setChannel(Integer.valueOf(cField.getText()));
+			if (marsBdvSource != null) {
+				try {
+					marsBdvSource.setChannel(Integer.valueOf(cField.getText()));
+				} catch (NumberFormatException e) {
+					marsBdvSource.setChannel(0);
+				}
+			}
 		});
 		cField.setPrefWidth(50);
 		cField.setMaxWidth(50);
-		gridpane5.add(cField, 3, 0);
+		n5OptionsGridpane.add(cField, 3, 0);
 		GridPane.setMargin(cField, new Insets(0, 5, 10, 5));
 		
-		getChildren().add(gridpane5);
+		getChildren().add(n5OptionsGridpane);
+		
+		GridPane infoGridpane = new GridPane();
+		
+		datasetInfo = new Label();
+		infoGridpane.add(datasetInfo, 0, 0);
+		GridPane.setMargin(datasetInfo, new Insets(0, 5, 10, 5));
+		
+		getChildren().add(infoGridpane);
 	}
 	
 	public void setMarsBdvSource(MarsBdvSource marsBdvSource) {
-		if (marsBdvSource == null)
-			return;
-		
-		this.marsBdvSource = marsBdvSource;
-		m00.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 0)));
-		m01.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 1))); 
-		m02.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 3))); 
-		m10.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 0))); 
-		m11.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 1))); 
-		m12.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 3))); 
-		cField.setText(String.valueOf(marsBdvSource.getChannel()));
-		n5Field.setText(marsBdvSource.getN5Dataset());
-		driftCorrect.set(marsBdvSource.getCorrectDrift());
-		pathField.setText(marsBdvSource.getPath());
+		if (marsBdvSource == null) {
+			m00.setText("1.0");
+			m01.setText("0.0"); 
+			m02.setText("0.0"); 
+			m10.setText("0.0"); 
+			m11.setText("1.0"); 
+			m12.setText("0.0"); 
+			driftCorrect.set(false);
+			pathField.setText("");
+			
+			cField.setText("0");
+			n5Field.setText("");
+			datasetInfo.setText("");
+			
+			for (Node node : getChildren())
+				node.setDisable(true);
+		} else {
+			for (Node node : getChildren())
+				node.setDisable(false);
+			
+			this.marsBdvSource = marsBdvSource;
+			m00.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 0)));
+			m01.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 1))); 
+			m02.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0, 3))); 
+			m10.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 0))); 
+			m11.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 1))); 
+			m12.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1, 3))); 
+			driftCorrect.set(marsBdvSource.getCorrectDrift());
+			pathField.setText(marsBdvSource.getPath());
+			
+			if (marsBdvSource.isN5()) {
+				if (!getChildren().contains(n5OptionsGridpane)) getChildren().add(n5OptionsGridpane);
+				cField.setText(String.valueOf(marsBdvSource.getChannel()));
+				n5Field.setText(marsBdvSource.getN5Dataset());
+				
+				//Dataset information
+				if (marsBdvSource.getProperties().containsKey("info"))
+				datasetInfo.setText(marsBdvSource.getProperties().get("info"));
+			} else {
+				getChildren().remove(n5OptionsGridpane);
+			}
+		}
 	}
 }
