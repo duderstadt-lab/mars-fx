@@ -53,7 +53,7 @@ public class MarsMetadataBeakerWidget extends AbstractBeakerWidget implements Ma
 		super.initialize();
 		
 		try {
-			loadScript("beaker", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+			loadScript("beaker", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,6 +61,7 @@ public class MarsMetadataBeakerWidget extends AbstractBeakerWidget implements Ma
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
 	}

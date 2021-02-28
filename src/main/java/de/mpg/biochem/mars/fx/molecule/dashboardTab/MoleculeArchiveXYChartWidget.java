@@ -56,7 +56,7 @@ public class MoleculeArchiveXYChartWidget extends AbstractXYChartWidget implemen
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ MoleculeArchive archive\n");
+			loadScript("xychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -64,6 +64,7 @@ public class MoleculeArchiveXYChartWidget extends AbstractXYChartWidget implemen
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 	}
 	

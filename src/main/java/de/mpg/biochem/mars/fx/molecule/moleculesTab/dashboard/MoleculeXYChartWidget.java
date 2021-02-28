@@ -55,7 +55,7 @@ public class MoleculeXYChartWidget extends AbstractXYChartWidget implements Mole
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
+			loadScript("xychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,7 @@ public class MoleculeXYChartWidget extends AbstractXYChartWidget implements Mole
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
 	}

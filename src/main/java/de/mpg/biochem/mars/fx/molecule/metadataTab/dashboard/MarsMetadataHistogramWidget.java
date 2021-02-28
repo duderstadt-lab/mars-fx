@@ -54,7 +54,7 @@ public class MarsMetadataHistogramWidget extends AbstractHistogramWidget impleme
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+			loadScript("histogramchart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +62,7 @@ public class MarsMetadataHistogramWidget extends AbstractHistogramWidget impleme
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
 	}

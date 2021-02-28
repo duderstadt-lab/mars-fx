@@ -53,7 +53,7 @@ public class MoleculeBeakerWidget extends AbstractBeakerWidget implements Molecu
 		super.initialize();
 		
 		try {
-			loadScript("beaker", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
+			loadScript("beaker", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,6 +61,7 @@ public class MoleculeBeakerWidget extends AbstractBeakerWidget implements Molecu
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
 	}

@@ -54,7 +54,7 @@ public class MarsTableXYChartWidget extends AbstractXYChartWidget implements Mar
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ MarsTable table\n");
+			loadScript("xychart", "#@ Context scijavaContext\n#@ MarsTable table\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +62,7 @@ public class MarsTableXYChartWidget extends AbstractXYChartWidget implements Mar
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 	}
 	

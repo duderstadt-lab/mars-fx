@@ -53,7 +53,7 @@ public class MarsTableCategoryChartWidget extends AbstractCategoryChartWidget im
 		super.initialize();
 		
 		try {
-			loadScript("categorychart", "#@ MarsTable table\n");
+			loadScript("categorychart", "#@ Context scijavaContext\n#@ MarsTable table\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,6 +61,7 @@ public class MarsTableCategoryChartWidget extends AbstractCategoryChartWidget im
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 	}
 	

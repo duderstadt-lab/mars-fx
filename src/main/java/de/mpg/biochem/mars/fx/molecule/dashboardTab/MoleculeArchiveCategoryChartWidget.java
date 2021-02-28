@@ -55,7 +55,7 @@ public class MoleculeArchiveCategoryChartWidget extends AbstractCategoryChartWid
 		super.initialize();
 		
 		try {
-			loadScript("categorychart", "#@ MoleculeArchive archive\n");
+			loadScript("categorychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,7 @@ public class MoleculeArchiveCategoryChartWidget extends AbstractCategoryChartWid
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 	}
 	

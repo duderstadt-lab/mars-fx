@@ -54,7 +54,7 @@ public class MarsMetadataCategoryChartWidget extends AbstractCategoryChartWidget
 		super.initialize();
 		
 		try {
-			loadScript("categorychart", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+			loadScript("categorychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +62,7 @@ public class MarsMetadataCategoryChartWidget extends AbstractCategoryChartWidget
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
 	}

@@ -54,7 +54,7 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
+			loadScript("histogramchart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,6 +62,7 @@ public class MoleculeHistogramWidget extends AbstractHistogramWidget implements 
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
 	}

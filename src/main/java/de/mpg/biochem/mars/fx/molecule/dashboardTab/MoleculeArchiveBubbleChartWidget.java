@@ -55,7 +55,7 @@ public class MoleculeArchiveBubbleChartWidget extends AbstractBubbleChartWidget 
 		super.initialize();
 		
 		try {
-			loadScript("bubblechart", "#@ MoleculeArchive archive\n");
+			loadScript("bubblechart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,7 @@ public class MoleculeArchiveBubbleChartWidget extends AbstractBubbleChartWidget 
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 	}
 	

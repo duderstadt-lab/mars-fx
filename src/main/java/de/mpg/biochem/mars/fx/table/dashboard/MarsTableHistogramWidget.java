@@ -53,7 +53,7 @@ public class MarsTableHistogramWidget extends AbstractHistogramWidget implements
 		super.initialize();
 		
 		try {
-			loadScript("histogramchart", "#@ MarsTable table\n");
+			loadScript("histogramchart", "#@ Context scijavaContext\n#@ MarsTable table\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -61,6 +61,7 @@ public class MarsTableHistogramWidget extends AbstractHistogramWidget implements
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 	}
 	

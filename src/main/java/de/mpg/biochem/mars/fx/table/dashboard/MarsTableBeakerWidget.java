@@ -49,7 +49,7 @@ public class MarsTableBeakerWidget extends AbstractBeakerWidget implements MarsT
 		super.initialize();
 		
 		try {
-			loadScript("beaker", "#@ MarsTable table\n");
+			loadScript("beaker", "#@ Context scijavaContext\n#@ MarsTable table\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -57,6 +57,7 @@ public class MarsTableBeakerWidget extends AbstractBeakerWidget implements MarsT
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 	}
 	

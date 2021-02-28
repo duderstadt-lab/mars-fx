@@ -55,7 +55,7 @@ public class MarsMetadataXYChartWidget extends AbstractXYChartWidget implements 
 		super.initialize();
 		
 		try {
-			loadScript("xychart", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+			loadScript("xychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,7 @@ public class MarsMetadataXYChartWidget extends AbstractXYChartWidget implements 
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
 	}

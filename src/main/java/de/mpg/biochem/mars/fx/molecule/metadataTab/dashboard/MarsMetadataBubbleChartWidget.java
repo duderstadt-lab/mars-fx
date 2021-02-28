@@ -55,7 +55,7 @@ public class MarsMetadataBubbleChartWidget extends AbstractBubbleChartWidget imp
 		super.initialize();
 		
 		try {
-			loadScript("bubblechart", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+			loadScript("bubblechart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -63,6 +63,7 @@ public class MarsMetadataBubbleChartWidget extends AbstractBubbleChartWidget imp
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
 	}

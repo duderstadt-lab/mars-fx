@@ -48,7 +48,7 @@ public class MarsTableBubbleChartWidget extends AbstractBubbleChartWidget implem
 		super.initialize();
 		
 		try {
-			loadScript("bubblechart", "#@ MarsTable table\n");
+			loadScript("bubblechart", "#@ Context scijavaContext\n#@ MarsTable table\n");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -56,6 +56,7 @@ public class MarsTableBubbleChartWidget extends AbstractBubbleChartWidget implem
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 	}
 	
