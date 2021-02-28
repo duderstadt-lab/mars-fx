@@ -160,6 +160,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected UIService uiService;
     
     @Parameter
+    protected PrefService prefService;
+    
+    @Parameter
     protected Context context;
     
     @Parameter
@@ -449,13 +452,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            @Override
 	            public void run() {
 	            	int views = dialog.getResult().getViewNumber();
-	          		boolean useVolatile = dialog.getResult().useVolatile;
 	          				
 	            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
 	            		BdvHandle[] handles = new BdvHandle[views];
 	            		marsBdvFrames = new MarsBdvFrame[views];
 	            		for (int i = 0; i < views; i++) {
-	            			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(useVolatile);
+	            			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(prefService.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
 		            		marsBdvFrames[i] = marsBdvFrame;
 	            			handles[i] = marsBdvFrame.getBdvHandle();
 	            		}

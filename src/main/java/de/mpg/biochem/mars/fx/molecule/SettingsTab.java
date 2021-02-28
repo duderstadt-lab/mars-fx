@@ -36,6 +36,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCode;
 
+import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.textfield.CustomTextField;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -73,6 +74,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.control.Button;
@@ -99,8 +101,6 @@ import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 
 public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
-	
-	//private JFXToggleButton smileEncodingButton;
 	
     protected TableView<HotKeyEntry> hotKeyTable;
     protected ObservableList<HotKeyEntry> hotKeyRowList = FXCollections.observableArrayList();
@@ -132,6 +132,30 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		VBox.setMargin(hotKeySettingsDescription, new Insets(5, 50, 5, 50));
 		
 		rootPane.getChildren().add(buildHotKeyTable());
+		
+		Text bdvHeading = new Text("Bdv options");
+		bdvHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
+		
+		rootPane.getChildren().add(bdvHeading);
+		VBox.setMargin(bdvHeading, new Insets(15, 15, 15, 15));
+		
+		GridPane gridpane = new GridPane();
+		
+		Label volatileLabel = new Label("Use N5 volatile view");
+		gridpane.add(volatileLabel, 0, 5);
+		GridPane.setMargin(volatileLabel, new Insets(5, 5, 5, 5));
+		
+		ToggleSwitch volatileSwitch = new ToggleSwitch();
+		gridpane.add(volatileSwitch, 1, 5);
+		volatileSwitch.setSelected(prefService.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
+		volatileSwitch.selectedProperty().addListener((t, o, n) -> {
+			prefService.remove(SettingsTab.class, "useN5VolatileViews");
+			prefService.put(SettingsTab.class, "useN5VolatileViews", n);
+		});
+		GridPane.setMargin(volatileSwitch, new Insets(5, 5, 5, 5));
+		
+		rootPane.getChildren().add(gridpane);
+		VBox.setMargin(gridpane, new Insets(15, 15, 15, 15));
 		
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		

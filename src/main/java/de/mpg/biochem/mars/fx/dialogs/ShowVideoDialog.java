@@ -86,41 +86,23 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		gridpane.add(views, 1, 4);
 		GridPane.setMargin(views, new Insets(5, 5, 5, 5));
 		
-		Label volatileLabel = new Label("N5 volatile view");
-		gridpane.add(volatileLabel, 0, 5);
-		GridPane.setMargin(volatileLabel, new Insets(5, 5, 5, 5));
-		
-		ToggleSwitch volatileSwitch = new ToggleSwitch();
-		gridpane.add(volatileSwitch, 1, 5);
-		volatileSwitch.setSelected(true);
-		GridPane.setMargin(volatileSwitch, new Insets(5, 5, 5, 5));
-		
-		dialogPane.setContent(gridpane);
-		
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
 			return (dialogButton == ButtonType.OK) ? new SelectionResult(
-					views.getSelectionModel().getSelectedItem(),
-					volatileSwitch.isSelected()) : null;
+					views.getSelectionModel().getSelectedItem()) : null;
 		});
 	}
 	
 	public class SelectionResult {
-		public final boolean useVolatile;
 		public final int views;
 		
-		public SelectionResult(int views, boolean useVolatile) {
+		public SelectionResult(int views) {
 			this.views = views;
-			this.useVolatile = useVolatile;
 		}
 		
 		public int getViewNumber() {
 			return views;
-		}
-		
-		public boolean useVolatile() {
-			return useVolatile;
 		}
 	}
 }
