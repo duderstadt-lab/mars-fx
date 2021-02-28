@@ -255,13 +255,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 	public void initFX(JFXPanel fxPanel) {	
 		Scene scene = buildScene();
+		scene.getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
 		this.fxPanel.setScene(scene);
 	}
 	
 	protected Scene buildScene() {
 		borderPane = new BorderPane();
-		
-		getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
     	
 		lockLogArea = new TextArea();
 		lockLogArea.getStyleClass().add("log-text-area");
