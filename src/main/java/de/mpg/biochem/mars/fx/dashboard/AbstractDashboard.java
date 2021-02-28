@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,6 +52,7 @@ import com.jfoenix.controls.JFXMasonryPane;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
@@ -62,6 +64,7 @@ import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.ScrollPane;
@@ -103,9 +106,17 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		borderPane = new BorderPane();
 
 		Action removeAllWidgets = new Action("Remove all", null, BOMB, e -> {
+			
 			widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget));
-			widgets.clear();
-			widgetPane.getChildren().clear();
+			
+			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
+					"Are you sure you want to remove all widgets?");
+			
+			Optional<ButtonType> result = alert.showAndWait();
+			if(result.get() == ButtonType.OK) {
+				widgets.clear();
+				widgetPane.getChildren().clear();
+			}
 		});
 
 		Action stopAllWidgets = new Action("Stop all", null, STOP,

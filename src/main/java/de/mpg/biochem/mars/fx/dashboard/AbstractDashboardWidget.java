@@ -367,7 +367,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		rt.stop();
 		
 		RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
-				"Are you sure we want to remove the widget?");
+				"Are you sure you want to remove the widget?");
 		
 		Optional<ButtonType> result = alert.showAndWait();
 		if(result.get() == ButtonType.OK && parent != null) {
