@@ -60,16 +60,16 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.geometry.HPos;
 
 /**
- * Rover alert message dialog.
+ * Rover confirmation dialog.
  *
  * @author Karl Duderstadt
  */
-public class RoverAlert extends Alert {
-	public RoverAlert(Window owner, String message, AlertType type) {
-		super(type);
+public class RoverConfirmationDialog extends Alert {
+	public RoverConfirmationDialog(Window owner, String message) {
+		super(AlertType.CONFIRMATION);
 	    initModality(Modality.WINDOW_MODAL);
 	    initOwner(owner);
-	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
+	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverSmile.png");
 	    ImageView imageView = new ImageView(image1);
 	    imageView.setFitWidth(80);
 	    imageView.setFitHeight(80);

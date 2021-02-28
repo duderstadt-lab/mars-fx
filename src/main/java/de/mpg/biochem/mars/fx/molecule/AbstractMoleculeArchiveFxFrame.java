@@ -1030,21 +1030,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		return dashboardTab;
 	}
 	
-	protected void showErrorMessage(String message) {
-		Alert alert = new Alert(AlertType.ERROR);
-	    alert.initModality(Modality.WINDOW_MODAL);
-	    alert.initOwner(getNode().getScene().getWindow());
-	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
-	    ImageView imageView = new ImageView(image1);
-	    imageView.setFitWidth(80);
-	    imageView.setFitHeight(80);
-	    alert.setGraphic(imageView);
-	    alert.setHeaderText(null);
-	    alert.setContentText(message);
-
-	    alert.show();
-	}
-	
 	//Lock, unlock and update event might be called by swing threads
 	//so we use Platform.runLater to ensure they are executed on 
 	//the javafx thread.
