@@ -61,9 +61,7 @@ import javafx.geometry.HPos;
  */
 public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 	
-	protected HashMap<String, ArrayList<String>> tabNameToSegmentName;
-	
-	public ShowVideoDialog(Window owner, Set<String> columnNames, Set<String> propertyNames) {
+	public ShowVideoDialog(Window owner) {
 		setTitle("BDV Setup");
 		initOwner(owner);
 		setResizable(true);

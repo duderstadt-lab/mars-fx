@@ -444,8 +444,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 	
 	protected void showVideo() {
-		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow(), 
-				archive.properties().getColumnSet(), archive.properties().getParameterSet());
+		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
 
 		dialog.showAndWait().ifPresent(result -> {
 			SwingUtilities.invokeLater(new Runnable() {
