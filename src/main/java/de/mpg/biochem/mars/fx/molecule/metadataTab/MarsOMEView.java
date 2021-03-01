@@ -28,19 +28,29 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.metadata.GenericModel;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.metadata.MarsOMEImage;
 import de.mpg.biochem.mars.metadata.MarsOMEPlane;
+import impl.org.controlsfx.skin.CustomTextFieldSkin;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TreeItem;
@@ -52,14 +62,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import ome.xml.meta.OMEXMLMetadata;
 
 /**
  * Inspired by FXML Controller class from Hadrien Mary. 
- * Moved all portions of the fxml into the code here and 
- * removed the image update interaction..
  * 
  * @author Karl Duderstadt
  */
@@ -74,19 +84,21 @@ public class MarsOMEView {
 	private AnchorPane rootAnchorPane;
 
 	private TreeView testTree;
+	
+	private CustomTextField filterField;
 
-	private TableView<List<String>> imageTable;
-	private TableColumn<List<String>, String> imageNameColumn;
-	private TableColumn<List<String>, String> imageValueColumn;
+	private TableView<String> imageTable;
+	private Map<String, String> imageData = new HashMap<String, String>();
+	private ObservableList<String> imageFieldNameList = FXCollections.observableArrayList();
+	private FilteredList<String> filteredImageFieldNameList = new FilteredList<>(imageFieldNameList, p -> true);
 
-	private TableView<List<String>> tiffDataTable;
-	private TableColumn<List<String>, String> tiffDataNameColumn;
-	private TableColumn<List<String>, String> tiffDataValueColumn;
+	private TableView<String> planeTable;
+	private Map<String, String> planeData = new HashMap<String, String>();
+	private ObservableList<String> planeFieldNameList = FXCollections.observableArrayList();
+	private FilteredList<String> filteredPlaneFieldNameList = new FilteredList<>(planeFieldNameList, p -> true);
 
 	public MarsOMEView(final Context context) {
 		context.inject(this);
-		
-		//Build everything that was in the fxml
 		
 		//Global container
 		rootAnchorPane = new AnchorPane();
@@ -165,21 +177,28 @@ public class MarsOMEView {
 		VBox.setMargin(separator, new Insets(10.0, 0.0, 10.0, 0.0));
 		vbox.getChildren().add(separator);
 		
-		imageTable = new TableView<List<String>>();
+		imageTable = new TableView<String>();
 		VBox.setVgrow(imageTable, Priority.ALWAYS);
+		imageTable.setItems(filteredImageFieldNameList);	
 		
-		imageNameColumn = new TableColumn<List<String>, String>();
+		TableColumn<String, String> imageNameColumn = new TableColumn<String, String>();
 		imageNameColumn.setEditable(false);
 		imageNameColumn.setPrefWidth(135.0);
 		imageNameColumn.setSortable(false);
 		imageNameColumn.setText("Name ");
+		imageNameColumn.setCellValueFactory(field -> {
+			return new ReadOnlyStringWrapper(field.getValue());
+		});
 		imageTable.getColumns().add(imageNameColumn);
 		
-		imageValueColumn = new TableColumn<List<String>, String>();
+		TableColumn<String, String> imageValueColumn = new TableColumn<String, String>();
 		imageValueColumn.setEditable(false);
 		imageValueColumn.setPrefWidth(135.0);
 		imageValueColumn.setSortable(false);
 		imageValueColumn.setText("Value ");
+		imageValueColumn.setCellValueFactory(field -> {
+			return new ReadOnlyStringWrapper(imageData.get(field.getValue()));
+		});
 		imageTable.getColumns().add(imageValueColumn);
 		
 		vbox.getChildren().add(imageTable);
@@ -206,27 +225,58 @@ public class MarsOMEView {
 		VBox.setMargin(separator2, new Insets(10.0, 0.0, 10.0, 0.0));
 		vBoxBottom.getChildren().add(separator2);
 		
-		tiffDataTable = new TableView<List<String>>();
-		VBox.setVgrow(tiffDataTable, Priority.ALWAYS);
+		planeTable = new TableView<String>();
+		VBox.setVgrow(planeTable, Priority.ALWAYS);
+		planeTable.setItems(filteredPlaneFieldNameList);
 		
-		tiffDataNameColumn = new TableColumn<List<String>, String>();
+		TableColumn<String, String> tiffDataNameColumn = new TableColumn<String, String>();
 		tiffDataNameColumn.setEditable(false);
 		tiffDataNameColumn.setPrefWidth(135.0);
 		tiffDataNameColumn.setSortable(false);
 		tiffDataNameColumn.setText("Name ");
-		tiffDataTable.getColumns().add(tiffDataNameColumn);
+		tiffDataNameColumn.setCellValueFactory(field -> {
+			return new ReadOnlyStringWrapper(field.getValue());
+		});
+		planeTable.getColumns().add(tiffDataNameColumn);
 		
-		tiffDataValueColumn = new TableColumn<List<String>, String>();
+		TableColumn<String, String> tiffDataValueColumn = new TableColumn<String, String>();
 		tiffDataValueColumn.setEditable(false);
 		tiffDataValueColumn.setPrefWidth(135.0);
 		tiffDataValueColumn.setSortable(false);
 		tiffDataValueColumn.setText("Value ");
-		tiffDataTable.getColumns().add(tiffDataValueColumn);
+		tiffDataValueColumn.setCellValueFactory(field -> {
+			return new ReadOnlyStringWrapper(planeData.get(field.getValue()));
+		});
+		planeTable.getColumns().add(tiffDataValueColumn);
 		
-		vBoxBottom.getChildren().add(tiffDataTable);
+		vBoxBottom.getChildren().add(planeTable);
 		positionAnchorPane.getChildren().add(vBoxBottom);
 		planeSplitPane.getItems().add(positionAnchorPane);
-		planeDetailsPane.getChildren().add(planeSplitPane);
+		
+		BorderPane borderPane = new BorderPane();
+		
+		filterField = new CustomTextField();
+        filterField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
+        filterField.getStyleClass().add("find");        
+        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+        	//If we don't clear the selection while we are searching the table will
+        	//steal the focus after every letter we type.
+        	imageTable.getSelectionModel().clearSelection();
+        	filteredImageFieldNameList.setPredicate(name -> name.contains(newValue));
+        	
+        	planeTable.getSelectionModel().clearSelection();
+        	filteredPlaneFieldNameList.setPredicate(name -> name.contains(newValue));
+        });
+        
+		filterField.setStyle(
+                "-fx-background-radius: 2em; "
+        );
+
+        borderPane.setTop(filterField);
+        BorderPane.setMargin(filterField, new Insets(5));
+		
+		borderPane.setCenter(planeSplitPane);
+		planeDetailsPane.getChildren().add(borderPane);
 	}
 
 	public void fill(MarsMetadata meta) {
@@ -258,39 +308,16 @@ public class MarsOMEView {
 	}
 
 	private void populateImageInformations(MarsOMEImage model) {
-
-		this.imageTable.getItems().clear();
-
-		this.imageNameColumn.setCellValueFactory(data -> {
-			return new ReadOnlyStringWrapper(data.getValue().get(0));
-		});
-
-		this.imageValueColumn.setCellValueFactory(data -> {
-			return new ReadOnlyStringWrapper(data.getValue().get(1));
-		});
-
-		for (List<String> row : model.getInformationsRow()) {
-			this.imageTable.getItems().add(row);
-		}
-
+		for (List<String> row : model.getInformationsRow())
+			this.imageData.put(row.get(0), row.get(1));
 	}
 
 	private void populateTiffDataInformations(MarsOMEPlane plane) {
 		MarsOMEImage imageModel = plane.getImage();
 		this.populateImageInformations(imageModel);
 
-		this.tiffDataTable.getItems().clear();
-
-		this.tiffDataNameColumn.setCellValueFactory(data -> {
-			return new ReadOnlyStringWrapper(data.getValue().get(0));
-		});
-
-		this.tiffDataValueColumn.setCellValueFactory(data -> {
-			return new ReadOnlyStringWrapper(data.getValue().get(1));
-		});
-
 		for (List<String> row : plane.getInformationsRow()) {
-			this.tiffDataTable.getItems().add(row);
+			this.planeData.put(row.get(0), row.get(1));
 		}
 	}
 	
