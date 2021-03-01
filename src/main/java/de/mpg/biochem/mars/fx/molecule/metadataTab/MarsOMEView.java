@@ -136,14 +136,14 @@ public class MarsOMEView {
 		splitPane.getItems().add(planeIndexPane);
 		
 		//Global Right side container
-		AnchorPane planeDetailsPane = new AnchorPane();
-		planeDetailsPane.minHeight(0.0);
-		planeDetailsPane.minWidth(0.0);
-		planeDetailsPane.prefHeight(520.0);
-		planeDetailsPane.prefWidth(320.0);
-		planeDetailsPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
+		//AnchorPane planeDetailsPane = new AnchorPane();
+		//planeDetailsPane.minHeight(0.0);
+		//planeDetailsPane.minWidth(0.0);
+		//planeDetailsPane.prefHeight(520.0);
+		//planeDetailsPane.prefWidth(320.0);
+		//planeDetailsPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
 		
-		splitPane.getItems().add(planeDetailsPane);
+		//splitPane.getItems().add(planeDetailsPane);
 		
 		//Right side vertical splitpane
 		SplitPane planeSplitPane = new SplitPane();
@@ -262,21 +262,35 @@ public class MarsOMEView {
         	//If we don't clear the selection while we are searching the table will
         	//steal the focus after every letter we type.
         	imageTable.getSelectionModel().clearSelection();
-        	filteredImageFieldNameList.setPredicate(name -> name.contains(newValue));
+        	filteredImageFieldNameList.setPredicate(name -> {
+        		// If filter text is empty, display everything.
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+                
+                return name.contains(newValue);
+        	});
         	
         	planeTable.getSelectionModel().clearSelection();
-        	filteredPlaneFieldNameList.setPredicate(name -> name.contains(newValue));
+        	filteredPlaneFieldNameList.setPredicate(name -> {
+        		// If filter text is empty, display everything.
+                if (newValue == null || newValue.isEmpty()) {
+                    return true;
+                }
+        		
+        		return name.contains(newValue);
+        	});
         });
         
 		filterField.setStyle(
-                "-fx-background-radius: 2em; "
+              "-fx-background-radius: 2em; "
         );
 
         borderPane.setTop(filterField);
         BorderPane.setMargin(filterField, new Insets(5));
 		
 		borderPane.setCenter(planeSplitPane);
-		planeDetailsPane.getChildren().add(borderPane);
+		splitPane.getItems().add(borderPane);
 	}
 
 	public void fill(MarsMetadata meta) {
@@ -307,17 +321,21 @@ public class MarsOMEView {
 
 	}
 
-	private void populateImageInformations(MarsOMEImage model) {
-		for (List<String> row : model.getInformationsRow())
-			this.imageData.put(row.get(0), row.get(1));
-	}
-
 	private void populateTiffDataInformations(MarsOMEPlane plane) {
 		MarsOMEImage imageModel = plane.getImage();
-		this.populateImageInformations(imageModel);
+		
+		imageData.clear();
+		imageFieldNameList.clear();
+		for (List<String> row : imageModel.getInformationsRow()) {
+			imageData.put(row.get(0), row.get(1));
+			imageFieldNameList.add(row.get(0));
+		}
 
+		planeData.clear();
+		planeFieldNameList.clear();
 		for (List<String> row : plane.getInformationsRow()) {
-			this.planeData.put(row.get(0), row.get(1));
+			planeData.put(row.get(0), row.get(1));
+			planeFieldNameList.add(row.get(0));
 		}
 	}
 	
