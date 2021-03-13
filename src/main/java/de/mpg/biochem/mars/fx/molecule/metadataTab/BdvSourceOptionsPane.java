@@ -57,6 +57,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
@@ -213,17 +214,23 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setHgrow(pathField, Priority.ALWAYS);
 		pathBox.getChildren().add(pathField);
 		
+		Text times = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
+		times.setStyle(times.getStyle() + "-fx-fill: red;");
+		
+		Text check = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
+		check.setStyle(check.getStyle() + "-fx-fill: green;");
+		
 		pathValidation = new Label("");
-		pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em"));
+		pathValidation.setGraphic(times);
 		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(pathValidation);
 		
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
 			File file = new File(pathField.getText());
 			if (file.exists())
-				pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em"));
+				pathValidation.setGraphic(check);
 			else
-				pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em"));
+				pathValidation.setGraphic(times);	
 			
 			if (marsBdvSource != null)
 				marsBdvSource.setPath(pathField.getText());
