@@ -115,7 +115,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 		
 		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.083em"));
 		
-		//smileEncodingButton = new JFXToggleButton();
 		rootPane = new VBox();
 			
 		Text moleculesHeading = new Text("Tag shortcuts");

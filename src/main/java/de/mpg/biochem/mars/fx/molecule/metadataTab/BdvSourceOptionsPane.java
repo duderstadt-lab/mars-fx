@@ -43,17 +43,23 @@ import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.GridPane;
 
 import javafx.stage.DirectoryChooser;
@@ -66,6 +72,7 @@ public class BdvSourceOptionsPane extends VBox {
 	private ToggleSwitch driftCorrectSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private Button pathButton;
+	private Label pathValidation;
 	private MarsBdvSource marsBdvSource;
 	
 	private GridPane n5OptionsGridpane;
@@ -73,6 +80,7 @@ public class BdvSourceOptionsPane extends VBox {
 	public BdvSourceOptionsPane() {
 		setPadding(new Insets(15, 20, 15, 20));
 		setSpacing(5);
+		setFillWidth(true);
 		
 		setStyle("-fx-border-color: lightgray");
 		
@@ -191,24 +199,39 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		getChildren().add(gridpane3);
 
-		GridPane gridpane4 = new GridPane();
+		HBox pathBox = new HBox();
+		pathBox.setAlignment(Pos.CENTER_LEFT);
 		
 		Label filePathLabel = new Label("Path");
-		gridpane4.add(filePathLabel, 0, 0);
-		GridPane.setMargin(filePathLabel, new Insets(0, 5, 10, 5));
+		filePathLabel.setPrefWidth(30);
+		filePathLabel.setMaxWidth(30);
+		HBox.setMargin(filePathLabel, new Insets(0, 5, 10, 5));
+		pathBox.getChildren().add(filePathLabel);
 		
 		pathField = new TextField();
-		pathField.setPrefWidth(300);
-		pathField.setMaxWidth(300);
-		gridpane4.add(pathField, 1, 0);
-		GridPane.setMargin(pathField, new Insets(0, 5, 10, 5));
+		HBox.setMargin(pathField, new Insets(0, 5, 10, 5));
+		HBox.setHgrow(pathField, Priority.ALWAYS);
+		pathBox.getChildren().add(pathField);
+		
+		pathValidation = new Label("");
+		pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em"));
+		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
+		pathBox.getChildren().add(pathValidation);
 		
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
+			File file = new File(pathField.getText());
+			if (file.exists())
+				pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em"));
+			else
+				pathValidation.setGraphic(FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em"));
+			
 			if (marsBdvSource != null)
 				marsBdvSource.setPath(pathField.getText());
 		});
 		
 		pathButton = new Button("Browse");
+		pathButton.setPrefWidth(100);
+		pathButton.setMaxWidth(100);
 		pathButton.setOnAction(e -> {
 			final File path = (pathField.getText().trim().equals("")) ? new File(System.getProperty("user.home")) : new File(pathField.getText().trim());
 			if (marsBdvSource.isN5()) {
@@ -258,10 +281,10 @@ public class BdvSourceOptionsPane extends VBox {
 				}
 			}
 		});
-		gridpane4.add(pathButton, 2, 0);
-		GridPane.setMargin(pathButton, new Insets(0, 5, 10, 5));
-		
-		getChildren().add(gridpane4);
+		HBox.setMargin(pathButton, new Insets(0, 5, 10, 5));
+		pathBox.getChildren().add(pathButton);
+
+		getChildren().add(pathBox);
 		
 		n5OptionsGridpane = new GridPane();
 		
