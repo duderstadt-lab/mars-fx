@@ -84,6 +84,8 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		gridpane.add(views, 1, 4);
 		GridPane.setMargin(views, new Insets(5, 5, 5, 5));
 		
+		dialogPane.setContent(gridpane);
+		
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {

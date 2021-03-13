@@ -203,6 +203,11 @@ public class BdvSourceOptionsPane extends VBox {
 		gridpane4.add(pathField, 1, 0);
 		GridPane.setMargin(pathField, new Insets(0, 5, 10, 5));
 		
+		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (marsBdvSource != null)
+				marsBdvSource.setPath(pathField.getText());
+		});
+		
 		pathButton = new Button("Browse");
 		pathButton.setOnAction(e -> {
 			final File path = (pathField.getText().trim().equals("")) ? new File(System.getProperty("user.home")) : new File(pathField.getText().trim());
@@ -300,6 +305,8 @@ public class BdvSourceOptionsPane extends VBox {
 	
 	public void setMarsBdvSource(MarsBdvSource marsBdvSource) {
 		if (marsBdvSource == null) {
+			this.marsBdvSource = null;
+			
 			m00.setText("1.0");
 			m01.setText("0.0"); 
 			m02.setText("0.0"); 

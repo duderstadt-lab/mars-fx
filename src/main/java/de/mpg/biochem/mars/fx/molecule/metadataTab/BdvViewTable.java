@@ -196,7 +196,7 @@ public class BdvViewTable implements MetadataEventHandler {
         
         bdvIndexTableListener = new ChangeListener<MarsBdvSource> () {
         	public void changed(ObservableValue<? extends MarsBdvSource> observable, MarsBdvSource oldMarsBdvSource, MarsBdvSource newMarsBdvSource) {
-	            if (newMarsBdvSource != null)
+        		if (newMarsBdvSource != null)
 	            	bdvSourceOptionsPane.setMarsBdvSource(newMarsBdvSource);
 	            else 
 	            	bdvSourceOptionsPane.setMarsBdvSource(null);
