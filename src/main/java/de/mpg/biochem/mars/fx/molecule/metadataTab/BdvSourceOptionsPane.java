@@ -73,10 +73,10 @@ public class BdvSourceOptionsPane extends VBox {
 	private ToggleSwitch driftCorrectSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private Button pathButton;
-	private Label pathValidation;
+	//private Label pathValidation;
 	private MarsBdvSource marsBdvSource;
 	
-	private GridPane n5OptionsGridpane;
+	private HBox n5OptionsHBox;
 	
 	public BdvSourceOptionsPane() {
 		setPadding(new Insets(15, 20, 15, 20));
@@ -220,7 +220,7 @@ public class BdvSourceOptionsPane extends VBox {
 		Text check = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
 		check.setStyle(check.getStyle() + "-fx-fill: green;");
 		
-		pathValidation = new Label("");
+		Label  pathValidation = new Label("");
 		pathValidation.setGraphic(times);
 		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(pathValidation);
@@ -295,19 +295,42 @@ public class BdvSourceOptionsPane extends VBox {
 
 		getChildren().add(pathBox);
 		
-		n5OptionsGridpane = new GridPane();
+		n5OptionsHBox = new HBox();
+		n5OptionsHBox.setAlignment(Pos.CENTER_LEFT);
 		
 		Label n5Label = new Label("Dataset");
-		n5OptionsGridpane.add(n5Label, 0, 0);
-		GridPane.setMargin(n5Label, new Insets(0, 5, 10, 5));
+		HBox.setMargin(n5Label, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(n5Label);
 		
 		n5Dataset = new Label("");
-		n5OptionsGridpane.add(n5Dataset, 2, 0);
-		GridPane.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
+		HBox.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(n5Dataset);
+		
+		Text times2 = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
+		times2.setStyle(times.getStyle() + "-fx-fill: red;");
+		
+		Text check2 = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
+		check2.setStyle(check.getStyle() + "-fx-fill: green;");
+		
+		Label datasetValidation = new Label("");
+		datasetValidation.setGraphic(times2);
+		HBox.setMargin(datasetValidation, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(datasetValidation);
+		
+		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (marsBdvSource == null)
+				return;
+			
+			File file = new File(pathField.getText() + "/" + marsBdvSource.getN5Dataset());
+			if (file.exists())
+				datasetValidation.setGraphic(check2);
+			else
+				datasetValidation.setGraphic(times2);	
+		});
 		
 		Label cLabel = new Label("C");
-		n5OptionsGridpane.add(cLabel, 3, 0);
-		GridPane.setMargin(cLabel, new Insets(0, 5, 10, 5));
+		HBox.setMargin(cLabel, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(cLabel);
 		
 		cField = new TextField();
 		cField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -321,10 +344,10 @@ public class BdvSourceOptionsPane extends VBox {
 		});
 		cField.setPrefWidth(50);
 		cField.setMaxWidth(50);
-		n5OptionsGridpane.add(cField, 4, 0);
-		GridPane.setMargin(cField, new Insets(0, 5, 10, 5));
+		HBox.setMargin(cField, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(cField);
 		
-		getChildren().add(n5OptionsGridpane);
+		getChildren().add(n5OptionsHBox);
 		
 		GridPane infoGridpane = new GridPane();
 		
@@ -369,7 +392,7 @@ public class BdvSourceOptionsPane extends VBox {
 			pathField.setText(marsBdvSource.getPath());
 			
 			if (marsBdvSource.isN5()) {
-				if (!getChildren().contains(n5OptionsGridpane)) getChildren().add(getChildren().size() - 1, n5OptionsGridpane);
+				if (!getChildren().contains(n5OptionsHBox)) getChildren().add(getChildren().size() - 1, n5OptionsHBox);
 				cField.setText(String.valueOf(marsBdvSource.getChannel()));
 				n5Dataset.setText(marsBdvSource.getN5Dataset());
 				
@@ -377,7 +400,7 @@ public class BdvSourceOptionsPane extends VBox {
 				if (marsBdvSource.getProperties().containsKey("info"))
 					datasetInfo.setText("Dimensions " + marsBdvSource.getProperties().get("info"));
 			} else {
-				getChildren().remove(n5OptionsGridpane);
+				getChildren().remove(n5OptionsHBox);
 				datasetInfo.setText("");
 			}
 		}

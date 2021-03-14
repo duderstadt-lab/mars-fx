@@ -507,7 +507,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		for (String metaUID : archive.getMetadataUIDs()) {
 			MarsMetadata meta = archive.getMetadata(metaUID);
 			for (String name : meta.getBdvSourceNames()) {
-				File path = (meta.getBdvSource(name).isN5()) ? new File(meta.getBdvSource(name).getPath() + meta.getBdvSource(name).getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
+				File path = (meta.getBdvSource(name).isN5()) ? new File(meta.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name).getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
 				if (!path.exists()) {
 					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
 							"The Bdv source path " + path.getAbsolutePath() + "\n" +
