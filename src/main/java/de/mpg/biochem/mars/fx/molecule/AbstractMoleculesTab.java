@@ -108,6 +108,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	protected MarsBdvFrame[] marsBdvFrames;
 	
 	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
+	protected double propertiesDividerPostion = 0.87f;
 
 	public AbstractMoleculesTab(final Context context) {
 		super(context);
@@ -419,13 +420,17 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 	
 	public void showProperties() {
-		if (!rootPane.getItems().contains(moleculePropertiesPane.getNode()))
+		if (!rootPane.getItems().contains(moleculePropertiesPane.getNode())) {
 			rootPane.getItems().add(moleculePropertiesPane.getNode());
+			rootPane.setDividerPosition(1, propertiesDividerPostion);
+		}
 	}
 	
 	public void hideProperties() {
-		if (rootPane.getItems().contains(moleculePropertiesPane.getNode()))
+		if (rootPane.getItems().contains(moleculePropertiesPane.getNode())) {
+			propertiesDividerPostion = rootPane.getDividerPositions()[1];
 			rootPane.getItems().remove(moleculePropertiesPane.getNode());
+		}
 	}
 	
 	public void saveCurrentRecord() {

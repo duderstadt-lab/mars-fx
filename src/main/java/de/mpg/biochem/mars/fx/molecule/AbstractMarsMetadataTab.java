@@ -84,6 +84,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	protected FilteredList<MetaIndexRow> filteredData;
 	
 	protected ChangeListener<MetaIndexRow> metaIndexTableListener;
+	
+	protected double propertiesDividerPostion = 0.87f;
 
 	public AbstractMarsMetadataTab(final Context context) {
 		super(context);
@@ -224,13 +226,17 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	}
 	
 	public void showProperties() {
-		if (!rootPane.getItems().contains(metadataPropertiesPane.getNode()))
+		if (!rootPane.getItems().contains(metadataPropertiesPane.getNode())) {
 			rootPane.getItems().add(metadataPropertiesPane.getNode());
+			rootPane.setDividerPosition(1, propertiesDividerPostion);
+		}
 	}
 	
 	public void hideProperties() {
-		if (rootPane.getItems().contains(metadataPropertiesPane.getNode()))
+		if (rootPane.getItems().contains(metadataPropertiesPane.getNode())) {
+			propertiesDividerPostion = rootPane.getDividerPositions()[1];
 			rootPane.getItems().remove(metadataPropertiesPane.getNode());
+		}
 	}
     
     public void saveCurrentRecord() {

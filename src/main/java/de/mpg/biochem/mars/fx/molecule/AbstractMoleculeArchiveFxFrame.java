@@ -462,19 +462,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					null,
 					rebuildIndexesAction);
 		
-		
-		
 		menuBar = new MenuBar(fileMenu, toolsMenu);
 		
 		//Setup show properties button but don't add it yet...
 		showPropertiesButton = new Button("");
-		showPropertiesButton.setStyle("-fx-focus-color: transparent");
-		Text caretRight = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.5em");
+		showPropertiesButton.setStyle("-fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;-fx-background-insets: 0, 1, 2;-fx-background-radius: 5, 4, 3;");
+		Text caretRight = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.4em");
 		caretRight.setStyle(caretRight.getStyle() + "-fx-fill: gray;");
-		Text caretLeft = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.5em");
+		Text caretLeft = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.4em");
 		caretLeft.setStyle(caretLeft.getStyle() + "-fx-fill: gray;");
 		showPropertiesButton.setGraphic(caretRight);
-		//HBox.setMargin(showPropertiesButton, new Insets(10, 10, 10, 5));
 		
 		showPropertiesButton.setOnAction(e -> {
 			if (showProperties.get()) {
