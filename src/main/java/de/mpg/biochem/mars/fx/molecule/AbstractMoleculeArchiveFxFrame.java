@@ -134,6 +134,7 @@ import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
 import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
@@ -503,6 +504,21 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 	
 	protected void showVideo() {
+		for (String metaUID : archive.getMetadataUIDs()) {
+			MarsMetadata meta = archive.getMetadata(metaUID);
+			for (String name : meta.getBdvSourceNames()) {
+				File path = (meta.getBdvSource(name).isN5()) ? new File(meta.getBdvSource(name).getPath() + meta.getBdvSource(name).getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
+				if (!path.exists()) {
+					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+							"The Bdv source path " + path.getAbsolutePath() + "\n" +
+							" of metadata record " + meta.getUID() + " does not exist.\n"
+							+ "Please correct the path and try again.");
+					alert.show();
+					return;
+				}
+			}
+		}
+		
 		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
 
 		dialog.showAndWait().ifPresent(result -> {
