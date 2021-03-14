@@ -261,9 +261,6 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 				g.setColor(color);
 				g.setStroke( new BasicStroke( 2 ) );
 				
-				if (showTrack())
-					drawTrack(g, molecule);
-				
 				double centerX = Double.NaN;
 				double centerY = Double.NaN;
 				
@@ -273,10 +270,14 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 				} else if (molecule.getTable().hasColumn(getXLocationSource()) && molecule.getTable().hasColumn(getYLocationSource())) {
 					centerX = molecule.getTable().mean(getXLocationSource());
 					centerY = molecule.getTable().mean(getYLocationSource());
-				}
+				} else
+					return;
 				
 				if (Double.isNaN(centerX) || Double.isNaN(centerY))
 					return;
+				
+				if (showTrack())
+					drawTrack(g, molecule);
 				
 				if (showLabel())
 					drawLabel(g, molecule.getUID().substring(0, 6), centerX, centerY);
