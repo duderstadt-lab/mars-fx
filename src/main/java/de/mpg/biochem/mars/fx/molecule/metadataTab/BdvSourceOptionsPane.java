@@ -237,8 +237,8 @@ public class BdvSourceOptionsPane extends VBox {
 		});
 		
 		pathButton = new Button("Browse");
-		pathButton.setPrefWidth(100);
-		pathButton.setMaxWidth(100);
+		pathButton.setPrefWidth(70);
+		pathButton.setMaxWidth(70);
 		pathButton.setOnAction(e -> {
 			final File path = (pathField.getText().trim().equals("")) ? new File(System.getProperty("user.home")) : new File(pathField.getText().trim());
 			if (marsBdvSource.isN5()) {
@@ -278,7 +278,9 @@ public class BdvSourceOptionsPane extends VBox {
 			} else {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle("Select xml");
-				fileChooser.setInitialDirectory(new File(pathField.getText()));
+				File startingDirectory = new File(path.getParent());
+				if (startingDirectory.exists())
+					fileChooser.setInitialDirectory(startingDirectory);
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file", "*.xml"));
 				File file = fileChooser.showOpenDialog(getScene().getWindow());
 				

@@ -98,7 +98,7 @@ public class DnaMoleculeCard extends JPanel implements MarsBdvCard {
 
 	@Override
 	public String getCardName() {
-		return "DNA";
+		return "DNA-Overlay";
 	}
 
 	@Override

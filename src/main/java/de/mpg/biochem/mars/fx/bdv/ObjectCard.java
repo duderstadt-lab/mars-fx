@@ -93,7 +93,7 @@ public class ObjectCard extends JPanel implements MarsBdvCard {
 
 	@Override
 	public String getCardName() {
-		return "Object";
+		return "Object-Overlay";
 	}
 
 	@Override

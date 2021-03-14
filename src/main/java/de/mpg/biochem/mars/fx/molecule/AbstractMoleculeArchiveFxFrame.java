@@ -58,6 +58,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.text.Text;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -73,6 +74,8 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.jfoenix.controls.JFXTabPane;
 
 import bdv.util.BdvHandle;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -97,10 +100,12 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Modality;
 import javafx.scene.control.DialogPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.Priority;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Button;
 
 import javafx.concurrent.Task;
 
@@ -122,6 +127,7 @@ import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.bdv.LocationCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
@@ -184,6 +190,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected TextArea lockLogArea;
     
 	protected MenuBar menuBar;
+	protected HBox menuHBox;
+	protected Button showPropertiesButton;
+	
+    protected Menu fileMenu, toolsMenu;
+    protected BooleanProperty showProperties = new SimpleBooleanProperty(true);
 	
 	protected DashboardTab dashboardTab;
     protected CommentsTab commentsTab; 
@@ -201,8 +212,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected MarsBdvFrame[] marsBdvFrames;
 
     protected double tabWidth = 50.0;
-    
-    protected Menu fileMenu, toolsMenu;
     
     protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
@@ -297,6 +306,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
         buildMenuBar();
         buildTabs();
         
+        showProperties.addListener((observable, oldValue, newValue) -> {
+        	if (newValue.booleanValue()) {
+        		imageMetadataTab.showProperties();
+        		moleculesTab.showProperties();
+        	} else {
+        		imageMetadataTab.hideProperties();
+        		moleculesTab.hideProperties();
+        	}
+        });
+        
         //Now add tabs to container
         tabSet.forEach(maTab -> tabsContainer.getTabs().add(maTab.getTab()));
         
@@ -365,9 +384,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     				
 	    			if (newValue == imageMetadataTab.getTab()) {
 						imageMetadataTab.fireEvent(new RefreshMetadataEvent());
+						showPropertiesButton();
 					} else if (newValue == moleculesTab.getTab()) {
 						moleculesTab.fireEvent(new RefreshMoleculeEvent());
-					} 
+						showPropertiesButton();
+					} else {
+						hidePropertiesButton();
+					}
     			}
     		});
     }
@@ -439,8 +462,47 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					null,
 					rebuildIndexesAction);
 		
+		
+		
 		menuBar = new MenuBar(fileMenu, toolsMenu);
-		borderPane.setTop(menuBar);
+		
+		//Setup show properties button but don't add it yet...
+		showPropertiesButton = new Button("");
+		showPropertiesButton.setStyle("-fx-focus-color: transparent");
+		Text caretRight = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.5em");
+		caretRight.setStyle(caretRight.getStyle() + "-fx-fill: gray;");
+		Text caretLeft = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.5em");
+		caretLeft.setStyle(caretLeft.getStyle() + "-fx-fill: gray;");
+		showPropertiesButton.setGraphic(caretRight);
+		//HBox.setMargin(showPropertiesButton, new Insets(10, 10, 10, 5));
+		
+		showPropertiesButton.setOnAction(e -> {
+			if (showProperties.get()) {
+				showProperties.set(false);
+				showPropertiesButton.setGraphic(caretLeft);
+			} else {
+				showProperties.set(true);
+				showPropertiesButton.setGraphic(caretRight);
+			}
+		});
+		
+		menuHBox = new HBox(menuBar);
+		menuHBox.setAlignment(Pos.CENTER);
+		HBox.setHgrow(menuBar, Priority.ALWAYS);
+		HBox.setHgrow(showPropertiesButton, Priority.NEVER);
+		
+		borderPane.setTop(menuHBox);
+	}
+	
+	public void showPropertiesButton() {
+		menuHBox.getChildren().clear();
+		menuHBox.getChildren().add(menuBar);
+		menuHBox.getChildren().add(showPropertiesButton);
+	}
+	
+	public void hidePropertiesButton() {
+		menuHBox.getChildren().clear();
+		menuHBox.getChildren().add(menuBar);
 	}
 	
 	protected void showVideo() {

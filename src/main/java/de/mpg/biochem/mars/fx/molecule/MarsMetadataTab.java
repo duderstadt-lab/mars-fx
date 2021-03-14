@@ -33,5 +33,7 @@ import de.mpg.biochem.mars.metadata.MarsMetadata;
 
 public interface MarsMetadataTab<C extends MetadataSubPane, O extends MetadataSubPane> extends MoleculeArchiveTab {
 	public void saveCurrentRecord();
+	public void showProperties();
+	public void hideProperties();
 	public MarsMetadata getSelectedMetadata();
 }

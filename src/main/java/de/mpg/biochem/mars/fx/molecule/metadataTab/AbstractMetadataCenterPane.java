@@ -94,7 +94,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		BdvTab = new Tab();
-		BdvTab.setText("Bdv Views");
+		BdvTab.setText("Bdv Sources");
 		bdvViewTable = new BdvViewTable();
 		BdvTab.setContent(bdvViewTable.getNode());
 		tabPane.getTabs().add(BdvTab);

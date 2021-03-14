@@ -118,18 +118,17 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
         setIcon(moleculeIcon);
 		
 		rootPane = new SplitPane();
-		ObservableList<Node> splitItems = rootPane.getItems();
 		
 		Node moleculeTableIndexContainer = buildMoleculeTableIndex();
 		SplitPane.setResizableWithParent(moleculeTableIndexContainer, Boolean.FALSE);
-		splitItems.add(moleculeTableIndexContainer);
+		rootPane.getItems().add(moleculeTableIndexContainer);
 		
 		moleculeCenterPane = createMoleculeCenterPane(context);
-		splitItems.add(moleculeCenterPane.getNode());
+		rootPane.getItems().add(moleculeCenterPane.getNode());
 		
 		moleculePropertiesPane = createMoleculePropertiesPane(context);
 		SplitPane.setResizableWithParent(moleculePropertiesPane.getNode(), Boolean.FALSE);
-		splitItems.add(moleculePropertiesPane.getNode());	
+		rootPane.getItems().add(moleculePropertiesPane.getNode());	
 		
 		rootPane.setDividerPositions(0.15f, 0.87f);
 		
@@ -417,6 +416,16 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
         borderPane.setCenter(moleculeIndexTable);
         
         return borderPane;
+	}
+	
+	public void showProperties() {
+		if (!rootPane.getItems().contains(moleculePropertiesPane.getNode()))
+			rootPane.getItems().add(moleculePropertiesPane.getNode());
+	}
+	
+	public void hideProperties() {
+		if (rootPane.getItems().contains(moleculePropertiesPane.getNode()))
+			rootPane.getItems().remove(moleculePropertiesPane.getNode());
 	}
 	
 	public void saveCurrentRecord() {

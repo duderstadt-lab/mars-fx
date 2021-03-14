@@ -94,18 +94,17 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		setIcon(microscopeIcon);
 		
 		rootPane = new SplitPane();
-		ObservableList<Node> splitItems = rootPane.getItems();
 		
 		Node metadataTableIndexContainer = buildMetadataTableIndex();
 		SplitPane.setResizableWithParent(metadataTableIndexContainer, Boolean.FALSE);
-		splitItems.add(metadataTableIndexContainer);
+		rootPane.getItems().add(metadataTableIndexContainer);
 		
 		metadataCenterPane = createMetadataCenterPane(context);
-		splitItems.add(metadataCenterPane.getNode());
+		rootPane.getItems().add(metadataCenterPane.getNode());
 		
 		metadataPropertiesPane = createMetadataPropertiesPane(context);
 		SplitPane.setResizableWithParent(metadataPropertiesPane.getNode(), Boolean.FALSE);
-		splitItems.add(metadataPropertiesPane.getNode());
+		rootPane.getItems().add(metadataPropertiesPane.getNode());
 		
 		rootPane.setDividerPositions(0.15f, 0.87f);
 		
@@ -222,6 +221,16 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
         borderPane.setCenter(metaIndexTable);
         
         return borderPane;
+	}
+	
+	public void showProperties() {
+		if (!rootPane.getItems().contains(metadataPropertiesPane.getNode()))
+			rootPane.getItems().add(metadataPropertiesPane.getNode());
+	}
+	
+	public void hideProperties() {
+		if (rootPane.getItems().contains(metadataPropertiesPane.getNode()))
+			rootPane.getItems().remove(metadataPropertiesPane.getNode());
 	}
     
     public void saveCurrentRecord() {
