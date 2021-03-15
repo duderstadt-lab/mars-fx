@@ -521,6 +521,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			}
 		}
 		
+		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
+		dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
+		
+		/*
+		
 		//Check if there are settings for MarsBdvFrames in the rover file...
 		if (discoveredBdvFrameSettings) {
 			RoverConfirmationDialog useBdvSettingsDialog = new RoverConfirmationDialog(getNode().getScene().getWindow(),"Video window settings were discovered.\n"
@@ -537,6 +542,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
 			dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
 		}
+		
+		*/
 	}
 	
 	private void buildBdvFrames(int views) {

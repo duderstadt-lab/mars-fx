@@ -427,7 +427,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		setFullView();
 		
 		Dimension dim = bdv.getViewerPanel().getDisplay().getSize();
-		viewerTransform = bdv.getViewerPanel().getDisplay().getTransformEventHandler().getTransform();
+		viewerTransform = bdv.getViewerPanel().state().getViewerTransform();
 		AffineTransform3D affine = viewerTransform;
 		
 		double[] source = new double[3];
@@ -460,7 +460,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 0, 3 ) - target[0] + dim.getWidth()/2, 0, 3 );
 		affine.set( affine.get( 1, 3 ) - target[1] + dim.getHeight()/2, 1, 3 );
 		
-		bdv.getViewerPanel().setCurrentViewerTransform( affine );
+		bdv.getViewerPanel().state().setViewerTransform( affine );
 	}
 
 	/**
