@@ -521,18 +521,23 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			}
 		}
 		
-		ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
-		dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
-		
-		/*
-		
 		//Check if there are settings for MarsBdvFrames in the rover file...
 		if (discoveredBdvFrameSettings) {
 			RoverConfirmationDialog useBdvSettingsDialog = new RoverConfirmationDialog(getNode().getScene().getWindow(),"Video window settings were discovered.\n"
-					+ "Would you like to use them?");
+					+ "Would you like to use them?", "Yes", "No");
 			useBdvSettingsDialog.showAndWait().ifPresent(result -> {
 				if (result.getButtonData().isDefaultButton()) {
+					System.out.println("Use Settings Confirmed...");
 					
+					/*
+					 * jParser -> {
+			while (jParser.nextToken() != JsonToken.END_ARRAY)
+				put(createMolecule(jParser));
+				
+				MarsUtil.passThroughUnknownArrays(jParser);
+				
+				or Objects in this case ???
+					 */
 				} else {
 					ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
 					dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
@@ -542,8 +547,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
 			dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
 		}
-		
-		*/
 	}
 	
 	private void buildBdvFrames(int views) {
@@ -1336,7 +1339,19 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					moleculeArchiveTab.fromJSON(jParser);
 			 	});
 		
-		setJsonField("BdvFrames", null, 
+		setJsonField("bdvFrames", jGenerator -> {
+					if (marsBdvFrames != null && marsBdvFrames.length > 0) {
+						jGenerator.writeArrayFieldStart("bdvFrames");
+						for (MarsBdvFrame bdvFrame : marsBdvFrames) {
+							System.out.println("writing object start");
+							//jGenerator.writeStartObject();
+							bdvFrame.toJSON(jGenerator);
+							//jGenerator.writeEndObject();
+							System.out.println("writing object end");
+						}
+						jGenerator.writeEndArray();
+					}
+				}, 
 				jParser -> {
 					//The settings were discovered but will not be loaded until showVideo is called.
 					//We just pass through the object for now.

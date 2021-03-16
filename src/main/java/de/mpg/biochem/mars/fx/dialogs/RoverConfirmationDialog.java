@@ -28,36 +28,14 @@
  */
 package de.mpg.biochem.mars.fx.dialogs;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import org.controlsfx.control.ToggleSwitch;
-
-import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 
-import javafx.scene.control.ComboBox;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.geometry.HPos;
+import javafx.scene.control.Button;
 
 /**
  * Rover confirmation dialog.
@@ -65,6 +43,7 @@ import javafx.geometry.HPos;
  * @author Karl Duderstadt
  */
 public class RoverConfirmationDialog extends Alert {
+	
 	public RoverConfirmationDialog(Window owner, String message) {
 		super(AlertType.CONFIRMATION);
 	    initModality(Modality.WINDOW_MODAL);
@@ -76,5 +55,11 @@ public class RoverConfirmationDialog extends Alert {
 	    setGraphic(imageView);
 	    setHeaderText(null);
 	    setContentText(message);
+	}
+	
+	public RoverConfirmationDialog(Window owner, String message, String confirmationName, String cancelName) {
+		this(owner, message);
+	    ((Button) getDialogPane().lookupButton(ButtonType.OK)).setText(confirmationName);
+		((Button) getDialogPane().lookupButton(ButtonType.CANCEL)).setText(cancelName);
 	}
 }

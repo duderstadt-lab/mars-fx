@@ -34,6 +34,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -53,6 +54,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -108,6 +110,10 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
 
@@ -116,7 +122,7 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 
 import java.util.Random;
 
-public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
+public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extends AbstractJsonConvertibleRecord {
 	
 	protected final JFrame frame;
 	
@@ -131,6 +137,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 	protected List<MarsBdvCard> cards;
 	
 	protected final boolean useVolatile;
+	
+	protected boolean windowStateLoaded = false;
 	
 	protected String metaUID = "";
 	
@@ -154,14 +162,51 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		this.useVolatile = useVolatile;
 		this.cards = cards;
 		
-		bdvSources = new HashMap<String, List<Source<T>>>();
-		n5Readers = new HashMap<String, N5Reader>();
-		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
-
-		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
-
 		frame = new JFrame( archive.getName() + " Bdv" );
 		helpDialog = new HelpDialog(frame);
+		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
+		
+		setupFrame();
+		
+		frame.setPreferredSize( new Dimension( 800, 600 ) );
+		frame.pack();
+		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		initializeMolecule();
+		
+		frame.setVisible( true );
+	}
+	
+	public MarsBdvFrame(JsonParser jParser, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards) throws IOException {
+		this.archive = archive;
+		this.molecule = molecule;
+		this.useVolatile = useVolatile;
+		this.cards = cards;
+		
+		frame = new JFrame( archive.getName() + " Bdv" );
+		helpDialog = new HelpDialog(frame);
+		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
+
+		setupFrame();
+		
+		if (jParser != null)
+			fromJSON(jParser);
+		
+		if (!windowStateLoaded)
+			frame.setPreferredSize( new Dimension( 800, 600 ) );
+		frame.pack();
+		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		initializeMolecule();
+		
+		frame.setVisible( true );
+	}
+	
+	public void setupFrame() {
+		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+
+		bdvSources = new HashMap<String, List<Source<T>>>();
+		n5Readers = new HashMap<String, N5Reader>();
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
 		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
@@ -178,11 +223,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		}
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
-		
-		frame.setPreferredSize( new Dimension( 800, 600 ) );
-		frame.pack();
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		
+	}
+	
+	public void initializeMolecule() {
 		if (molecule != null) {
 			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			metaUID = meta.getUID();
@@ -195,8 +238,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		}
 		
 		setMolecule(molecule);
-		
-		frame.setVisible( true );
 	}
 	
 	public void setMolecule(Molecule molecule) {
@@ -283,7 +324,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		ViewerPanel viewer = bdv.getViewerPanel();
 		Dimension dim = viewer.getDisplay().getSize();
 		viewerTransform = initTransform( (int)dim.getWidth(), (int)dim.getHeight(), false, viewer.state() );
-		viewer.setCurrentViewerTransform(viewerTransform);
+		viewer.state().setViewerTransform(viewerTransform);
 	}
 	
 	public ImagePlus exportView(int x0, int y0, int width, int height) {
@@ -461,6 +502,45 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > {
 		affine.set( affine.get( 1, 3 ) - target[1] + dim.getHeight()/2, 1, 3 );
 		
 		bdv.getViewerPanel().state().setViewerTransform( affine );
+	}
+	
+	@Override
+	protected void createIOMaps() {
+		
+		setJsonField("window", 
+			jGenerator -> {
+				jGenerator.writeObjectFieldStart("window");
+				jGenerator.writeNumberField("x", frame.getX());
+				jGenerator.writeNumberField("y", frame.getY());
+				jGenerator.writeNumberField("width", frame.getWidth());
+				jGenerator.writeNumberField("height", frame.getHeight());
+				jGenerator.writeEndObject();
+			}, 
+			jParser -> {
+				Rectangle rect = new Rectangle(0, 0, 800, 600);
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					if ("x".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.x = jParser.getIntValue();
+					}
+					if ("y".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.y = jParser.getIntValue();
+					}
+					if ("width".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.width = jParser.getIntValue();
+					}
+					if ("height".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						rect.height = jParser.getIntValue();
+					}
+				}
+				
+				windowStateLoaded = true;
+				
+				frame.setBounds(rect);
+			});
 	}
 
 	/**
