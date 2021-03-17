@@ -29,6 +29,7 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Consumer;
 
 import javax.swing.SwingUtilities;
@@ -95,10 +96,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m00Label, new Insets(0, 5, 10, 5));
 		
 		m00 = new TextField();
-		m00.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m00.getText()), 0, 0);
-		});
+		m00.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m00.getText(), 0, 0));
 		m00.setPrefWidth(80);
 		m00.setMaxWidth(80);
 		gridpane1.add(m00, 1, 0);
@@ -109,10 +107,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m01Label, new Insets(0, 5, 10, 5));
 		
 		m01 = new TextField();
-		m01.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m01.getText()), 0, 1);
-		});
+		m01.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m01.getText(), 0, 1));
 		m01.setPrefWidth(80);
 		m01.setMaxWidth(80);
 		gridpane1.add(m01, 3, 0);
@@ -123,10 +118,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m02Label, new Insets(0, 5, 10, 5));
 		
 		m02 = new TextField();
-		m02.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m02.getText()), 0, 3);
-		});
+		m02.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m02.getText(), 0, 3));
 		m02.setPrefWidth(80);
 		m02.setMaxWidth(80);
 		gridpane1.add(m02, 5, 0);
@@ -142,10 +134,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m10Label, new Insets(0, 5, 10, 5));
 		
 		m10 = new TextField();
-		m10.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m10.getText()), 1, 0);
-		});
+		m10.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m10.getText(), 1, 0));
 		m10.setPrefWidth(80);
 		m10.setMaxWidth(80);
 		gridpane2.add(m10, 1, 0);
@@ -156,10 +145,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m11Label, new Insets(0, 5, 10, 5));
 		
 		m11 = new TextField();
-		m11.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m11.getText()), 1, 1);
-		});
+		m11.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m11.getText(), 1, 1));
 		m11.setPrefWidth(80);
 		m11.setMaxWidth(80);
 		gridpane2.add(m11, 3, 0);
@@ -170,10 +156,7 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m12Label, new Insets(0, 5, 10, 5));
 		
 		m12 = new TextField();
-		m12.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource != null)
-				marsBdvSource.getAffineTransform3D().set(Double.valueOf(m12.getText()), 1, 3);
-		});
+		m12.textProperty().addListener((observable, oldValue, newValue) -> setAffineTransform3D(m12.getText(), 1, 3));
 		m12.setPrefWidth(80);
 		m12.setMaxWidth(80);
 		gridpane2.add(m12, 5, 0);
@@ -356,6 +339,20 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(datasetInfo, new Insets(0, 5, 10, 5));
 		
 		getChildren().add(infoGridpane);
+	}
+	
+	private void setAffineTransform3D(String value, int m, int n) {
+		if (marsBdvSource == null)
+			return;
+		
+		double number;
+		try {
+			number = Double.valueOf(value);
+		} catch (NumberFormatException e) {
+			return;
+		}
+		
+		marsBdvSource.getAffineTransform3D().set(number, m, n);
 	}
 	
 	public void setMarsBdvSource(MarsBdvSource marsBdvSource) {

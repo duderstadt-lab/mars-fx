@@ -527,7 +527,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					+ "Would you like to use them?", "Yes", "No");
 			useBdvSettingsDialog.showAndWait().ifPresent(result -> {
 				if (result.getButtonData().isDefaultButton()) {
-					System.out.println("Use Settings Confirmed...");
 					
 					/*
 					 * jParser -> {
@@ -539,8 +538,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				or Objects in this case ???
 					 */
 				} else {
-					ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
-					dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
+							dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
+						}
+					});
 				}
 			});
 		} else {
@@ -1343,11 +1347,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					if (marsBdvFrames != null && marsBdvFrames.length > 0) {
 						jGenerator.writeArrayFieldStart("bdvFrames");
 						for (MarsBdvFrame bdvFrame : marsBdvFrames) {
-							System.out.println("writing object start");
 							//jGenerator.writeStartObject();
 							bdvFrame.toJSON(jGenerator);
 							//jGenerator.writeEndObject();
-							System.out.println("writing object end");
 						}
 						jGenerator.writeEndArray();
 					}
