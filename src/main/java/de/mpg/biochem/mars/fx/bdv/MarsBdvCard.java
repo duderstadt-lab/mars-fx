@@ -28,12 +28,25 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
-import bdv.util.BdvOverlay;
-import de.mpg.biochem.mars.molecule.Molecule;
+import javax.swing.JPanel;
 
-public interface MarsBdvCard {
-	String getCardName();
+import org.scijava.command.Command;
+import org.scijava.plugin.SciJavaPlugin;
+
+import bdv.util.BdvOverlay;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import net.imagej.ops.Initializable;
+
+public interface MarsBdvCard extends SciJavaPlugin, JsonConvertibleRecord, Initializable {
+	String getName();
+	JPanel getPanel();
 	void setMolecule(Molecule molecule);
+	void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive);
 	BdvOverlay getBdvOverlay();
 	boolean isActive();
 	void setActive(boolean active);

@@ -26,13 +26,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.mpg.biochem.mars.fx.bdv;
+package de.mpg.biochem.mars.fx.object;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.io.IOException;
 import java.util.Random;
 
 import javax.swing.JCheckBox;
@@ -40,46 +41,62 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+
+import com.fasterxml.jackson.core.JsonParser;
+
 import bdv.util.BdvOverlay;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
+import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 import de.mpg.biochem.mars.image.PeakShape;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.object.MartianObject;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
-public class ObjectCard extends JPanel implements MarsBdvCard {
+@Plugin( type = MarsBdvCard.class, name = "Object-Overlay" )
+public class ObjectCard extends AbstractJsonConvertibleRecord implements MarsBdvCard, SciJavaPlugin, Initializable {
 
-	private final JTextField outlineThickness;
-	private final JCheckBox showObject;
+	private JTextField outlineThickness;
+	private JCheckBox showObject;
+	
+	private JPanel panel;
 	
 	private ObjectOverlay objectOverlay;
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	
 	private boolean active = false;
 	
 	public Random ran = new Random();
 	
-	public ObjectCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-		this.archive = archive;
-		setLayout(new GridLayout(0, 2));
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Override
+	public void initialize() {
+		panel = new JPanel();
+		panel.setLayout(new GridLayout(0, 2));
 
 		showObject = new JCheckBox("show", false);
-		add(showObject);
-		add(new JPanel());
+		panel.add(showObject);
+		panel.add(new JPanel());
 		
-		add(new JLabel("Thickness"));
+		panel.add(new JLabel("Thickness"));
 		
 		outlineThickness = new JTextField(6);
 		outlineThickness.setText("5");
 		Dimension dimScaleField = new Dimension(100, 20);
 		outlineThickness.setMinimumSize(dimScaleField);
 		
-		add(outlineThickness);
+		panel.add(outlineThickness);
 	}
 	
 	public boolean showObject() {
@@ -90,9 +107,14 @@ public class ObjectCard extends JPanel implements MarsBdvCard {
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
 	}
+	
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
+	}
 
 	@Override
-	public String getCardName() {
+	public String getName() {
 		return "Object-Overlay";
 	}
 
@@ -177,5 +199,15 @@ public class ObjectCard extends JPanel implements MarsBdvCard {
 			final int b = ARGBType.blue( info.getColor().get() );
 			return new Color( r , g, b, alpha );
 		}
+	}
+
+	@Override
+	public JPanel getPanel() {
+		return panel;
+	}
+
+	@Override
+	protected void createIOMaps() {
+		//Add custom stuff here..
 	}
 }

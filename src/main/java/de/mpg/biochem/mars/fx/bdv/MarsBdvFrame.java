@@ -76,6 +76,7 @@ import bdv.viewer.ViewerState;
 import bdv.tools.HelpDialog;
 import bdv.util.volatiles.SharedQueue;
 import mpicbg.spim.data.SpimDataException;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
@@ -110,6 +111,8 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -123,6 +126,9 @@ import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 import java.util.Random;
 
 public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extends AbstractJsonConvertibleRecord {
+	
+	@Parameter
+    protected MarsBdvCardService marsBdvCardService;
 	
 	protected final JFrame frame;
 	
@@ -152,11 +158,14 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	
 	protected AffineTransform3D viewerTransform;
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile) {
-		this(archive, molecule, useVolatile, new ArrayList<MarsBdvCard>());
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, final Context context) {
+		this(archive, molecule, useVolatile, new ArrayList<MarsBdvCard>(), context);
 	}
 	
-	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards) {
+	public MarsBdvFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards, final Context context) {
+		super();
+		context.inject(this);
+		
 		this.archive = archive;
 		this.molecule = molecule;
 		this.useVolatile = useVolatile;
@@ -166,43 +175,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		helpDialog = new HelpDialog(frame);
 		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
 		
-		setupFrame();
-		
-		frame.setPreferredSize( new Dimension( 800, 600 ) );
-		frame.pack();
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		
-		initializeMolecule();
-		
-		frame.setVisible( true );
-	}
-	
-	public MarsBdvFrame(JsonParser jParser, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards) throws IOException {
-		this.archive = archive;
-		this.molecule = molecule;
-		this.useVolatile = useVolatile;
-		this.cards = cards;
-		
-		frame = new JFrame( archive.getName() + " Bdv" );
-		helpDialog = new HelpDialog(frame);
-		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
-
-		setupFrame();
-		
-		if (jParser != null)
-			fromJSON(jParser);
-		
-		if (!windowStateLoaded)
-			frame.setPreferredSize( new Dimension( 800, 600 ) );
-		frame.pack();
-		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
-		
-		initializeMolecule();
-		
-		frame.setVisible( true );
-	}
-	
-	public void setupFrame() {
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
@@ -214,15 +186,73 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 
 		bdv.getBdvHandle().getCardPanel().addCard("Display", "Display", new NavigationPanel( bdv.getViewerPanel().state(), this), true);
 		
-		locationCard = new LocationCard(archive);
-		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard, true);
+		locationCard = new LocationCard();
+		locationCard.setArchive(archive);
+		locationCard.initialize();
+		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard.getPanel(), true);
 		
 		//Add custom cards
-		for (MarsBdvCard card : cards) {
-			bdv.getBdvHandle().getCardPanel().addCard(card.getCardName(), card.getCardName(), (JPanel) card, true);
-		}
+		for (MarsBdvCard card : cards)
+			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(), card.getPanel(), true);
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
+		
+		frame.setPreferredSize( new Dimension( 800, 600 ) );
+		frame.pack();
+		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		initializeMolecule();
+		
+		frame.setVisible( true );
+	}
+	
+	public MarsBdvFrame(JsonParser jParser, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Molecule molecule, boolean useVolatile, final Context context) throws IOException {
+		context.inject(this);
+		this.archive = archive;
+		this.molecule = molecule;
+		this.useVolatile = useVolatile;
+		this.cards = new ArrayList<MarsBdvCard>();
+		
+		frame = new JFrame( archive.getName() + " Bdv" );
+		helpDialog = new HelpDialog(frame);
+		sharedQueue = new SharedQueue( Math.max( 1, Runtime.getRuntime().availableProcessors() / 2 ) );
+
+		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
+
+		bdvSources = new HashMap<String, List<Source<T>>>();
+		n5Readers = new HashMap<String, N5Reader>();
+		
+		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
+		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
+		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_VIEWERMODES_CARD);
+
+		bdv.getBdvHandle().getCardPanel().addCard("Display", "Display", new NavigationPanel( bdv.getViewerPanel().state(), this), true);
+		
+		if (jParser != null)
+			fromJSON(jParser);
+		
+		//Add custom cards
+		for (MarsBdvCard card : cards)
+			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(), card.getPanel(), true);
+		
+		if (locationCard == null) {
+			locationCard = new LocationCard();
+			locationCard.setArchive(archive);
+			locationCard.initialize();
+		}
+		
+		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard.getPanel(), true);
+		
+		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
+		
+		if (!windowStateLoaded)
+			frame.setPreferredSize( new Dimension( 800, 600 ) );
+		frame.pack();
+		frame.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+		
+		initializeMolecule();
+		
+		frame.setVisible( true );
 	}
 	
 	public void initializeMolecule() {
@@ -265,7 +295,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			for (MarsBdvCard card : cards) {
 				card.setMolecule(molecule);
 				if (!card.isActive()) {
-					BdvFunctions.showOverlay(card.getBdvOverlay(), card.getCardName(), Bdv.options().addTo(bdv));
+					BdvFunctions.showOverlay(card.getBdvOverlay(), card.getName(), Bdv.options().addTo(bdv));
 					card.setActive(true);
 				}
 			}
@@ -537,9 +567,58 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 					}
 				}
 				
-				windowStateLoaded = true;
-				
 				frame.setBounds(rect);
+				frame.setPreferredSize(new Dimension(rect.width, rect.height));
+				
+				windowStateLoaded = true;
+			});
+		
+		setJsonField("cards", 
+			jGenerator -> {
+				jGenerator.writeArrayFieldStart("cards");
+				
+				//Save location card settings
+				jGenerator.writeStartObject();
+				jGenerator.writeStringField("name", locationCard.getName());
+				jGenerator.writeFieldName("settings");
+				locationCard.toJSON(jGenerator);
+				jGenerator.writeEndObject();
+				
+				//Then we save custom card settings
+				for (MarsBdvCard card : cards) {
+					jGenerator.writeStartObject();
+					jGenerator.writeStringField("name", card.getName());
+					jGenerator.writeFieldName("settings");
+					card.toJSON(jGenerator);
+					jGenerator.writeEndObject();
+				}
+				jGenerator.writeEndArray();
+			}, 
+			jParser -> {
+				while (jParser.nextToken() != JsonToken.END_ARRAY) {
+					while (jParser.nextToken() != JsonToken.END_OBJECT) {
+						MarsBdvCard card = null;
+	
+						if ("name".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							card = marsBdvCardService.createCard(jParser.getText());
+							
+							card.setArchive(archive);
+							card.initialize();
+							
+							if (card instanceof LocationCard)
+								locationCard = (LocationCard) card;
+							else
+								cards.add(card);
+						}
+	
+						if ("settings".equals(jParser.getCurrentName())) {
+							jParser.nextToken();
+							if (card != null)
+								card.fromJSON(jParser);
+						}
+					}
+				}
 			});
 	}
 

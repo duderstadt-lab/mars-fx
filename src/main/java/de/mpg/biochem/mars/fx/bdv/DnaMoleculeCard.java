@@ -37,6 +37,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
@@ -48,43 +49,67 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+
+import com.fasterxml.jackson.core.JsonParser;
+
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTableRow;
+import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
-public class DnaMoleculeCard extends JPanel implements MarsBdvCard {
+@Plugin( type = MarsBdvCard.class, name = "DNA-Overlay" )
+public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements MarsBdvCard, SciJavaPlugin, Initializable {
 
-	private final JTextField dnaThickness;
-	private final JCheckBox showDNA;
+	private JTextField dnaThickness;
+	private JCheckBox showDNA;
+	
+	private JPanel panel;
 	
 	private DnaMoleculeOverlay dnaMoleculeOverlay;
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	
 	private boolean active = false;
 	
-	public DnaMoleculeCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-		this.archive = archive;
-		setLayout(new GridLayout(0, 2));
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Override
+	public void initialize() {
+		panel = new JPanel();
+		panel.setLayout(new GridLayout(0, 2));
 
 		showDNA = new JCheckBox("show", false);
-		add(showDNA);
-		add(new JPanel());
+		panel.add(showDNA);
+		panel.add(new JPanel());
 		
-		add(new JLabel("Thickness"));
+		panel.add(new JLabel("Thickness"));
 		
 		dnaThickness = new JTextField(6);
 		dnaThickness.setText("5");
 		Dimension dimScaleField = new Dimension(100, 20);
 		dnaThickness.setMinimumSize(dimScaleField);
 		
-		add(dnaThickness);
+		panel.add(dnaThickness);
+	}
+	
+	@Override
+	public JPanel getPanel() {
+		return panel;
+	}
+
+	@Override
+	protected void createIOMaps() {
+		// What do we want to save and reload??
 	}
 	
 	public boolean showDNA() {
@@ -95,9 +120,14 @@ public class DnaMoleculeCard extends JPanel implements MarsBdvCard {
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
 	}
+	
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
+	}
 
 	@Override
-	public String getCardName() {
+	public String getName() {
 		return "DNA-Overlay";
 	}
 

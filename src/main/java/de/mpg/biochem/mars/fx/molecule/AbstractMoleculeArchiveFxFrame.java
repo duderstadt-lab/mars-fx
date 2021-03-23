@@ -149,10 +149,12 @@ import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.DefaultJsonConverter;
 import de.mpg.biochem.mars.util.MarsUtil;
 
 import javafx.scene.control.TextArea;
@@ -527,16 +529,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					+ "Would you like to use them?", "Yes", "No");
 			useBdvSettingsDialog.showAndWait().ifPresent(result -> {
 				if (result.getButtonData().isDefaultButton()) {
-					
-					/*
-					 * jParser -> {
-			while (jParser.nextToken() != JsonToken.END_ARRAY)
-				put(createMolecule(jParser));
-				
-				MarsUtil.passThroughUnknownArrays(jParser);
-				
-				or Objects in this case ???
-					 */
+					loadBdvSettings();
 				} else {
 					Platform.runLater(new Runnable() {
 						@Override
@@ -1130,6 +1123,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	
 	public abstract MarsBdvFrame createMarsBdvFrame(boolean useVolatile);
 	
+	public abstract MarsBdvFrame createMarsBdvFrame(JsonParser jParser, boolean useVolatile);
+	
 	public DashboardTab getDashboard() {
 		return dashboardTab;
 	}
@@ -1345,20 +1340,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		setJsonField("bdvFrames", jGenerator -> {
 					if (marsBdvFrames != null && marsBdvFrames.length > 0) {
-						jGenerator.writeArrayFieldStart("bdvFrames");
-						for (MarsBdvFrame bdvFrame : marsBdvFrames) {
-							//jGenerator.writeStartObject();
+						jGenerator.writeObjectFieldStart("bdvFrames");
+						jGenerator.writeNumberField("numberViews", marsBdvFrames.length);
+						jGenerator.writeArrayFieldStart("views");
+						for (MarsBdvFrame bdvFrame : marsBdvFrames)
 							bdvFrame.toJSON(jGenerator);
-							//jGenerator.writeEndObject();
-						}
 						jGenerator.writeEndArray();
+						jGenerator.writeEndObject();
 					}
 				}, 
 				jParser -> {
 					//The settings were discovered but will not be loaded until showVideo is called.
 					//We just pass through the object for now.
 					discoveredBdvFrameSettings = true;
-					MarsUtil.passThroughUnknownArrays(jParser);
+					MarsUtil.passThroughUnknownObjects(jParser);
 				});
 		
 		/*
@@ -1423,6 +1418,74 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    fromJSON(jParser);
 		jParser.close();
 		inputStream.close();
+    }
+    
+    protected void loadBdvSettings() {
+    	if (archive.getFile() == null)
+    		return;
+    	
+    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
+    	if (!stateFile.exists())
+    		return;
+    	
+    	//Build default parser
+    	DefaultJsonConverter defaultParser = new DefaultJsonConverter();
+    	defaultParser.setShowWarnings(false);
+ 	    defaultParser.setJsonField("bdvFrames", null, jParser -> {
+ 	    	jParser.nextToken();
+ 	    	jParser.nextToken();
+ 	    	final int views = jParser.getNumberValue().intValue();
+     		BdvHandle[] handles = new BdvHandle[views];
+     		marsBdvFrames = new MarsBdvFrame[views];
+     		int index = 0;
+     		jParser.nextToken();
+     		while (jParser.nextToken() != JsonToken.END_ARRAY) {
+     			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(jParser, prefService.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
+         		marsBdvFrames[index] = marsBdvFrame;
+     			handles[index] = marsBdvFrame.getBdvHandle();
+     			index++;
+     			if (index == marsBdvFrames.length)
+     				break;
+     		}
+          
+     		ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles, true);
+     		
+     		for (int i = 0; i < marsBdvFrames.length; i++) {
+         		marsBdvFrames[i].getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+         		    @Override
+         		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+         		    	super.windowClosing(windowEvent);
+         		    	for (int i=0; i<marsBdvFrames.length; i++)
+         		    		if (marsBdvFrames[i] != null) {
+         		    			marsBdvFrames[i].getFrame().dispose();
+         		    			marsBdvFrames[i] = null;
+         		    		}
+         		    	
+                        new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
+         		    }
+         		});
+     		}
+            sync.run();
+                 
+         	if (moleculesTab.getSelectedMolecule() != null)
+         		moleculesTab.setMarsBdvFrames(marsBdvFrames);
+ 		});
+    	
+ 	   SwingUtilities.invokeLater(new Runnable() {
+           @Override
+           public void run() {	
+        	   try {
+	        	   InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
+	        	   JsonParser jParser = jfactory.createParser(inputStream);
+				   defaultParser.fromJSON(jParser);
+	       		   jParser.close();
+	       		   inputStream.close();
+        	   } catch (IOException e) {
+   				e.printStackTrace();
+   			   }
+           }
+ 	   });
+		
     }
 
     public void fireEvent(Event event) {

@@ -28,10 +28,13 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.scijava.Context;
+
+import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.bdv.DnaMoleculeCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
@@ -60,7 +63,22 @@ public class DnaMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<De
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
-		cards.add(new DnaMoleculeCard(archive));
-		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile, cards);
+		DnaMoleculeCard card = new DnaMoleculeCard();
+		card.setArchive(archive);
+		card.initialize();
+		cards.add(card);
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile, cards, context);
+	}
+	
+	@Override
+	public MarsBdvFrame createMarsBdvFrame(JsonParser jParser, boolean useVolatile) {
+		try {
+			return new MarsBdvFrame(jParser, archive, moleculesTab.getSelectedMolecule(), useVolatile, context);
+		} catch (IOException e) {
+			//have a nice error dialog show up to alert the user there is an issue.
+			
+			//return frame with defaults
+			return createMarsBdvFrame(useVolatile);
+		}
 	}
 }

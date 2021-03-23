@@ -37,6 +37,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
@@ -48,25 +49,34 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+
+import com.fasterxml.jackson.core.JsonParser;
+
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTableRow;
+import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
-public class LocationCard extends JPanel implements MarsBdvCard {
+@Plugin( type = MarsBdvCard.class, name = "Location" )
+public class LocationCard extends AbstractJsonConvertibleRecord implements MarsBdvCard, SciJavaPlugin, Initializable {
 
-	private final JTextField magnificationField, radiusField;
-	private final JCheckBox showCircle, showTrack, followTrack, showLabel, roverSync, rainbowColor, showAll;
+	private JPanel panel;
+	private JTextField magnificationField, radiusField;
+	private JCheckBox showCircle, showTrack, followTrack, showLabel, roverSync, rainbowColor, showAll;
 	
-	private final JComboBox<String> locationSource, tLocation, xLocation, yLocation;
+	private JComboBox<String> locationSource, tLocation, xLocation, yLocation;
 	
 	private MoleculeLocationOverlay moleculeLocationOverlay;
-	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	
 	private boolean active = false;
@@ -74,28 +84,32 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	public static HashMap<String, Color> moleculeRainbowColors;
 	public Random ran = new Random();
 	
-	public LocationCard(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-		this.archive = archive;
-		setLayout(new GridLayout(0, 2));
+	@Parameter
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Override
+	public void initialize() {
+		panel = new JPanel();
+		panel.setLayout(new GridLayout(0, 2));
 
 		Set<String> columnNames = archive.properties().getColumnSet();
 		Set<String> parameterNames = archive.properties().getParameterSet();
 		
-		add(new JLabel("Source"));
+		panel.add(new JLabel("Source"));
 		locationSource = new JComboBox<>(new String[] {"Table", "Parameters"});
-		add(locationSource);
-		add(new JLabel("T"));
+		panel.add(locationSource);
+		panel.add(new JLabel("T"));
 		tLocation = new JComboBox<>(columnNames.stream().sorted().collect(toList()).toArray(new String[0]));
 		tLocation.setSelectedItem("T");
-		add(tLocation);
-		add(new JLabel("X"));
+		panel.add(tLocation);
+		panel.add(new JLabel("X"));
 		xLocation = new JComboBox<>(columnNames.stream().sorted().collect(toList()).toArray(new String[0]));
 		xLocation.setSelectedItem("x");
-		add(xLocation);
-		add(new JLabel("Y"));
+		panel.add(xLocation);
+		panel.add(new JLabel("Y"));
 		yLocation = new JComboBox<>(columnNames.stream().sorted().collect(toList()).toArray(new String[0]));
 		yLocation.setSelectedItem("y");
-		add(yLocation);
+		panel.add(yLocation);
 		
 		locationSource.addActionListener(new ActionListener( ) {
 		      public void actionPerformed(ActionEvent e) {
@@ -120,36 +134,40 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 		});
 		
 		showCircle = new JCheckBox("circle", false);
-		add(showCircle);
+		panel.add(showCircle);
 		showLabel = new JCheckBox("label", false);
-		add(showLabel);
+		panel.add(showLabel);
 		showTrack = new JCheckBox("track", false);
-		add(showTrack);
+		panel.add(showTrack);
 		followTrack = new JCheckBox("follow", false);
-		add(followTrack);
+		panel.add(followTrack);
 		showAll = new JCheckBox("all", false);
-		add(showAll);
+		panel.add(showAll);
 		roverSync = new JCheckBox("rover sync", false);
-		add(roverSync);
+		panel.add(roverSync);
 		rainbowColor = new JCheckBox("rainbow", false);
-		add(rainbowColor);
-		add(new JPanel());
+		panel.add(rainbowColor);
+		panel.add(new JPanel());
 		
-		add(new JLabel("Radius"));
+		panel.add(new JLabel("Radius"));
 		
 		radiusField = new JTextField(6);
 		radiusField.setText("5");
 		Dimension dimScaleField = new Dimension(100, 20);
 		radiusField.setMinimumSize(dimScaleField);
 		
-		add(radiusField);
-		add(new JLabel("Scale factor"));
+		panel.add(radiusField);
+		panel.add(new JLabel("Scale factor"));
 		
 		magnificationField = new JTextField(6);
 		magnificationField.setText("10");
 		magnificationField.setMinimumSize(dimScaleField);
 		
-		add(magnificationField);
+		panel.add(magnificationField);
+	}
+	
+	public JPanel getPanel() {
+		return panel;
 	}
 	
 	public boolean showLocationOverlay() {
@@ -210,14 +228,25 @@ public class LocationCard extends JPanel implements MarsBdvCard {
 	public double getRadius() {
 		return Double.valueOf(radiusField.getText());
 	}
+	
+	@Override
+	protected void createIOMaps() {
+		//What do we want to save ???
+		
+	}
 
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
 	}
+	
+	@Override
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
+	}
 
 	@Override
-	public String getCardName() {
+	public String getName() {
 		return "Location";
 	}
 
