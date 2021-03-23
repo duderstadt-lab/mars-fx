@@ -92,7 +92,7 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements Ma
 		panel.add(showDNA);
 		panel.add(new JPanel());
 		
-		panel.add(new JLabel("Thickness"));
+		panel.add(new JLabel("thickness"));
 		
 		dnaThickness = new JTextField(6);
 		dnaThickness.setText("5");
@@ -109,7 +109,14 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements Ma
 
 	@Override
 	protected void createIOMaps() {
-		// What do we want to save and reload??
+		
+		setJsonField("show", jGenerator -> {
+			if (showDNA != null) jGenerator.writeBooleanField("show", showDNA.isSelected());
+		}, jParser -> showDNA.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("thickness", jGenerator -> {
+			if (dnaThickness != null) jGenerator.writeStringField("thickness", dnaThickness.getText());
+		}, jParser -> dnaThickness.setText(jParser.getText()));
 	}
 	
 	public boolean showDNA() {

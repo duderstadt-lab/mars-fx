@@ -89,7 +89,7 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements MarsBdv
 		panel.add(showObject);
 		panel.add(new JPanel());
 		
-		panel.add(new JLabel("Thickness"));
+		panel.add(new JLabel("thickness"));
 		
 		outlineThickness = new JTextField(6);
 		outlineThickness.setText("5");
@@ -208,6 +208,13 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements MarsBdv
 
 	@Override
 	protected void createIOMaps() {
-		//Add custom stuff here..
+		
+		setJsonField("show", jGenerator -> {
+			if (showObject != null) jGenerator.writeBooleanField("show", showObject.isSelected());
+		}, jParser -> showObject.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("thickness", jGenerator -> {
+			if (outlineThickness != null) jGenerator.writeStringField("thickness", outlineThickness.getText());
+		}, jParser -> outlineThickness.setText(jParser.getText()));
 	}
 }

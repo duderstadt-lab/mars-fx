@@ -231,7 +231,58 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements MarsB
 	
 	@Override
 	protected void createIOMaps() {
-		//What do we want to save ???
+
+		setJsonField("locationSource", jGenerator -> {
+			if (locationSource != null) jGenerator.writeStringField("locationSource", (String) locationSource.getSelectedItem());
+		}, jParser -> locationSource.setSelectedItem(jParser.getText()));
+		
+		setJsonField("tLocation", jGenerator -> {
+			if (tLocation != null) jGenerator.writeStringField("tLocation", (String) tLocation.getSelectedItem());
+		}, jParser -> tLocation.setSelectedItem(jParser.getText()));
+		
+		setJsonField("xLocation", jGenerator -> {
+			if (xLocation != null) jGenerator.writeStringField("xLocation", (String) xLocation.getSelectedItem());
+		}, jParser -> xLocation.setSelectedItem(jParser.getText()));
+		
+		setJsonField("yLocation", jGenerator -> {
+			if (yLocation != null) jGenerator.writeStringField("yLocation", (String) yLocation.getSelectedItem());
+		}, jParser -> yLocation.setSelectedItem(jParser.getText()));
+		
+		setJsonField("showCircle", jGenerator -> {
+			if (showCircle != null) jGenerator.writeBooleanField("showCircle", showCircle.isSelected());
+		}, jParser -> showCircle.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("showTrack", jGenerator -> {
+			if (showTrack != null) jGenerator.writeBooleanField("showTrack", showTrack.isSelected());
+		}, jParser -> showTrack.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("followTrack", jGenerator -> {
+			if (followTrack != null) jGenerator.writeBooleanField("followTrack", followTrack.isSelected());
+		}, jParser -> followTrack.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("showLabel", jGenerator -> {
+			if (showLabel != null) jGenerator.writeBooleanField("showLabel", showLabel.isSelected());
+		}, jParser -> showLabel.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("roverSync", jGenerator -> {
+			if (roverSync != null) jGenerator.writeBooleanField("roverSync", roverSync.isSelected());
+		}, jParser -> roverSync.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("rainbowColor", jGenerator -> {
+			if (rainbowColor != null) jGenerator.writeBooleanField("rainbowColor", rainbowColor.isSelected());
+		}, jParser -> rainbowColor.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("showAll", jGenerator -> {
+			if (showAll != null) jGenerator.writeBooleanField("showAll", showAll.isSelected());
+		}, jParser -> showAll.setSelected(jParser.getBooleanValue()));
+		
+		setJsonField("magnification", jGenerator -> {
+			if (magnificationField != null) jGenerator.writeStringField("magnification", magnificationField.getText());
+		}, jParser -> magnificationField.setText(jParser.getText()));
+		
+		setJsonField("radius", jGenerator -> {
+			if (magnificationField != null) jGenerator.writeStringField("radius", radiusField.getText());
+		}, jParser -> radiusField.setText(jParser.getText()));
 		
 	}
 
