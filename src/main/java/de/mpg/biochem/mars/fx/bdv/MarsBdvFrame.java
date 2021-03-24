@@ -91,6 +91,7 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
@@ -139,6 +140,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	protected final SharedQueue sharedQueue;
 	
 	protected Map<String, List<Source<T>>> bdvSources;
+	protected Map<String, SourceDisplaySettings> displaySettings;
 	protected Map<String, N5Reader> n5Readers;
 	protected List<MarsBdvCard> cards;
 	
@@ -179,6 +181,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
+		displaySettings = new HashMap<String, SourceDisplaySettings>();
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
 		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
@@ -221,6 +224,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
+		displaySettings = new HashMap<String, SourceDisplaySettings>();
 		
 		bdv = new BdvHandlePanel( frame, Bdv.options().is2D() );
 		bdv.getBdvHandle().getCardPanel().removeCard(DEFAULT_SOURCEGROUPS_CARD);
@@ -231,17 +235,16 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		if (jParser != null)
 			fromJSON(jParser);
 		
-		//Add custom cards
-		for (MarsBdvCard card : cards)
-			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(), card.getPanel(), true);
-		
 		if (locationCard == null) {
 			locationCard = new LocationCard();
 			locationCard.setArchive(archive);
 			locationCard.initialize();
 		}
-		
 		bdv.getBdvHandle().getCardPanel().addCard("Location", "Location", locationCard.getPanel(), true);
+		
+		//Add custom cards
+		for (MarsBdvCard card : cards)
+			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(), card.getPanel(), true);
 		
 		frame.add( bdv.getSplitPanel(), BorderLayout.CENTER );
 		
@@ -333,6 +336,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	}
 	
 	private void createView(MarsMetadata meta) {
+		saveSourceDisplaySettings();
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
 				bdvSources.put(meta.getUID(), loadSources(meta));
@@ -347,6 +351,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
 		
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
+		applySourceDisplaySettings();
 	}
 	
 	public void setFullView() {
@@ -622,6 +627,77 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 					}
 				}
 			});
+		
+		setJsonField("sources", 
+				jGenerator -> {
+					saveSourceDisplaySettings();
+					jGenerator.writeArrayFieldStart("sources");
+					for (String name : displaySettings.keySet())
+						displaySettings.get(name).toJSON(jGenerator);
+					jGenerator.writeEndArray();
+				}, jParser -> {
+					while (jParser.nextToken() != JsonToken.END_ARRAY) {
+						SourceDisplaySettings settings = new SourceDisplaySettings(jParser);
+						displaySettings.put(settings.name, settings);
+					}
+				}); 
+	}
+	
+	private void saveSourceDisplaySettings() {		
+		for (SourceAndConverter<?> source : bdv.getViewerPanel().state().getSources()) {
+			SourceDisplaySettings settings = new SourceDisplaySettings(source.getSpimSource().getName(), bdv.getConverterSetups().getConverterSetup(source));
+			displaySettings.put(source.getSpimSource().getName(), settings);
+		}
+	}
+	
+	private void applySourceDisplaySettings() {
+		for (SourceAndConverter<?> source : bdv.getViewerPanel().state().getSources()) {
+			ConverterSetup converterSetup = bdv.getConverterSetups().getConverterSetup(source);
+			
+			if (!displaySettings.containsKey(source.getSpimSource().getName()))
+				continue;
+			
+			SourceDisplaySettings settings = displaySettings.get(source.getSpimSource().getName()); 
+			converterSetup.setColor(new ARGBType( settings.color ));
+			converterSetup.setDisplayRange(settings.min, settings.max);
+		}
+	}
+	
+	private class SourceDisplaySettings extends AbstractJsonConvertibleRecord {
+		public String name;
+		public int color;
+		public double min, max;
+		
+		public SourceDisplaySettings(JsonParser jParser) throws IOException {
+			super();
+			fromJSON(jParser);
+		}
+		
+		public SourceDisplaySettings(String name, ConverterSetup converterSetup) {
+			this.name = name;
+			
+			this.color = converterSetup.getColor().get();
+		
+			this.min = converterSetup.getDisplayRangeMin();
+			this.max = converterSetup.getDisplayRangeMax();
+		}
+
+		@Override
+		protected void createIOMaps() {
+			
+			setJsonField("name", jGenerator -> jGenerator.writeStringField("name", 
+					name), jParser -> name = jParser.getText());
+			
+			setJsonField("color", jGenerator -> jGenerator.writeNumberField("color",
+					color), jParser -> color = jParser.getIntValue());
+			
+			setJsonField("min", jGenerator -> jGenerator.writeNumberField("min",
+					min), jParser -> min = jParser.getIntValue());
+			
+			setJsonField("max", jGenerator -> jGenerator.writeNumberField("max",
+					max), jParser -> max = jParser.getIntValue());
+
+		}
 	}
 
 	/**
