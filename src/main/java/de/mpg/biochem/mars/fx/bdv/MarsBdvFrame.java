@@ -263,6 +263,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			metaUID = meta.getUID();
 			createView(meta);
+			applySourceDisplaySettings();
 			
 			if (meta.getImage(0).getSizeX() != -1 && meta.getImage(0).getSizeY() != -1)
 				goTo(meta.getImage(0).getSizeX()/2, meta.getImage(0).getSizeY()/2);
@@ -282,6 +283,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	}
 	
 	public void updateView() {
+		saveSourceDisplaySettings();
 		if (molecule != null) {
 			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
 			if (!metaUID.equals(meta.getUID())) {
@@ -303,6 +305,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				}
 			}
 		 }
+		applySourceDisplaySettings();
 	}
 	
 	public void updateLocation() {
@@ -336,7 +339,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	}
 	
 	private void createView(MarsMetadata meta) {
-		saveSourceDisplaySettings();
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
 				bdvSources.put(meta.getUID(), loadSources(meta));
@@ -351,7 +353,6 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
 		
 		initBrightness( 0.001, 0.999, bdv.getViewerPanel().state(), bdv.getConverterSetups() );
-		applySourceDisplaySettings();
 	}
 	
 	public void setFullView() {
@@ -675,9 +676,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		
 		public SourceDisplaySettings(String name, ConverterSetup converterSetup) {
 			this.name = name;
-			
 			this.color = converterSetup.getColor().get();
-		
 			this.min = converterSetup.getDisplayRangeMin();
 			this.max = converterSetup.getDisplayRangeMax();
 		}
