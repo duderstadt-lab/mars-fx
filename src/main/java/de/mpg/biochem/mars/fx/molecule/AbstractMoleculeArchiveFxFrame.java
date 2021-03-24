@@ -1444,9 +1444,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
          		marsBdvFrames[index] = marsBdvFrame;
      			handles[index] = marsBdvFrame.getBdvHandle();
      			index++;
-     			if (index == marsBdvFrames.length)
-     				break;
      		}
+     		
+     		//Make sure we move out of the bdvFrames field to the end of the object...
+     		jParser.nextToken();
           
      		ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles, true);
      		

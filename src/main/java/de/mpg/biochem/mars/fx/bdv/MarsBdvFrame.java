@@ -611,6 +611,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 							else
 								cards.add(card);
 						}
+						
+						jParser.nextToken();
 	
 						if ("settings".equals(jParser.getCurrentName())) {
 							jParser.nextToken();

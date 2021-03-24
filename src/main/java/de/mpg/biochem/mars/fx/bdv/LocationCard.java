@@ -114,12 +114,13 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements MarsB
 		locationSource.addActionListener(new ActionListener( ) {
 		      public void actionPerformed(ActionEvent e) {
 		        String sourceName = (String)locationSource.getSelectedItem();
+		        Set<String> sourceItemNames = (sourceName.equals("Table")) ? columnNames : parameterNames;
 		        
 		        tLocation.removeAllItems();
 		        xLocation.removeAllItems();
 		    	yLocation.removeAllItems();  
 		        
-		    	for (String item : parameterNames.stream().sorted().collect(toList())) {
+		    	for (String item : sourceItemNames.stream().sorted().collect(toList())) {
 					tLocation.addItem(item);
 					xLocation.addItem(item);
 					yLocation.addItem(item);
