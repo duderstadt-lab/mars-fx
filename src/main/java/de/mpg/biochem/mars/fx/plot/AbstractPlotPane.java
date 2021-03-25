@@ -339,10 +339,11 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			
 			//issues with updating here appear to be related to https://github.com/GSI-CS-CO/chart-fx/issues/23
 			//Still the plot area doesn't update together with the axis...
-			Platform.runLater(() -> subPlot.getChart().layoutChildren());
+			//Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
 		
-		//Platform.runLater(() -> chartsPane.layout() ???.layoutChildren());
+		for (SubPlot subPlot : charts)
+			Platform.runLater(() -> subPlot.getChart().layoutChildren());
 	}
 	
 	public abstract void addChart();
