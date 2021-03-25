@@ -231,7 +231,7 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 				xyChart.getDatasets().clear();
 				xyChart.getDatasets().addAll(datasets);
 				
-				xyChart.layout();
+				Platform.runLater(() -> xyChart.layoutChildren());
 			}
 		});
 	}

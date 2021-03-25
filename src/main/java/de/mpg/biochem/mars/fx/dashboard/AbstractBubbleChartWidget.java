@@ -228,7 +228,7 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 				bubbleChart.getDatasets().clear();
 				bubbleChart.getDatasets().addAll(datasets);
 				
-				bubbleChart.layout();
+				Platform.runLater(() -> bubbleChart.layoutChildren());
 			}
 		});
 	}

@@ -224,7 +224,7 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 				barChart.getDatasets().clear();
 				barChart.getDatasets().add(dataSet);
 				
-				barChart.layout();
+				Platform.runLater(() -> barChart.layoutChildren());
 			}
 		});
 	}

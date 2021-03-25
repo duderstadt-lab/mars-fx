@@ -228,7 +228,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				outlineHistogramRenderer.getDatasets().clear();
 				outlineHistogramRenderer.getDatasets().addAll(datasets);
 				
-				histChart.layout();
+				Platform.runLater(() -> histChart.layoutChildren());
 			}
 		});
 	}
