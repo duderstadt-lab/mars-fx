@@ -217,7 +217,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
 			//Somehow layoutChildren, even in a runLater block doesn't always work
 			//Needs further investigation. This should be removed once a solution is found.
-			resetXYZoom();
+			//resetXYZoom();
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
 		
@@ -341,6 +341,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			//Still the plot area doesn't update together with the axis...
 			Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
+		
+		//Platform.runLater(() -> chartsPane.layout() ???.layoutChildren());
 	}
 	
 	public abstract void addChart();
@@ -551,7 +553,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		            	//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
 		    			//Somehow layoutChildren, even in a runLater block doesn't always work
 		    			//Needs further investigation. This should be removed once a solution is found.
-		    			resetXYZoom();
+		    			//resetXYZoom();
 		            }
 		        }
 			};
