@@ -566,12 +566,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	            		    @Override
 	            		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
 	            		    	super.windowClosing(windowEvent);
-	            		    	for (int i=0; i<marsBdvFrames.length; i++)
-	            		    		if (marsBdvFrames[i] != null) {
-	            		    			marsBdvFrames[i].getFrame().dispose();
-	            		    			marsBdvFrames[i] = null;
-	            		    		}
-	            		    	
+	             		    	for (int i=0; i<marsBdvFrames.length; i++)
+	             		    		if (marsBdvFrames[i] != null) {
+	             		    			marsBdvFrames[i].getFrame().dispose();
+	             		    			marsBdvFrames[i] = null;
+	             		    		}
+	             		    	
+	             		    	marsBdvFrames = null;
 	                            new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
 	            		    }
 	            		});
@@ -1344,7 +1345,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 						jGenerator.writeNumberField("numberViews", marsBdvFrames.length);
 						jGenerator.writeArrayFieldStart("views");
 						for (MarsBdvFrame bdvFrame : marsBdvFrames)
-							bdvFrame.toJSON(jGenerator);
+							if (bdvFrame != null)
+								bdvFrame.toJSON(jGenerator);
 						jGenerator.writeEndArray();
 						jGenerator.writeEndObject();
 					}
@@ -1461,7 +1463,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
          		    			marsBdvFrames[i].getFrame().dispose();
          		    			marsBdvFrames[i] = null;
          		    		}
-         		    	
+         		    	marsBdvFrames = null;
                         new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
          		    }
          		});
