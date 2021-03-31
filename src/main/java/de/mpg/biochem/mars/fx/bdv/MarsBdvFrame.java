@@ -289,6 +289,11 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			if (!metaUID.equals(meta.getUID())) {
 				metaUID = meta.getUID();
 				createView(meta);
+				
+				//createView removes overlays.. this deactivates ensure they are readded below.
+				locationCard.setActive(false);
+				for (MarsBdvCard card : cards)
+					card.setActive(false);
 			}
 			
 			locationCard.setMolecule(molecule);
@@ -346,8 +351,15 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				e.printStackTrace();
 			}
 		}
-			
-		bdv.getViewerPanel().state().removeSources(bdv.getViewerPanel().state().getSources());
+		
+		List<SourceAndConverter<?>> sourcesAndConverters = new ArrayList<SourceAndConverter<?>>();
+		for (SourceAndConverter<?> sourceAndConverter : bdv.getViewerPanel().state().getSources())
+			sourcesAndConverters.add(sourceAndConverter);
+				
+		for (SourceAndConverter<?> sourceAndConverter : sourcesAndConverters)
+			bdv.getViewerPanel().state().removeSource(sourceAndConverter);
+		
+		sourcesAndConverters.clear();
 		
 		for (Source<T> source : bdvSources.get(meta.getUID()))
 			BdvFunctions.show( source, numTimePoints, Bdv.options().addTo( bdv ) );
