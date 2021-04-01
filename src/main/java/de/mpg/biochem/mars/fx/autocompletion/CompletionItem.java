@@ -43,6 +43,7 @@ public class CompletionItem {
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
 	 */
 	public CompletionItem(Method method, String completionText){
@@ -52,6 +53,7 @@ public class CompletionItem {
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
 	 * @param shortDesc A short description of the completion.  This will be
 	 *        displayed in the completion list.  This may be <code>null</code>.
@@ -65,6 +67,7 @@ public class CompletionItem {
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
 	 * @param shortDesc A short description of the completion.  This will be
 	 *        displayed in the completion list.  This may be <code>null</code>.

@@ -55,7 +55,8 @@ import java.util.List;
  * An easy way to manage chips in a text area component with an x to
  * omit the chip.
  *
- * @author Shadi Shaheen & Gerard Moubarak
+ * @author Shadi Shaheen 
+ * @author Gerard Moubarak
  * @version 1.0.0
  * @since 2018-02-01
  * 

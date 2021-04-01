@@ -57,8 +57,6 @@ import static de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper.MatrixApprox
  * (i.e. the view target is approximately equal to the source {@link ViewerTransformSyncStopper#MatrixApproxEquals}),
  * then there's no need to trigger a view transform change to the next BdvHandle
  *
- * see also {@link ViewerOrthoSyncStarter}
- *
  * See ViewTransformSynchronizationDemo for a usage example
  *
  * @author Nicolas Chiaruttini, BIOP EPFL, nicolas.chiaruttini@epfl.ch

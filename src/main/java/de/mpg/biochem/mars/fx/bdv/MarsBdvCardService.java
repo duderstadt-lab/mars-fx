@@ -63,6 +63,8 @@ public class MarsBdvCardService extends AbstractPTService<MarsBdvCard> implement
 	/**
 	 * Gets the list of available cards. The names on this list can be passed to
 	 * {@link #createCard(String)} to create instances of that widget.
+	 * 
+	 * @return The set of cards.
 	 */
 	public Set<String> getCardNames() {
 		return cards.keySet();
@@ -80,7 +82,6 @@ public class MarsBdvCardService extends AbstractPTService<MarsBdvCard> implement
 		return cardsOfType;
 	}
 
-	/** Creates a card of the given name. */
 	public MarsBdvCard createCard(final String name) {
 		final PluginInfo<MarsBdvCard> info = cards.get(name);
 

@@ -65,11 +65,11 @@ import javafx.scene.input.KeyCode;
 
 /**
  * Region along X or Y axis.
- * <ul>
- * <li>region selection start - triggered on {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED}
- * event that is accepted by {@link #getregionInMouseFilter() region-in filter}. It
+ * 
+ * Region selection start - triggered on {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED}
+ * event that is accepted by getregionInMouseFilter() region-in filter. It
  * shows a rectangle determining the region once mouse button is
- * released.</li>
+ * released.
  * 
  * @author Karl Duderstadt
  */
@@ -163,7 +163,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     /**
      * Creates a new instance of region selector with animation disabled.
      *
-     * @param regionMode
+     * @param axisMode
      *            initial value of {@link #axisModeProperty() regionMode} property
      */
     public MarsRegionSelectionPlugin(final AxisMode axisMode) {
@@ -242,7 +242,6 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
      * Returns region-in mouse event filter.
      *
      * @return region-in mouse event filter
-     * @see #setregionInMouseFilter(Predicate)
      */
     public Predicate<MouseEvent> getRegionSelectionMouseFilter() {
         return regionSelectionMouseFilter;
@@ -276,14 +275,13 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements MarsPlotPl
     }
 
     /**
-     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that
+     * Sets filter on MouseEvent#DRAG_DETECTED DRAG_DETECTED events that
      * should start region-in operation.
      *
-     * @param regionInMouseFilter
+     * @param regionSelectionMouseFilter
      *            the filter to accept region-in mouse event. If {@code null} then
      *            any DRAG_DETECTED event will start region-in operation. By
-     *            default it's set to {@link #defaultregionInMouseFilter}.
-     * @see #getregionInMouseFilter()
+     *            default it's set to defaultregionInMouseFilter.
      */
     public void setRegionSelectionMouseFilter(final Predicate<MouseEvent> regionSelectionMouseFilter) {
         this.regionSelectionMouseFilter = regionSelectionMouseFilter;

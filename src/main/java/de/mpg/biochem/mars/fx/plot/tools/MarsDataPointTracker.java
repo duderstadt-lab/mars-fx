@@ -55,7 +55,7 @@ import javafx.util.Pair;
 /**
  * A tool tip label appearing next to the mouse cursor when placed over a data point's symbol. If symbols are not
  * created/shown for given plot, the tool tip is shown for the closest data point that is within the
- * {@link #pickingDistanceProperty()} from the mouse cursor.
+ * pickingDistanceProperty() from the mouse cursor.
  * <p>
  * CSS style class name: {@value #STYLE_CLASS_LABEL}
  *
@@ -90,7 +90,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
     private final EventHandler<MouseEvent> mouseMoveHandler = this::updateToolTip;
 
     /**
-     * Creates a new instance of MarsDataPointTracker class with {{@link #pickingDistanceProperty() picking distance}
+     * Creates a new instance of MarsDataPointTracker class with pickingDistanceProperty() picking distance
      * initialized to {@value #DEFAULT_PICKING_DISTANCE}.
      */
     public MarsDataPointTracker() {

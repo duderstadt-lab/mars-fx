@@ -37,8 +37,7 @@ import java.util.Map;
 /**
  * BigDataViewer Playground Action --
  * Action which stops the synchronization of the display location of a {@link BdvHandle}
- * Works in combination with the action {@link ViewerTransformSyncStarter}
- * and {@link ViewerOrthoSyncStarter}
+ * Works in combination with the action
  *
  * See ViewTransformSynchronizationDemo for a usage example
  *
@@ -77,7 +76,7 @@ public class ViewerTransformSyncStopper implements Runnable {
      *
      * @param m1 first matrix of double
      * @param m2 second matrix of double
-     * @return
+     * @return True if m1 and m2 are equal.
      */
     public static boolean MatrixApproxEquals(double[] m1, double[] m2) {
         assert m1.length == m2.length;

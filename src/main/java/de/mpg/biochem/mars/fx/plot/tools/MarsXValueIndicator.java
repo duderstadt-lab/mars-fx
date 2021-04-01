@@ -56,6 +56,7 @@ public class MarsXValueIndicator extends XValueIndicator implements MarsPlotPlug
      *
      * @param axis the axis this indicator is associated with
      * @param value a X value to be indicated
+     * @param datasetOptionsPane Reference to the datasetOptionsPane.
      */
     public MarsXValueIndicator(final Axis axis, final double value, DatasetOptionsPane datasetOptionsPane) {
         this(axis, value, null, datasetOptionsPane);
@@ -67,6 +68,7 @@ public class MarsXValueIndicator extends XValueIndicator implements MarsPlotPlug
      * @param axis the axis this indicator is associated with
      * @param value a X value to be indicated
      * @param text the text to be shown by the label. Value of {@link #textProperty()}.
+     * @param datasetOptionsPane Reference to the datasetOptionsPane.
      */
     public MarsXValueIndicator(final Axis axis, final double value, final String text, DatasetOptionsPane datasetOptionsPane) {
         super(axis, value, text);

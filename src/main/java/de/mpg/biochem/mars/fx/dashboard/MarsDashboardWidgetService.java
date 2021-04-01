@@ -63,6 +63,8 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 	/**
 	 * Gets the list of available widgets. The names on this list can be passed to
 	 * {@link #createWidget(String)} to create instances of that widget.
+	 * 
+	 * @return The set of widget names.
 	 */
 	public Set<String> getWidgetNames() {
 		return widgets.keySet();
@@ -80,7 +82,6 @@ public class MarsDashboardWidgetService extends AbstractPTService<MarsDashboardW
 		return widgetsOfType;
 	}
 
-	/** Creates a widget of the given name. */
 	public MarsDashboardWidget createWidget(final String name) {
 		final PluginInfo<MarsDashboardWidget> info = widgets.get(name);
 

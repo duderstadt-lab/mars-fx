@@ -60,10 +60,10 @@ import de.gsi.chart.XYChart;
 
 /**
  * Position along X or Y axis.
- * <ul>
- * <li>position selection - triggered on {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED}
- * event that is accepted by {@link #getPositionInMouseFilter() position-in filter}. 
- * released.</li>
+ * 
+ * Position selection - triggered on {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED}
+ * event that is accepted by getPositionInMouseFilter() position-in filter. 
+ * released.
  * 
  * @author Karl Duderstadt
  */
@@ -110,7 +110,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     /**
      * Creates a new instance of region selector with animation disabled.
      *
-     * @param regionMode
+     * @param axisMode
      *            initial value of {@link #axisModeProperty() regionMode} property
      */
     public MarsPositionSelectionPlugin(final AxisMode axisMode) {
@@ -162,7 +162,6 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
      * Returns region-in mouse event filter.
      *
      * @return region-in mouse event filter
-     * @see #setregionInMouseFilter(Predicate)
      */
     public Predicate<MouseEvent> getPositionSelectionMouseFilter() {
         return positionSelectionMouseFilter;
@@ -189,11 +188,10 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
      * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that
      * should start region-in operation.
      *
-     * @param regionInMouseFilter
+     * @param positionSelectionMouseFilter
      *            the filter to accept region-in mouse event. If {@code null} then
      *            any DRAG_DETECTED event will start region-in operation. By
-     *            default it's set to {@link #defaultregionInMouseFilter}.
-     * @see #getregionInMouseFilter()
+     *            default it's set to defaultregionInMouseFilter.
      */
     public void setPositionSelectionMouseFilter(final Predicate<MouseEvent> positionSelectionMouseFilter) {
         this.positionSelectionMouseFilter = positionSelectionMouseFilter;

@@ -725,6 +725,8 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	 *            width of the viewer display
 	 * @param viewerHeight
 	 *            height of the viewer display
+	 * @param zoomedIn
+	 * 			  True if zoomed in.
 	 * @param state
 	 *            the {@link ViewerState} containing at least one source.
 	 * @return proposed initial viewer transform.
@@ -816,10 +818,16 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	}
 	
 	/**
+	 * @param source
+	 * 		the source.
+	 * @param timepoint
+	 * 		time point.
 	 * @param cumulativeMinCutoff
 	 * 		fraction of pixels that are allowed to be saturated at the lower end of the range.
 	 * @param cumulativeMaxCutoff
 	 * 		fraction of pixels that are allowed to be saturated at the upper end of the range.
+	 * 
+	 * @return The bounds.
 	 */
 	public static Bounds estimateSourceRange( final Source< ? > source, final int timepoint, final double cumulativeMinCutoff, final double cumulativeMaxCutoff )
 	{
