@@ -70,6 +70,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.format.DataFormatDetector;
 import com.fasterxml.jackson.core.format.DataFormatMatcher;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.jfoenix.controls.JFXTabPane;
 
@@ -123,6 +125,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.MaskerPane;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
@@ -208,13 +211,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected SettingsTab settingsTab;
     
     protected boolean windowStateLoaded = false;
-    protected boolean discoveredBdvFrameSettings = false;
+    //protected boolean discoveredBdvFrameSettings = false;
     
     protected static JsonFactory jfactory;
 	
     protected Set<MoleculeArchiveTab> tabSet;
     
     protected MarsBdvFrame[] marsBdvFrames;
+    protected byte[] roverFileBackground;
 
     protected double tabWidth = 50.0;
     
@@ -521,6 +525,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					return;
 				}
 			}
+		}
+
+		boolean discoveredBdvFrameSettings = false;
+		if (archive.getFile() != null) {
+			try {
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonNode = mapper.readTree(FileUtils.readFileToByteArray(new File(archive.getFile().getAbsolutePath() + ".rover")));
+				if (jsonNode.get("bdvFrames") != null)
+					discoveredBdvFrameSettings = true;
+			} catch (IOException e) {}
 		}
 		
 		//Check if there are settings for MarsBdvFrames in the rover file...
@@ -1349,12 +1363,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 								bdvFrame.toJSON(jGenerator);
 						jGenerator.writeEndArray();
 						jGenerator.writeEndObject();
+					} else {
+						//We should check if there were settings already saved and restore them!
+						ObjectMapper mapper = new ObjectMapper();	
+			    		JsonNode jsonNode = mapper.readTree(roverFileBackground);
+			    		JsonNode bdvFrameNode = jsonNode.get("bdvFrames");
+			    		jGenerator.writeFieldName("bdvFrames");
+			    		mapper.writeTree(jGenerator, bdvFrameNode);
 					}
 				}, 
 				jParser -> {
 					//The settings were discovered but will not be loaded until showVideo is called.
-					//We just pass through the object for now.
-					discoveredBdvFrameSettings = true;
 					MarsUtil.passThroughUnknownObjects(jParser);
 				});
 		
@@ -1398,6 +1417,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
     
     protected void saveState(String path) throws IOException {
+    	if (marsBdvFrames == null)
+    		roverFileBackground = FileUtils.readFileToByteArray(new File(path + ".rover"));
+ 
 		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
 		jGenerator.useDefaultPrettyPrinter();
