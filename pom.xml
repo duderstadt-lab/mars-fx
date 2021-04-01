@@ -95,7 +95,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-13-SNAPSHOT</mars-core.version>
+		<mars-core.version>1.0.0-beta-13</mars-core.version>
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
