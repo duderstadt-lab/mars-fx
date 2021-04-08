@@ -1363,20 +1363,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 								bdvFrame.toJSON(jGenerator);
 						jGenerator.writeEndArray();
 						jGenerator.writeEndObject();
-					} else {
+					} else if (roverFileBackground != null) {
 						//We should check if there were settings already saved and restore them!
 						ObjectMapper mapper = new ObjectMapper();	
 			    		JsonNode jsonNode = mapper.readTree(roverFileBackground);
 			    		JsonNode bdvFrameNode = jsonNode.get("bdvFrames");
-			    		jGenerator.writeFieldName("bdvFrames");
-			    		mapper.writeTree(jGenerator, bdvFrameNode);
+			    		if (bdvFrameNode != null) {
+			    			jGenerator.writeFieldName("bdvFrames");
+			    			mapper.writeTree(jGenerator, bdvFrameNode);
+			    		}
 					}
 				}, 
 				jParser -> {
 					//The settings were discovered but will not be loaded until showVideo is called.
 					MarsUtil.passThroughUnknownObjects(jParser);
 				});
-		
+
 		/*
 		 * 
 		 * The fields below are needed for backwards compatibility.
@@ -1417,7 +1419,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
     
     protected void saveState(String path) throws IOException {
-    	if (marsBdvFrames == null)
+    	if (marsBdvFrames == null && new File(path + ".rover").exists())
     		roverFileBackground = FileUtils.readFileToByteArray(new File(path + ".rover"));
  
 		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
