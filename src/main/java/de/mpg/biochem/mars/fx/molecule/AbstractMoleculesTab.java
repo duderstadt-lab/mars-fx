@@ -536,9 +536,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	
 	protected class MoleculeIndexRow {
     	private int index;
+    	private String UID;
     	
-    	MoleculeIndexRow(int index) {
+    	MoleculeIndexRow(int index, String UID) {
     		this.index = index;
+    		this.UID = UID;
     	}
     	
     	boolean contains(String str) {
@@ -560,15 +562,15 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     	}
     	
     	String getUID() {
-    		return archive.getUIDAtIndex(index);
+    		return UID;
     	}
     	
     	String getTags() {
-    		return archive.getTagList(archive.getUIDAtIndex(index));
+    		return archive.getTagList(UID);
     	}
     	
     	String getImageMetaDataUID() {
-    		return archive.getMetadataUIDforMolecule(archive.getUIDAtIndex(index));
+    		return archive.getMetadataUIDforMolecule(UID);
     	}
     }
 
@@ -586,8 +588,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
     		currentUID = molecule.getUID();
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
-	    	for (int index = 0; index < archive.getNumberOfMolecules(); index++) {
-	    		MoleculeIndexRow row = new MoleculeIndexRow(index);
+	    	List<String> UIDs = archive.getMoleculeUIDs();
+	    	for (int index=0; index < UIDs.size(); index++) {
+	    		MoleculeIndexRow row = new MoleculeIndexRow(index, UIDs.get(index));
 	        	moleculeRowList.add(row);
 	        }
 	    	

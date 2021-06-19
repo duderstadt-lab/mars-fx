@@ -30,6 +30,8 @@ package de.mpg.biochem.mars.fx.molecule;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
+
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 
@@ -333,9 +335,11 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	
 	protected class MetaIndexRow {
     	private int index;
+    	private String UID;
     	
-    	MetaIndexRow(int index) {
+    	MetaIndexRow(int index, String UID) {
     		this.index = index;
+    		this.UID = UID;
     	}
     	
     	int getIndex() {
@@ -343,11 +347,11 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
     	}
     	
     	String getUID() {
-    		return archive.getMetadataUIDAtIndex(index);
+    		return UID;
     	}
     	
     	String getTags() {
-    		return archive.getMetadataTagList(archive.getMetadataUIDAtIndex(index));
+    		return archive.getMetadataTagList(UID);
     	}
     }
 
@@ -365,10 +369,11 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
     		currentUID = metaIndexTable.getSelectionModel().getSelectedItem().getUID();
     	metaRowList.clear();
     	if (archive.getNumberOfMetadatas() > 0) {
-    		for (int index = 0; index < archive.getNumberOfMetadatas(); index++) {
-    			MetaIndexRow row = new MetaIndexRow(index);
-    			metaRowList.add(row);
-    		}
+    		List<String> metaUIDs = archive.getMetadataUIDs();
+	    	for (int index=0; index < metaUIDs.size(); index++) {
+	    		MetaIndexRow row = new MetaIndexRow(index, metaUIDs.get(index));
+	    		metaRowList.add(row);
+	        }
     		
     		int newIndex = 0;
 	    	for (int index = 0; index < filteredData.size(); index++) {
