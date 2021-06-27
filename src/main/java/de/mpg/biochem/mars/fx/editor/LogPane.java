@@ -199,7 +199,8 @@ public class LogPane
 
 		// replace text
 		lineSeparator = determineLineSeparator(markdown);
-		textArea.replaceText(markdown);
+		//textArea.replaceText(markdown);
+		textArea.replaceText(0, textArea.getLength(), markdown);
 
 		// restore old selection range
         int newLength = textArea.getLength();
