@@ -130,7 +130,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 						//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
 					});
 					e.consume();
-				} if (e.getEventType().getName().equals("REFRESH_METADATA_PROPERTIES_EVENT")) {
+				} else if (e.getEventType().getName().equals("REFRESH_METADATA_PROPERTIES_EVENT")) {
 			    	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
 					Platform.runLater(() -> {
 						metaIndexTable.requestFocus();
