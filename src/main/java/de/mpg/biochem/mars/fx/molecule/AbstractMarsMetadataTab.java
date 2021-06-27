@@ -59,6 +59,7 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractMoleculesTab.MoleculeIndexRow;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.*;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
@@ -129,7 +130,13 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 						//metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
 					});
 					e.consume();
-				} else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
+				} if (e.getEventType().getName().equals("REFRESH_METADATA_PROPERTIES_EVENT")) {
+			    	metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));
+					Platform.runLater(() -> {
+						metaIndexTable.requestFocus();
+					});
+					e.consume();
+			   } else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
 					metaIndexTable.refresh();
 				    e.consume();
 			    }

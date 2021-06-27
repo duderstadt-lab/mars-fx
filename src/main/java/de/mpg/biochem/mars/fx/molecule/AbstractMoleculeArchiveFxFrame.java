@@ -142,12 +142,14 @@ import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
+import de.mpg.biochem.mars.fx.event.RefreshMetadataPropertiesEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
@@ -412,9 +414,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
            	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
            	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
            	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
+				} else if (tabsContainer.getSelectionModel().getSelectedItem() == imageMetadataTab.getTab()) {
+           	 		imageMetadataTab.getSelectedMetadata().addTag(hotKeyEntry.getTag());
+           	 		imageMetadataTab.fireEvent(new RefreshMetadataPropertiesEvent());
+           	 		imageMetadataTab.fireEvent(new MetadataTagsChangedEvent(imageMetadataTab.getSelectedMetadata()));
 				}
             };
-            	getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
+            getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
 		}
 	}
 	
