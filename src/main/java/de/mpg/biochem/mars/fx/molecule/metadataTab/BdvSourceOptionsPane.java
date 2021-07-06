@@ -67,12 +67,14 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
+import net.imglib2.realtransform.AffineTransform3D;
 
 public class BdvSourceOptionsPane extends VBox {
-	private TextField m00, m01, m02, m10, m11, m12, cField, pathField;
+	private TextField m00, m01, m02, m10, m11, m12, cField, tField, pathField;
 	private Label datasetInfo, n5Dataset;
-	private ToggleSwitch driftCorrectSwitch;
+	private ToggleSwitch driftCorrectSwitch, oneTimePointSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
+	private BooleanProperty singleTimePoint = new SimpleBooleanProperty();
 	private Button pathButton;
 	//private Label pathValidation;
 	private MarsBdvSource marsBdvSource;
@@ -330,6 +332,37 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setMargin(cField, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(cField);
 		
+		oneTimePointSwitch = new ToggleSwitch();
+		singleTimePoint.setValue(false);
+		oneTimePointSwitch.selectedProperty().bindBidirectional(singleTimePoint);
+		singleTimePoint.addListener((observable, oldValue, newValue) -> {
+			if (newValue.booleanValue()) {
+				marsBdvSource.setProperty("SingleTimePoint", "true");
+			} else
+				marsBdvSource.setProperty("SingleTimePoint", "false");
+		});
+		
+		Label singleTimePointLabel = new Label("Single Time Point Overlay");
+		HBox.setMargin(singleTimePointLabel, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(singleTimePointLabel);
+
+		HBox.setMargin(oneTimePointSwitch, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(oneTimePointSwitch);
+		
+		Label tLabel = new Label("T");
+		HBox.setMargin(tLabel, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(tLabel);
+		
+		tField = new TextField();
+		tField.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (marsBdvSource != null)
+				marsBdvSource.setProperty("SingleTimePointValue", tField.getText());
+		});
+		tField.setPrefWidth(50);
+		tField.setMaxWidth(50);
+		HBox.setMargin(tField, new Insets(0, 5, 10, 5));
+		n5OptionsHBox.getChildren().add(tField);
+		
 		getChildren().add(n5OptionsHBox);
 		
 		GridPane infoGridpane = new GridPane();
@@ -369,6 +402,7 @@ public class BdvSourceOptionsPane extends VBox {
 			pathField.setText("");
 			
 			cField.setText("0");
+			tField.setText("0");
 			n5Dataset.setText("");
 			datasetInfo.setText("");
 			
@@ -392,6 +426,18 @@ public class BdvSourceOptionsPane extends VBox {
 				if (!getChildren().contains(n5OptionsHBox)) getChildren().add(getChildren().size() - 1, n5OptionsHBox);
 				cField.setText(String.valueOf(marsBdvSource.getChannel()));
 				n5Dataset.setText(marsBdvSource.getN5Dataset());
+				
+				if (marsBdvSource.getProperties().containsKey("SingleTimePoint") && Boolean.valueOf(marsBdvSource.getProperties().get("SingleTimePoint")))
+					singleTimePoint.setValue(true);
+				else
+					singleTimePoint.setValue(false);
+
+				if (marsBdvSource.getProperties().containsKey("SingleTimePointValue"))
+					tField.setText(marsBdvSource.getProperties().get("SingleTimePointValue"));
+				else {
+					tField.setText("0");
+					marsBdvSource.setProperty("SingleTimePointValue", "0");
+				}
 				
 				//Dataset information
 				if (marsBdvSource.getProperties().containsKey("info"))

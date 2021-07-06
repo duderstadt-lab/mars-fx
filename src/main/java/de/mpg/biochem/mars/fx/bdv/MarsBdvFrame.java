@@ -446,29 +446,47 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				
 				if (tSize > numTimePoints)
 					numTimePoints = tSize;
-
-				AffineTransform3D[] transforms = new AffineTransform3D[tSize];
-				
-				for (int t = 0; t < tSize; t++) {
-					if (source.getCorrectDrift()) {
-						double dX = meta.getPlane(0, 0, 0, t).getXDrift();
-						double dY = meta.getPlane(0, 0, 0, t).getYDrift();
-						transforms[t] = source.getAffineTransform3D(dX, dY);
-					} else
-						transforms[t] = source.getAffineTransform3D();
-				}
 				
 				@SuppressWarnings( "rawtypes" )
 				final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
 				images[0] = image;
 
-				@SuppressWarnings( "unchecked" )
-				final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
-				
-				if (useVolatile)
-					sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
-				else
-					sources.add(n5Source);
+				if (source.getProperties().containsKey("SingleTimePoint") && Boolean.valueOf(source.getProperties().get("SingleTimePoint"))) {
+					AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+					
+					//We don't drift correct single time point overlays
+					//Drift should be corrected against them
+					for (int t = 0; t < tSize; t++)
+						transforms[t] = source.getAffineTransform3D();
+					
+					int singleTimePoint = (source.getProperties().containsKey("SingleTimePointValue")) ? Integer.valueOf(source.getProperties().get("SingleTimePointValue")) : 0;
+					@SuppressWarnings( "unchecked" )
+					final MarsSingleTimePointN5Source<T> n5Source = new MarsSingleTimePointN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms, singleTimePoint);
+					
+					if (useVolatile)
+						sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
+					else
+						sources.add(n5Source);
+				} else {
+					AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+					
+					for (int t = 0; t < tSize; t++) {
+						if (source.getCorrectDrift()) {
+							double dX = meta.getPlane(0, 0, 0, t).getXDrift();
+							double dY = meta.getPlane(0, 0, 0, t).getYDrift();
+							transforms[t] = source.getAffineTransform3D(dX, dY);
+						} else
+							transforms[t] = source.getAffineTransform3D();
+					}
+					
+					@SuppressWarnings( "unchecked" )
+					final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
+					
+					if (useVolatile)
+						sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
+					else
+						sources.add(n5Source);
+				}
 				
 			} else {
 				SpimDataMinimal spimData;
