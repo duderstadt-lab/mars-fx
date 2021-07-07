@@ -78,7 +78,7 @@ public class MarsSingleTimePointN5Source< T extends NumericType< T > > extends A
 	@Override
 	public synchronized void getSourceTransform( final int t, final int level, final AffineTransform3D transform )
 	{
-		transform.set( transforms[ t ] );
+		transform.set( transforms[ singleTimePoint ] );
 	}
 
 	@Override
