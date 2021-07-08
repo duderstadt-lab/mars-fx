@@ -265,7 +265,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 			createView(meta);
 			applySourceDisplaySettings();
 			
-			if (meta.getImage(0).getSizeX() != -1 && meta.getImage(0).getSizeY() != -1)
+			if (meta.getImage(0) != null && meta.getImage(0).getSizeX() != -1 && meta.getImage(0).getSizeY() != -1)
 				goTo(meta.getImage(0).getSizeX()/2, meta.getImage(0).getSizeY()/2);
 			else 
 				goTo(0,0);
@@ -451,7 +451,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
 				images[0] = image;
 
-				if (source.getProperties().containsKey("SingleTimePoint") && Boolean.valueOf(source.getProperties().get("SingleTimePoint"))) {
+				if (source.getSingleTimePointMode()) {
 					AffineTransform3D[] transforms = new AffineTransform3D[tSize];
 					
 					//We don't drift correct single time point overlays
@@ -459,7 +459,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 					for (int t = 0; t < tSize; t++)
 						transforms[t] = source.getAffineTransform3D();
 					
-					int singleTimePoint = (source.getProperties().containsKey("SingleTimePointValue")) ? Integer.valueOf(source.getProperties().get("SingleTimePointValue")) : 0;
+					int singleTimePoint = source.getSingleTimePoint();
 					@SuppressWarnings( "unchecked" )
 					final MarsSingleTimePointN5Source<T> n5Source = new MarsSingleTimePointN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms, singleTimePoint);
 					

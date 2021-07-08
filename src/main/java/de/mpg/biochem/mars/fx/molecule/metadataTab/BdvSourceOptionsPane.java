@@ -337,9 +337,9 @@ public class BdvSourceOptionsPane extends VBox {
 		oneTimePointSwitch.selectedProperty().bindBidirectional(singleTimePoint);
 		singleTimePoint.addListener((observable, oldValue, newValue) -> {
 			if (newValue.booleanValue()) {
-				marsBdvSource.setProperty("SingleTimePoint", "true");
+				marsBdvSource.setSingleTimePointMode(true);
 			} else
-				marsBdvSource.setProperty("SingleTimePoint", "false");
+				marsBdvSource.setSingleTimePointMode(false);
 		});
 		
 		Label singleTimePointLabel = new Label("Single Time Point Overlay");
@@ -356,7 +356,7 @@ public class BdvSourceOptionsPane extends VBox {
 		tField = new TextField();
 		tField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource != null)
-				marsBdvSource.setProperty("SingleTimePointValue", tField.getText());
+				marsBdvSource.setSingleTimePoint(Integer.valueOf(tField.getText()));
 		});
 		tField.setPrefWidth(50);
 		tField.setMaxWidth(50);
@@ -427,17 +427,12 @@ public class BdvSourceOptionsPane extends VBox {
 				cField.setText(String.valueOf(marsBdvSource.getChannel()));
 				n5Dataset.setText(marsBdvSource.getN5Dataset());
 				
-				if (marsBdvSource.getProperties().containsKey("SingleTimePoint") && Boolean.valueOf(marsBdvSource.getProperties().get("SingleTimePoint")))
+				if (marsBdvSource.getSingleTimePointMode())
 					singleTimePoint.setValue(true);
 				else
 					singleTimePoint.setValue(false);
 
-				if (marsBdvSource.getProperties().containsKey("SingleTimePointValue"))
-					tField.setText(marsBdvSource.getProperties().get("SingleTimePointValue"));
-				else {
-					tField.setText("0");
-					marsBdvSource.setProperty("SingleTimePointValue", "0");
-				}
+				tField.setText(String.valueOf(marsBdvSource.getSingleTimePoint()));
 				
 				//Dataset information
 				if (marsBdvSource.getProperties().containsKey("info"))
