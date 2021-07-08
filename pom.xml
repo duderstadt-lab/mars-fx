@@ -10,7 +10,7 @@
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.1.3-SNAPSHOT</version>
+	<version>0.2.0</version>
 
 	<name>mars-fx</name>
 	<url>http://biochem.mpg.de/duderstadt/</url>
@@ -71,7 +71,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/duderstadt-lab/mars-fx</connection>
 		<developerConnection>scm:git:git@github.com:duderstadt-lab/mars-fx</developerConnection>
-		<tag>HEAD</tag>
+		<tag>mars-fx-0.2.0</tag>
 		<url>https://github.com/duderstadt-lab/mars-fx</url>
 	</scm>
 	<issueManagement>
