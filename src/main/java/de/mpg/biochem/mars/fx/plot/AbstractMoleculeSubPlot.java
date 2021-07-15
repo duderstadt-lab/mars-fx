@@ -132,10 +132,10 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 				MarsTable segmentsTable = molecule.getSegmentsTable(segmentTableName);
 				
 				for (int row=0;row<segmentsTable.getRowCount();row++) {
-					double x1 = segmentsTable.getValue("x1", row);
-					double y1 = segmentsTable.getValue("y1", row);
-					double x2 = segmentsTable.getValue("x2", row);
-					double y2 = segmentsTable.getValue("y2", row);
+					double x1 = segmentsTable.getValue("X1", row);
+					double y1 = segmentsTable.getValue("Y1", row);
+					double x2 = segmentsTable.getValue("X2", row);
+					double y2 = segmentsTable.getValue("Y2", row);
 					
 					if (!Double.isNaN(x1) && !Double.isNaN(y1) && !Double.isNaN(x2) && !Double.isNaN(y2)) {
 						segmentsDataSet.add(x1, y1);
