@@ -34,6 +34,7 @@ import bdv.util.volatiles.VolatileTypeMatcher;
 import mpicbg.spim.data.sequence.VoxelDimensions;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
+import net.imglib2.img.Img;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
@@ -67,6 +68,9 @@ public class MarsSingleTimePointN5Source< T extends NumericType< T > > extends A
 	@Override
 	public RandomAccessibleInterval< T > getSource( final int t, final int level )
 	{
+		if (images[ level ].numDimensions() == 2)
+			return Views.addDimension(images[level], 0, 0);
+		
 		RandomAccessibleInterval< T > img = Views.hyperSlice(images[ level ], images[ level ].numDimensions() - 1, singleTimePoint);
 		//For now we assume time is the last axis and reslice accordingly
 		if (img.numDimensions() > 2)
@@ -78,7 +82,10 @@ public class MarsSingleTimePointN5Source< T extends NumericType< T > > extends A
 	@Override
 	public synchronized void getSourceTransform( final int t, final int level, final AffineTransform3D transform )
 	{
-		transform.set( transforms[ singleTimePoint ] );
+		if (singleTimePoint >= transforms.length)
+			transform.set( transforms[ 0 ] );
+		else
+			transform.set( transforms[ singleTimePoint ] );
 	}
 
 	@Override

@@ -32,6 +32,9 @@ import bdv.util.AbstractSource;
 import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileTypeMatcher;
 import mpicbg.spim.data.sequence.VoxelDimensions;
+import net.imagej.Dataset;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -39,6 +42,7 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
+import net.imglib2.img.Img;
 
 import java.util.function.Supplier;
 
@@ -63,6 +67,13 @@ public class MarsN5Source< T extends NumericType< T > > extends AbstractSource< 
 	@Override
 	public RandomAccessibleInterval< T > getSource( final int t, final int level )
 	{
+		if (images[ level ].numDimensions() == 2 && t == 0)
+			return Views.addDimension(images[level], 0, 0);
+		else if (images[ level ].numDimensions() == 2 && t != 0)
+			return Views.addDimension(((Img) images[level]).factory().create(images[level]), 0, 0);
+		else if (images[level].dimension(images[level].numDimensions() - 1) <= t)
+			return Views.addDimension(((Img) images[level]).factory().create(images[level]), 0, 0);
+		
 		RandomAccessibleInterval< T > img = Views.hyperSlice(images[ level ], images[ level ].numDimensions() - 1, t);
 		//For now we assume time is the last axis and reslice accordingly
 		if (img.numDimensions() > 2)
@@ -74,7 +85,10 @@ public class MarsN5Source< T extends NumericType< T > > extends AbstractSource< 
 	@Override
 	public synchronized void getSourceTransform( final int t, final int level, final AffineTransform3D transform )
 	{
-		transform.set( transforms[ t ] );
+		if (t >= transforms.length)
+			transform.set( transforms[ 0 ] );
+		else
+			transform.set( transforms[ t ] );
 	}
 
 	@Override
