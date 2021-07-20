@@ -98,7 +98,9 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     private final Label label = new Label();
     private final Circle circle = new Circle();
 
-    private Point2D trackingDataPoint;
+    private Point2D trackingDataPointScreen;
+    private DataPoint positionPoint = null;
+    private DataPoint currentTrackingDataPoint;
 
     private final EventHandler<MouseEvent> trackMouseMoveHandler = this::updateToolTip;
 
@@ -110,7 +112,6 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
 
     private Predicate<MouseEvent> positionSelectionMouseFilter = defaultPositionSelectionMouseFilter;
 
-    private Point2D positionPoint = null;
     private ObservableList<Axis> omitAxisregion = FXCollections.observableArrayList();
 
     private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
@@ -129,8 +130,8 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     };
     
     private final EventHandler<KeyEvent> keyPressedHandler = event -> {
-        if (event.getCode() == KeyCode.P && trackingDataPoint != null) {
-        	positionSelected(trackingDataPoint.getX(), trackingDataPoint.getY());
+        if (event.getCode() == KeyCode.P && trackingDataPointScreen != null) {
+        	positionSelected(trackingDataPointScreen.getX(), trackingDataPointScreen.getY());
             event.consume();
         }
     };
@@ -260,11 +261,9 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     private void positionSelected(final MouseEvent event) {
     	if (datasetOptionsPane.getTrackingSeries() == null)
     		return;
-    	
-    	positionPoint = new Point2D(event.getX(), event.getY());
 
     	// pixel coordinates w.r.t. plot area
-        final Point2D positionPlotCoordinate = getChart().toPlotArea(positionPoint.getX(), positionPoint.getY());
+        final Point2D positionPlotCoordinate = getChart().toPlotArea(event.getX(), event.getY());
         
         Axis axis = ((XYChart) getChart()).getXAxis();
         double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
@@ -280,9 +279,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
         	getChart().fireEvent(new NewMetadataPositionEvent(poi));
         else if (datasetOptionsPane.isMoleculeIndicators())
         	getChart().fireEvent(new NewMoleculePositionEvent(poi));
-    	
-        positionPoint = null;
-        //installCursor();
+        
         event.consume();
     }
     
@@ -290,23 +287,27 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     	if (datasetOptionsPane.getTrackingSeries() == null)
     		return;
     	
+    	positionPoint = this.currentTrackingDataPoint;//new Point2D(event.getX(), event.getY());
+
     	// pixel coordinates w.r.t. plot area
-        final Point2D positionPlotCoordinate = getChart().toPlotArea(x, y);
+        //final Point2D positionPlotCoordinate = getChart().toPlotArea(positionPoint.getX(), positionPoint.getY());
         
-        Axis axis = ((XYChart) getChart()).getXAxis();
-        double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
-    	
-    	 MarsPosition poi = new MarsPosition("Position");
-         poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
-         poi.setPosition(xPosition);
-         
-         //We add the region to the metadata if those indicators are selected.
-         //Otherwise we add it for molecule
-         //If None is selected we add nothing.
-         if (datasetOptionsPane.isMetadataIndicators())
-         	getChart().fireEvent(new NewMetadataPositionEvent(poi));
-         else if (datasetOptionsPane.isMoleculeIndicators())
-         	getChart().fireEvent(new NewMoleculePositionEvent(poi));
+        //Axis axis = ((XYChart) getChart()).getXAxis();
+        //double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
+        if (positionPoint != null) {
+	        MarsPosition poi = new MarsPosition("Position");
+	        poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+	        poi.setPosition(positionPoint.x);
+	        
+	        //We add the region to the metadata if those indicators are selected.
+	        //Otherwise we add it for molecule
+	        //If None is selected we add nothing.
+	        if (datasetOptionsPane.isMetadataIndicators())
+	        	getChart().fireEvent(new NewMetadataPositionEvent(poi));
+	        else if (datasetOptionsPane.isMoleculeIndicators())
+	        	getChart().fireEvent(new NewMoleculePositionEvent(poi));
+        }
+        positionPoint = null;
     }
     
     private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
@@ -317,6 +318,10 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
         final Point2D mouseLocation = getLocationInPlotArea(event);
 
         Chart chart = getChart();
+        
+        if (chart.getDatasets().size() == 0)
+        	return null;
+        
         return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
     }
 
@@ -349,10 +354,13 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
      * @return return neighouring data points
      */
     private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
+    	if (dataSet == null)
+    		return null;
+    	
         int prevIndex = -1;
         int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
+        double prevX = Double.NEGATIVE_INFINITY;
+        double nextX = Double.POSITIVE_INFINITY;
 
         final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
         for (int i = 0, size = nDataCount; i < size; i++) {
@@ -375,6 +383,9 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
                 : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
                         dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
+        if (prevPoint == null || nextPoint == null)
+         	return null;
+        
         final double prevDistance = Math.abs(searchedX - prevPoint.x);
         final double nextDistance = Math.abs(searchedX - nextPoint.x);
 
@@ -397,25 +408,25 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     }
 
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index,
-                Double.toString(dataSet.get(DataSet.DIM_X, index)), Double.toString(dataSet.get(DataSet.DIM_Y, index)));
+    	return String.format("%s", dataSet.getName());
     }
 
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
         label.setText(formatDataPoint(dataPoint));
         final double width = label.prefWidth(-1);
         final double height = label.prefHeight(width);
-
+        
         final XYChart xyChart = (XYChart) getChart();
-
+        
         final double dataPointX = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
         final double dataPointY = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
 
         double xLocation = dataPointX + MarsPositionSelectionPlugin.LABEL_X_OFFSET;
         double yLocation = dataPointY - MarsPositionSelectionPlugin.LABEL_Y_OFFSET - height;
-
-        trackingDataPoint = new Point2D(dataPointX, dataPointY);
-
+        
+        trackingDataPointScreen = new Point2D(dataPointX, dataPointY);
+        currentTrackingDataPoint = dataPoint;
+        
         circle.setCenterX(dataPointX);
 	    circle.setCenterY(dataPointY);
 
@@ -427,7 +438,6 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
         }
         label.resizeRelocate(xLocation, yLocation, width, height);
     }
-    
 
     private void updateToolTip(final MouseEvent event) {
         final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
@@ -438,7 +448,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
             getChartChildren().remove(circle);
             return;
         }
-
+        
         updateLabel(event, plotAreaBounds, dataPoint);
         if (!getChartChildren().contains(label)) {
             getChartChildren().add(label);
