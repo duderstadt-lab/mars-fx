@@ -259,7 +259,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     }
 
     private void positionSelected(final MouseEvent event) {
-    	if (datasetOptionsPane.getTrackingSeries() == null)
+    	if (datasetOptionsPane.getTrackingSeries() == null || event == null)
     		return;
 
     	// pixel coordinates w.r.t. plot area
