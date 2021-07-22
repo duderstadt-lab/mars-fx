@@ -216,18 +216,16 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlot
     }
 
     private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {	
-    	//System.out.println("source: " + mouseEvent.getSource());
     	//Now sure why but sometimes this is fired...
     	// and these are null.. For the moment we add this work around
     	if (getChart() == null)
-    		return true;
+    		return false;
     	else if (getChart().getCanvas() == null)
-    		return true;
+    		return false;
     	
     	//This will prevent creation of a new position during drag events.
     	//drag events always originate from the Scene...
     	if (!(mouseEvent.getSource() instanceof HiddenSidesPane)) {
-    		//System.out.println("Event not from HiddenSidesPane");
     		return false;
     	}
     	
