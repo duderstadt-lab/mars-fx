@@ -166,10 +166,10 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements Ma
 				AffineTransform2D transform = new AffineTransform2D();
 				getCurrentTransform2D(transform);
 				
-				double x1 = molecule.getParameter("Dna_Top_x1"); 
-				double y1 = molecule.getParameter("Dna_Top_y1");
-				double x2 = molecule.getParameter("Dna_Bottom_x2"); 
-				double y2 = molecule.getParameter("Dna_Bottom_y2");
+				double x1 = molecule.getParameter("Dna_Top_X1"); 
+				double y1 = molecule.getParameter("Dna_Top_Y1");
+				double x2 = molecule.getParameter("Dna_Bottom_X2"); 
+				double y2 = molecule.getParameter("Dna_Bottom_Y2");
 					
 				if (Double.isNaN(x1) || Double.isNaN(y1) || Double.isNaN(x2) || Double.isNaN(y2))
 					return;
