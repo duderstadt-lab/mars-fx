@@ -27,6 +27,8 @@
  * #L%
  */
 package de.mpg.biochem.mars.fx.molecule;
+import java.util.LinkedHashMap;
+
 import org.controlsfx.control.textfield.CustomTextField;
 
 import com.jfoenix.controls.JFXCheckBox;
@@ -37,6 +39,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.util.EditCell;
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -143,15 +147,27 @@ public abstract class AbstractParametersTable {
     	deleteColumn.setSortable(false);
         parameterTable.getColumns().add(deleteColumn);
 
-        TableColumn<ParameterRow, String> ParameterColumn = new TableColumn<>("Parameter");
-        ParameterColumn.setCellValueFactory(parameterRow ->
-                new ReadOnlyObjectWrapper<>(parameterRow.getValue().getName())
+        TableColumn<ParameterRow, String> parameterColumn = new TableColumn<>("Parameter");
+        parameterColumn.setCellFactory(column -> EditCell.createStringEditCell());
+        parameterColumn.setOnEditCommit(event -> { 
+        	String newName = event.getNewValue();
+        	if (!record.hasParameter(newName)) {
+        		ParameterRow row = event.getRowValue();      		
+        		row.setName(newName);
+        	} else {
+        		((ParameterRow) event.getTableView().getItems()
+        	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
+        		parameterTable.refresh();
+        	}
+        });
+        parameterColumn.setCellValueFactory(parameterRow ->
+        	new ReadOnlyObjectWrapper<>(parameterRow.getValue().getName())
         );
-        ParameterColumn.setSortable(false);
-        ParameterColumn.setPrefWidth(100);
-        ParameterColumn.setMinWidth(100);
-        ParameterColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
-        parameterTable.getColumns().add(ParameterColumn);
+        parameterColumn.setSortable(false);
+        parameterColumn.setPrefWidth(100);
+        parameterColumn.setMinWidth(100);
+        parameterColumn.setStyle( "-fx-alignment: CENTER-LEFT;");
+        parameterTable.getColumns().add(parameterColumn);
         
         TableColumn<ParameterRow, String> valueColumn = new TableColumn<>("Value");
         valueColumn.setCellValueFactory(param -> {
@@ -367,6 +383,31 @@ public abstract class AbstractParametersTable {
     	
     	public String getName() {
     		return parameter;
+    	}
+    	
+    	public void setName(String name) {
+    		if (parameter.equals(name))
+    			return;
+    		
+    		//We need to rebuild the map to maintain the order in the table
+    		LinkedHashMap<String, Object> allParameters = new LinkedHashMap<String, Object>();
+    		for (String key: record.getParameters().keySet()) {
+    			if (key.equals(parameter)) 
+    				allParameters.put(name, getValue());
+    			else
+    				allParameters.put(key, record.getParameters().get(key));
+    		}
+    		record.removeAllParameters();
+    		this.parameter = name;
+    		
+    		for (String key : allParameters.keySet()) {
+    			if (allParameters.get(key) instanceof Double)
+    				record.setParameter(key, (Double) allParameters.get(key));
+    			else if (allParameters.get(key) instanceof Boolean)
+    				record.setParameter(key, (Boolean) allParameters.get(key));
+    			else
+    				record.setParameter(key, (String) allParameters.get(key));
+    		}
     	}
     	
     	public int getType() {
