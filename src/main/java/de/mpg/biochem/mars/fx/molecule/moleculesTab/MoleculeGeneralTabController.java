@@ -207,6 +207,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
     	VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
     	notesTextArea.setMinHeight(150.0);
     	notesTextArea.setPromptText("none");
+    	notesTextArea.setWrapText(true);
     	vBox.getChildren().add(notesTextArea);
     	
     	rootPane.setFitToWidth(true);
