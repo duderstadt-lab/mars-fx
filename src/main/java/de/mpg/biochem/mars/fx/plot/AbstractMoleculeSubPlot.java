@@ -109,7 +109,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
 		
-		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
+		if (getDataTable() == null || !getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
 			return;
 		
 		//Check if there are any segment table with these columns
