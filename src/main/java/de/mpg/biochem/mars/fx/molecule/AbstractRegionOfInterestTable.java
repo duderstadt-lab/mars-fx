@@ -27,6 +27,9 @@
  * #L%
  */
 package de.mpg.biochem.mars.fx.molecule;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
@@ -126,12 +129,24 @@ public abstract class AbstractRegionOfInterestTable {
         nameColumn.setOnEditCommit(event -> { 
         	String newRegionName = event.getNewValue();
         	if (!record.hasRegion(newRegionName)) {
-        		MarsRegion roi = event.getRowValue();
-        		String oldName = roi.getName();
-        		record.removeRegion(oldName);
+        		MarsRegion region = event.getRowValue();
+        		String oldName = region.getName();
+        		region.setName(newRegionName);
         		
-        		roi.setName(newRegionName);
-        		record.putRegion(roi);
+        		//We need to rebuild the map to maintain the order in the table
+        		List<MarsRegion> regionList = new ArrayList<MarsRegion>();
+        		for (String key: record.getRegionNames()) {
+        			if (key.equals(oldName)) 
+        				regionList.add(region);
+        			else
+        				regionList.add(record.getRegions().get(key));
+        		}
+        		record.removeAllRegions();
+        		
+        		for (MarsRegion item : regionList)
+        			record.putRegion(item);
+        		
+        		fireIndicatorChangedEvent();
         	} else {
         		((MarsRegion) event.getTableView().getItems()
         	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());

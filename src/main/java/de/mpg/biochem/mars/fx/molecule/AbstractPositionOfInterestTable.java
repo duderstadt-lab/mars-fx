@@ -28,6 +28,8 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
@@ -131,10 +133,21 @@ public abstract class AbstractPositionOfInterestTable {
         	if (!record.hasPosition(newPositionName)) {
         		MarsPosition poi = event.getRowValue();
         		String oldName = poi.getName();
-        		record.removePosition(oldName);
-        		
         		poi.setName(newPositionName);
-        		record.putPosition(poi);
+        		
+        		//We need to rebuild the map to maintain the order in the table
+        		List<MarsPosition> positionList = new ArrayList<MarsPosition>();
+        		for (String key: record.getPositionNames()) {
+        			if (key.equals(oldName)) 
+        				positionList.add(poi);
+        			else
+        				positionList.add(record.getPosition(key));
+        		}
+        		record.removeAllPositions();
+        		
+        		for (MarsPosition item : positionList)
+        			record.putPosition(item);
+        		
         		fireIndicatorChangedEvent();
         	} else {
         		((MarsPosition) event.getTableView().getItems()

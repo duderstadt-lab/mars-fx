@@ -28,7 +28,9 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -51,6 +53,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.util.EditCell;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.util.MarsPosition;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.application.Platform;
@@ -168,14 +171,24 @@ public class BdvViewTable implements MetadataEventHandler {
         
         nameColumn.setCellFactory(column -> EditCell.createStringEditCell());
         nameColumn.setOnEditCommit(event -> { 
-        	String newRegionName = event.getNewValue();
-        	if (!marsImageMetadata.hasBdvSource(newRegionName)) {
+        	String newBdvName = event.getNewValue();
+        	if (!marsImageMetadata.hasBdvSource(newBdvName)) {
         		MarsBdvSource bdvSource = event.getRowValue();
         		String oldName = bdvSource.getName();
-        		marsImageMetadata.removeBdvSource(oldName);
+        		bdvSource.setName(newBdvName);
         		
-        		bdvSource.setName(newRegionName);
-        		marsImageMetadata.putBdvSource(bdvSource);
+        		//We need to rebuild the map to maintain the order in the table
+        		List<MarsBdvSource> bdvSourceList = new ArrayList<MarsBdvSource>();
+        		for (String key: marsImageMetadata.getBdvSourceNames()) {
+        			if (key.equals(oldName)) 
+        				bdvSourceList.add(bdvSource);
+        			else
+        				bdvSourceList.add(marsImageMetadata.getBdvSource(key));
+        		}
+        		marsImageMetadata.removeAllBdvSources();
+        		
+        		for (MarsBdvSource item : bdvSourceList)
+        			marsImageMetadata.putBdvSource(item);
         	} else {
         		((MarsBdvSource) event.getTableView().getItems()
         	            .get(event.getTablePosition().getRow())).setName(event.getOldValue());
