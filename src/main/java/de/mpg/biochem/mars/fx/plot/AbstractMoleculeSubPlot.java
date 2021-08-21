@@ -176,6 +176,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			record = ((AbstractMoleculePlotPane<Molecule, SubPlot>)plotPane).getArchive().getMetadata(molecule.getMetadataUID());
 		} else
 			return;
+		
+		if (record == null)
+			return;
 			
 		ArrayList<String> regionNames = new ArrayList<>(record.getRegionNames());
 		
