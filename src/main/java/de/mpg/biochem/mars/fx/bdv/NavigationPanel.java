@@ -36,9 +36,15 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 
 import java.awt.Color;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import net.imagej.ImgPlus;
 import net.miginfocom.swing.MigLayout;
 
 import static bdv.viewer.Interpolation.NEARESTNEIGHBOR;
@@ -99,12 +105,9 @@ public class NavigationPanel extends JPanel
 	  		int width = (int)dialog.getNextNumber();
 	  		int height = (int)dialog.getNextNumber();
 	  		
-	  		ImagePlus ip = marsBdvFrame.exportView(x0, y0, width, height);
-	  		
-	  		//Now show it!
-	  		ip.show();
-	  		
-	  		IJ.run(ip, "Enhance Contrast...", "saturated=0.35");
+	  		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+	  		backgroundThread.submit(() -> marsBdvFrame.exportView(x0, y0, width, height));
+	  		backgroundThread.shutdown();
 		});
 		
 		help.addActionListener( e -> marsBdvFrame.showHelp(true));

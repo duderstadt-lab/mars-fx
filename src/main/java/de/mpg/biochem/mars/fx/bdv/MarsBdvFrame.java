@@ -83,10 +83,15 @@ import de.mpg.biochem.mars.molecule.*;
 import ij.IJ;
 import ij.ImagePlus;
 import net.imglib2.util.Util;
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.Cursor;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.img.ImgView;
+import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
@@ -114,6 +119,7 @@ import net.imglib2.type.volatiles.VolatileUnsignedShortType;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
+import org.scijava.ui.UIService;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
@@ -130,6 +136,9 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	
 	@Parameter
     protected MarsBdvCardService marsBdvCardService;
+	
+	@Parameter
+	protected UIService uiService;
 	
 	protected final JFrame frame;
 	
@@ -375,20 +384,19 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		viewer.state().setViewerTransform(viewerTransform);
 	}
 	
-	public ImagePlus exportView(int x0, int y0, int width, int height) {
+	public void exportView(int x0, int y0, int width, int height) {
 		int numSources = bdvSources.get(metaUID).size();
 		
 		double xCenter = getXLocation();
 		double yCenter = getYLocation();
 		
 		if (Double.isNaN(xCenter) || Double.isNaN(yCenter))
-			return new ImagePlus();
+			return;
 		
 		int TOP_left_x0 = (int)xCenter + x0;
 		int TOP_left_y0 = (int)yCenter + y0;
-		
-		ImagePlus[] images = new ImagePlus[numSources];
-		
+
+		List<RandomAccessibleInterval< T >> finalImages = new ArrayList<RandomAccessibleInterval< T >>();
 		for ( int i = 0; i < numSources; i++ ) {
 			ArrayList< RandomAccessibleInterval< T > > raiList = new ArrayList< RandomAccessibleInterval< T > >(); 
 			Source<T> bdvSource = bdvSources.get(metaUID).get(i);
@@ -404,18 +412,25 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				final AffineRandomAccessible< T, AffineGet > rai = RealViews.affine( raiRaw, affine );
 				RandomAccessibleInterval< T > view = Views.interval( Views.raster( rai ), new long[] { TOP_left_x0, TOP_left_y0, 0 }, new long[]{ TOP_left_x0 + width, TOP_left_y0 + height, 0 } );
 				
-				raiList.add( view );
+				raiList.add(Views.hyperSlice(view, 2, 0));
 			}
-			RandomAccessibleInterval< T > raiStack = Views.stack( raiList );
-			images[i] = ImageJFunctions.wrap( raiStack, "channel " + i );
+			
+			finalImages.add(Views.addDimension(Views.stack( raiList ), 0, 0));
 		}
-		if (numSources == 1)
-			return images[0];
 		
-		//image arrays, boolean keep original.
-		ImagePlus ip = ij.plugin.RGBStackMerge.mergeChannels(images, false);
-		ip.setTitle("molecule " + molecule.getUID());
-		return ip;
+		String title = (molecule != null) ? "molecule " + molecule.getUID() : "BDV export (" + xCenter + ", " + yCenter + ")" ;
+		
+		for (RandomAccessibleInterval< T > image : finalImages)
+			System.out.println(image.numDimensions());
+		
+		AxisType[] axInfo = new AxisType[4];
+		axInfo[0] = Axes.X;
+		axInfo[1] = Axes.Y; 
+		axInfo[2] = Axes.TIME;
+		axInfo[3] = Axes.CHANNEL;
+		
+		ImgPlus<T> img = new ImgPlus<T>(ImgView.wrap(Views.concatenate(3, finalImages)), title,  axInfo );
+		uiService.show( img );
 	}
 	
 	private List<Source<T>> loadSources(MarsMetadata meta) throws IOException {
