@@ -101,6 +101,9 @@ import net.imglib2.type.numeric.NumericType;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 import net.imglib2.IterableInterval;
+import net.imglib2.img.Img;
+import net.imglib2.loops.LoopBuilder;
+import net.imglib2.type.Type;
 import mpicbg.spim.data.registration.*;
 import mpicbg.spim.data.sequence.ViewId;
 import net.imglib2.realtransform.AffineGet;
@@ -149,6 +152,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	protected final SharedQueue sharedQueue;
 	
 	protected Map<String, List<Source<T>>> bdvSources;
+	protected Map<String, List<Source<T>>> bdvSourcesForExport;
 	protected Map<String, SourceDisplaySettings> displaySettings;
 	protected Map<String, N5Reader> n5Readers;
 	protected List<MarsBdvCard> cards;
@@ -189,6 +193,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
+		bdvSourcesForExport = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		displaySettings = new HashMap<String, SourceDisplaySettings>();
 		
@@ -232,6 +237,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		System.setProperty( "apple.laf.useScreenMenuBar", "true" );
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
+		bdvSourcesForExport = new HashMap<String, List<Source<T>>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		displaySettings = new HashMap<String, SourceDisplaySettings>();
 		
@@ -355,7 +361,28 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	private void createView(MarsMetadata meta) {
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
-				bdvSources.put(meta.getUID(), loadSources(meta));
+				List<Source<T>> sources = new ArrayList<Source<T>>();
+				List<Source<T>> exportSources = new ArrayList<Source<T>>();
+				
+				for (MarsBdvSource marsSource : meta.getBdvSources()) {
+					if (marsSource.isN5()) {
+						if (useVolatile) {
+							sources.add(loadN5VolatileSource(marsSource, meta));
+							exportSources.add(loadN5Source(marsSource, meta));
+						} else {
+							Source<T> source = loadN5Source(marsSource, meta);
+							sources.add(source);
+							exportSources.add(source);
+						}
+					} else {
+						Source<T> source = loadAsSpimDataMinimal(marsSource, meta);
+						sources.add(source);
+						exportSources.add(source);
+					}
+				}
+				
+				bdvSources.put(meta.getUID(), sources);
+				bdvSourcesForExport.put(meta.getUID(), exportSources);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -385,7 +412,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 	}
 	
 	public void exportView(int x0, int y0, int width, int height) {
-		int numSources = bdvSources.get(metaUID).size();
+		int numSources = bdvSourcesForExport.get(metaUID).size();
 		
 		double xCenter = getXLocation();
 		double yCenter = getYLocation();
@@ -399,7 +426,7 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		List<RandomAccessibleInterval< T >> finalImages = new ArrayList<RandomAccessibleInterval< T >>();
 		for ( int i = 0; i < numSources; i++ ) {
 			ArrayList< RandomAccessibleInterval< T > > raiList = new ArrayList< RandomAccessibleInterval< T > >(); 
-			Source<T> bdvSource = bdvSources.get(metaUID).get(i);
+			Source<T> bdvSource = bdvSourcesForExport.get(metaUID).get(i);
 			
 			for ( int t = 0; t < numTimePoints; t++ ) {
 
@@ -420,117 +447,167 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		
 		String title = (molecule != null) ? "molecule " + molecule.getUID() : "BDV export (" + xCenter + ", " + yCenter + ")" ;
 		
-		for (RandomAccessibleInterval< T > image : finalImages)
-			System.out.println(image.numDimensions());
-		
 		AxisType[] axInfo = new AxisType[4];
 		axInfo[0] = Axes.X;
 		axInfo[1] = Axes.Y; 
 		axInfo[2] = Axes.TIME;
 		axInfo[3] = Axes.CHANNEL;
+		final RandomAccessibleInterval<T> rai = Views.concatenate(3, finalImages);
+		final Img<T> img = Util.getSuitableImgFactory(rai, Util.getTypeFromInterval(rai)).create(rai);
+		LoopBuilder.setImages(img, rai).multiThreaded().forEachPixel(Type::set);
 		
-		ImgPlus<T> img = new ImgPlus<T>(ImgView.wrap(Views.concatenate(3, finalImages)), title,  axInfo );
-		uiService.show( img );
+		final ImgPlus<T> imgPlus = new ImgPlus<T>(img, title,  axInfo );
+		uiService.show( imgPlus );
+  		
+  		IJ.run(IJ.getImage(), "Enhance Contrast...", "saturated=0.35");
 	}
 	
-	private List<Source<T>> loadSources(MarsMetadata meta) throws IOException {
-		List<Source<T>> sources = new ArrayList<Source<T>>();
-		for (MarsBdvSource source : meta.getBdvSources()) {
-			if (source.isN5()) {
-				N5Reader reader;
-				if (n5Readers.containsKey(source.getPath())) { 
-					reader = n5Readers.get(source.getPath());
-				} else {
-					reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
-					n5Readers.put(source.getPath(), reader);
-				}
-				
-				@SuppressWarnings( "rawtypes" )
-				final RandomAccessibleInterval wholeImage = (useVolatile) ? 
-						N5Utils.openVolatile( reader, source.getN5Dataset() ) :
-						N5Utils.open( reader, source.getN5Dataset() );
-						
-				//wholeImage should be XYT or XYCT. If XYCT, we hyperSlice to get one channel.
-				//XYZCT should also be supported
-				int dims = wholeImage.numDimensions();
-				
-				@SuppressWarnings( "rawtypes" )
-				final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(wholeImage, wholeImage.numDimensions() - 2, source.getChannel()) : wholeImage;
-
-				int tSize = (int) image.dimension(image.numDimensions() - 1);
-				
-				if (tSize > numTimePoints)
-					numTimePoints = tSize;
-				
-				@SuppressWarnings( "rawtypes" )
-				final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
-				images[0] = image;
-
-				if (source.getSingleTimePointMode()) {
-					AffineTransform3D[] transforms = new AffineTransform3D[tSize];
-					
-					//We don't drift correct single time point overlays
-					//Drift should be corrected against them
-					for (int t = 0; t < tSize; t++)
-						transforms[t] = source.getAffineTransform3D();
-					
-					int singleTimePoint = source.getSingleTimePoint();
-					@SuppressWarnings( "unchecked" )
-					final MarsSingleTimePointN5Source<T> n5Source = new MarsSingleTimePointN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms, singleTimePoint);
-					
-					if (useVolatile)
-						sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
-					else
-						sources.add(n5Source);
-				} else {
-					AffineTransform3D[] transforms = new AffineTransform3D[tSize];
-					
-					for (int t = 0; t < tSize; t++) {
-						if (source.getCorrectDrift()) {
-							double dX = meta.getPlane(0, 0, 0, t).getXDrift();
-							double dY = meta.getPlane(0, 0, 0, t).getYDrift();
-							transforms[t] = source.getAffineTransform3D(dX, dY);
-						} else
-							transforms[t] = source.getAffineTransform3D();
-					}
-					
-					@SuppressWarnings( "unchecked" )
-					final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
-					
-					if (useVolatile)
-						sources.add((Source<T>) n5Source.asVolatile(sharedQueue));
-					else
-						sources.add(n5Source);
-				}
-				
-			} else {
-				SpimDataMinimal spimData;
-				try {
-					spimData = new XmlIoSpimDataMinimal().load( source.getPath() );
-					
-					//Add transforms to spimData...
-					Map< ViewId, ViewRegistration > registrations = spimData.getViewRegistrations().getViewRegistrations();
-						
-					for (ViewId id : registrations.keySet()) {
-						if (source.getCorrectDrift()) {
-							double dX = meta.getPlane(0, 0, 0, id.getTimePointId()).getXDrift();
-							double dY = meta.getPlane(0, 0, 0, id.getTimePointId()).getYDrift();
-							registrations.get(id).getModel().set(source.getAffineTransform3D(dX, dY));
-						} else
-							registrations.get(id).getModel().set(source.getAffineTransform3D());
-					}
-					
-					if (spimData.getSequenceDescription().getTimePoints().size() > numTimePoints)
-						numTimePoints = spimData.getSequenceDescription().getTimePoints().size();
-					
-					sources.add(new SpimSource<T>(spimData, 0, source.getName()));
-				} catch (SpimDataException e) {
-					e.printStackTrace();
-				}
-			}
+	private Source<T> loadN5Source(MarsBdvSource source, MarsMetadata meta) throws IOException {
+		N5Reader reader;
+		if (n5Readers.containsKey(source.getPath())) { 
+			reader = n5Readers.get(source.getPath());
+		} else {
+			reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
+			n5Readers.put(source.getPath(), reader);
 		}
 		
-		return sources;
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval wholeImage = N5Utils.open( reader, source.getN5Dataset() );
+				
+		//wholeImage should be XYT or XYCT. If XYCT, we hyperSlice to get one channel.
+		//XYZCT should also be supported
+		int dims = wholeImage.numDimensions();
+		
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(wholeImage, wholeImage.numDimensions() - 2, source.getChannel()) : wholeImage;
+
+		int tSize = (int) image.dimension(image.numDimensions() - 1);
+		
+		if (tSize > numTimePoints)
+			numTimePoints = tSize;
+		
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
+		images[0] = image;
+
+		if (source.getSingleTimePointMode()) {
+			AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+			
+			//We don't drift correct single time point overlays
+			//Drift should be corrected against them
+			for (int t = 0; t < tSize; t++)
+				transforms[t] = source.getAffineTransform3D();
+			
+			int singleTimePoint = source.getSingleTimePoint();
+			@SuppressWarnings( "unchecked" )
+			final MarsSingleTimePointN5Source<T> n5Source = new MarsSingleTimePointN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms, singleTimePoint);
+			
+			return n5Source;
+		} else {
+			AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+			
+			for (int t = 0; t < tSize; t++) {
+				if (source.getCorrectDrift()) {
+					double dX = meta.getPlane(0, 0, 0, t).getXDrift();
+					double dY = meta.getPlane(0, 0, 0, t).getYDrift();
+					transforms[t] = source.getAffineTransform3D(dX, dY);
+				} else
+					transforms[t] = source.getAffineTransform3D();
+			}
+			
+			@SuppressWarnings( "unchecked" )
+			final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
+			
+			return n5Source;
+		}
+		
+	}
+	
+	private Source<T> loadN5VolatileSource(MarsBdvSource source, MarsMetadata meta) throws IOException {
+		N5Reader reader;
+		if (n5Readers.containsKey(source.getPath())) { 
+			reader = n5Readers.get(source.getPath());
+		} else {
+			reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
+			n5Readers.put(source.getPath(), reader);
+		}
+		
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval wholeImage = N5Utils.openVolatile( reader, source.getN5Dataset() );
+				
+		//wholeImage should be XYT or XYCT. If XYCT, we hyperSlice to get one channel.
+		//XYZCT should also be supported
+		int dims = wholeImage.numDimensions();
+		
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(wholeImage, wholeImage.numDimensions() - 2, source.getChannel()) : wholeImage;
+
+		int tSize = (int) image.dimension(image.numDimensions() - 1);
+		
+		if (tSize > numTimePoints)
+			numTimePoints = tSize;
+		
+		@SuppressWarnings( "rawtypes" )
+		final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
+		images[0] = image;
+
+		if (source.getSingleTimePointMode()) {
+			AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+			
+			//We don't drift correct single time point overlays
+			//Drift should be corrected against them
+			for (int t = 0; t < tSize; t++)
+				transforms[t] = source.getAffineTransform3D();
+			
+			int singleTimePoint = source.getSingleTimePoint();
+			@SuppressWarnings( "unchecked" )
+			final MarsSingleTimePointN5Source<T> n5Source = new MarsSingleTimePointN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms, singleTimePoint);
+			
+			return (Source<T>) n5Source.asVolatile(sharedQueue);
+		} else {
+			AffineTransform3D[] transforms = new AffineTransform3D[tSize];
+			
+			for (int t = 0; t < tSize; t++) {
+				if (source.getCorrectDrift()) {
+					double dX = meta.getPlane(0, 0, 0, t).getXDrift();
+					double dY = meta.getPlane(0, 0, 0, t).getYDrift();
+					transforms[t] = source.getAffineTransform3D(dX, dY);
+				} else
+					transforms[t] = source.getAffineTransform3D();
+			}
+			
+			@SuppressWarnings( "unchecked" )
+			final MarsN5Source<T> n5Source = new MarsN5Source<>((T)Util.getTypeFromInterval(image), source.getName(), images, transforms);
+			
+			return (Source<T>) n5Source.asVolatile(sharedQueue);
+		}
+	}
+	
+	private Source<T> loadAsSpimDataMinimal(MarsBdvSource source, MarsMetadata meta) {
+		SpimDataMinimal spimData;
+		try {
+			spimData = new XmlIoSpimDataMinimal().load( source.getPath() );
+			
+			//Add transforms to spimData...
+			Map< ViewId, ViewRegistration > registrations = spimData.getViewRegistrations().getViewRegistrations();
+				
+			for (ViewId id : registrations.keySet()) {
+				if (source.getCorrectDrift()) {
+					double dX = meta.getPlane(0, 0, 0, id.getTimePointId()).getXDrift();
+					double dY = meta.getPlane(0, 0, 0, id.getTimePointId()).getYDrift();
+					registrations.get(id).getModel().set(source.getAffineTransform3D(dX, dY));
+				} else
+					registrations.get(id).getModel().set(source.getAffineTransform3D());
+			}
+			
+			if (spimData.getSequenceDescription().getTimePoints().size() > numTimePoints)
+				numTimePoints = spimData.getSequenceDescription().getTimePoints().size();
+			
+			return new SpimSource<T>(spimData, 0, source.getName());
+		} catch (SpimDataException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 	
 	public void showHelp(boolean showHelp) {
