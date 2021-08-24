@@ -28,36 +28,15 @@
  */
 package de.mpg.biochem.mars.fx.dialogs;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
-import org.controlsfx.control.ToggleSwitch;
-
-import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
-import javafx.scene.control.Label;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 
-import javafx.scene.control.ComboBox;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.geometry.HPos;
+import javafx.scene.text.Text;
+import javafx.scene.layout.AnchorPane;
+import javafx.geometry.Insets;
 
 /**
  * Rover error dialog.
@@ -75,6 +54,15 @@ public class RoverErrorDialog extends Alert {
 	    imageView.setFitHeight(80);
 	    setGraphic(imageView);
 	    setHeaderText(null);
+	    setResizable(true);
 	    setContentText(message);
+	    Text text = new Text(message);
+	    text.setWrappingWidth(400);
+	    final AnchorPane anchorPane = new AnchorPane();
+	    anchorPane.setPadding(new Insets(15, 25, 15, 15));
+	    AnchorPane.setTopAnchor(text, 0.0);
+	    AnchorPane.setLeftAnchor(text, 0.0);
+	    anchorPane.getChildren().add(text);
+	    getDialogPane().setContent(anchorPane);
 	}
 }
