@@ -77,31 +77,41 @@ import bdv.tools.HelpDialog;
 import bdv.util.volatiles.SharedQueue;
 import mpicbg.spim.data.SpimDataException;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import ij.IJ;
 import ij.ImagePlus;
+import javafx.application.Platform;
 import net.imglib2.util.Util;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.Cursor;
+import net.imglib2.Dimensions;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImg;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.img.list.ListImgFactory;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealRandomAccessible;
+import net.imglib2.exception.IncompatibleTypeException;
 import net.imglib2.img.ImgView;
-import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
+import net.imglib2.util.Fraction;
+import net.imglib2.util.Intervals;
 import net.imglib2.util.LinAlgHelpers;
 import net.imglib2.view.Views;
 import net.imglib2.IterableInterval;
-import net.imglib2.img.Img;
 import net.imglib2.loops.LoopBuilder;
 import net.imglib2.type.Type;
 import mpicbg.spim.data.registration.*;
@@ -115,9 +125,13 @@ import net.imglib2.histogram.DiscreteFrequencyDistribution;
 import net.imglib2.histogram.Real1dBinMapper;
 
 import bdv.util.Bounds;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.volatiles.VolatileUnsignedShortType;
+
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
 
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.scijava.Context;
@@ -423,6 +437,19 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 		int TOP_left_x0 = (int)xCenter + x0;
 		int TOP_left_y0 = (int)yCenter + y0;
 
+		if (bdvSourcesForExport.get(metaUID).stream().map(source -> source.getType().getClass()).distinct().count()>1) {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					RoverErrorDialog alert = new RoverErrorDialog(((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getNode().getScene().getWindow(), 
+							"Could not create composite view because the sources are not all the same type (uint16, float32, ...).");
+					alert.show();
+				}
+			});
+			
+			return;
+	    }
+		
 		List<RandomAccessibleInterval< T >> finalImages = new ArrayList<RandomAccessibleInterval< T >>();
 		for ( int i = 0; i < numSources; i++ ) {
 			ArrayList< RandomAccessibleInterval< T > > raiList = new ArrayList< RandomAccessibleInterval< T > >(); 
@@ -442,24 +469,47 @@ public class MarsBdvFrame< T extends NumericType< T > & NativeType< T > > extend
 				raiList.add(Views.hyperSlice(view, 2, 0));
 			}
 			
-			finalImages.add(Views.addDimension(Views.stack( raiList ), 0, 0));
+			if (numSources > 1)
+				finalImages.add(Views.addDimension(Views.stack( raiList ), 0, 0));
+			else
+				finalImages.add(Views.stack( raiList ));
 		}
 		
 		String title = (molecule != null) ? "molecule " + molecule.getUID() : "BDV export (" + xCenter + ", " + yCenter + ")" ;
 		
-		AxisType[] axInfo = new AxisType[4];
-		axInfo[0] = Axes.X;
-		axInfo[1] = Axes.Y; 
-		axInfo[2] = Axes.TIME;
-		axInfo[3] = Axes.CHANNEL;
-		final RandomAccessibleInterval<T> rai = Views.concatenate(3, finalImages);
+		AxisType[] axInfo = (numSources > 1) ? new AxisType[] {Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL} : new AxisType[] {Axes.X, Axes.Y, Axes.TIME};
+		
+		final RandomAccessibleInterval<T> rai = (numSources > 1) ? Views.concatenate(3, finalImages) : finalImages.get(0);
+		
 		final Img<T> img = Util.getSuitableImgFactory(rai, Util.getTypeFromInterval(rai)).create(rai);
 		LoopBuilder.setImages(img, rai).multiThreaded().forEachPixel(Type::set);
 		
 		final ImgPlus<T> imgPlus = new ImgPlus<T>(img, title,  axInfo );
-		uiService.show( imgPlus );
-  		
-  		IJ.run(IJ.getImage(), "Enhance Contrast...", "saturated=0.35");
+		
+		//Make sure these are run on the Swing EDT
+		SwingUtilities.invokeLater( () -> {
+			uiService.show( imgPlus );
+			IJ.run(IJ.getImage(), "Enhance Contrast...", "saturated=0.35");
+		});
+	}
+	
+	/**
+	 * The possible java array size is JVM dependent an actually
+	 * slightly below Integer.MAX_VALUE. This is the same MAX_ARRAY_SIZE
+	 * as used for example in ArrayList in OpenJDK8.
+	 */
+	private static final int MAX_ARRAY_SIZE = Integer.MAX_VALUE - 8;
+	
+	public static < T extends NativeType< T > > ImgFactory< T > getArrayOrCellImgFactory( final Dimensions targetSize, final int targetCellSize, final T type )
+	{
+		Fraction entitiesPerPixel = type.getEntitiesPerPixel();
+		final long numElements = Intervals.numElements( targetSize );
+		final long numEntities = entitiesPerPixel.mulCeil( numElements );
+		if ( numElements <= Integer.MAX_VALUE && numEntities <= MAX_ARRAY_SIZE )
+			return new ArrayImgFactory<>( type );
+		final int maxCellSize = ( int ) Math.pow( Math.min( MAX_ARRAY_SIZE / entitiesPerPixel.getRatio(), Integer.MAX_VALUE ), 1.0 / targetSize.numDimensions() );
+		final int cellSize = Math.min( targetCellSize, maxCellSize );
+		return new CellImgFactory<>( type, cellSize );
 	}
 	
 	private Source<T> loadN5Source(MarsBdvSource source, MarsMetadata meta) throws IOException {
