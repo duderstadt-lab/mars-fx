@@ -79,8 +79,8 @@
 		<url>https://github.com/duderstadt-lab/mars-fx/issues</url>
 	</issueManagement>
 	<ciManagement>
-		<system>Travis CI</system>
-		<url>https://travis-ci.com/duderstadt-lab/mars-fx</url>
+		<system>GitHub Actions</system>
+		<url>https://github.com/duderstadt-lab/mars-fx/actions</url>
 	</ciManagement>
 
 	<properties>
