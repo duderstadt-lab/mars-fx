@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
@@ -13,11 +14,12 @@
 	<version>0.2.1-SNAPSHOT</version>
 
 	<name>mars-fx</name>
-	<url>http://biochem.mpg.de/duderstadt/</url>
+	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
+	<url>https://github.com/duderstadt-lab/mars-fx</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>Max Planck Institute of Biochemistry</name>
-		<url>http://biochem.mpg.de/duderstadt/</url>
+		<url>https://biochem.mpg.de/</url>
 	</organization>
 	<licenses>
 		<license>
@@ -31,7 +33,7 @@
 		<developer>
 			<id>karlduderstadt</id>
 			<name>Karl Duderstadt</name>
-			<url>http://biochem.mpg.de/duderstadt/</url>
+			<url>https://biochem.mpg.de/duderstadt/</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -59,12 +61,17 @@
 		<contributor>
 			<name>Thomas Retzer</name>
 		</contributor>
+		<contributor>
+			<name>Curtis Rueden</name>
+			<url>https://imagej.net/people/ctrueden</url>
+			<properties><id>ctrueden</id></properties>
+		</contributor>
 	</contributors>
 
-    <mailingLists>
+	<mailingLists>
 		<mailingList>
 			<name>Duderstadt Lab</name>
-			<archive>https://wiki-laue.biochem.mpg.de</archive>
+			<archive>https://wiki-laue.biochem.mpg.de/</archive>
 		</mailingList>
 	</mailingLists>
 
@@ -88,52 +95,50 @@
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.excludes>**/resources/**</license.excludes>
-		
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
 		<mars-core.version>1.0.0-beta-18</mars-core.version>
+
+		<chartfx.version>8.1.5</chartfx.version>
+		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
+		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
+		<chartfx-math.version>${chartfx.version}</chartfx-math.version>
+
+		<flexmark.version>0.62.2</flexmark.version>
+		<flexmark-ext-anchorlink.version>${flexmark.version}</flexmark-ext-anchorlink.version>
+		<flexmark-ext-autolink.version>${flexmark.version}</flexmark-ext-autolink.version>
+		<flexmark-ext-definition.version>${flexmark.version}</flexmark-ext-definition.version>
+		<flexmark-ext-footnotes.version>${flexmark.version}</flexmark-ext-footnotes.version>
+		<flexmark-ext-gfm-strikethrough.version>${flexmark.version}</flexmark-ext-gfm-strikethrough.version>
+		<flexmark-ext-tables.version>${flexmark.version}</flexmark-ext-tables.version>
+		<flexmark-ext-toc.version>${flexmark.version}</flexmark-ext-toc.version>
+		<flexmark-ext-gitlab.version>${flexmark.version}</flexmark-ext-gitlab.version>
+		<flexmark-util-ast.version>${flexmark.version}</flexmark-util-ast.version>
+		<flexmark-util-collection.version>${flexmark.version}</flexmark-util-collection.version>
+		<flexmark-util-html.version>${flexmark.version}</flexmark-util-html.version>
+		<flexmark-util-misc.version>${flexmark.version}</flexmark-util-misc.version>
+		<flexmark-util-sequence.version>${flexmark.version}</flexmark-util-sequence.version>
+
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
-		<org.apache.commons.codec.version>1.8</org.apache.commons.codec.version>
-		<base58-codec.version>1.2.0</base58-codec.version>
-		<decimal4j.version>1.0.3</decimal4j.version>
-		<junit-jupiter.version>5.2.0</junit-jupiter.version>
-		<junit-jupiter-api.version>${junit-jupiter.version}</junit-jupiter-api.version>
-		<junit-jupiter-engine.version>${junit-jupiter.version}</junit-jupiter-engine.version>
+
+		<autolink.version>0.10.0</autolink.version>
+		<annotations.version>15.0</annotations.version>
+		<controlsfx.version>8.40.17</controlsfx.version>
+		<flowless.version>0.6.1</flowless.version>
+		<fontawesomefx-commons.version>8.15</fontawesomefx-commons.version>
+		<fontawesomefx-fontawesome.version>4.7.0-5</fontawesomefx-fontawesome.version>
+		<fontawesomefx-materialicons.version>2.2.0-5</fontawesomefx-materialicons.version>
+		<fontawesomefx-octicons.version>4.3.0-5</fontawesomefx-octicons.version>
+		<jfoenix.version>8.0.10</jfoenix.version>
+		<reactfx.version>2.0-M5</reactfx.version>
+		<richtextfx.version>0.9.2</richtextfx.version>
+		<undofx.version>2.1.0</undofx.version>
+		<wellbehavedfx.version>0.3.3</wellbehavedfx.version>
 	</properties>
-	
-	<repositories>
-		<repository>
-			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
-		</repository>
-	</repositories>
-		
-	<build>
-	<plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-      </plugin>
-    </plugins>
-	    <resources>
-	    <resource>
-	      <directory>src/main/resources</directory>
-	      <includes>
-	        <include>**/*</include>
-	      </includes>
-	      <filtering>true</filtering>
-	    </resource>
-	  </resources>
-	  </build>
 
 	<dependencies>
 		<dependency>
@@ -141,37 +146,36 @@
 			<artifactId>mars-core</artifactId>
 			<version>${mars-core.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<version>${jackson-core.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.dataformat</groupId>
-			<artifactId>jackson-dataformat-smile</artifactId>
-			<version>${jackson-dataformat-smile.version}</version>
-		</dependency>
+
+		<!-- ImageJ dependencies -->
 		<dependency>
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-ops</artifactId>
+		</dependency>
+
+		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.janelia.saalfeldlab</groupId>
-			<artifactId>n5-ij</artifactId>
-			<version>2.0.0</version>
+			<artifactId>imglib2-cache</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-realtransform</artifactId>
 		</dependency>
+
+		<!-- SciJava dependencies -->
 		<dependency>
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-common</artifactId>
@@ -180,156 +184,243 @@
 			<groupId>org.scijava</groupId>
 			<artifactId>scijava-table</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>spim_data</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.decimal4j</groupId>
-			<artifactId>decimal4j</artifactId>
-			<version>${decimal4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>${junit-jupiter-api.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-engine</artifactId>
-			<version>${junit-jupiter-engine.version}</version>
-			<scope>test</scope>
-		</dependency>
+
+		<!-- BigDataViewer dependencies -->
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-core</artifactId>
-			<version>10.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-			<version>1.0.0-beta-28</version>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer_fiji</artifactId>
+			<artifactId>spim_data</artifactId>
+		</dependency>
+
+		<!-- N5 dependencies -->
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-commons</artifactId>
-    		<version>8.15</version>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-ij</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-fontawesome</artifactId>
-   			<version>4.7.0-5</version>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-imglib2</artifactId>
+		</dependency>
+
+		<!-- Third party dependencies -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-materialicons</artifactId>
-   		 <version>2.2.0-5</version>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>de.jensd</groupId>
-			<artifactId>fontawesomefx-octicons</artifactId>
-			<version>4.3.0-5</version>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+			<version>${jackson-dataformat-smile.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfoenix</groupId>
 			<artifactId>jfoenix</artifactId>
-			<version>8.0.10</version>
+			<version>${jfoenix.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.reactfx</groupId>
-			<artifactId>reactfx</artifactId>
-			<version>2.0-M5</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fxmisc.cssfx</groupId>
-			<artifactId>cssfx</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.controlsfx</groupId>
-			<artifactId>controlsfx</artifactId>
-			<version>8.40.17</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fxmisc.flowless</groupId>
-			<artifactId>flowless</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fxmisc.wellbehaved</groupId>
-			<artifactId>wellbehavedfx</artifactId>
-			<version>0.3.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fxmisc.undo</groupId>
-			<artifactId>undofx</artifactId>
-			<version>2.1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nibor.autolink</groupId>
-			<artifactId>autolink</artifactId>
-			<version>0.10.0</version>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark</artifactId>
-			<version>0.62.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-anchorlink</artifactId>
-			<version>0.62.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-autolink</artifactId>
-			<version>0.62.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-definition</artifactId>
-			<version>0.62.2</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-footnotes</artifactId>
-			<version>0.62.2</version>
+			<version>${flexmark.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-ext-gfm-strikethrough</artifactId>
-			<version>0.62.2</version>
+			<version>${flexmark-ext-gfm-strikethrough.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-ext-tables</artifactId>
-			<version>0.62.2</version>
+			<version>${flexmark-ext-tables.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-toc</artifactId>
-			<version>0.62.2</version>
+			<artifactId>flexmark-util-ast</artifactId>
+			<version>${flexmark-util-ast.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-gitlab</artifactId>
-			<version>0.62.2</version>
+			<artifactId>flexmark-util-collection</artifactId>
+			<version>${flexmark-util-collection.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.fxmisc.richtext</groupId>
-			<artifactId>richtextfx</artifactId>
-			<version>0.9.2</version>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-html</artifactId>
+			<version>${flexmark-util-html.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-misc</artifactId>
+			<version>${flexmark-util-misc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-sequence</artifactId>
+			<version>${flexmark-util-sequence.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>de.gsi.chart</groupId>
 			<artifactId>chartfx-chart</artifactId>
-			<version>8.1.5</version>
+			<version>${chartfx-chart.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.gsi.dataset</groupId>
+			<artifactId>chartfx-dataset</artifactId>
+			<version>${chartfx-dataset.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.gsi.math</groupId>
+			<artifactId>chartfx-math</artifactId>
+			<version>${chartfx-math.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-commons</artifactId>
+			<version>${fontawesomefx-commons.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-fontawesome</artifactId>
+			<version>${fontawesomefx-fontawesome.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-materialicons</artifactId>
+			<version>${fontawesomefx-materialicons.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-octicons</artifactId>
+			<version>${fontawesomefx-octicons.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.controlsfx</groupId>
+			<artifactId>controlsfx</artifactId>
+			<version>${controlsfx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fxmisc.flowless</groupId>
+			<artifactId>flowless</artifactId>
+			<version>${flowless.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fxmisc.richtext</groupId>
+			<artifactId>richtextfx</artifactId>
+			<version>${richtextfx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fxmisc.undo</groupId>
+			<artifactId>undofx</artifactId>
+			<version>${undofx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.fxmisc.wellbehaved</groupId>
+			<artifactId>wellbehavedfx</artifactId>
+			<version>${wellbehavedfx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>${annotations.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.reactfx</groupId>
+			<artifactId>reactfx</artifactId>
+			<version>${reactfx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-anchorlink</artifactId>
+			<version>${flexmark-ext-anchorlink.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-autolink</artifactId>
+			<version>${flexmark-ext-autolink.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-definition</artifactId>
+			<version>${flexmark-ext-definition.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-footnotes</artifactId>
+			<version>${flexmark-ext-footnotes.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-gitlab</artifactId>
+			<version>${flexmark-ext-gitlab.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-toc</artifactId>
+			<version>${flexmark-ext-toc.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
-	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
+
+	<repositories>
+		<repository>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
+		</repository>
+	</repositories>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
 </project>
