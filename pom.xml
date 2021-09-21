@@ -61,7 +61,7 @@
 		</contributor>
 	</contributors>
 
-    <mailingLists>
+	<mailingLists>
 		<mailingList>
 			<name>Duderstadt Lab</name>
 			<archive>https://wiki-laue.biochem.mpg.de/</archive>
@@ -88,7 +88,7 @@
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.excludes>**/resources/**</license.excludes>
-		
+
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
@@ -103,37 +103,37 @@
 		<junit-jupiter-api.version>${junit-jupiter.version}</junit-jupiter-api.version>
 		<junit-jupiter-engine.version>${junit-jupiter.version}</junit-jupiter-engine.version>
 	</properties>
-	
+
 	<repositories>
 		<repository>
-			<id>imagej.public</id>
-			<url>http://maven.imagej.net/content/groups/public</url>
+			<id>scijava.public</id>
+			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
-		
+
 	<build>
-	<plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-                    <encoding>UTF-8</encoding>
-                    <compilerArgs>
-                        <arg>-parameters</arg>
-                    </compilerArgs>
-                </configuration>
-      </plugin>
-    </plugins>
-	    <resources>
-	    <resource>
-	      <directory>src/main/resources</directory>
-	      <includes>
-	        <include>**/*</include>
-	      </includes>
-	      <filtering>true</filtering>
-	    </resource>
-	  </resources>
-	  </build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<compilerArgs>
+						<arg>-parameters</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+	</build>
 
 	<dependencies>
 		<dependency>
@@ -216,19 +216,19 @@
 			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-commons</artifactId>
-    		<version>8.15</version>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-commons</artifactId>
+			<version>8.15</version>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-fontawesome</artifactId>
-   			<version>4.7.0-5</version>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-fontawesome</artifactId>
+			<version>4.7.0-5</version>
 		</dependency>
 		<dependency>
-    		<groupId>de.jensd</groupId>
-    		<artifactId>fontawesomefx-materialicons</artifactId>
-   		 <version>2.2.0-5</version>
+			<groupId>de.jensd</groupId>
+			<artifactId>fontawesomefx-materialicons</artifactId>
+			<version>2.2.0-5</version>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
