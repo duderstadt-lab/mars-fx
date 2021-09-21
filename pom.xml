@@ -13,11 +13,11 @@
 	<version>0.2.1-SNAPSHOT</version>
 
 	<name>mars-fx</name>
-	<url>http://biochem.mpg.de/duderstadt/</url>
+	<url>https://github.com/duderstadt-lab/mars-fx</url>
 	<inceptionYear>2018</inceptionYear>
 	<organization>
 		<name>Max Planck Institute of Biochemistry</name>
-		<url>http://biochem.mpg.de/duderstadt/</url>
+		<url>https://biochem.mpg.de/</url>
 	</organization>
 	<licenses>
 		<license>
@@ -31,7 +31,7 @@
 		<developer>
 			<id>karlduderstadt</id>
 			<name>Karl Duderstadt</name>
-			<url>http://biochem.mpg.de/duderstadt/</url>
+			<url>https://biochem.mpg.de/duderstadt/</url>
 			<roles>
 				<role>founder</role>
 				<role>lead</role>
@@ -64,7 +64,7 @@
     <mailingLists>
 		<mailingList>
 			<name>Duderstadt Lab</name>
-			<archive>https://wiki-laue.biochem.mpg.de</archive>
+			<archive>https://wiki-laue.biochem.mpg.de/</archive>
 		</mailingList>
 	</mailingLists>
 
