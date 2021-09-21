@@ -128,8 +128,6 @@
 		<autolink.version>0.10.0</autolink.version>
 		<annotations.version>15.0</annotations.version>
 		<controlsfx.version>8.40.17</controlsfx.version>
-		<cssfx.version>1.0.0</cssfx.version>
-		<decimal4j.version>1.0.3</decimal4j.version>
 		<flowless.version>0.6.1</flowless.version>
 		<fontawesomefx-commons.version>8.15</fontawesomefx-commons.version>
 		<fontawesomefx-fontawesome.version>4.7.0-5</fontawesomefx-fontawesome.version>
@@ -174,10 +172,6 @@
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
-			<artifactId>imglib2-ij</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2-realtransform</artifactId>
 		</dependency>
 
@@ -199,10 +193,6 @@
 		<dependency>
 			<groupId>sc.fiji</groupId>
 			<artifactId>bigdataviewer-vistools</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>sc.fiji</groupId>
-			<artifactId>bigdataviewer_fiji</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>sc.fiji</groupId>
@@ -253,43 +243,13 @@
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-anchorlink</artifactId>
-			<version>${flexmark-ext-anchorlink.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-autolink</artifactId>
-			<version>${flexmark-ext-autolink.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-definition</artifactId>
-			<version>${flexmark-ext-definition.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-footnotes</artifactId>
-			<version>${flexmark-ext-footnotes.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-ext-gfm-strikethrough</artifactId>
 			<version>${flexmark-ext-gfm-strikethrough.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-gitlab</artifactId>
-			<version>${flexmark-ext-gitlab.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-ext-tables</artifactId>
 			<version>${flexmark-ext-tables.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark-ext-toc</artifactId>
-			<version>${flexmark-ext-toc.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
@@ -369,16 +329,6 @@
 			<version>${controlsfx.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.decimal4j</groupId>
-			<artifactId>decimal4j</artifactId>
-			<version>${decimal4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.fxmisc.cssfx</groupId>
-			<artifactId>cssfx</artifactId>
-			<version>${cssfx.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.fxmisc.flowless</groupId>
 			<artifactId>flowless</artifactId>
 			<version>${flowless.version}</version>
@@ -411,6 +361,44 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<!-- Runtime dependencies -->
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-anchorlink</artifactId>
+			<version>${flexmark-ext-anchorlink.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-autolink</artifactId>
+			<version>${flexmark-ext-autolink.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-definition</artifactId>
+			<version>${flexmark-ext-definition.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-footnotes</artifactId>
+			<version>${flexmark-ext-footnotes.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-gitlab</artifactId>
+			<version>${flexmark-ext-gitlab.version}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-toc</artifactId>
+			<version>${flexmark-ext-toc.version}</version>
+			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
 
