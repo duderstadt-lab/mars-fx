@@ -103,6 +103,8 @@
 
 		<chartfx.version>8.1.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
+		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
+		<chartfx-math.version>${chartfx.version}</chartfx-math.version>
 
 		<flexmark.version>0.62.2</flexmark.version>
 		<flexmark-ext-anchorlink.version>${flexmark.version}</flexmark-ext-anchorlink.version>
@@ -113,12 +115,18 @@
 		<flexmark-ext-tables.version>${flexmark.version}</flexmark-ext-tables.version>
 		<flexmark-ext-toc.version>${flexmark.version}</flexmark-ext-toc.version>
 		<flexmark-ext-gitlab.version>${flexmark.version}</flexmark-ext-gitlab.version>
+		<flexmark-util-ast.version>${flexmark.version}</flexmark-util-ast.version>
+		<flexmark-util-collection.version>${flexmark.version}</flexmark-util-collection.version>
+		<flexmark-util-html.version>${flexmark.version}</flexmark-util-html.version>
+		<flexmark-util-misc.version>${flexmark.version}</flexmark-util-misc.version>
+		<flexmark-util-sequence.version>${flexmark.version}</flexmark-util-sequence.version>
 
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
 
 		<autolink.version>0.10.0</autolink.version>
+		<annotations.version>15.0</annotations.version>
 		<controlsfx.version>8.40.17</controlsfx.version>
 		<cssfx.version>1.0.0</cssfx.version>
 		<decimal4j.version>1.0.3</decimal4j.version>
@@ -146,11 +154,23 @@
 			<groupId>net.imagej</groupId>
 			<artifactId>ij</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imagej</groupId>
+			<artifactId>imagej-ops</artifactId>
+		</dependency>
 
 		<!-- ImgLib2 dependencies -->
 		<dependency>
 			<groupId>net.imglib2</groupId>
 			<artifactId>imglib2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.imglib2</groupId>
+			<artifactId>imglib2-cache</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>net.imglib2</groupId>
@@ -192,13 +212,25 @@
 		<!-- N5 dependencies -->
 		<dependency>
 			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
 			<artifactId>n5-ij</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-imglib2</artifactId>
 		</dependency>
 
 		<!-- Third party dependencies -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -209,6 +241,10 @@
 			<groupId>com.jfoenix</groupId>
 			<artifactId>jfoenix</artifactId>
 			<version>${jfoenix.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.miglayout</groupId>
+			<artifactId>miglayout-swing</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
@@ -256,9 +292,52 @@
 			<version>${flexmark-ext-toc.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-ast</artifactId>
+			<version>${flexmark-util-ast.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-collection</artifactId>
+			<version>${flexmark-util-collection.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-html</artifactId>
+			<version>${flexmark-util-html.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-misc</artifactId>
+			<version>${flexmark-util-misc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-util-sequence</artifactId>
+			<version>${flexmark-util-sequence.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>de.gsi.chart</groupId>
 			<artifactId>chartfx-chart</artifactId>
 			<version>${chartfx-chart.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.gsi.dataset</groupId>
+			<artifactId>chartfx-dataset</artifactId>
+			<version>${chartfx-dataset.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.gsi.math</groupId>
+			<artifactId>chartfx-math</artifactId>
+			<version>${chartfx-math.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
@@ -279,6 +358,10 @@
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-octicons</artifactId>
 			<version>${fontawesomefx-octicons.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.controlsfx</groupId>
@@ -316,9 +399,18 @@
 			<version>${wellbehavedfx.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>${annotations.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>org.reactfx</groupId>
 			<artifactId>reactfx</artifactId>
 			<version>${reactfx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
 		</dependency>
 
 		<!-- Test scope dependencies -->
