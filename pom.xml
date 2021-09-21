@@ -59,6 +59,11 @@
 		<contributor>
 			<name>Thomas Retzer</name>
 		</contributor>
+		<contributor>
+			<name>Curtis Rueden</name>
+			<url>https://imagej.net/people/ctrueden</url>
+			<properties><id>ctrueden</id></properties>
+		</contributor>
 	</contributors>
 
 	<mailingLists>
