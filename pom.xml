@@ -106,7 +106,7 @@
 		<org.apache.commons.codec.version>1.8</org.apache.commons.codec.version>
 		<base58-codec.version>1.2.0</base58-codec.version>
 		<decimal4j.version>1.0.3</decimal4j.version>
-		<junit-jupiter.version>5.2.0</junit-jupiter.version>
+		<junit-jupiter.version>5.7.1</junit-jupiter.version>
 		<junit-jupiter-api.version>${junit-jupiter.version}</junit-jupiter-api.version>
 		<junit-jupiter-engine.version>${junit-jupiter.version}</junit-jupiter-engine.version>
 	</properties>
