@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 8
-          distribution: jdk+fx
+          java-package: jdk+fx
       - name: Set up CI environment
         run: .github/setup.sh
       - name: Execute the build
