@@ -91,7 +91,7 @@
 	</ciManagement>
 
 	<properties>
-		<package-name>de.mpg.biochem.mars</package-name>
+		<package-name>de.mpg.biochem.mars.fx</package-name>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.licenseName>bsd_2</license.licenseName>
 		<license.excludes>**/resources/**</license.excludes>
