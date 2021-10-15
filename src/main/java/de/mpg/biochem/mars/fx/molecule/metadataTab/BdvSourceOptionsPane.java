@@ -37,9 +37,11 @@ import javax.swing.SwingUtilities;
 import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
-import org.janelia.saalfeldlab.n5.metadata.DefaultMetadata;
+import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5Metadata;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
 import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
@@ -234,10 +236,12 @@ public class BdvSourceOptionsPane extends VBox {
 							new N5ViewerReaderFun(),
 							new N5BasePathFun(),
 							path.getAbsolutePath(),
-							null, // no group parsers
+							new N5MetadataParser[]{}, // no group parsers
 							new N5MetadataParser[]{
-								new DefaultMetadata( "", -1 )
-							});
+									  new ImagePlusLegacyMetadataParser(),
+									  new N5CosemMetadataParser(),
+									  new N5SingleScaleMetadataParser()
+							  });
 		            	
 	            			selectionDialog.setVirtualOption( false );
 		            		selectionDialog.setCropOption( false );

@@ -40,11 +40,14 @@ import org.controlsfx.control.textfield.CustomTextField;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
-import org.janelia.saalfeldlab.n5.metadata.DefaultMetadata;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
 import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
+import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.N5DatasetMetadata;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
@@ -250,10 +253,12 @@ public class BdvViewTable implements MetadataEventHandler {
 								new N5ViewerReaderFun(),
 								new N5BasePathFun(),
 								System.getProperty("user.home"),
-								null, // no group parsers
+								new N5MetadataParser[]{}, // no group parsers
 								new N5MetadataParser[]{
-									new DefaultMetadata( "", -1 )
-								});
+										  new ImagePlusLegacyMetadataParser(),
+										  new N5CosemMetadataParser(),
+										  new N5SingleScaleMetadataParser()
+								  });
 			            	
 		            			selectionDialog.setVirtualOption( false );
 			            		selectionDialog.setCropOption( false );
@@ -269,7 +274,7 @@ public class BdvViewTable implements MetadataEventHandler {
 			            				public void run() {
 			            					bdvSource.setPath(selectionDialog.getN5RootPath());
 			            					bdvSource.setN5Dataset(dataSelection.metadata.get(0).getPath());
-			            					bdvSource.setProperty("info", getDatasetInfo(dataSelection.metadata.get(0).getAttributes()));
+			            					bdvSource.setProperty("info", getDatasetInfo(((N5DatasetMetadata)dataSelection.metadata.get(0)).getAttributes()));
 			        						marsImageMetadata.putBdvSource(bdvSource);
 			        						loadBdvSources();
 			            				}

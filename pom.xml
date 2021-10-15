@@ -71,7 +71,7 @@
 	<mailingLists>
 		<mailingList>
 			<name>Duderstadt Lab</name>
-			<archive>https://wiki-laue.biochem.mpg.de/</archive>
+			<archive>https://duderstadtlab.org/</archive>
 		</mailingList>
 	</mailingLists>
 
@@ -99,7 +99,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-18</mars-core.version>
+		<mars-core.version>1.0.0-beta-19</mars-core.version>
 
 		<chartfx.version>8.1.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
@@ -124,6 +124,9 @@
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
+		
+		<n5-ij.version>3.0.0</n5-ij.version>
+		<n5-imglib2.version>4.1.1</n5-imglib2.version>
 
 		<autolink.version>0.10.0</autolink.version>
 		<annotations.version>15.0</annotations.version>
@@ -207,10 +210,12 @@
 		<dependency>
 			<groupId>org.janelia.saalfeldlab</groupId>
 			<artifactId>n5-ij</artifactId>
+			<version>${n5-ij.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.janelia.saalfeldlab</groupId>
 			<artifactId>n5-imglib2</artifactId>
+			<version>${n5-imglib2.version}</version>
 		</dependency>
 
 		<!-- Third party dependencies -->
