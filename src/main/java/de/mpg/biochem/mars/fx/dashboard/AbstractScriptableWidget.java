@@ -65,6 +65,7 @@ import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.control.Label;
 
 import javafx.scene.layout.HBox;
 import javafx.scene.control.Toggle;
@@ -103,7 +104,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected Context context;
 
 	protected ScriptLanguage lang;
-	protected RadioButton radioButtonGroovy, radioButtonPython;
+	protected Label langLabel;
 	protected ToggleGroup languageGroup;
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
@@ -135,36 +136,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		BorderPane scriptBorder = new BorderPane();
 		scriptBorder.setCenter(new VirtualizedScrollPane<>(codeArea));
 
-		languageGroup = new ToggleGroup();
-
-		radioButtonGroovy = new RadioButton("Groovy");
-		radioButtonGroovy.setToggleGroup(languageGroup);
-
-		radioButtonPython = new RadioButton("Python");
-		radioButtonPython.setToggleGroup(languageGroup);
-
-		if (lang == scriptService.getLanguageByName("Groovy"))
-			radioButtonGroovy.setSelected(true);
-		else if (lang == scriptService.getLanguageByName("Python"))
-			radioButtonPython.setSelected(true);
-
-		languageGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
-			@Override
-			public void changed(ObservableValue<? extends Toggle> ov, Toggle oldToggle, Toggle newToggle) {
-				if (newToggle == radioButtonGroovy)
-					lang = scriptService.getLanguageByName("Groovy");
-				else if (newToggle == radioButtonPython)
-					lang = scriptService.getLanguageByName("Python");
-			}
-		});
-
-		HBox hbox = new HBox(radioButtonGroovy, radioButtonPython);
-		hbox.setSpacing(5);
-		hbox.setPadding(new Insets(5, 5, 5, 5));
-		scriptBorder.setPadding(new Insets(5, 5, 5, 5));
-		scriptBorder.setPrefSize(100, 100);
-		scriptBorder.setTop(hbox);
-
+		langLabel = new Label(lang.getLanguageName());
+		langLabel.setPadding(new Insets(5, 5, 5, 5));
+		scriptBorder.setTop(langLabel);
+		
 		scriptTab.setContent(scriptBorder);
 		getTabPane().getTabs().add(scriptTab);
 
@@ -189,9 +164,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		Reader reader = new StringReader(codeArea.getText());
 
 		String scriptName = "script";
-		if (radioButtonGroovy.isSelected()) {
+		if (lang.getLanguageName().equals("Groovy")) {
 			scriptName += ".groovy";
-		} else if (radioButtonPython.isSelected()) {
+		} else if (lang.getLanguageName().equals("Python")) {
 			scriptName += ".py";
 		}
 
@@ -249,9 +224,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected abstract void setScriptInputs(ScriptModule module);
 
 	protected void loadScript(String name) throws IOException {
-		if (radioButtonGroovy.isSelected()) {
+		if (lang.getLanguageName().equals("Groovy")) {
 			name += ".groovy";
-		} else if (radioButtonPython.isSelected()) {
+		} else if (lang.getLanguageName().equals("Python")) {
 			name += ".py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
@@ -261,9 +236,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	}
 
 	protected void loadScript(String name, String inputParameters) throws IOException {
-		if (radioButtonGroovy.isSelected()) {
+		if (lang.getLanguageName().equals("Groovy")) {
 			name += ".groovy";
-		} else if (radioButtonPython.isSelected()) {
+		} else if (lang.getLanguageName().equals("Python")) {
 			name += ".py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
@@ -282,11 +257,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			},
 			jParser -> {
 				String language = jParser.getText();
-				if (language.equals("Groovy")) {
-					radioButtonGroovy.setSelected(true);
-				} else if (language.equals("Python")) {
-					radioButtonPython.setSelected(true);
-				}
+				langLabel.setText(language);
 				lang = scriptService.getLanguageByName(language);
 			});
 			
