@@ -99,6 +99,8 @@ public class DatasetOptionsPane extends VBox {
 	private BooleanProperty fixYBounds = new SimpleBooleanProperty();
 	
 	private TableView<PlotSeries> plotPropertiesTable;
+	private String previousSeries0XColumn = "";
+	private String previousSeries0YColumn = "";
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
 	
@@ -398,10 +400,15 @@ public class DatasetOptionsPane extends VBox {
 			if (plotSeriesList.size() > 0) {
 				PlotSeries plotSeries = plotSeriesList.get(0);
 				
-				if (xNameField.getText().equals(""))
+				if (xNameField.getText().equals("") || !plotSeries.getXColumn().equals(previousSeries0XColumn)) {
+					previousSeries0XColumn = plotSeries.getXColumn();
 					xNameField.setText(plotSeries.getXColumn());
-				if (yNameField.getText().equals(""))
+				}
+				
+				if (yNameField.getText().equals("") || !plotSeries.getYColumn().equals(previousSeries0YColumn)) {
+					previousSeries0YColumn = plotSeries.getYColumn();
 					yNameField.setText(plotSeries.getYColumn());
+				}
 			}
 		    subPlot.update();
 		});
