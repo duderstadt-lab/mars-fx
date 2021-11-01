@@ -318,7 +318,11 @@ public class MarsOMEView {
 					if (selectedItem != null && selectedItem.getValue() instanceof MarsOMEPlane)
 						populateTiffDataInformations((MarsOMEPlane) selectedItem.getValue());
 				});
-
+		
+		imageData.clear();
+		imageFieldNameList.clear();
+		planeData.clear();
+		planeFieldNameList.clear();
 	}
 
 	private void populateTiffDataInformations(MarsOMEPlane plane) {
