@@ -917,23 +917,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     private boolean saveAs(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
-		if (saveAsFile == null) {
-			saveAsFile = new File(System.getProperty("user.home"));
-		}
+		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
+		
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File newFile = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 
 		if (newFile != null) {
+			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(newFile);
+
 			lockFX("Saving...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAs(newFile);
- 	            	saveState(newFile.getAbsolutePath());
+ 	            	archive.saveAs(newFileWithExtension);
+ 	            	saveState(newFileWithExtension.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -944,10 +945,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	           	if (moleculeArchiveService.contains(archive.getName()))
 					moleculeArchiveService.removeArchive(archive);
 	           	
-				archive.setFile(newFile);
-				archive.setName(newFile.getName());
+				archive.setFile(newFileWithExtension);
+				archive.setName(newFileWithExtension.getName());
 				SwingUtilities.invokeLater(() -> {
-					frame.setTitle(newFile.getName());
+					frame.setTitle(newFileWithExtension.getName());
 				});
 
 				moleculeArchiveService.addArchive(archive);
@@ -965,23 +966,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	private boolean saveAsCopy(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
-		if (saveAsFile == null) {
-			saveAsFile = new File(System.getProperty("user.home"));
-		}
+		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
+		
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 
 		if (file != null) {
+			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(file);
+			
 			lockFX("Saving...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAs(file);	
- 	            	saveState(file.getAbsolutePath());
+ 	            	archive.saveAs(newFileWithExtension);	
+ 	            	saveState(newFileWithExtension.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -1001,25 +1003,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	private boolean saveAsJsonCopy(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
-		if (saveAsFile == null) {
-			saveAsFile = new File(System.getProperty("user.home"));
-		} else if (!saveAsFile.getAbsolutePath().endsWith(".json")) {
-			saveAsFile = new File(saveAsFile.getAbsolutePath() + ".json");
-		}
+		saveAsFile = ArchiveUtils.jsonFileExtensionFixer(saveAsFile);
+		
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 
 		if (file != null) {
+			final File newFileWithExtension = ArchiveUtils.jsonFileExtensionFixer(file);
+			
 			lockFX("Saving...");
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAsJson(file);	
- 	            	saveState(file.getAbsolutePath());
+ 	            	archive.saveAsJson(newFileWithExtension);	
+ 	            	saveState(newFileWithExtension.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -1071,23 +1072,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	private void saveAsVirtualStore(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
-		if (saveAsFile == null) {
-			saveAsFile = new File(System.getProperty("user.home"));
-		}
+		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
+		
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
 		if (virtualDirectory != null) {	
+			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
+			
 			lockFX("Saving Virtual Store Copy...");
 			
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAsVirtualStore(virtualDirectory);	
- 	            	saveState(virtualDirectory.getAbsolutePath());
+ 	            	archive.saveAsVirtualStore(newFileWithExtension);	
+ 	            	saveState(newFileWithExtension.getAbsolutePath());
  	                return null;
  	            }
  	        };
@@ -1104,23 +1106,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	private void saveAsJsonVirtualStore(File saveAsFile) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		
-		if (saveAsFile == null) {
-			saveAsFile = new File(System.getProperty("user.home"));
-		}
+		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
+		
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
 		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
 		
-		if (virtualDirectory != null) {	
+		if (virtualDirectory != null) {
+			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
+			
 			lockFX("Saving Virtual Store Copy...");
 			
 			fireEvent(new MoleculeArchiveSavingEvent(archive));
 			Task<Void> task = new Task<Void>() {
  	            @Override
  	            public Void call() throws Exception {
- 	            	archive.saveAsJsonVirtualStore(virtualDirectory);	
- 	            	saveState(virtualDirectory.getAbsolutePath());
+ 	            	archive.saveAsJsonVirtualStore(newFileWithExtension);	
+ 	            	saveState(newFileWithExtension.getAbsolutePath());
  	                return null;
  	            }
  	        };
