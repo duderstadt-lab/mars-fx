@@ -94,7 +94,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			   @Override 
 			   public void handle(PlotEvent e) { 
 				   if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
-					   	removeIndicators();
+					    System.out.println("Updating plot area");
 						update();
 						e.consume();
 				   }
@@ -262,6 +262,14 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
 		return new DatasetOptionsPane(columns, this);
 	}
+	
+	@Override
+	public void update() {
+		for (ChartPlugin plugin : getChart().getPlugins())
+			if (plugin instanceof MarsMoleculePlotPlugin)
+				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
+		super.update();
+	}
 
 	@Override
 	public void removeIndicators() {
@@ -290,10 +298,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
-		removeIndicators();
-		for (ChartPlugin plugin : getChart().getPlugins())
-			if (plugin instanceof MarsMoleculePlotPlugin)
-				((MarsMoleculePlotPlugin) plugin).setMolecule(molecule);
 		update();
 	}
 

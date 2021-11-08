@@ -62,6 +62,7 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import de.gsi.chart.XYChart;
+import de.gsi.chart.plugins.ChartPlugin;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -410,6 +411,7 @@ public class DatasetOptionsPane extends VBox {
 					yNameField.setText(plotSeries.getYColumn());
 				}
 			}
+			
 		    subPlot.update();
 		});
 	}

@@ -171,9 +171,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 	}
 	
 	public void update() {
-		chartPane.getDatasets().clear();
+		boolean firstUpdate = (chartPane.getDatasets().size() == 0) ? true : false;
 		
 		removeIndicators();
+		chartPane.getDatasets().clear();
 		
 		Set<String> xAxisList = new HashSet<String>();
 		Set<String> yAxisList = new HashSet<String>();
@@ -200,7 +201,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 			chartPane.getYAxis().set(datasetOptionsPane.getYMin(), datasetOptionsPane.getYMax());
 		}
 		
-		addIndicators(xAxisList, yAxisList);
+		//Make sure to update the layout before adding the indicators the first time
+		if (firstUpdate) chartPane.layout();
+		if (chartPane.getDatasets().size() != 0) addIndicators(xAxisList, yAxisList);
 		
 		chartPane.layout();
 	}
