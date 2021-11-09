@@ -158,6 +158,7 @@ import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.object.MartianObject;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.DefaultJsonConverter;
 import de.mpg.biochem.mars.util.MarsUtil;
@@ -750,53 +751,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				
 				String tag = result.getList().get(0);
 	     		 
-	     		ArrayList<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
+	     		List<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
              
 	     		if (mergeUIDs.size() < 2) 
 	     			return;
 	     		
-	     		String mergeNote = "Merged " + mergeUIDs.size() + " molecules \n";
+	     		for (int i=1; i < mergeUIDs.size(); i++) {
+	     			
+	     			if (archive.get(mergeUIDs.get(0)) instanceof MartianObject) 
+						((MartianObject) archive.get(mergeUIDs.get(0))).merge((MartianObject) archive.get(mergeUIDs.get(i)));
+	     			else archive.get(mergeUIDs.get(0)).merge(archive.get(mergeUIDs.get(i)));
+	     			
+	     			archive.remove(mergeUIDs.get(i));
+	     		}
 	     		
-	     		MarsTable mergedDataTable = archive.get(mergeUIDs.get(0)).getTable();
-	     		
-	     		HashSet<Double> tNumbers = new HashSet<Double>();
-	     		
-	     		//First add all current T to set
-	     		for (int row=0;row<mergedDataTable.getRowCount();row++) {
-            		tNumbers.add(mergedDataTable.getValue("T", row));
-            	}
-	     		
-	     		mergeNote += mergeUIDs.get(0).substring(0, 5) + " : Ts " + mergedDataTable.getValue("T", 0) + " " + mergedDataTable.getValue("T", mergedDataTable.getRowCount()-1) + "\n";
-	     		
-	            for (int i = 1; i < mergeUIDs.size() ; i++) {
-	            	MarsTable nextDataTable = archive.get(mergeUIDs.get(i)).getTable();
-	            	
-	            	for (int row=0;row<nextDataTable.getRowCount();row++) {
-	            		if (!tNumbers.contains(nextDataTable.getValue("T", row))) {
-	            			mergedDataTable.appendRow();
-	            			int mergeLastRow = mergedDataTable.getRowCount() - 1;
-	            			
-	            			for (int col=0;col<mergedDataTable.getColumnCount();col++) {
-	            				String column = mergedDataTable.getColumnHeader(col);
-	    	            		mergedDataTable.setValue(column, mergeLastRow, nextDataTable.getValue(column, row));
-	    	            	}
-	            			
-	            			tNumbers.add(nextDataTable.getValue("T", row));
-	            		}
-	            	}
-	            	mergeNote += mergeUIDs.get(i).substring(0, 5) + " : Ts " + nextDataTable.getValue("T", 0) + " " + nextDataTable.getValue("T", nextDataTable.getRowCount()-1) + "\n";
-	            	
-	            	archive.remove(mergeUIDs.get(i));
-	            }
-	            
-	            //sort by T
-	            mergedDataTable.sort(true, "T");
-	            
-	            String previousNotes = "";
-	            if (archive.get(mergeUIDs.get(0)).getNotes() != null)
-	            	previousNotes = archive.get(mergeUIDs.get(0)).getNotes() + "\n";
-	            
-	            archive.get(mergeUIDs.get(0)).setNotes(previousNotes + mergeNote);
 			}, "Merging Molecules...");
 		});
 	}
