@@ -108,6 +108,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Button;
+import javafx.stage.*;
 
 import javafx.concurrent.Task;
 
@@ -186,9 +187,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
-	protected JFrame frame;
+	//protected JFrame frame;
 	protected String title;
-	protected JFXPanel fxPanel;
+	protected Stage stage;
+	//protected JFXPanel fxPanel;
 
 	protected StackPane maskerStackPane;
 	protected MaskerPane masker;
@@ -241,25 +243,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
 	public void init() {
-		frame = new JFrame(title);
-		
-		//frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		frame.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowClosing(WindowEvent windowEvent) {
-				SwingUtilities.invokeLater(() -> {
-					close();
-				});
-			}
-		});
-		
-		this.fxPanel = new JFXPanel();
-		frame.add(this.fxPanel);
-		
+		/*		
 		if (!uiService.isHeadless())
 			WindowManager.addWindow(frame);
-
+*/
+		
+		
+		new JFXPanel(); // initializes JavaFX environment
+		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		// Allows multiple runLaters in the same session...
 		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
@@ -268,15 +259,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				initFX(fxPanel);
+				stage = new Stage();
+				stage.setTitle(title);
+				stage.setOnHidden(e -> 
+					SwingUtilities.invokeLater(() -> {
+						close();
+					}));
+				buildScene();
 			}
 		});
 
-	}
-
-	public void initFX(JFXPanel fxPanel) {	
-		Scene scene = buildScene();
-		this.fxPanel.setScene(scene);
 	}
 	
 	protected Scene buildScene() {
@@ -336,14 +328,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
         borderPane.setCenter(tabsContainer);
         Scene scene = new Scene(maskerStackPane);
         
+        stage.setScene(scene);
+        
         try {
 			loadState();
 			
-			if (!windowStateLoaded)
-				SwingUtilities.invokeLater(() -> { 
-	    			frame.setSize(800, 600);
-	    			frame.setVisible(true);
-				});
+			if (!windowStateLoaded) {
+				stage.setWidth(800);
+				stage.setHeight(600);
+				stage.show();
+			}
 		} catch (IOException e) {
 			logService.warn("A problem was encountered when loading the rover file " 
 					+ archive.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
@@ -797,9 +791,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
 		return archive;
 	}
-	
-	public JFrame getFrame() {
-		return frame;
+
+	public Stage getStage() {
+		return stage;
 	}
 	
 	public String getTitle() {
@@ -915,9 +909,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	           	
 				archive.setFile(newFileWithExtension);
 				archive.setName(newFileWithExtension.getName());
-				SwingUtilities.invokeLater(() -> {
-					frame.setTitle(newFileWithExtension.getName());
-				});
+				stage.setTitle(newFileWithExtension.getName());
 
 				moleculeArchiveService.addArchive(archive);
 	           	
@@ -1271,11 +1263,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
-		if (frame != null)
-			WindowManager.removeWindow(frame);
-		
-		if (frame != null)
-			frame.dispose();
+		//if (stage != null)
+		//	WindowManager.removeWindow(stage);
     }
     
     //Creates settings input and output maps to save the current state of the program.
@@ -1285,10 +1274,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		setJsonField("window", 
 			jGenerator -> {
 				jGenerator.writeObjectFieldStart("window");
-				jGenerator.writeNumberField("x", frame.getX());
-				jGenerator.writeNumberField("y", frame.getY());
-				jGenerator.writeNumberField("width", frame.getWidth());
-				jGenerator.writeNumberField("height", frame.getHeight());
+				jGenerator.writeNumberField("x", stage.getX());
+				jGenerator.writeNumberField("y", stage.getY());
+				jGenerator.writeNumberField("width", stage.getWidth());
+				jGenerator.writeNumberField("height", stage.getHeight());
 				jGenerator.writeEndObject();
 			}, 
 			jParser -> {
@@ -1314,10 +1303,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				
 				windowStateLoaded = true;
 				
-				SwingUtilities.invokeLater(() -> { 
-					frame.setBounds(rect);
-					frame.setVisible(true);
-				});
+				stage.setX(rect.x);
+				stage.setY(rect.y);
+				stage.setWidth(rect.width);
+				stage.setHeight(rect.height);
+				stage.show();
 			});
     	
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet)
@@ -1388,10 +1378,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				
 				windowStateLoaded = true;
 				
-				SwingUtilities.invokeLater(() -> { 
-					frame.setBounds(rect);
-					frame.setVisible(true);
-				});
+				stage.setX(rect.x);
+				stage.setY(rect.y);
+				stage.setWidth(rect.width);
+				stage.setHeight(rect.height);
+				stage.show();
 			});
 	}
     
