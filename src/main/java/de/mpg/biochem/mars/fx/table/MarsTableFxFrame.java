@@ -64,6 +64,7 @@ import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -81,6 +82,7 @@ import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
 import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.IJStage;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.table.*;
 import ij.WindowManager;
@@ -106,8 +108,9 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
     @Parameter
     private Context context;
 
-    private JFrame frame;
     protected String title;
+    protected Stage stage;
+	protected IJStage ijStage;
 
 	private MarsTable table;
     protected boolean windowStateLoaded = false;
@@ -143,68 +146,55 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
 	public void init() {
-		frame = new JFrame(title);
+		new JFXPanel(); // initializes JavaFX environment
 		
-		frame.addWindowListener(new WindowAdapter() {
-
-			@Override
-			public void windowClosing(WindowEvent windowEvent) {
-				//SwingUtilities.invokeLater(() -> {
-					close();
-				//});
-			}
-		});
-		
-		this.fxPanel = new JFXPanel();
-		frame.add(this.fxPanel);
-		
-		// add window to window manager
-		// IJ1 style IJ2 doesn't seem to work...
-		if (!uiService.isHeadless())
-			WindowManager.addWindow(frame);
-
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		// Allows multiple runLaters in the same session...
 		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
 		Platform.setImplicitExit(false);
 		
-		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				initFX(fxPanel);
+				stage = new Stage();
+				stage.setTitle(title);
+				stage.setOnHidden(e -> 
+					SwingUtilities.invokeLater(() -> {
+						close();
+					}));
+				
+				ijStage = new IJStage(stage);
+				
+				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
+				
+				borderPane = new BorderPane();
+				borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+				
+				borderPane.setTop(buildMenuBar());
+				borderPane.setCenter(buildTabs());
+
+				scene = new Scene(borderPane);
+				stage.setScene(scene);
+				
+				if (jfactory == null)
+		        	jfactory = new JsonFactory();
+
+				try {
+					loadState();
+					
+					if (!windowStateLoaded) {
+						stage.setWidth(800);
+						stage.setHeight(600);
+						stage.show();
+					}
+				}  catch (IOException e) {
+					logService.warn("A problem was encountered when loading the rover file " 
+							+ table.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
+							+ "Please check the file to make sure the syntax is correct."
+							+ "Aborting and opening with the default settings.");
+				}
 			}
 		});
-	}
-
-	public void initFX(JFXPanel fxPanel) {	
-		borderPane = new BorderPane();
-		borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
-		
-		borderPane.setTop(buildMenuBar());
-		borderPane.setCenter(buildTabs());
-
-		scene = new Scene(borderPane);
-		
-		this.fxPanel.setScene(scene);
-		
-		if (jfactory == null)
-        	jfactory = new JsonFactory();
-
-		try {
-			loadState();
-			
-			if (!windowStateLoaded)
-				SwingUtilities.invokeLater(() -> { 
-	    			frame.setSize(800, 600);
-	    			frame.setVisible(true);
-				});
-		}  catch (IOException e) {
-			logService.warn("A problem was encountered when loading the rover file " 
-					+ table.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
-					+ "Please check the file to make sure the syntax is correct."
-					+ "Aborting and opening with the default settings.");
-		}
 	}
 	
 	protected MenuBar buildMenuBar() {
@@ -357,27 +347,27 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	}
 	
 	public void close() {
+		if (stage.isShowing())
+			stage.hide();
+		
 		if (marsTableService.contains(table.getName()))
 			marsTableService.removeTable(table);
 		
-		if (!uiService.isHeadless())
-			WindowManager.removeWindow(frame);
-		
-		//frame.setVisible(true);
-		frame.dispose();
+		if (ijStage != null)
+			WindowManager.removeWindow(ijStage);
     }
 	
 	//Creates settings input and output maps to save the current state of the program.
     @Override
 	protected void createIOMaps() {
     	
-		setJsonField("Window", 
+		setJsonField("window", 
 			jGenerator -> {
-				jGenerator.writeObjectFieldStart("Window");
-				jGenerator.writeNumberField("x", frame.getX());
-				jGenerator.writeNumberField("y", frame.getY());
-				jGenerator.writeNumberField("width", frame.getWidth());
-				jGenerator.writeNumberField("height", frame.getHeight());
+				jGenerator.writeObjectFieldStart("window");
+				jGenerator.writeNumberField("x", stage.getX());
+				jGenerator.writeNumberField("y", stage.getY());
+				jGenerator.writeNumberField("width", stage.getWidth());
+				jGenerator.writeNumberField("height", stage.getHeight());
 				jGenerator.writeEndObject();
 			}, 
 			jParser -> {
@@ -403,31 +393,32 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 				
 				windowStateLoaded = true;
 				
-				SwingUtilities.invokeLater(() -> { 
-					frame.setBounds(rect);
-					frame.setVisible(true);
-				});
+				stage.setX(rect.x);
+				stage.setY(rect.y);
+				stage.setWidth(rect.width);
+				stage.setHeight(rect.height);
+				stage.show();
 			});
     	
 
-			setJsonField("PlotPane", 
+			setJsonField("plotPane", 
 				jGenerator -> {
-					jGenerator.writeFieldName("PlotPane");
+					jGenerator.writeFieldName("plotPane");
 					plotPane.toJSON(jGenerator);
 				},
 				jParser -> plotPane.fromJSON(jParser));
 			
 			
-			setJsonField("MarsTableDashboard", 
+			setJsonField("marsTableDashboard", 
 					jGenerator -> {
-						jGenerator.writeFieldName("MarsTableDashboard");
+						jGenerator.writeFieldName("marsTableDashboard");
 						marsTableDashboardPane.toJSON(jGenerator);
 					}, 
 					jParser -> marsTableDashboardPane.fromJSON(jParser));
 			
-			setJsonField("Comments", 
+			setJsonField("comments", 
 					jGenerator -> {
-						jGenerator.writeStringField("Comments", commentPane.getComments());
+						jGenerator.writeStringField("comments", commentPane.getComments());
 					},
 					jParser -> commentPane.setComments(jParser.getText()));
 	}
