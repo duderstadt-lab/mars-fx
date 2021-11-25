@@ -36,6 +36,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.*;
+import java.awt.Window;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -187,10 +188,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
-	//protected JFrame frame;
 	protected String title;
 	protected Stage stage;
-	//protected JFXPanel fxPanel;
+	protected IJStage ijStage;
 
 	protected StackPane maskerStackPane;
 	protected MaskerPane masker;
@@ -242,13 +242,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	/**
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
-	public void init() {
-		/*		
-		if (!uiService.isHeadless())
-			WindowManager.addWindow(frame);
-*/
-		
-		
+	public void init() {	
 		new JFXPanel(); // initializes JavaFX environment
 		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
@@ -265,6 +259,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					SwingUtilities.invokeLater(() -> {
 						close();
 					}));
+				
+				ijStage = new IJStage(stage);
+				
+				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 				buildScene();
 			}
 		});
@@ -1263,8 +1261,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
-		//if (stage != null)
-		//	WindowManager.removeWindow(stage);
+		if (ijStage != null)
+			WindowManager.removeWindow(ijStage);
     }
     
     //Creates settings input and output maps to save the current state of the program.
