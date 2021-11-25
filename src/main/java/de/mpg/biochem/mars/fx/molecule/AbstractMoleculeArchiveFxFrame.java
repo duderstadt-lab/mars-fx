@@ -1258,6 +1258,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     @Override
     public void close() {
+    	if (stage.isShowing())
+			stage.hide();
+    	
     	if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
