@@ -347,14 +347,14 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	}
 	
 	public void close() {
-		if (stage.isShowing())
-			stage.hide();
-		
 		if (marsTableService.contains(table.getName()))
 			marsTableService.removeTable(table);
 		
 		if (ijStage != null)
 			WindowManager.removeWindow(ijStage);
+		
+		if (stage.isShowing())
+			stage.hide();
     }
 	
 	//Creates settings input and output maps to save the current state of the program.

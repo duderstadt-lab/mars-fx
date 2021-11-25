@@ -1258,14 +1258,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     @Override
     public void close() {
-    	if (stage.isShowing())
-			stage.hide();
-    	
     	if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
 		if (ijStage != null)
 			WindowManager.removeWindow(ijStage);
+		
+		if (stage.isShowing())
+			stage.hide();
     }
     
     //Creates settings input and output maps to save the current state of the program.
