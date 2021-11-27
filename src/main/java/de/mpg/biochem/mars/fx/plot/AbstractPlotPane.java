@@ -58,6 +58,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.ButtonBase;
@@ -87,6 +88,8 @@ import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 
 import javafx.beans.property.DoubleProperty;
@@ -164,6 +167,32 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		
 		buildTools();
 		rootBorderPane.setTop(createToolBar());
+		
+		rootBorderPane.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+            	if (event.getGestureSource() != rootBorderPane
+                        && event.getDragboard().hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY);
+                }
+                event.consume();
+            }
+        });
+        
+		rootBorderPane.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(".rover")) {
+                    success = importFromRoverFile(db.getFiles().get(0));
+                }
+                /* let the source know whether the string was successfully 
+                 * transferred and used */
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
 	}
 	
 	protected void buildTools() {
@@ -346,7 +375,15 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			Platform.runLater(() -> subPlot.getChart().layoutChildren());
 	}
 	
+	public void reload() {
+		for (SubPlot subPlot : charts)
+			subPlot.update();
+		resetXYZoom();
+	}
+	
 	public abstract void addChart();
+	
+	public abstract boolean importFromRoverFile(File roverFile);
 	
 	public void addChart(SubPlot subplot) {
 		charts.add(subplot);

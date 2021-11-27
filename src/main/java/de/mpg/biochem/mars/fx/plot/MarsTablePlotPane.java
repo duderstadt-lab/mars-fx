@@ -32,11 +32,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
 import static java.util.stream.Collectors.toList;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsUtil;
 
 public class MarsTablePlotPane extends AbstractPlotPane {
 	private MarsTable table;
@@ -124,6 +133,22 @@ public class MarsTablePlotPane extends AbstractPlotPane {
 		    	}
 		 	});
 		
+	}
+	
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
+		   JsonFactory jfactory = new JsonFactory();
+		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "plotPane");
+		   reload();
+     	   jParser.close();
+     	   inputStream.close();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
