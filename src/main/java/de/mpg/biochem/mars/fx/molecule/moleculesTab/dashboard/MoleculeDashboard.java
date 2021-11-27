@@ -28,6 +28,11 @@
  */
 package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -43,6 +48,9 @@ import java.util.Set;
 
 import org.scijava.Context;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -50,6 +58,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
@@ -108,6 +117,21 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 
 	public Set<String> getWidgetNames() {
 		return marsDashboardWidgetService.getWidgetNames(MoleculeDashboardWidget.class);
+	}
+	
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
+		   JsonFactory jfactory = new JsonFactory();
+		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane", "moleculeDashboard");
+     	   jParser.close();
+     	   inputStream.close();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

@@ -28,6 +28,11 @@
  */
 package de.mpg.biochem.mars.fx.table.dashboard;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -39,7 +44,11 @@ import java.util.Set;
 
 import org.scijava.Context;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsUtil;
 
 public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidget> {
 	
@@ -80,5 +89,20 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 
 	public Set<String> getWidgetNames() {
 		return marsDashboardWidgetService.getWidgetNames(MarsTableDashboardWidget.class);
+	}
+	
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
+		   JsonFactory jfactory = new JsonFactory();
+		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "marsTableDashboard");
+     	   jParser.close();
+     	   inputStream.close();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 }

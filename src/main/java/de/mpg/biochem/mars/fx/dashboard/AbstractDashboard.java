@@ -33,6 +33,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STOP;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REORDER;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -73,6 +74,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+
+import javafx.event.EventHandler;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.input.Dragboard;
 
 public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends AbstractJsonConvertibleRecord
 		implements MarsDashboard<W> {
@@ -183,6 +189,32 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		scrollPane.setContent(widgetPane);
 		scrollPane.setFitToWidth(true);
 		borderPane.setCenter(scrollPane);
+		
+		borderPane.setOnDragOver(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+            	if (event.getGestureSource() != borderPane
+                        && event.getDragboard().hasFiles()) {
+                    event.acceptTransferModes(TransferMode.COPY);
+                }
+                event.consume();
+            }
+        });
+        
+		borderPane.setOnDragDropped(new EventHandler<DragEvent>() {
+            @Override
+            public void handle(DragEvent event) {
+                Dragboard db = event.getDragboard();
+                boolean success = false;
+                if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(".rover")) {
+                    success = importFromRoverFile(db.getFiles().get(0));
+                }
+                /* let the source know whether the string was successfully 
+                 * transferred and used */
+                event.setDropCompleted(success);
+                event.consume();
+            }
+        });
 	}
 
 	public void runWidget(MarsDashboardWidget widget) {
@@ -328,6 +360,8 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	public abstract ArrayList<String> getWidgetToolbarOrder();
 
 	public abstract Set<String> getWidgetNames();
+	
+	public abstract boolean importFromRoverFile(File roverFile);
 
 	class WidgetRunnable implements Runnable {
 
