@@ -130,6 +130,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public String getName() {
-		return "CommentsTab";
+		return "commentsTab";
 	}
 }

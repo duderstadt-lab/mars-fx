@@ -106,7 +106,11 @@ public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveD
 	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
 		   JsonFactory jfactory = new JsonFactory();
 		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "dashboardTab");
+		   
+		   //Need for backward compatibility
 		   MarsUtil.readJsonObject(jParser, this, "DashboardTab");
+		   
      	   jParser.close();
      	   inputStream.close();
 		} catch (IOException e) {

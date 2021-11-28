@@ -330,7 +330,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeA
 	
 	@Override
 	public String getName() {
-		return "SettingsTab";
+		return "settingsTab";
 	}
 	
 	private static class KeyEditField extends TableCell<HotKeyEntry, KeyCombination> {

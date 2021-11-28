@@ -118,7 +118,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	
 	@Override
 	public String getName() {
-		return "DashboardTab";
+		return "dashboardTab";
 	}
 
 	@Override

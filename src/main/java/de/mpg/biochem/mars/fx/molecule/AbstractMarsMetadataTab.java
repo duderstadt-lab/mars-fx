@@ -407,6 +407,6 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	
 	@Override
 	public String getName() {
-		return "MetadataTab";
+		return "metadataTab";
 	}
 }

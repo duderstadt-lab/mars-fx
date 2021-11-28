@@ -125,7 +125,11 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
 		   JsonFactory jfactory = new JsonFactory();
 		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane", "moleculeDashboard");
+		   
+		   //Need for backward compatibility
 		   MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane", "moleculeDashboard");
+		   
      	   jParser.close();
      	   inputStream.close();
 		} catch (IOException e) {

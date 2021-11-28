@@ -121,7 +121,11 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
 		   JsonFactory jfactory = new JsonFactory();
 		   JsonParser jParser = jfactory.createParser(inputStream);
+		   MarsUtil.readJsonObject(jParser, this, "metadataTab", "centerPane", "marsMetadataDashboard");
+		   
+		   //Need for backward compatibility
 		   MarsUtil.readJsonObject(jParser, this, "MetadataTab", "centerPane", "marsMetadataDashboard");
+		   
      	   jParser.close();
      	   inputStream.close();
 		} catch (IOException e) {

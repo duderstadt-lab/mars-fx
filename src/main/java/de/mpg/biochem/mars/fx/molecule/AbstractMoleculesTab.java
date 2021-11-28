@@ -641,6 +641,6 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	
 	@Override
 	public String getName() {
-		return "MoleculesTab";
+		return "moleculesTab";
 	}
 }

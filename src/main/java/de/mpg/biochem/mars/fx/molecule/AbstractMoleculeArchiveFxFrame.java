@@ -1355,6 +1355,25 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		 * 
 		 */
 		
+		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
+			String name = moleculeArchiveTab.getName();
+			if (moleculeArchiveTab.getName().equals("dashboardTab"))
+				name = "DashboardTab";
+			else if (moleculeArchiveTab.getName().equals("commentsTab"))
+				name = "CommentsTab";
+			else if (moleculeArchiveTab.getName().equals("settingsTab"))
+				name = "SettingsTab";
+			else if (moleculeArchiveTab.getName().equals("metadataTab"))
+				name = "MetadataTab";
+			else if (moleculeArchiveTab.getName().equals("moleculesTab"))
+				name = "MoleculesTab";
+			
+			setJsonField(name, null, 
+				jParser -> {
+					moleculeArchiveTab.fromJSON(jParser);
+			 	});
+		}
+		
 		setJsonField("Window", null, 
 			jParser -> {
 				Rectangle rect = new Rectangle(0, 0, 800, 600);
