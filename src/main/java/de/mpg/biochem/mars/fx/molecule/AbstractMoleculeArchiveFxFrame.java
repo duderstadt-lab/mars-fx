@@ -426,7 +426,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileSaveJsonCopyAction = new Action("Save a Json Copy...", null, null, e -> saveJsonCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
 		Action fileSaveJsonVirtualStoreAction = new Action("Save a Json Virtual Store Copy...", null, null, e -> saveJsonVirtualStoreCopy());
-		Action importRoverSettingsAction = new Action("Import Rover Settings...", null, null, e -> importRoverSettings());
+		//Comment this out for now since it doesn't clear the settings before loading the new ones and
+		//I have to check on BDV...
+		//Action importRoverSettingsAction = new Action("Import Rover Settings...", null, null, e -> importRoverSettings());
 		Action fileCloseAction = new Action("Close", null, null, e -> close());
 		
 		fileMenu = ActionUtils.createMenu("File",
@@ -435,8 +437,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				fileSaveJsonCopyAction,
 				fileSaveVirtualStoreAction,
 				fileSaveJsonVirtualStoreAction,
-				null,
-				importRoverSettingsAction,
+				//null,
+				//importRoverSettingsAction,
 				null,
 				fileCloseAction);
 		
