@@ -124,6 +124,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -156,6 +157,7 @@ import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.molecule.DashboardTab.*;
 import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -424,6 +426,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileSaveJsonCopyAction = new Action("Save a Json Copy...", null, null, e -> saveJsonCopy());
 		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
 		Action fileSaveJsonVirtualStoreAction = new Action("Save a Json Virtual Store Copy...", null, null, e -> saveJsonVirtualStoreCopy());
+		Action importRoverSettingsAction = new Action("Import Rover Settings...", null, null, e -> importRoverSettings());
 		Action fileCloseAction = new Action("Close", null, null, e -> close());
 		
 		fileMenu = ActionUtils.createMenu("File",
@@ -432,6 +435,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				fileSaveJsonCopyAction,
 				fileSaveVirtualStoreAction,
 				fileSaveJsonVirtualStoreAction,
+				null,
+				importRoverSettingsAction,
 				null,
 				fileCloseAction);
 		
@@ -1093,6 +1098,37 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			
  	       new Thread(task).run();
 		}
+	}
+	
+	private void importRoverSettings() {
+		FileChooser fileChooser = new FileChooser();
+		
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("rover files (*.rover)", "*.rover");
+		fileChooser.getExtensionFilters().add(extFilter);
+		
+		File stateFile = fileChooser.showOpenDialog(this.tabsContainer.getScene().getWindow());
+		
+		if (stateFile == null || !stateFile.exists())
+        		return;
+		
+		lockFX("Loading Rover Settings...");
+		Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() throws Exception {
+ 	       		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
+ 	       	    JsonParser jParser = jfactory.createParser(inputStream);
+ 	       	    fromJSON(jParser);
+ 	       		jParser.close();
+ 	       		inputStream.close();
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+           	unlockFX();
+        });
+
+        new Thread(task).run();
 	}
 	
 	public Node getNode() {
