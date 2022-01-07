@@ -161,6 +161,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 		widgetPane = new JFXMasonryPane();
 		widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.BIN_PACKING);
+		widgetPane.setLimitRow(100000);
 		widgetPane.setCellWidth(50);
 		widgetPane.setCellHeight(50);
 		widgetPane.setPadding(new Insets(10, 10, 10, 10));
