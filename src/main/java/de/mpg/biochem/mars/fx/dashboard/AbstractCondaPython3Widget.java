@@ -92,6 +92,8 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
+		
+		loadImage();
 	}
 
 	@Override
@@ -170,10 +172,8 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 			 imageView.setFitHeight(rootHeight);
 		 }
 	}
-
-	@Override
-	public void run() {
-		runScript();
+	
+	private void loadImage() {
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
@@ -202,5 +202,11 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 				}
 			}
 		});
+	}
+
+	@Override
+	public void run() {
+		runScript();
+		loadImage();
 	}
 }
