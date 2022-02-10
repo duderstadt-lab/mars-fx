@@ -152,7 +152,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		loadButton.getStyleClass().add("icon-button");
 		loadButton.setAlignment(Pos.CENTER);
 
-		rt = new RotateTransition(Duration.millis(500), loadButton);
+		rt = new RotateTransition(Duration.millis(500), syncIcon);
 		rt.setInterpolator(Interpolator.LINEAR);
 		rt.setByAngle(0);
 		rt.setByAngle(360);
