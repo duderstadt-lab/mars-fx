@@ -152,7 +152,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	borderPane.setCenter(tabPane);
     	initializeToolBars();
     	borderPane.setTop(nonEditToolBar);
-		//borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		
 		// update activeDocumentEditor property
 		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
@@ -436,35 +435,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
  		tabPane.getSelectionModel().select(tab);
  		return DocumentEditor;
  	}
-
- 	private DocumentEditor[] getAllEditors() {
- 		ObservableList<Tab> tabs = tabPane.getTabs();
- 		DocumentEditor[] allEditors = new DocumentEditor[tabs.size()];
- 		for (int i = 0; i < tabs.size(); i++)
- 			allEditors[i] = (DocumentEditor) tabs.get(i).getUserData();
- 		return allEditors;
- 	}
-
- 	private DocumentEditor findPreviewEditor() {
- 		for (Tab tab : tabPane.getTabs()) {
- 			if (isPreviewEditor((DocumentEditor) tab.getUserData()))
- 				return (DocumentEditor) tab.getUserData();
- 		}
- 		return null;
- 	}
-
- 	private boolean isPreviewEditor(DocumentEditor DocumentEditor) {
- 		return DocumentEditor.getTab().getStyleClass().contains("preview");
- 	}
-
- 	private void setPreviewEditor(DocumentEditor DocumentEditor, boolean preview) {
- 		ObservableList<String> styleClasses = DocumentEditor.getTab().getStyleClass();
- 		if (preview) {
- 			if (!styleClasses.contains("preview"))
- 				styleClasses.add("preview");
- 		} else
- 			styleClasses.remove("preview");
- 	}
     
     public ArrayList<Menu> getMenus() {
 		return menus;
@@ -483,7 +453,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 			if (editMode.get()) {
 				borderPane.setTop(editToolBar);
 			} else {
-				getActiveDocumentEditor().showPreview();
 				borderPane.setTop(nonEditToolBar);
 			}
 		});
@@ -493,7 +462,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	this.archive = archive;
-    	//load all documents including default documents... This is also when archive will injected!!
     	for (String name : archive.properties().getDocumentNames())
     		newEditor(name);
 	}

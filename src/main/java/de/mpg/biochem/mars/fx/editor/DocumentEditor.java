@@ -105,8 +105,8 @@ public class DocumentEditor extends AnchorPane {
 		tab.setUserData(this);
 		
 		@SuppressWarnings("rawtypes")
-		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
-		ChangeListener editModeListener = (observable, oldValue, newValue) -> showEditor();
+		ChangeListener previewVisibleListener = (observable, oldValue, newValue) -> updateEditAndPreview();
+		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditAndPreview();
 		ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
 			if (newValue)
 				load();
@@ -116,16 +116,16 @@ public class DocumentEditor extends AnchorPane {
 			if(tab.isSelected()) {
 				Platform.runLater(() -> activated());
 
-				Options.markdownRendererProperty().addListener(previewTypeListener);
-				commentsTab.previewVisible.addListener(previewTypeListener);
+				Options.markdownRendererProperty().addListener(previewVisibleListener);
+				commentsTab.previewVisible.addListener(previewVisibleListener);
 				commentsTab.editMode.addListener(editModeListener);
 
 				//mainWindow.stageFocusedProperty.addListener(stageFocusedListener);
 			} else {
 				Platform.runLater(() -> deactivated());
 
-				Options.markdownRendererProperty().removeListener(previewTypeListener);
-				commentsTab.previewVisible.removeListener(previewTypeListener);
+				Options.markdownRendererProperty().removeListener(previewVisibleListener);
+				commentsTab.previewVisible.removeListener(previewVisibleListener);
 				commentsTab.editMode.removeListener(editModeListener);
 
 				//mainWindow.stageFocusedProperty.removeListener(stageFocusedListener);
@@ -178,45 +178,15 @@ public class DocumentEditor extends AnchorPane {
 	// 'canRedo' property
 	private final BooleanProperty canRedo = new SimpleBooleanProperty();
 	BooleanProperty canRedoProperty() { return canRedo; }
-
-	private boolean updatePreviewTypePending;
-	private void updatePreviewType() {
-		if (markdownPreviewPane == null)
-			return;
-
-		// avoid too many (and useless) runLater() invocations
-		if (updatePreviewTypePending)
-			return;
-		updatePreviewTypePending = true;
-
-		Platform.runLater(() -> {
-			updatePreviewTypePending = false;
-
-			MarkdownPreviewPane.Type previewType = getPreviewType();
-
-			markdownPreviewPane.setRendererType(Options.getMarkdownRenderer());
-			markdownPreviewPane.setType(previewType);
-
-			// add/remove previewPane from splitPane
-			ObservableList<Node> splitItems = splitPane.getItems();
-			Node previewPane = markdownPreviewPane.getNode();
-			if (previewType != Type.None) {
-				if (!splitItems.contains(previewPane))
-					splitItems.add(previewPane);
-			} else
-				splitItems.remove(previewPane);
-		});
-	}
 	
 	private void activated() {
 		if( tab.getTabPane() == null || !tab.isSelected())
 			return; // tab is already closed or no longer active
 
 		if (tab.getContent() != null) {
-			load();
-			updatePreviewType();
 			markdownEditorPane.setVisible(true);
 			markdownEditorPane.requestFocus();
+			updateEditAndPreview();
 			return;
 		}
 
@@ -236,6 +206,9 @@ public class DocumentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
 		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane.scrollYProperty());
 
+		markdownPreviewPane.setRendererType(Options.getMarkdownRenderer());
+		markdownPreviewPane.setType(MarkdownPreviewPane.Type.Web);
+		
 		// bind properties
 		readOnly.bind(markdownEditorPane.readOnlyProperty());
 
@@ -245,22 +218,52 @@ public class DocumentEditor extends AnchorPane {
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 
-		//splitPane = new SplitPane(markdownEditorPane.getNode());
 		splitPane = new SplitPane();
-		if (getPreviewType() != MarkdownPreviewPane.Type.None)
-			splitPane.getItems().add(markdownPreviewPane.getNode());
+		splitPane.setStyle("-fx-border-color: lightgray");
 		tab.setContent(splitPane);
 
-		updatePreviewType();
 		markdownEditorPane.setVisible(true);
 		markdownEditorPane.requestFocus();
 
 		// update 'editor' property
 		editor.set(markdownEditorPane);
 		
+		updateEditAndPreview();
+		
 		//We unbind selections until edit mode is activated.
 		//markdownPreviewPane.editorSelectionProperty().unbind();
 		//markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+	}
+	
+	private boolean updateEditAndPreviewPending;
+	public void updateEditAndPreview() {
+		if (markdownPreviewPane == null || markdownPreviewPane == null)
+			return;
+		
+		// avoid too many (and useless) runLater() invocations
+		if (updateEditAndPreviewPending)
+			return;
+		
+		updateEditAndPreviewPending = true;
+
+		Platform.runLater(() -> {
+			updateEditAndPreviewPending = false;
+			ObservableList<Node> splitItems = splitPane.getItems();	
+			if (commentsTab.editMode.get()) 
+				showEditor();
+			else if (splitItems.contains(markdownEditorPane.getNode())) {
+				splitItems.remove(markdownEditorPane.getNode());
+				markdownPreviewPane.editorSelectionProperty().unbind();
+				markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+				commentsTab.previewVisible.set(true);
+			}
+				
+			if (commentsTab.previewVisible.get())
+				showPreview();
+			else if (splitItems.contains(markdownPreviewPane.getNode())) {
+				splitItems.remove(markdownPreviewPane.getNode());
+			}		
+		});
 	}
 	
 	public void load() {
@@ -284,18 +287,12 @@ public class DocumentEditor extends AnchorPane {
 		if (markdownEditorPane != null)
 			markdownEditorPane.requestFocus();
 	}
-
+	
 	public void showPreview() {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		Node previewPane = markdownPreviewPane.getNode();
 		if (!splitItems.contains(previewPane)) {
-			commentsTab.previewVisible.set(true);
 			splitItems.add(previewPane);
-		}
-		if (splitItems.contains(markdownEditorPane.getNode())) {
-			splitItems.remove(markdownEditorPane.getNode());
-			markdownPreviewPane.editorSelectionProperty().unbind();
-			markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 		}
 	}
 	
@@ -306,15 +303,6 @@ public class DocumentEditor extends AnchorPane {
 			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());				
 		}
 	}
-
-	private MarkdownPreviewPane.Type getPreviewType() {
-		MarkdownPreviewPane.Type previewType = Type.None;
-		if (commentsTab.previewVisible.get())
-			previewType = MarkdownPreviewPane.Type.Web;
-		else 
-			previewType = Type.None;
-		return previewType;
-	}
 	
 	public void save() {
 		if (archive != null) {
@@ -322,65 +310,5 @@ public class DocumentEditor extends AnchorPane {
 			markdownEditorPane.getUndoManager().mark();
 		}
 	}
-
-	/*
-	private void initialize() {
-		markdownEditorPane = new MarkdownEditorPane();
-		markdownPreviewPane = new MarkdownPreviewPane();
-
-		markdownEditorPane.pathProperty().bind(path);
-
-		// clear undo history after first load
-		markdownEditorPane.getUndoManager().forgetHistory();
-
-		// bind preview to editor
-		markdownPreviewPane.pathProperty().bind(pathProperty());
-		markdownPreviewPane.markdownTextProperty().bind(markdownEditorPane.markdownTextProperty());
-		markdownPreviewPane.markdownASTProperty().bind(markdownEditorPane.markdownASTProperty());
-		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
-		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane.scrollYProperty());
-		
-		// bind properties
-		readOnly.bind(markdownEditorPane.readOnlyProperty());
-
-		// bind the editor undo manager to the properties
-		UndoManager<?> undoManager = markdownEditorPane.getUndoManager();
-		modified.bind(Bindings.not(undoManager.atMarkedPositionProperty()));
-		canUndo.bind(undoManager.undoAvailableProperty());
-		canRedo.bind(undoManager.redoAvailableProperty());
-
-		//splitPane = new SplitPane(markdownEditorPane.getNode());
-		if (getPreviewType() != MarkdownPreviewPane.Type.None)
-			splitPane = new SplitPane(markdownPreviewPane.getNode());
-		
-		getChildren().add(splitPane);
-        AnchorPane.setTopAnchor(splitPane, 0.0);
-        AnchorPane.setBottomAnchor(splitPane, 0.0);
-        AnchorPane.setRightAnchor(splitPane, 0.0);
-        AnchorPane.setLeftAnchor(splitPane, 0.0);
-
-		updatePreviewType();
-		markdownEditorPane.requestFocus();
-
-		// update 'editor' property
-		editor.set(markdownEditorPane);
-		
-		//We unbind selections until edit mode is activated.
-		markdownPreviewPane.editorSelectionProperty().unbind();
-		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
-	}
-
-	
-	public void setComments(String comments) {
-		markdownEditorPane.setMarkdown(comments);
-		markdownEditorPane.getUndoManager().mark();
-	}
-
-	public String getComments() {
-		String comments = markdownEditorPane.getMarkdown();
-		markdownEditorPane.getUndoManager().mark();
-		return comments;
-	}
-*/
 }
 
