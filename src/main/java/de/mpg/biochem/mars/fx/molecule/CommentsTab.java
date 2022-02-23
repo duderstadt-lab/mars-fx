@@ -142,13 +142,17 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
+		tabPane.setStyle("");
+		tabPane.getStylesheets().clear();
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
+		
 		borderPane = new BorderPane();
     	borderPane.getStyleClass().add("main");
     	borderPane.setPrefSize(800, 800);
     	borderPane.setCenter(tabPane);
     	initializeToolBars();
     	borderPane.setTop(nonEditToolBar);
-		borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
+		//borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		
 		// update activeDocumentEditor property
 		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
@@ -189,6 +193,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
     	nonEditToolBar = new ToolBar();
     	nonEditToolBar.getItems().add(0, editModeButton);
+    	nonEditToolBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
 		// Edit actions
 		Action editUndoAction = new Action(Messages.get("MainWindow.editUndoAction"), "Shortcut+Z", UNDO,
@@ -339,6 +344,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)));
 		
 		editToolBar.getItems().add(0, new Separator());
+		
+		editToolBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 
 		// horizontal spacer
 		Region spacer = new Region();
@@ -487,7 +494,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	this.archive = archive;
     	//load all documents including default documents... This is also when archive will injected!!
-    	
+    	for (String name : archive.properties().getDocumentNames())
+    		newEditor(name);
 	}
 	
 	public void setEditMode(boolean editmode) {
@@ -500,11 +508,13 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {
-		//Save all documents back to the archive
+		for (Tab tab : tabPane.getTabs())
+			((DocumentEditor)tab.getUserData()).save();
 	}
 	
 	public void saveComments() {
-		//Save all documents back to the archive
+		for (Tab tab : tabPane.getTabs())
+			((DocumentEditor)tab.getUserData()).save();
 	}
 
 	@Override
@@ -512,8 +522,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	protected void createIOMaps() {
-		// TODO Auto-generated method stub
-		
+		// Currently we are not saving any settings into the rover file. The documents are saved back to the archive.
 	}
 
 	@Override

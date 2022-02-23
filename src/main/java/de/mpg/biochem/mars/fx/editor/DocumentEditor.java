@@ -97,6 +97,7 @@ public class DocumentEditor extends AnchorPane {
 
 	public DocumentEditor(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
 		this.commentsTab = commentsTab;
+		this.name = name;
 		tab.setText(name);
 		this.archive = archive;
 		
@@ -105,6 +106,7 @@ public class DocumentEditor extends AnchorPane {
 		
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
+		ChangeListener editModeListener = (observable, oldValue, newValue) -> showEditor();
 		ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
 			if (newValue)
 				load();
@@ -116,9 +118,7 @@ public class DocumentEditor extends AnchorPane {
 
 				Options.markdownRendererProperty().addListener(previewTypeListener);
 				commentsTab.previewVisible.addListener(previewTypeListener);
-				commentsTab.htmlSourceVisible.addListener(previewTypeListener);
-				commentsTab.markdownAstVisible.addListener(previewTypeListener);
-				commentsTab.externalVisible.addListener(previewTypeListener);
+				commentsTab.editMode.addListener(editModeListener);
 
 				//mainWindow.stageFocusedProperty.addListener(stageFocusedListener);
 			} else {
@@ -126,19 +126,11 @@ public class DocumentEditor extends AnchorPane {
 
 				Options.markdownRendererProperty().removeListener(previewTypeListener);
 				commentsTab.previewVisible.removeListener(previewTypeListener);
-				commentsTab.htmlSourceVisible.removeListener(previewTypeListener);
-				commentsTab.markdownAstVisible.removeListener(previewTypeListener);
-				commentsTab.externalVisible.removeListener(previewTypeListener);
+				commentsTab.editMode.removeListener(editModeListener);
 
 				//mainWindow.stageFocusedProperty.removeListener(stageFocusedListener);
 			}
 		});
-		
-		//Options.markdownRendererProperty().addListener(previewTypeListener);
-		//previewVisible.addListener(previewTypeListener);
-		
-		//ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditMode();
-		//editMode.addListener(editModeListener);
 	}
 	
 	public Node getNode() {
@@ -253,7 +245,8 @@ public class DocumentEditor extends AnchorPane {
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 
-		splitPane = new SplitPane(markdownEditorPane.getNode());
+		//splitPane = new SplitPane(markdownEditorPane.getNode());
+		splitPane = new SplitPane();
 		if (getPreviewType() != MarkdownPreviewPane.Type.None)
 			splitPane.getItems().add(markdownPreviewPane.getNode());
 		tab.setContent(splitPane);
@@ -264,6 +257,10 @@ public class DocumentEditor extends AnchorPane {
 
 		// update 'editor' property
 		editor.set(markdownEditorPane);
+		
+		//We unbind selections until edit mode is activated.
+		//markdownPreviewPane.editorSelectionProperty().unbind();
+		//markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 	}
 	
 	public void load() {
@@ -287,42 +284,12 @@ public class DocumentEditor extends AnchorPane {
 		if (markdownEditorPane != null)
 			markdownEditorPane.requestFocus();
 	}
-	/*
-	private boolean updateEditModePending;
-	private void updateEditMode() {
-		if (markdownPreviewPane == null)
-			return;
 
-		// avoid too many (and useless) runLater() invocations
-		if (updateEditModePending)
-			return;
-		updateEditModePending = true;
-		
-		Platform.runLater(() -> {
-			updateEditModePending = false;
-			
-			MarkdownPreviewPane.Type previewType = getPreviewType();
-
-			markdownPreviewPane.setRendererType(Options.getMarkdownRenderer());
-			markdownPreviewPane.setType(previewType);
-
-			// add/remove editopPane from splitPane
-			ObservableList<Node> splitItems = splitPane.getItems();
-			Node previewPane = markdownPreviewPane.getNode();
-			if (!splitItems.contains(markdownEditorPane.getNode())) {
-				showEditor();				
-			} else {
-				showPreview();
-			}
-		});
-	}
-*/
 	public void showPreview() {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		Node previewPane = markdownPreviewPane.getNode();
 		if (!splitItems.contains(previewPane)) {
 			commentsTab.previewVisible.set(true);
-			System.out.println("adding Preview");
 			splitItems.add(previewPane);
 		}
 		if (splitItems.contains(markdownEditorPane.getNode())) {
@@ -347,6 +314,13 @@ public class DocumentEditor extends AnchorPane {
 		else 
 			previewType = Type.None;
 		return previewType;
+	}
+	
+	public void save() {
+		if (archive != null) {
+			archive.properties().putDocument(name, markdownEditorPane.getMarkdown());
+			markdownEditorPane.getUndoManager().mark();
+		}
 	}
 
 	/*
@@ -395,7 +369,7 @@ public class DocumentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().unbind();
 		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 	}
-*/
+
 	
 	public void setComments(String comments) {
 		markdownEditorPane.setMarkdown(comments);
@@ -407,5 +381,6 @@ public class DocumentEditor extends AnchorPane {
 		markdownEditorPane.getUndoManager().mark();
 		return comments;
 	}
+*/
 }
 
