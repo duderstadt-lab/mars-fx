@@ -125,76 +125,77 @@
     -fx-background-color: red;
 }
 
-
 /*---- project tree view ----*/
 
 .main .project-tree-view {
     -fx-padding: 1 0 0 0;
 }
 
-
 /*---- main tab pane ----*/
-
-.main .tab-pane {
+.tab-pane {
 	-mwfx-tab-background: derive(-fx-background,25%);
 	-mwfx-tab-active: #f47806;
-
-    -fx-tab-max-width: 10em;
 }
 
-.main .tab-pane > .tab-header-area {
-	-fx-padding: 0 0.25em 0 0;
-}
-
-.main .tab-pane > .tab-header-area > .tab-header-background {
-	-fx-background-color: -fx-outer-border, transparent, -mwfx-tab-background;
-	-fx-background-insets: 1 1 0 1, 0 0 1 0, 1;
-}
-
-.main .tab-pane > .tab-header-area > .headers-region > .tab {
+.tab-pane > .tab-header-area > .headers-region > .tab {
 	-fx-background-color: -mwfx-tab-background;
-	-fx-background-insets: 0 1 1 0;
+	-fx-background-insets: 0 0 0 0;
 	-fx-background-radius: 0;
-	-fx-padding: 0.5em 0.25em 0.5em 1em;
+	-fx-padding: 0em 0em 0em 0em;
 }
-.main .tab-pane > .tab-header-area > .headers-region > .tab.preview {
+
+.tab-pane {
+  -fx-tab-min-height:35px;
+  -fx-tab-max-height:35px;
+}
+
+.tab-pane > .tab-header-area {
+	-fx-padding: 0 0 0em 0 0;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+	-fx-background-color: -fx-outer-border, transparent, -mwfx-tab-background;
+	-fx-background-insets: 0 0 0 0, 0 0 0 0, 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab.preview {
 	-fx-font-style: italic;
 }
 
 /* orange marker for selected/hover tab */
-.main .tab-pane > .tab-header-area > .headers-region > .tab:selected {
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
 	-fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
 	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
 }
-.main .tab-pane > .tab-header-area > .headers-region > .tab:hover {
+.tab-pane > .tab-header-area > .headers-region > .tab:hover {
 	-fx-background-color: derive(-mwfx-tab-active,35%), -mwfx-tab-background;
 	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
 }
 
 /* make tab texts brighter, except selected tab */
-.main .tab-pane .tab-label {
+.tab-pane .tab-label {
 	-fx-text-fill: derive(-fx-text-base-color,35%);
 }
-.main .tab-pane .tab:selected .tab-label,
-.main .tab-pane .tab:hover .tab-label {
+.tab-pane .tab:selected .tab-label,
+.tab-pane .tab:hover .tab-label {
 	-fx-text-fill: -fx-text-base-color;
 }
 
-.main .tab-pane .focus-indicator {
+.tab-pane .focus-indicator {
 	visibility: hidden;
 }
 
 
 /* hide tab-close-button by default; show it only for selected tab and on hover */
-.main .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
 	-fx-background-color: transparent;
 }
-.main .tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
-.main .tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
+.tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
+.tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
 	-fx-background-color: -fx-mark-color;
 	-fx-opacity: 0.4;
 }
-.main .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
 	-fx-background-color: red;
 	-fx-opacity: 1.0;
 }

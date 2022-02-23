@@ -144,7 +144,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
+		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 		
 		borderPane = new BorderPane();
     	borderPane.getStyleClass().add("main");
