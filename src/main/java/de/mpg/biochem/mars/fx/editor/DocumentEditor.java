@@ -107,10 +107,10 @@ public class DocumentEditor extends AnchorPane {
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewVisibleListener = (observable, oldValue, newValue) -> updateEditAndPreview();
 		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditAndPreview();
-		ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
-			if (newValue)
-				load();
-		};
+		//ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
+		//	if (newValue)
+		//		load();
+		//};
 		
 		tab.setOnSelectionChanged(e -> {
 			if(tab.isSelected()) {
@@ -195,7 +195,10 @@ public class DocumentEditor extends AnchorPane {
 		markdownEditorPane = new MarkdownEditorPane();
 		markdownPreviewPane = new MarkdownPreviewPane();
 
-		load();
+		String markdown = archive.properties().getDocument(name);
+
+		markdownEditorPane.setMarkdown(markdown);
+		//markdownEditorPane.getUndoManager().mark();
 
 		// clear undo history after first load
 		markdownEditorPane.getUndoManager().forgetHistory();
@@ -264,16 +267,6 @@ public class DocumentEditor extends AnchorPane {
 				splitItems.remove(markdownPreviewPane.getNode());
 			}		
 		});
-	}
-	
-	public void load() {
-		if (markdownEditorPane == null)
-			return;
-
-		String markdown = archive.properties().getDocument(name);
-
-		markdownEditorPane.setMarkdown(markdown);
-		markdownEditorPane.getUndoManager().mark();
 	}
 
 	private void deactivated() {
