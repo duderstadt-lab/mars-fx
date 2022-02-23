@@ -377,7 +377,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     				tabSet.stream().filter(maTab -> newValue == maTab.getTab()).findFirst().ifPresent(maTab -> updateMenus(maTab.getMenus()));
     					
     				if (oldValue == commentsTab.getTab()) {
-    					commentsTab.getCommentPane().setEditMode(false);
+    					commentsTab.setEditMode(false);
     					commentsTab.saveComments();
     				} else if (oldValue == imageMetadataTab.getTab()) {
     					imageMetadataTab.saveCurrentRecord();

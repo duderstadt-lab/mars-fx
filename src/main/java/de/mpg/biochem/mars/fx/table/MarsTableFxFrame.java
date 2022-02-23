@@ -71,7 +71,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
-import de.mpg.biochem.mars.fx.editor.CommentPane;
+//import de.mpg.biochem.mars.fx.editor.CommentPane;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
@@ -124,7 +124,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 	private MarsTablePlotPane plotPane;
 	
 	private MarsTableDashboard marsTableDashboardPane;
-	private CommentPane commentPane;
+//	private CommentPane commentPane;
 	
 	protected MenuBar menuBar;
 	
@@ -235,20 +235,20 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 		marsTableDashboardPane = new MarsTableDashboard(context, table);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
 		
-		commentTab = new Tab();
-		commentTab.setText("");
+		//commentTab = new Tab();
+		//commentTab.setText("");
 		
-		Region bookIcon = new Region();
-        bookIcon.getStyleClass().add("smallBookIcon");
+		//Region bookIcon = new Region();
+        //bookIcon.getStyleClass().add("smallBookIcon");
 		
-		commentTab.setGraphic(bookIcon);
-		commentPane = new CommentPane();
-		commentTab.setContent(commentPane.getNode());
+		//commentTab.setGraphic(bookIcon);
+		//commentPane = new CommentPane();
+		//commentTab.setContent(commentPane.getNode());
 		
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(dashboardTab);
-		tabPane.getTabs().add(commentTab);
+		//tabPane.getTabs().add(commentTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		
 		tabPane.setStyle("");
@@ -257,7 +257,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/table/TableWindowPane.css");
 		
 		tabPane.getSelectionModel().select(dataTableTab);
-		
+		/*
 		tabPane.getSelectionModel().selectedItemProperty().addListener(
 	    		new ChangeListener<Tab>() {
 	    			@Override
@@ -273,6 +273,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 						} 
 	    			}
 	    		});
+		*/
 		
 		return tabPane;
 	}
@@ -416,11 +417,11 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements M
 					}, 
 					jParser -> marsTableDashboardPane.fromJSON(jParser));
 			
-			setJsonField("comments", 
-					jGenerator -> {
-						jGenerator.writeStringField("comments", commentPane.getComments());
-					},
-					jParser -> commentPane.setComments(jParser.getText()));
+//			setJsonField("comments", 
+//					jGenerator -> {
+//						jGenerator.writeStringField("comments", commentPane.getComments());
+//					},
+//					jParser -> commentPane.setComments(jParser.getText()));
 	}
 	
 	protected void saveState(String path) throws IOException {

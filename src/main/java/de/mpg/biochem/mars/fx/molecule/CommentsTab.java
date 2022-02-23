@@ -58,8 +58,8 @@ import org.controlsfx.control.PopOver.ArrowLocation;
 import org.scijava.Context;
 
 import de.mpg.biochem.mars.fx.*;
-import de.mpg.biochem.mars.fx.editor.CommentEditor;
-import de.mpg.biochem.mars.fx.editor.CommentPane;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.editor.SmartEdit;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensionsPane;
@@ -67,6 +67,7 @@ import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -74,49 +75,436 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CODE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COPY;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CUT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.EYE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FILE_CODE_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.HEADER;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ITALIC;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINK;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_OL;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_UL;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PASTE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PENCIL;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PICTURE_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUOTE_LEFT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REPEAT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.RETWEET;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SEARCH;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STRIKETHROUGH;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
+
+import de.mpg.biochem.mars.fx.Messages;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ListChangeListener;
+
+import javafx.collections.ObservableList;
+
 public class CommentsTab extends AbstractMoleculeArchiveTab {
-	private CommentPane commentPane;
+	
+	final BooleanProperty stageFocusedProperty = new SimpleBooleanProperty();
+	
+	private BorderPane borderPane;
+	private final TabPane tabPane;
+	private final ReadOnlyObjectWrapper<DocumentEditor> activeDocumentEditor = new ReadOnlyObjectWrapper<>();
+	
+	public final PrefsBooleanProperty editMode = new PrefsBooleanProperty(false);
+	
+	public final PrefsBooleanProperty previewVisible = new PrefsBooleanProperty(true);
+	public final PrefsBooleanProperty htmlSourceVisible = new PrefsBooleanProperty();
+	public final PrefsBooleanProperty markdownAstVisible = new PrefsBooleanProperty();
+	public final PrefsBooleanProperty externalVisible = new PrefsBooleanProperty();
+	
+	private ArrayList<Menu> menus;
+	
+	private Node extensionsButton;
+	private ToolBar nonEditToolBar;
+	private ToolBar editToolBar;
 	
 	public CommentsTab(final Context context) {
 		super(context);
 		
 		Region bookIcon = new Region();
         bookIcon.getStyleClass().add("bookIcon");
-		
 		setIcon(bookIcon);
-    	
-    	commentPane = new CommentPane();
+		
+		Options.load(getOptions());
+		
+		tabPane = new TabPane();
+		tabPane.setFocusTraversable(false);
+		tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
+		borderPane = new BorderPane();
+    	borderPane.getStyleClass().add("main");
+    	borderPane.setPrefSize(800, 800);
+    	borderPane.setCenter(tabPane);
+    	initializeToolBars();
+    	borderPane.setTop(nonEditToolBar);
+		borderPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
+		
+		// update activeDocumentEditor property
+		tabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldTab, newTab) -> {
+			activeDocumentEditor.set((newTab != null) ? (DocumentEditor) newTab.getUserData() : null);
+		});
+		
+		tabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
+			while (c.next()) {
+				if (c.wasRemoved()) {
+					for (Tab tab : c.getRemoved()) {
+						((DocumentEditor)tab.getUserData()).dispose();
+					}
+				}
+			}
+		});
+		
+		//Utils.fixSpaceAfterDeadKey(scene);
+		
+		//Platform.runLater(() -> stageFocusedProperty.bind(scene.getWindow().focusedProperty()));
 
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
 		
-		getTab().setContent(commentPane.getNode());
+		getTab().setContent(borderPane);
 	}
+	
+	static private Preferences getPrefsRoot() {
+		return Preferences.userRoot().node("markdownwriterfx");
+	}
+
+	static Preferences getOptions() {
+		return getPrefsRoot().node("options");
+	}
+    
+    private void initializeToolBars() {
+    	Action editModeAction = new Action("Edit", "Shortcut+E", PENCIL,
+				null, null, editMode);
+		Node editModeButton = ActionUtils.createToolBarButton(editModeAction);
+
+    	nonEditToolBar = new ToolBar();
+    	nonEditToolBar.getItems().add(0, editModeButton);
+    	
+		// Edit actions
+		Action editUndoAction = new Action(Messages.get("MainWindow.editUndoAction"), "Shortcut+Z", UNDO,
+				e -> getActiveEditor().undo());
+		Action editRedoAction = new Action(Messages.get("MainWindow.editRedoAction"), "Shortcut+Y", REPEAT,
+				e -> getActiveEditor().redo());
+		Action editCutAction = new Action(Messages.get("MainWindow.editCutAction"), "Shortcut+X", CUT,
+				e -> getActiveEditor().cut());
+		Action editCopyAction = new Action(Messages.get("MainWindow.editCopyAction"), "Shortcut+C", COPY,
+				e -> getActiveEditor().copy());
+		Action editPasteAction = new Action(Messages.get("MainWindow.editPasteAction"), "Shortcut+V", PASTE,
+				e -> getActiveEditor().paste());
+		Action editSelectAllAction = new Action(Messages.get("MainWindow.editSelectAllAction"), "Shortcut+A", null,
+				e -> getActiveEditor().selectAll());
+		Action editFindAction = new Action(Messages.get("MainWindow.editFindAction"), "Shortcut+F", SEARCH,
+				e -> getActiveEditor().find(false));
+		Action editReplaceAction = new Action(Messages.get("MainWindow.editReplaceAction"), "Shortcut+H", RETWEET,
+				e -> getActiveEditor().find(true));
+		Action editFindNextAction = new Action(Messages.get("MainWindow.editFindNextAction"), "F3", null,
+				e -> getActiveEditor().findNextPrevious(true));
+		Action editFindPreviousAction = new Action(Messages.get("MainWindow.editFindPreviousAction"), "Shift+F3", null,
+				e -> getActiveEditor().findNextPrevious(false));
+
+		Action editFormatAllAction = new Action(Messages.get("MainWindow.editFormatAll"), "Shortcut+Shift+F", null,
+				e -> getActiveSmartEdit().format(false, null));
+		Action editFormatSelectionAction = new Action(Messages.get("MainWindow.editFormatSelection"), "Shortcut+Shift+Alt+F", null,
+				e -> getActiveSmartEdit().format(true, null));
+		
+		// View actions
+		Action viewPreviewAction = new Action(Messages.get("MainWindow.viewPreviewAction"), null, EYE,
+				null, null, previewVisible);
+		Action viewShowLineNoAction = new Action(Messages.get("MainWindow.viewShowLineNoAction"), null, null,
+				null, null, Options.showLineNoProperty());
+		Action viewShowWhitespaceAction = new Action(Messages.get("MainWindow.viewShowWhitespaceAction"), "Alt+W", null,
+				null, null, Options.showWhitespaceProperty());
+		Action viewShowImagesEmbeddedAction = new Action(Messages.get("MainWindow.viewShowImagesEmbeddedAction"), "Alt+I", null,
+				null, null, Options.showImagesEmbeddedProperty());
+
+		// Insert actions
+		Action insertBoldAction = new Action(Messages.get("MainWindow.insertBoldAction"), "Shortcut+B", BOLD,
+				e -> getActiveSmartEdit().insertBold(Messages.get("MainWindow.insertBoldText")));
+		Action insertItalicAction = new Action(Messages.get("MainWindow.insertItalicAction"), "Shortcut+I", ITALIC,
+				e -> getActiveSmartEdit().insertItalic(Messages.get("MainWindow.insertItalicText")));
+		Action insertStrikethroughAction = new Action(Messages.get("MainWindow.insertStrikethroughAction"), "Shortcut+T", STRIKETHROUGH,
+				e -> getActiveSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")));
+		Action insertCodeAction = new Action(Messages.get("MainWindow.insertCodeAction"), "Shortcut+K", CODE,
+				e -> getActiveSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")));
+
+		Action insertLinkAction = new Action(Messages.get("MainWindow.insertLinkAction"), "Shortcut+L", LINK,
+				e -> getActiveSmartEdit().insertLink());
+		Action insertImageAction = new Action(Messages.get("MainWindow.insertImageAction"), "Shortcut+G", PICTURE_ALT,
+				e -> getActiveSmartEdit().insertImage());
+
+		Action insertUnorderedListAction = new Action(Messages.get("MainWindow.insertUnorderedListAction"), "Shortcut+U", LIST_UL,
+				e -> getActiveSmartEdit().insertUnorderedList());
+		Action insertOrderedListAction = new Action(Messages.get("MainWindow.insertOrderedListAction"), "Shortcut+Shift+U", LIST_OL,
+				e -> getActiveSmartEdit().surroundSelection("\n\n1. ", ""));
+		Action insertBlockquoteAction = new Action(Messages.get("MainWindow.insertBlockquoteAction"), "Ctrl+Q", QUOTE_LEFT, // not Shortcut+Q because of conflict on Mac
+				e -> getActiveSmartEdit().surroundSelection("\n\n> ", ""));
+		Action insertFencedCodeBlockAction = new Action(Messages.get("MainWindow.insertFencedCodeBlockAction"), "Shortcut+Shift+K", FILE_CODE_ALT,
+				e -> getActiveSmartEdit().surroundSelection("\n\n```\n", "\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")));
+
+		Action insertHeader1Action = new Action(Messages.get("MainWindow.insertHeader1Action"), "Shortcut+1", HEADER,
+				e -> getActiveSmartEdit().insertHeading(1, Messages.get("MainWindow.insertHeader1Text")));
+		Action insertHeader2Action = new Action(Messages.get("MainWindow.insertHeader2Action"), "Shortcut+2", HEADER,
+				e -> getActiveSmartEdit().insertHeading(2, Messages.get("MainWindow.insertHeader2Text")));
+		Action insertHeader3Action = new Action(Messages.get("MainWindow.insertHeader3Action"), "Shortcut+3", HEADER,
+				e -> getActiveSmartEdit().insertHeading(3, Messages.get("MainWindow.insertHeader3Text")));
+		Action insertHeader4Action = new Action(Messages.get("MainWindow.insertHeader4Action"), "Shortcut+4", HEADER,
+				e -> getActiveSmartEdit().insertHeading(4, Messages.get("MainWindow.insertHeader4Text")));
+		Action insertHeader5Action = new Action(Messages.get("MainWindow.insertHeader5Action"), "Shortcut+5", HEADER,
+				e -> getActiveSmartEdit().insertHeading(5, Messages.get("MainWindow.insertHeader5Text")));
+		Action insertHeader6Action = new Action(Messages.get("MainWindow.insertHeader6Action"), "Shortcut+6", HEADER,
+				e -> getActiveSmartEdit().insertHeading(6, Messages.get("MainWindow.insertHeader6Text")));
+
+		Action insertHorizontalRuleAction = new Action(Messages.get("MainWindow.insertHorizontalRuleAction"), null, null,
+				e -> getActiveSmartEdit().surroundSelection("\n\n---\n\n", ""));
+
+		Menu editMenu = ActionUtils.createMenu("Edit",
+				editUndoAction,
+				editRedoAction,
+				null,
+				editCutAction,
+				editCopyAction,
+				editPasteAction,
+				editSelectAllAction,
+				null,
+				editFindAction,
+				editReplaceAction,
+				null,
+				editFindNextAction,
+				editFindPreviousAction,
+				null,
+				editFormatAllAction,
+				editFormatSelectionAction);
+
+		Menu viewMenu = ActionUtils.createMenu("View",
+				viewPreviewAction,
+				null,
+				viewShowLineNoAction,
+				viewShowWhitespaceAction);
+		
+		//,viewShowImagesEmbeddedAction);
+
+		Menu insertMenu = ActionUtils.createMenu("Insert",
+				insertBoldAction,
+				insertItalicAction,
+				insertStrikethroughAction,
+				insertCodeAction,
+				null,
+				//insertLinkAction,
+				//insertImageAction,
+				//null,
+				insertUnorderedListAction,
+				insertOrderedListAction,
+				insertBlockquoteAction,
+				insertFencedCodeBlockAction,
+				null,
+				insertHeader1Action,
+				insertHeader2Action,
+				insertHeader3Action,
+				insertHeader4Action,
+				insertHeader5Action,
+				insertHeader6Action,
+				null,
+				insertHorizontalRuleAction);
+		
+		menus = new ArrayList<Menu>();
+		
+		menus.add(editMenu);
+		menus.add(viewMenu);
+		menus.add(insertMenu);
+
+		//---- ToolBar ----
+
+		editToolBar = ActionUtils.createToolBar(
+				editUndoAction,
+				editRedoAction,
+				null,
+				new Action(insertBoldAction, createActiveEditBooleanProperty(SmartEdit::boldProperty)),
+				new Action(insertItalicAction, createActiveEditBooleanProperty(SmartEdit::italicProperty)),
+				new Action(insertCodeAction, createActiveEditBooleanProperty(SmartEdit::codeProperty)),
+				new Action(insertUnorderedListAction, createActiveEditBooleanProperty(SmartEdit::unorderedListProperty)),
+				new Action(insertOrderedListAction, createActiveEditBooleanProperty(SmartEdit::orderedListProperty)),
+				new Action(insertBlockquoteAction, createActiveEditBooleanProperty(SmartEdit::blockquoteProperty)),
+				new Action(insertFencedCodeBlockAction, createActiveEditBooleanProperty(SmartEdit::fencedCodeProperty)),
+				null,
+				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)));
+		
+		editToolBar.getItems().add(0, new Separator());
+
+		// horizontal spacer
+		Region spacer = new Region();
+		HBox.setHgrow(spacer, Priority.ALWAYS);
+		editToolBar.getItems().add(spacer);
+
+		// preview renderer type choice box
+		ChoiceBox<RendererType> previewRenderer = new ChoiceBox<>();
+		previewRenderer.setFocusTraversable(false);
+		previewRenderer.getItems().addAll(RendererType.values());
+		previewRenderer.getSelectionModel().select(Options.getMarkdownRenderer());
+		previewRenderer.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
+			Options.setMarkdownRenderer(n);
+		});
+		Options.markdownRendererProperty().addListener((ob, o, n) -> {
+			previewRenderer.getSelectionModel().select(n);
+		});
+
+		Action editModeAction2 = new Action("Edit", "Shortcut+E", PENCIL,
+				null, null, editMode);
+		Node editModeButton2 = ActionUtils.createToolBarButton(editModeAction2);
+
+    	editToolBar.getItems().add(0, editModeButton2);
+		
+		// preview actions
+		Node previewButton = ActionUtils.createToolBarButton(viewPreviewAction);
+		editToolBar.getItems().add(previewButton);
+		
+    	ChangeListener editModeListener = (observable, oldValue, newValue) -> updateToolsAndMenus();
+    	editMode.addListener(editModeListener);
+	}
+    
+    private MarkdownEditorPane getActiveEditor() {
+		return getActiveDocumentEditor().getEditor();
+	}
+
+	private SmartEdit getActiveSmartEdit() {
+		return getActiveEditor().getSmartEdit();
+	}
+    
+    /**
+	 * Creates a boolean property that is bound to another boolean value
+	 * of the active editor's SmartEdit.
+	 */
+	private BooleanProperty createActiveEditBooleanProperty(Function<SmartEdit, ObservableBooleanValue> func) {
+		BooleanProperty b = new SimpleBooleanProperty() {
+			@Override
+			public void set(boolean newValue) {
+				// invoked when the user invokes an action
+				// do not try to change SmartEdit properties because this
+				// would throw a "bound value cannot be set" exception
+			}
+		};
+
+		ChangeListener<? super DocumentEditor> listener = (observable, oldDocumentEditor, newDocumentEditor) -> {
+			b.unbind();
+			if (newDocumentEditor != null) {
+				if (newDocumentEditor.getEditor() != null)
+					b.bind(func.apply(newDocumentEditor.getEditor().getSmartEdit()));
+				else {
+					newDocumentEditor.editorProperty().addListener((ob, o, n) -> {
+						b.bind(func.apply(n.getSmartEdit()));
+					});
+				}
+			} else
+				b.set(false);
+		};
+		DocumentEditor documentEditor = getActiveDocumentEditor();
+		listener.changed(null, null, documentEditor);
+		activeDocumentEditorProperty().addListener(listener);
+		return b;
+	}
+    
+    // 'activeDocumentEditor' property
+ 	DocumentEditor getActiveDocumentEditor() { return activeDocumentEditor.get(); }
+ 	ReadOnlyObjectProperty<DocumentEditor> activeDocumentEditorProperty() {
+ 		return activeDocumentEditor.getReadOnlyProperty();
+ 	}
+
+ 	DocumentEditor newEditor(String name) {
+ 		DocumentEditor DocumentEditor = new DocumentEditor(archive, this, name);
+ 		//DocumentEditor.getTab().setOnCloseRequest(e -> {
+ 		//	if (!canCloseEditor(DocumentEditor))
+ 		//		e.consume();
+ 		//});
+ 		Tab tab = DocumentEditor.getTab();
+ 		tabPane.getTabs().add(tab);
+ 		tabPane.getSelectionModel().select(tab);
+ 		return DocumentEditor;
+ 	}
+
+ 	private DocumentEditor[] getAllEditors() {
+ 		ObservableList<Tab> tabs = tabPane.getTabs();
+ 		DocumentEditor[] allEditors = new DocumentEditor[tabs.size()];
+ 		for (int i = 0; i < tabs.size(); i++)
+ 			allEditors[i] = (DocumentEditor) tabs.get(i).getUserData();
+ 		return allEditors;
+ 	}
+
+ 	private DocumentEditor findPreviewEditor() {
+ 		for (Tab tab : tabPane.getTabs()) {
+ 			if (isPreviewEditor((DocumentEditor) tab.getUserData()))
+ 				return (DocumentEditor) tab.getUserData();
+ 		}
+ 		return null;
+ 	}
+
+ 	private boolean isPreviewEditor(DocumentEditor DocumentEditor) {
+ 		return DocumentEditor.getTab().getStyleClass().contains("preview");
+ 	}
+
+ 	private void setPreviewEditor(DocumentEditor DocumentEditor, boolean preview) {
+ 		ObservableList<String> styleClasses = DocumentEditor.getTab().getStyleClass();
+ 		if (preview) {
+ 			if (!styleClasses.contains("preview"))
+ 				styleClasses.add("preview");
+ 		} else
+ 			styleClasses.remove("preview");
+ 	}
+    
+    public ArrayList<Menu> getMenus() {
+		return menus;
+	}
+    
+    private boolean updateToolsAndMenus;
+    private void updateToolsAndMenus() {
+    	// avoid too many (and useless) runLater() invocations
+		if (updateToolsAndMenus)
+			return;
+		updateToolsAndMenus = true;
+		
+		Platform.runLater(() -> {
+			updateToolsAndMenus = false;
+
+			if (editMode.get()) {
+				borderPane.setTop(editToolBar);
+			} else {
+				getActiveDocumentEditor().showPreview();
+				borderPane.setTop(nonEditToolBar);
+			}
+		});
+    }
     
 	@Override
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
-    	commentPane.setComments(archive.getComments());
+    	this.archive = archive;
+    	//load all documents including default documents... This is also when archive will injected!!
+    	
 	}
 	
-	public CommentPane getCommentPane() {
-		return commentPane;
-	}
+	public void setEditMode(boolean editmode) {
+    	editMode.set(editmode);
+    }
 	
 	public Node getNode() {
-		return commentPane.getNode();
-	}
-	
-	public ArrayList<Menu> getMenus() {
-		return commentPane.getMenus();
+		return tabPane;
 	}
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {
-		archive.setComments(commentPane.getComments());
+		//Save all documents back to the archive
 	}
 	
 	public void saveComments() {
-		archive.setComments(commentPane.getComments());
+		//Save all documents back to the archive
 	}
 
 	@Override

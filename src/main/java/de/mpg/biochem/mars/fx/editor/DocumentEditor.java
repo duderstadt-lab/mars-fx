@@ -57,11 +57,26 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
 
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.molecule.CommentsTab;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
+
+import javafx.event.Event;
+import javafx.event.EventHandler;
+
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
+import de.mpg.biochem.mars.fx.event.MetadataEvent;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.DefaultJsonConverter;
+import de.mpg.biochem.mars.util.MarsUtil;
 
 /**
  * Editor for MoleculeArchive comments
@@ -69,38 +84,84 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
  * Original author - Karl Tauber from markdownwriterfx
  * Modifications by Karl Duderstadt adapted for MoleculeArchive comments editing.
  */
-public class CommentEditor extends AnchorPane {
+public class DocumentEditor extends AnchorPane {
+	
+	private final CommentsTab commentsTab;
+	private final Tab tab = new Tab();
 	private SplitPane splitPane;
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
-
-	final PrefsBooleanProperty editMode = new PrefsBooleanProperty(false);
+	private String name;
 	
-	final PrefsBooleanProperty previewVisible = new PrefsBooleanProperty(true);
-	final PrefsBooleanProperty htmlSourceVisible = new PrefsBooleanProperty();
-	final PrefsBooleanProperty markdownAstVisible = new PrefsBooleanProperty();
-	final PrefsBooleanProperty externalVisible = new PrefsBooleanProperty();
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
-	public CommentEditor() {
+	public DocumentEditor(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
+		this.commentsTab = commentsTab;
+		tab.setText(name);
+		this.archive = archive;
+		
+		// avoid that this is GCed
+		tab.setUserData(this);
+		
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
+		ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
+			if (newValue)
+				load();
+		};
 		
-		Options.markdownRendererProperty().addListener(previewTypeListener);
-		previewVisible.addListener(previewTypeListener);
+		tab.setOnSelectionChanged(e -> {
+			if(tab.isSelected()) {
+				Platform.runLater(() -> activated());
+
+				Options.markdownRendererProperty().addListener(previewTypeListener);
+				commentsTab.previewVisible.addListener(previewTypeListener);
+				commentsTab.htmlSourceVisible.addListener(previewTypeListener);
+				commentsTab.markdownAstVisible.addListener(previewTypeListener);
+				commentsTab.externalVisible.addListener(previewTypeListener);
+
+				//mainWindow.stageFocusedProperty.addListener(stageFocusedListener);
+			} else {
+				Platform.runLater(() -> deactivated());
+
+				Options.markdownRendererProperty().removeListener(previewTypeListener);
+				commentsTab.previewVisible.removeListener(previewTypeListener);
+				commentsTab.htmlSourceVisible.removeListener(previewTypeListener);
+				commentsTab.markdownAstVisible.removeListener(previewTypeListener);
+				commentsTab.externalVisible.removeListener(previewTypeListener);
+
+				//mainWindow.stageFocusedProperty.removeListener(stageFocusedListener);
+			}
+		});
 		
-		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditMode();
-		editMode.addListener(editModeListener);
+		//Options.markdownRendererProperty().addListener(previewTypeListener);
+		//previewVisible.addListener(previewTypeListener);
 		
-		initialize();
+		//ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditMode();
+		//editMode.addListener(editModeListener);
+	}
+	
+	public Node getNode() {
+		return splitPane;
+	}
+	
+	public void dispose() {
+		// avoid memory leaks
+		tab.setUserData(null);
+		tab.setContent(null);
 	}
 
-	MarkdownEditorPane getEditor() {
+	public Tab getTab() {
+		return tab;
+	}
+
+	public MarkdownEditorPane getEditor() {
 		return markdownEditorPane;
 	}
 
 	// 'editor' property
 	private final ObjectProperty<MarkdownEditorPane> editor = new SimpleObjectProperty<>();
-	ReadOnlyObjectProperty<MarkdownEditorPane> editorProperty() { return editor; }
+	public ReadOnlyObjectProperty<MarkdownEditorPane> editorProperty() { return editor; }
 
 	// 'path' property
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
@@ -155,6 +216,78 @@ public class CommentEditor extends AnchorPane {
 		});
 	}
 	
+	private void activated() {
+		if( tab.getTabPane() == null || !tab.isSelected())
+			return; // tab is already closed or no longer active
+
+		if (tab.getContent() != null) {
+			load();
+			updatePreviewType();
+			markdownEditorPane.setVisible(true);
+			markdownEditorPane.requestFocus();
+			return;
+		}
+
+		// load file and create UI when the tab becomes visible the first time
+
+		markdownEditorPane = new MarkdownEditorPane();
+		markdownPreviewPane = new MarkdownPreviewPane();
+
+		load();
+
+		// clear undo history after first load
+		markdownEditorPane.getUndoManager().forgetHistory();
+
+		// bind preview to editor
+		markdownPreviewPane.markdownTextProperty().bind(markdownEditorPane.markdownTextProperty());
+		markdownPreviewPane.markdownASTProperty().bind(markdownEditorPane.markdownASTProperty());
+		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
+		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane.scrollYProperty());
+
+		// bind properties
+		readOnly.bind(markdownEditorPane.readOnlyProperty());
+
+		// bind the editor undo manager to the properties
+		UndoManager<?> undoManager = markdownEditorPane.getUndoManager();
+		modified.bind(Bindings.not(undoManager.atMarkedPositionProperty()));
+		canUndo.bind(undoManager.undoAvailableProperty());
+		canRedo.bind(undoManager.redoAvailableProperty());
+
+		splitPane = new SplitPane(markdownEditorPane.getNode());
+		if (getPreviewType() != MarkdownPreviewPane.Type.None)
+			splitPane.getItems().add(markdownPreviewPane.getNode());
+		tab.setContent(splitPane);
+
+		updatePreviewType();
+		markdownEditorPane.setVisible(true);
+		markdownEditorPane.requestFocus();
+
+		// update 'editor' property
+		editor.set(markdownEditorPane);
+	}
+	
+	public void load() {
+		if (markdownEditorPane == null)
+			return;
+
+		String markdown = archive.properties().getDocument(name);
+
+		markdownEditorPane.setMarkdown(markdown);
+		markdownEditorPane.getUndoManager().mark();
+	}
+
+	private void deactivated() {
+		if (markdownEditorPane == null)
+			return;
+
+		markdownEditorPane.setVisible(false);
+	}
+
+	public void requestFocus() {
+		if (markdownEditorPane != null)
+			markdownEditorPane.requestFocus();
+	}
+	/*
 	private boolean updateEditModePending;
 	private void updateEditMode() {
 		if (markdownPreviewPane == null)
@@ -183,12 +316,12 @@ public class CommentEditor extends AnchorPane {
 			}
 		});
 	}
-	
+*/
 	public void showPreview() {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		Node previewPane = markdownPreviewPane.getNode();
 		if (!splitItems.contains(previewPane)) {
-			previewVisible.set(true);
+			commentsTab.previewVisible.set(true);
 			System.out.println("adding Preview");
 			splitItems.add(previewPane);
 		}
@@ -209,13 +342,14 @@ public class CommentEditor extends AnchorPane {
 
 	private MarkdownPreviewPane.Type getPreviewType() {
 		MarkdownPreviewPane.Type previewType = Type.None;
-		if (previewVisible.get())
+		if (commentsTab.previewVisible.get())
 			previewType = MarkdownPreviewPane.Type.Web;
 		else 
 			previewType = Type.None;
 		return previewType;
 	}
 
+	/*
 	private void initialize() {
 		markdownEditorPane = new MarkdownEditorPane();
 		markdownPreviewPane = new MarkdownPreviewPane();
@@ -261,7 +395,8 @@ public class CommentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().unbind();
 		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 	}
-
+*/
+	
 	public void setComments(String comments) {
 		markdownEditorPane.setMarkdown(comments);
 		markdownEditorPane.getUndoManager().mark();

@@ -72,6 +72,9 @@ import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
 
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+
 /**
  * Markdown editor pane.
  *
@@ -161,8 +164,8 @@ public class MarkdownEditorPane
 				updateShowLineNo();
 			else if (e == Options.showWhitespaceProperty())
 				updateShowWhitespace();
-			else if (e == Options.showImagesEmbeddedProperty())
-				updateShowImagesEmbedded();
+			//else if (e == Options.showImagesEmbeddedProperty())
+			//	updateShowImagesEmbedded();
 			else if (e == Options.markdownRendererProperty() || e == Options.markdownExtensionsProperty()) {
 				// re-process markdown if markdown extensions option changes
 				parser = null;
@@ -298,6 +301,12 @@ public class MarkdownEditorPane
 	public Path getPath() { return path.get(); }
 	public void setPath(Path path) { this.path.set(path); }
 	public ObjectProperty<Path> pathProperty() { return path; }
+	
+	// 'visible' property
+	private final ReadOnlyBooleanWrapper visible = new ReadOnlyBooleanWrapper(false);
+	public boolean isVisible() { return visible.get(); }
+	public void setVisible(boolean visible) { this.visible.set(visible); }
+	public ReadOnlyBooleanProperty visibleProperty() { return visible.getReadOnlyProperty(); }
 
 	Path getParentPath() {
 		Path path = getPath();
@@ -316,8 +325,8 @@ public class MarkdownEditorPane
 
 		Node astRoot = parseMarkdown(newText);
 
-		if (Options.isShowImagesEmbedded())
-			EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
+		//if (Options.isShowImagesEmbedded())
+		//	EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
 
 		applyHighlighting(astRoot);
 
@@ -390,12 +399,12 @@ public class MarkdownEditorPane
 		}
 	}
 
-	private void updateShowImagesEmbedded() {
-		if (Options.isShowImagesEmbedded())
-			EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(), getParentPath());
-		else
-			EmbeddedImage.removeAllImageSegments(textArea);
-	}
+	//private void updateShowImagesEmbedded() {
+	//	if (Options.isShowImagesEmbedded())
+	//		EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(), getParentPath());
+	//	else
+	//		EmbeddedImage.removeAllImageSegments(textArea);
+	//}
 
 	public void undo() {
 		textArea.getUndoManager().undo();
