@@ -195,9 +195,6 @@ public class DocumentEditor extends AnchorPane {
 		markdownEditorPane = new MarkdownEditorPane();
 		markdownPreviewPane = new MarkdownPreviewPane();
 
-		String markdown = archive.properties().getDocument(name);
-
-		markdownEditorPane.setMarkdown(markdown);
 		//markdownEditorPane.getUndoManager().mark();
 
 		// clear undo history after first load
@@ -234,8 +231,11 @@ public class DocumentEditor extends AnchorPane {
 		updateEditAndPreview();
 		
 		//We unbind selections until edit mode is activated.
-		//markdownPreviewPane.editorSelectionProperty().unbind();
-		//markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+		markdownPreviewPane.editorSelectionProperty().unbind();
+		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+		
+		String markdown = archive.properties().getDocument(name);
+		markdownEditorPane.setMarkdown(markdown);
 	}
 	
 	private boolean updateEditAndPreviewPending;
@@ -293,7 +293,7 @@ public class DocumentEditor extends AnchorPane {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		if (!splitItems.contains(markdownEditorPane.getNode())) {
 			splitItems.add(0, markdownEditorPane.getNode());
-			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());				
+			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
 		}
 	}
 	
