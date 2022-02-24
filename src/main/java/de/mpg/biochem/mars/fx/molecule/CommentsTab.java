@@ -462,8 +462,11 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
     	super.onInitializeMoleculeArchiveEvent(archive);
     	this.archive = archive;
-    	for (String name : archive.properties().getDocumentNames())
-    		newEditor(name);
+    	for (String name : archive.properties().getDocumentNames()) {
+    		DocumentEditor editor = newEditor(name);
+    		if (name.equals("Comments"))
+    			editor.getTab().setClosable(false);
+    	}
 	}
 	
 	public void setEditMode(boolean editmode) {
