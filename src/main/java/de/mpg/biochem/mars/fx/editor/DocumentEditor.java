@@ -76,6 +76,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.DefaultJsonConverter;
+import de.mpg.biochem.mars.util.MarsDocument;
 import de.mpg.biochem.mars.util.MarsUtil;
 
 /**
@@ -91,15 +92,19 @@ public class DocumentEditor extends AnchorPane {
 	private SplitPane splitPane;
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
-	private String name;
+	private MarsDocument document;
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	public DocumentEditor(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
 		this.commentsTab = commentsTab;
-		this.name = name;
 		tab.setText(name);
 		this.archive = archive;
+		
+		if (archive.properties().getDocumentNames().contains(name))
+			this.document = archive.properties().getDocument(name);
+		else
+			this.document = new MarsDocument(name, "");
 		
 		// avoid that this is GCed
 		tab.setUserData(this);
@@ -107,10 +112,6 @@ public class DocumentEditor extends AnchorPane {
 		@SuppressWarnings("rawtypes")
 		ChangeListener previewVisibleListener = (observable, oldValue, newValue) -> updateEditAndPreview();
 		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditAndPreview();
-		//ChangeListener<Boolean> stageFocusedListener = (observable, oldValue, newValue) -> {
-		//	if (newValue)
-		//		load();
-		//};
 		
 		tab.setOnSelectionChanged(e -> {
 			if(tab.isSelected()) {
@@ -135,6 +136,10 @@ public class DocumentEditor extends AnchorPane {
 	
 	public Node getNode() {
 		return splitPane;
+	}
+	
+	public MarsDocument getDocument() {
+		return document;
 	}
 	
 	public void dispose() {
@@ -192,7 +197,7 @@ public class DocumentEditor extends AnchorPane {
 
 		// load file and create UI when the tab becomes visible the first time
 
-		markdownEditorPane = new MarkdownEditorPane();
+		markdownEditorPane = new MarkdownEditorPane(this);
 		markdownPreviewPane = new MarkdownPreviewPane();
 
 		//markdownEditorPane.getUndoManager().mark();
@@ -234,8 +239,7 @@ public class DocumentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().unbind();
 		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
 		
-		String markdown = archive.properties().getDocument(name);
-		markdownEditorPane.setMarkdown(markdown);
+		markdownEditorPane.setMarkdown(document.getContent());
 	}
 	
 	private boolean updateEditAndPreviewPending;
@@ -299,7 +303,8 @@ public class DocumentEditor extends AnchorPane {
 	
 	public void save() {
 		if (archive != null) {
-			archive.properties().putDocument(name, markdownEditorPane.getMarkdown());
+			document.setContent(markdownEditorPane.getMarkdown());
+			archive.properties().putDocument(document);
 			markdownEditorPane.getUndoManager().mark();
 		}
 	}

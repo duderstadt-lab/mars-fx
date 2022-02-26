@@ -126,7 +126,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	
 	private ArrayList<Menu> menus;
 	
-	private Node extensionsButton;
 	private ToolBar nonEditToolBar;
 	private ToolBar editToolBar;
 	
@@ -339,8 +338,16 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				new Action(insertOrderedListAction, createActiveEditBooleanProperty(SmartEdit::orderedListProperty)),
 				new Action(insertBlockquoteAction, createActiveEditBooleanProperty(SmartEdit::blockquoteProperty)),
 				new Action(insertFencedCodeBlockAction, createActiveEditBooleanProperty(SmartEdit::fencedCodeProperty)),
-				null,
-				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)));
+				new Action(insertHeader1Action, createActiveEditBooleanProperty(SmartEdit::headerProperty)),
+				null);
+		
+		Action createNewDocumentAction = new Action("New", "Shortcut+N", PLUS,
+				e -> {
+					newEditor("Untitled");
+				});
+		Node createNewDocumentButton = ActionUtils.createToolBarButton(createNewDocumentAction);
+		
+		editToolBar.getItems().add(createNewDocumentButton);
 		
 		editToolBar.getItems().add(0, new Separator());
 		

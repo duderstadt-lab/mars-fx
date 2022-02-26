@@ -798,6 +798,26 @@ public class SmartEdit
 		replaceText(textArea, position, end, linkOrImage);
 		selectRange(textArea, position, position + linkOrImage.length());
 	}
+	
+	public void insertEmbbedImageKey(int position, String name, String imageKey) {
+		int end = position;
+
+		LinkNode linkNode = findNodeAt(position, (s, e, n) -> n instanceof LinkNode);
+		if (linkNode != null && position > linkNode.getStartOffset()) {
+			// if dropping on an existing link or image, then replace it
+			position = linkNode.getStartOffset();
+			end = linkNode.getEndOffset();
+		}
+
+		imageKey = imageKey.replace('\\', '/');
+
+		String linkOrImage = "![" + name.replace("[", "\\[").replace("]", "\\]")
+			+ "](" + imageKey.replace("(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
+		//	+ "](" + newUrl.replace("(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
+
+		replaceText(textArea, position, end, linkOrImage);
+		selectRange(textArea, position, position + linkOrImage.length());
+	}
 
 	//---- heading ------------------------------------------------------------
 
