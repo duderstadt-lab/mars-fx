@@ -40,10 +40,12 @@ import java.util.function.BiConsumer;
 import javafx.concurrent.Worker.State;
 import javafx.scene.control.IndexRange;
 import javafx.scene.web.WebView;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Utils;
+import de.mpg.biochem.mars.util.MarsDocument;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.util.ast.Node;
@@ -65,6 +67,8 @@ class WebViewPreview
 	private int lastScrollX;
 	private int lastScrollY;
 	private IndexRange lastEditorSelection;
+	
+	private MarsDocument document;
 
 	WebViewPreview() {
 	}
@@ -90,6 +94,10 @@ class WebViewPreview
 					runnable.run();
 			}
 		});
+	}
+	
+	public void setMarsDocument(MarsDocument document) {
+		this.document = document;
 	}
 
 	private void runWhenLoaded(Runnable runnable) {
@@ -147,7 +155,7 @@ class WebViewPreview
 			+ base
 			+ "</head>\n"
 			+ "<body" + scrollScript + ">\n"
-			+ renderer.getHtml(false)
+			+ renderer.getHtml(false, document)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
 			+ "<script>" + anchorFixer() + "</script>\n"
 			+ "<script> (function () {"

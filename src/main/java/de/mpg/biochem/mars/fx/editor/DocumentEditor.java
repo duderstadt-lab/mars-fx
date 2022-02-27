@@ -198,7 +198,7 @@ public class DocumentEditor extends AnchorPane {
 		// load file and create UI when the tab becomes visible the first time
 
 		markdownEditorPane = new MarkdownEditorPane(this);
-		markdownPreviewPane = new MarkdownPreviewPane();
+		markdownPreviewPane = new MarkdownPreviewPane(this);
 
 		//markdownEditorPane.getUndoManager().mark();
 
