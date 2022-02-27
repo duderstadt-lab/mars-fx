@@ -31,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -79,6 +80,8 @@ import de.mpg.biochem.mars.util.DefaultJsonConverter;
 import de.mpg.biochem.mars.util.MarsDocument;
 import de.mpg.biochem.mars.util.MarsUtil;
 
+import java.util.Set;
+
 /**
  * Editor for MoleculeArchive comments
  *
@@ -93,6 +96,7 @@ public class DocumentEditor extends AnchorPane {
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
 	private MarsDocument document;
+	private Set<String> activeMediaIDs = new HashSet<String>();
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
@@ -140,6 +144,22 @@ public class DocumentEditor extends AnchorPane {
 	
 	public MarsDocument getDocument() {
 		return document;
+	}
+	
+	public void addActiveMediaID(String activeMediaID) {
+		this.activeMediaIDs.add(activeMediaID);
+	}
+	
+	public void removeAllActiveMediaIDs() {
+		activeMediaIDs.clear();
+	}
+	
+	public void clearUnusedMedia() {
+		//Clean-up by removing all media not currently in use from the document media store..
+		System.out.println("clearUnusedMedia");
+		for (String mediaID : document.getMediaIDs())
+			if (!activeMediaIDs.contains(mediaID))
+				document.removeMedia(mediaID);
 	}
 	
 	public void dispose() {
@@ -304,7 +324,6 @@ public class DocumentEditor extends AnchorPane {
 	public void save() {
 		if (archive != null) {
 			document.setContent(markdownEditorPane.getMarkdown());
-			archive.properties().putDocument(document);
 			markdownEditorPane.getUndoManager().mark();
 		}
 	}

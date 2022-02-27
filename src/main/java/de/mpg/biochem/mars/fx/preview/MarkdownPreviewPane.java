@@ -70,7 +70,7 @@ public class MarkdownPreviewPane
 	interface Renderer {
 		void update(String markdownText, Node astRoot, Path path);
 		String getHtml(boolean source);
-		String getHtml(boolean source, MarsDocument document);
+		String getHtml(boolean source, DocumentEditor documentEditor);
 		String getAST();
 		List<Range> findSequences(int startOffset, int endOffset);
 	}
@@ -113,8 +113,8 @@ public class MarkdownPreviewPane
 	public MarkdownPreviewPane(DocumentEditor documentEditor) {
 		this();
 		this.documentEditor = documentEditor;
-		if (documentEditor != null && documentEditor.getDocument() != null)
-			webViewPreview.setMarsDocument(documentEditor.getDocument());
+		if (documentEditor != null)
+			webViewPreview.setDocumentEditor(documentEditor);
 	}
 
 	public static boolean hasExternalPreview() {

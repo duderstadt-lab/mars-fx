@@ -6,18 +6,18 @@ import com.vladsch.flexmark.html.renderer.NodeRenderer;
 import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.util.data.DataHolder;
 
-import de.mpg.biochem.mars.util.MarsDocument;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
 public class MarsEmbbedImageRendererFactory implements NodeRendererFactory {
-	private MarsDocument document;
+	private DocumentEditor documentEditor;
 	
-	public MarsEmbbedImageRendererFactory(MarsDocument document) {
-		this.document = document;
+	public MarsEmbbedImageRendererFactory(DocumentEditor documentEditor) {
+		this.documentEditor = documentEditor;
 	}
 	
     @NotNull
     @Override
     public NodeRenderer apply(@NotNull DataHolder options) {
-        return new MarsEmbbededImageRenderer(options, document);
+        return new MarsEmbbededImageRenderer(options, documentEditor);
     }
 }

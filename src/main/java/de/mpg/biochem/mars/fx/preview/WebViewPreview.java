@@ -68,7 +68,7 @@ class WebViewPreview
 	private int lastScrollY;
 	private IndexRange lastEditorSelection;
 	
-	private MarsDocument document;
+	private DocumentEditor documentEditor;
 
 	WebViewPreview() {
 	}
@@ -96,8 +96,8 @@ class WebViewPreview
 		});
 	}
 	
-	public void setMarsDocument(MarsDocument document) {
-		this.document = document;
+	public void setDocumentEditor(DocumentEditor documentEditor) {
+		this.documentEditor = documentEditor;
 	}
 
 	private void runWhenLoaded(Runnable runnable) {
@@ -155,7 +155,7 @@ class WebViewPreview
 			+ base
 			+ "</head>\n"
 			+ "<body" + scrollScript + ">\n"
-			+ renderer.getHtml(false, document)
+			+ renderer.getHtml(false, documentEditor)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
 			+ "<script>" + anchorFixer() + "</script>\n"
 			+ "<script> (function () {"

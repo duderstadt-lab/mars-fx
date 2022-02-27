@@ -107,14 +107,14 @@ class FlexmarkPreviewRenderer
 	}
 	
 	@Override
-	public String getHtml(boolean source, MarsDocument document) {
+	public String getHtml(boolean source, DocumentEditor documentEditor) {
 		if (source) {
 			if (htmlSource == null)
-				htmlSource = toHtml(true, document);
+				htmlSource = toHtml(true, documentEditor);
 			return htmlSource;
 		} else {
 			if (htmlPreview == null)
-				htmlPreview = toHtml(false, document);
+				htmlPreview = toHtml(false, documentEditor);
 			return htmlPreview;
 		}
 	}
@@ -179,7 +179,7 @@ class FlexmarkPreviewRenderer
 		return toHtml(source, null);
 	}
 	
-	private String toHtml(boolean source, MarsDocument document) {
+	private String toHtml(boolean source, DocumentEditor documentEditor) {
 		Node astRoot;
 		if (addons.iterator().hasNext()) {
 			String text = markdownText;
@@ -201,9 +201,10 @@ class FlexmarkPreviewRenderer
 		if (!source)
 			builder.attributeProviderFactory(new MyAttributeProvider.Factory());
 		
-		if (document != null) {
+		if (documentEditor != null) {
+			documentEditor.removeAllActiveMediaIDs();
 			builder.nodeRendererFactory(new FencedCodeWidgetRenderer.Factory());
-			builder.nodeRendererFactory(new MarsEmbbedImageRendererFactory(document));
+			builder.nodeRendererFactory(new MarsEmbbedImageRendererFactory(documentEditor));
 		}
 		
 		String html = builder.build().render(astRoot);

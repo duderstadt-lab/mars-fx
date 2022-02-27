@@ -486,8 +486,10 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {
-		for (Tab tab : tabPane.getTabs())
+		for (Tab tab : tabPane.getTabs()) {
+			((DocumentEditor)tab.getUserData()).clearUnusedMedia();
 			((DocumentEditor)tab.getUserData()).save();
+		}
 	}
 	
 	public void saveComments() {

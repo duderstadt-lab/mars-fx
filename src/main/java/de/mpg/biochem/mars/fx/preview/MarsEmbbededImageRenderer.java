@@ -13,14 +13,15 @@ import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.util.data.DataHolder;
 
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.util.MarsDocument;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
 
 public class MarsEmbbededImageRenderer implements NodeRenderer {
-	private MarsDocument document;
+	private DocumentEditor documentEditor;
 	
-    public MarsEmbbededImageRenderer(DataHolder options, MarsDocument document) {
-    	this.document = document;
+    public MarsEmbbededImageRenderer(DataHolder options, DocumentEditor documentEditor) {
+    	this.documentEditor = documentEditor;
     }
 
     @Override
@@ -32,15 +33,11 @@ public class MarsEmbbededImageRenderer implements NodeRenderer {
 
     private void render(Image node, NodeRendererContext context, HtmlWriter html) {
     	String mediaData = node.getUrl().toString();
-    	if (document != null && document.getMediaIDs().contains(mediaData)) {
-    		System.out.println("inserting image data");
-    		mediaData = document.getMedia(mediaData);
+    	if (documentEditor != null && documentEditor.getDocument().getMediaIDs().contains(mediaData)) {
+    		documentEditor.addActiveMediaID(mediaData);
+    		mediaData = documentEditor.getDocument().getMedia(mediaData);
     		node.setUrl(BasedSequence.of(mediaData));
     	}
-    	
     	context.delegateRender();
-    	
-    	//Record Active media list somehow... So non-active can be removed... Add to MarsDocment ???
-
     }
 }
