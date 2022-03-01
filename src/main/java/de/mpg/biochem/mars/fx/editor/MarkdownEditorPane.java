@@ -352,7 +352,6 @@ public class MarkdownEditorPane
 		if (parser == null) {
 			parser = Parser.builder()
 				.extensions(MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer()))
-				//.postProcessorFactory(new FencedCodeWidgetNodePostProcessorFactory(documentEditor))
 				.build();
 		}
 		return parser.parse(text);

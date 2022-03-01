@@ -34,6 +34,9 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
         if (node.getInfo().equals("python-image-widget")) {
         	String script = node.getContentChars().normalizeEOL();
         	if (documentEditor.getDocument().getMediaIDs().contains(script)) {
+        		
+        		System.out.println("rendering... ");
+        		
 	        	html.attr("src", documentEditor.getDocument().getMedia(script))
 	        	.withAttr()
 	            .tag("img", true);

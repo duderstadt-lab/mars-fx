@@ -59,10 +59,14 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
 
+import com.vladsch.flexmark.parser.Parser;
+
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.molecule.CommentsTab;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
@@ -98,6 +102,7 @@ public class DocumentEditor extends AnchorPane {
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
 	private MarsDocument document;
+	private Parser widgetParser;
 	private Set<String> activeMediaIDs = new HashSet<String>();
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
@@ -154,11 +159,20 @@ public class DocumentEditor extends AnchorPane {
 			return;
 		
 		renderWidgetsPending = true;
-		
+
+		if (widgetParser == null) {
+    		widgetParser = Parser.builder()
+				.extensions(MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer()))
+				.postProcessorFactory(new FencedCodeWidgetNodePostProcessorFactory(this))
+				.build();
+		}
 		
 		Task<Void> task = new Task<Void>() {
             @Override
             public Void call() throws Exception {
+
+            	widgetParser.parse(markdownEditorPane.getMarkdown());
+            	
                 return null;
             }
         };
