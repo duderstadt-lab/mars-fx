@@ -42,12 +42,14 @@ import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
 import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5DatasetMetadata;
+import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
@@ -255,10 +257,12 @@ public class BdvViewTable implements MetadataEventHandler {
 								System.getProperty("user.home"),
 								new N5MetadataParser[]{}, // no group parsers
 								new N5MetadataParser[]{
-										  new ImagePlusLegacyMetadataParser(),
-										  new N5CosemMetadataParser(),
-										  new N5SingleScaleMetadataParser()
-								  });
+										new ImagePlusLegacyMetadataParser(),
+										new N5CosemMetadataParser(),
+										new N5SingleScaleMetadataParser(),
+										new CanonicalMetadataParser(),
+										new N5GenericSingleScaleMetadataParser()
+								 });
 			            	
 		            			selectionDialog.setVirtualOption( false );
 			            		selectionDialog.setCropOption( false );
