@@ -13,9 +13,13 @@ import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.util.data.DataHolder;
 
-public class FencedCodeWidgetRenderer implements NodeRenderer {
-    public FencedCodeWidgetRenderer(DataHolder options) {
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
+public class FencedCodeWidgetRenderer implements NodeRenderer {
+	private DocumentEditor documentEditor;
+	
+    public FencedCodeWidgetRenderer(DataHolder options, DocumentEditor documentEditor) {
+    	this.documentEditor = documentEditor;
     }
 
     @Override
@@ -27,22 +31,20 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
 
     private void render(FencedCodeBlock node, NodeRendererContext context, HtmlWriter html) {
     	// test the node to see if it needs overriding
-        if (node.getInfo().equals("marspy")) {
-            System.out.println("Found a marspy: " + html.toSequence());
-            html.text("");
-        	//html.attr("class", "my-info").withAttr().tag("p").line();
-            //html.text(node.getContentChars().normalizeEOL());
-            //html.closeTag("p").line();
+        if (node.getInfo().equals("python-image-widget")) {
+        	String script = node.getContentChars().normalizeEOL();
+        	if (documentEditor.getDocument().getMediaIDs().contains(script)) {
+	        	html.attr("src", documentEditor.getDocument().getMedia(script))
+	        	.withAttr()
+	            .tag("img", true);
+        	}
+	        	
+        } else if (node.getInfo().equals("python-string-widget")) {
+        	
+        } else if (node.getInfo().equals("groovy-string-widget")) {	
+        	
         } else {
             context.delegateRender();
-        }
-    }
-
-    public static class Factory implements NodeRendererFactory {
-        @NotNull
-        @Override
-        public NodeRenderer apply(@NotNull DataHolder options) {
-            return new FencedCodeWidgetRenderer(options);
         }
     }
 }

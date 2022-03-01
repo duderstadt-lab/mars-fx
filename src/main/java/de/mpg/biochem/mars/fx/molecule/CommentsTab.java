@@ -227,8 +227,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				null, null, Options.showLineNoProperty());
 		Action viewShowWhitespaceAction = new Action(Messages.get("MainWindow.viewShowWhitespaceAction"), "Alt+W", null,
 				null, null, Options.showWhitespaceProperty());
-		Action viewShowImagesEmbeddedAction = new Action(Messages.get("MainWindow.viewShowImagesEmbeddedAction"), "Alt+I", null,
-				null, null, Options.showImagesEmbeddedProperty());
 
 		// Insert actions
 		Action insertBoldAction = new Action(Messages.get("MainWindow.insertBoldAction"), "Shortcut+B", BOLD,
@@ -239,11 +237,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				e -> getActiveSmartEdit().insertStrikethrough(Messages.get("MainWindow.insertStrikethroughText")));
 		Action insertCodeAction = new Action(Messages.get("MainWindow.insertCodeAction"), "Shortcut+K", CODE,
 				e -> getActiveSmartEdit().insertInlineCode(Messages.get("MainWindow.insertCodeText")));
-
-		Action insertLinkAction = new Action(Messages.get("MainWindow.insertLinkAction"), "Shortcut+L", LINK,
-				e -> getActiveSmartEdit().insertLink());
-		Action insertImageAction = new Action(Messages.get("MainWindow.insertImageAction"), "Shortcut+G", PICTURE_ALT,
-				e -> getActiveSmartEdit().insertImage());
 
 		Action insertUnorderedListAction = new Action(Messages.get("MainWindow.insertUnorderedListAction"), "Shortcut+U", LIST_UL,
 				e -> getActiveSmartEdit().insertUnorderedList());
@@ -375,7 +368,16 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		Node editModeButton2 = ActionUtils.createToolBarButton(editModeAction2);
 
     	editToolBar.getItems().add(0, editModeButton2);
+    	
+		//Render widgets
+		Action renderWidgetsAction = new Action("Render Widgets", null, REFRESH,
+				e -> {
+					getActiveDocumentEditor().renderWidgets();
+				});
 		
+    	Node renderWidgetsButton = ActionUtils.createToolBarButton(renderWidgetsAction);
+    	editToolBar.getItems().add(renderWidgetsButton);
+    	
 		// preview actions
 		Node previewButton = ActionUtils.createToolBarButton(viewPreviewAction);
 		editToolBar.getItems().add(previewButton);

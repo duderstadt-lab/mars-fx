@@ -203,7 +203,7 @@ class FlexmarkPreviewRenderer
 		
 		if (documentEditor != null) {
 			documentEditor.removeAllActiveMediaIDs();
-			builder.nodeRendererFactory(new FencedCodeWidgetRenderer.Factory());
+			builder.nodeRendererFactory(new FencedCodeWidgetRendererFactory(documentEditor));
 			builder.nodeRendererFactory(new MarsEmbbedImageRendererFactory(documentEditor));
 		}
 		

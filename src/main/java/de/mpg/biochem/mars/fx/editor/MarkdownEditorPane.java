@@ -73,6 +73,7 @@ import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
 import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import org.apache.commons.io.FileUtils;
@@ -351,6 +352,7 @@ public class MarkdownEditorPane
 		if (parser == null) {
 			parser = Parser.builder()
 				.extensions(MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer()))
+				//.postProcessorFactory(new FencedCodeWidgetNodePostProcessorFactory(documentEditor))
 				.build();
 		}
 		return parser.parse(text);

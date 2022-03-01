@@ -44,6 +44,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -59,6 +60,7 @@ import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.molecule.CommentsTab;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
@@ -146,6 +148,41 @@ public class DocumentEditor extends AnchorPane {
 		return document;
 	}
 	
+	private boolean renderWidgetsPending;
+	public void renderWidgets() {
+		if (renderWidgetsPending)
+			return;
+		
+		renderWidgetsPending = true;
+		
+		
+		Task<Void> task = new Task<Void>() {
+            @Override
+            public Void call() throws Exception {
+                return null;
+            }
+        };
+
+        task.setOnSucceeded(event -> { 
+        	renderWidgetsPending = false;
+        });
+
+        new Thread(task).start();
+		
+		//Start a status screen
+		
+		//Clear stored rendered widgets... How to distinguish these from other media?? Special part of key??
+		
+		//Perhaps parse in a separate thread and add the FencedCodeWidgetNodePostProcessor to process all the widgets running the scripts..
+		
+		//This would run everything in the background and insert all the needed keys into the media map..but wouldn't actually do the preview...
+		
+		//When they are done it should stop the status screen and parse again
+		//Parsing the second time should retrieve the rendered content from the keys.. So the renderer only needs to use the keys...
+		
+		//Insert renderWidgetsPending = false somewhere here at the end...
+	}
+	
 	public void addActiveMediaID(String activeMediaID) {
 		this.activeMediaIDs.add(activeMediaID);
 	}
@@ -156,7 +193,6 @@ public class DocumentEditor extends AnchorPane {
 	
 	public void clearUnusedMedia() {
 		//Clean-up by removing all media not currently in use from the document media store..
-		System.out.println("clearUnusedMedia");
 		for (String mediaID : document.getMediaIDs())
 			if (!activeMediaIDs.contains(mediaID))
 				document.removeMedia(mediaID);
