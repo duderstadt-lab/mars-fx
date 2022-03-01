@@ -125,8 +125,8 @@
 		<jackson-core.version>${jackson.version}</jackson-core.version>
 		<jackson-dataformat-smile.version>${jackson.version}</jackson-dataformat-smile.version>
 		
-		<n5-ij.version>3.0.0</n5-ij.version>
-		<n5-imglib2.version>4.1.1</n5-imglib2.version>
+		<n5-ij.version>3.2.0</n5-ij.version>
+		<n5-imglib2.version>4.3.0</n5-imglib2.version>
 
 		<autolink.version>0.10.0</autolink.version>
 		<annotations.version>15.0</annotations.version>
