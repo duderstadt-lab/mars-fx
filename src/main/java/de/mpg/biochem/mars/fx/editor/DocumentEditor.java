@@ -33,6 +33,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -170,7 +171,7 @@ public class DocumentEditor extends AnchorPane {
 	}
 	
 	//private boolean renderWidgetsPending;
-	public void renderWidgets() {
+	public void renderWidgets(RotateTransition rt) {
 	//	if (renderWidgetsPending)
 	//		return;
 		
@@ -191,7 +192,10 @@ public class DocumentEditor extends AnchorPane {
             	clearWidgetMedia();
             	widgetParser.parse(markdownEditorPane.getMarkdown());
             	markdownEditorPane.textChanged();
-                return null;
+            	Platform.runLater(() -> {
+            		rt.stop();
+            	});
+            	return null;
             }
         };
 

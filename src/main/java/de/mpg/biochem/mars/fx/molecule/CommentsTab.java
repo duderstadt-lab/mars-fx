@@ -28,6 +28,9 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -36,15 +39,20 @@ import javafx.beans.value.ObservableBooleanValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Separator;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
@@ -57,6 +65,7 @@ import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
 import org.scijava.Context;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.*;
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
@@ -100,6 +109,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 import de.mpg.biochem.mars.fx.Messages;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
@@ -370,12 +380,29 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	editToolBar.getItems().add(0, editModeButton2);
     	
 		//Render widgets
-		Action renderWidgetsAction = new Action("Render Widgets", null, REFRESH,
-				e -> {
-					getActiveDocumentEditor().renderWidgets();
-				});
+		//Action renderWidgetsAction = new Action("Render Widgets", null, REFRESH,
+		//		e -> {
+		//			getActiveDocumentEditor().renderWidgets();
+		//		});
+
+
+		ButtonBase renderWidgetsButton = new Button();
+		Text renderWidgetsIcon = FontAwesomeIconFactory.get().createIcon(REFRESH, "1.2em");
+		renderWidgetsButton.setGraphic(renderWidgetsIcon);
+		renderWidgetsButton.setTooltip(new Tooltip("Render Widgets"));
+		renderWidgetsButton.setFocusTraversable(false);
 		
-    	Node renderWidgetsButton = ActionUtils.createToolBarButton(renderWidgetsAction);
+		RotateTransition rt = new RotateTransition(Duration.millis(1000), renderWidgetsIcon);
+		rt.setInterpolator(Interpolator.LINEAR);
+		rt.setByAngle(0);
+		rt.setByAngle(360);
+		rt.setCycleCount(Animation.INDEFINITE);
+
+		renderWidgetsButton.setOnMouseClicked(e -> {
+			rt.play();
+			getActiveDocumentEditor().renderWidgets(rt);
+		});
+	
     	editToolBar.getItems().add(renderWidgetsButton);
     	
 		// preview actions
