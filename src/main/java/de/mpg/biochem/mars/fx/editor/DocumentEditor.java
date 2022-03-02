@@ -58,6 +58,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
 
 import com.vladsch.flexmark.parser.Parser;
 
@@ -105,9 +107,15 @@ public class DocumentEditor extends AnchorPane {
 	private Parser widgetParser;
 	private Set<String> activeMediaIDs = new HashSet<String>();
 	
+	@Parameter
+	protected Context context;
+	
+	public static final String MARKDOWN_WIDGET_MEDIA_KEY_PREFIX = "MARKDOWN_WIDGET_MEDIA_KEY:";
+	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
-	public DocumentEditor(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
+	public DocumentEditor(final Context context, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
+		context.inject(this);
 		this.commentsTab = commentsTab;
 		tab.setText(name);
 		this.archive = archive;
@@ -153,12 +161,22 @@ public class DocumentEditor extends AnchorPane {
 		return document;
 	}
 	
-	private boolean renderWidgetsPending;
+	public Context getContext() {
+		return context;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+		return archive;
+	}
+	
+	//private boolean renderWidgetsPending;
 	public void renderWidgets() {
-		if (renderWidgetsPending)
-			return;
+	//	if (renderWidgetsPending)
+	//		return;
 		
-		renderWidgetsPending = true;
+	//	renderWidgetsPending = true;
+		
+		//Start a status screen
 
 		if (widgetParser == null) {
     		widgetParser = Parser.builder()
@@ -170,31 +188,32 @@ public class DocumentEditor extends AnchorPane {
 		Task<Void> task = new Task<Void>() {
             @Override
             public Void call() throws Exception {
-
+            	clearWidgetMedia();
             	widgetParser.parse(markdownEditorPane.getMarkdown());
-            	
+            	markdownEditorPane.textChanged();
                 return null;
             }
         };
 
-        task.setOnSucceeded(event -> { 
-        	renderWidgetsPending = false;
-        });
+        //task.setOnSucceeded(event -> { 
+        	//renderWidgetsPending = false;
+        	
+        	//markdownPreviewPane.update();
+        	//Stop status screen
+        	
+        	//run final parse/preview cycle to update with new media...
+        //});
 
         new Thread(task).start();
-		
-		//Start a status screen
-		
-		//Clear stored rendered widgets... How to distinguish these from other media?? Special part of key??
-		
-		//Perhaps parse in a separate thread and add the FencedCodeWidgetNodePostProcessor to process all the widgets running the scripts..
-		
-		//This would run everything in the background and insert all the needed keys into the media map..but wouldn't actually do the preview...
-		
-		//When they are done it should stop the status screen and parse again
-		//Parsing the second time should retrieve the rendered content from the keys.. So the renderer only needs to use the keys...
-		
-		//Insert renderWidgetsPending = false somewhere here at the end...
+	}
+	
+	public void clearWidgetMedia() {
+		Set<String> oldKeys = new HashSet<String>();
+    	for (String key : document.getMediaIDs())
+    		if (key.startsWith(MARKDOWN_WIDGET_MEDIA_KEY_PREFIX)) oldKeys.add(key);
+    	
+    	for (String oldKey : oldKeys)
+    		document.removeMedia(oldKey);
 	}
 	
 	public void addActiveMediaID(String activeMediaID) {
@@ -208,7 +227,7 @@ public class DocumentEditor extends AnchorPane {
 	public void clearUnusedMedia() {
 		//Clean-up by removing all media not currently in use from the document media store..
 		for (String mediaID : document.getMediaIDs())
-			if (!activeMediaIDs.contains(mediaID))
+			if (!activeMediaIDs.contains(mediaID) && !mediaID.startsWith(MARKDOWN_WIDGET_MEDIA_KEY_PREFIX))
 				document.removeMedia(mediaID);
 	}
 	

@@ -32,22 +32,22 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
     private void render(FencedCodeBlock node, NodeRendererContext context, HtmlWriter html) {
     	// test the node to see if it needs overriding
         if (node.getInfo().equals("python-image-widget")) {
-        	String script = node.getContentChars().normalizeEOL();
-        	if (documentEditor.getDocument().getMediaIDs().contains(script)) {
-        		
-        		System.out.println("rendering... ");
-        		
-	        	html.attr("src", documentEditor.getDocument().getMedia(script))
+        	String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node.getInfo() + ":" + node.getContentChars().normalizeEOL();
+        	if (documentEditor.getDocument().getMediaIDs().contains(key)) {
+	        	html.attr("src", documentEditor.getDocument().getMedia(key))
 	        	.withAttr()
 	            .tag("img", true);
-        	}
-	        	
+	        	return;
+        	}	
         } else if (node.getInfo().equals("python-string-widget")) {
+        	
+        } else if (node.getInfo().equals("python-jekyll-widget")) {
         	
         } else if (node.getInfo().equals("groovy-string-widget")) {	
         	
-        } else {
-            context.delegateRender();
+        } else if (node.getInfo().equals("groovy-jekyll-widget")) {
+        	
         }
+        context.delegateRender();
     }
 }

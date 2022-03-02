@@ -434,7 +434,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
  	}
 
  	DocumentEditor newEditor(String name) {
- 		DocumentEditor DocumentEditor = new DocumentEditor(archive, this, name);
+ 		DocumentEditor DocumentEditor = new DocumentEditor(context, archive, this, name);
  		//DocumentEditor.getTab().setOnCloseRequest(e -> {
  		//	if (!canCloseEditor(DocumentEditor))
  		//		e.consume();

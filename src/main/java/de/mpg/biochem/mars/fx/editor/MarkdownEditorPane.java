@@ -184,7 +184,7 @@ public class MarkdownEditorPane
 		Options.markdownExtensionsProperty().addListener(weakOptionsListener);
 		Options.showLineNoProperty().addListener(weakOptionsListener);
 		Options.showWhitespaceProperty().addListener(weakOptionsListener);
-		Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
+		//Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
 
 		// workaround a problem with wrong selection after undo:
 		//   after undo the selection is 0-0, anchor is 0, but caret position is correct
@@ -321,6 +321,10 @@ public class MarkdownEditorPane
 	Path getParentPath() {
 		Path path = getPath();
 		return (path != null) ? path.getParent() : null;
+	}
+	
+	public void textChanged() {
+		textChanged(textArea.getText());
 	}
 
 	private void textChanged(String newText) {

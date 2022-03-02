@@ -29,6 +29,6 @@ public class FencedCodeWidgetNodePostProcessorFactory extends NodePostProcessorF
     @NotNull
     @Override
     public NodePostProcessor apply(@NotNull Document document) {
-        return new FencedCodeWidgetNodePostProcessor(document);
+        return new FencedCodeWidgetNodePostProcessor(document, documentEditor);
     }
 }

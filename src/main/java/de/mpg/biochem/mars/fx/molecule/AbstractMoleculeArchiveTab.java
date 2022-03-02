@@ -56,6 +56,9 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
     @Parameter
     protected MoleculeArchiveService moleculeArchiveService;
     
+    @Parameter
+    protected Context context;
+    
     protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
