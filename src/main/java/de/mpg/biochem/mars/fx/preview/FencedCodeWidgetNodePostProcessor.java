@@ -36,6 +36,7 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
         		PythonImageMarkdownWidget pythonImageMarkdownWidget = new PythonImageMarkdownWidget(documentEditor.getContext(), "Conda Python 3");
   
         		Map<String, Object> outputs = pythonImageMarkdownWidget.runScript(inputs, script);
+        		
         		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
         		documentEditor.getDocument().putMedia(key, (String) outputs.get("imageData"));
         	}        	
