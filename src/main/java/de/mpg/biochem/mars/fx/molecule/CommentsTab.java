@@ -379,30 +379,14 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
     	editToolBar.getItems().add(0, editModeButton2);
     	
-		//Render widgets
-		//Action renderWidgetsAction = new Action("Render Widgets", null, REFRESH,
-		//		e -> {
-		//			getActiveDocumentEditor().renderWidgets();
-		//		});
-
-
 		ButtonBase renderWidgetsButton = new Button();
 		Text renderWidgetsIcon = FontAwesomeIconFactory.get().createIcon(REFRESH, "1.2em");
 		renderWidgetsButton.setGraphic(renderWidgetsIcon);
 		renderWidgetsButton.setTooltip(new Tooltip("Render Widgets"));
 		renderWidgetsButton.setFocusTraversable(false);
 		
-		RotateTransition rt = new RotateTransition(Duration.millis(1000), renderWidgetsIcon);
-		rt.setInterpolator(Interpolator.LINEAR);
-		rt.setByAngle(0);
-		rt.setByAngle(360);
-		rt.setCycleCount(Animation.INDEFINITE);
-
-		renderWidgetsButton.setOnMouseClicked(e -> {
-			rt.play();
-			getActiveDocumentEditor().renderWidgets(rt);
-		});
-	
+		renderWidgetsButton.setOnAction(e -> getActiveDocumentEditor().renderWidgets());
+		
     	editToolBar.getItems().add(renderWidgetsButton);
     	
 		// preview actions

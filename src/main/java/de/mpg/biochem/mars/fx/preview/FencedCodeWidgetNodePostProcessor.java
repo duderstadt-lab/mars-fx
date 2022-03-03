@@ -24,7 +24,7 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
     public void process(@NotNull NodeTracker state, @NotNull Node node) {
         if (node instanceof FencedCodeBlock) {
         	FencedCodeBlock fencedCodeBlockNode = (FencedCodeBlock) node;
-        	
+
         	if(fencedCodeBlockNode.getInfo().equals("python-image-widget")) {
         		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
         		
@@ -34,11 +34,11 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
         		inputs.put("archive", documentEditor.getArchive());
         		
         		PythonImageMarkdownWidget pythonImageMarkdownWidget = new PythonImageMarkdownWidget(documentEditor.getContext(), "Conda Python 3");
-  
+        		
         		Map<String, Object> outputs = pythonImageMarkdownWidget.runScript(inputs, script);
         		
         		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
-        		documentEditor.getDocument().putMedia(key, (String) outputs.get("imageData"));
+        		documentEditor.getDocument().putMedia(key, (String) outputs.get("imgsrc"));
         	}        	
         }
     }

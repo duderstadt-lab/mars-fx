@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import org.scijava.Context;
+import org.scijava.module.DefaultMutableModuleItem;
 import org.scijava.module.ModuleException;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
@@ -42,7 +43,9 @@ public class PythonImageMarkdownWidget {
 
 		ScriptInfo scriptInfo = new ScriptInfo(context, scriptName, new StringReader(script));
 		scriptInfo.setLanguage(lang);
-
+		
+		//scriptInfo.registerOutput(new DefaultMutableModuleItem(scriptInfo, "imageData", String.class));
+		
 		ScriptModule module = null;
 		try {
 			module = scriptInfo.createModule();
@@ -52,7 +55,7 @@ public class PythonImageMarkdownWidget {
 		}
 		
 		module.setInputs(inputs);
-
+		
 		/*
 		OutputConsole outputConsole = new OutputConsole(logArea);
 		PrintStream outputPS = new PrintStream(outputConsole, true);

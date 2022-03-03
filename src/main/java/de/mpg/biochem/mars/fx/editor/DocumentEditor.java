@@ -66,6 +66,7 @@ import com.vladsch.flexmark.parser.Parser;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
+import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.CommentsTab;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
@@ -171,13 +172,11 @@ public class DocumentEditor extends AnchorPane {
 	}
 	
 	//private boolean renderWidgetsPending;
-	public void renderWidgets(RotateTransition rt) {
+	public void renderWidgets() {
 	//	if (renderWidgetsPending)
 	//		return;
 		
 	//	renderWidgetsPending = true;
-		
-		//Start a status screen
 
 		if (widgetParser == null) {
     		widgetParser = Parser.builder()
@@ -186,29 +185,11 @@ public class DocumentEditor extends AnchorPane {
 				.build();
 		}
 		
-		Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
-            	clearWidgetMedia();
-            	widgetParser.parse(markdownEditorPane.getMarkdown());
-            	markdownEditorPane.textChanged();
-            	Platform.runLater(() -> {
-            		rt.stop();
-            	});
-            	return null;
-            }
-        };
-
-        //task.setOnSucceeded(event -> { 
-        	//renderWidgetsPending = false;
-        	
-        	//markdownPreviewPane.update();
-        	//Stop status screen
-        	
-        	//run final parse/preview cycle to update with new media...
-        //});
-
-        new Thread(task).start();
+		getNode().fireEvent(new RunMoleculeArchiveTaskEvent(archive, () -> {
+			clearWidgetMedia();
+        	widgetParser.parse(markdownEditorPane.getMarkdown());
+        	markdownEditorPane.textChanged();
+		}, "Rendering widgets..."));
 	}
 	
 	public void clearWidgetMedia() {
