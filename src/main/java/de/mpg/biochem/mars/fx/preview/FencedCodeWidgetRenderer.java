@@ -1,6 +1,8 @@
 package de.mpg.biochem.mars.fx.preview;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.jetbrains.annotations.NotNull;
@@ -12,6 +14,8 @@ import com.vladsch.flexmark.html.renderer.NodeRendererContext;
 import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.util.data.DataHolder;
+import com.vladsch.flexmark.util.sequence.BasedSequence;
+import com.vladsch.flexmark.util.ast.BlockContent;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
@@ -30,15 +34,30 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
     }
 
     private void render(FencedCodeBlock node, NodeRendererContext context, HtmlWriter html) {
-    	// test the node to see if it needs overriding
-        if (node.getInfo().equals("python-image-widget")) {
-        	String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node.getInfo() + ":" + node.getContentChars().normalizeEOL();
-        	if (documentEditor.getDocument().getMediaIDs().contains(key)) {
-	        	html.attr("src", documentEditor.getDocument().getMedia(key))
-	        	.withAttr()
-	            .tag("img", true);
-	        	return;
-        	}	
+    	if (node.getInfo().equals("python-image-widget")) {
+    		
+    		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node.getInfo() + ":" + node.getContentChars().normalizeEOL();
+    		
+    		if (documentEditor.getDocument().getMediaIDs().contains(key)) {
+    			String content = documentEditor.getDocument().getMedia(key);
+		    	if (content.startsWith(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+		    		int startOffset = node.getStartOffset();
+		    		int endOffset = node.getEndOffset();
+		    		BasedSequence errorMessage = BasedSequence.of(content.substring(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX.length()));
+		    		html.line();
+		            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
+		            html.attr("data-pos", startOffset + ":" + endOffset).srcPosWithEOL(errorMessage).withAttr().tag("code");
+		            html.text(errorMessage.normalizeEOL());
+		            html.tag("/code");
+		            html.tag("/pre").closePre();
+		            return;
+		    	} else {
+		        	html.attr("src", documentEditor.getDocument().getMedia(key))
+		        	.withAttr()
+		            .tag("img", true);
+		        	return;
+	        	}	
+    		}
         } else if (node.getInfo().equals("python-string-widget")) {
         	
         } else if (node.getInfo().equals("python-jekyll-widget")) {

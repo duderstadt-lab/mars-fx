@@ -171,13 +171,7 @@ public class DocumentEditor extends AnchorPane {
 		return archive;
 	}
 	
-	//private boolean renderWidgetsPending;
 	public void renderWidgets() {
-	//	if (renderWidgetsPending)
-	//		return;
-		
-	//	renderWidgetsPending = true;
-
 		if (widgetParser == null) {
     		widgetParser = Parser.builder()
 				.extensions(MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer()))
