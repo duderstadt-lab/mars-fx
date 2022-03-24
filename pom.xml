@@ -120,6 +120,8 @@
 		<flexmark-util-html.version>${flexmark.version}</flexmark-util-html.version>
 		<flexmark-util-misc.version>${flexmark.version}</flexmark-util-misc.version>
 		<flexmark-util-sequence.version>${flexmark.version}</flexmark-util-sequence.version>
+		<flexmark-ext-jekyll-tag.version>${flexmark.version}</flexmark-ext-jekyll-tag.version>
+		<flexmark-pdf-converter.version>${flexmark.version}</flexmark-pdf-converter.version>
 
 		<jackson.version>2.11.2</jackson.version>
 		<jackson-core.version>${jackson.version}</jackson-core.version>
@@ -280,6 +282,16 @@
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-util-sequence</artifactId>
 			<version>${flexmark-util-sequence.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-jekyll-tag</artifactId>
+			<version>${flexmark-ext-jekyll-tag.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-pdf-converter</artifactId>
+			<version>${flexmark-pdf-converter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-io</groupId>
