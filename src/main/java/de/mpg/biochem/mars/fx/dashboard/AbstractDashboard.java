@@ -56,6 +56,7 @@ import javafx.beans.value.ObservableValue;
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.application.Platform;
@@ -89,7 +90,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	private BorderPane borderPane;
 
 	private ScrollPane scrollPane;
-	private JFXMasonryPane widgetPane;
+	private MarsJFXMasonryPane widgetPane;
 	private ToolBar toolbar;
 	private ComboBox<String> widgetScriptLanguage;
 
@@ -159,8 +160,9 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 		borderPane.setTop(toolbar);
 
-		widgetPane = new JFXMasonryPane();
-		widgetPane.setLayoutMode(JFXMasonryPane.LayoutMode.BIN_PACKING);
+		widgetPane = new MarsJFXMasonryPane();
+		widgetPane.setLayoutMode(MarsJFXMasonryPane.LayoutMode.BIN_PACKING);
+		widgetPane.setLimitRow(100000);
 		widgetPane.setCellWidth(50);
 		widgetPane.setCellHeight(50);
 		widgetPane.setPadding(new Insets(10, 10, 10, 10));
@@ -230,7 +232,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		return borderPane;
 	}
 
-	public JFXMasonryPane getWidgetPane() {
+	public MarsJFXMasonryPane getWidgetPane() {
 		return widgetPane;
 	}
 

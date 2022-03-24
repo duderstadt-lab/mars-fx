@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.jfoenix.controls.JFXMasonryPane;
 
+import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
@@ -45,7 +46,7 @@ public interface MarsDashboard<W extends MarsDashboardWidget> {
 	
 	Node getNode();
 	
-	JFXMasonryPane getWidgetPane();
+	MarsJFXMasonryPane getWidgetPane();
 
 	ObservableList<W> getWidgets();
 	
