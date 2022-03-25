@@ -37,41 +37,26 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import org.scijava.module.ModuleItem;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import javafx.scene.Group;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
 
-import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.util.MarsMath;
 import javafx.application.Platform;
 import javafx.scene.Node;
 
 import org.scijava.convert.ConvertService;
 import org.scijava.module.ModuleException;
 import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptInfo;
-import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
 
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 import org.apache.commons.codec.binary.Base64;
@@ -165,10 +150,8 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 	}
 
 	private void updateImageViewSize(ImageView imageView, double HtoWratio) {		 
-		 //double rootWidth = rootPane.getWidth() - 30;
-		 //double rootHeight = rootPane.getHeight() - 70;
-		 double rootWidth = rootPane.getWidth();
-		 double rootHeight = rootPane.getHeight();
+		 double rootWidth = rootPane.getWidth() - 30;
+		 double rootHeight = rootPane.getHeight() - 30;
 
 		 if (rootWidth*HtoWratio < rootHeight) {
 			 imageView.setFitWidth(rootWidth);

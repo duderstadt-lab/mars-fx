@@ -28,7 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,7 +42,6 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.MarsMath;
 import de.mpg.biochem.mars.fx.dashboard.AbstractCondaPython3Widget;
 import net.imagej.ops.Initializable;
 
@@ -81,7 +79,7 @@ public class MoleculeArchiveCondaPython3Widget extends AbstractCondaPython3Widge
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
-		module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 75)/72));
+		module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
 	}
 
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
