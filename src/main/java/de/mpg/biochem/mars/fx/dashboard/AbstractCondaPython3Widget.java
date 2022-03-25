@@ -43,6 +43,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import org.scijava.module.ModuleItem;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -72,10 +74,12 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
+import org.apache.commons.codec.binary.Base64;
+
 public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidget
 		implements MarsDashboardWidget, SciJavaPlugin, Initializable {
 
-	protected File file;
+	protected String imgsrc;
 	protected BorderPane borderPane;
 
 	@Parameter
@@ -116,8 +120,6 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 		} catch (ModuleException e) {
 			return null;
 		}
-
-		// Can these move into the initialize block...
 
 		OutputConsole outputConsole = new OutputConsole(logArea);
 		PrintStream outputPS = new PrintStream(outputConsole, true);
@@ -163,8 +165,10 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 	}
 
 	private void updateImageViewSize(ImageView imageView, double HtoWratio) {		 
-		 double rootWidth = rootPane.getWidth() - 30;
-		 double rootHeight = rootPane.getHeight() - 70;
+		 //double rootWidth = rootPane.getWidth() - 30;
+		 //double rootHeight = rootPane.getHeight() - 70;
+		 double rootWidth = rootPane.getWidth();
+		 double rootHeight = rootPane.getHeight();
 
 		 if (rootWidth*HtoWratio < rootHeight) {
 			 imageView.setFitWidth(rootWidth);
@@ -178,26 +182,30 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 			@Override
 			public void run() {
 				try {
-					if (!file.exists())
+					if (imgsrc == null)
 						return;
-					InputStream stream = new FileInputStream(file);
-					Image image = new Image(stream);
-					ImageView imageView = new ImageView();
+					String base64string = imgsrc.substring(22);
+					
+		            byte[] imageByte = Base64.decodeBase64(base64string);
+		            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+		            Image image = new Image(bis);
+					bis.close();
+		            ImageView imageView = new ImageView();
 					imageView.setImage(image);
-
+	
 					rootPane.widthProperty().addListener((obs, oldVal, newVal) -> {
 						updateImageViewSize(imageView, image.getHeight()/image.getWidth());		 
 					});
 					rootPane.heightProperty().addListener((obs, oldVal, newVal) -> {
 						updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
 					});
-
+	
 					imageView.setPreserveRatio(true);
-
+	
 					borderPane.setCenter(imageView);
-
+	
 					updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
-				} catch (FileNotFoundException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -206,7 +214,8 @@ public abstract class AbstractCondaPython3Widget extends AbstractScriptableWidge
 
 	@Override
 	public void run() {
-		runScript();
+		Map<String, Object> outputs = runScript();
+		imgsrc = (String) outputs.get("imgsrc");
 		loadImage();
 	}
 }

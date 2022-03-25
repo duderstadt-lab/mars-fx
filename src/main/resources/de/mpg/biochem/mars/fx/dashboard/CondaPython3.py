@@ -2,8 +2,11 @@
 #@ MoleculeArchive archive
 #@ Float width
 #@ Float height
-#@ String path
+#@OUTPUT String imgsrc
 
+import marspylib as mars
+import matplotlib
+matplotlib.use('agg')
 from matplotlib.figure import Figure
 import numpy as np
 
@@ -18,4 +21,4 @@ ax.set(xlabel='time (s)', ylabel='voltage (mV)',
        title='About as simple as it gets, folks')
 ax.grid()
 fig.set_size_inches(width, height)
-fig.savefig(sj.to_python(path), bbox_inches='tight', dpi=100)
+imgsrc = mars.figure_to_imgsrc(fig)

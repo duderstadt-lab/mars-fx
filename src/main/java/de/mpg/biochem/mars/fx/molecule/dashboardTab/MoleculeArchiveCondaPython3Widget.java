@@ -57,9 +57,6 @@ public class MoleculeArchiveCondaPython3Widget extends AbstractCondaPython3Widge
 	public void initialize() {
 		super.initialize();
 
-		if (file == null)
-			file = new File(archive.getFile().getAbsolutePath() + ".rover.images/" + MarsMath.getUUID58() + ".png");
-
 		try {
 			InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream("CondaPython3.py");
 			String scriptTemplate = IOUtils.toString(is, "UTF-8");
@@ -74,9 +71,9 @@ public class MoleculeArchiveCondaPython3Widget extends AbstractCondaPython3Widge
 	protected void createIOMaps() {
 		super.createIOMaps();
 
-		setJsonField("imageFilename", 
-			jGenerator -> jGenerator.writeStringField("imageFilename", file.getName()),
-			jParser -> file = new File(archive.getFile().getAbsolutePath() + ".rover.images/" + jParser.getText()));
+		setJsonField("imgsrc", 
+			jGenerator -> jGenerator.writeStringField("imgsrc", imgsrc),
+			jParser -> imgsrc = jParser.getText());
 	}
 
 	@Override
@@ -85,9 +82,6 @@ public class MoleculeArchiveCondaPython3Widget extends AbstractCondaPython3Widge
 		module.setInput("archive", archive);
 		module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
 		module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 75)/72));
-		module.setInput("path", file.getAbsolutePath());
-		if (!file.getParentFile().exists())
-			file.getParentFile().mkdir();
 	}
 
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
