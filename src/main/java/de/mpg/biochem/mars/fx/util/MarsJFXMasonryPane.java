@@ -720,7 +720,6 @@ public class MarsJFXMasonryPane extends Pane {
                             limitCol,
                             gutterX,
                             gutterY);
-                        
                         /*
                         if (!validWidth(box, block, cellWidth, gutterX, gutterY) || !validHeight(box,
                             block,
@@ -730,6 +729,10 @@ public class MarsJFXMasonryPane extends Pane {
                             continue;
                         }
                         */
+                        if (!validWidth(box, block, cellWidth, gutterX, gutterY)) {
+                            continue;
+                        }
+                        
                         matrix = fillMatrix(matrix,
                             b + 1,
                             box.getMinX(),

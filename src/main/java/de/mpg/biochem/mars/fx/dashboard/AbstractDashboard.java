@@ -50,6 +50,7 @@ import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.jfoenix.controls.JFXMasonryPane;
+import javafx.scene.layout.AnchorPane;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -170,7 +171,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
 			@Override
 			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-				//int hCells = (int)((getWidgetPane().getWidth() - 20) / getWidgetPane().getCellWidth());
 				int hCells = (int)(getWidgetPane().getWidth() / getWidgetPane().getCellWidth());
 				double containerWidth = hCells*getWidgetPane().getCellWidth();
 				
@@ -179,10 +179,10 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 				
 				if (outOfBoundsWidget) {
 					widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
-					widget.setWidth(containerWidth));
-					
-					getWidgetPane().clearLayout();
-					getWidgetPane().layout();
+						widget.setWidth(containerWidth));
+
+					//getWidgetPane().clearLayout();
+					//getWidgetPane().layout();
 				}
 			}
 		});
