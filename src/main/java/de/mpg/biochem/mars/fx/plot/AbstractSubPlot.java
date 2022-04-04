@@ -50,6 +50,7 @@ import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DefaultDataSet;
@@ -123,8 +124,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
 		
-		final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
-		reductionAlgorithm.setMinPointPixelDistance(0);
+		//final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
+		final RamanDouglasPeukerDataReducer reductionAlgorithm = new RamanDouglasPeukerDataReducer();
+		//reductionAlgorithm.setMinPointPixelDistance(0);
+		renderer.setRendererDataReducer(reductionAlgorithm);
 		renderer.setMinRequiredReductionSize(500);
 		renderer.setDrawMarker(false);
 		
