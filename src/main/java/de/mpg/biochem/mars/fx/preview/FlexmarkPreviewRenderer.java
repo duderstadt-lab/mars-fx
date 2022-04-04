@@ -65,8 +65,10 @@ import java.util.function.BiConsumer;
 import org.jetbrains.annotations.NotNull;
 
 import de.mpg.biochem.mars.fx.addons.PreviewRendererAddon;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.util.Range;
+import de.mpg.biochem.mars.util.MarsDocument;
 
 import com.vladsch.flexmark.ast.Heading;
 import com.vladsch.flexmark.util.ast.Node;
@@ -131,6 +133,19 @@ class FlexmarkPreviewRenderer
 			return htmlPreview;
 		}
 	}
+	
+	@Override
+	public String getHtml(boolean source, DocumentEditor documentEditor) {
+		if (source) {
+			if (htmlSource == null)
+				htmlSource = toHtml(true, documentEditor);
+			return htmlSource;
+		} else {
+			if (htmlPreview == null)
+				htmlPreview = toHtml(false, documentEditor);
+			return htmlPreview;
+		}
+	}
 
 	@Override
 	public String getAST() {
@@ -189,6 +204,10 @@ class FlexmarkPreviewRenderer
 	}
 
 	private String toHtml(boolean source) {
+		return toHtml(source, null);
+	}
+	
+	private String toHtml(boolean source, DocumentEditor documentEditor) {
 		Node astRoot;
 		if (addons.iterator().hasNext()) {
 			String text = markdownText;
@@ -209,6 +228,13 @@ class FlexmarkPreviewRenderer
 				.extensions(MarkdownExtensions.getFlexmarkExtensions());
 		if (!source)
 			builder.attributeProviderFactory(new MyAttributeProvider.Factory());
+		
+		if (documentEditor != null) {
+			documentEditor.removeAllActiveMediaIDs();
+			builder.nodeRendererFactory(new FencedCodeWidgetRendererFactory(documentEditor));
+			builder.nodeRendererFactory(new MarsEmbbedImageRendererFactory(documentEditor));
+		}
+		
 		String html = builder.build().render(astRoot);
 
         for (PreviewRendererAddon addon : addons)

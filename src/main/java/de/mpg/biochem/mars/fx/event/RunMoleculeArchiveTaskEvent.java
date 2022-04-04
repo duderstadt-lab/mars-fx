@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2022 Karl Duderstadt
+ * Copyright (C) 2018 - 2021 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,35 +26,42 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.mpg.biochem.mars.fx.dashboard;
+package de.mpg.biochem.mars.fx.event;
 
-import java.util.ArrayList;
-import java.util.Set;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.EventType;
 
-import com.jfoenix.controls.JFXMasonryPane;
-
-import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-
-public interface MarsDashboard<W extends MarsDashboardWidget> {
-	void runWidget(W widget);
-
-	void stopWidget(W widget);
-
-	void removeWidget(W widget);
+public class RunMoleculeArchiveTaskEvent extends MoleculeArchiveEvent {
 	
-	Node getNode();
-	
-	MarsJFXMasonryPane getWidgetPane();
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private final Runnable process;
+	private final String message;
 
-	ObservableList<W> getWidgets();
-	
-	void addWidget(W widget);
-	
-	W createWidget(String widgetName);
+	public static final EventType<MoleculeArchiveEvent> RUN_MOLECULE_ARCHIVE_TASK = new EventType<>(MOLECULE_ARCHIVE_EVENT, "RUN_MOLECULE_ARCHIVE_TASK");
 
-	ArrayList<String> getWidgetToolbarOrder();
+    public RunMoleculeArchiveTaskEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Runnable process, String message) {
+        super(RUN_MOLECULE_ARCHIVE_TASK, archive);
+        this.process = process;
+        this.message = message;
+    }
+    
+    public Runnable getTask() {
+    	return process;
+    }
+    
+    public String getMessage() {
+    	return message;
+    }
 
-	Set<String> getWidgetNames();
+    @Override
+    public void invokeHandler(MoleculeArchiveEventHandler handler) {
+        //Not used..
+    }
 }

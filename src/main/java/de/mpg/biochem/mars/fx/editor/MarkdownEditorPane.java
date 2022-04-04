@@ -60,8 +60,10 @@ import static javafx.scene.input.KeyCombination.*;
 import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
 import static org.fxmisc.wellbehaved.event.InputMap.*;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -99,6 +101,10 @@ import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
 import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Markdown editor pane.
@@ -123,6 +129,8 @@ public class MarkdownEditorPane
 	private Parser parser;
 	private final InvalidationListener optionsListener;
 	private String lineSeparator = getLineSeparatorOrDefault();
+	
+	private DocumentEditor documentEditor;
 
 	public MarkdownEditorPane() {
 		textArea = new MarkdownTextArea();
@@ -138,10 +146,10 @@ public class MarkdownEditorPane
 
 		textArea.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, this::showContextMenu);
 		textArea.addEventHandler(MouseEvent.MOUSE_PRESSED, this::hideContextMenu);
-		//textArea.setOnDragEntered(this::onDragEntered);
-		//textArea.setOnDragExited(this::onDragExited);
-		//textArea.setOnDragOver(this::onDragOver);
-		//textArea.setOnDragDropped(this::onDragDropped);
+		textArea.setOnDragEntered(this::onDragEntered);
+		textArea.setOnDragExited(this::onDragExited);
+		textArea.setOnDragOver(this::onDragOver);
+		textArea.setOnDragDropped(this::onDragDropped);
 
 		smartEdit = new SmartEdit(this, textArea);
 
@@ -189,8 +197,8 @@ public class MarkdownEditorPane
 				updateShowLineNo();
 			else if (e == Options.showWhitespaceProperty())
 				updateShowWhitespace();
-			else if (e == Options.showImagesEmbeddedProperty())
-				updateShowImagesEmbedded();
+			//else if (e == Options.showImagesEmbeddedProperty())
+			//	updateShowImagesEmbedded();
 			else if (e == Options.markdownRendererProperty() || e == Options.markdownExtensionsProperty()) {
 				// re-process markdown if markdown extensions option changes
 				parser = null;
@@ -204,7 +212,7 @@ public class MarkdownEditorPane
 		Options.markdownExtensionsProperty().addListener(weakOptionsListener);
 		Options.showLineNoProperty().addListener(weakOptionsListener);
 		Options.showWhitespaceProperty().addListener(weakOptionsListener);
-		Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
+		//Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
 
 		// workaround a problem with wrong selection after undo:
 		//   after undo the selection is 0-0, anchor is 0, but caret position is correct
@@ -218,6 +226,11 @@ public class MarkdownEditorPane
 					textArea.selectRange(caretPosition, caretPosition);
 			});
 		});
+	}
+	
+	public MarkdownEditorPane(DocumentEditor documentEditor) {
+		this();
+		this.documentEditor = documentEditor;
 	}
 
 	private void updateFont() {
@@ -326,10 +339,20 @@ public class MarkdownEditorPane
 	public Path getPath() { return path.get(); }
 	public void setPath(Path path) { this.path.set(path); }
 	public ObjectProperty<Path> pathProperty() { return path; }
+	
+	// 'visible' property
+	private final ReadOnlyBooleanWrapper visible = new ReadOnlyBooleanWrapper(false);
+	public boolean isVisible() { return visible.get(); }
+	public void setVisible(boolean visible) { this.visible.set(visible); }
+	public ReadOnlyBooleanProperty visibleProperty() { return visible.getReadOnlyProperty(); }
 
 	Path getParentPath() {
 		Path path = getPath();
 		return (path != null) ? path.getParent() : null;
+	}
+	
+	public void textChanged() {
+		textChanged(textArea.getText());
 	}
 
 	private void textChanged(String newText) {
@@ -344,8 +367,8 @@ public class MarkdownEditorPane
 
 		Node astRoot = parseMarkdown(newText);
 
-		if (Options.isShowImagesEmbedded())
-			EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
+		//if (Options.isShowImagesEmbedded())
+		//	EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
 
 		applyHighlighting(astRoot);
 
@@ -418,12 +441,12 @@ public class MarkdownEditorPane
 		}
 	}
 
-	private void updateShowImagesEmbedded() {
-		if (Options.isShowImagesEmbedded())
-			EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(), getParentPath());
-		else
-			EmbeddedImage.removeAllImageSegments(textArea);
-	}
+	//private void updateShowImagesEmbedded() {
+	//	if (Options.isShowImagesEmbedded())
+	//		EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(), getParentPath());
+	//	else
+	//		EmbeddedImage.removeAllImageSegments(textArea);
+	//}
 
 	public void undo() {
 		textArea.getUndoManager().undo();
@@ -551,8 +574,29 @@ public class MarkdownEditorPane
 		if (db.hasFiles()) {
 			// drop files (e.g. from project file tree)
 			List<File> files = db.getFiles();
-			if (!files.isEmpty())
-				smartEdit.insertLinkOrImage(dragCaret.getPosition(), files.get(0).toPath());
+			if (!files.isEmpty()) {
+						
+				String encodedString;
+				try {
+					byte[] fileContent = FileUtils.readFileToByteArray(files.get(0));
+					encodedString = Base64.getEncoder().encodeToString(fileContent);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					//e.printStackTrace();
+					encodedString = "IOException";
+				}
+				
+				String dataPrefix = "";
+				if (files.get(0).getName().endsWith("png")) 
+					dataPrefix = "data:image/png;base64,";
+				else if (files.get(0).getName().endsWith("jpg"))
+					dataPrefix = "data:image/jpg;base64,";
+				
+				String imageKey = dataPrefix + encodedString.substring(0, Math.min(encodedString.length(), 25)) + "..." + encodedString.substring(Math.max(0, encodedString.length() - 25));
+				encodedString = dataPrefix + encodedString;
+				documentEditor.getDocument().putMedia(imageKey, encodedString);
+				smartEdit.insertEmbbedImageKey(dragCaret.getPosition(), files.get(0).getName(), imageKey);
+			}
 		} else if (db.hasString()) {
 			// drop text
 			String newText = db.getString();

@@ -146,6 +146,7 @@ import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
@@ -155,6 +156,7 @@ import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataPropertiesEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
+import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.molecule.DashboardTab.*;
@@ -346,7 +348,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		}
         
         updateAccelerators();
-
+        
+        getNode().addEventFilter(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals("RUN_MOLECULE_ARCHIVE_TASK")) {
+			   		runTask(((RunMoleculeArchiveTaskEvent)e).getTask(), ((RunMoleculeArchiveTaskEvent)e).getMessage());
+			   		e.consume();
+			   	}
+			} 
+        });
         return scene;
 	}
 	
@@ -377,7 +388,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     				tabSet.stream().filter(maTab -> newValue == maTab.getTab()).findFirst().ifPresent(maTab -> updateMenus(maTab.getMenus()));
     					
     				if (oldValue == commentsTab.getTab()) {
-    					commentsTab.getCommentPane().setEditMode(false);
+    					commentsTab.setEditMode(false);
     					commentsTab.saveComments();
     				} else if (oldValue == imageMetadataTab.getTab()) {
     					imageMetadataTab.saveCurrentRecord();

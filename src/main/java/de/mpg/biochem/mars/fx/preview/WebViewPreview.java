@@ -68,10 +68,12 @@ import java.util.function.BiConsumer;
 import javafx.concurrent.Worker.State;
 import javafx.scene.control.IndexRange;
 import javafx.scene.web.WebView;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Utils;
+import de.mpg.biochem.mars.util.MarsDocument;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.util.ast.Node;
@@ -93,6 +95,8 @@ class WebViewPreview
 	private int lastScrollX;
 	private int lastScrollY;
 	private IndexRange lastEditorSelection;
+	
+	private DocumentEditor documentEditor;
 
 	WebViewPreview() {
 	}
@@ -118,6 +122,10 @@ class WebViewPreview
 					runnable.run();
 			}
 		});
+	}
+	
+	public void setDocumentEditor(DocumentEditor documentEditor) {
+		this.documentEditor = documentEditor;
 	}
 
 	private void runWhenLoaded(Runnable runnable) {
@@ -167,6 +175,12 @@ class WebViewPreview
 			+ "  margin-right: -5px;\n"
 			+ "  background-color: rgb(253, 247, 241);\n"
 			+ "}\n"
+			+ "img {\n"
+			+ "  display: block;\n"
+			+ "  float: none;\n"
+			+ "  margin-left: auto;\n"
+			+ "  margin-right: auto;\n"
+			+ "}\n"
 			+ "</style>\n"
 			+ "<script src=\"" + getClass().getResource("katex.min.js") + "\"></script>\n"	
 			+ "<script src=\"" + getClass().getResource("mermaid.min.js") + "\"></script>\n"	
@@ -175,7 +189,7 @@ class WebViewPreview
 			+ base
 			+ "</head>\n"
 			+ "<body" + scrollScript + ">\n"
-			+ renderer.getHtml(false)
+			+ renderer.getHtml(false, documentEditor)
 			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
 			+ "<script>" + anchorFixer() + "</script>\n"
 			+ "<script> (function () {"

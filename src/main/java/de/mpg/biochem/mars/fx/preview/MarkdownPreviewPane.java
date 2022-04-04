@@ -65,9 +65,11 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.IndexRange;
 import javafx.scene.layout.BorderPane;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
 import de.mpg.biochem.mars.fx.util.Range;
+import de.mpg.biochem.mars.util.MarsDocument;
 
 import com.vladsch.flexmark.util.ast.Node;
 
@@ -90,10 +92,13 @@ public class MarkdownPreviewPane
 	private RendererType activeRendererType;
 	private Renderer activeRenderer;
 	private Preview activePreview;
+	
+	private DocumentEditor documentEditor;
 
 	interface Renderer {
 		void update(String markdownText, Node astRoot, Path path);
 		String getHtml(boolean source);
+		String getHtml(boolean source, DocumentEditor documentEditor);
 		String getAST();
 		List<Range> findSequences(int startOffset, int endOffset);
 	}
@@ -131,6 +136,13 @@ public class MarkdownPreviewPane
 		editorSelection.addListener((observable, oldValue, newValue) -> editorSelectionChanged());
 
 		Options.additionalCSSProperty().addListener((observable, oldValue, newValue) -> update() );
+	}
+	
+	public MarkdownPreviewPane(DocumentEditor documentEditor) {
+		this();
+		this.documentEditor = documentEditor;
+		if (documentEditor != null)
+			webViewPreview.setDocumentEditor(documentEditor);
 	}
 
 	public static boolean hasExternalPreview() {

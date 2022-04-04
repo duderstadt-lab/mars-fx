@@ -93,8 +93,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected Tab contentTab;
 
 	protected static final int RESIZE_REGION = 2;
-	protected double MINIMUM_WIDTH = 250;
-	protected double MINIMUM_HEIGHT = 250;
+	public static final double MINIMUM_WIDTH = 250;
+	public static final double MINIMUM_HEIGHT = 250;
 	protected double y, x;
 	protected AtomicBoolean running = new AtomicBoolean(false);
 	protected boolean initHeight, initWidth;
