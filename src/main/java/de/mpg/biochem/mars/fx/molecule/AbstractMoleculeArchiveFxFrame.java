@@ -1313,8 +1313,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (ijStage != null)
 			WindowManager.removeWindow(ijStage);
 		
-		if (stage.isShowing())
-			stage.hide();
+		Platform.runLater(() -> {
+			if (stage.isShowing()) stage.hide();
+		});
+		
+		for (int i=0; i<marsBdvFrames.length; i++)
+    		if (marsBdvFrames[i] != null) {
+    			marsBdvFrames[i].getFrame().dispose();
+    			marsBdvFrames[i] = null;
+    		}
+	    
+		marsBdvFrames = null;
     }
     
     //Creates settings input and output maps to save the current state of the program.
