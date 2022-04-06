@@ -28,69 +28,31 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CIRCLE_ALT;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINE_CHART;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.controlsfx.control.PopOver;
-import org.controlsfx.control.PopOver.ArrowLocation;
-
 import com.jfoenix.controls.JFXBadge;
-import com.jfoenix.controls.JFXColorPicker;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.AxisLabelFormatter;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.chart.ui.css.StylishBooleanProperty;
-import de.gsi.chart.ui.css.StylishObjectProperty;
-
-import javafx.stage.WindowEvent;
-
-import de.gsi.chart.ui.geometry.Side;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableObjectProperty;
-import javafx.css.StyleableProperty;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.table.MarsTable;
-import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
-import javafx.css.CssMetaData;
-import javafx.css.StyleableObjectProperty;
-import javafx.event.EventHandler;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.util.StringConverter;
-
-import javafx.scene.input.MouseEvent;
-import javafx.event.Event;
-
-import javafx.scene.paint.Color;
 
 public abstract class AbstractSubPlot implements SubPlot {
 	protected MarsNumericAxis xAxis, yAxis;
@@ -124,10 +86,10 @@ public abstract class AbstractSubPlot implements SubPlot {
 		
 		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
 		
-		//final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
-		final RamanDouglasPeukerDataReducer reductionAlgorithm = new RamanDouglasPeukerDataReducer();
-		//reductionAlgorithm.setMinPointPixelDistance(0);
-		renderer.setRendererDataReducer(reductionAlgorithm);
+		final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) renderer.getRendererDataReducer();
+		//final RamanDouglasPeukerDataReducer reductionAlgorithm = new RamanDouglasPeukerDataReducer();
+		reductionAlgorithm.setMinPointPixelDistance(0);
+		//renderer.setRendererDataReducer(reductionAlgorithm);
 		renderer.setMinRequiredReductionSize(500);
 		renderer.setDrawMarker(false);
 		
