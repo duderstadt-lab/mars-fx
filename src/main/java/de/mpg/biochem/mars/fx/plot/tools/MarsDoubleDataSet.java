@@ -60,7 +60,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
 	private double width;
 	private String lineStyle;
 
-	private AxisRange range;
+	private MarsNumericAxis axis;
     private int maxPointCount;
 	
     /**
@@ -125,12 +125,12 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
 		this.lineStyle = lineStyle;
 	}
     
-    public MarsDoubleDataSet(String name, Color color, double width, final String lineStyle, final AxisRange range, final int maxPointCount) {
+    public MarsDoubleDataSet(String name, Color color, double width, final String lineStyle, final MarsNumericAxis axis, final int maxPointCount) {
 		this(name);
 		this.color = color;
 		this.width = width;
 		this.lineStyle = lineStyle;
-		this.range = range;
+		this.axis = axis;
 		this.maxPointCount = maxPointCount;
 	}
 
@@ -319,33 +319,77 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
         return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
     }
 
-    @Override
-    public final double get(final int dimIndex, final int index) {
-        return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
-    }
-
     /**
      * @return storage capacity of dataset
      */
     public int getCapacity() {
         return Math.min(xValues.elements().length, yValues.elements().length);
     }
+    
+    @Override
+    public final double get(final int dimIndex, final int index) {
+    	if (downsampledXValues != null && rangeTooLarge())
+    		return dimIndex == DataSet.DIM_X ? downsampledXValues.elements()[index] : downsampledYValues.elements()[index];
+    	else
+    		return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
+    }
 
     @Override
     public int getDataCount(final int dimIndex) {
-        return Math.min(xValues.size(), yValues.size());
+    	if (downsampledXValues != null && rangeTooLarge())
+    		return Math.min(downsampledXValues.size(), downsampledYValues.size());
+    	else
+    		return Math.min(xValues.size(), yValues.size());
     }
 
     @Override
     public final double[] getValues(final int dimIndex) {
-        return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
+    	if (downsampledXValues != null && rangeTooLarge())
+    		return dimIndex == DataSet.DIM_X ? downsampledXValues.elements() : downsampledYValues.elements();
+    	else
+    		return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
     }
     
-    private void initializeDownsampledValues() {
+    private int ccc = 0;
+    
+    private boolean rangeTooLarge() {
+    	if (xValues.size() == 0)
+    		return false;
+    	
+    	AxisRange range = axis.getRange();
+    	
+    	//We assume a linear relationship between range and values
+    	double pointsPerX = xValues.size()/(xValues.getDouble(xValues.size() - 1) - xValues.getDouble(0));
+    	
+    	int pointCount = (int)(pointsPerX*(range.getMax() - range.getMin()));
+    		
+    	if (pointCount > maxPointCount) return true;
+    	else return false;
+    }
+    
+    public void initializeDownsampledValues() {
     	downsampledXValues = new DoubleArrayList(maxPointCount);
     	downsampledYValues = new DoubleArrayList(maxPointCount);
-    	
-    	
+		
+		int binSize = (int)Math.floor(xValues.size()/maxPointCount);
+		
+		double xsum = 0;
+		double ysum = 0;
+		int count = 0;
+		int index = 0;
+		for (int i = 0; i < xValues.size(); i++) {
+			xsum += xValues.getDouble(i);
+			ysum += yValues.getDouble(i);
+			count++;
+			if (count == binSize && index < maxPointCount) {
+				downsampledXValues.add(xsum/count); 
+				downsampledYValues.add(ysum/count); 
+				count = 0;
+				xsum = 0;
+				ysum = 0;
+				index++;
+			}
+		}
     }
 
     /**
