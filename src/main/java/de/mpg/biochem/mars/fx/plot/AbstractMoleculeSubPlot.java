@@ -150,7 +150,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
 		
-		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle(), xAxis, 500_000);
+		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
 		
 		for (int row=0;row<getDataTable().getRowCount();row++) {
 			double x = getDataTable().getValue(xColumn, row);
@@ -162,7 +162,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		}
 
 		dataset.setStyle(plotSeries.getType());
-		dataset.initializeDownsampledValues();
+		dataset.downsample(xAxis, 10_000);
 		getChart().getDatasets().add(dataset);	
 	}
 	
