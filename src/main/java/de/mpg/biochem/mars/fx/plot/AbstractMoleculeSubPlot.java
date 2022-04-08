@@ -162,7 +162,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		}
 
 		dataset.setStyle(plotSeries.getType());
-		dataset.downsample(xAxis, 10_000);
+		if (plotPane.getPlotOptionsPane().downsample())
+			dataset.downsample(xAxis, plotPane.getPlotOptionsPane().getMinDownsamplePoints());
 		getChart().getDatasets().add(dataset);	
 	}
 	
