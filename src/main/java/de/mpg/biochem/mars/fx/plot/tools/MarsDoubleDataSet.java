@@ -60,7 +60,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
 	private MarsNumericAxis axis;
     private int maxPointCount;
     private double pointsPerX;
-    private int binSize = 1;
+    private double binSize = 1;
     private boolean downsampling = false;
 	
     /**
@@ -319,7 +319,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
     @Override
     public final double get(final int dimIndex, final int index) {
     	if (downsampling && rangeTooLarge()) {
-    		int newIndex = index*binSize;
+    		int newIndex = (int)(index*binSize);
     		return dimIndex == DataSet.DIM_X ? xValues.elements()[newIndex] : yValues.elements()[newIndex];
     	} else
     		return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues.elements()[index];
@@ -331,7 +331,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet> implem
     		AxisRange range = axis.getRange();
     		int fullRangePointCount = (int)(maxPointCount*(xValues.getDouble(xValues.size() - 1) - xValues.getDouble(0))/(range.getMax() - range.getMin()));
     		fullRangePointCount = (fullRangePointCount < maxPointCount) ? maxPointCount : fullRangePointCount;
-    		binSize = (int)Math.floor(xValues.size()/fullRangePointCount);
+    		binSize = ((double)xValues.size())/fullRangePointCount;
     		return fullRangePointCount;
     	} else
     		return Math.min(xValues.size(), yValues.size());
