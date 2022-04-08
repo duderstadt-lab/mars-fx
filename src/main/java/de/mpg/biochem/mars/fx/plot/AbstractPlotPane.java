@@ -77,6 +77,7 @@ import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 
+import org.apache.commons.math3.util.MathArrays.Position;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -87,6 +88,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
@@ -126,6 +128,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 	protected BooleanProperty gridlines = new SimpleBooleanProperty();
 	protected BooleanProperty fixXBounds = new SimpleBooleanProperty();
 	protected BooleanProperty reducePoints = new SimpleBooleanProperty();
+	protected BooleanProperty downsample = new SimpleBooleanProperty();
 	
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
@@ -164,6 +167,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
 		reducePoints.setValue(true);
+		downsample.setValue(true);
 		
 		buildTools();
 		rootBorderPane.setTop(createToolBar());
@@ -535,19 +539,29 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		return charts;
 	}
 	
+	@Override
 	public BooleanProperty fixXBoundsProperty() {
 		return fixXBounds;
 	}
 	
+	@Override
+	public PlotOptionsPane getPlotOptionsPane() {
+		return plotOptionsPane;
+	}
+	
 	class PlotOptionsPane extends VBox  {
-		private TextField minReductionTextField, xMinTextField, xMaxTextField;
+		private TextField minReductionTextField, minDownsampleTextField, xMinTextField, xMaxTextField;
 		
 		public PlotOptionsPane() {
+			setAlignment(Pos.CENTER_LEFT);
+			
 			//gridlines control
 			BorderPane gridBorderPane = new BorderPane();
 			ToggleSwitch gridlineSwitch = new ToggleSwitch();
 			gridlineSwitch.selectedProperty().bindBidirectional(gridlines);
-			gridBorderPane.setLeft(new Label("Gridlines"));
+			Label gridlinesLabel = new Label("Gridlines");
+			gridlinesLabel.setAlignment(Pos.CENTER_LEFT);
+			gridBorderPane.setLeft(gridlinesLabel);
 			gridBorderPane.setRight(gridlineSwitch);
 			getChildren().add(gridBorderPane);
 			
@@ -556,6 +570,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			ToggleSwitch reducerSwitch = new ToggleSwitch();
 			reducerSwitch.selectedProperty().bindBidirectional(reducePoints);
 			Label pointReducer = new Label("Point reducer");
+			pointReducer.setAlignment(Pos.CENTER_LEFT);
 			reducerBorderPane.setLeft(pointReducer);
 			reducerBorderPane.setRight(reducerSwitch);
 			getChildren().add(reducerBorderPane);
@@ -567,16 +582,39 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			minReductionTextField = new TextField();
 			minReductionTextField.setText(String.valueOf(500));
 			Label reduceAbove = new Label("Reduce above");
+			reduceAbove.setAlignment(Pos.CENTER_LEFT);
 			BorderPane.setMargin(reduceAbove, new Insets(0, 10, 0, 0));
 			minReductionBorderPane.setLeft(reduceAbove);
 			minReductionBorderPane.setRight(minReductionTextField);
 			getChildren().add(minReductionBorderPane);
 			
+			//Downsampler
+			BorderPane downsamplerBorderPane = new BorderPane();
+			ToggleSwitch downsampleSwitch = new ToggleSwitch();
+			downsampleSwitch.selectedProperty().bindBidirectional(downsample);
+			Label downsampleLabel = new Label("Downsample");
+			downsampleLabel.setAlignment(Pos.CENTER_LEFT);
+			downsamplerBorderPane.setLeft(downsampleLabel);
+			downsamplerBorderPane.setRight(downsampleSwitch);
+			getChildren().add(downsamplerBorderPane);
+			
+			BorderPane maxDownsamplerBorderPane = new BorderPane();
+			minDownsampleTextField = new TextField();
+			minDownsampleTextField.setText(String.valueOf(10_000));
+			Label downsampleAbove = new Label("Downsample above");
+			downsampleAbove.setAlignment(Pos.CENTER_LEFT);
+			BorderPane.setMargin(downsampleAbove, new Insets(0, 10, 0, 0));
+			maxDownsamplerBorderPane.setLeft(downsampleAbove);
+			maxDownsamplerBorderPane.setRight(minDownsampleTextField);
+			getChildren().add(maxDownsamplerBorderPane);
+			
 			//X Bounds
 			BorderPane fixXBoundsBorderPane = new BorderPane();
 			ToggleSwitch fixXBoundsSwitch = new ToggleSwitch();
 			fixXBoundsSwitch.selectedProperty().bindBidirectional(fixXBounds);
-			fixXBoundsBorderPane.setLeft(new Label("Fix X Bounds"));
+			Label fixXBoundsLabel = new Label("Fix X Bounds");
+			fixXBoundsLabel.setAlignment(Pos.CENTER_LEFT);
+			fixXBoundsBorderPane.setLeft(fixXBoundsLabel);
 			fixXBoundsBorderPane.setRight(fixXBoundsSwitch);
 			getChildren().add(fixXBoundsBorderPane);
 			
@@ -637,6 +675,22 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		
 		int getMinRequiredReductionSize() {
 			return Integer.valueOf(minReductionTextField.getText());
+		}
+		
+		boolean reducePoints() {
+			return reducePoints.get();
+		}
+		
+		boolean downsample() {
+			return downsample.get();
+		}
+		
+		void setMinDownsamplePoints(int minDownsamplePoints) {
+			minDownsampleTextField.setText(String.valueOf(minDownsamplePoints));
+		}
+		
+		int getMinDownsamplePoints() {
+			return Integer.valueOf(minDownsampleTextField.getText());
 		}
 	}
 }
