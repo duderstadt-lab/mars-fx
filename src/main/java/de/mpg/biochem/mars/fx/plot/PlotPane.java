@@ -31,16 +31,20 @@ package de.mpg.biochem.mars.fx.plot;
 import java.util.ArrayList;
 import java.util.Set;
 
+import de.mpg.biochem.mars.fx.plot.AbstractPlotPane.PlotOptionsPane;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.event.Event;
 import javafx.scene.Node;
+import javafx.beans.property.BooleanProperty;
 
 public interface PlotPane extends JsonConvertibleRecord {
 	public StyleSheetUpdater getStyleSheetUpdater();
 	public Node getNode();
 	public ArrayList<SubPlot> getCharts();
 	public ArrayList<String> getColumnNames();
+	public BooleanProperty fixXBoundsProperty();
+	public PlotOptionsPane getPlotOptionsPane();
 	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane);
 	public void hideSubPlotOptions();
 	public void fireEvent(Event event);
