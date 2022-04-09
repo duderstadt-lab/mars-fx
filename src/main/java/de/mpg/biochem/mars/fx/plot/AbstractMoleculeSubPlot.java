@@ -94,7 +94,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			   @Override 
 			   public void handle(PlotEvent e) { 
 				   if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
-					    System.out.println("Updating plot area");
 						update();
 						e.consume();
 				   }
