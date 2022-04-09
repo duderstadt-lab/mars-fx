@@ -36,6 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.scijava.table.DoubleColumn;
+
 import com.fasterxml.jackson.core.JsonToken;
 
 import javafx.scene.paint.Color;
@@ -57,6 +59,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.MarsWrappedDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Utils;
@@ -148,18 +151,37 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		}
 		
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
-		
-		MarsDoubleDataSet dataset = new MarsDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
-		
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			double x = getDataTable().getValue(xColumn, row);
-			double y = getDataTable().getValue(yColumn, row);
-			
-			if (!Double.isNaN(x) && !Double.isNaN(y)) {
-				dataset.add(x, y);
-			}
-		}
 
+		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
+		
+		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
+		DoubleColumn yCol = (DoubleColumn) getDataTable().get(yColumn);
+		int realCount = 0;
+		for (int row=0;row<getDataTable().getRowCount();row++) {
+			if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row)));
+				realCount++;
+		}
+		if (realCount < getDataTable().getRowCount()) {
+			//There are NaN values in this dataset we must make a copy without NaNs
+			//to ensure a continuous plot
+			double[] xColumnCopy = new double[realCount];
+			double[] yColumnCopy = new double[realCount];
+			int count = 0;
+			for (int row=0;row<getDataTable().getRowCount();row++) {
+				if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row))) {
+					xColumnCopy[count] = xCol.getValue(row);
+					yColumnCopy[count] = yCol.getValue(row);
+					count++;
+				}
+			}
+			DoubleColumn noNaNxCol = new DoubleColumn();
+			noNaNxCol.fill(xColumnCopy);
+			DoubleColumn noNaNyCol = new DoubleColumn();
+			noNaNyCol.fill(yColumnCopy);
+			dataset.add(noNaNxCol, noNaNyCol);
+		} else 
+			dataset.add((DoubleColumn) getDataTable().get(xColumn), (DoubleColumn) getDataTable().get(yColumn));
+		
 		dataset.setStyle(plotSeries.getType());
 		if (plotPane.getPlotOptionsPane().downsample())
 			dataset.downsample(xAxis, plotPane.getPlotOptionsPane().getMinDownsamplePoints());

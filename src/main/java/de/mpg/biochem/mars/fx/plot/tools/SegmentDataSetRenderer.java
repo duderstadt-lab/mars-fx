@@ -148,10 +148,10 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
             double width = 1;
             String lineStyle = "";
             
-            if (dataSet instanceof MarsDoubleDataSet) {
-            	color = ((MarsDoubleDataSet) dataSet).getColor();
-            	width = ((MarsDoubleDataSet) dataSet).getWidth();
-            	lineStyle = ((MarsDoubleDataSet) dataSet).getLineStyle();
+            if (dataSet instanceof MarsWrappedDoubleDataSet) {
+            	color = ((MarsWrappedDoubleDataSet) dataSet).getColor();
+            	width = ((MarsWrappedDoubleDataSet) dataSet).getWidth();
+            	lineStyle = ((MarsWrappedDoubleDataSet) dataSet).getLineStyle();
             }
             
             int indexMin;
