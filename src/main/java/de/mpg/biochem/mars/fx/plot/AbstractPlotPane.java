@@ -351,6 +351,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				if (subPlot.getPlotSeriesList().get(i).getXColumn() == null || subPlot.getPlotSeriesList().get(i).getYColumn() == null)
 					return;
 			}
+			
+			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
+				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 	
 			if (fixXBounds.get()) {
 				subPlot.getChart().getXAxis().setAutoRanging(false);
@@ -363,20 +366,21 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 				subPlot.getChart().getYAxis().set(subPlot.getDatasetOptionsPane().getYMin(), subPlot.getDatasetOptionsPane().getYMax());
 			} else
 				subPlot.getChart().getYAxis().setAutoRanging(true);
-						
-			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
-				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
 			
-			for (Axis a : subPlot.getChart().getAxes())
-	            a.forceRedraw();
+			for (Axis a : subPlot.getChart().getAxes()) {
+				Platform.runLater(() -> {
+					a.forceRedraw();
+					subPlot.getChart().layoutChildren();
+				});
+			}
 			
 			//issues with updating here appear to be related to https://github.com/GSI-CS-CO/chart-fx/issues/23
 			//Still the plot area doesn't update together with the axis...
 			//Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
 		
-		for (SubPlot subPlot : charts)
-			Platform.runLater(() -> subPlot.getChart().layoutChildren());
+		//for (SubPlot subPlot : charts)
+		//	Platform.runLater(() -> subPlot.getChart().layoutChildren());
 	}
 	
 	public void reload() {
