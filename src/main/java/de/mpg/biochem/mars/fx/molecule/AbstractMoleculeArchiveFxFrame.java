@@ -738,7 +738,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
-				ArrayList<String> segmentTableName = result.getSegmentTableName();
+				List<String> segmentTableName = result.getSegmentTableName();
 	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
 	            		Molecule molecule = archive.get(UID);
 	            	 	molecule.removeSegmentsTable(segmentTableName);

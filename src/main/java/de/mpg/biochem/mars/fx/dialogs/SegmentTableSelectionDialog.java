@@ -76,9 +76,9 @@ import javafx.scene.layout.HBox;
  */
 public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDialog.SelectionResult> {
 	
-	protected HashMap<String,ArrayList<String>> tabNameToSegmentName;
+	protected HashMap<String,List<String>> tabNameToSegmentName;
 	
-	public SegmentTableSelectionDialog(Window owner, Set<ArrayList<String>> segmentTableNames, String title) {
+	public SegmentTableSelectionDialog(Window owner, Set<List<String>> segmentTableNames, String title) {
 		setTitle(title);
 		initOwner(owner);
 		setResizable(true);
@@ -90,9 +90,9 @@ public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDia
 		hbox.getChildren().add(new Label("Segment table "));
 		ComboBox<String> table = new ComboBox<String>();
 		
-		tabNameToSegmentName = new HashMap<String, ArrayList<String>>();
+		tabNameToSegmentName = new HashMap<String, List<String>>();
 		
-		for (ArrayList<String> segmentTableName : segmentTableNames) {
+		for (List<String> segmentTableName : segmentTableNames) {
 			String tabName;
 			if (segmentTableName.get(2).equals(""))
 				tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
@@ -120,7 +120,7 @@ public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDia
 			this.tableName = tableName;
 		}
 		
-		public ArrayList<String> getSegmentTableName() {
+		public List<String> getSegmentTableName() {
 			return tabNameToSegmentName.get(tableName);
 		}
 	}

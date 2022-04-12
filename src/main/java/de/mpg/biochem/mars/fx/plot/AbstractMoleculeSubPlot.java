@@ -115,9 +115,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 			return;
 		
 		//Check if there are any segment table with these columns
-		Set<ArrayList<String>> segmentTableNames = new HashSet<ArrayList<String>>();
+		Set<List<String>> segmentTableNames = new HashSet<List<String>>();
 		boolean hasSegmentsTables = false;
-		for (ArrayList<String> names : molecule.getSegmentsTableNames()) {
+		for (List<String> names : molecule.getSegmentsTableNames()) {
 			if (names.get(0).equals(plotSeries.getXColumn()) && names.get(1).equals(plotSeries.getYColumn())) {
 				hasSegmentsTables = true;
 				segmentTableNames.add(names);
@@ -126,7 +126,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		
 		//Add segments
 		if (plotSeries.drawSegments() && hasSegmentsTables) {
-			for (ArrayList<String> segmentTableName : segmentTableNames) {
+			for (List<String> segmentTableName : segmentTableNames) {
 				double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
 				
 				MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet("Segments - " + yColumn + " vs " + xColumn + " - " + segmentTableName.get(2), plotSeries.getSegmentsColor(), segmentWidth, "");

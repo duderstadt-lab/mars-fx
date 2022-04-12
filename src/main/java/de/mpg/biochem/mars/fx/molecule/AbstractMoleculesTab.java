@@ -331,6 +331,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	            if (newMoleculeIndexRow != null) {
 	            	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
 	            	
+	            	//Here is an opportunity to update global indexes based
+	            	archive.properties().addMoleculeProperties(molecule);
+	            	
 	            	//Update center pane and properties pane.
 	            	moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 	            	moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));

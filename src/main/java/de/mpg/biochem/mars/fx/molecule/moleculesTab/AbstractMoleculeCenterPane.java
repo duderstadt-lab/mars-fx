@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.scijava.Context;
@@ -76,9 +78,9 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected P plotPane;
 	protected MoleculeDashboard<M> moleculeDashboardPane;
 	
-	protected HashSet<ArrayList<String>> segmentTableNames;
-	protected HashSet<String> refreshedTabs;
-	protected HashMap<String, ArrayList<String>> tabNameToSegmentName;
+	protected Set<List<String>> segmentTableNames;
+	protected Set<String> refreshedTabs;
+	protected Map<String, List<String>> tabNameToSegmentName;
 	
 	protected M molecule;
 	
@@ -116,9 +118,9 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		
 		tabPane.getSelectionModel().select(dataTableTab);
 		
-		segmentTableNames = new HashSet<ArrayList<String>>();
+		segmentTableNames = new HashSet<List<String>>();
 		refreshedTabs = new HashSet<String>();
-		tabNameToSegmentName = new HashMap<String, ArrayList<String>>();
+		tabNameToSegmentName = new HashMap<String, List<String>>();
 		
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
@@ -169,7 +171,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		refreshedTabs.add(tabName);
 	}
 
-	protected Tab buildSegmentTab(ArrayList<String> segmentTableName) {		
+	protected Tab buildSegmentTab(List<String> segmentTableName) {		
 		String tabName;
 		if (segmentTableName.get(2).equals(""))
 			tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
@@ -186,8 +188,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	
 	protected void updateSegmentTables() {
 		//Build new segment table list
-		HashSet<ArrayList<String>> newSegmentTableNames = new HashSet<ArrayList<String>>();
-		for (ArrayList<String> segmentTableName : molecule.getSegmentsTableNames())
+		Set<List<String>> newSegmentTableNames = new HashSet<List<String>>();
+		for (List<String> segmentTableName : molecule.getSegmentsTableNames())
 			newSegmentTableNames.add(segmentTableName);
 		
 		//Remove segment table tabs that are not needed 

@@ -49,6 +49,7 @@ import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.table.MarsTable;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
@@ -154,10 +155,13 @@ public abstract class AbstractSubPlot implements SubPlot {
 					xAxisList.add(plotSeries.getXColumn());
 					yAxisList.add(plotSeries.getYColumn());
 			} else {
-				RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
-						"One or more plot series are missing column selections. " 
-						+ " Please select columns to be plotted.");
-				alert.show();
+				//This must be put in a runLater block to ensure the scene is not null
+				Platform.runLater(() -> {
+					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+							"One or more plot series are missing column selections. " 
+							+ " Please select columns to be plotted.");
+					alert.show();
+				});
 				return;
 			}
 		}
