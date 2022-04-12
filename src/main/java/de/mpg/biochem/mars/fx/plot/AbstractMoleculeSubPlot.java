@@ -158,7 +158,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends Abstra
 		DoubleColumn yCol = (DoubleColumn) getDataTable().get(yColumn);
 		int realCount = 0;
 		for (int row=0;row<getDataTable().getRowCount();row++) {
-			if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row)));
+			if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row)))
 				realCount++;
 		}
 		if (realCount < getDataTable().getRowCount()) {
