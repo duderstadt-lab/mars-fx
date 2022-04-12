@@ -401,12 +401,12 @@ public class DatasetOptionsPane extends VBox {
 			if (plotSeriesList.size() > 0) {
 				PlotSeries plotSeries = plotSeriesList.get(0);
 				
-				if (xNameField.getText().equals("") || !plotSeries.getXColumn().equals(previousSeries0XColumn)) {
+				if (xNameField.getText() != null && xNameField.getText().equals("") || plotSeries.getXColumn() !=null && !plotSeries.getXColumn().equals(previousSeries0XColumn)) {
 					previousSeries0XColumn = plotSeries.getXColumn();
 					xNameField.setText(plotSeries.getXColumn());
 				}
 				
-				if (yNameField.getText().equals("") || !plotSeries.getYColumn().equals(previousSeries0YColumn)) {
+				if (yNameField.getText() != null && yNameField.getText().equals("") || plotSeries.getYColumn() != null && !plotSeries.getYColumn().equals(previousSeries0YColumn)) {
 					previousSeries0YColumn = plotSeries.getYColumn();
 					yNameField.setText(plotSeries.getYColumn());
 				}

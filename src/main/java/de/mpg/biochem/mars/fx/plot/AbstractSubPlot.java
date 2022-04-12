@@ -156,9 +156,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
 			setTitle(datasetOptionsPane.getTitle());
-		if (!datasetOptionsPane.getXAxisName().equals(""))
+		if (datasetOptionsPane.getXAxisName() != null && !datasetOptionsPane.getXAxisName().equals(""))
 			setXLabel(datasetOptionsPane.getXAxisName());
-		if (!datasetOptionsPane.getYAxisName().equals(""))
+		if (datasetOptionsPane.getYAxisName() != null && !datasetOptionsPane.getYAxisName().equals(""))
 			setYLabel(datasetOptionsPane.getYAxisName());
 		
 		if (datasetOptionsPane.fixYBounds().get()) {
