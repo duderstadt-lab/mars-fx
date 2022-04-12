@@ -109,7 +109,7 @@ public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDia
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			return (dialogButton == ButtonType.OK) ? new SelectionResult(table.getSelectionModel().getSelectedItem()) : null;
+			return (dialogButton == ButtonType.OK && table.getSelectionModel().getSelectedItem() != null) ? new SelectionResult(table.getSelectionModel().getSelectedItem()) : null;
 		});
 	}
 	
