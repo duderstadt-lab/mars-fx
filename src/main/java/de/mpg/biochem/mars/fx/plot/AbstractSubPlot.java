@@ -42,6 +42,7 @@ import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
@@ -152,6 +153,12 @@ public abstract class AbstractSubPlot implements SubPlot {
 					addDataSet(plotSeries);
 					xAxisList.add(plotSeries.getXColumn());
 					yAxisList.add(plotSeries.getYColumn());
+			} else {
+				RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+						"One or more plot series are missing column selections. " 
+						+ " Please select columns to be plotted.");
+				alert.show();
+				return;
 			}
 		}
 		if (!datasetOptionsPane.getTitle().equals(""))
