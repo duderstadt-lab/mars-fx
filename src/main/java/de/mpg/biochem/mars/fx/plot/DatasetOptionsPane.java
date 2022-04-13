@@ -33,6 +33,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 import org.apache.batik.bridge.ViewBox;
@@ -94,7 +95,7 @@ public class DatasetOptionsPane extends VBox {
 	private TextField titleField, xNameField, yNameField, yMinField, yMaxField;
 	private Button addButton, updateButton;
 	private RadioButton radioButtonMolecules, radioButtonMetadata, radioButtonNone;
-	private ToggleGroup indicatorSourceGroup;
+	private ToggleGroup indicatorSourceGroup, trackingGroup;
 	
 	private ToggleSwitch fixYBoundsSwitch;
 	private BooleanProperty fixYBounds = new SimpleBooleanProperty();
@@ -104,8 +105,6 @@ public class DatasetOptionsPane extends VBox {
 	private String previousSeries0YColumn = "";
 	
 	private ObservableList<PlotSeries> plotSeriesList = FXCollections.observableArrayList();
-	
-	private ToggleGroup trackingGroup;
 	
 	private SubPlot subPlot;
 	
@@ -379,10 +378,7 @@ public class DatasetOptionsPane extends VBox {
 		addButton.setOnAction(e -> {
 			if (columns != null) {
 				PlotSeries defaultPlotSeries = new PlotSeries(columns);
-				defaultPlotSeries.getTrackingButton().setToggleGroup(trackingGroup);
-				if (plotSeriesList.size() < 1)
-					defaultPlotSeries.getTrackingButton().selectedProperty().set(true);
-				plotSeriesList.add(defaultPlotSeries);
+				addPlotSeries(defaultPlotSeries);
 			}
 		});
 
@@ -435,7 +431,7 @@ public class DatasetOptionsPane extends VBox {
 	}
 	
 	public XYChart getTrackingChart() {
-		for (PlotSeries series : getPlotSeriesList()) {
+		for (PlotSeries series : plotSeriesList) {
 			if (series.track())
 				return series.getChart();
 		}
@@ -444,14 +440,21 @@ public class DatasetOptionsPane extends VBox {
 	}
 	
 	public PlotSeries getTrackingSeries() {
-		for (PlotSeries series : getPlotSeriesList())
+		for (PlotSeries series : plotSeriesList)
 			if (series.track())
 				return series;
 
 		return null;
 	}
 	
-	public ObservableList<PlotSeries> getPlotSeriesList() {
+	public void addPlotSeries(PlotSeries series) {
+		series.getTrackingButton().setToggleGroup(trackingGroup);
+		plotSeriesList.add(series);
+		if (plotSeriesList.size() == 1)
+			trackingGroup.selectToggle(series.getTrackingButton());
+	}
+	
+	public List<PlotSeries> getPlotSeriesList() {
 		return plotSeriesList;
 	}
 	
