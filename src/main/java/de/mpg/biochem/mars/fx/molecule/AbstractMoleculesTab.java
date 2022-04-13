@@ -332,6 +332,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	            	molecule = (M) archive.get(newMoleculeIndexRow.getUID());
 	            	
 	            	//Here is an opportunity to update global indexes based
+	            	System.out.println("Adding new molecule");
 	            	archive.properties().addMoleculeProperties(molecule);
 	            	
 	            	//Update center pane and properties pane.

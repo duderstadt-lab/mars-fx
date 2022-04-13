@@ -288,6 +288,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 		chartsPane.getChildren().clear();
 		
 		for (SubPlot subPlot : charts) {
+			subPlot.getDatasetOptionsPane().setColumns(archive.properties().getColumnSet());
 			subPlot.fireEvent(new MoleculeSelectionChangedEvent(molecule));
 			chartsPane.getChildren().add(subPlot.getNode());
 		}
