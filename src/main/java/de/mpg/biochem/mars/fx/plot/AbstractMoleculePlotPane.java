@@ -211,7 +211,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 							while (jParser.nextToken() != JsonToken.END_ARRAY) {
 								PlotSeries series = new PlotSeries(getColumnNames());
 								series.fromJSON(jParser);
-								charts.get(subPlotIndex).getPlotSeriesList().add(series);
+								charts.get(subPlotIndex).getDatasetOptionsPane().addPlotSeries(series);
 					    	}
 						}
 					}

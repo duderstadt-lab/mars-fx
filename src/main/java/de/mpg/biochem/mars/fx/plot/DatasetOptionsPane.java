@@ -454,7 +454,7 @@ public class DatasetOptionsPane extends VBox {
 			trackingGroup.selectToggle(series.getTrackingButton());
 	}
 	
-	public List<PlotSeries> getPlotSeriesList() {
+	public ObservableList<PlotSeries> getPlotSeriesList() {
 		return plotSeriesList;
 	}
 	
