@@ -125,7 +125,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin implement
         final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
 
         DataSet dataset = null;
-        if (this.datasetOptionsPane != null) {
+        if (this.datasetOptionsPane != null && datasetOptionsPane.getTrackingSeries() != null) {
         	String datasetName =  datasetOptionsPane.getTrackingSeries().getYColumn() + " vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
         	for (DataSet dataS : xyChart.getDatasets())
         		if (dataS.getName().equals(datasetName))
