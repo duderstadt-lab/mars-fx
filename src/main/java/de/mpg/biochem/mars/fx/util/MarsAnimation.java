@@ -189,7 +189,7 @@ public class MarsAnimation extends BorderPane {
 	}
 	
 	String getTimeEstimate() {
-        if (startTime == null || progress <= 0) {
+        if (startTime == null || progress <= 0 || progress >= 1) {
             return "";
         } else {
             Instant now = Instant.now();
