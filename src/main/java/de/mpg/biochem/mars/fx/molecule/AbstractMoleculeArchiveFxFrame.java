@@ -284,7 +284,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
     	masker = new MaskerPane();
     	masker.setVisible(false);
-    	
+   
     	marsSpinning = new MarsAnimation();
     	
     	masker.setProgressNode(marsSpinning);
@@ -827,35 +827,24 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     }
 
     public void save() {
-	   	 try {
-			 if (archive.getFile() != null) {
-				 if(archive.getFile().getName().equals(archive.getName())) {
-					lockFX("Saving...");
-	    		    fireEvent(new MoleculeArchiveSavingEvent(archive));
-		    		Task<Void> task = new Task<Void>() {
-	     	            @Override
-	     	            public Void call() throws Exception {
-	     	            	archive.save();	 
+		 if (archive.getFile() != null) {
+			 if(archive.getFile().getName().equals(archive.getName())) {
+				 runTask(() -> {
+						fireEvent(new MoleculeArchiveSavingEvent(archive));
+						try {
+							archive.save();	 
 	     	            	saveState(archive.getFile().getAbsolutePath());
-	     	                return null;
-	     	            }
-	     	        };
-	
-	     	        task.setOnSucceeded(event -> {
-			           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-			           	unlockFX();
-	     	        });
-	
-	     	        new Thread(task).run();
-				 } else {
-				    //the archive name has changed... so let's check with the user about the new name...
-					saveAs(archive.getFile());
-				 }
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+						fireEvent(new MoleculeArchiveSavedEvent(archive));
+					}, "Saving...");
 			 } else {
-				saveAs(new File(archive.getName()));
+			    //the archive name has changed... so let's check with the user about the new name...
+				saveAs(archive.getFile());
 			 }
-	   	 } catch (IOException e1) {
-			e1.printStackTrace();
+		 } else {
+			saveAs(new File(archive.getName()));
 		 }
 	   	 settingsTab.save();
     }
@@ -864,15 +853,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    String fileName = archive.getName();
 	    if (fileName.endsWith(".store"))
 	    	fileName = fileName.substring(0, fileName.length() - 6);
-	    
-	    try {
-			if (archive.getFile() != null) {
-				saveAsCopy(new File(archive.getFile().getParentFile(), fileName));
-			} else {
-				saveAsCopy(new File(System.getProperty("user.home"), fileName));
-			}
-	    } catch (IOException e1) {
-			e1.printStackTrace();
+
+		if (archive.getFile() != null) {
+			saveAsCopy(new File(archive.getFile().getParentFile(), fileName));
+		} else {
+			saveAsCopy(new File(System.getProperty("user.home"), fileName));
 		}
     }
     
@@ -881,18 +866,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	    if (fileName.endsWith(".store"))
 	    	fileName = fileName.substring(0, fileName.length() - 6);
 	    
-	    try {
 			if (archive.getFile() != null) {
 				saveAsJsonCopy(new File(archive.getFile().getParentFile(), fileName));
 			} else {
 				saveAsJsonCopy(new File(System.getProperty("user.home"), fileName));
 			}
-	    } catch (IOException e1) {
-			e1.printStackTrace();
-		}
     }
     
-    private boolean saveAs(File saveAsFile) throws IOException {
+    private boolean saveAs(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
 		
 		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
@@ -904,42 +885,33 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		if (newFile != null) {
 			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(newFile);
-
-			lockFX("Saving...");
-			fireEvent(new MoleculeArchiveSavingEvent(archive));
-
-			Task<Void> task = new Task<Void>() {
- 	            @Override
- 	            public Void call() throws Exception {
- 	            	archive.saveAs(newFileWithExtension);
+			
+			
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAs(newFileWithExtension);
  	            	saveState(newFileWithExtension.getAbsolutePath());
- 	                return null;
- 	            }
- 	        };
-
- 	        task.setOnSucceeded(event -> {
-	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	           	
-	           	if (moleculeArchiveService.contains(archive.getName()))
-					moleculeArchiveService.removeArchive(archive);
-	           	
-				archive.setFile(newFileWithExtension);
-				archive.setName(newFileWithExtension.getName());
-				stage.setTitle(newFileWithExtension.getName());
-
-				moleculeArchiveService.addArchive(archive);
-	           	
-	           	unlockFX();
- 	        });
-
- 	        new Thread(task).run();
- 	        
+ 	            	
+	 	           	if (moleculeArchiveService.contains(archive.getName()))
+						moleculeArchiveService.removeArchive(archive);
+		           	
+					archive.setFile(newFileWithExtension);
+					archive.setName(newFileWithExtension.getName());
+					stage.setTitle(newFileWithExtension.getName());
+	
+					moleculeArchiveService.addArchive(archive);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
  	        return true;
 		}
 		return false;
 	}
     
-	private boolean saveAsCopy(File saveAsFile) throws IOException {
+	private boolean saveAsCopy(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
 		
 		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
@@ -951,32 +923,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		if (file != null) {
 			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(file);
-			
-			lockFX("Saving...");
-			fireEvent(new MoleculeArchiveSavingEvent(archive));
-
-			Task<Void> task = new Task<Void>() {
- 	            @Override
- 	            public Void call() throws Exception {
- 	            	archive.saveAs(newFileWithExtension);	
- 	            	saveState(newFileWithExtension.getAbsolutePath());
- 	                return null;
- 	            }
- 	        };
-
- 	        task.setOnSucceeded(event -> {
-	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	           	unlockFX();
- 	        });
-
- 	        new Thread(task).run();
- 	        
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAs(newFileWithExtension);
+					saveState(newFileWithExtension.getAbsolutePath());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
  	        return true;
 		}
 		return false;
 	}
 	
-	private boolean saveAsJsonCopy(File saveAsFile) throws IOException {
+	private boolean saveAsJsonCopy(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
 		
 		saveAsFile = ArchiveUtils.jsonFileExtensionFixer(saveAsFile);
@@ -989,25 +951,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (file != null) {
 			final File newFileWithExtension = ArchiveUtils.jsonFileExtensionFixer(file);
 			
-			lockFX("Saving...");
-			fireEvent(new MoleculeArchiveSavingEvent(archive));
-
-			Task<Void> task = new Task<Void>() {
- 	            @Override
- 	            public Void call() throws Exception {
- 	            	archive.saveAsJson(newFileWithExtension);	
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAsJson(newFileWithExtension);	
  	            	saveState(newFileWithExtension.getAbsolutePath());
- 	                return null;
- 	            }
- 	        };
-
- 	        task.setOnSucceeded(event -> {
-	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	           	unlockFX();
- 	        });
-
- 	        new Thread(task).run();
- 	        
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
  	        return true;
 		}
 		return false;
@@ -1021,12 +974,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 	} else if (!name.endsWith(".yama.store")) {
  		 	name += ".yama.store";
  		}
-	 
-		try {
-			saveAsVirtualStore(new File(name));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+	 	saveAsVirtualStore(new File(name));
     }
     
     public void saveJsonVirtualStoreCopy() {
@@ -1037,15 +985,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 	} else if (!name.endsWith(".yama.store")) {
  		 	name += ".yama.store";
  		}
-	 
-		try {
-			saveAsJsonVirtualStore(new File(name));
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		saveAsJsonVirtualStore(new File(name));
     }
     
-	private void saveAsVirtualStore(File saveAsFile) throws IOException {
+	private void saveAsVirtualStore(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
 		
 		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
@@ -1057,29 +1000,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		if (virtualDirectory != null) {	
 			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
-			
-			lockFX("Saving Virtual Store Copy...");
-			
-			fireEvent(new MoleculeArchiveSavingEvent(archive));
-			Task<Void> task = new Task<Void>() {
- 	            @Override
- 	            public Void call() throws Exception {
- 	            	archive.saveAsVirtualStore(newFileWithExtension);	
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAsVirtualStore(newFileWithExtension);	
  	            	saveState(newFileWithExtension.getAbsolutePath());
- 	                return null;
- 	            }
- 	        };
-
- 	        task.setOnSucceeded(event -> {
-	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	           	unlockFX();
- 	        });
-			
- 	       new Thread(task).run();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving Virtual Store Copy...");
 		}
 	}
 	
-	private void saveAsJsonVirtualStore(File saveAsFile) throws IOException {
+	private void saveAsJsonVirtualStore(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
 		
 		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
@@ -1091,25 +1025,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		if (virtualDirectory != null) {
 			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
-			
-			lockFX("Saving Virtual Store Copy...");
-			
-			fireEvent(new MoleculeArchiveSavingEvent(archive));
-			Task<Void> task = new Task<Void>() {
- 	            @Override
- 	            public Void call() throws Exception {
- 	            	archive.saveAsJsonVirtualStore(newFileWithExtension);	
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAsJsonVirtualStore(newFileWithExtension);	
  	            	saveState(newFileWithExtension.getAbsolutePath());
- 	                return null;
- 	            }
- 	        };
-
- 	        task.setOnSucceeded(event -> {
-	           	fireEvent(new MoleculeArchiveSavedEvent(archive));
-	           	unlockFX();
- 	        });
-			
- 	       new Thread(task).run();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving Virtual Store Copy...");
 		}
 	}
 	
@@ -1124,24 +1049,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (stateFile == null || !stateFile.exists())
         		return;
 		
-		lockFX("Loading Rover Settings...");
-		Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
- 	       		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
- 	       	    JsonParser jParser = jfactory.createParser(inputStream);
- 	       	    fromJSON(jParser);
- 	       		jParser.close();
- 	       		inputStream.close();
-                return null;
-            }
-        };
-
-        task.setOnSucceeded(event -> {
-           	unlockFX();
-        });
-
-        new Thread(task).run();
+		runTask(() -> {
+			try {
+	 	       		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
+	 	       	    JsonParser jParser = jfactory.createParser(inputStream);
+	 	       	    fromJSON(jParser);
+	 	       		jParser.close();
+	 	       		inputStream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}, "Loading Rover Settings...");
 	}
 	
 	public Node getNode() {
@@ -1184,7 +1102,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		masker.setText(message);
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
-		//masker.setProgress(-1);
 		masker.setVisible(true);
 		lockLogArea.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
@@ -1208,7 +1125,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     }
     
     private void lockFX() {
-    	//masker.setProgress(-1);
 		masker.setVisible(true);
 		lockLogArea.setVisible(true);
 		marsSpinning.play();
