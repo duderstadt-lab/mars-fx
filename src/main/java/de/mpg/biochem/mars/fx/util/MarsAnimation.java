@@ -41,6 +41,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
 
+import javafx.scene.control.ProgressBar;
+import java.time.Instant;
+
 import javafx.animation.Timeline;
 import javafx.scene.text.Text;
 import javafx.animation.KeyFrame;
@@ -59,15 +62,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.text.Font;
 
-import java.text.DecimalFormat;
-import java.math.RoundingMode;
-
 public class MarsAnimation extends BorderPane {
 	
 	private TranslateTransition animation;
 	private double progress = -1;
+	private Instant startTime;
 	private Timeline timeline;
-	private int hours = 0, mins = 0, secs = 0, millis = 0;
+	private VBox vbox;
 	
 	public MarsAnimation() {
 		Image image = new Image("de/mpg/biochem/mars/fx/molecule/mars.jpg");
@@ -128,29 +129,31 @@ public class MarsAnimation extends BorderPane {
     	setPrefSize(125, 100);
 		setCenter(stack);
 		
-		Text timerLabel = new Text("0.0");
-		timerLabel.setFont(Font.font("Courier", 14));
-		timerLabel.setFill(Color.valueOf("#fff"));
+		Text countdownLabel = new Text("");
+		countdownLabel.setFont(Font.font("Courier", 14));
+		countdownLabel.setFill(Color.valueOf("#fff"));
 		
-		Text progressLabel = new Text("");
-		progressLabel.setFont(Font.font("Courier", 14));
-		progressLabel.setFill(Color.valueOf("#fff"));
+		ProgressBar progress = new ProgressBar();
+		progress.setStyle("-fx-accent: white; "
+				+ "-fx-control-inner-background: black; "
+				+ "-fx-background-color: black; "
+				+ "-fx-border-width: 1;"
+				);
 		
 		timeline = new Timeline(new KeyFrame(Duration.millis(1), new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
-				updateTimer(timerLabel);
-				updateProgress(progressLabel);
+				countdownLabel.setText(getTimeEstimate());
+				updateProgress(progress);
 			}
 		}));
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.setAutoReverse(false);
 		
-		VBox vbox = new VBox();
-		vbox.setSpacing(5);
+		vbox = new VBox();
+		vbox.setSpacing(10);
 		vbox.setAlignment(Pos.CENTER);
-		vbox.getChildren().add(timerLabel);
-		vbox.getChildren().add(progressLabel);
+		vbox.getChildren().add(countdownLabel);
 
 		setBottom(vbox);
 		//Insets(double top, double right, double bottom, double left)
@@ -158,56 +161,53 @@ public class MarsAnimation extends BorderPane {
 		BorderPane.setAlignment(vbox, Pos.CENTER);
 	}
 	
-	private void updateTimer(Text text) {
-		if (millis == 1000) {
-			secs++;
-			millis = 0;
-		}
-		if (secs == 60) {
-			mins++;
-			secs = 0;
-		}
-		if (mins == 60) {
-			hours++;
-			mins = 0;
-		}
+	private String getHumanReadableTimeString(int seconds) {
+		int hours = (int)Math.floor((seconds/60)/60);
+		seconds = seconds - hours*60*60;
+		int minutes = (int)Math.floor(seconds/60);
+		seconds = seconds - minutes*60;
 		if (hours > 0) {
-			text.setText((((hours/10) == 0) ? "0" : "") + hours + ":"
-				+ (((mins/10) == 0) ? "0" : "") + mins + ":"
-				 + (((secs/10) == 0) ? "0" : "") + secs + ":" 
-					+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
-		} else if (mins > 0) {
-			text.setText((((mins/10) == 0) ? "0" : "") + mins + ":"
-					 + (((secs/10) == 0) ? "0" : "") + secs + ":" 
-						+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
-		} else {
-			text.setText((((secs/10) == 0) ? "0" : "") + secs + ":" 
-						+ (((millis/10) == 0) ? "00" : (((millis/100) == 0) ? "0" : "")) + millis++);
-		}
-    }
-	
-	private void updateProgress(Text text) {
-		if (progress >= 0 && progress <= 1) {
-			DecimalFormat df = new DecimalFormat("#.0");
-			df.setRoundingMode(RoundingMode.HALF_UP);
-			String rounded = df.format(progress*100);
-			text.setText(rounded + "%");
+			return (((hours/10) == 0) ? "0" : "") + hours + ":"
+				+ (((minutes/10) == 0) ? "0" : "") + minutes + ":"
+				 + (((seconds/10) == 0) ? "0" : "") + seconds;
+		} else if (minutes > 0) {
+			return (((minutes/10) == 0) ? "0" : "") + minutes + ":"
+					 + (((seconds/10) == 0) ? "0" : "") + seconds;
+		} else if (seconds > 0) {
+			return (((seconds/10) == 0) ? "0" : "") + seconds;
 		} else 
-			text.setText("");
+			return "";
+    }
+
+	private void updateProgress(ProgressBar progressBar) {
+		if (progress >= 0) {
+			if (!vbox.getChildren().contains(progressBar))
+				vbox.getChildren().add(progressBar);
+			progressBar.setProgress(progress);
+		} else if (vbox.getChildren().contains(progressBar))
+			vbox.getChildren().remove(progressBar);
 	}
+	
+	String getTimeEstimate() {
+        if (startTime == null || progress <= 0) {
+            return "";
+        } else {
+            Instant now = Instant.now();
+            java.time.Duration elapsedTime = java.time.Duration.between(startTime, now);
+            double elapsedTimeS = elapsedTime.getSeconds();
+            double totalTimeS = elapsedTimeS/progress;
+            double remainingTimeS = totalTimeS-elapsedTimeS;
+            return getHumanReadableTimeString((int)remainingTimeS);
+        }
+    }
 	
 	public void setProgress(double progress) {
 		this.progress = progress;
 	}
 	
 	public void play() {
+		startTime = Instant.now();
 		animation.play();
-		//Reset timer
-		hours = 0;
-		mins = 0;
-		secs = 0;
-		millis = 0;
-		//Reset progress
 		progress = -1;
 		timeline.play();
 	}
@@ -215,5 +215,6 @@ public class MarsAnimation extends BorderPane {
 	public void stop() {
 		animation.stop();
 		timeline.stop();
+		startTime = null;
 	}
 }

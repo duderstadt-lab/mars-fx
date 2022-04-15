@@ -1,3 +1,8 @@
+.progress-bar > .bar {
+	-fx-padding: 0.50em;
+	-fx-background-radius: 0, 0, 0;
+}
+
 .jfx-tab-pane {
     -fx-base: white;
     -fx-color: -fx-base;
