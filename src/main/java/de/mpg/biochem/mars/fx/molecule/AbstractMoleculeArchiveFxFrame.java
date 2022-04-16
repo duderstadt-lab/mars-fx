@@ -1391,6 +1391,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     protected void saveState(String path) throws IOException {
     	if (marsBdvFrames == null && new File(path + ".rover").exists())
     		roverFileBackground = FileUtils.readFileToByteArray(new File(path + ".rover"));
+    	
+    	logln("Saving archive window settings to rover file...");
  
 		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
