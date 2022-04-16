@@ -112,6 +112,9 @@ import javafx.scene.control.Button;
 import javafx.stage.*;
 
 import javafx.concurrent.Task;
+import javafx.scene.control.ListView;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -203,7 +206,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	protected BorderPane borderPane;
     protected JFXTabPane tabsContainer;
     
-    protected TextArea lockLogArea;
+    //protected TextArea lockLogArea;
+    protected ListView<String> lockLogArea;
+    protected ObservableList<String> lockLogAreaStrings = FXCollections.observableArrayList();
     
 	protected MenuBar menuBar;
 	protected HBox menuHBox;
@@ -276,10 +281,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	protected Scene buildScene() {
 		borderPane = new BorderPane();
     	
-		lockLogArea = new TextArea();
+		lockLogArea = new ListView<String>();
+		lockLogArea.setFixedCellSize(40);
 		lockLogArea.getStyleClass().add("log-text-area");
-		lockLogArea.setStyle("-fx-font-family: 'Courier'; -fx-font-size: 10pt");
-		lockLogArea.setWrapText(true);
+		lockLogArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt");
+		lockLogArea.setItems(lockLogAreaStrings);
 		lockLogArea.setVisible(false);
 		
     	masker = new MaskerPane();
@@ -291,6 +297,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	
     	maskerStackPane = new StackPane();
     	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+    	masker.setStyle("-fx-accent: #f5f5f5; -fx-text-fill: #f5f5f5;");
     	maskerStackPane.getChildren().add(borderPane);
     	maskerStackPane.getChildren().add(lockLogArea);
     	maskerStackPane.getChildren().add(masker);
@@ -1148,11 +1155,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				lockLogArea.appendText(message + "\n");
-				lockLogArea.setScrollTop(Double.MAX_VALUE);
-				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				if (scroll != null)
-					scroll.setDisable(true);
+				lockLogAreaStrings.add(message);
+				lockLogArea.scrollTo(lockLogAreaStrings.size());
+				//ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				//if (scroll != null)
+				//	scroll.setDisable(true);
 			}
     	});
     }
@@ -1167,11 +1174,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				lockLogArea.appendText(message);
-				lockLogArea.setScrollTop(Double.MAX_VALUE);
-				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				if (scroll != null)
-					scroll.setDisable(true);
+				lockLogAreaStrings.add(message);
+				lockLogArea.scrollTo(lockLogAreaStrings.size());
+				//ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				//if (scroll != null)
+				//	scroll.setDisable(true);
 			}
     	});
     }

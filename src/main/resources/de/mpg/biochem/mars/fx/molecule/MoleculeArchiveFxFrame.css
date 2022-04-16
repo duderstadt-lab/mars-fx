@@ -40,6 +40,16 @@
     -fx-opacity: 0;
 }
 
+.log-text-area .list-cell {
+	-fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.log-text-area .list-view {
+	-fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
 /*******************************************************************************
  *                                                                             *
  * JFX Tab Pane                                                                *
