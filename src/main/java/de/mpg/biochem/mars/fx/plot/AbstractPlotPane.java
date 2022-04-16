@@ -604,7 +604,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			
 			BorderPane maxDownsamplerBorderPane = new BorderPane();
 			minDownsampleTextField = new TextField();
-			minDownsampleTextField.setText(String.valueOf(10_000));
+			minDownsampleTextField.setText(String.valueOf(100_000));
 			Label downsampleAbove = new Label("Downsample above");
 			downsampleAbove.setAlignment(Pos.CENTER_LEFT);
 			BorderPane.setMargin(downsampleAbove, new Insets(0, 10, 0, 0));
