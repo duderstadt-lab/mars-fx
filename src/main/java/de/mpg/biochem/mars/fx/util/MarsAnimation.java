@@ -131,10 +131,10 @@ public class MarsAnimation extends BorderPane {
 		
 		Text countdownLabel = new Text("");
 		countdownLabel.setFont(Font.font("Courier", 14));
-		countdownLabel.setFill(Color.valueOf("#fff"));
-		
+		countdownLabel.setFill(Color.valueOf("#f5f5f5"));
+
 		ProgressBar progress = new ProgressBar();
-		progress.setStyle("-fx-accent: white; "
+		progress.setStyle("-fx-accent: #f5f5f5; "
 				+ "-fx-control-inner-background: black; "
 				+ "-fx-background-color: black; "
 				+ "-fx-border-width: 1;"
