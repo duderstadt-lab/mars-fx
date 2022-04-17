@@ -282,7 +282,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		borderPane = new BorderPane();
     	
 		lockLogArea = new ListView<String>();
-		lockLogArea.setFixedCellSize(40);
 		lockLogArea.getStyleClass().add("log-text-area");
 		lockLogArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt");
 		lockLogArea.setItems(lockLogAreaStrings);
@@ -1133,6 +1132,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     
     private void lockFX() {
 		masker.setVisible(true);
+		lockLogAreaStrings.clear();
 		lockLogArea.setVisible(true);
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
@@ -1157,16 +1157,25 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			public void run() {
 				lockLogAreaStrings.add(message);
 				lockLogArea.scrollTo(lockLogAreaStrings.size());
-				//ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				//if (scroll != null)
-				//	scroll.setDisable(true);
+				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				if (scroll != null)
+					scroll.setDisable(true);
 			}
     	});
     }
     
     @Override
     public void logln(String message) {
-		log(message + "\n");
+    	Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				lockLogAreaStrings.add(message);
+				if (lockLogAreaStrings.size() - 1 > 0) lockLogArea.scrollTo(lockLogAreaStrings.size() - 1);
+				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				if (scroll != null)
+					scroll.setDisable(true);
+			}
+    	});
     }
     
     @Override
@@ -1174,11 +1183,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     	Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				lockLogAreaStrings.add(message);
-				lockLogArea.scrollTo(lockLogAreaStrings.size());
-				//ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				//if (scroll != null)
-				//	scroll.setDisable(true);
+				if (lockLogAreaStrings.size() > 0) {
+					int index = lockLogAreaStrings.size() - 1;
+					String oldMessage = lockLogAreaStrings.get(index);
+					lockLogAreaStrings.set(index, oldMessage + message);
+    				lockLogArea.scrollTo(index);
+				} else lockLogAreaStrings.add(message);
+				
+				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
+				if (scroll != null)
+					scroll.setDisable(true);
 			}
     	});
     }
