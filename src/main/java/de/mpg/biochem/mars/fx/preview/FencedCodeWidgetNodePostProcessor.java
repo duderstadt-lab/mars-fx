@@ -43,7 +43,25 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
         			documentEditor.getDocument().putMedia(key, (String) outputs.get(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
         		} else
         			documentEditor.getDocument().putMedia(key, (String) outputs.get("imgsrc"));
-        	}        	
+        	} else if (fencedCodeBlockNode.getInfo().equals("python-html-widget")) {   
+        		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
+        		
+        		Map<String, Object> inputs = new HashMap<String, Object>();
+        		
+        		inputs.put("scijavaContext", documentEditor.getContext());
+        		inputs.put("archive", documentEditor.getArchive());
+        		
+        		PythonMarkdownWidget pythonImageMarkdownWidget = new PythonMarkdownWidget(documentEditor.getContext(), documentEditor.getArchive(), "Conda Python 3");
+        		
+        		Map<String, Object> outputs = pythonImageMarkdownWidget.runScript(inputs, script);
+        		
+        		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
+        		
+        		if (outputs.containsKey(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+        			documentEditor.getDocument().putMedia(key, (String) outputs.get(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
+        		} else
+        			documentEditor.getDocument().putMedia(key, (String) outputs.get("html"));
+        	}
         }
     }
 }

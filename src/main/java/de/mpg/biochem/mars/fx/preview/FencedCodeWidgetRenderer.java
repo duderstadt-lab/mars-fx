@@ -34,39 +34,46 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
     }
 
     private void render(FencedCodeBlock node, NodeRendererContext context, HtmlWriter html) {
-    	if (node.getInfo().equals("python-image-widget")) {
+    	
+    	//Should we check if node.getInfo() matches something first?
+    	
+    	String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node.getInfo() + ":" + node.getContentChars().normalizeEOL();
+		
+		if (documentEditor.getDocument().getMediaIDs().contains(key)) {
+			int startOffset = node.getStartOffset();
+    		int endOffset = node.getEndOffset();
+    		String content = documentEditor.getDocument().getMedia(key);
     		
-    		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node.getInfo() + ":" + node.getContentChars().normalizeEOL();
-    		
-    		if (documentEditor.getDocument().getMediaIDs().contains(key)) {
-    			String content = documentEditor.getDocument().getMedia(key);
-		    	if (content.startsWith(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
-		    		int startOffset = node.getStartOffset();
-		    		int endOffset = node.getEndOffset();
-		    		BasedSequence errorMessage = BasedSequence.of(content.substring(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX.length()));
-		    		html.line();
-		            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
-		            html.attr("data-pos", startOffset + ":" + endOffset).srcPosWithEOL(errorMessage).withAttr().tag("code");
-		            html.text(errorMessage.normalizeEOL());
-		            html.tag("/code");
-		            html.tag("/pre").closePre();
-		            return;
-		    	} else {
-		        	html.attr("src", documentEditor.getDocument().getMedia(key))
-		        	.withAttr()
-		            .tag("img", true);
-		        	return;
-	        	}	
-    		}
-        } else if (node.getInfo().equals("python-string-widget")) {
-        	
-        } else if (node.getInfo().equals("python-jekyll-widget")) {
-        	
-        } else if (node.getInfo().equals("groovy-string-widget")) {	
-        	
-        } else if (node.getInfo().equals("groovy-jekyll-widget")) {
-        	
-        }
+    		if (content.startsWith(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+    			BasedSequence errorMessage = BasedSequence.of(content.substring(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX.length()));
+	    		html.line();
+	            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
+	            html.attr("data-pos", startOffset + ":" + endOffset).srcPosWithEOL(errorMessage).withAttr().tag("code");
+	            html.text(errorMessage.normalizeEOL());
+	            html.tag("/code");
+	            html.tag("/pre").closePre();
+	            return;
+			} else if (node.getInfo().equals("python-image-widget")) {
+	        	html.attr("src", documentEditor.getDocument().getMedia(key))
+	        	.withAttr()
+	            .tag("img", true);
+	        	return;
+	        } else if (node.getInfo().equals("python-html-widget")) {
+	    		html.line();
+	            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
+	            html.raw(documentEditor.getDocument().getMedia(key));
+	            html.tag("/pre").closePre();
+	            return;
+	        } else if (node.getInfo().equals("python-markdown-widget")) {
+	        	
+	        } else if (node.getInfo().equals("python-jekyll-widget")) {
+	        	
+	        } else if (node.getInfo().equals("groovy-string-widget")) {	
+	        	
+	        } else if (node.getInfo().equals("groovy-jekyll-widget")) {
+	        	
+	        }
+		}
         context.delegateRender();
     }
 }
