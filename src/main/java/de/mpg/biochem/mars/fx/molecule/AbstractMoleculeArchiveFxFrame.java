@@ -786,13 +786,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 	
 	protected void runTask(Runnable process, String message) {
-		masker.setText(message);
-		//masker.setProgress(-1);
-		marsSpinning.play();
-		marsSpinning.setProgress(-1);
-		masker.setVisible(true);
-		lockLogArea.setVisible(true);
-    	fireEvent(new MoleculeArchiveLockEvent(archive));
+		lockFX(message);
+		
 		Task<Void> task = new Task<Void>() {
             @Override
             public Void call() throws Exception {
@@ -801,11 +796,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
             }
         };
 
-        task.setOnSucceeded(event -> { 
-        	fireEvent(new MoleculeArchiveUnlockEvent(archive));
-			masker.setVisible(false);
-			lockLogArea.setVisible(false);
-        });
+        task.setOnSucceeded(event -> unlockFX());
 
         new Thread(task).start();
 	}
@@ -1106,10 +1097,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	
 	private void lockFX(String message) {
 		masker.setText(message);
+		masker.setVisible(true);
+		lockLogAreaStrings.clear();
+		lockLogArea.setVisible(true);
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
-		masker.setVisible(true);
-		lockLogArea.setVisible(true);
     	fireEvent(new MoleculeArchiveLockEvent(archive));
     	archiveLocked.set(true);
 	}
@@ -1131,13 +1123,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
     }
     
     private void lockFX() {
-		masker.setVisible(true);
-		lockLogAreaStrings.clear();
-		lockLogArea.setVisible(true);
-		marsSpinning.play();
-		marsSpinning.setProgress(-1);
-    	fireEvent(new MoleculeArchiveLockEvent(archive));
-    	archiveLocked.set(true);
+		lockFX("Please Wait...");
     }
     
     @Override
@@ -1234,7 +1220,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		lockLogArea.setVisible(false);
 		marsSpinning.stop();
 		archiveLocked.set(false);
-		masker.setText("Please Wait...");
     }
     
     @Override
