@@ -161,7 +161,7 @@ class WebViewPreview
 		String scrollScript = (lastScrollX > 0 || lastScrollY > 0)
 				? ("  onload='window.scrollTo("+lastScrollX+", "+lastScrollY+");'")
 				: "";
-
+				
 		webView.getEngine().loadContent(
 			"<!DOCTYPE html>\n"
 			+ "<html>\n"
@@ -174,12 +174,6 @@ class WebViewPreview
 			+ "  border-right: 5px solid #f47806;\n"
 			+ "  margin-right: -5px;\n"
 			+ "  background-color: rgb(253, 247, 241);\n"
-			+ "}\n"
-			+ "img {\n"
-			+ "  display: block;\n"
-			+ "  float: none;\n"
-			+ "  margin-left: auto;\n"
-			+ "  margin-right: auto;\n"
 			+ "}\n"
 			+ "</style>\n"
 			+ "<script src=\"" + getClass().getResource("katex.min.js") + "\"></script>\n"	

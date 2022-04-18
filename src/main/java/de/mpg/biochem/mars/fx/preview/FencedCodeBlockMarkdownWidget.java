@@ -29,7 +29,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveWindow;
 import javafx.application.Platform;
 
-public class PythonMarkdownWidget {
+public class FencedCodeBlockMarkdownWidget {
 
 	@Parameter
 	protected ScriptService scriptService;
@@ -40,20 +40,20 @@ public class PythonMarkdownWidget {
 	@Parameter
 	protected Context context;
 	
-	public static final String MARKDOWN_WIDGET_ERROR_KEY_PREFIX = "PYTHON_MARKDOWN_WIDGET_ERROR:";
+	public static final String MARKDOWN_WIDGET_ERROR_KEY_PREFIX = "MARKDOWN_WIDGET_ERROR:";
 	
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	protected ScriptLanguage lang;
 
-	public PythonMarkdownWidget(final Context context, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, String language) {
+	public FencedCodeBlockMarkdownWidget(final Context context, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, String language) {
 		this.archive = archive;
 		context.inject(this);
 		lang = scriptService.getLanguageByName(language);
 	}
 
 	protected Map<String, Object> runScript(Map<String, Object> inputs, String script) {
-		archive.getWindow().logln("Running PythonMarkdownWidget...");
+		archive.getWindow().logln("Running fenced code block markdown widget...");
 		
 		String scriptName = "script";
 		if (lang.getLanguageName().equals("Groovy")) {

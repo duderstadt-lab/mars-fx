@@ -25,43 +25,34 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
         if (node instanceof FencedCodeBlock) {
         	FencedCodeBlock fencedCodeBlockNode = (FencedCodeBlock) node;
 
-        	if(fencedCodeBlockNode.getInfo().equals("python-image-widget")) {
-        		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
-        		
-        		Map<String, Object> inputs = new HashMap<String, Object>();
-        		
-        		inputs.put("scijavaContext", documentEditor.getContext());
-        		inputs.put("archive", documentEditor.getArchive());
-        		
-        		PythonMarkdownWidget pythonImageMarkdownWidget = new PythonMarkdownWidget(documentEditor.getContext(), documentEditor.getArchive(), "Conda Python 3");
-        		
-        		Map<String, Object> outputs = pythonImageMarkdownWidget.runScript(inputs, script);
-        		
-        		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
-        		
-        		if (outputs.containsKey(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
-        			documentEditor.getDocument().putMedia(key, (String) outputs.get(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
-        		} else
-        			documentEditor.getDocument().putMedia(key, (String) outputs.get("imgsrc"));
-        	} else if (fencedCodeBlockNode.getInfo().equals("python-html-widget")) {   
-        		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
-        		
-        		Map<String, Object> inputs = new HashMap<String, Object>();
-        		
-        		inputs.put("scijavaContext", documentEditor.getContext());
-        		inputs.put("archive", documentEditor.getArchive());
-        		
-        		PythonMarkdownWidget pythonImageMarkdownWidget = new PythonMarkdownWidget(documentEditor.getContext(), documentEditor.getArchive(), "Conda Python 3");
-        		
-        		Map<String, Object> outputs = pythonImageMarkdownWidget.runScript(inputs, script);
-        		
-        		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
-        		
-        		if (outputs.containsKey(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
-        			documentEditor.getDocument().putMedia(key, (String) outputs.get(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
-        		} else
-        			documentEditor.getDocument().putMedia(key, (String) outputs.get("html"));
-        	}
+        	if (fencedCodeBlockNode.getInfo().equals("python-image-widget")) 
+        		processFencedCodeBlockWidget(fencedCodeBlockNode, "Conda Python 3", "imgsrc");
+        	else if (fencedCodeBlockNode.getInfo().equals("python-html-widget")) 
+        		processFencedCodeBlockWidget(fencedCodeBlockNode, "Conda Python 3", "html");
+        	else if (fencedCodeBlockNode.getInfo().equals("groovy-image-widget")) 
+        		processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "imgsrc");
+        	else if (fencedCodeBlockNode.getInfo().equals("groovy-html-widget")) 
+        		processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "html");
         }
+    }
+    
+    private void processFencedCodeBlockWidget(FencedCodeBlock fencedCodeBlockNode, String language, String outputVariableName) {
+    	String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
+		
+		Map<String, Object> inputs = new HashMap<String, Object>();
+		
+		inputs.put("scijavaContext", documentEditor.getContext());
+		inputs.put("archive", documentEditor.getArchive());
+		
+		FencedCodeBlockMarkdownWidget fencedCodeBlockMarkdownWidget = new FencedCodeBlockMarkdownWidget(documentEditor.getContext(), documentEditor.getArchive(), language);
+		
+		Map<String, Object> outputs = fencedCodeBlockMarkdownWidget.runScript(inputs, script);
+		
+		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + fencedCodeBlockNode.getInfo() + ":" + script;
+		
+		if (outputs.containsKey(FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+			documentEditor.getDocument().putMedia(key, (String) outputs.get(FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
+		} else
+			documentEditor.getDocument().putMedia(key, (String) outputs.get(outputVariableName));
     }
 }

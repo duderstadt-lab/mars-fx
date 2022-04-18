@@ -44,8 +44,8 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
     		int endOffset = node.getEndOffset();
     		String content = documentEditor.getDocument().getMedia(key);
     		
-    		if (content.startsWith(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
-    			BasedSequence errorMessage = BasedSequence.of(content.substring(PythonMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX.length()));
+    		if (content.startsWith(FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+    			BasedSequence errorMessage = BasedSequence.of(content.substring(FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX.length()));
 	    		html.line();
 	            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
 	            html.attr("data-pos", startOffset + ":" + endOffset).srcPosWithEOL(errorMessage).withAttr().tag("code");
@@ -53,25 +53,15 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
 	            html.tag("/code");
 	            html.tag("/pre").closePre();
 	            return;
-			} else if (node.getInfo().equals("python-image-widget")) {
+			} else if (node.getInfo().equals("python-image-widget") || node.getInfo().equals("groovy-markdown-widget")) {
 	        	html.attr("src", documentEditor.getDocument().getMedia(key))
 	        	.withAttr()
 	            .tag("img", true);
 	        	return;
-	        } else if (node.getInfo().equals("python-html-widget")) {
-	    		html.line();
-	            html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag("pre").openPre();
+	        } else if (node.getInfo().equals("python-html-widget") || node.getInfo().equals("groovy-html-widget")) {
+	        	html.line();
 	            html.raw(documentEditor.getDocument().getMedia(key));
-	            html.tag("/pre").closePre();
 	            return;
-	        } else if (node.getInfo().equals("python-markdown-widget")) {
-	        	
-	        } else if (node.getInfo().equals("python-jekyll-widget")) {
-	        	
-	        } else if (node.getInfo().equals("groovy-string-widget")) {	
-	        	
-	        } else if (node.getInfo().equals("groovy-jekyll-widget")) {
-	        	
 	        }
 		}
         context.delegateRender();
