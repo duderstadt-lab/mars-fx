@@ -279,27 +279,38 @@ hr {
 =============================================================================*/
 
 table {
-  margin-left: auto;
-  margin-right: auto;
+        margin-left: auto;
+        margin-right: auto;
+        border: none;
+        border-collapse: collapse;
+        border-spacing: 0;
+        color: @rendered_html_border_color;
+        font-size: 14px;
+        table-layout: fixed;
 }
-
-table th {
-  font-weight: bold;
+thead {
+    border-bottom: 1px solid @rendered_html_border_color;
+    vertical-align: bottom;
 }
-
-table th, table td {
-  border: 1px solid #ccc;
-  padding: 6px 13px;
+tr, th, td {
+    text-align: right;
+    vertical-align: middle;
+    padding: 0.5em 0.5em;
+    line-height: normal;
+    white-space: normal;
+    max-width: none;
+    border: none;
 }
-
-table tr {
-  border-top: 1px solid #ccc;
-  background-color: #fff;
+th {
+    font-weight: bold;
 }
-
-table tr:nth-child(2n) {
-  background-color: #f8f8f8;
+tbody tr:nth-child(odd) {
+    background: #f5f5f5;
 }
+tbody tr:hover {
+    background: rgba(66, 165, 245, 0.2);
+}
+* + table {margin-top: 1em;}
 
 /* IMAGES
 =============================================================================*/
