@@ -31,7 +31,6 @@ package de.mpg.biochem.mars.fx.dashboard;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOMB;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STOP;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REORDER;
 
 import java.io.File;
 import java.io.IOException;

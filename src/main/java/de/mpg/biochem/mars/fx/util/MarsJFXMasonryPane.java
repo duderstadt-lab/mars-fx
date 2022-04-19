@@ -22,6 +22,8 @@
 package de.mpg.biochem.mars.fx.util;
 
 import com.jfoenix.transitions.CachedTransition;
+
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import javafx.animation.Interpolator;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -579,10 +581,11 @@ public class MarsJFXMasonryPane extends Pane {
 
         protected boolean validWidth(BoundingBox box, Region region, double cellW, double gutterX, double gutterY) {
             boolean valid = false;
+            
             if (region.getMinWidth() != -1 && box.getWidth() * cellW + (box.getWidth() - 1) * 2 * gutterX < region.getMinWidth()) {
                 return false;
             }
-
+    
             if (region.getPrefWidth() == USE_COMPUTED_SIZE && box.getWidth() * cellW + (box.getWidth() - 1) * 2 * gutterX >= region
                 .prefWidth(-1)) {
                 valid = true;
@@ -701,7 +704,7 @@ public class MarsJFXMasonryPane extends Pane {
             }
             int col = matrix[0].length;
             List<BoundingBox> boxes = new ArrayList<>();
-
+            
             for (int b = 0; b < children.size(); b++) {
                 Region block = children.get(b);
                 for (int i = 0; i < row; i++) {
@@ -720,19 +723,15 @@ public class MarsJFXMasonryPane extends Pane {
                             limitCol,
                             gutterX,
                             gutterY);
-                        /*
-                        if (!validWidth(box, block, cellWidth, gutterX, gutterY) || !validHeight(box,
-                            block,
-                            cellHeight,
-                            gutterX,
-                            gutterY)) {
-                            continue;
-                        }
-                        */
-                        if (!validWidth(box, block, cellWidth, gutterX, gutterY)) {
-                            continue;
-                        }
                         
+                        //HACK: prevents boxes from disappearing unless under cellWidth * 5, which is usually 250
+                        //This also allows boxes to resize if the window resizes to some extent
+                        //Despite considerable troubleshooting, this appears to be the best solution for now.
+                        //if (!validWidth(box, block, cellWidth, gutterX, gutterY)) {
+                        if (box.getWidth() < 5) {
+                        	continue;
+                        }
+
                         matrix = fillMatrix(matrix,
                             b + 1,
                             box.getMinX(),

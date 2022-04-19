@@ -883,7 +883,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (newFile != null) {
 			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(newFile);
 			
-			
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
