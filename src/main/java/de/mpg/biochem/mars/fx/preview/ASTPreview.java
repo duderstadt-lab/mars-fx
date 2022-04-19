@@ -55,6 +55,7 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -233,5 +234,11 @@ class ASTPreview
 
 	private static int groupLength(Matcher matcher, int group) {
 		return matcher.end(group) - matcher.start(group);
+	}
+
+	@Override
+	public void exportPDF() {
+		// TODO Auto-generated method stub
+		
 	}
 }

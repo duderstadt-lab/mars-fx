@@ -26,6 +26,7 @@
  */
 package de.mpg.biochem.mars.fx.editor;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
@@ -351,6 +352,10 @@ public class DocumentEditor extends AnchorPane {
 	public void requestFocus() {
 		if (markdownEditorPane != null)
 			markdownEditorPane.requestFocus();
+	}
+	
+	public void exportPDF() {
+		markdownPreviewPane.exportPDF();
 	}
 	
 	public void showPreview() {

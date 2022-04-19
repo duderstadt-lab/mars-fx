@@ -55,6 +55,7 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -144,5 +145,11 @@ class HtmlSourcePreview
 			spanStyleCache.put(style, spanStyle);
 		}
 		return spanStyle;
+	}
+
+	@Override
+	public void exportPDF() {
+		// TODO Auto-generated method stub
+		
 	}
 }

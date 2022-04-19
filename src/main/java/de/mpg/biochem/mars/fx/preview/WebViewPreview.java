@@ -56,6 +56,7 @@
 package de.mpg.biochem.mars.fx.preview;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -69,6 +70,7 @@ import javafx.concurrent.Worker.State;
 import javafx.scene.control.IndexRange;
 import javafx.scene.web.WebView;
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
@@ -80,6 +82,11 @@ import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.Visitor;
 
+import javafx.print.PrinterJob;
+
+import com.vladsch.flexmark.util.data.DataHolder;
+import com.vladsch.flexmark.util.data.MutableDataSet;
+
 /**
  * WebView preview.
  *
@@ -90,6 +97,8 @@ class WebViewPreview
 {
 	private static final HashMap<String, String> prismLangDependenciesMap = new HashMap<>();
 
+	static final DataHolder OPTIONS = new MutableDataSet().toImmutable();
+	
 	private WebView webView;
 	private final ArrayList<Runnable> runWhenLoadedList = new ArrayList<>();
 	private int lastScrollX;
@@ -99,6 +108,8 @@ class WebViewPreview
 	private DocumentEditor documentEditor;
 
 	WebViewPreview() {
+		//.set(Parser.EXTENSIONS
+		//MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer());
 	}
 
 	private void createNodes() {
@@ -161,7 +172,7 @@ class WebViewPreview
 		String scrollScript = (lastScrollX > 0 || lastScrollY > 0)
 				? ("  onload='window.scrollTo("+lastScrollX+", "+lastScrollY+");'")
 				: "";
-				
+		
 		webView.getEngine().loadContent(
 			"<!DOCTYPE html>\n"
 			+ "<html>\n"
@@ -199,6 +210,16 @@ class WebViewPreview
 		    + "</script>\n"
 			+ "</body>\n"
 			+ "</html>");
+	}
+
+	public void exportPDF() {
+        PrinterJob printerJob = PrinterJob.createPrinterJob();
+        if(printerJob != null)
+        {
+            printerJob.showPrintDialog(this.getNode().getScene().getWindow());
+            webView.getEngine().print(printerJob);
+            printerJob.endJob();
+        }                
 	}
 
 	@Override

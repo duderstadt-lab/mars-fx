@@ -55,6 +55,7 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
+import java.io.File;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
@@ -116,5 +117,11 @@ class ExternalPreview
 	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
 		if (previewView != null)
 			previewView.editorSelectionChanged(range);
+	}
+
+	@Override
+	public void exportPDF() {
+		// TODO Auto-generated method stub
+		
 	}
 }

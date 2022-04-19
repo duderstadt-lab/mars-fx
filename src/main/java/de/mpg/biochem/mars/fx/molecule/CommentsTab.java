@@ -52,10 +52,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -79,6 +81,7 @@ import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.ArchiveUtils;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -105,6 +108,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.RETWEET;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SEARCH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STRIKETHROUGH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FILE_PDF_ALT;
 
 import de.mpg.biochem.mars.fx.Messages;
 import javafx.scene.control.Tab;
@@ -199,8 +203,13 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				null, null, editMode);
 		Node editModeButton = ActionUtils.createToolBarButton(editModeAction);
 
+		Action createPDFDocumentAction2 = new Action("Export PDF", null, FILE_PDF_ALT,
+				e -> getActiveDocumentEditor().exportPDF());
+		Node createPDFDocumentButton2 = ActionUtils.createToolBarButton(createPDFDocumentAction2);
+		
     	nonEditToolBar = new ToolBar();
     	nonEditToolBar.getItems().add(0, editModeButton);
+    	nonEditToolBar.getItems().add(1, createPDFDocumentButton2);
     	nonEditToolBar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
     	
 		// Edit actions
@@ -349,8 +358,12 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 					newEditor("Untitled");
 				});
 		Node createNewDocumentButton = ActionUtils.createToolBarButton(createNewDocumentAction);
-		
 		editToolBar.getItems().add(createNewDocumentButton);
+		
+		Action createPDFDocumentAction = new Action("Export PDF", null, FILE_PDF_ALT,
+				e -> getActiveDocumentEditor().exportPDF());
+		Node createPDFDocumentButton = ActionUtils.createToolBarButton(createPDFDocumentAction);
+		editToolBar.getItems().add(createPDFDocumentButton);
 		
 		editToolBar.getItems().add(0, new Separator());
 		

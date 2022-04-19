@@ -55,6 +55,7 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import javafx.application.Platform;
@@ -68,6 +69,8 @@ import javafx.scene.layout.BorderPane;
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Range;
 import de.mpg.biochem.mars.util.MarsDocument;
 
@@ -106,6 +109,7 @@ public class MarkdownPreviewPane
 	interface Preview {
 		javafx.scene.Node getNode();
 		void update(PreviewContext context, Renderer renderer);
+		void exportPDF();
 		void scrollY(PreviewContext context, double value);
 		void editorSelectionChanged(PreviewContext context, IndexRange range);
 	}
@@ -194,6 +198,10 @@ public class MarkdownPreviewPane
 
 		update();
 		scrollY();
+	}
+	
+	public void exportPDF() {
+		activePreview.exportPDF();
 	}
 
 	private boolean updateRunLaterPending;
