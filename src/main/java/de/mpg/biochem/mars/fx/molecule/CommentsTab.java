@@ -41,6 +41,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Separator;
@@ -60,6 +61,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 
@@ -111,6 +113,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PRINT;
 
 import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -458,15 +461,20 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
  	}
 
  	DocumentEditor newEditor(String name) {
- 		DocumentEditor DocumentEditor = new DocumentEditor(context, archive, this, name);
- 		//DocumentEditor.getTab().setOnCloseRequest(e -> {
- 		//	if (!canCloseEditor(DocumentEditor))
- 		//		e.consume();
- 		//});
- 		Tab tab = DocumentEditor.getTab();
+ 		DocumentEditor documentEditor = new DocumentEditor(context, archive, this, name);
+ 		documentEditor.getTab().setOnCloseRequest(e -> {
+ 			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
+ 					"Are you sure you want to close " + documentEditor.getTab().getText() + "?");
+ 			
+ 			Optional<ButtonType> result = alert.showAndWait();
+ 			if(result.get() != ButtonType.OK) {
+ 				e.consume();
+ 			}
+ 		});
+ 		Tab tab = documentEditor.getTab();
  		tabPane.getTabs().add(tab);
  		tabPane.getSelectionModel().select(tab);
- 		return DocumentEditor;
+ 		return documentEditor;
  	}
     
     public ArrayList<Menu> getMenus() {
