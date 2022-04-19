@@ -32,6 +32,7 @@ import java.util.ArrayList;
 
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -58,6 +59,9 @@ public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertible
     
     @Parameter
     protected Context context;
+    
+    @Parameter
+    protected PrefService prefService;
     
     protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	

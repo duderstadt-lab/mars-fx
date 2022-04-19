@@ -55,10 +55,12 @@ import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
+import javafx.collections.FXCollections;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -113,7 +115,9 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PRINT;
 
 import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.dialogs.DocumentTemplateSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.ToggleButton;
@@ -124,7 +128,9 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
 
-import javafx.collections.ObservableList;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.charset.StandardCharsets;
 
 public class CommentsTab extends AbstractMoleculeArchiveTab {
 	
@@ -363,7 +369,32 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		
 		Action createNewDocumentAction = new Action("New", "Shortcut+N", PLUS,
 				e -> {
-					newEditor("Untitled");
+					String reportTemplateDirectoryPath = prefService.get(CommentsTab.class, "reportTemplateDirectory");
+					File reportTemplateDirectory = (reportTemplateDirectoryPath != null) ? new File(reportTemplateDirectoryPath) : null;
+			 		DocumentTemplateSelectionDialog documentTemplateSelectionDialog = new DocumentTemplateSelectionDialog(getNode().getScene().getWindow(), "Create report", reportTemplateDirectory);
+			 		documentTemplateSelectionDialog.showAndWait().ifPresent(result -> {
+			 			DocumentEditor documentEditor = newEditor(result.getName());
+			 			
+			 			//Should a template be used?
+			 			if (result.getTemplateFileName() != null && result.getSelectedDirectory() != null) {
+			 				String path = result.getSelectedDirectory().getAbsolutePath() + "/" + result.getTemplateFileName();
+			 				String content = "";
+			 				try {
+			 					byte[] encoded = Files.readAllBytes(Paths.get(path));
+			 					content = new String(encoded, StandardCharsets.UTF_8);
+			 				} catch (IOException ioexception) {
+			 					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+										"Unable to load the report template selected due to IOException.");
+								alert.show();
+			 				}
+			 				documentEditor.getDocument().setContent(content);
+			 			}
+			 			
+			 			if (result.getSelectedDirectory() != null) {
+			 				prefService.remove(CommentsTab.class, "reportTemplateDirectory");
+			 				prefService.put(CommentsTab.class, "reportTemplateDirectory", result.getSelectedDirectory().getAbsolutePath());
+			 			}	
+			 		});
 				});
 		Node createNewDocumentButton = ActionUtils.createToolBarButton(createNewDocumentAction);
 		editToolBar.getItems().add(createNewDocumentButton);
