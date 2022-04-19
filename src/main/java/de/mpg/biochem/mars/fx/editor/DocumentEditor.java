@@ -51,12 +51,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.IndexRange;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.text.Text;
 import org.fxmisc.undo.UndoManager;
@@ -120,7 +122,49 @@ public class DocumentEditor extends AnchorPane {
 	public DocumentEditor(final Context context, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, CommentsTab commentsTab, String name) {
 		context.inject(this);
 		this.commentsTab = commentsTab;
-		tab.setText(name);
+		
+		if (!name.equals("Comments")) {
+			Label label = new Label(name);
+			tab.setGraphic(label);
+	
+			TextField textField = new TextField();
+			label.setOnMouseClicked(event -> {
+				if(event.getClickCount() == 2) {
+					textField.setText(getDocument().getName());
+					textField.setPrefWidth(label.getWidth() + label.getWidth()/2);
+					tab.setGraphic(textField);
+					textField.selectAll();
+					textField.requestFocus();
+				}
+			});
+	
+			textField.setOnAction(event -> {
+				if (!textField.getText().equals(getDocument().getName()) && !archive.properties().getDocumentNames().contains(textField.getText())) {
+					String newName = textField.getText();
+					MarsDocument document = getDocument();
+					archive.properties().removeDocument(document.getName());
+					document.setName(newName);
+					archive.properties().putDocument(document);
+					label.setText(newName);
+				}
+				tab.setGraphic(label);
+			});
+	
+			textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+				if(!newValue) {
+					if (!textField.getText().equals(getDocument().getName()) && !archive.properties().getDocumentNames().contains(textField.getText())) {
+						String newName = textField.getText();
+						MarsDocument document = getDocument();
+						archive.properties().removeDocument(document.getName());
+						document.setName(newName);
+						archive.properties().putDocument(document);
+						label.setText(newName);
+					}
+					tab.setGraphic(label);
+				}
+			});
+		} else tab.setText(name);
+		
 		this.archive = archive;
 		
 		if (archive.properties().getDocumentNames().contains(name))

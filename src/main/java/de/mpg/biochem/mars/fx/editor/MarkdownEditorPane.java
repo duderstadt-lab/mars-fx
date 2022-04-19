@@ -232,6 +232,10 @@ public class MarkdownEditorPane
 		this();
 		this.documentEditor = documentEditor;
 	}
+	
+	public DocumentEditor getDocumentEditor() {
+		return documentEditor;
+	}
 
 	private void updateFont() {
 		textArea.setStyle("-fx-font-family: '" + Options.getFontFamily()

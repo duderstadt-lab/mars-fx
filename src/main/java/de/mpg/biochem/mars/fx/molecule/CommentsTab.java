@@ -66,6 +66,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.PopOver.ArrowLocation;
@@ -113,6 +115,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SEARCH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STRIKETHROUGH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PRINT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SAVE;
 
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.dialogs.DocumentTemplateSelectionDialog;
@@ -373,6 +376,13 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 					File reportTemplateDirectory = (reportTemplateDirectoryPath != null) ? new File(reportTemplateDirectoryPath) : null;
 			 		DocumentTemplateSelectionDialog documentTemplateSelectionDialog = new DocumentTemplateSelectionDialog(getNode().getScene().getWindow(), "Create report", reportTemplateDirectory);
 			 		documentTemplateSelectionDialog.showAndWait().ifPresent(result -> {
+			 			if (archive.properties().getDocumentNames().contains(result.getName())) {
+			 				RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+									"Document name " + result.getName() + " is already in use. Please choose another.");
+							alert.show();
+							return;
+			 			}
+			 			
 			 			DocumentEditor documentEditor = newEditor(result.getName());
 			 			
 			 			//Should a template be used?
@@ -398,6 +408,30 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 				});
 		Node createNewDocumentButton = ActionUtils.createToolBarButton(createNewDocumentAction);
 		editToolBar.getItems().add(createNewDocumentButton);
+		
+		Action saveDocumentTemplateAction = new Action("Save template", null, SAVE,
+				e -> {
+					FileChooser fileChooser = new FileChooser();
+					fileChooser.setTitle("Save report template");
+					String reportTemplateDirectoryPath = prefService.get(CommentsTab.class, "reportTemplateDirectory");
+					File reportTemplateDirectory = (reportTemplateDirectoryPath != null) ? new File(reportTemplateDirectoryPath) : null;
+					if (reportTemplateDirectory != null)
+						fileChooser.setInitialDirectory(reportTemplateDirectory);
+					fileChooser.setInitialFileName(getActiveEditor().getDocumentEditor().getDocument().getName() + ".md");
+					
+					File newFile = fileChooser.showSaveDialog(getNode().getScene().getWindow());
+					if (newFile != null) {
+						try {
+		 					Files.write( Paths.get(newFile.getAbsolutePath()), getActiveEditor().getMarkdown().getBytes());
+		 				} catch (IOException ioexception) {
+		 					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
+									"Unable to write template file due to IOException.");
+							alert.show();
+		 				}
+					}
+				});
+		Node saveDocumentTemplateButton = ActionUtils.createToolBarButton(saveDocumentTemplateAction);
+		editToolBar.getItems().add(saveDocumentTemplateButton);
 		
 		editToolBar.getItems().add(0, new Separator());
 		
@@ -495,7 +529,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
  		DocumentEditor documentEditor = new DocumentEditor(context, archive, this, name);
  		documentEditor.getTab().setOnCloseRequest(e -> {
  			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
- 					"Are you sure you want to close " + documentEditor.getTab().getText() + "?");
+ 					"Are you sure you want to close " + documentEditor.getDocument().getName() + "?");
  			
  			Optional<ButtonType> result = alert.showAndWait();
  			if(result.get() != ButtonType.OK) {
@@ -536,9 +570,11 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
     	this.archive = archive;
     	for (String name : archive.properties().getDocumentNames()) {
     		DocumentEditor editor = newEditor(name);
-    		if (name.equals("Comments"))
+    		if (name.equals("Comments")) {
     			editor.getTab().setClosable(false);
+    		}
     	}
+    	tabPane.getSelectionModel().select(0);
 	}
 	
 	public void setEditMode(boolean editmode) {
