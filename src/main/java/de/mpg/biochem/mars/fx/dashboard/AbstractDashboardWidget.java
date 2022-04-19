@@ -102,6 +102,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected boolean dragY = false;
 	protected RotateTransition rt;
 	protected Button closeButton, loadButton;
+	protected Text syncIcon;
 
 	@Parameter
 	protected MarsDashboard parent;
@@ -145,13 +146,13 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		closeButton.setPrefWidth(20);
 		closeButton.setPrefHeight(20);
 
-		Text syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
+		syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
 		loadButton = new Button();
 		loadButton.setGraphic(syncIcon);
 		loadButton.setCenterShape(true);
 		loadButton.getStyleClass().add("icon-button");
 		loadButton.setAlignment(Pos.CENTER);
-
+		
 		rt = new RotateTransition(Duration.millis(500), syncIcon);
 		rt.setInterpolator(Interpolator.LINEAR);
 		rt.setByAngle(0);
@@ -310,6 +311,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	public void stopSpinning() {
 		rt.stop();
+		syncIcon.setRotate(0);
 	}
 
 	@Override
@@ -365,6 +367,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	@Override
 	public void close() {
 		rt.stop();
+		syncIcon.setRotate(0);
 		
 		RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
 				"Are you sure you want to remove the widget?");
