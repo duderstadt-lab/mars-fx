@@ -109,7 +109,7 @@ public class MarkdownPreviewPane
 	interface Preview {
 		javafx.scene.Node getNode();
 		void update(PreviewContext context, Renderer renderer);
-		void exportPDF();
+		void createPrintJob();
 		void scrollY(PreviewContext context, double value);
 		void editorSelectionChanged(PreviewContext context, IndexRange range);
 	}
@@ -200,8 +200,8 @@ public class MarkdownPreviewPane
 		scrollY();
 	}
 	
-	public void exportPDF() {
-		activePreview.exportPDF();
+	public void createPrintJob() {
+		activePreview.createPrintJob();
 	}
 
 	private boolean updateRunLaterPending;

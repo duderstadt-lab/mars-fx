@@ -212,7 +212,7 @@ class WebViewPreview
 			+ "</html>");
 	}
 
-	public void exportPDF() {
+	public void createPrintJob() {
         PrinterJob printerJob = PrinterJob.createPrinterJob();
         if(printerJob != null)
         {

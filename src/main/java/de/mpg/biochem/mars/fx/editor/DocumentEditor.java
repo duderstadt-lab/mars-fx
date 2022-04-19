@@ -354,8 +354,8 @@ public class DocumentEditor extends AnchorPane {
 			markdownEditorPane.requestFocus();
 	}
 	
-	public void exportPDF() {
-		markdownPreviewPane.exportPDF();
+	public void createPrintJob() {
+		markdownPreviewPane.createPrintJob();
 	}
 	
 	public void showPreview() {

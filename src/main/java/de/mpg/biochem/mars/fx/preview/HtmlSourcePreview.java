@@ -148,7 +148,7 @@ class HtmlSourcePreview
 	}
 
 	@Override
-	public void exportPDF() {
+	public void createPrintJob() {
 		// TODO Auto-generated method stub
 		
 	}
