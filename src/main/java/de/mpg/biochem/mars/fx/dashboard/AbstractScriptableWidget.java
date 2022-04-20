@@ -31,6 +31,7 @@ package de.mpg.biochem.mars.fx.dashboard;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOOK;
 import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -44,6 +45,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -64,6 +66,8 @@ import javafx.geometry.Insets;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.Label;
 
@@ -108,6 +112,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected ToggleGroup languageGroup;
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
+	
+	//Used for Conda Python 3 widgets
+	protected String imgsrc;
 
 	@Override
 	public void initialize() {
@@ -156,6 +163,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
 		getTabPane().getTabs().add(logTab);
 
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			loadImage();
+		}
 	}
 
 	protected Map<String, Object> runScript() {
@@ -166,7 +176,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		String scriptName = "script";
 		if (lang.getLanguageName().equals("Groovy")) {
 			scriptName += ".groovy";
-		} else if (lang.getLanguageName().equals("Python")) {
+		} else if (lang.getLanguageName().equals("Python") || lang.getLanguageName().equals("Conda Python 3")) {
 			scriptName += ".py";
 		}
 
@@ -240,11 +250,61 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			name += ".groovy";
 		} else if (lang.getLanguageName().equals("Python")) {
 			name += ".py";
+		} else if (lang.getLanguageName().equals("Conda Python 3")) {
+			name += "_conda.py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
 		String scriptTemplate = inputParameters + IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptTemplate);
+	}
+	
+	private void updateImageViewSize(ImageView imageView, double HtoWratio) {		 
+		 double rootWidth = rootPane.getWidth() - 30;
+		 double rootHeight = rootPane.getHeight() - 30;
+
+		 if (rootWidth*HtoWratio < rootHeight) {
+			 imageView.setFitWidth(rootWidth);
+		 } else {
+			 imageView.setFitHeight(rootHeight);
+		 }
+	}
+	
+	protected void loadImage() {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (imgsrc == null)
+						return;
+					String base64string = imgsrc.substring(22);
+					
+		            byte[] imageByte = Base64.decodeBase64(base64string);
+		            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+		            Image image = new Image(bis);
+					bis.close();
+		            ImageView imageView = new ImageView();
+					imageView.setImage(image);
+	
+					rootPane.widthProperty().addListener((obs, oldVal, newVal) -> {
+						updateImageViewSize(imageView, image.getHeight()/image.getWidth());		 
+					});
+					rootPane.heightProperty().addListener((obs, oldVal, newVal) -> {
+						updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
+					});
+	
+					imageView.setPreserveRatio(true);
+	
+					BorderPane borderPane = new BorderPane();
+					setContent(borderPane);
+					borderPane.setCenter(imageView);
+	
+					updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -270,6 +330,12 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 				codeArea.replaceText(jParser.getText());
 			});
 		
+		setJsonField("imgsrc", 
+			jGenerator -> {
+				if (imgsrc != null)
+					jGenerator.writeStringField("imgsrc", imgsrc);
+			},
+			jParser -> imgsrc = jParser.getText());
 	}
 
 	@Override

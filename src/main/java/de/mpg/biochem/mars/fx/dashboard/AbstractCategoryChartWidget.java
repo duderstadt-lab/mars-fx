@@ -127,40 +127,44 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 	public void initialize() {
 		super.initialize();
 
-		xAxis = new MarsCategoryAxis("Categories");
-		xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-
-		yAxis = new MarsNumericAxis();
-		yAxis.setName("Frequency");
-		yAxis.setMinorTickVisible(false);
-		yAxis.setForceZeroInRange(true);
-		yAxis.setAutoRanging(true);
-		yAxis.setAutoRangeRounding(false);
-		// yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
-
-		barChart = new XYChart(xAxis, yAxis);
-		barChart.setAnimated(false);
-		barChart.getRenderers().clear();
-		final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
-		renderer.setPolyLineStyle(LineStyle.NONE);
-		renderer.setDrawBars(true);
-		renderer.setBarWidthPercentage(70);
-		renderer.setDrawMarker(false);
-
-		// Make sure this is set to false. Otherwise second to last points seems to be
-		// lost :(...
-		renderer.pointReductionProperty().set(false);
-		barChart.getRenderers().add(renderer);
-		barChart.setLegend(null);
-		barChart.horizontalGridLinesVisibleProperty().set(false);
-		barChart.verticalGridLinesVisibleProperty().set(false);
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			setContent(getIcon(), new BorderPane());
+		} else {
+			xAxis = new MarsCategoryAxis("Categories");
+			xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+	
+			yAxis = new MarsNumericAxis();
+			yAxis.setName("Frequency");
+			yAxis.setMinorTickVisible(false);
+			yAxis.setForceZeroInRange(true);
+			yAxis.setAutoRanging(true);
+			yAxis.setAutoRangeRounding(false);
+			// yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
+	
+			barChart = new XYChart(xAxis, yAxis);
+			barChart.setAnimated(false);
+			barChart.getRenderers().clear();
+			final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
+			renderer.setPolyLineStyle(LineStyle.NONE);
+			renderer.setDrawBars(true);
+			renderer.setBarWidthPercentage(70);
+			renderer.setDrawMarker(false);
+	
+			// Make sure this is set to false. Otherwise second to last points seems to be
+			// lost :(...
+			renderer.pointReductionProperty().set(false);
+			barChart.getRenderers().add(renderer);
+			barChart.setLegend(null);
+			barChart.horizontalGridLinesVisibleProperty().set(false);
+			barChart.verticalGridLinesVisibleProperty().set(false);
+			
+			barChart.setTriggerDistance(0);
+			
+			barChart.setPrefSize(100, 100);
+			barChart.setPadding(new Insets(10, 20, 10, 10));
+			setContent(getIcon(), barChart);
+		}
 		
-		barChart.setTriggerDistance(0);
-		
-		barChart.setPrefSize(100, 100);
-		barChart.setPadding(new Insets(10, 20, 10, 10));
-		setContent(getIcon(), barChart);
-
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
 	}
@@ -172,6 +176,17 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 		if (outputs == null)
 			return;
 
+		if (!outputs.containsKey("imgsrc")) {
+			writeToLog("required output imgsrc is missing.");
+			return;
+		}
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			imgsrc = (String) outputs.get("imgsrc");
+			loadImage();
+			return;
+		}
+		
 		for (String field : requiredGlobalFields)
 			if (!outputs.containsKey(field)) {
 				writeToLog("required output " + field + " is missing.");

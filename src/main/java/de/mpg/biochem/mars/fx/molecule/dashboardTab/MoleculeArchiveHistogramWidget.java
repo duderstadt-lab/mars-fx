@@ -65,6 +65,11 @@ public class MoleculeArchiveHistogramWidget extends AbstractHistogramWidget impl
 	protected void setScriptInputs(ScriptModule module) {
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
+			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+		}
 	}
 	
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {

@@ -1,5 +1,3 @@
-#@ Context scijavaContext
-#@ MoleculeArchive archive
 #@ Float width
 #@ Float height
 #@OUTPUT String imgsrc
@@ -18,7 +16,8 @@ fig = Figure()
 ax = fig.subplots()
 ax.plot(t,s)
 ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-       title='About as simple as it gets, folks')
+       title='Title')
 ax.grid()
 fig.set_size_inches(width, height)
 imgsrc = mars.figure_to_imgsrc(fig)
+

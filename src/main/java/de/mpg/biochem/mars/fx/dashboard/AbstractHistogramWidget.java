@@ -89,39 +89,43 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	public void initialize() {
 		super.initialize();
 
-		xAxis = new MarsNumericAxis("");
-		// xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-		xAxis.minorTickVisibleProperty().set(false);
-		xAxis.setAutoRangeRounding(false);
-		// xAxis.setAutoRanging(true);
-		yAxis = new MarsNumericAxis("");
-		yAxis.setMinorTickVisible(false);
-		yAxis.setForceZeroInRange(true);
-		yAxis.setAutoRanging(true);
-		yAxis.setAutoRangeRounding(false);
-
-		histChart = new XYChart(xAxis, yAxis);
-		histChart.setAnimated(false);
-		histChart.getRenderers().clear();
-
-		outlineHistogramRenderer = new ErrorDataSetRenderer();
-		outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
-		outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
-		outlineHistogramRenderer.pointReductionProperty().set(false);
-
-		datasets = new ArrayList<DefaultErrorDataSet>();
-
-		histChart.getRenderers().add(outlineHistogramRenderer);
-		histChart.setLegend(null);
-		histChart.horizontalGridLinesVisibleProperty().set(false);
-		histChart.verticalGridLinesVisibleProperty().set(false);
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			setContent(getIcon(), new BorderPane());
+		} else {
+			xAxis = new MarsNumericAxis("");
+			// xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setAutoRangeRounding(false);
+			// xAxis.setAutoRanging(true);
+			yAxis = new MarsNumericAxis("");
+			yAxis.setMinorTickVisible(false);
+			yAxis.setForceZeroInRange(true);
+			yAxis.setAutoRanging(true);
+			yAxis.setAutoRangeRounding(false);
+	
+			histChart = new XYChart(xAxis, yAxis);
+			histChart.setAnimated(false);
+			histChart.getRenderers().clear();
+	
+			outlineHistogramRenderer = new ErrorDataSetRenderer();
+			outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
+			outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
+			outlineHistogramRenderer.pointReductionProperty().set(false);
+	
+			datasets = new ArrayList<DefaultErrorDataSet>();
+	
+			histChart.getRenderers().add(outlineHistogramRenderer);
+			histChart.setLegend(null);
+			histChart.horizontalGridLinesVisibleProperty().set(false);
+			histChart.verticalGridLinesVisibleProperty().set(false);
+			
+			histChart.setTriggerDistance(0);
+			
+			histChart.setPrefSize(100, 100);
+			histChart.setPadding(new Insets(10, 20, 10, 10));
+			setContent(getIcon(), histChart);
+		}
 		
-		histChart.setTriggerDistance(0);
-		
-		histChart.setPrefSize(100, 100);
-		histChart.setPadding(new Insets(10, 20, 10, 10));
-		setContent(getIcon(), histChart);
-
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
 	}
@@ -132,6 +136,17 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 		if (outputs == null)
 			return;
+		
+		if (!outputs.containsKey("imgsrc")) {
+			writeToLog("required output imgsrc is missing.");
+			return;
+		}
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			imgsrc = (String) outputs.get("imgsrc");
+			loadImage();
+			return;
+		}
 
 		for (String field : requiredGlobalFields)
 			if (!outputs.containsKey(field)) {

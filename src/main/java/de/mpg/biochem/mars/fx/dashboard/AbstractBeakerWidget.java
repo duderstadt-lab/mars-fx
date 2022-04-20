@@ -82,6 +82,17 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 
 		if (outputs == null)
 			return;
+		
+		if (!outputs.containsKey("imgsrc")) {
+			writeToLog("required output imgsrc is missing.");
+			return;
+		}
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			imgsrc = (String) outputs.get("imgsrc");
+			loadImage();
+			return;
+		}
 
 		if (!outputs.containsKey("node")) {
 			writeToLog("required output node is missing.");
