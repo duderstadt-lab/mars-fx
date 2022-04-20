@@ -45,6 +45,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.scijava.Context;
+import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -86,6 +87,9 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 	@Parameter
 	protected MarsDashboardWidgetService marsDashboardWidgetService;
+	
+	@Parameter
+	protected ObjectService objectService;
 
 	private BorderPane borderPane;
 
@@ -148,6 +152,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		ArrayList<String> languages = new ArrayList<>();
 		languages.add("Groovy");
 		languages.add("Python");
+		languages.add("Conda Python 3");
 		widgetScriptLanguage.getItems().addAll(languages);
 		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
 			if (marsDashboardWidgetService != null)
