@@ -527,15 +527,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
  	DocumentEditor newEditor(String name) {
  		DocumentEditor documentEditor = new DocumentEditor(context, archive, this, name);
- 		documentEditor.getTab().setOnCloseRequest(e -> {
- 			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
- 					"Are you sure you want to close " + documentEditor.getDocument().getName() + "?");
- 			
- 			Optional<ButtonType> result = alert.showAndWait();
- 			if(result.get() != ButtonType.OK) {
- 				e.consume();
- 			}
- 		});
  		Tab tab = documentEditor.getTab();
  		tabPane.getTabs().add(tab);
  		tabPane.getSelectionModel().select(tab);

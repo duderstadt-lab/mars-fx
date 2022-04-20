@@ -217,7 +217,6 @@ public class CommentEditor extends AnchorPane {
 		Node previewPane = markdownPreviewPane.getNode();
 		if (!splitItems.contains(previewPane)) {
 			previewVisible.set(true);
-			System.out.println("adding Preview");
 			splitItems.add(previewPane);
 		}
 		if (splitItems.contains(markdownEditorPane.getNode())) {

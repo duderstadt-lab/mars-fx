@@ -33,6 +33,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Optional;
 
 import javafx.animation.RotateTransition;
 import javafx.application.Platform;
@@ -83,6 +84,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -163,14 +165,26 @@ public class DocumentEditor extends AnchorPane {
 					tab.setGraphic(label);
 				}
 			});
+			
+			tab.setOnCloseRequest(e -> {
+	 			RoverConfirmationDialog alert = new RoverConfirmationDialog(commentsTab.getNode().getScene().getWindow(), 
+	 					"Are you sure you want to close " + this.document.getName() + "?");
+	 			
+	 			Optional<ButtonType> result = alert.showAndWait();
+	 			if(result.get() != ButtonType.OK) {
+	 				e.consume();
+	 			} else close();
+	 		});
 		} else tab.setText(name);
 		
 		this.archive = archive;
 		
 		if (archive.properties().getDocumentNames().contains(name))
 			this.document = archive.properties().getDocument(name);
-		else
+		else {
 			this.document = new MarsDocument(name, "");
+			archive.properties().putDocument(document);
+		}
 		
 		// avoid that this is GCed
 		tab.setUserData(this);
@@ -206,6 +220,10 @@ public class DocumentEditor extends AnchorPane {
 	
 	public MarsDocument getDocument() {
 		return document;
+	}
+	
+	public void close() {
+		archive.properties().removeDocument(document.getName());
 	}
 	
 	public Context getContext() {
@@ -391,6 +409,7 @@ public class DocumentEditor extends AnchorPane {
 			return;
 
 		markdownEditorPane.setVisible(false);
+		document.setContent(markdownEditorPane.getMarkdown());
 	}
 
 	public void requestFocus() {
@@ -419,7 +438,7 @@ public class DocumentEditor extends AnchorPane {
 	}
 	
 	public void save() {
-		if (archive != null) {
+		if (archive != null && markdownEditorPane != null) {
 			document.setContent(markdownEditorPane.getMarkdown());
 			markdownEditorPane.getUndoManager().mark();
 		}

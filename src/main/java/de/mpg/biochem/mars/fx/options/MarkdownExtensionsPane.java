@@ -121,7 +121,6 @@ public class MarkdownExtensionsPane extends VBox {
 				ext.toggleSwitch.setDisable(true);
 
 			getChildren().add(ext.toggleSwitch);
-			System.out.println("Adding extension");
 		}
 
 		// listener that updates toggle switch selection and option property
