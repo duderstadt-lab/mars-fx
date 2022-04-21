@@ -140,7 +140,8 @@ public class MarsScriptEditor extends CodeArea {
 				})
 				.subscribe(change -> this.setStyleSpans(0, change));
 		
-		InnerController innerController = new InnerController(this);
+		//Disable autocompletion for now. Needs more work. Currently not always stable and limited suggestions to specific words.
+		//InnerController innerController = new InnerController(this);
 	}
 	
 	private boolean shouldSuggest(KeyEvent e) {
