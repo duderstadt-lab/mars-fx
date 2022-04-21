@@ -143,12 +143,12 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			return;
 		}
 		
-		if (!outputs.containsKey("imgsrc")) {
-			writeToLog("required output imgsrc is missing.");
-			return;
-		}
-		
 		if (lang.getLanguageName().equals("Conda Python 3")) {
+			if (!outputs.containsKey("imgsrc")) {
+				writeToLog("required output imgsrc is missing.");
+				return;
+			}
+			
 			imgsrc = (String) outputs.get("imgsrc");
 			loadImage();
 			return;

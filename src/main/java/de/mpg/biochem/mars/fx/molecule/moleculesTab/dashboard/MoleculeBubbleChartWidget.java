@@ -66,6 +66,11 @@ public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget impleme
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
+			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+		}
 	}
 	
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {

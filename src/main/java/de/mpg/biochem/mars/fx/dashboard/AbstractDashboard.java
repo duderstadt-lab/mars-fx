@@ -155,7 +155,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		languages.add("Conda Python 3");
 		widgetScriptLanguage.getItems().addAll(languages);
 		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
-			if (marsDashboardWidgetService != null)
+			if (marsDashboardWidgetService != null) 
 				marsDashboardWidgetService.setDefaultScriptingLanguage(n);
 		});
 		toolbar.getItems().add(widgetScriptLanguage);

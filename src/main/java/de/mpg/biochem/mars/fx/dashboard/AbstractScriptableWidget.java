@@ -119,9 +119,20 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	@Override
 	public void initialize() {
 		super.initialize();
-
-		lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
-
+		
+		//Here Python becomes Conda Python 3... So we have to implement a workaround
+		//lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
+		
+		String languageName = marsDashboardWidgetService.getDefaultScriptingLanguage();
+		
+		if (languageName.equals("Groovy")) {
+			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Groovy")).findFirst().get();
+		} else if (languageName.equals("Python")) {
+			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Python")).findFirst().get();
+		} else if (languageName.equals("Conda Python 3")) {
+			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Conda Python 3")).findFirst().get();
+		}
+		
 		// Script Pane
 		Tab scriptTab = new Tab();
 		scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
@@ -163,9 +174,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
 		getTabPane().getTabs().add(logTab);
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
-			loadImage();
-		}
+		if (lang.getLanguageName().equals("Conda Python 3")) loadImage();
 	}
 
 	protected Map<String, Object> runScript() {
@@ -234,15 +243,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected abstract void setScriptInputs(ScriptModule module);
 
 	protected void loadScript(String name) throws IOException {
-		if (lang.getLanguageName().equals("Groovy")) {
-			name += ".groovy";
-		} else if (lang.getLanguageName().equals("Python")) {
-			name += ".py";
-		}
-		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
-		String scriptExample = IOUtils.toString(is, "UTF-8");
-		is.close();
-		codeArea.replaceText(scriptExample);
+		loadScript(name, null);
 	}
 
 	protected void loadScript(String name, String inputParameters) throws IOException {
@@ -254,7 +255,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			name += "_conda.py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
-		String scriptTemplate = inputParameters + IOUtils.toString(is, "UTF-8");
+		String scriptTemplate = (inputParameters != null) ? 
+				inputParameters + IOUtils.toString(is, "UTF-8") : IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptTemplate);
 	}
