@@ -58,6 +58,11 @@ public class MarsTableBubbleChartWidget extends AbstractBubbleChartWidget implem
 	protected void setScriptInputs(ScriptModule module) {
 		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
+		
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
+			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+		}
 	}
 	
 	public void setTable(MarsTable table) {
