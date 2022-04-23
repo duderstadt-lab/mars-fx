@@ -34,10 +34,9 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
+import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
 import de.mpg.biochem.mars.table.MarsTable;
 import net.imagej.ops.Initializable;
-import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
-import de.mpg.biochem.mars.molecule.Molecule;
 
 @Plugin( type = MarsTableDashboardWidget.class, name = "MarsTableBeakerWidget" )
 public class MarsTableBeakerWidget extends AbstractBeakerWidget implements MarsTableDashboardWidget, SciJavaPlugin, Initializable {

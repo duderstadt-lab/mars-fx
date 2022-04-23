@@ -56,12 +56,13 @@
 package de.mpg.biochem.mars.fx.controls;
 
 import java.io.File;
-import javafx.event.ActionEvent;
-import javafx.scene.control.Tooltip;
-import javafx.stage.DirectoryChooser;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.Messages;
+import javafx.event.ActionEvent;
+import javafx.scene.control.Tooltip;
+import javafx.stage.DirectoryChooser;
 
 /**
  * Button that opens a directory chooser to select a local directory for a URL in markdown.

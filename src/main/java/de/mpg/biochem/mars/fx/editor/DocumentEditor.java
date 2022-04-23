@@ -26,16 +26,30 @@
  */
 package de.mpg.biochem.mars.fx.editor;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
-import javafx.animation.RotateTransition;
+import org.fxmisc.undo.UndoManager;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+
+import com.vladsch.flexmark.parser.Parser;
+
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
+import de.mpg.biochem.mars.fx.molecule.CommentsTab;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
+import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.MarsDocument;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -47,55 +61,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
-import javafx.scene.text.Text;
-import org.fxmisc.undo.UndoManager;
-import org.scijava.Context;
-import org.scijava.plugin.Parameter;
-
-import com.vladsch.flexmark.parser.Parser;
-
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
-import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
-import de.mpg.biochem.mars.fx.molecule.CommentsTab;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
-import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-
-import javafx.event.Event;
-import javafx.event.EventHandler;
-
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
-import de.mpg.biochem.mars.fx.event.MetadataEvent;
-import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.DefaultJsonConverter;
-import de.mpg.biochem.mars.util.MarsDocument;
-import de.mpg.biochem.mars.util.MarsUtil;
-
-import java.util.Set;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * Editor for MoleculeArchive comments

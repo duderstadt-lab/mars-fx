@@ -55,11 +55,20 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
-import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCombination.*;
+import static javafx.scene.input.KeyCode.BACK_SPACE;
+import static javafx.scene.input.KeyCode.D;
+import static javafx.scene.input.KeyCode.DOWN;
+import static javafx.scene.input.KeyCode.ENTER;
+import static javafx.scene.input.KeyCode.F;
+import static javafx.scene.input.KeyCode.TAB;
+import static javafx.scene.input.KeyCode.UP;
+import static javafx.scene.input.KeyCombination.ALT_DOWN;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
+import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
 import static org.fxmisc.wellbehaved.event.InputMap.consume;
 import static org.fxmisc.wellbehaved.event.InputMap.sequence;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,26 +76,16 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.IndexRange;
-import javafx.scene.input.KeyEvent;
+
 import org.apache.commons.lang3.StringUtils;
 import org.fxmisc.richtext.MultiChangeBuilder;
 import org.fxmisc.richtext.model.TwoDimensional.Bias;
 import org.fxmisc.wellbehaved.event.Nodes;
 
-import de.mpg.biochem.mars.fx.dialogs.ImageDialog;
-import de.mpg.biochem.mars.fx.dialogs.LinkDialog;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.util.Utils;
-
 import com.vladsch.flexmark.ast.AutoLink;
 import com.vladsch.flexmark.ast.BlockQuote;
 import com.vladsch.flexmark.ast.BulletListItem;
 import com.vladsch.flexmark.ast.Code;
-import com.vladsch.flexmark.util.ast.DelimitedNode;
 import com.vladsch.flexmark.ast.Emphasis;
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.ast.Heading;
@@ -98,13 +97,24 @@ import com.vladsch.flexmark.ast.LinkRef;
 import com.vladsch.flexmark.ast.ListBlock;
 import com.vladsch.flexmark.ast.ListItem;
 import com.vladsch.flexmark.ast.MailLink;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.ast.NodeVisitor;
-import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.ast.OrderedListItem;
 import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
+import com.vladsch.flexmark.util.ast.DelimitedNode;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
+
+import de.mpg.biochem.mars.fx.dialogs.ImageDialog;
+import de.mpg.biochem.mars.fx.dialogs.LinkDialog;
+import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.util.Utils;
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyEvent;
 
 /**
  * Smart Markdown text edit methods.

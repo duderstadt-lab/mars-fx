@@ -3,19 +3,15 @@ package de.mpg.biochem.mars.fx.preview;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.vladsch.flexmark.ast.Image;
 import com.vladsch.flexmark.html.HtmlWriter;
 import com.vladsch.flexmark.html.renderer.NodeRenderer;
 import com.vladsch.flexmark.html.renderer.NodeRendererContext;
-import com.vladsch.flexmark.html.renderer.NodeRendererFactory;
 import com.vladsch.flexmark.html.renderer.NodeRenderingHandler;
 import com.vladsch.flexmark.util.data.DataHolder;
+import com.vladsch.flexmark.util.sequence.BasedSequence;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
-import de.mpg.biochem.mars.util.MarsDocument;
-import com.vladsch.flexmark.util.sequence.BasedSequence;
 
 public class MarsEmbbededImageRenderer implements NodeRenderer {
 	private DocumentEditor documentEditor;

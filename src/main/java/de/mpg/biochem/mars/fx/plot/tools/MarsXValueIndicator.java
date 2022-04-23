@@ -32,13 +32,9 @@ import de.gsi.chart.axes.Axis;
 import de.gsi.chart.plugins.XValueIndicator;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
-import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMetadataPositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMoleculePositionEvent;
 import de.mpg.biochem.mars.util.MarsPosition;
-import de.mpg.biochem.mars.util.MarsRegion;
-import javafx.event.EventHandler;
 import javafx.scene.input.MouseEvent;
 
 /**

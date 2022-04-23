@@ -28,14 +28,8 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import java.io.IOException;
-
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLIPBOARD;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-
-import java.net.URL;
-import java.util.ArrayList;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 
 import org.scijava.Context;
 
@@ -47,30 +41,18 @@ import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeRegionOfInterestTable;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeGeneralTabController;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculePositionOfInterestTable;
 import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata> implements MetadataSubPane {

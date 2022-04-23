@@ -28,6 +28,8 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
+import java.util.function.Supplier;
+
 import bdv.util.AbstractSource;
 import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileViews;
@@ -38,8 +40,6 @@ import net.imglib2.cache.volatiles.CacheHints;
 import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.NumericType;
-
-import java.util.function.Supplier;
 
 public class MarsSingleTimePointN5VolatileSource< T extends NumericType< T >, V extends Volatile< T > & NumericType< V > > extends AbstractSource< V > {
 

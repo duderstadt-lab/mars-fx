@@ -64,26 +64,55 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 
-import javafx.application.Platform;
-import com.vladsch.flexmark.ast.*;
+import org.fxmisc.richtext.model.Paragraph;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.fxmisc.richtext.model.TwoDimensional.Bias;
+
+import com.vladsch.flexmark.ast.AutoLink;
+import com.vladsch.flexmark.ast.BlockQuote;
+import com.vladsch.flexmark.ast.BulletList;
+import com.vladsch.flexmark.ast.BulletListItem;
+import com.vladsch.flexmark.ast.Code;
+import com.vladsch.flexmark.ast.Emphasis;
+import com.vladsch.flexmark.ast.FencedCodeBlock;
+import com.vladsch.flexmark.ast.HardLineBreak;
+import com.vladsch.flexmark.ast.Heading;
+import com.vladsch.flexmark.ast.HtmlBlock;
+import com.vladsch.flexmark.ast.HtmlBlockBase;
+import com.vladsch.flexmark.ast.HtmlCommentBlock;
+import com.vladsch.flexmark.ast.HtmlEntity;
+import com.vladsch.flexmark.ast.HtmlInline;
+import com.vladsch.flexmark.ast.HtmlInlineBase;
+import com.vladsch.flexmark.ast.HtmlInlineComment;
+import com.vladsch.flexmark.ast.HtmlInnerBlock;
+import com.vladsch.flexmark.ast.HtmlInnerBlockComment;
+import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ast.ImageRef;
+import com.vladsch.flexmark.ast.IndentedCodeBlock;
+import com.vladsch.flexmark.ast.Link;
+import com.vladsch.flexmark.ast.LinkRef;
+import com.vladsch.flexmark.ast.ListItem;
+import com.vladsch.flexmark.ast.MailLink;
+import com.vladsch.flexmark.ast.OrderedList;
+import com.vladsch.flexmark.ast.OrderedListItem;
+import com.vladsch.flexmark.ast.Reference;
+import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ext.gfm.strikethrough.Strikethrough;
 import com.vladsch.flexmark.ext.tables.TableBlock;
 import com.vladsch.flexmark.ext.tables.TableBody;
 import com.vladsch.flexmark.ext.tables.TableCell;
 import com.vladsch.flexmark.ext.tables.TableHead;
 import com.vladsch.flexmark.ext.tables.TableRow;
-import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.VisitHandler;
 import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
-import org.fxmisc.richtext.model.Paragraph;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
-import org.fxmisc.richtext.model.TwoDimensional.Bias;
 
 import de.mpg.biochem.mars.fx.addons.MarkdownSyntaxHighlighterAddon;
 import de.mpg.biochem.mars.fx.syntaxhighlighter.SyntaxHighlighter;
 import de.mpg.biochem.mars.fx.util.Range;
+import javafx.application.Platform;
 
 /**
  * Markdown syntax highlighter.

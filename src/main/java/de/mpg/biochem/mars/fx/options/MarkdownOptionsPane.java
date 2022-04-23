@@ -55,13 +55,12 @@
 
 package de.mpg.biochem.mars.fx.options;
 
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.text.Font;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.options.Options.RendererType;
-
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.text.Font;
 
 /**
  * Markdown options pane

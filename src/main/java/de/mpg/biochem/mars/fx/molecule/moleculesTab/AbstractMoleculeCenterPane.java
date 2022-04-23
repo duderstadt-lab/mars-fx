@@ -28,8 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,12 +35,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.scijava.Context;
-import org.scijava.plugin.Parameter;
-
-import com.fasterxml.jackson.core.JsonToken;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
@@ -50,16 +44,11 @@ import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
-import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.util.MarsRegion;
-import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;

@@ -64,25 +64,23 @@ import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.NotNull;
 
-import de.mpg.biochem.mars.fx.addons.PreviewRendererAddon;
-import de.mpg.biochem.mars.fx.editor.DocumentEditor;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.util.Range;
-import de.mpg.biochem.mars.util.MarsDocument;
-
 import com.vladsch.flexmark.ast.Heading;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.ast.NodeVisitor;
-import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.html.AttributeProvider;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.html.IndependentAttributeProviderFactory;
 import com.vladsch.flexmark.html.renderer.AttributablePart;
 import com.vladsch.flexmark.html.renderer.LinkResolverContext;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.html.Attributes;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.html.MutableAttributes;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
+
+import de.mpg.biochem.mars.fx.addons.PreviewRendererAddon;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
+import de.mpg.biochem.mars.fx.util.Range;
 
 /**
  * flexmark-java preview.

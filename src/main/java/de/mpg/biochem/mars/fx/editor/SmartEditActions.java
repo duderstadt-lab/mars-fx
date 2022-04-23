@@ -55,10 +55,10 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
-import javafx.scene.control.ContextMenu;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import javafx.scene.control.ContextMenu;
 
 /**
  * Smart Markdown text edit actions.

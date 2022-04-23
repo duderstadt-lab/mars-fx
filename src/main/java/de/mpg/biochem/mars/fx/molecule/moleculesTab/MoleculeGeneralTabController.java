@@ -28,23 +28,10 @@
  */
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-
-import java.util.ArrayList;
-
-import com.jfoenix.controls.JFXChipView;
-import com.jfoenix.controls.JFXDefaultChip;
-import com.jfoenix.controls.JFXTextArea;
-import com.jfoenix.controls.JFXTextField;
-import com.jfoenix.skins.JFXChipViewSkin;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXChip;
+import com.jfoenix.controls.JFXChipView;
+import com.jfoenix.controls.JFXTextField;
 
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.FlowPane;
-
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
@@ -57,28 +44,25 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.text.TextFlow;
-import javafx.scene.text.Text;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
-
-import javafx.scene.control.TextArea;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 
 public class MoleculeGeneralTabController implements MoleculeSubPane {
 	

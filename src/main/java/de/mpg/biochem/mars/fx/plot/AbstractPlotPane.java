@@ -28,40 +28,17 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisLabelFormatter;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.Panner;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.plugins.DataPointTooltip;
-
-import javafx.scene.Cursor;
-import javafx.scene.Node;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.Label;
-import javafx.scene.control.Separator;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.ButtonBase;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_H;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CIRCLE_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.EXPAND;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.HAND_PAPER_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.IMAGE;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,6 +46,15 @@ import java.util.ArrayList;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import javax.imageio.ImageIO;
+
+import org.controlsfx.control.PopOver;
+import org.controlsfx.control.ToggleSwitch;
+
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.plugins.Panner;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
@@ -76,37 +62,44 @@ import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-
-import org.apache.commons.math3.util.MathArrays.Position;
-import org.controlsfx.control.PopOver;
-import org.controlsfx.control.ToggleSwitch;
-import org.controlsfx.control.PopOver.ArrowLocation;
-
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.beans.value.ChangeListener;
+import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.ToolBar;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.DragEvent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
-
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-
-import javafx.scene.image.WritableImage;
-import javafx.scene.SnapshotParameters;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
-import javax.imageio.ImageIO;
-import javafx.embed.swing.SwingFXUtils;
-
-import javafx.scene.control.TextField;
-
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
 
 public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord implements PlotPane {
 	

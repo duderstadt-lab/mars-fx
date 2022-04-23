@@ -28,39 +28,36 @@
  */
 package de.mpg.biochem.mars.fx.util;
 
+import java.time.Instant;
+
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.animation.TranslateTransition;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Group;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.effect.BlurType;
+import javafx.scene.effect.DropShadow;
+import javafx.scene.effect.InnerShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.util.Duration;
-
-import javafx.scene.control.ProgressBar;
-import java.time.Instant;
-
-import javafx.animation.Timeline;
-import javafx.scene.text.Text;
-import javafx.animation.KeyFrame;
-import javafx.event.EventHandler;
-import javafx.event.ActionEvent;
-
-import javafx.scene.effect.InnerShadow;
-import javafx.scene.effect.BlurType;
-import javafx.scene.paint.RadialGradient;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.Stop;
-
-import javafx.scene.effect.DropShadow;
 import javafx.scene.layout.VBox;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.CycleMethod;
+import javafx.scene.paint.RadialGradient;
+import javafx.scene.paint.Stop;
+import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.util.Duration;
 
 public class MarsAnimation extends BorderPane {
 	

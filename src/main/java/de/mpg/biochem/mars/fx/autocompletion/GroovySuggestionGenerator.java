@@ -28,14 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.autocompletion;
 
-import de.mpg.biochem.mars.molecule.AbstractMolecule;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.SingleMolecule;
-import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
-import de.mpg.biochem.mars.table.MarsTable;
-import javafx.scene.control.IndexRange;
-
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
@@ -51,6 +43,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang.ClassUtils;
+
+import de.mpg.biochem.mars.molecule.SingleMolecule;
+import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
+import de.mpg.biochem.mars.table.MarsTable;
+import javafx.scene.control.IndexRange;
 
 public class GroovySuggestionGenerator {
 	protected static HashMap<Class, List<CompletionItem>> autoCompletionClasses;

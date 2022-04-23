@@ -28,20 +28,9 @@
  */
 package de.mpg.biochem.mars.fx.options;
 
-import java.util.ArrayList;
-
 import com.jfoenix.controls.JFXToggleButton;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
 
 public class MarsOptionsPane {

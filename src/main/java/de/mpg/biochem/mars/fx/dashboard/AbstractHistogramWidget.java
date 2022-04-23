@@ -28,48 +28,23 @@
  */
 package de.mpg.biochem.mars.fx.dashboard;
 
-import org.scijava.plugin.Plugin;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.spi.Histogram;
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-import de.gsi.chart.renderer.ErrorStyle;
-
-import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
-import org.scijava.plugin.Parameter;
-import java.util.stream.DoubleStream;
-
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractHistogramWidget extends AbstractScriptableWidget

@@ -35,11 +35,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
-
 import java.util.Set;
 
 import org.scijava.Context;
@@ -47,6 +42,7 @@ import org.scijava.Context;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsUtil;
 

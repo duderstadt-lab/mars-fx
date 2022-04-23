@@ -30,7 +30,6 @@ package de.mpg.biochem.mars.fx.bdv;
 
 import javax.swing.JPanel;
 
-import org.scijava.command.Command;
 import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;

@@ -29,7 +29,6 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.function.Consumer;
 
 import javax.swing.SwingUtilities;
@@ -38,7 +37,6 @@ import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
 import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5Metadata;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
@@ -56,20 +54,14 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.GridPane;
-
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
-import net.imglib2.realtransform.AffineTransform3D;
 
 public class BdvSourceOptionsPane extends VBox {
 	private TextField m00, m01, m02, m10, m11, m12, cField, tField, pathField;

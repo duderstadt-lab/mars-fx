@@ -28,7 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,26 +38,16 @@ import com.jfoenix.controls.JFXColorPicker;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
-import javafx.scene.paint.Color;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
-import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -68,8 +57,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 
 public abstract class AbstractRegionOfInterestTable {
     

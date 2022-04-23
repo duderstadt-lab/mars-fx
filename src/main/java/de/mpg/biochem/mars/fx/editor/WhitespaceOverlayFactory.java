@@ -58,15 +58,16 @@ package de.mpg.biochem.mars.fx.editor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import org.fxmisc.richtext.model.Paragraph;
+
+import de.mpg.biochem.mars.fx.editor.ParagraphOverlayGraphicFactory.OverlayFactory;
+import de.mpg.biochem.mars.fx.util.Range;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.text.Text;
-import org.fxmisc.richtext.model.Paragraph;
-
-import de.mpg.biochem.mars.fx.editor.ParagraphOverlayGraphicFactory.OverlayFactory;
-import de.mpg.biochem.mars.fx.util.Range;
 
 /**
  * Shows whitespace characters.

@@ -28,23 +28,19 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
+import java.util.function.Supplier;
+
 import bdv.util.AbstractSource;
 import bdv.util.volatiles.SharedQueue;
 import bdv.util.volatiles.VolatileTypeMatcher;
 import mpicbg.spim.data.sequence.VoxelDimensions;
-import net.imagej.Dataset;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Volatile;
+import net.imglib2.img.Img;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
-import net.imglib2.img.Img;
-
-import java.util.function.Supplier;
 
 public class MarsN5Source< T extends NumericType< T > > extends AbstractSource< T >
 {

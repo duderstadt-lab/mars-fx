@@ -31,8 +31,6 @@ package de.mpg.biochem.mars.fx.table;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
 
 import java.awt.Rectangle;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -42,7 +40,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import org.scijava.Context;
@@ -55,6 +52,20 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
+import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
+import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
+import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
+import de.mpg.biochem.mars.fx.util.Action;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.IJStage;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.table.MarsTableService;
+import de.mpg.biochem.mars.table.MarsTableWindow;
+import ij.WindowManager;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -62,31 +73,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.embed.swing.JFXPanel;
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
-//import de.mpg.biochem.mars.fx.editor.CommentPane;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
-import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
-import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
-import de.mpg.biochem.mars.fx.molecule.MoleculeArchiveTab;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
-import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
-import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
-import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.fx.util.IJStage;
-import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.table.*;
-import ij.WindowManager;
-import ij.io.SaveDialog;
 
 public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements MarsTableWindow {
 

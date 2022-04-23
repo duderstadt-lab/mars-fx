@@ -55,7 +55,13 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
-import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.*;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.HARD_LINE_BREAK_BACKSLASH;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.HARD_LINE_BREAK_SPACES;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.LINE_BREAK;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.PROTECTED_SPACE;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.PROTECTED_TAB;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.SOFT_LINE_BREAK;
+import static de.mpg.biochem.mars.fx.addons.SmartFormatAddon.SPECIAL_INDENT;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,27 +71,27 @@ import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 
-import javafx.scene.control.IndexRange;
-import javafx.scene.input.KeyEvent;
 import org.fxmisc.richtext.MultiChangeBuilder;
 
-import de.mpg.biochem.mars.fx.addons.SmartFormatAddon;
-import de.mpg.biochem.mars.fx.options.Options;
-
-import com.vladsch.flexmark.util.ast.Block;
 import com.vladsch.flexmark.ast.BlockQuote;
-import com.vladsch.flexmark.util.ast.DelimitedNode;
 import com.vladsch.flexmark.ast.HardLineBreak;
 import com.vladsch.flexmark.ast.HtmlBlock;
 import com.vladsch.flexmark.ast.ListItem;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.ast.Paragraph;
 import com.vladsch.flexmark.ast.SoftLineBreak;
 import com.vladsch.flexmark.ast.Text;
+import com.vladsch.flexmark.util.ast.Block;
+import com.vladsch.flexmark.util.ast.DelimitedNode;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.misc.Pair;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
-import com.vladsch.flexmark.util.ast.Visitor;
+
+import de.mpg.biochem.mars.fx.addons.SmartFormatAddon;
+import de.mpg.biochem.mars.fx.options.Options;
+import javafx.scene.control.IndexRange;
+import javafx.scene.input.KeyEvent;
 
 /**
  * Smart Markdown text formatting methods.

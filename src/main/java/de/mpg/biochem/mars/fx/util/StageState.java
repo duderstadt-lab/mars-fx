@@ -56,6 +56,7 @@
 package de.mpg.biochem.mars.fx.util;
 
 import java.util.prefs.Preferences;
+
 import javafx.application.Platform;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;

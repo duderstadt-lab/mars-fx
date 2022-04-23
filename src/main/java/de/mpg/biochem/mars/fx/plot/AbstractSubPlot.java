@@ -41,7 +41,6 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.AbstractValueIndicator;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
-import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;

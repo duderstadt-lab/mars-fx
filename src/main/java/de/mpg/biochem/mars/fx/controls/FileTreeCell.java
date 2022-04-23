@@ -56,12 +56,13 @@
 package de.mpg.biochem.mars.fx.controls;
 
 import java.io.File;
-import javafx.scene.Node;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
+
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.util.Utils;
+import javafx.scene.Node;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
 
 /**
  * The {@link TreeCell} type used with the {@link FileTreeView} control.

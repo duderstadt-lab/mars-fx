@@ -31,8 +31,6 @@ package de.mpg.biochem.mars.fx.dashboard;
 import java.util.ArrayList;
 import java.util.Set;
 
-import com.jfoenix.controls.JFXMasonryPane;
-
 import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;

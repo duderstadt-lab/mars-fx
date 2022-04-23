@@ -28,15 +28,14 @@
  */
 package de.mpg.biochem.mars.fx.dialogs;
 
+import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.text.Text;
 import javafx.stage.Modality;
 import javafx.stage.Window;
-
-import javafx.scene.text.Text;
-import javafx.scene.layout.AnchorPane;
-import javafx.geometry.Insets;
 
 /**
  * Rover error dialog.

@@ -28,29 +28,16 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
-import bdv.viewer.DisplayMode;
-import bdv.viewer.Interpolation;
-import bdv.viewer.ViewerState;
-import ij.IJ;
-import ij.ImagePlus;
-import ij.gui.GenericDialog;
-
 import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
-import net.imagej.ImgPlus;
+import bdv.viewer.ViewerState;
+import ij.gui.GenericDialog;
 import net.miginfocom.swing.MigLayout;
-
-import static bdv.viewer.Interpolation.NEARESTNEIGHBOR;
-import static bdv.viewer.Interpolation.NLINEAR;
-import static bdv.viewer.ViewerStateChange.DISPLAY_MODE_CHANGED;
-import static bdv.viewer.ViewerStateChange.INTERPOLATION_CHANGED;
 
 public class NavigationPanel extends JPanel
 {

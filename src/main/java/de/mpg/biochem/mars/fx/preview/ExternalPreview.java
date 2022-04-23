@@ -55,16 +55,15 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
-import java.io.File;
 import java.util.Iterator;
 import java.util.ServiceLoader;
 
-import javafx.scene.control.IndexRange;
-import javafx.scene.control.Label;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.addons.PreviewViewAddon;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import javafx.scene.control.IndexRange;
+import javafx.scene.control.Label;
 
 /**
  * External preview (provided by addon).

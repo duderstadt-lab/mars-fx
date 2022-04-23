@@ -28,37 +28,28 @@
  */
 package de.mpg.biochem.mars.fx.editor;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
-import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.reactfx.Subscription;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.value.ObservableValue;
+import de.mpg.biochem.mars.fx.autocompletion.CompletionItem;
+import de.mpg.biochem.mars.fx.autocompletion.GroovySuggestionGenerator;
+import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import impl.org.controlsfx.skin.AutoCompletePopup;
+import impl.org.controlsfx.skin.AutoCompletePopupSkin;
 import javafx.concurrent.Task;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Skin;
@@ -66,40 +57,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Region;
-import javafx.stage.PopupWindow;
-import de.mpg.biochem.mars.fx.autocompletion.CompletionItem;
-import de.mpg.biochem.mars.fx.autocompletion.GroovySuggestionGenerator;
-import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import impl.org.controlsfx.skin.AutoCompletePopup;
-import impl.org.controlsfx.skin.AutoCompletePopupSkin;
-
-import javafx.application.Application;
-import javafx.geometry.Bounds;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Popup;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
-
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.InlineCssTextArea;
-import org.reactfx.EventStream;
-import org.reactfx.EventStreams;
-import org.reactfx.Subscription;
-import org.reactfx.value.Var;
-
-import static org.reactfx.EventStreams.nonNullValuesOf;
-
-import java.util.Optional;
 
 public class MarsScriptEditor extends CodeArea {
 	

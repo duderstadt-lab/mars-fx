@@ -28,31 +28,15 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-
-import java.util.ArrayList;
-
-import com.jfoenix.controls.JFXChipView;
-import com.jfoenix.controls.JFXDefaultChip;
-import com.jfoenix.controls.JFXTextArea;
-import com.jfoenix.controls.JFXTextField;
-import com.jfoenix.skins.JFXChipViewSkin;
 import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXChip;
+import com.jfoenix.controls.JFXChipView;
+import com.jfoenix.controls.JFXTextField;
 
-import javafx.scene.control.TextArea;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.ClipboardContent;
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -63,16 +47,16 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
-import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 

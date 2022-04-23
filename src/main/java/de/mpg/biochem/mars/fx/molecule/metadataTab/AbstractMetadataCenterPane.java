@@ -28,7 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import java.io.IOException;
 import java.util.HashSet;
 
 import org.scijava.Context;
@@ -41,10 +40,8 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard.MarsMetadataDashboard;
-import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;

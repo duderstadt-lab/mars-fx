@@ -45,7 +45,6 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.Axis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.MouseEventsHelper;
 import de.gsi.chart.plugins.Panner;

@@ -29,14 +29,13 @@
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
-import java.util.Set;
 
 import de.mpg.biochem.mars.fx.plot.AbstractPlotPane.PlotOptionsPane;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import javafx.beans.property.BooleanProperty;
 import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.beans.property.BooleanProperty;
 
 public interface PlotPane extends JsonConvertibleRecord {
 	public StyleSheetUpdater getStyleSheetUpdater();

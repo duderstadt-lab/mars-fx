@@ -54,12 +54,14 @@
  */
 package de.mpg.biochem.mars.fx.editor;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 
+import org.fxmisc.undo.UndoManager;
+
+import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
+import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -72,24 +74,9 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.IndexRange;
-import javafx.scene.control.Menu;
-import javafx.scene.control.Alert.AlertType;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.Tooltip;
-import javafx.scene.text.Text;
-import org.fxmisc.undo.UndoManager;
-
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Type;
-import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * Editor for MoleculeArchive comments

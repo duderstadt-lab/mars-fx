@@ -32,7 +32,8 @@ import org.scijava.Priority;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
-import de.mpg.biochem.mars.table.*;
+
+import de.mpg.biochem.mars.table.MarsTable;
 
 /**
  * Display for {@link MarsTable}. This ensures that uiService.show() for a MarsTable will automatically be detected and 

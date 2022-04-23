@@ -28,49 +28,10 @@
  */
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TAG;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
-import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.axes.spi.CategoryAxis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.utils.DecimalStringConverter;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.testdata.spi.RandomDataGenerator;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.Tab;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Text;
-import javafx.util.StringConverter;
 import java.text.DecimalFormat;
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -78,6 +39,26 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.AxisLabelOverlapPolicy;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.util.StringConverter;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = MoleculeArchiveDashboardWidget.class, name = "TagFrequencyWidget" )

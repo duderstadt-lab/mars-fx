@@ -55,6 +55,7 @@
 
 package de.mpg.biochem.mars.fx.util;
 
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -69,11 +70,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
-
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TAG;
-
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.TagFrequencyWidget;
 
 /**
  * Action utilities

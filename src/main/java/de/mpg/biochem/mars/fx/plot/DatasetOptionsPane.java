@@ -28,42 +28,28 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 
-import org.apache.batik.bridge.ViewBox;
 import org.controlsfx.control.ToggleSwitch;
 
-import static java.util.stream.Collectors.toList;
+import com.jfoenix.controls.JFXCheckBox;
+import com.jfoenix.controls.JFXColorPicker;
+import com.jfoenix.controls.JFXTextField;
 
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.RowConstraints;
+import de.gsi.chart.XYChart;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.table.MarsTable;
-import javafx.animation.Animation;
-import javafx.animation.Interpolator;
-import javafx.animation.RotateTransition;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.ChartPlugin;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -75,21 +61,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.text.Text;
-
-import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-
 //import org.tbee.javafx.scene.layout.fxml.MigPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
-
-import com.jfoenix.controls.JFXCheckBox;
-import com.jfoenix.controls.JFXColorPicker;
-import com.jfoenix.controls.JFXTextField;
+import javafx.scene.text.Text;
 
 public class DatasetOptionsPane extends VBox {
 	private TextField titleField, xNameField, yNameField, yMinField, yMaxField;

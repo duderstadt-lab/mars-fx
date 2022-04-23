@@ -28,9 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.dialogs;
 
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,21 +35,13 @@ import org.controlsfx.control.ToggleSwitch;
 
 import com.jfoenix.controls.JFXChipView;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.stage.Window;
-
-import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.VBox;
-
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 
 /**
  * Property selection dialog.

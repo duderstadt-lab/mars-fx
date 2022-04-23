@@ -28,24 +28,20 @@
  */
 package de.mpg.biochem.mars.fx.object;
 
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
 import org.scijava.Context;
-
+import org.scijava.Priority;
 import org.scijava.display.Display;
-import org.scijava.display.DisplayService;
-import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.Priority;
 
-import net.imagej.display.WindowService;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.object.ObjectArchive;
 
 

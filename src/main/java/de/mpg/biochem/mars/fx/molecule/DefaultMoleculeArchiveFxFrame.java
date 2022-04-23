@@ -29,15 +29,11 @@
 package de.mpg.biochem.mars.fx.molecule;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.scijava.Context;
 
 import com.fasterxml.jackson.core.JsonParser;
 
-import de.mpg.biochem.mars.fx.bdv.LocationCard;
-import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;

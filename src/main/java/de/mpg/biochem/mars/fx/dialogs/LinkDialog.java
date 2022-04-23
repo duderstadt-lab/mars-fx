@@ -56,6 +56,12 @@
 package de.mpg.biochem.mars.fx.dialogs;
 
 import java.nio.file.Path;
+
+import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.controls.BrowseDirectoryButton;
+import de.mpg.biochem.mars.fx.controls.BrowseFileButton;
+import de.mpg.biochem.mars.fx.controls.EscapeTextField;
+import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -64,16 +70,9 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.stage.Window;
-import de.mpg.biochem.mars.fx.Messages;
-import de.mpg.biochem.mars.fx.controls.BrowseDirectoryButton;
-import de.mpg.biochem.mars.fx.controls.BrowseFileButton;
-import de.mpg.biochem.mars.fx.controls.EscapeTextField;
-import de.mpg.biochem.mars.fx.util.Utils;
-
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.Window;
 
 /**
  * Dialog to enter a markdown link.

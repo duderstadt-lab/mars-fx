@@ -30,7 +30,6 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.plot.DefaultMoleculePlotPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 

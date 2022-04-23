@@ -30,9 +30,6 @@ package de.mpg.biochem.mars.fx.util;
 
 import java.awt.Frame;
 import java.awt.HeadlessException;
-import java.awt.Window;
-
-import javax.swing.SwingUtilities;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;

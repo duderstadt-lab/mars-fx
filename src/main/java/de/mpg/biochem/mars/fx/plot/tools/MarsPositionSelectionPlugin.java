@@ -31,21 +31,19 @@ package de.mpg.biochem.mars.fx.plot.tools;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import de.gsi.chart.plugins.*;
+import de.gsi.chart.Chart;
+import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.dataset.DataSet;
 import de.gsi.chart.plugins.ChartPlugin;
+import de.gsi.chart.plugins.MouseEventsHelper;
 import de.gsi.chart.ui.HiddenSidesPane;
+import de.gsi.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMoleculePositionEvent;
-import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
-import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker.DataPoint;
 import de.mpg.biochem.mars.util.MarsPosition;
-import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -53,21 +51,13 @@ import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
-import javafx.scene.Cursor;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.Region;
-import javafx.scene.shape.Rectangle;
-import de.gsi.chart.XYChart;
-
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-
-import de.gsi.chart.Chart;
-
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.KeyCode;
 
 
 /**

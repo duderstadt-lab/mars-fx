@@ -36,11 +36,9 @@ import java.util.List;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.AxisTransform;
 import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
 import de.gsi.dataset.DataSet;
-
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;

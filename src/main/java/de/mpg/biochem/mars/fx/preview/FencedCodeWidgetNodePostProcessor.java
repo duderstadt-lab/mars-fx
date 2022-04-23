@@ -1,17 +1,17 @@
 package de.mpg.biochem.mars.fx.preview;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
+
+import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.block.NodePostProcessor;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeTracker;
 import com.vladsch.flexmark.util.data.DataHolder;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jetbrains.annotations.NotNull;
-import com.vladsch.flexmark.ast.FencedCodeBlock;
 
 public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 	private DocumentEditor documentEditor;

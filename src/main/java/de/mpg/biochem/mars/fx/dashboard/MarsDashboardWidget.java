@@ -28,16 +28,10 @@
  */
 package de.mpg.biochem.mars.fx.dashboard;
 
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.scene.Node;
-
 import org.scijava.command.Command;
-import java.util.concurrent.RunnableFuture;
+
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import javafx.scene.Node;
 import net.imagej.ops.Initializable;
 
 public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {

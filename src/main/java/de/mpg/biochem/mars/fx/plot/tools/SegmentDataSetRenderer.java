@@ -37,32 +37,26 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.renderer.spi.AbstractErrorDataSetRendererParameter;
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.XYChartCss;
 import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.marker.DefaultMarker;
 import de.gsi.chart.marker.Marker;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.renderer.spi.utils.BezierCurve;
-import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.chart.renderer.spi.AbstractErrorDataSetRendererParameter;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError.ErrorType;
 import de.gsi.dataset.spi.utils.Triple;
+import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.FillRule;
-
-import javafx.scene.control.Label;
 
 /**
  * Renders data points with error bars and/or error surfaces 

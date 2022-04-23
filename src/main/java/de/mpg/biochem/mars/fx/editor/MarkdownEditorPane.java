@@ -55,21 +55,47 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
-import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCombination.*;
+import static javafx.scene.input.KeyCode.DIGIT0;
+import static javafx.scene.input.KeyCode.I;
+import static javafx.scene.input.KeyCode.MINUS;
+import static javafx.scene.input.KeyCode.PLUS;
+import static javafx.scene.input.KeyCode.W;
+import static javafx.scene.input.KeyCombination.ALT_DOWN;
+import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
-import static org.fxmisc.wellbehaved.event.InputMap.*;
+import static org.fxmisc.wellbehaved.event.InputMap.consume;
+import static org.fxmisc.wellbehaved.event.InputMap.sequence;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.Caret.CaretVisibility;
+import org.fxmisc.richtext.CaretNode;
+import org.fxmisc.richtext.CharacterHit;
+import org.fxmisc.undo.UndoManager;
+import org.fxmisc.wellbehaved.event.Nodes;
+
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+
+import de.mpg.biochem.mars.fx.controls.BottomSlidePane;
+import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
+import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
+import de.mpg.biochem.mars.fx.options.Options;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringProperty;
@@ -86,25 +112,6 @@ import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.misc.Extension;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.Caret.CaretVisibility;
-import org.fxmisc.richtext.CaretNode;
-import org.fxmisc.richtext.CharacterHit;
-import org.fxmisc.undo.UndoManager;
-import org.fxmisc.wellbehaved.event.Nodes;
-
-import de.mpg.biochem.mars.fx.controls.BottomSlidePane;
-import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
-import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
-import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import org.apache.commons.io.FileUtils;
 
 /**
  * Markdown editor pane.

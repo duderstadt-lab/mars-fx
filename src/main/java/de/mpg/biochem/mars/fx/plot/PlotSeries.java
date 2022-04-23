@@ -28,29 +28,22 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Set;
 
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.table.MarsTable;
-import de.mpg.biochem.mars.util.MarsUtil;
 import de.gsi.chart.XYChart;
+import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
 import javafx.scene.paint.Color;
-
-import javafx.util.Callback;
-import javafx.scene.control.ListView;
-import javafx.scene.control.ListCell;
 import javafx.scene.shape.Line;
-import javafx.scene.control.ContentDisplay;
-
-import com.fasterxml.jackson.core.JsonParser;
+import javafx.util.Callback;
 
 public class PlotSeries extends AbstractJsonConvertibleRecord {
 		private ComboBox<String> yColumnField, xColumnField, typeField;

@@ -33,7 +33,7 @@ import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.molecule.DnaMoleculeArchive;
 
 /**
  * Display for {@link DnaMoleculeArchive}. This ensures that uiService.show() for a DnaMoleculeArchive will automatically be detected and 

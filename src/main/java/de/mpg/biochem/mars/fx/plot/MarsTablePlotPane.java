@@ -28,14 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-
 import static java.util.stream.Collectors.toList;
 
 import java.io.BufferedInputStream;
@@ -43,6 +35,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
 
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsUtil;

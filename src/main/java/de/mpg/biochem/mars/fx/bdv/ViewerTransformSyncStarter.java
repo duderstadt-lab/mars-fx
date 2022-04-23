@@ -28,15 +28,16 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
-import bdv.util.BdvHandle;
-import bdv.viewer.TimePointListener;
-import net.imglib2.RealPoint;
-import net.imglib2.realtransform.AffineTransform3D;
-import bdv.viewer.TransformListener;//net.imglib2.ui.TransformListener;
+import static de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper.MatrixApproxEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import static de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper.MatrixApproxEquals;
+import bdv.util.BdvHandle;
+import bdv.viewer.TimePointListener;
+import bdv.viewer.TransformListener;//net.imglib2.ui.TransformListener;
+import net.imglib2.RealPoint;
+import net.imglib2.realtransform.AffineTransform3D;
 
 /**
  * BigDataViewer Playground Action --

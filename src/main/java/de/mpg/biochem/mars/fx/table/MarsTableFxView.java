@@ -28,16 +28,16 @@
  */
 package de.mpg.biochem.mars.fx.table;
 
-import org.scijava.plugin.Parameter;
 import org.scijava.Context;
 import org.scijava.Priority;
 import org.scijava.display.Display;
+import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
 
-import de.mpg.biochem.mars.table.*;
+import de.mpg.biochem.mars.table.MarsTable;
 
 @Plugin(type = DisplayViewer.class, priority = Priority.NORMAL)
 public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements DisplayViewer<MarsTable> {

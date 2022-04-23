@@ -55,12 +55,12 @@
 
 package de.mpg.biochem.mars.fx.util;
 
+import de.jensd.fx.glyphs.GlyphIcons;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.input.KeyCombination;
-import de.jensd.fx.glyphs.GlyphIcons;
 
 /**
  * Simple action class

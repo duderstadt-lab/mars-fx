@@ -32,15 +32,9 @@ import java.util.LinkedHashMap;
 import org.controlsfx.control.textfield.CustomTextField;
 
 import com.jfoenix.controls.JFXCheckBox;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.input.KeyCode;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.util.EditCell;
-import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
@@ -49,11 +43,15 @@ import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 
 public abstract class AbstractParametersTable {
     

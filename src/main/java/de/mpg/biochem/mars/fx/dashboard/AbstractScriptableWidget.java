@@ -43,14 +43,18 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import javafx.application.Platform;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.InlineCssTextArea;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.module.ModuleException;
 import org.scijava.module.ModuleService;
+import org.scijava.plugin.Parameter;
 import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
@@ -58,37 +62,17 @@ import org.scijava.script.ScriptService;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
-import de.mpg.biochem.mars.fx.syntaxhighlighter.JavaSyntaxHighlighter;
-import de.mpg.biochem.mars.util.MarsUtil;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.RadioButton;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.control.Label;
-
-import javafx.scene.layout.HBox;
-import javafx.scene.control.Toggle;
-
-import net.imagej.ops.Initializable;
-import org.scijava.plugin.Parameter;
-
-import java.time.Duration;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.InlineCssTextArea;
-import org.fxmisc.richtext.LineNumberFactory;
-import org.reactfx.Subscription;
+import javafx.scene.layout.BorderPane;
+import net.imagej.ops.Initializable;
 
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
 

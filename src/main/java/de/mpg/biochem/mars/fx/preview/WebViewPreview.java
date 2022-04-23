@@ -56,7 +56,6 @@
 package de.mpg.biochem.mars.fx.preview;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -66,26 +65,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.function.BiConsumer;
 
-import javafx.concurrent.Worker.State;
-import javafx.scene.control.IndexRange;
-import javafx.scene.web.WebView;
-import de.mpg.biochem.mars.fx.editor.DocumentEditor;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
-import de.mpg.biochem.mars.fx.util.Utils;
-import de.mpg.biochem.mars.util.MarsDocument;
-
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeVisitor;
 import com.vladsch.flexmark.util.ast.Visitor;
-
-import javafx.print.PrinterJob;
-
 import com.vladsch.flexmark.util.data.DataHolder;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
+import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import de.mpg.biochem.mars.fx.util.Utils;
+import javafx.concurrent.Worker.State;
+import javafx.print.PrinterJob;
+import javafx.scene.control.IndexRange;
+import javafx.scene.web.WebView;
 
 /**
  * WebView preview.

@@ -33,17 +33,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.scijava.command.CommandService;
+import org.scijava.plugin.AbstractPTService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.prefs.PrefService;
-import org.scijava.plugin.AbstractPTService;
-import org.scijava.plugin.PluginInfo;
 import org.scijava.service.Service;
 
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
-import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboardWidget;
-import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboardWidget;
 import net.imagej.ImageJService;
 
 @Plugin(type = Service.class)

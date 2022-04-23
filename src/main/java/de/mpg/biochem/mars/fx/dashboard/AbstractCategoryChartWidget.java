@@ -28,90 +28,24 @@
  */
 package de.mpg.biochem.mars.fx.dashboard;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
-import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
-import javafx.scene.control.ScrollPane.ScrollBarPolicy;
-
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
-import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.table.MarsTable;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.axes.spi.CategoryAxis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.testdata.spi.RandomDataGenerator;
+import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.scene.control.Tab;
+import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import net.imagej.ops.Initializable;
-import javafx.scene.layout.AnchorPane;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-
-import org.scijava.Context;
-import org.scijava.log.LogService;
-import org.scijava.module.ModuleException;
-import org.scijava.script.ScriptLanguage;
-import javafx.embed.swing.SwingNode;
-import javafx.application.Application;
-import javafx.application.Platform;
-
-import javax.swing.SwingUtilities;
-import javafx.scene.control.ScrollPane;
-
-import javax.swing.JScrollPane;
-
-import org.scijava.script.ScriptHeaderService;
-import org.scijava.script.ScriptInfo;
-import org.scijava.script.ScriptLanguage;
-import org.scijava.script.ScriptModule;
-import org.scijava.script.ScriptService;
-
-import org.scijava.module.ModuleService;
-import javafx.scene.control.TextArea;
-import javafx.scene.Node;
-
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-import org.apache.commons.io.IOUtils;
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
-import org.scijava.plugin.Parameter;
 
 public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidget
 		implements MarsDashboardWidget, Initializable {

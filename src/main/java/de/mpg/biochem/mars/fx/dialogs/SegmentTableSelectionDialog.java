@@ -54,20 +54,17 @@
  ******************************************************************************/
 package de.mpg.biochem.mars.fx.dialogs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.stage.Window;
-
-import javafx.scene.control.ComboBox;
-
 import javafx.scene.layout.HBox;
+import javafx.stage.Window;
 
 /**
  * Segment table selection dialog.

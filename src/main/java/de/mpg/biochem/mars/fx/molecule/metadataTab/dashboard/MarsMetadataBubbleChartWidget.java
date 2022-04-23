@@ -30,13 +30,11 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
 import java.io.IOException;
 
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;

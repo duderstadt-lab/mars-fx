@@ -37,7 +37,6 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
 import java.util.Random;
@@ -52,8 +51,6 @@ import javax.swing.JTextField;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
-
-import com.fasterxml.jackson.core.JsonParser;
 
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.metadata.MarsMetadata;

@@ -60,9 +60,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.control.IndexRange;
+
 import org.fxmisc.richtext.GenericStyledArea;
 import org.fxmisc.richtext.StyledTextArea;
 import org.fxmisc.richtext.TextExt;
@@ -75,6 +73,10 @@ import org.reactfx.Guard;
 import org.reactfx.util.Either;
 import org.reactfx.value.SuspendableVal;
 import org.reactfx.value.Val;
+
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.control.IndexRange;
 
 /**
  * Markdown text area.

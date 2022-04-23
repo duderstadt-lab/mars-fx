@@ -3,7 +3,6 @@ package de.mpg.biochem.mars.fx.preview;
 import org.jetbrains.annotations.NotNull;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
-import com.vladsch.flexmark.ast.Link;
 import com.vladsch.flexmark.parser.block.NodePostProcessor;
 import com.vladsch.flexmark.parser.block.NodePostProcessorFactory;
 import com.vladsch.flexmark.util.ast.Document;

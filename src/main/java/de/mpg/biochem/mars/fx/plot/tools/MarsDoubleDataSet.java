@@ -28,17 +28,18 @@
  */
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
-import javafx.scene.paint.Color;
 import de.gsi.chart.axes.spi.AxisRange;
 import de.gsi.dataset.AxisDescription;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.spi.AbstractDataSet;
+import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.utils.AssertUtils;
-import de.gsi.dataset.spi.*;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import javafx.scene.paint.Color;
 
 /**
  * Implementation of the {@code DataSet} interface which stores x,y values in two separate arrays. It provides methods

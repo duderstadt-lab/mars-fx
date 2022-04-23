@@ -47,15 +47,18 @@
 
 package de.mpg.biochem.mars.fx.util;
 
-import com.jfoenix.skins.JFXAutoCompletePopupSkin;
+import java.util.List;
+
 import com.jfoenix.controls.JFXAutoCompletePopup;
 import com.jfoenix.controls.JFXChip;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXDefaultChip;
+import com.jfoenix.skins.JFXAutoCompletePopupSkin;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.KeyBinding;
 import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
 import com.sun.javafx.scene.traversal.Direction;
+
 import javafx.collections.ListChangeListener;
 import javafx.collections.WeakListChangeListener;
 import javafx.css.PseudoClass;
@@ -75,8 +78,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
-
-import java.util.List;
 
 /**
  * JFXChipArea is the material design implementation of chip Input.

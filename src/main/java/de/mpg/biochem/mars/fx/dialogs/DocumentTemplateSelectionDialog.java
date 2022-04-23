@@ -28,43 +28,24 @@
  */
 package de.mpg.biochem.mars.fx.dialogs;
 
-import static java.util.stream.Collectors.toList;
-
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 import java.io.FilenameFilter;
 
-import org.controlsfx.control.ToggleSwitch;
-
-import com.jfoenix.controls.JFXChipView;
-
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
-import javafx.stage.DirectoryChooser;
-
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-
-import javafx.scene.control.CheckBox;
-import javafx.scene.layout.VBox;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.control.ListView;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
+import javafx.scene.layout.VBox;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Window;
 
 /**
  * Property selection dialog.

@@ -28,77 +28,51 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 
-import java.io.IOException;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.KeyCode;
+import java.util.stream.Collectors;
 
 import org.controlsfx.control.ToggleSwitch;
-import org.controlsfx.control.textfield.CustomTextField;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.jfoenix.controls.JFXColorPicker;
-import com.jfoenix.controls.JFXToggleButton;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.util.HotKeyEntry;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveWindow;
-import de.mpg.biochem.mars.util.MarsPosition;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ListChangeListener.Change;
-import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyCombination.ModifierValue;
 import javafx.scene.input.KeyEvent;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.collections.ListChangeListener;
-
-import java.util.stream.Collectors;
-
-import javafx.scene.text.Text;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-
-import org.scijava.Context;
-import org.scijava.plugin.Parameter;
-import org.scijava.prefs.PrefService;
+import javafx.scene.text.Text;
 
 public class SettingsTab extends AbstractMoleculeArchiveTab implements MoleculeArchiveTab {
 	

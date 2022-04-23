@@ -46,10 +46,8 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-
-import javafx.scene.shape.Circle;
 import javafx.scene.paint.Color;
-
+import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 
 /**

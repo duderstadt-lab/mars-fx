@@ -28,11 +28,12 @@
  */
 package de.mpg.biochem.mars.fx.bdv;
 
+import java.util.Map;
+
 import bdv.util.BdvHandle;
 import bdv.viewer.TimePointListener;
-import net.imglib2.realtransform.AffineTransform3D;
 import bdv.viewer.TransformListener;
-import java.util.Map;
+import net.imglib2.realtransform.AffineTransform3D;
 
 /**
  * BigDataViewer Playground Action --

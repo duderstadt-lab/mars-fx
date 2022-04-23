@@ -55,17 +55,20 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
-import static javafx.scene.input.KeyCode.*;
-import static javafx.scene.input.KeyCombination.*;
-import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
-import static org.fxmisc.wellbehaved.event.InputMap.*;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.undo.UndoManager;
+
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.ast.Node;
+
+import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
+import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
+import de.mpg.biochem.mars.fx.options.Options;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -76,32 +79,8 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.IndexRange;
-import javafx.scene.input.ContextMenuEvent;
-import javafx.scene.input.DragEvent;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.TransferMode;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.parser.Parser;
-import org.fxmisc.flowless.VirtualizedScrollPane;
-import org.fxmisc.richtext.Caret.CaretVisibility;
-import org.fxmisc.richtext.CaretNode;
-import org.fxmisc.richtext.CharacterHit;
-import org.fxmisc.undo.UndoManager;
-import org.fxmisc.wellbehaved.event.Nodes;
-
-import de.mpg.biochem.mars.fx.controls.BottomSlidePane;
-import de.mpg.biochem.mars.fx.editor.FindReplacePane.HitsChangeListener;
-import de.mpg.biochem.mars.fx.editor.MarkdownSyntaxHighlighter.ExtraStyledRanges;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.options.Options;
 
 public class LogPane
 {

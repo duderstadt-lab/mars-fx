@@ -56,15 +56,16 @@
 package de.mpg.biochem.mars.fx.preview;
 
 import java.util.Collection;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.WeakInvalidationListener;
-import javafx.scene.control.IndexRange;
+
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.undo.UndoManagerFactory;
 
 import de.mpg.biochem.mars.fx.options.Options;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
+import javafx.scene.control.IndexRange;
 
 /**
  * A styled text area for preview.

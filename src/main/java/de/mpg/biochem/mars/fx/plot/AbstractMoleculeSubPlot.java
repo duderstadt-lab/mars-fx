@@ -28,40 +28,24 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.scijava.table.DoubleColumn;
 
-import com.fasterxml.jackson.core.JsonToken;
-
-import javafx.scene.paint.Color;
-
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.AbstractValueIndicator;
+import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.XRangeIndicator;
-import de.gsi.chart.plugins.XValueIndicator;
 import de.gsi.chart.plugins.YRangeIndicator;
 import de.gsi.chart.plugins.YValueIndicator;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsWrappedDoubleDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsXValueIndicator;
-import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
 import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
@@ -72,13 +56,9 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
-import de.mpg.biochem.mars.util.MarsUtil;
-import javafx.application.Platform;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.Cursor;
+import javafx.scene.paint.Color;
 
 public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends AbstractSubPlot implements MoleculeSubPane {
 	

@@ -28,7 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.event;
 
-import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
 import javafx.event.EventType;
 

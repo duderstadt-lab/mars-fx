@@ -38,23 +38,18 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.scijava.Context;
-import org.scijava.plugin.Parameter;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.DefaultJsonConverter;
 import de.mpg.biochem.mars.util.MarsUtil;
-import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveDashboardWidget> {

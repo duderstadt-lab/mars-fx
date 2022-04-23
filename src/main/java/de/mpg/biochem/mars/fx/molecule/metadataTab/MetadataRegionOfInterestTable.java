@@ -32,8 +32,6 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataIndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractRegionOfInterestTable;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import javafx.event.Event;
 
 public class MetadataRegionOfInterestTable extends AbstractRegionOfInterestTable implements MetadataSubPane {

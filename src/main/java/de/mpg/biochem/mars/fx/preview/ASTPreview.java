@@ -55,7 +55,6 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,8 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javafx.scene.control.IndexRange;
-import javafx.scene.control.ScrollBar;
+
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -75,6 +73,8 @@ import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Range;
 import de.mpg.biochem.mars.fx.util.Utils;
+import javafx.scene.control.IndexRange;
+import javafx.scene.control.ScrollBar;
 
 /**
  * Markdown AST preview.

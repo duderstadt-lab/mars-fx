@@ -28,34 +28,31 @@
  */
 package de.mpg.biochem.mars.fx.molecule;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.SwingUtilities;
 
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 
-import com.fasterxml.jackson.core.JsonToken;
-
-import javafx.beans.property.ObjectProperty;
-
-import javafx.scene.layout.StackPane;
-
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MetadataEvent;
-import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculePositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.NewMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdateMetadataPositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdateMoleculePositionEvent;
+import de.mpg.biochem.mars.fx.plot.event.UpdateMoleculeRegionEvent;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
@@ -65,10 +62,12 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsPosition;
 import de.mpg.biochem.mars.util.MarsRegion;
-import de.mpg.biochem.mars.util.MarsUtil;
 import impl.org.controlsfx.skin.CustomTextFieldSkin;
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
@@ -83,13 +82,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import de.mpg.biochem.mars.fx.plot.event.*;
-
-import javax.swing.RowFilter;
-import javax.swing.SwingUtilities;
-
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.scene.layout.StackPane;
 
 public abstract class AbstractMoleculesTab<M extends Molecule, C extends MoleculeSubPane, O extends MoleculeSubPane> extends AbstractMoleculeArchiveTab implements MoleculesTab<C, O> {
 	protected SplitPane rootPane;

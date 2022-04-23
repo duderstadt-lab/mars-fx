@@ -55,10 +55,13 @@
 
 package de.mpg.biochem.mars.fx.options;
 
+import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
+import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.event.ActionEvent;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -66,9 +69,6 @@ import javafx.scene.control.DialogPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.stage.Window;
-import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
-import de.mpg.biochem.mars.fx.Messages;
-import de.mpg.biochem.mars.fx.util.Utils;
 
 /**
  * Options dialog

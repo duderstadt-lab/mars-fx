@@ -28,33 +28,6 @@
  */
 package de.mpg.biochem.mars.fx.dashboard;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
-import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-
-import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,10 +35,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
-import org.scijava.plugin.Parameter;
-
+import de.gsi.chart.XYChart;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractXYChartWidget extends AbstractScriptableWidget

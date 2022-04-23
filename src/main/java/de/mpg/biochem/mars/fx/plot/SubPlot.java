@@ -33,16 +33,13 @@ import java.util.Set;
 import com.jfoenix.controls.JFXBadge;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.ToggleButton;
 
 public interface SubPlot {
 	public MarsNumericAxis getXAxis();

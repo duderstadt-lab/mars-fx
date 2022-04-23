@@ -55,19 +55,19 @@
 
 package de.mpg.biochem.mars.fx.options;
 
-import java.io.File;
 import java.util.List;
 import java.util.prefs.Preferences;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.text.Font;
+
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.PrefsEnumProperty;
 import de.mpg.biochem.mars.fx.util.PrefsIntegerProperty;
 import de.mpg.biochem.mars.fx.util.PrefsStringProperty;
 import de.mpg.biochem.mars.fx.util.PrefsStringsProperty;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.text.Font;
 
 /**
  * Options

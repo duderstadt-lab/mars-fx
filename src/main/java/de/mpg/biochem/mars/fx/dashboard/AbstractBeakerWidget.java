@@ -30,28 +30,14 @@ package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import de.gsi.dataset.spi.DefaultErrorDataSet;
+import org.scijava.plugin.SciJavaPlugin;
+
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.scene.Node;
-
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-import org.scijava.script.ScriptModule;
-
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractBeakerWidget extends AbstractScriptableWidget

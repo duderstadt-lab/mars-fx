@@ -28,11 +28,14 @@
  */
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
+
+import org.scijava.plugin.Parameter;
+import org.scijava.plugin.Plugin;
+import org.scijava.plugin.SciJavaPlugin;
+
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -44,12 +47,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
-
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-import org.scijava.plugin.Parameter;
 import net.imagej.ops.Initializable;
 
 @Plugin( type = MoleculeArchiveDashboardWidget.class, name = "ArchivePropertiesWidget" )

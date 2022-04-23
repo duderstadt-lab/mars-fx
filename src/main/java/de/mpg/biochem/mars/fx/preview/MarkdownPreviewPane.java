@@ -55,9 +55,15 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+
+import com.vladsch.flexmark.util.ast.Node;
+
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.options.Options;
+import de.mpg.biochem.mars.fx.options.Options.RendererType;
+import de.mpg.biochem.mars.fx.util.Range;
 import javafx.application.Platform;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -66,15 +72,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.scene.control.IndexRange;
 import javafx.scene.layout.BorderPane;
-import de.mpg.biochem.mars.fx.editor.DocumentEditor;
-import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.options.Options.RendererType;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
-import de.mpg.biochem.mars.fx.util.Range;
-import de.mpg.biochem.mars.util.MarsDocument;
-
-import com.vladsch.flexmark.util.ast.Node;
 
 /**
  * Markdown preview pane.

@@ -28,11 +28,8 @@
  */
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-
-import java.io.IOException;
-import java.net.URL;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
@@ -40,24 +37,20 @@ import org.scijava.plugin.Parameter;
 import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.plot.PlotSeries;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
-import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.AnchorPane;

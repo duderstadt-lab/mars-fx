@@ -28,14 +28,13 @@
  */
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import javafx.scene.paint.Color;
-
 import org.scijava.table.DoubleColumn;
 
 import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.dataset.spi.*;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSet2D;
+import de.gsi.dataset.spi.AbstractDataSet;
+import javafx.scene.paint.Color;
 
 /**
  * Implementation of the {@code DataSet} warpper that retrieves x,y values from backing DoubleColumns and passes them to plots.

@@ -36,7 +36,6 @@ import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractCategoryChartWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;

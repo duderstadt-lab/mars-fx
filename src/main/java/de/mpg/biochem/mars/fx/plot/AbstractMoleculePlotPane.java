@@ -28,24 +28,16 @@
  */
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
 import static java.util.stream.Collectors.toList;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.scijava.Context;
-
-import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonToken;
 
 import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.Zoomer;
-import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
@@ -62,12 +54,10 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 
 public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends SubPlot> extends AbstractPlotPane implements MoleculeSubPane {
 	

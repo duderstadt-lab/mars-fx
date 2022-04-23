@@ -56,6 +56,7 @@
 package de.mpg.biochem.mars.fx.editor;
 
 import java.util.Optional;
+
 import org.fxmisc.richtext.model.SegmentOpsBase;
 
 /**

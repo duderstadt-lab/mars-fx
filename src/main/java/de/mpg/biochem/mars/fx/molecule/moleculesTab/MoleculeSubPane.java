@@ -29,7 +29,6 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEventHandler;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.scene.Node;
 
 public interface MoleculeSubPane extends MoleculeEventHandler {

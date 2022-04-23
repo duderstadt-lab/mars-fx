@@ -56,14 +56,14 @@
 package de.mpg.biochem.mars.fx.options;
 
 import java.util.Arrays;
+
+import org.controlsfx.control.ToggleSwitch;
+
+import de.mpg.biochem.mars.fx.options.Options.RendererType;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
-import org.controlsfx.control.ToggleSwitch;
-
 import javafx.scene.layout.VBox;
-
-import de.mpg.biochem.mars.fx.options.Options.RendererType;
 
 /**
  * Markdown extensions pane

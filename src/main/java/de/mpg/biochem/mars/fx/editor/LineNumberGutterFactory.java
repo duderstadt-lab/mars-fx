@@ -56,11 +56,13 @@
 package de.mpg.biochem.mars.fx.editor;
 
 import java.util.function.IntFunction;
+
+import org.reactfx.collection.LiveList;
+import org.reactfx.value.Val;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import org.reactfx.collection.LiveList;
-import org.reactfx.value.Val;
 
 /**
  * @author Karl Tauber
