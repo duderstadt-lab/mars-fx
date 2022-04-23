@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
@@ -137,26 +138,27 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, 
-		M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>> extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow {
-	
+public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<? extends MetadataSubPane, ? extends MetadataSubPane>, M extends MoleculesTab<? extends MoleculeSubPane, ? extends MoleculeSubPane>>
+	extends AbstractJsonConvertibleRecord implements MoleculeArchiveWindow
+{
+
 	@Parameter
-    protected MoleculeArchiveService moleculeArchiveService;
-	
-    @Parameter
-    protected UIService uiService;
-    
-    @Parameter
-    protected PrefService prefService;
-    
-    @Parameter
-    protected Context context;
-    
-    @Parameter
-    protected LogService logService;
+	protected MoleculeArchiveService moleculeArchiveService;
+
+	@Parameter
+	protected UIService uiService;
+
+	@Parameter
+	protected PrefService prefService;
+
+	@Parameter
+	protected Context context;
+
+	@Parameter
+	protected LogService logService;
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
-	
+
 	protected String title;
 	protected Stage stage;
 	protected IJStage ijStage;
@@ -164,348 +166,391 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	protected StackPane maskerStackPane;
 	protected MaskerPane masker;
 	protected MarsAnimation marsSpinning;
-	
+
 	protected BorderPane borderPane;
-    protected JFXTabPane tabsContainer;
-    
-    //protected TextArea lockLogArea;
-    protected ListView<String> lockLogArea;
-    protected ObservableList<String> lockLogAreaStrings = FXCollections.observableArrayList();
-    
+	protected JFXTabPane tabsContainer;
+
+	// protected TextArea lockLogArea;
+	protected ListView<String> lockLogArea;
+	protected ObservableList<String> lockLogAreaStrings = FXCollections
+		.observableArrayList();
+
 	protected MenuBar menuBar;
 	protected HBox menuHBox;
 	protected Button showPropertiesButton;
-	
-    protected Menu fileMenu, toolsMenu;
-    protected BooleanProperty showProperties = new SimpleBooleanProperty(true);
-	
+
+	protected Menu fileMenu, toolsMenu;
+	protected BooleanProperty showProperties = new SimpleBooleanProperty(true);
+
 	protected DashboardTab dashboardTab;
-    protected CommentsTab commentsTab; 
-    
-    protected I imageMetadataTab;
-    protected M moleculesTab;
-    protected SettingsTab settingsTab;
-    
-    protected boolean windowStateLoaded = false;
-    //protected boolean discoveredBdvFrameSettings = false;
-    
-    protected static JsonFactory jfactory;
-	
-    protected Set<MoleculeArchiveTab> tabSet;
-    
-    protected MarsBdvFrame[] marsBdvFrames;
-    protected byte[] roverFileBackground;
+	protected CommentsTab commentsTab;
 
-    protected double tabWidth = 50.0;
-    
-    protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
+	protected I imageMetadataTab;
+	protected M moleculesTab;
+	protected SettingsTab settingsTab;
 
-	public AbstractMoleculeArchiveFxFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, final Context context) {
+	protected boolean windowStateLoaded = false;
+	// protected boolean discoveredBdvFrameSettings = false;
+
+	protected static JsonFactory jfactory;
+
+	protected Set<MoleculeArchiveTab> tabSet;
+
+	protected MarsBdvFrame[] marsBdvFrames;
+	protected byte[] roverFileBackground;
+
+	protected double tabWidth = 50.0;
+
+	protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
+
+	public AbstractMoleculeArchiveFxFrame(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		final Context context)
+	{
 		super();
 		context.inject(this);
 
 		this.title = archive.getName();
 		this.archive = archive;
-		
+
 		archive.setWindow(this);
 	}
 
 	/**
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
-	public void init() {	
+	public void init() {
 		new JFXPanel(); // initializes JavaFX environment
-		
-		// The call to runLater() avoid a mix between JavaFX thread and Swing thread.
+
+		// The call to runLater() avoid a mix between JavaFX thread and Swing
+		// thread.
 		// Allows multiple runLaters in the same session...
-		// Suggested here - https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
+		// Suggested here -
+		// https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
 		Platform.setImplicitExit(false);
-		
+
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				stage = new Stage();
 				stage.setTitle(title);
-				stage.setOnHidden(e -> 
-					SwingUtilities.invokeLater(() -> {
-						close();
-					}));
-				
+				stage.setOnHidden(e -> SwingUtilities.invokeLater(() -> {
+					close();
+				}));
+
 				ijStage = new IJStage(stage);
-				
+
 				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 				buildScene();
 			}
 		});
 
 	}
-	
+
 	protected Scene buildScene() {
 		borderPane = new BorderPane();
-    	
+
 		lockLogArea = new ListView<String>();
 		lockLogArea.getStyleClass().add("log-text-area");
 		lockLogArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt");
 		lockLogArea.setItems(lockLogAreaStrings);
 		lockLogArea.setVisible(false);
-		
-    	masker = new MaskerPane();
-    	masker.setVisible(false);
-   
-    	marsSpinning = new MarsAnimation();
-    	
-    	masker.setProgressNode(marsSpinning);
-    	
-    	maskerStackPane = new StackPane();
-    	maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
-    	masker.setStyle("-fx-accent: #f5f5f5; -fx-text-fill: #f5f5f5;");
-    	maskerStackPane.getChildren().add(borderPane);
-    	maskerStackPane.getChildren().add(lockLogArea);
-    	maskerStackPane.getChildren().add(masker);
-    	
-    	tabsContainer = new JFXTabPane();
+
+		masker = new MaskerPane();
+		masker.setVisible(false);
+
+		marsSpinning = new MarsAnimation();
+
+		masker.setProgressNode(marsSpinning);
+
+		maskerStackPane = new StackPane();
+		maskerStackPane.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+		masker.setStyle("-fx-accent: #f5f5f5; -fx-text-fill: #f5f5f5;");
+		maskerStackPane.getChildren().add(borderPane);
+		maskerStackPane.getChildren().add(lockLogArea);
+		maskerStackPane.getChildren().add(masker);
+
+		tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(128.0);
 		tabsContainer.prefWidth(308.0);
 		tabsContainer.setSide(Side.LEFT);
 		tabsContainer.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabsContainer.setTabMinWidth(tabWidth);
-        tabsContainer.setTabMaxWidth(tabWidth);
-        tabsContainer.setTabMinHeight(tabWidth);
-        tabsContainer.setTabMaxHeight(tabWidth);
-        tabsContainer.setRotateGraphic(true);
-        
-        if (jfactory == null)
-        	jfactory = new JsonFactory();
+		tabsContainer.setTabMaxWidth(tabWidth);
+		tabsContainer.setTabMinHeight(tabWidth);
+		tabsContainer.setTabMaxHeight(tabWidth);
+		tabsContainer.setRotateGraphic(true);
 
-        buildMenuBar();
-        buildTabs();
-        
-        showProperties.addListener((observable, oldValue, newValue) -> {
-        	if (newValue.booleanValue()) {
-        		imageMetadataTab.showProperties();
-        		moleculesTab.showProperties();
-        	} else {
-        		imageMetadataTab.hideProperties();
-        		moleculesTab.hideProperties();
-        	}
-        });
-        
-        //Now add tabs to container
-        tabSet.forEach(maTab -> tabsContainer.getTabs().add(maTab.getTab()));
-        
-        fireEvent(new InitializeMoleculeArchiveEvent(archive));
-        
-        borderPane.setCenter(tabsContainer);
-        Scene scene = new Scene(maskerStackPane);
-        
-        stage.setScene(scene);
-        
-        try {
+		if (jfactory == null) jfactory = new JsonFactory();
+
+		buildMenuBar();
+		buildTabs();
+
+		showProperties.addListener((observable, oldValue, newValue) -> {
+			if (newValue.booleanValue()) {
+				imageMetadataTab.showProperties();
+				moleculesTab.showProperties();
+			}
+			else {
+				imageMetadataTab.hideProperties();
+				moleculesTab.hideProperties();
+			}
+		});
+
+		// Now add tabs to container
+		tabSet.forEach(maTab -> tabsContainer.getTabs().add(maTab.getTab()));
+
+		fireEvent(new InitializeMoleculeArchiveEvent(archive));
+
+		borderPane.setCenter(tabsContainer);
+		Scene scene = new Scene(maskerStackPane);
+
+		stage.setScene(scene);
+
+		try {
 			loadState();
-			
+
 			if (!windowStateLoaded) {
 				stage.setWidth(800);
 				stage.setHeight(600);
 				stage.show();
 			}
-		} catch (IOException e) {
-			logService.warn("A problem was encountered when loading the rover file " 
-					+ archive.getFile().getAbsolutePath() + ".rover" + " containing the mars-fx display settings. "
-					+ "Please check the file to make sure the syntax is correct."
-					+ "Aborting and opening with the default settings.");
 		}
-        
-        updateAccelerators();
-        
-        getNode().addEventFilter(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("RUN_MOLECULE_ARCHIVE_TASK")) {
-			   		runTask(((RunMoleculeArchiveTaskEvent)e).getTask(), ((RunMoleculeArchiveTaskEvent)e).getMessage());
-			   		e.consume();
-			   	}
-			} 
-        });
-        return scene;
+		catch (IOException e) {
+			logService.warn("A problem was encountered when loading the rover file " +
+				archive.getFile().getAbsolutePath() + ".rover" +
+				" containing the mars-fx display settings. " +
+				"Please check the file to make sure the syntax is correct." +
+				"Aborting and opening with the default settings.");
+		}
+
+		updateAccelerators();
+
+		getNode().addEventFilter(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals("RUN_MOLECULE_ARCHIVE_TASK")) {
+						runTask(((RunMoleculeArchiveTaskEvent) e).getTask(),
+							((RunMoleculeArchiveTaskEvent) e).getMessage());
+						e.consume();
+					}
+				}
+			});
+		return scene;
 	}
-	
+
 	protected void buildTabs() {
 		tabSet = new LinkedHashSet<MoleculeArchiveTab>();
-		
+
 		dashboardTab = new DashboardTab(context);
-        dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
-        tabSet.add(dashboardTab);
+		dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
+		tabSet.add(dashboardTab);
 
-        imageMetadataTab = createImageMetadataTab(context);
-        tabSet.add(imageMetadataTab);
-        
-        moleculesTab = createMoleculesTab(context);
-        tabSet.add(moleculesTab);
-        
-        commentsTab = new CommentsTab(context);
-        tabSet.add(commentsTab);
-        
-        settingsTab = new SettingsTab(context);
-        tabSet.add(settingsTab);
+		imageMetadataTab = createImageMetadataTab(context);
+		tabSet.add(imageMetadataTab);
 
-        //fire save events for tabs as they are left and update events for new tabs
-        tabsContainer.getSelectionModel().selectedItemProperty().addListener(
-    		new ChangeListener<Tab>() {
-    			@Override
-    			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-    				tabSet.stream().filter(maTab -> newValue == maTab.getTab()).findFirst().ifPresent(maTab -> updateMenus(maTab.getMenus()));
-    					
-    				if (oldValue == commentsTab.getTab()) {
-    					commentsTab.setEditMode(false);
-    					commentsTab.saveComments();
-    				} else if (oldValue == imageMetadataTab.getTab()) {
-    					imageMetadataTab.saveCurrentRecord();
-    				} else if (oldValue == moleculesTab.getTab()) {
-    					moleculesTab.saveCurrentRecord();
-    				} else if (oldValue == settingsTab.getTab()) {
-    					settingsTab.save();
-    					updateAccelerators();
-    				}
-    				
-	    			if (newValue == imageMetadataTab.getTab()) {
+		moleculesTab = createMoleculesTab(context);
+		tabSet.add(moleculesTab);
+
+		commentsTab = new CommentsTab(context);
+		tabSet.add(commentsTab);
+
+		settingsTab = new SettingsTab(context);
+		tabSet.add(settingsTab);
+
+		// fire save events for tabs as they are left and update events for new tabs
+		tabsContainer.getSelectionModel().selectedItemProperty().addListener(
+			new ChangeListener<Tab>()
+			{
+
+				@Override
+				public void changed(ObservableValue<? extends Tab> observable,
+					Tab oldValue, Tab newValue)
+			{
+					tabSet.stream().filter(maTab -> newValue == maTab.getTab())
+						.findFirst().ifPresent(maTab -> updateMenus(maTab.getMenus()));
+
+					if (oldValue == commentsTab.getTab()) {
+						commentsTab.setEditMode(false);
+						commentsTab.saveComments();
+					}
+					else if (oldValue == imageMetadataTab.getTab()) {
+						imageMetadataTab.saveCurrentRecord();
+					}
+					else if (oldValue == moleculesTab.getTab()) {
+						moleculesTab.saveCurrentRecord();
+					}
+					else if (oldValue == settingsTab.getTab()) {
+						settingsTab.save();
+						updateAccelerators();
+					}
+
+					if (newValue == imageMetadataTab.getTab()) {
 						imageMetadataTab.fireEvent(new RefreshMetadataEvent());
 						showPropertiesButton();
-					} else if (newValue == moleculesTab.getTab()) {
+					}
+					else if (newValue == moleculesTab.getTab()) {
 						moleculesTab.fireEvent(new RefreshMoleculeEvent());
 						showPropertiesButton();
-					} else {
+					}
+					else {
 						hidePropertiesButton();
 					}
-    			}
-    		});
-    }
-	
-	protected void updateAccelerators() {
-		//Update global accelerators...
-		for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
-			Runnable rn = ()-> {
-				if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab.getTab()) {
-           	 		moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
-           	 		moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
-           	 		moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab.getSelectedMolecule()));
-				} else if (tabsContainer.getSelectionModel().getSelectedItem() == imageMetadataTab.getTab()) {
-           	 		imageMetadataTab.getSelectedMetadata().addTag(hotKeyEntry.getTag());
-           	 		imageMetadataTab.fireEvent(new RefreshMetadataPropertiesEvent());
-           	 		imageMetadataTab.fireEvent(new MetadataTagsChangedEvent(imageMetadataTab.getSelectedMetadata()));
 				}
-            };
-            getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
+			});
+	}
+
+	protected void updateAccelerators() {
+		// Update global accelerators...
+		for (HotKeyEntry hotKeyEntry : settingsTab.getHotKeyList()) {
+			Runnable rn = () -> {
+				if (tabsContainer.getSelectionModel().getSelectedItem() == moleculesTab
+					.getTab())
+				{
+					moleculesTab.getSelectedMolecule().addTag(hotKeyEntry.getTag());
+					moleculesTab.fireEvent(new RefreshMoleculePropertiesEvent());
+					moleculesTab.fireEvent(new MoleculeTagsChangedEvent(moleculesTab
+						.getSelectedMolecule()));
+				}
+				else if (tabsContainer.getSelectionModel()
+					.getSelectedItem() == imageMetadataTab.getTab())
+				{
+					imageMetadataTab.getSelectedMetadata().addTag(hotKeyEntry.getTag());
+					imageMetadataTab.fireEvent(new RefreshMetadataPropertiesEvent());
+					imageMetadataTab.fireEvent(new MetadataTagsChangedEvent(
+						imageMetadataTab.getSelectedMetadata()));
+				}
+			};
+			getNode().getScene().getAccelerators().put(hotKeyEntry.getShortcut(), rn);
 		}
 	}
-	
+
 	protected void buildMenuBar() {
-		//Build file menu
-		Action fileSaveAction = new Action("Save", "Shortcut+S", FLOPPY_ALT, e -> save());
-		Action fileSaveCopyAction = new Action("Save a Copy...", null, null, e -> saveCopy());
-		Action fileSaveJsonCopyAction = new Action("Save a Json Copy...", null, null, e -> saveJsonCopy());
-		Action fileSaveVirtualStoreAction = new Action("Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
-		Action fileSaveJsonVirtualStoreAction = new Action("Save a Json Virtual Store Copy...", null, null, e -> saveJsonVirtualStoreCopy());
-		//Comment this out for now since it doesn't clear the settings before loading the new ones and
-		//I have to check on BDV...
-		//Action importRoverSettingsAction = new Action("Import Rover Settings...", null, null, e -> importRoverSettings());
+		// Build file menu
+		Action fileSaveAction = new Action("Save", "Shortcut+S", FLOPPY_ALT,
+			e -> save());
+		Action fileSaveCopyAction = new Action("Save a Copy...", null, null,
+			e -> saveCopy());
+		Action fileSaveJsonCopyAction = new Action("Save a Json Copy...", null,
+			null, e -> saveJsonCopy());
+		Action fileSaveVirtualStoreAction = new Action(
+			"Save a Virtual Store Copy...", null, null, e -> saveVirtualStoreCopy());
+		Action fileSaveJsonVirtualStoreAction = new Action(
+			"Save a Json Virtual Store Copy...", null, null,
+			e -> saveJsonVirtualStoreCopy());
+		// Comment this out for now since it doesn't clear the settings before
+		// loading the new ones and
+		// I have to check on BDV...
+		// Action importRoverSettingsAction = new Action("Import Rover Settings...",
+		// null, null, e -> importRoverSettings());
 		Action fileCloseAction = new Action("Close", null, null, e -> close());
-		
-		fileMenu = ActionUtils.createMenu("File",
-				fileSaveAction,
-				fileSaveCopyAction,
-				fileSaveJsonCopyAction,
-				fileSaveVirtualStoreAction,
-				fileSaveJsonVirtualStoreAction,
-				//null,
-				//importRoverSettingsAction,
-				null,
-				fileCloseAction);
-		
-		//Build tools menu
-		Action showVideoAction = new Action("Show Video", null, null, e -> showVideo()); 
-		Action deleteMoleculesAction = new Action("Delete Molecules", null, null, e -> deleteMolecules());
-		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null, null, e -> deleteMoleculeTags());
-		Action deleteMoleculeParametersAction = new Action("Delete Molecule Parameters", null, null, e -> deleteMoleculeParameters());
-		Action deleteMoleculeRegionsAction = new Action("Delete Molecule Regions", null, null, e -> deleteMoleculeRegions());
-		Action deleteMoleculePositionsAction = new Action("Delete Molecule Positions", null, null, e -> deleteMoleculePositions());
-		Action deleteSegmentTablesAction = new Action("Delete Segment Tables", null, null, e -> deleteSegmentTables());
-		
-		Action mergeMoleculesAction = new Action("Merge Molecules", null, null, e -> mergeMolecules());
-		
+
+		fileMenu = ActionUtils.createMenu("File", fileSaveAction,
+			fileSaveCopyAction, fileSaveJsonCopyAction, fileSaveVirtualStoreAction,
+			fileSaveJsonVirtualStoreAction,
+			// null,
+			// importRoverSettingsAction,
+			null, fileCloseAction);
+
+		// Build tools menu
+		Action showVideoAction = new Action("Show Video", null, null,
+			e -> showVideo());
+		Action deleteMoleculesAction = new Action("Delete Molecules", null, null,
+			e -> deleteMolecules());
+		Action deleteMoleculeTagsAction = new Action("Delete Molecule Tags", null,
+			null, e -> deleteMoleculeTags());
+		Action deleteMoleculeParametersAction = new Action(
+			"Delete Molecule Parameters", null, null,
+			e -> deleteMoleculeParameters());
+		Action deleteMoleculeRegionsAction = new Action("Delete Molecule Regions",
+			null, null, e -> deleteMoleculeRegions());
+		Action deleteMoleculePositionsAction = new Action(
+			"Delete Molecule Positions", null, null, e -> deleteMoleculePositions());
+		Action deleteSegmentTablesAction = new Action("Delete Segment Tables", null,
+			null, e -> deleteSegmentTables());
+
+		Action mergeMoleculesAction = new Action("Merge Molecules", null, null,
+			e -> mergeMolecules());
+
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", null, null,
 			e -> {
 				runTask(() -> {
-    	            	try {
-    						archive.rebuildIndexes();
-    					} catch (IOException e1) {
-    						e1.printStackTrace();
-    					}
-    	            }, "Rebuilding Indexes...");					
+					try {
+						archive.rebuildIndexes();
+					}
+					catch (IOException e1) {
+						e1.printStackTrace();
+					}
+				}, "Rebuilding Indexes...");
 			});
-			
-		toolsMenu = ActionUtils.createMenu("Tools",
-					deleteMoleculesAction,
-					deleteMoleculeTagsAction,
-					deleteMoleculeParametersAction,
-					deleteMoleculeRegionsAction,
-					deleteMoleculePositionsAction,
-					deleteSegmentTablesAction,
-					mergeMoleculesAction,
-					null,
-					showVideoAction,
-					null,
-					rebuildIndexesAction);
-		
+
+		toolsMenu = ActionUtils.createMenu("Tools", deleteMoleculesAction,
+			deleteMoleculeTagsAction, deleteMoleculeParametersAction,
+			deleteMoleculeRegionsAction, deleteMoleculePositionsAction,
+			deleteSegmentTablesAction, mergeMoleculesAction, null, showVideoAction,
+			null, rebuildIndexesAction);
+
 		menuBar = new MenuBar(fileMenu, toolsMenu);
-		
-		//Setup show properties button but don't add it yet...
+
+		// Setup show properties button but don't add it yet...
 		showPropertiesButton = new Button("");
-		showPropertiesButton.setStyle("-fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;-fx-background-insets: 0, 1, 2;-fx-background-radius: 5, 4, 3;");
-		Text caretRight = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.4em");
+		showPropertiesButton.setStyle(
+			"-fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;-fx-background-insets: 0, 1, 2;-fx-background-radius: 5, 4, 3;");
+		Text caretRight = FontAwesomeIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.4em");
 		caretRight.setStyle(caretRight.getStyle() + "-fx-fill: gray;");
-		Text caretLeft = FontAwesomeIconFactory.get().createIcon(de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.4em");
+		Text caretLeft = FontAwesomeIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.4em");
 		caretLeft.setStyle(caretLeft.getStyle() + "-fx-fill: gray;");
 		showPropertiesButton.setGraphic(caretRight);
-		
+
 		showPropertiesButton.setOnAction(e -> {
 			if (showProperties.get()) {
 				showProperties.set(false);
 				showPropertiesButton.setGraphic(caretLeft);
-			} else {
+			}
+			else {
 				showProperties.set(true);
 				showPropertiesButton.setGraphic(caretRight);
 			}
 		});
-		
+
 		menuHBox = new HBox(menuBar);
 		menuHBox.setAlignment(Pos.CENTER);
 		HBox.setHgrow(menuBar, Priority.ALWAYS);
 		HBox.setHgrow(showPropertiesButton, Priority.NEVER);
-		
+
 		borderPane.setTop(menuHBox);
 	}
-	
+
 	public void showPropertiesButton() {
 		menuHBox.getChildren().clear();
 		menuHBox.getChildren().add(menuBar);
 		menuHBox.getChildren().add(showPropertiesButton);
 	}
-	
+
 	public void hidePropertiesButton() {
 		menuHBox.getChildren().clear();
 		menuHBox.getChildren().add(menuBar);
 	}
-	
+
 	protected void showVideo() {
 		for (String metaUID : archive.getMetadataUIDs()) {
 			MarsMetadata meta = archive.getMetadata(metaUID);
 			for (String name : meta.getBdvSourceNames()) {
-				File path = (meta.getBdvSource(name).isN5()) ? new File(meta.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name).getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
+				File path = (meta.getBdvSource(name).isN5()) ? new File(meta
+					.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name)
+						.getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
 				if (!path.exists()) {
-					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene().getWindow(), 
-							"The Bdv source path " + path.getAbsolutePath()
-							+ " of metadata record " + meta.getUID() + " does not exist. "
-							+ "Please correct the path and try again.");
+					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+						.getWindow(), "The Bdv source path " + path.getAbsolutePath() +
+							" of metadata record " + meta.getUID() + " does not exist. " +
+							"Please correct the path and try again.");
 					alert.show();
 					return;
 				}
@@ -516,546 +561,615 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (archive.getFile() != null) {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonNode = mapper.readTree(FileUtils.readFileToByteArray(new File(archive.getFile().getAbsolutePath() + ".rover")));
-				if (jsonNode.get("bdvFrames") != null)
-					discoveredBdvFrameSettings = true;
-			} catch (IOException e) {}
+				JsonNode jsonNode = mapper.readTree(FileUtils.readFileToByteArray(
+					new File(archive.getFile().getAbsolutePath() + ".rover")));
+				if (jsonNode.get("bdvFrames") != null) discoveredBdvFrameSettings =
+					true;
+			}
+			catch (IOException e) {}
 		}
-		
-		//Check if there are settings for MarsBdvFrames in the rover file...
+
+		// Check if there are settings for MarsBdvFrames in the rover file...
 		if (discoveredBdvFrameSettings) {
-			RoverConfirmationDialog useBdvSettingsDialog = new RoverConfirmationDialog(getNode().getScene().getWindow(),"Video window settings were discovered.\n"
-					+ "Would you like to use them?", "Yes", "No");
+			RoverConfirmationDialog useBdvSettingsDialog =
+				new RoverConfirmationDialog(getNode().getScene().getWindow(),
+					"Video window settings were discovered.\n" +
+						"Would you like to use them?", "Yes", "No");
 			useBdvSettingsDialog.showAndWait().ifPresent(result -> {
 				if (result.getButtonData().isDefaultButton()) {
 					loadBdvSettings();
-				} else {
+				}
+				else {
 					Platform.runLater(new Runnable() {
+
 						@Override
 						public void run() {
-							ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
-							dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
+							ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
+								.getWindow());
+							dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
+								.getViewNumber()));
 						}
 					});
 				}
 			});
-		} else {
-			ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene().getWindow());
-			dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2.getViewNumber()));
+		}
+		else {
+			ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
+				.getWindow());
+			dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
+				.getViewNumber()));
 		}
 	}
-	
+
 	private void buildBdvFrames(int views) {
 		SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {		
-            	if (archive != null && moleculesTab.getSelectedMolecule() != null) {
-            		BdvHandle[] handles = new BdvHandle[views];
-            		marsBdvFrames = new MarsBdvFrame[views];
-            		for (int i = 0; i < views; i++) {
-            			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(prefService.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
-	            		marsBdvFrames[i] = marsBdvFrame;
-            			handles[i] = marsBdvFrame.getBdvHandle();
-            		}
-                 
-            		ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles, true);
-            		
-            		for (int i = 0; i < marsBdvFrames.length; i++) {
-	            		marsBdvFrames[i].getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
-	            		    @Override
-	            		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-	            		    	super.windowClosing(windowEvent);
-	             		    	for (int i=0; i<marsBdvFrames.length; i++)
-	             		    		if (marsBdvFrames[i] != null) {
-	             		    			marsBdvFrames[i].getFrame().dispose();
-	             		    			marsBdvFrames[i] = null;
-	             		    		}
-	             		    	
-	             		    	marsBdvFrames = null;
-	                            new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
-	            		    }
-	            		});
-            		}
-                    sync.run();
-            		
-            		moleculesTab.setMarsBdvFrames(marsBdvFrames);
-            	}
-            }
-        });
+
+			@Override
+			public void run() {
+				if (archive != null && moleculesTab.getSelectedMolecule() != null) {
+					BdvHandle[] handles = new BdvHandle[views];
+					marsBdvFrames = new MarsBdvFrame[views];
+					for (int i = 0; i < views; i++) {
+						MarsBdvFrame marsBdvFrame = createMarsBdvFrame(prefService
+							.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
+						marsBdvFrames[i] = marsBdvFrame;
+						handles[i] = marsBdvFrame.getBdvHandle();
+					}
+
+					ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(
+						handles, true);
+
+					for (int i = 0; i < marsBdvFrames.length; i++) {
+						marsBdvFrames[i].getFrame().addWindowListener(
+							new java.awt.event.WindowAdapter()
+							{
+
+								@Override
+								public void windowClosing(
+									java.awt.event.WindowEvent windowEvent)
+							{
+									super.windowClosing(windowEvent);
+									for (int i = 0; i < marsBdvFrames.length; i++)
+										if (marsBdvFrames[i] != null) {
+											marsBdvFrames[i].getFrame().dispose();
+											marsBdvFrames[i] = null;
+										}
+
+									marsBdvFrames = null;
+									new ViewerTransformSyncStopper(sync.getSynchronizers(), sync
+										.getTimeSynchronizers()).run();
+								}
+							});
+					}
+					sync.run();
+
+					moleculesTab.setMarsBdvFrames(marsBdvFrames);
+				}
+			}
+		});
 	}
-	
+
 	protected void deleteMolecules() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getTagSet(), "Delete Molecules", "Delete molecules with tags:", "Delete molecules with no tags");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getTagSet(),
+			"Delete Molecules", "Delete molecules with tags:",
+			"Delete molecules with no tags");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
-				ArrayList<String> deleteUIDs = (ArrayList<String>)archive.getMoleculeUIDs().parallelStream().filter(UID -> {
-	        	 	if (result.removeAll() && archive.get(UID).getTags().size() == 0) {
-	        	 		return true;
-	        	 	}
-	        	 
-	 				boolean hasTag = false;
-	 				List<String> tagList = result.getList();
-	 				for (int i=0; i<tagList.size(); i++) {
-	 		        	for (String tag : archive.get(UID).getTags()) {
-	 		        		if (tagList.get(i).equals(tag)) {
-	 		        			hasTag = true;
-	 		        		}
-	 		        	}
-	 		        }
-	 				return hasTag;
-	 			}).collect(toList());
-	             
+				ArrayList<String> deleteUIDs = (ArrayList<String>) archive
+					.getMoleculeUIDs().parallelStream().filter(UID -> {
+						if (result.removeAll() && archive.get(UID).getTags().size() == 0) {
+							return true;
+						}
+
+						boolean hasTag = false;
+						List<String> tagList = result.getList();
+						for (int i = 0; i < tagList.size(); i++) {
+							for (String tag : archive.get(UID).getTags()) {
+								if (tagList.get(i).equals(tag)) {
+									hasTag = true;
+								}
+							}
+						}
+						return hasTag;
+					}).collect(toList());
+
 				deleteUIDs.parallelStream().forEach(UID -> archive.remove(UID));
 			}, "Deleting Molecules...");
 		});
 	}
-	
+
 	protected void deleteMoleculeTags() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getTagSet(), "Delete Molecule Tags", "Delete molecule tags:", "Delete all tags");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getTagSet(),
+			"Delete Molecule Tags", "Delete molecule tags:", "Delete all tags");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				List<String> tagList = result.getList();
-	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
-	            		Molecule molecule = archive.get(UID);
-	            	 	if (result.removeAll()) {
-	            	 		molecule.removeAllTags();
-	            	 	} else {
-	     		        	for (int i=0;i<tagList.size();i++) {
-	     		        		molecule.removeTag(tagList.get(i));
-	     		        	}
-	            	 	}
-	            	 	archive.put(molecule);
-	     			});
+				archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+					Molecule molecule = archive.get(UID);
+					if (result.removeAll()) {
+						molecule.removeAllTags();
+					}
+					else {
+						for (int i = 0; i < tagList.size(); i++) {
+							molecule.removeTag(tagList.get(i));
+						}
+					}
+					archive.put(molecule);
+				});
 			}, "Deleting Molecule Tags...");
 		});
 	}
-	
+
 	protected void deleteMoleculeParameters() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getParameterSet(), "Delete Molecule Parameters", "Delete molecule parameters:", "Delete all parameters");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getParameterSet(),
+			"Delete Molecule Parameters", "Delete molecule parameters:",
+			"Delete all parameters");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				List<String> parameterList = result.getList();
-	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
-	            		Molecule molecule = archive.get(UID);
-	            	 	if (result.removeAll()) {
-	            	 		molecule.removeAllParameters();
-	            	 	} else {
-	            	 		for (int i=0;i<parameterList.size();i++) {
-	     		        		molecule.removeParameter(parameterList.get(i));
-	     		        	}
-	            	 	}
-	            	 	archive.put(molecule);
-	     			});
+				archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+					Molecule molecule = archive.get(UID);
+					if (result.removeAll()) {
+						molecule.removeAllParameters();
+					}
+					else {
+						for (int i = 0; i < parameterList.size(); i++) {
+							molecule.removeParameter(parameterList.get(i));
+						}
+					}
+					archive.put(molecule);
+				});
 			}, "Deleting Molecule Parameters...");
 		});
 	}
-	
+
 	protected void deleteMoleculeRegions() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getRegionSet(), "Delete Molecule Regions", "Delete molecule regions:", "Delete all regions");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getRegionSet(),
+			"Delete Molecule Regions", "Delete molecule regions:",
+			"Delete all regions");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				List<String> regionList = result.getList();
-	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
-	            		Molecule molecule = archive.get(UID);
-	            	 	if (result.removeAll()) {
-	            	 		molecule.removeAllRegions();
-	            	 	} else {
-	            	 		for (int i=0;i<regionList.size();i++) {
-	     		        		molecule.removeRegion(regionList.get(i));
-	     		        	}
-	            	 	}
-	            	 	archive.put(molecule);
-	     			});
+				archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+					Molecule molecule = archive.get(UID);
+					if (result.removeAll()) {
+						molecule.removeAllRegions();
+					}
+					else {
+						for (int i = 0; i < regionList.size(); i++) {
+							molecule.removeRegion(regionList.get(i));
+						}
+					}
+					archive.put(molecule);
+				});
 			}, "Deleting Molecule Regions...");
 		});
 	}
-	
+
 	protected void deleteMoleculePositions() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getPositionSet(), "Delete Molecule Positions", "Delete molecule positions:", "Delete all positions");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getPositionSet(),
+			"Delete Molecule Positions", "Delete molecule positions:",
+			"Delete all positions");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				List<String> regionList = result.getList();
-	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
-	            		Molecule molecule = archive.get(UID);
-	            	 	if (result.removeAll()) {
-	            	 		molecule.removeAllPositions();
-	            	 	} else {
-	            	 		for (int i=0;i<regionList.size();i++) {
-	     		        		molecule.removePosition(regionList.get(i));
-	     		        	}
-	            	 	}
-	            	 	archive.put(molecule);
-	     			});
+				archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+					Molecule molecule = archive.get(UID);
+					if (result.removeAll()) {
+						molecule.removeAllPositions();
+					}
+					else {
+						for (int i = 0; i < regionList.size(); i++) {
+							molecule.removePosition(regionList.get(i));
+						}
+					}
+					archive.put(molecule);
+				});
 			}, "Deleting Molecule Positions...");
 		});
 	}
-	
+
 	protected void deleteSegmentTables() {
-		SegmentTableSelectionDialog dialog = new SegmentTableSelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getSegmentsTableNames(), "Delete segments table");
+		SegmentTableSelectionDialog dialog = new SegmentTableSelectionDialog(
+			getNode().getScene().getWindow(), archive.properties()
+				.getSegmentsTableNames(), "Delete segments table");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
 				List<String> segmentTableName = result.getSegmentTableName();
-	            archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
-	            		Molecule molecule = archive.get(UID);
-	            	 	molecule.removeSegmentsTable(segmentTableName);
-	            	 	archive.put(molecule);
-	     			});
-	            
-	            archive.properties().getSegmentsTableNames().remove(segmentTableName);
+				archive.getMoleculeUIDs().parallelStream().forEach(UID -> {
+					Molecule molecule = archive.get(UID);
+					molecule.removeSegmentsTable(segmentTableName);
+					archive.put(molecule);
+				});
+
+				archive.properties().getSegmentsTableNames().remove(segmentTableName);
 			}, "Deleting Segments Tables...");
 		});
 	}
-	
+
 	protected void mergeMolecules() {
-		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode().getScene().getWindow(), 
-				archive.properties().getTagSet(), "Merge Molecules", "Merge molecules with tag:");
+		PropertySelectionDialog dialog = new PropertySelectionDialog(getNode()
+			.getScene().getWindow(), archive.properties().getTagSet(),
+			"Merge Molecules", "Merge molecules with tag:");
 
 		dialog.showAndWait().ifPresent(result -> {
 			runTask(() -> {
-				if (result.getList().size() == 0)
-					return;
-				
+				if (result.getList().size() == 0) return;
+
 				String tag = result.getList().get(0);
-	     		 
-	     		List<String> mergeUIDs = (ArrayList<String>)archive.getMoleculeUIDs().stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(toList());
-             
-	     		if (mergeUIDs.size() < 2) 
-	     			return;
-	     		
-	     		for (int i=1; i < mergeUIDs.size(); i++) {
-	     			
-	     			if (archive.get(mergeUIDs.get(0)) instanceof MartianObject) 
-						((MartianObject) archive.get(mergeUIDs.get(0))).merge((MartianObject) archive.get(mergeUIDs.get(i)));
-	     			else archive.get(mergeUIDs.get(0)).merge(archive.get(mergeUIDs.get(i)));
-	     			
-	     			archive.remove(mergeUIDs.get(i));
-	     		}
-	     		
+
+				List<String> mergeUIDs = (ArrayList<String>) archive.getMoleculeUIDs()
+					.stream().filter(UID -> archive.moleculeHasTag(UID, tag)).collect(
+						toList());
+
+				if (mergeUIDs.size() < 2) return;
+
+				for (int i = 1; i < mergeUIDs.size(); i++) {
+
+					if (archive.get(mergeUIDs.get(0)) instanceof MartianObject)
+						((MartianObject) archive.get(mergeUIDs.get(0))).merge(
+							(MartianObject) archive.get(mergeUIDs.get(i)));
+					else archive.get(mergeUIDs.get(0)).merge(archive.get(mergeUIDs.get(
+						i)));
+
+					archive.remove(mergeUIDs.get(i));
+				}
+
 			}, "Merging Molecules...");
 		});
 	}
-	
+
 	protected void runTask(Runnable process, String message) {
 		lockFX(message);
-		
+
 		Task<Void> task = new Task<Void>() {
-            @Override
-            public Void call() throws Exception {
-            	process.run();
-                return null;
-            }
-        };
 
-        task.setOnSucceeded(event -> unlockFX());
+			@Override
+			public Void call() throws Exception {
+				process.run();
+				return null;
+			}
+		};
 
-        new Thread(task).start();
+		task.setOnSucceeded(event -> unlockFX());
+
+		new Thread(task).start();
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
 
 	public Stage getStage() {
 		return stage;
 	}
-	
+
 	public String getTitle() {
 		return title;
 	}
 
-	public void updateMenus(ArrayList<Menu> menus) {	
-    	while (menuBar.getMenus().size() > 1)
-    		menuBar.getMenus().remove(1);
-    	if(menus != null && menus.size() > 0) {
-    		for (Menu menu : menus)
-    			menuBar.getMenus().add(menu);
-    	}
-    	menuBar.getMenus().add(toolsMenu);
-    }
+	public void updateMenus(ArrayList<Menu> menus) {
+		while (menuBar.getMenus().size() > 1)
+			menuBar.getMenus().remove(1);
+		if (menus != null && menus.size() > 0) {
+			for (Menu menu : menus)
+				menuBar.getMenus().add(menu);
+		}
+		menuBar.getMenus().add(toolsMenu);
+	}
 
-    public void save() {
-		 if (archive.getFile() != null) {
-			 if(archive.getFile().getName().equals(archive.getName())) {
-				 runTask(() -> {
-						fireEvent(new MoleculeArchiveSavingEvent(archive));
-						try {
-							archive.save();	 
-	     	            	saveState(archive.getFile().getAbsolutePath());
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-						fireEvent(new MoleculeArchiveSavedEvent(archive));
-					}, "Saving...");
-			 } else {
-			    //the archive name has changed... so let's check with the user about the new name...
+	public void save() {
+		if (archive.getFile() != null) {
+			if (archive.getFile().getName().equals(archive.getName())) {
+				runTask(() -> {
+					fireEvent(new MoleculeArchiveSavingEvent(archive));
+					try {
+						archive.save();
+						saveState(archive.getFile().getAbsolutePath());
+					}
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+					fireEvent(new MoleculeArchiveSavedEvent(archive));
+				}, "Saving...");
+			}
+			else {
+				// the archive name has changed... so let's check with the user about
+				// the new name...
 				saveAs(archive.getFile());
-			 }
-		 } else {
+			}
+		}
+		else {
 			saveAs(new File(archive.getName()));
-		 }
-	   	 settingsTab.save();
-    }
-    
-    public void saveCopy() {
-	    String fileName = archive.getName();
-	    if (fileName.endsWith(".store"))
-	    	fileName = fileName.substring(0, fileName.length() - 6);
+		}
+		settingsTab.save();
+	}
+
+	public void saveCopy() {
+		String fileName = archive.getName();
+		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
+			.length() - 6);
 
 		if (archive.getFile() != null) {
 			saveAsCopy(new File(archive.getFile().getParentFile(), fileName));
-		} else {
+		}
+		else {
 			saveAsCopy(new File(System.getProperty("user.home"), fileName));
 		}
-    }
-    
-    public void saveJsonCopy() {
-	    String fileName = archive.getName();
-	    if (fileName.endsWith(".store"))
-	    	fileName = fileName.substring(0, fileName.length() - 6);
-	    
-			if (archive.getFile() != null) {
-				saveAsJsonCopy(new File(archive.getFile().getParentFile(), fileName));
-			} else {
-				saveAsJsonCopy(new File(System.getProperty("user.home"), fileName));
-			}
-    }
-    
-    private boolean saveAs(File saveAsFile) {
+	}
+
+	public void saveJsonCopy() {
+		String fileName = archive.getName();
+		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
+			.length() - 6);
+
+		if (archive.getFile() != null) {
+			saveAsJsonCopy(new File(archive.getFile().getParentFile(), fileName));
+		}
+		else {
+			saveAsJsonCopy(new File(System.getProperty("user.home"), fileName));
+		}
+	}
+
+	private boolean saveAs(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
-		
+
 		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
-		
+
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
-		File newFile = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
+		File newFile = fileChooser.showSaveDialog(this.tabsContainer.getScene()
+			.getWindow());
 
 		if (newFile != null) {
-			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(newFile);
-			
-			runTask(() -> {
-				fireEvent(new MoleculeArchiveSavingEvent(archive));
-				try {
-					archive.saveAs(newFileWithExtension);
- 	            	saveState(newFileWithExtension.getAbsolutePath());
- 	            	
-	 	           	if (moleculeArchiveService.contains(archive.getName()))
-						moleculeArchiveService.removeArchive(archive);
-		           	
-					archive.setFile(newFileWithExtension);
-					archive.setName(newFileWithExtension.getName());
-					stage.setTitle(newFileWithExtension.getName());
-	
-					moleculeArchiveService.addArchive(archive);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				fireEvent(new MoleculeArchiveSavedEvent(archive));
-			}, "Saving...");
- 	        return true;
-		}
-		return false;
-	}
-    
-	private boolean saveAsCopy(File saveAsFile) {
-		FileChooser fileChooser = new FileChooser();
-		
-		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
-		
-		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
-		fileChooser.setInitialFileName(saveAsFile.getName());
+			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(
+				newFile);
 
-		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
-
-		if (file != null) {
-			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(file);
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
 					archive.saveAs(newFileWithExtension);
 					saveState(newFileWithExtension.getAbsolutePath());
-				} catch (IOException e) {
+
+					if (moleculeArchiveService.contains(archive.getName()))
+						moleculeArchiveService.removeArchive(archive);
+
+					archive.setFile(newFileWithExtension);
+					archive.setName(newFileWithExtension.getName());
+					stage.setTitle(newFileWithExtension.getName());
+
+					moleculeArchiveService.addArchive(archive);
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				fireEvent(new MoleculeArchiveSavedEvent(archive));
 			}, "Saving...");
- 	        return true;
+			return true;
 		}
 		return false;
 	}
-	
-	private boolean saveAsJsonCopy(File saveAsFile) {
+
+	private boolean saveAsCopy(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
-		
-		saveAsFile = ArchiveUtils.jsonFileExtensionFixer(saveAsFile);
-		
+
+		saveAsFile = ArchiveUtils.yamaFileExtensionFixer(saveAsFile);
+
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
-		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
+		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene()
+			.getWindow());
 
 		if (file != null) {
-			final File newFileWithExtension = ArchiveUtils.jsonFileExtensionFixer(file);
-			
+			final File newFileWithExtension = ArchiveUtils.yamaFileExtensionFixer(
+				file);
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
-					archive.saveAsJson(newFileWithExtension);	
- 	            	saveState(newFileWithExtension.getAbsolutePath());
-				} catch (IOException e) {
+					archive.saveAs(newFileWithExtension);
+					saveState(newFileWithExtension.getAbsolutePath());
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				fireEvent(new MoleculeArchiveSavedEvent(archive));
 			}, "Saving...");
- 	        return true;
+			return true;
 		}
 		return false;
 	}
-    
-    public void saveVirtualStoreCopy() {
-	 	String name = archive.getName();
-	 	
-	 	if (name.endsWith(".yama")) {
-	 		name += ".store";
-	 	} else if (!name.endsWith(".yama.store")) {
- 		 	name += ".yama.store";
- 		}
-	 	saveAsVirtualStore(new File(name));
-    }
-    
-    public void saveJsonVirtualStoreCopy() {
-	 	String name = archive.getName();
-	 	
-	 	if (name.endsWith(".yama")) {
-	 		name += ".store";
-	 	} else if (!name.endsWith(".yama.store")) {
- 		 	name += ".yama.store";
- 		}
+
+	private boolean saveAsJsonCopy(File saveAsFile) {
+		FileChooser fileChooser = new FileChooser();
+
+		saveAsFile = ArchiveUtils.jsonFileExtensionFixer(saveAsFile);
+
+		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
+		fileChooser.setInitialFileName(saveAsFile.getName());
+
+		File file = fileChooser.showSaveDialog(this.tabsContainer.getScene()
+			.getWindow());
+
+		if (file != null) {
+			final File newFileWithExtension = ArchiveUtils.jsonFileExtensionFixer(
+				file);
+
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAsJson(newFileWithExtension);
+					saveState(newFileWithExtension.getAbsolutePath());
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
+			return true;
+		}
+		return false;
+	}
+
+	public void saveVirtualStoreCopy() {
+		String name = archive.getName();
+
+		if (name.endsWith(".yama")) {
+			name += ".store";
+		}
+		else if (!name.endsWith(".yama.store")) {
+			name += ".yama.store";
+		}
+		saveAsVirtualStore(new File(name));
+	}
+
+	public void saveJsonVirtualStoreCopy() {
+		String name = archive.getName();
+
+		if (name.endsWith(".yama")) {
+			name += ".store";
+		}
+		else if (!name.endsWith(".yama.store")) {
+			name += ".yama.store";
+		}
 		saveAsJsonVirtualStore(new File(name));
-    }
-    
+	}
+
 	private void saveAsVirtualStore(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
-		
+
 		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
-		
+
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
-		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
-		
-		if (virtualDirectory != null) {	
-			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
+		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer
+			.getScene().getWindow());
+
+		if (virtualDirectory != null) {
+			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(
+				virtualDirectory);
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
-					archive.saveAsVirtualStore(newFileWithExtension);	
- 	            	saveState(newFileWithExtension.getAbsolutePath());
-				} catch (IOException e) {
+					archive.saveAsVirtualStore(newFileWithExtension);
+					saveState(newFileWithExtension.getAbsolutePath());
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				fireEvent(new MoleculeArchiveSavedEvent(archive));
 			}, "Saving Virtual Store Copy...");
 		}
 	}
-	
+
 	private void saveAsJsonVirtualStore(File saveAsFile) {
 		FileChooser fileChooser = new FileChooser();
-		
+
 		saveAsFile = ArchiveUtils.storeFileExtensionFixer(saveAsFile);
-		
+
 		fileChooser.setInitialDirectory(saveAsFile.getParentFile());
 		fileChooser.setInitialFileName(saveAsFile.getName());
 
-		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer.getScene().getWindow());
-		
+		File virtualDirectory = fileChooser.showSaveDialog(this.tabsContainer
+			.getScene().getWindow());
+
 		if (virtualDirectory != null) {
-			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(virtualDirectory);
+			final File newFileWithExtension = ArchiveUtils.storeFileExtensionFixer(
+				virtualDirectory);
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
-					archive.saveAsJsonVirtualStore(newFileWithExtension);	
- 	            	saveState(newFileWithExtension.getAbsolutePath());
-				} catch (IOException e) {
+					archive.saveAsJsonVirtualStore(newFileWithExtension);
+					saveState(newFileWithExtension.getAbsolutePath());
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				fireEvent(new MoleculeArchiveSavedEvent(archive));
 			}, "Saving Virtual Store Copy...");
 		}
 	}
-	
+
 	private void importRoverSettings() {
 		FileChooser fileChooser = new FileChooser();
-		
-		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("rover files (*.rover)", "*.rover");
+
+		FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter(
+			"rover files (*.rover)", "*.rover");
 		fileChooser.getExtensionFilters().add(extFilter);
-		
-		File stateFile = fileChooser.showOpenDialog(this.tabsContainer.getScene().getWindow());
-		
-		if (stateFile == null || !stateFile.exists())
-        		return;
-		
+
+		File stateFile = fileChooser.showOpenDialog(this.tabsContainer.getScene()
+			.getWindow());
+
+		if (stateFile == null || !stateFile.exists()) return;
+
 		runTask(() -> {
 			try {
-	 	       		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
-	 	       	    JsonParser jParser = jfactory.createParser(inputStream);
-	 	       	    fromJSON(jParser);
-	 	       		jParser.close();
-	 	       		inputStream.close();
-			} catch (IOException e) {
+				InputStream inputStream = new BufferedInputStream(new FileInputStream(
+					stateFile));
+				JsonParser jParser = jfactory.createParser(inputStream);
+				fromJSON(jParser);
+				jParser.close();
+				inputStream.close();
+			}
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}, "Loading Rover Settings...");
 	}
-	
+
 	public Node getNode() {
 		return maskerStackPane;
 	}
-	
+
 	public abstract I createImageMetadataTab(final Context context);
-	
+
 	public abstract M createMoleculesTab(final Context context);
-	
+
 	public abstract MarsBdvFrame createMarsBdvFrame(boolean useVolatile);
-	
-	public abstract MarsBdvFrame createMarsBdvFrame(JsonParser jParser, boolean useVolatile);
-	
+
+	public abstract MarsBdvFrame createMarsBdvFrame(JsonParser jParser,
+		boolean useVolatile);
+
 	public DashboardTab getDashboard() {
 		return dashboardTab;
 	}
-	
-	//Lock, unlock and update event might be called by swing threads
-	//so we use Platform.runLater to ensure they are executed on 
-	//the javafx thread.
-	
+
+	// Lock, unlock and update event might be called by swing threads
+	// so we use Platform.runLater to ensure they are executed on
+	// the javafx thread.
+
 	public void lock(String message) {
-		if (archiveLocked.get())
-    		return;
-		
+		if (archiveLocked.get()) return;
+
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				lockFX(message);
 			}
-    	});
-		
-		//Make sure we block the calling (swing) thread until
-		//the archive has actually been locked...
+		});
+
+		// Make sure we block the calling (swing) thread until
+		// the archive has actually been locked...
 		while (!archiveLocked.get()) {}
 	}
-	
+
 	private void lockFX(String message) {
 		masker.setText(message);
 		masker.setVisible(true);
@@ -1063,231 +1177,235 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		lockLogArea.setVisible(true);
 		marsSpinning.play();
 		marsSpinning.setProgress(-1);
-    	fireEvent(new MoleculeArchiveLockEvent(archive));
-    	archiveLocked.set(true);
+		fireEvent(new MoleculeArchiveLockEvent(archive));
+		archiveLocked.set(true);
 	}
-	
-    public void lock() {
-    	if (archiveLocked.get())
-    		return;
-    	
-    	Platform.runLater(new Runnable() {
+
+	public void lock() {
+		if (archiveLocked.get()) return;
+
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				lockFX();
 			}
-    	});
-    	
-    	//Make sure we block the calling (swing) thread until
-		//the archive has actually been locked...
+		});
+
+		// Make sure we block the calling (swing) thread until
+		// the archive has actually been locked...
 		while (!archiveLocked.get()) {}
-    }
-    
-    private void lockFX() {
+	}
+
+	private void lockFX() {
 		lockFX("Please Wait...");
-    }
-    
-    @Override
-    public void updateLockMessage(String message) {
-    	Platform.runLater(new Runnable() {
+	}
+
+	@Override
+	public void updateLockMessage(String message) {
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				masker.setText(message);
 			}
-    	});
-    }
-    
-    @Override
-    public void addLogMessage(String message) {
-    	Platform.runLater(new Runnable() {
+		});
+	}
+
+	@Override
+	public void addLogMessage(String message) {
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				lockLogAreaStrings.add(message);
 				lockLogArea.scrollTo(lockLogAreaStrings.size());
-				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				if (scroll != null)
-					scroll.setDisable(true);
+				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
+					".scroll-bar:vertical");
+				if (scroll != null) scroll.setDisable(true);
 			}
-    	});
-    }
-    
-    @Override
-    public void logln(String message) {
-    	Platform.runLater(new Runnable() {
+		});
+	}
+
+	@Override
+	public void logln(String message) {
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				lockLogAreaStrings.add(message);
-				if (lockLogAreaStrings.size() - 1 > 0) lockLogArea.scrollTo(lockLogAreaStrings.size() - 1);
-				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				if (scroll != null)
-					scroll.setDisable(true);
+				if (lockLogAreaStrings.size() - 1 > 0) lockLogArea.scrollTo(
+					lockLogAreaStrings.size() - 1);
+				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
+					".scroll-bar:vertical");
+				if (scroll != null) scroll.setDisable(true);
 			}
-    	});
-    }
-    
-    @Override
-    public void log(String message) {
-    	Platform.runLater(new Runnable() {
+		});
+	}
+
+	@Override
+	public void log(String message) {
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				if (lockLogAreaStrings.size() > 0) {
 					int index = lockLogAreaStrings.size() - 1;
 					String oldMessage = lockLogAreaStrings.get(index);
 					lockLogAreaStrings.set(index, oldMessage + message);
-    				lockLogArea.scrollTo(index);
-				} else lockLogAreaStrings.add(message);
-				
-				ScrollBar scroll = (ScrollBar)lockLogArea.lookup(".scroll-bar:vertical");
-				if (scroll != null)
-					scroll.setDisable(true);
+					lockLogArea.scrollTo(index);
+				}
+				else lockLogAreaStrings.add(message);
+
+				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
+					".scroll-bar:vertical");
+				if (scroll != null) scroll.setDisable(true);
 			}
-    	});
-    }
-    
-    //Not really ideal since a Task and updateProgress would be the best
-    //But this is the only way for direct interaction through swing threads.
-    @Override
-    public void setProgress(double progress) {
-    	Platform.runLater(new Runnable() {
+		});
+	}
+
+	// Not really ideal since a Task and updateProgress would be the best
+	// But this is the only way for direct interaction through swing threads.
+	@Override
+	public void setProgress(double progress) {
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				if (masker.isVisible()) {
 					marsSpinning.setProgress(progress);
 				}
 			}
-    	});
-    }
-    
-    @Override
-    public void unlock() {
-    	if (!archiveLocked.get())
-    		return;
-    	
-    	Platform.runLater(new Runnable() {
+		});
+	}
+
+	@Override
+	public void unlock() {
+		if (!archiveLocked.get()) return;
+
+		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
-		    	unlockFX();
+				unlockFX();
 			}
-    	});
-    	
-    	//Make sure we block the calling (swing) thread until
-		//the archive has actually been unlocked...
+		});
+
+		// Make sure we block the calling (swing) thread until
+		// the archive has actually been unlocked...
 		while (archiveLocked.get()) {}
-    }
-    
-    private void unlockFX() {
-    	fireEvent(new MoleculeArchiveUnlockEvent(archive));
+	}
+
+	private void unlockFX() {
+		fireEvent(new MoleculeArchiveUnlockEvent(archive));
 		masker.setVisible(false);
 		lockLogArea.setVisible(false);
 		marsSpinning.stop();
 		archiveLocked.set(false);
-    }
-    
-    @Override
-    public void update() {
-    	unlock();
-    }
-    
-    @Override
-    public void close() {
-    	if (moleculeArchiveService.contains(archive.getName()))
+	}
+
+	@Override
+	public void update() {
+		unlock();
+	}
+
+	@Override
+	public void close() {
+		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
-		if (ijStage != null)
-			WindowManager.removeWindow(ijStage);
-		
+		if (ijStage != null) WindowManager.removeWindow(ijStage);
+
 		Platform.runLater(() -> {
 			if (stage.isShowing()) stage.hide();
 		});
-		
+
 		if (marsBdvFrames != null) {
-			for (int i=0; i<marsBdvFrames.length; i++)
-	    		if (marsBdvFrames[i] != null) {
-	    			marsBdvFrames[i].getFrame().dispose();
-	    			marsBdvFrames[i] = null;
-	    		}
-			marsBdvFrames = null;
-		}	
-    }
-    
-    //Creates settings input and output maps to save the current state of the program.
-    @Override
-	protected void createIOMaps() {
-    	
-		setJsonField("window", 
-			jGenerator -> {
-				jGenerator.writeObjectFieldStart("window");
-				jGenerator.writeNumberField("x", stage.getX());
-				jGenerator.writeNumberField("y", stage.getY());
-				jGenerator.writeNumberField("width", stage.getWidth());
-				jGenerator.writeNumberField("height", stage.getHeight());
-				jGenerator.writeEndObject();
-			}, 
-			jParser -> {
-				Rectangle rect = new Rectangle(0, 0, 800, 600);
-				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					if ("x".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.x = jParser.getIntValue();
-					}
-					if ("y".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.y = jParser.getIntValue();
-					}
-					if ("width".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.width = jParser.getIntValue();
-					}
-					if ("height".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.height = jParser.getIntValue();
-					}
+			for (int i = 0; i < marsBdvFrames.length; i++)
+				if (marsBdvFrames[i] != null) {
+					marsBdvFrames[i].getFrame().dispose();
+					marsBdvFrames[i] = null;
 				}
-				
-				windowStateLoaded = true;
-				
-				stage.setX(rect.x);
-				stage.setY(rect.y);
-				stage.setWidth(rect.width);
-				stage.setHeight(rect.height);
-				stage.show();
-			});
-    	
+			marsBdvFrames = null;
+		}
+	}
+
+	// Creates settings input and output maps to save the current state of the
+	// program.
+	@Override
+	protected void createIOMaps() {
+
+		setJsonField("window", jGenerator -> {
+			jGenerator.writeObjectFieldStart("window");
+			jGenerator.writeNumberField("x", stage.getX());
+			jGenerator.writeNumberField("y", stage.getY());
+			jGenerator.writeNumberField("width", stage.getWidth());
+			jGenerator.writeNumberField("height", stage.getHeight());
+			jGenerator.writeEndObject();
+		}, jParser -> {
+			Rectangle rect = new Rectangle(0, 0, 800, 600);
+			while (jParser.nextToken() != JsonToken.END_OBJECT) {
+				if ("x".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.x = jParser.getIntValue();
+				}
+				if ("y".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.y = jParser.getIntValue();
+				}
+				if ("width".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.width = jParser.getIntValue();
+				}
+				if ("height".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.height = jParser.getIntValue();
+				}
+			}
+
+			windowStateLoaded = true;
+
+			stage.setX(rect.x);
+			stage.setY(rect.y);
+			stage.setWidth(rect.width);
+			stage.setHeight(rect.height);
+			stage.show();
+		});
+
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet)
-			setJsonField(moleculeArchiveTab.getName(), 
-				jGenerator -> {
-					jGenerator.writeFieldName(moleculeArchiveTab.getName());
-					moleculeArchiveTab.toJSON(jGenerator);
-				}, 
-				jParser -> {
-					moleculeArchiveTab.fromJSON(jParser);
-			 	});
-		
+			setJsonField(moleculeArchiveTab.getName(), jGenerator -> {
+				jGenerator.writeFieldName(moleculeArchiveTab.getName());
+				moleculeArchiveTab.toJSON(jGenerator);
+			}, jParser -> {
+				moleculeArchiveTab.fromJSON(jParser);
+			});
+
 		setJsonField("bdvFrames", jGenerator -> {
-					if (marsBdvFrames != null && marsBdvFrames.length > 0) {
-						jGenerator.writeObjectFieldStart("bdvFrames");
-						jGenerator.writeNumberField("numberViews", marsBdvFrames.length);
-						jGenerator.writeArrayFieldStart("views");
-						for (MarsBdvFrame bdvFrame : marsBdvFrames)
-							if (bdvFrame != null)
-								bdvFrame.toJSON(jGenerator);
-						jGenerator.writeEndArray();
-						jGenerator.writeEndObject();
-					} else if (roverFileBackground != null) {
-						//We should check if there were settings already saved and restore them!
-						ObjectMapper mapper = new ObjectMapper();	
-			    		JsonNode jsonNode = mapper.readTree(roverFileBackground);
-			    		JsonNode bdvFrameNode = jsonNode.get("bdvFrames");
-			    		if (bdvFrameNode != null) {
-			    			jGenerator.writeFieldName("bdvFrames");
-			    			mapper.writeTree(jGenerator, bdvFrameNode);
-			    		}
-					}
-				}, 
-				jParser -> {
-					//The settings were discovered but will not be loaded until showVideo is called.
-					MarsUtil.passThroughUnknownObjects(jParser);
-				});
+			if (marsBdvFrames != null && marsBdvFrames.length > 0) {
+				jGenerator.writeObjectFieldStart("bdvFrames");
+				jGenerator.writeNumberField("numberViews", marsBdvFrames.length);
+				jGenerator.writeArrayFieldStart("views");
+				for (MarsBdvFrame bdvFrame : marsBdvFrames)
+					if (bdvFrame != null) bdvFrame.toJSON(jGenerator);
+				jGenerator.writeEndArray();
+				jGenerator.writeEndObject();
+			}
+			else if (roverFileBackground != null) {
+				// We should check if there were settings already saved and restore
+				// them!
+				ObjectMapper mapper = new ObjectMapper();
+				JsonNode jsonNode = mapper.readTree(roverFileBackground);
+				JsonNode bdvFrameNode = jsonNode.get("bdvFrames");
+				if (bdvFrameNode != null) {
+					jGenerator.writeFieldName("bdvFrames");
+					mapper.writeTree(jGenerator, bdvFrameNode);
+				}
+			}
+		}, jParser -> {
+			// The settings were discovered but will not be loaded until showVideo is
+			// called.
+			MarsUtil.passThroughUnknownObjects(jParser);
+		});
 
 		/*
 		 * 
@@ -1296,162 +1414,169 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		 * Please remove for a future release.
 		 * 
 		 */
-		
+
 		for (MoleculeArchiveTab moleculeArchiveTab : tabSet) {
 			String name = moleculeArchiveTab.getName();
-			if (moleculeArchiveTab.getName().equals("dashboardTab"))
-				name = "DashboardTab";
-			else if (moleculeArchiveTab.getName().equals("commentsTab"))
-				name = "CommentsTab";
-			else if (moleculeArchiveTab.getName().equals("settingsTab"))
-				name = "SettingsTab";
-			else if (moleculeArchiveTab.getName().equals("metadataTab"))
-				name = "MetadataTab";
-			else if (moleculeArchiveTab.getName().equals("moleculesTab"))
-				name = "MoleculesTab";
-			
-			setJsonField(name, null, 
-				jParser -> {
-					moleculeArchiveTab.fromJSON(jParser);
-			 	});
-		}
-		
-		setJsonField("Window", null, 
-			jParser -> {
-				Rectangle rect = new Rectangle(0, 0, 800, 600);
-				while (jParser.nextToken() != JsonToken.END_OBJECT) {
-					if ("x".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.x = jParser.getIntValue();
-					}
-					if ("y".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.y = jParser.getIntValue();
-					}
-					if ("width".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.width = jParser.getIntValue();
-					}
-					if ("height".equals(jParser.getCurrentName())) {
-						jParser.nextToken();
-						rect.height = jParser.getIntValue();
-					}
-				}
-				
-				windowStateLoaded = true;
-				
-				stage.setX(rect.x);
-				stage.setY(rect.y);
-				stage.setWidth(rect.width);
-				stage.setHeight(rect.height);
-				stage.show();
+			if (moleculeArchiveTab.getName().equals("dashboardTab")) name =
+				"DashboardTab";
+			else if (moleculeArchiveTab.getName().equals("commentsTab")) name =
+				"CommentsTab";
+			else if (moleculeArchiveTab.getName().equals("settingsTab")) name =
+				"SettingsTab";
+			else if (moleculeArchiveTab.getName().equals("metadataTab")) name =
+				"MetadataTab";
+			else if (moleculeArchiveTab.getName().equals("moleculesTab")) name =
+				"MoleculesTab";
+
+			setJsonField(name, null, jParser -> {
+				moleculeArchiveTab.fromJSON(jParser);
 			});
+		}
+
+		setJsonField("Window", null, jParser -> {
+			Rectangle rect = new Rectangle(0, 0, 800, 600);
+			while (jParser.nextToken() != JsonToken.END_OBJECT) {
+				if ("x".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.x = jParser.getIntValue();
+				}
+				if ("y".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.y = jParser.getIntValue();
+				}
+				if ("width".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.width = jParser.getIntValue();
+				}
+				if ("height".equals(jParser.getCurrentName())) {
+					jParser.nextToken();
+					rect.height = jParser.getIntValue();
+				}
+			}
+
+			windowStateLoaded = true;
+
+			stage.setX(rect.x);
+			stage.setY(rect.y);
+			stage.setWidth(rect.width);
+			stage.setHeight(rect.height);
+			stage.show();
+		});
 	}
-    
-    protected void saveState(String path) throws IOException {
-    	if (marsBdvFrames == null && new File(path + ".rover").exists())
-    		roverFileBackground = FileUtils.readFileToByteArray(new File(path + ".rover"));
-    	
-    	logln("Saving archive window settings to rover file...");
- 
-		OutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(path + ".rover")));
+
+	protected void saveState(String path) throws IOException {
+		if (marsBdvFrames == null && new File(path + ".rover").exists())
+			roverFileBackground = FileUtils.readFileToByteArray(new File(path +
+				".rover"));
+
+		logln("Saving archive window settings to rover file...");
+
+		OutputStream stream = new BufferedOutputStream(new FileOutputStream(
+			new File(path + ".rover")));
 		JsonGenerator jGenerator = jfactory.createGenerator(stream);
 		jGenerator.useDefaultPrettyPrinter();
 		toJSON(jGenerator);
 		jGenerator.close();
 		stream.flush();
 		stream.close();
-    }
-    
-    protected void loadState() throws IOException {
-    	if (archive.getFile() == null)
-    		return;
-    	
-    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
-    	if (!stateFile.exists())
-    		return;
-    	
-		InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
-	    JsonParser jParser = jfactory.createParser(inputStream);
-	    fromJSON(jParser);
+	}
+
+	protected void loadState() throws IOException {
+		if (archive.getFile() == null) return;
+
+		File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
+		if (!stateFile.exists()) return;
+
+		InputStream inputStream = new BufferedInputStream(new FileInputStream(
+			stateFile));
+		JsonParser jParser = jfactory.createParser(inputStream);
+		fromJSON(jParser);
 		jParser.close();
 		inputStream.close();
-    }
-    
-    protected void loadBdvSettings() {
-    	if (archive.getFile() == null)
-    		return;
-    	
-    	File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
-    	if (!stateFile.exists())
-    		return;
-    	
-    	//Build default parser
-    	DefaultJsonConverter defaultParser = new DefaultJsonConverter();
-    	defaultParser.setShowWarnings(false);
- 	    defaultParser.setJsonField("bdvFrames", null, jParser -> {
- 	    	jParser.nextToken();
- 	    	jParser.nextToken();
- 	    	final int views = jParser.getNumberValue().intValue();
-     		BdvHandle[] handles = new BdvHandle[views];
-     		marsBdvFrames = new MarsBdvFrame[views];
-     		int index = 0;
-     		jParser.nextToken();
-     		while (jParser.nextToken() != JsonToken.END_ARRAY) {
-     			MarsBdvFrame marsBdvFrame = createMarsBdvFrame(jParser, prefService.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
-         		marsBdvFrames[index] = marsBdvFrame;
-     			handles[index] = marsBdvFrame.getBdvHandle();
-     			index++;
-     		}
-     		
-     		//Make sure we move out of the bdvFrames field to the end of the object...
-     		jParser.nextToken();
-          
-     		ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles, true);
-     		
-     		for (int i = 0; i < marsBdvFrames.length; i++) {
-         		marsBdvFrames[i].getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
-         		    @Override
-         		    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-         		    	super.windowClosing(windowEvent);
-         		    	for (int i=0; i<marsBdvFrames.length; i++)
-         		    		if (marsBdvFrames[i] != null) {
-         		    			marsBdvFrames[i].getFrame().dispose();
-         		    			marsBdvFrames[i] = null;
-         		    		}
-         		    	marsBdvFrames = null;
-                        new ViewerTransformSyncStopper(sync.getSynchronizers(), sync.getTimeSynchronizers()).run();
-         		    }
-         		});
-     		}
-            sync.run();
-                 
-         	if (moleculesTab.getSelectedMolecule() != null)
-         		moleculesTab.setMarsBdvFrames(marsBdvFrames);
- 		});
-    	
- 	   SwingUtilities.invokeLater(new Runnable() {
-           @Override
-           public void run() {	
-        	   try {
-	        	   InputStream inputStream = new BufferedInputStream(new FileInputStream(stateFile));
-	        	   JsonParser jParser = jfactory.createParser(inputStream);
-				   defaultParser.fromJSON(jParser);
-	       		   jParser.close();
-	       		   inputStream.close();
-        	   } catch (IOException e) {
-   				e.printStackTrace();
-   			   }
-           }
- 	   });
-		
-    }
+	}
 
-    public void fireEvent(Event event) {
-    	dashboardTab.fireEvent(event);
-        imageMetadataTab.fireEvent(event);
-        moleculesTab.fireEvent(event);
-        commentsTab.fireEvent(event);
-        settingsTab.fireEvent(event);
-    }
+	protected void loadBdvSettings() {
+		if (archive.getFile() == null) return;
+
+		File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
+		if (!stateFile.exists()) return;
+
+		// Build default parser
+		DefaultJsonConverter defaultParser = new DefaultJsonConverter();
+		defaultParser.setShowWarnings(false);
+		defaultParser.setJsonField("bdvFrames", null, jParser -> {
+			jParser.nextToken();
+			jParser.nextToken();
+			final int views = jParser.getNumberValue().intValue();
+			BdvHandle[] handles = new BdvHandle[views];
+			marsBdvFrames = new MarsBdvFrame[views];
+			int index = 0;
+			jParser.nextToken();
+			while (jParser.nextToken() != JsonToken.END_ARRAY) {
+				MarsBdvFrame marsBdvFrame = createMarsBdvFrame(jParser, prefService
+					.getBoolean(SettingsTab.class, "useN5VolatileViews", true));
+				marsBdvFrames[index] = marsBdvFrame;
+				handles[index] = marsBdvFrame.getBdvHandle();
+				index++;
+			}
+
+			// Make sure we move out of the bdvFrames field to the end of the
+			// object...
+			jParser.nextToken();
+
+			ViewerTransformSyncStarter sync = new ViewerTransformSyncStarter(handles,
+				true);
+
+			for (int i = 0; i < marsBdvFrames.length; i++) {
+				marsBdvFrames[i].getFrame().addWindowListener(
+					new java.awt.event.WindowAdapter()
+					{
+
+						@Override
+						public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+							super.windowClosing(windowEvent);
+							for (int i = 0; i < marsBdvFrames.length; i++)
+								if (marsBdvFrames[i] != null) {
+									marsBdvFrames[i].getFrame().dispose();
+									marsBdvFrames[i] = null;
+								}
+							marsBdvFrames = null;
+							new ViewerTransformSyncStopper(sync.getSynchronizers(), sync
+								.getTimeSynchronizers()).run();
+						}
+					});
+			}
+			sync.run();
+
+			if (moleculesTab.getSelectedMolecule() != null) moleculesTab
+				.setMarsBdvFrames(marsBdvFrames);
+		});
+
+		SwingUtilities.invokeLater(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					InputStream inputStream = new BufferedInputStream(new FileInputStream(
+						stateFile));
+					JsonParser jParser = jfactory.createParser(inputStream);
+					defaultParser.fromJSON(jParser);
+					jParser.close();
+					inputStream.close();
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+	}
+
+	public void fireEvent(Event event) {
+		dashboardTab.fireEvent(event);
+		imageMetadataTab.fireEvent(event);
+		moleculesTab.fireEvent(event);
+		commentsTab.fireEvent(event);
+		settingsTab.fireEvent(event);
+	}
 }

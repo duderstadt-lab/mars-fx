@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import java.io.IOException;
@@ -43,19 +44,25 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeArchiveDashboardWidget.class, name = "CategoryChartWidget" )
-public class MoleculeArchiveCategoryChartWidget extends AbstractCategoryChartWidget implements MoleculeArchiveDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MoleculeArchiveDashboardWidget.class,
+	name = "CategoryChartWidget")
+public class MoleculeArchiveCategoryChartWidget extends
+	AbstractCategoryChartWidget implements MoleculeArchiveDashboardWidget,
+	SciJavaPlugin, Initializable
+{
 
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("categorychart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n");
-		} catch (IOException e) {
+			loadScript("categorychart",
+				"#@ Context scijavaContext\n#@ MoleculeArchive archive\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -64,21 +71,27 @@ public class MoleculeArchiveCategoryChartWidget extends AbstractCategoryChartWid
 	protected void setScriptInputs(ScriptModule module) {
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
-		
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
-			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
-			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
 		}
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+
+	public void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
 		this.archive = archive;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "CategoryChartWidget";

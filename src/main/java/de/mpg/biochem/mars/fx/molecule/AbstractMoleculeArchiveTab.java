@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import java.util.ArrayList;
@@ -49,77 +50,85 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculeArchiveTab extends AbstractJsonConvertibleRecord implements MoleculeArchiveTab {
+public abstract class AbstractMoleculeArchiveTab extends
+	AbstractJsonConvertibleRecord implements MoleculeArchiveTab
+{
 
 	protected Tab tab;
-    protected double tabWidth = 60.0;
-    
-    @Parameter
-    protected MoleculeArchiveService moleculeArchiveService;
-    
-    @Parameter
-    protected Context context;
-    
-    @Parameter
-    protected PrefService prefService;
-    
-    protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
-	
+	protected double tabWidth = 60.0;
+
+	@Parameter
+	protected MoleculeArchiveService moleculeArchiveService;
+
+	@Parameter
+	protected Context context;
+
+	@Parameter
+	protected PrefService prefService;
+
+	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+
 	protected EventHandler<Event> replaceBackgroundColorHandler = event -> {
-        Tab currentTab = (Tab) event.getTarget();
-        if (currentTab.isSelected()) {
-            currentTab.setStyle("-fx-background-color: -fx-focus-color;");
-        } else {
-            currentTab.setStyle("-fx-background-color: -fx-accent;");
-        }
-    };
-    
-    public AbstractMoleculeArchiveTab(final Context context) {
-    	super();
-    	context.inject(this);
-    	tab = new Tab();
-    	tab.setText("");
-    	tab.setOnSelectionChanged(replaceBackgroundColorHandler);
-    	tab.closableProperty().set(false);
-    }
-	
+		Tab currentTab = (Tab) event.getTarget();
+		if (currentTab.isSelected()) {
+			currentTab.setStyle("-fx-background-color: -fx-focus-color;");
+		}
+		else {
+			currentTab.setStyle("-fx-background-color: -fx-accent;");
+		}
+	};
+
+	public AbstractMoleculeArchiveTab(final Context context) {
+		super();
+		context.inject(this);
+		tab = new Tab();
+		tab.setText("");
+		tab.setOnSelectionChanged(replaceBackgroundColorHandler);
+		tab.closableProperty().set(false);
+	}
+
 	protected void setIcon(Node icon) {
 		BorderPane tabPane = new BorderPane();
-        tabPane.setRotate(90.0);
-        tabPane.setMaxWidth(tabWidth);
-        tabPane.setCenter(icon);
-        tab.setGraphic(tabPane);
+		tabPane.setRotate(90.0);
+		tabPane.setMaxWidth(tabWidth);
+		tabPane.setCenter(icon);
+		tab.setGraphic(tabPane);
 	}
-    
-    public abstract ArrayList<Menu> getMenus();
-    
-    @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-    	this.archive = archive;
-    }
 
-    @Override
-    public void handle(MoleculeArchiveEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
+	public abstract ArrayList<Menu> getMenus();
+
+	@Override
+	public void onInitializeMoleculeArchiveEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		this.archive = archive;
+	}
+
+	@Override
+	public void handle(MoleculeArchiveEvent event) {
+		event.invokeHandler(this);
+		event.consume();
+	}
 
 	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
-	
+
 	public abstract Node getNode();
-	
+
 	public Tab getTab() {
 		return tab;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return this.archive;
 	}
-	
-	//Override any events below that should trigger a specific response.
+
+	// Override any events below that should trigger a specific response.
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {}

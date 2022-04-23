@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import java.util.HashMap;
@@ -57,180 +58,200 @@ import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
 
-public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane> extends AbstractJsonConvertibleRecord implements MoleculeSubPane {
+public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends PlotPane>
+	extends AbstractJsonConvertibleRecord implements MoleculeSubPane
+{
+
 	protected TabPane tabPane;
 	protected Tab dataTableTab;
 	protected Tab plotTab;
 	protected Tab moleculeDashboardTab;
-	
+
 	protected BorderPane dataTableContainer;
 	protected P plotPane;
 	protected MoleculeDashboard<M> moleculeDashboardPane;
-	
+
 	protected Set<List<String>> segmentTableNames;
 	protected Set<String> refreshedTabs;
 	protected Map<String, List<String>> tabNameToSegmentName;
-	
+
 	protected M molecule;
-	
+
 	public AbstractMoleculeCenterPane(final Context context) {
 		super();
 		context.inject(this);
-		
+
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 
-		dataTableTab = new Tab();		
+		dataTableTab = new Tab();
 		dataTableTab.setText("Table");
 		dataTableContainer = new BorderPane();
 		dataTableTab.setContent(dataTableContainer);
-		
+
 		plotTab = new Tab();
 		plotTab.setText("Plot");
 		plotPane = createPlotPane(context);
 		plotTab.setContent(plotPane.getNode());
-		
+
 		moleculeDashboardTab = new Tab();
 		moleculeDashboardTab.setText("");
-		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
 		moleculeDashboardPane = new MoleculeDashboard<M>(context);
 		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
-		
+
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(moleculeDashboardTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-		
+
 		tabPane.setStyle("");
 		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
-		
+		tabPane.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
+
 		tabPane.getSelectionModel().select(dataTableTab);
-		
+
 		segmentTableNames = new HashSet<List<String>>();
 		refreshedTabs = new HashSet<String>();
 		tabNameToSegmentName = new HashMap<String, List<String>>();
-		
+
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-		getNode().addEventHandler(PlotEvent.PLOT_EVENT, new EventHandler<PlotEvent>() { 
-			   @Override 
-			   public void handle(PlotEvent e) { 
-				   	if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
-				   		plotPane.fireEvent(new UpdatePlotAreaEvent());
-				   		e.consume();
-				   	}
-			   }
+		getNode().addEventHandler(PlotEvent.PLOT_EVENT,
+			new EventHandler<PlotEvent>()
+			{
+
+				@Override
+				public void handle(PlotEvent e) {
+					if (e.getEventType().getName().equals("UPDATE_PLOT_AREA")) {
+						plotPane.fireEvent(new UpdatePlotAreaEvent());
+						e.consume();
+					}
+				}
+			});
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e
+							.getArchive()));
+						moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e
+							.getArchive()));
+						e.consume();
+					}
+					else if (e.getEventType().getName().equals(
+						"MOLECULE_ARCHIVE_UNLOCK"))
+			{
+				plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
+				e.consume();
+			}
+				}
+			});
+
+		tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab,
+			newTab) -> {
+			refreshSelectedTab();
 		});
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-			   		plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
-			   		moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e.getArchive()));
-			   		e.consume();
-			   	} else if (e.getEventType().getName().equals("MOLECULE_ARCHIVE_UNLOCK")) {
-			   		plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
-			   		e.consume();
-			   	}
-			} 
-        });
-		
-		tabPane.getSelectionModel().selectedItemProperty().addListener((ov, oldTab, newTab) -> {
-            refreshSelectedTab();
-        });
 	}
-	
+
 	public void refreshSelectedTab() {
 		Tab selectedTab = tabPane.getSelectionModel().selectedItemProperty().get();
 		String tabName = selectedTab.getText();
-		
-		//Tab has already been refreshed
-		if (refreshedTabs.contains(tabName))
-			return;
-		
+
+		// Tab has already been refreshed
+		if (refreshedTabs.contains(tabName)) return;
+
 		if (selectedTab.equals(dataTableTab)) {
 			dataTableContainer.setCenter(new MarsTableView(molecule.getTable()));
-		} else if (selectedTab.equals(plotTab)) {
+		}
+		else if (selectedTab.equals(plotTab)) {
 			plotPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		} else if (selectedTab.equals(moleculeDashboardTab)) {
-			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		} else {
-			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
+		}
+		else if (selectedTab.equals(moleculeDashboardTab)) {
+			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
+				molecule));
+		}
+		else {
+			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(
+				molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
 		}
 		refreshedTabs.add(tabName);
 	}
 
-	protected Tab buildSegmentTab(List<String> segmentTableName) {		
+	protected Tab buildSegmentTab(List<String> segmentTableName) {
 		String tabName;
-		if (segmentTableName.get(2).equals(""))
-			tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
-		else 
-			tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
+		if (segmentTableName.get(2).equals("")) tabName = segmentTableName.get(1) +
+			" vs " + segmentTableName.get(0);
+		else tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) +
+			" - " + segmentTableName.get(2);
 		tabNameToSegmentName.put(tabName, segmentTableName);
-				
+
 		Tab segmentTableTab = new Tab(tabName);
 		BorderPane segmentTableContainer = new BorderPane();
 		segmentTableTab.setContent(segmentTableContainer);
-		
+
 		return segmentTableTab;
 	}
-	
+
 	protected void updateSegmentTables() {
-		//Build new segment table list
+		// Build new segment table list
 		Set<List<String>> newSegmentTableNames = new HashSet<List<String>>();
 		for (List<String> segmentTableName : molecule.getSegmentsTableNames())
 			newSegmentTableNames.add(segmentTableName);
-		
-		//Remove segment table tabs that are not needed 
-		segmentTableNames.stream().filter(segmentTableName -> !newSegmentTableNames.contains(segmentTableName))
-			.forEach(segmentTableName -> tabPane.getTabs().stream().filter(tab -> {
-				String tabName;
-				if (segmentTableName.get(2).equals(""))
-					tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
-				else 
-					tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
-				return tab.getText().equals(tabName);
-			})
-			.findFirst()
-			.ifPresent(tabToRemove -> tabPane.getTabs().remove(tabToRemove)));
-		
-		//Add new segment table tabs that are needed
-		newSegmentTableNames.stream().filter(name -> !segmentTableNames.contains(name))
-			.forEach(name -> tabPane.getTabs().add(buildSegmentTab(name)));
-		
+
+		// Remove segment table tabs that are not needed
+		segmentTableNames.stream().filter(segmentTableName -> !newSegmentTableNames
+			.contains(segmentTableName)).forEach(segmentTableName -> tabPane.getTabs()
+				.stream().filter(tab -> {
+					String tabName;
+					if (segmentTableName.get(2).equals("")) tabName = segmentTableName
+						.get(1) + " vs " + segmentTableName.get(0);
+					else tabName = segmentTableName.get(1) + " vs " + segmentTableName
+						.get(0) + " - " + segmentTableName.get(2);
+					return tab.getText().equals(tabName);
+				}).findFirst().ifPresent(tabToRemove -> tabPane.getTabs().remove(
+					tabToRemove)));
+
+		// Add new segment table tabs that are needed
+		newSegmentTableNames.stream().filter(name -> !segmentTableNames.contains(
+			name)).forEach(name -> tabPane.getTabs().add(buildSegmentTab(name)));
+
 		segmentTableNames = newSegmentTableNames;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
-		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(molecule));
-		
-		//all tabs are now stale
+		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
+			molecule));
+
+		// all tabs are now stale
 		refreshedTabs.clear();
-		
+
 		updateSegmentTables();
-		
+
 		refreshSelectedTab();
 	}
-	
+
 	@Override
 	protected void createIOMaps() {
-		
-		setJsonField("plotPane", 
-			jGenerator -> {
-				jGenerator.writeFieldName("plotPane");
-				plotPane.toJSON(jGenerator);
-			},
-			jParser -> plotPane.fromJSON(jParser));
-			
-		setJsonField("moleculeDashboard", 
-			jGenerator -> {
-				jGenerator.writeFieldName("moleculeDashboard");
-				moleculeDashboardPane.toJSON(jGenerator);
-			}, 
-			jParser -> moleculeDashboardPane.fromJSON(jParser));
-		
+
+		setJsonField("plotPane", jGenerator -> {
+			jGenerator.writeFieldName("plotPane");
+			plotPane.toJSON(jGenerator);
+		}, jParser -> plotPane.fromJSON(jParser));
+
+		setJsonField("moleculeDashboard", jGenerator -> {
+			jGenerator.writeFieldName("moleculeDashboard");
+			moleculeDashboardPane.toJSON(jGenerator);
+		}, jParser -> moleculeDashboardPane.fromJSON(jParser));
+
 		/*
 		 * 
 		 * The fields below are needed for backwards compatibility.
@@ -238,29 +259,28 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		 * Please remove for a future release.
 		 * 
 		 */
-		
-		setJsonField("PlotPane", null,
-			jParser -> plotPane.fromJSON(jParser));
-				
-		setJsonField("MoleculeDashboard", null, 
-			jParser -> moleculeDashboardPane.fromJSON(jParser));
+
+		setJsonField("PlotPane", null, jParser -> plotPane.fromJSON(jParser));
+
+		setJsonField("MoleculeDashboard", null, jParser -> moleculeDashboardPane
+			.fromJSON(jParser));
 	}
-	
+
 	public abstract P createPlotPane(final Context context);
-	
+
 	@Override
 	public Node getNode() {
 		return tabPane;
 	}
-	
+
 	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
-   
-   @Override
-   public void handle(MoleculeEvent event) {
-	   event.invokeHandler(this);
-	   event.consume();
-   }
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+		event.consume();
+	}
 }

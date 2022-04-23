@@ -65,9 +65,8 @@ import javafx.scene.control.Hyperlink;
  *
  * @author Karl Tauber
  */
-public class WebHyperlink
-	extends Hyperlink
-{
+public class WebHyperlink extends Hyperlink {
+
 	public WebHyperlink() {
 		setStyle("-fx-padding: 0; -fx-border-width: 0");
 	}
@@ -79,7 +78,16 @@ public class WebHyperlink
 
 	// 'uri' property
 	private final StringProperty uri = new SimpleStringProperty();
-	public String getUri() { return uri.get(); }
-	public void setUri(String uri) { this.uri.set(uri); }
-	public StringProperty UriProperty() { return uri; }
+
+	public String getUri() {
+		return uri.get();
+	}
+
+	public void setUri(String uri) {
+		this.uri.set(uri);
+	}
+
+	public StringProperty UriProperty() {
+		return uri;
+	}
 }

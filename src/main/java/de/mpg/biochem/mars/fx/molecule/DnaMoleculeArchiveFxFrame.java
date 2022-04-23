@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import java.io.IOException;
@@ -45,8 +46,14 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class DnaMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DnaMoleculesTab> {
-	public DnaMoleculeArchiveFxFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, final Context context) {
+public class DnaMoleculeArchiveFxFrame extends
+	AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DnaMoleculesTab>
+{
+
+	public DnaMoleculeArchiveFxFrame(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		final Context context)
+	{
 		super(archive, context);
 	}
 
@@ -67,17 +74,22 @@ public class DnaMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<De
 		card.setArchive(archive);
 		card.initialize();
 		cards.add(card);
-		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile, cards, context);
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
+			useVolatile, cards, context);
 	}
-	
+
 	@Override
-	public MarsBdvFrame createMarsBdvFrame(JsonParser jParser, boolean useVolatile) {
+	public MarsBdvFrame createMarsBdvFrame(JsonParser jParser,
+		boolean useVolatile)
+	{
 		try {
-			return new MarsBdvFrame(jParser, archive, moleculesTab.getSelectedMolecule(), useVolatile, context);
-		} catch (IOException e) {
-			//have a nice error dialog show up to alert the user there is an issue.
-			
-			//return frame with defaults
+			return new MarsBdvFrame(jParser, archive, moleculesTab
+				.getSelectedMolecule(), useVolatile, context);
+		}
+		catch (IOException e) {
+			// have a nice error dialog show up to alert the user there is an issue.
+
+			// return frame with defaults
 			return createMarsBdvFrame(useVolatile);
 		}
 	}

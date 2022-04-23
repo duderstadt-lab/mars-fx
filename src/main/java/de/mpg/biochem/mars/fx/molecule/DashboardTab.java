@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import java.io.IOException;
@@ -52,34 +53,40 @@ import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
 
 public class DashboardTab extends AbstractMoleculeArchiveTab {
+
 	private BorderPane borderPane;
-	
+
 	private MoleculeArchiveDashboard dashboardPane;
-    
-    @Parameter
-    private MarsDashboardWidgetService marsDashboardWidgetService;
-	
-    public DashboardTab(final Context context) {
+
+	@Parameter
+	private MarsDashboardWidgetService marsDashboardWidgetService;
+
+	public DashboardTab(final Context context) {
 		super(context);
-		
-    	setIcon(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"));
-    	
-    	dashboardPane = new MoleculeArchiveDashboard(context);
-    	
-    	borderPane = new BorderPane();
-    	borderPane.setCenter(dashboardPane.getNode());
-    	
-        getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, this);
-        
-    	getTab().setContent(borderPane);
-    }
-	
-    @Override
-    public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-    	this.archive = archive;  
-    	dashboardPane.getNode().fireEvent(new InitializeMoleculeArchiveEvent(archive));
-    }
-	
+
+		setIcon(MaterialIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"));
+
+		dashboardPane = new MoleculeArchiveDashboard(context);
+
+		borderPane = new BorderPane();
+		borderPane.setCenter(dashboardPane.getNode());
+
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			this);
+
+		getTab().setContent(borderPane);
+	}
+
+	@Override
+	public void onInitializeMoleculeArchiveEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		this.archive = archive;
+		dashboardPane.getNode().fireEvent(new InitializeMoleculeArchiveEvent(
+			archive));
+	}
+
 	@Override
 	public String getName() {
 		return "dashboardTab";
@@ -99,7 +106,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	public void toJSON(JsonGenerator jGenerator) throws IOException {
 		dashboardPane.toJSON(jGenerator);
 	}
-	
+
 	@Override
 	public void fromJSON(JsonParser jParser) throws IOException {
 		dashboardPane.fromJSON(jParser);

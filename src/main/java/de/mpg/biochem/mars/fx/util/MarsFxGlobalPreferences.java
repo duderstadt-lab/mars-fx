@@ -52,6 +52,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package de.mpg.biochem.mars.fx.util;
 
 import java.util.prefs.Preferences;
@@ -59,9 +60,9 @@ import java.util.prefs.Preferences;
 import javafx.application.Application;
 
 public class MarsFxGlobalPreferences {
-	
+
 	private static Application app;
-	
+
 	public static void showDocument(String uri) {
 		app.getHostServices().showDocument(uri);
 	}

@@ -52,6 +52,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package de.mpg.biochem.mars.fx;
 
 import java.text.MessageFormat;
@@ -60,17 +61,17 @@ import java.util.ResourceBundle;
 /**
  * @author Karl Tauber
  */
-public class Messages
-{
-	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.fx.messages";
-	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+public class Messages {
 
-	private Messages() {
-	}
+	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.fx.messages";
+	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
+		.getBundle(BUNDLE_NAME);
+
+	private Messages() {}
 
 	public static String get(String key) {
 //		try {
-			return RESOURCE_BUNDLE.getString(key);
+		return RESOURCE_BUNDLE.getString(key);
 //		} catch (MissingResourceException e) {
 //			return '!' + key + '!';
 //		}

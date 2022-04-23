@@ -67,8 +67,8 @@ import javafx.stage.WindowEvent;
  *
  * @author Karl Tauber
  */
-public class StageState
-{
+public class StageState {
+
 	private final Stage stage;
 	private final Preferences state;
 
@@ -119,20 +119,17 @@ public class StageState
 			stage.setHeight(h);
 		} // else: default behavior is use scene size
 
-		if (fullScreen != stage.isFullScreen())
-			stage.setFullScreen(fullScreen);
-		if (maximized != stage.isMaximized())
-			stage.setMaximized(maximized);
+		if (fullScreen != stage.isFullScreen()) stage.setFullScreen(fullScreen);
+		if (maximized != stage.isMaximized()) stage.setMaximized(maximized);
 	}
 
 	/**
-	 * Remembers the window bounds when the window
-	 * is not iconified, maximized or in fullScreen.
+	 * Remembers the window bounds when the window is not iconified, maximized or
+	 * in fullScreen.
 	 */
 	private void boundsChanged() {
 		// avoid too many (and useless) runLater() invocations
-		if (runLaterPending)
-			return;
+		if (runLaterPending) return;
 		runLaterPending = true;
 
 		// must use runLater() to ensure that change of all properties
@@ -141,16 +138,17 @@ public class StageState
 		Platform.runLater(() -> {
 			runLaterPending = false;
 
-			if (isNormalState())
-				normalBounds = getStageBounds();
+			if (isNormalState()) normalBounds = getStageBounds();
 		});
 	}
 
 	private boolean isNormalState() {
-		return !stage.isIconified() && !stage.isMaximized() && !stage.isFullScreen();
+		return !stage.isIconified() && !stage.isMaximized() && !stage
+			.isFullScreen();
 	}
 
 	private Rectangle getStageBounds() {
-		return new Rectangle(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+		return new Rectangle(stage.getX(), stage.getY(), stage.getWidth(), stage
+			.getHeight());
 	}
 }

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOMB;
@@ -74,12 +75,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends AbstractJsonConvertibleRecord
-		implements MarsDashboard<W> {
+public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
+	AbstractJsonConvertibleRecord implements MarsDashboard<W>
+{
 
 	@Parameter
 	protected MarsDashboardWidgetService marsDashboardWidgetService;
-	
+
 	@Parameter
 	protected ObjectService objectService;
 
@@ -92,13 +94,15 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 	private final int MAX_THREADS = 1;
 
-	private final List<WidgetRunnable> activeWidgets = Collections.synchronizedList(new ArrayList<>());
+	private final List<WidgetRunnable> activeWidgets = Collections
+		.synchronizedList(new ArrayList<>());
 
-	private final ExecutorService executor = Executors.newFixedThreadPool(MAX_THREADS, runnable -> {
-		Thread t = new Thread(runnable);
-		t.setDaemon(true);
-		return t;
-	});
+	private final ExecutorService executor = Executors.newFixedThreadPool(
+		MAX_THREADS, runnable -> {
+			Thread t = new Thread(runnable);
+			t.setDaemon(true);
+			return t;
+		});
 
 	protected ObservableList<W> widgets = FXCollections.observableArrayList();
 
@@ -109,25 +113,29 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		borderPane = new BorderPane();
 
 		Action removeAllWidgets = new Action("Remove all", null, BOMB, e -> {
-			
-			widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget));
-			
-			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode().getScene().getWindow(), 
-					"Are you sure you want to remove all widgets?");
-			
+
+			widgets.stream().filter(widget -> widget.isRunning()).forEach(
+				widget -> stopWidget(widget));
+
+			RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode()
+				.getScene().getWindow(),
+				"Are you sure you want to remove all widgets?");
+
 			Optional<ButtonType> result = alert.showAndWait();
-			if(result.get() == ButtonType.OK) {
+			if (result.get() == ButtonType.OK) {
 				widgets.clear();
 				widgetPane.getChildren().clear();
 			}
 		});
 
-		Action stopAllWidgets = new Action("Stop all", null, STOP,
-				e -> widgets.stream().filter(widget -> widget.isRunning()).forEach(widget -> stopWidget(widget)));
+		Action stopAllWidgets = new Action("Stop all", null, STOP, e -> widgets
+			.stream().filter(widget -> widget.isRunning()).forEach(
+				widget -> stopWidget(widget)));
 
 		Action reloadWidgets = new Action("Reload", null, REFRESH, e -> {
 			// executor.shutdownNow();
-			widgets.stream().filter(widget -> !widget.isRunning()).forEach(widget -> runWidget(widget));
+			widgets.stream().filter(widget -> !widget.isRunning()).forEach(
+				widget -> runWidget(widget));
 		});
 
 		toolbar = new ToolBar();
@@ -146,14 +154,16 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		languages.add("Python");
 		languages.add("Conda Python 3");
 		widgetScriptLanguage.getItems().addAll(languages);
-		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
-			if (marsDashboardWidgetService != null) 
-				marsDashboardWidgetService.setDefaultScriptingLanguage(n);
-		});
+		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener(
+			(ob, o, n) -> {
+				if (marsDashboardWidgetService != null) marsDashboardWidgetService
+					.setDefaultScriptingLanguage(n);
+			});
 		toolbar.getItems().add(widgetScriptLanguage);
 
 		toolbar.getItems().addAll(ActionUtils.createToolBarButton(removeAllWidgets),
-				ActionUtils.createToolBarButton(stopAllWidgets), ActionUtils.createToolBarButton(reloadWidgets));
+			ActionUtils.createToolBarButton(stopAllWidgets), ActionUtils
+				.createToolBarButton(reloadWidgets));
 
 		borderPane.setTop(toolbar);
 
@@ -163,22 +173,26 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		widgetPane.setCellWidth(50);
 		widgetPane.setCellHeight(50);
 		widgetPane.setPadding(new Insets(10, 10, 10, 10));
-		
-		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
-			@Override
-			public void changed(ObservableValue<? extends Object> observable, Object oldValue, Object newValue) {
-				int hCells = (int)(getWidgetPane().getWidth() / getWidgetPane().getCellWidth());
-				double containerWidth = hCells*getWidgetPane().getCellWidth();
-				
-				boolean outOfBoundsWidget = widgets.stream().filter(widget -> 
-					widget.getWidth() > getWidgetPane().getWidth()).findFirst().isPresent();
-				
-				if (outOfBoundsWidget) {
-					widgets.stream().filter(widget -> widget.getWidth() > containerWidth).forEach(widget ->
-						widget.setWidth(containerWidth));
 
-					//getWidgetPane().clearLayout();
-					//getWidgetPane().layout();
+		widgetPane.layoutBoundsProperty().addListener(new ChangeListener<Object>() {
+
+			@Override
+			public void changed(ObservableValue<? extends Object> observable,
+				Object oldValue, Object newValue)
+			{
+				int hCells = (int) (getWidgetPane().getWidth() / getWidgetPane()
+					.getCellWidth());
+				double containerWidth = hCells * getWidgetPane().getCellWidth();
+
+				boolean outOfBoundsWidget = widgets.stream().filter(widget -> widget
+					.getWidth() > getWidgetPane().getWidth()).findFirst().isPresent();
+
+				if (outOfBoundsWidget) {
+					widgets.stream().filter(widget -> widget.getWidth() > containerWidth)
+						.forEach(widget -> widget.setWidth(containerWidth));
+
+					// getWidgetPane().clearLayout();
+					// getWidgetPane().layout();
 				}
 			}
 		});
@@ -187,32 +201,37 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		scrollPane.setContent(widgetPane);
 		scrollPane.setFitToWidth(true);
 		borderPane.setCenter(scrollPane);
-		
+
 		borderPane.setOnDragOver(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-            	if (event.getGestureSource() != borderPane
-                        && event.getDragboard().hasFiles()) {
-                    event.acceptTransferModes(TransferMode.COPY);
-                }
-                event.consume();
-            }
-        });
-        
+
+			@Override
+			public void handle(DragEvent event) {
+				if (event.getGestureSource() != borderPane && event.getDragboard()
+					.hasFiles())
+				{
+					event.acceptTransferModes(TransferMode.COPY);
+				}
+				event.consume();
+			}
+		});
+
 		borderPane.setOnDragDropped(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                Dragboard db = event.getDragboard();
-                boolean success = false;
-                if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(".rover")) {
-                    success = importFromRoverFile(db.getFiles().get(0));
-                }
-                /* let the source know whether the string was successfully 
-                 * transferred and used */
-                event.setDropCompleted(success);
-                event.consume();
-            }
-        });
+
+			@Override
+			public void handle(DragEvent event) {
+				Dragboard db = event.getDragboard();
+				boolean success = false;
+				if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(
+					".rover"))
+				{
+					success = importFromRoverFile(db.getFiles().get(0));
+				}
+				/* let the source know whether the string was successfully 
+				 * transferred and used */
+				event.setDropCompleted(success);
+				event.consume();
+			}
+		});
 	}
 
 	public void runWidget(MarsDashboardWidget widget) {
@@ -220,8 +239,8 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	}
 
 	public void stopWidget(MarsDashboardWidget widget) {
-		activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget)).findFirst()
-				.ifPresent(activeWidget -> activeWidget.stop());
+		activeWidgets.stream().filter(wr -> wr.getWidget().equals(widget))
+			.findFirst().ifPresent(activeWidget -> activeWidget.stop());
 	}
 
 	public Node getNode() {
@@ -248,79 +267,81 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	}
 
 	public ButtonBase createWidgetButton(String widgetName) {
-		// HACK to get the Icon for the toolbar before any widgets have been added to
+		// HACK to get the Icon for the toolbar before any widgets have been added
+		// to
 		// the Dashboard...
 		// We create a dummy widget just to get the Icon but never use it.
 		// What is the workaround - can't seem to use a static method because that
 		// couldn't be in the interface.
-		MarsDashboardWidget dummyWidgetForIcon = marsDashboardWidgetService.createWidget(widgetName);
+		MarsDashboardWidget dummyWidgetForIcon = marsDashboardWidgetService
+			.createWidget(widgetName);
 
-		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName, dummyWidgetForIcon.getIcon(), e -> {
-			W widget = createWidget(widgetName);
-			addWidget(widget);
-		}, null);
+		ButtonBase widgetButton = ActionUtils.createToolBarButton(widgetName,
+			dummyWidgetForIcon.getIcon(), e -> {
+				W widget = createWidget(widgetName);
+				addWidget(widget);
+			}, null);
 
 		return widgetButton;
 	}
 
 	protected void discoverWidgets() {
-		if (marsDashboardWidgetService == null)
-			return;
+		if (marsDashboardWidgetService == null) return;
 
-		widgetScriptLanguage.getSelectionModel().select(marsDashboardWidgetService.getDefaultScriptingLanguage());
+		widgetScriptLanguage.getSelectionModel().select(marsDashboardWidgetService
+			.getDefaultScriptingLanguage());
 
 		Set<String> discoveredWidgets = getWidgetNames();
 
 		ArrayList<Node> widgetButtons = new ArrayList<Node>();
 
 		// Add all the expected widgets in the order defined by widgetToolbarOrder
-		getWidgetToolbarOrder().stream().filter(widgetName -> discoveredWidgets.contains(widgetName))
-				.forEach(widgetName -> widgetButtons.add(createWidgetButton(widgetName)));
+		getWidgetToolbarOrder().stream().filter(widgetName -> discoveredWidgets
+			.contains(widgetName)).forEach(widgetName -> widgetButtons.add(
+				createWidgetButton(widgetName)));
 
 		// Now add any newly discovered widgets besides the default set
-		discoveredWidgets.stream().filter(widgetName -> !getWidgetToolbarOrder().contains(widgetName))
-				.forEach(widgetName -> widgetButtons.add(createWidgetButton(widgetName)));
+		discoveredWidgets.stream().filter(widgetName -> !getWidgetToolbarOrder()
+			.contains(widgetName)).forEach(widgetName -> widgetButtons.add(
+				createWidgetButton(widgetName)));
 
 		toolbar.getItems().addAll(0, widgetButtons);
 	}
 
 	@Override
 	protected void createIOMaps() {
-		
-		setJsonField("widgets", 
-			jGenerator -> {
-				jGenerator.writeArrayFieldStart("widgets");
-				for (MarsDashboardWidget widget : widgets) {
-					jGenerator.writeStartObject();
-					jGenerator.writeStringField("name", widget.getName());
-					jGenerator.writeFieldName("settings");
-					widget.toJSON(jGenerator);
-					jGenerator.writeEndObject();
-				}
-				jGenerator.writeEndArray();
-			}, 
-			jParser -> {
-				while (jParser.nextToken() != JsonToken.END_ARRAY) {
-					while (jParser.nextToken() != JsonToken.END_OBJECT) {
-						W widget = null;
-	
-						if ("name".equals(jParser.getCurrentName())) {
-							jParser.nextToken();
-							widget = createWidget(jParser.getText());
-							addWidget(widget);
-						}
-	
+
+		setJsonField("widgets", jGenerator -> {
+			jGenerator.writeArrayFieldStart("widgets");
+			for (MarsDashboardWidget widget : widgets) {
+				jGenerator.writeStartObject();
+				jGenerator.writeStringField("name", widget.getName());
+				jGenerator.writeFieldName("settings");
+				widget.toJSON(jGenerator);
+				jGenerator.writeEndObject();
+			}
+			jGenerator.writeEndArray();
+		}, jParser -> {
+			while (jParser.nextToken() != JsonToken.END_ARRAY) {
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					W widget = null;
+
+					if ("name".equals(jParser.getCurrentName())) {
 						jParser.nextToken();
-	
-						if ("settings".equals(jParser.getCurrentName())) {
-							jParser.nextToken();
-							if (widget != null)
-								widget.fromJSON(jParser);
-						}
+						widget = createWidget(jParser.getText());
+						addWidget(widget);
+					}
+
+					jParser.nextToken();
+
+					if ("settings".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						if (widget != null) widget.fromJSON(jParser);
 					}
 				}
-			});
-		
+			}
+		});
+
 		/*
 		 * 
 		 * The fields below are needed for backwards compatibility.
@@ -328,29 +349,27 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		 * Please remove for a future release.
 		 * 
 		 */
-		
-		setJsonField("Widgets", null, 
-			jParser -> {
-				while (jParser.nextToken() != JsonToken.END_ARRAY) {
-					while (jParser.nextToken() != JsonToken.END_OBJECT) {
-						W widget = null;
-	
-						if ("Name".equals(jParser.getCurrentName())) {
-							jParser.nextToken();
-							widget = createWidget(jParser.getText());
-							addWidget(widget);
-						}
-	
+
+		setJsonField("Widgets", null, jParser -> {
+			while (jParser.nextToken() != JsonToken.END_ARRAY) {
+				while (jParser.nextToken() != JsonToken.END_OBJECT) {
+					W widget = null;
+
+					if ("Name".equals(jParser.getCurrentName())) {
 						jParser.nextToken();
-	
-						if ("Settings".equals(jParser.getCurrentName())) {
-							jParser.nextToken();
-							if (widget != null)
-								widget.fromJSON(jParser);
-						}
+						widget = createWidget(jParser.getText());
+						addWidget(widget);
+					}
+
+					jParser.nextToken();
+
+					if ("Settings".equals(jParser.getCurrentName())) {
+						jParser.nextToken();
+						if (widget != null) widget.fromJSON(jParser);
 					}
 				}
-			});
+			}
+		});
 	}
 
 	public abstract W createWidget(String widgetName);
@@ -358,7 +377,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 	public abstract ArrayList<String> getWidgetToolbarOrder();
 
 	public abstract Set<String> getWidgetNames();
-	
+
 	public abstract boolean importFromRoverFile(File roverFile);
 
 	class WidgetRunnable implements Runnable {
@@ -377,11 +396,11 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 
 		@Override
 		public void run() {
-			if (canceled.get())
-				return;
+			if (canceled.get()) return;
 			thread = Thread.currentThread();
 			runnable.run();
 			Platform.runLater(new Runnable() {
+
 				@Override
 				public void run() {
 					runnable.stopSpinning();
@@ -396,8 +415,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends A
 		}
 
 		public void stop() {
-			if (thread != null)
-				thread.interrupt();
+			if (thread != null) thread.interrupt();
 			canceled.set(true);
 			runnable.stopSpinning();
 			runnable.setRunning(false);

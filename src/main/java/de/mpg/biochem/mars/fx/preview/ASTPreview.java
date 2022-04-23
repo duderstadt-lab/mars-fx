@@ -77,22 +77,19 @@ import javafx.scene.control.IndexRange;
 import javafx.scene.control.ScrollBar;
 
 /**
- * Markdown AST preview.
- * Prints the AST tree to a text area.
+ * Markdown AST preview. Prints the AST tree to a text area.
  *
  * @author Karl Tauber
  */
-class ASTPreview
-	implements MarkdownPreviewPane.Preview
-{
+class ASTPreview implements MarkdownPreviewPane.Preview {
+
 	private PreviewStyledTextArea textArea;
 	private VirtualizedScrollPane<StyleClassedTextArea> scrollPane;
 	private ScrollBar vScrollBar;
 
 	private IndexRange lastEditorSelection;
 
-	ASTPreview() {
-	}
+	ASTPreview() {}
 
 	private void createNodes() {
 		textArea = new PreviewStyledTextArea();
@@ -104,8 +101,7 @@ class ASTPreview
 
 	@Override
 	public javafx.scene.Node getNode() {
-		if (scrollPane == null)
-			createNodes();
+		if (scrollPane == null) createNodes();
 		return scrollPane;
 	}
 
@@ -122,31 +118,32 @@ class ASTPreview
 
 	@Override
 	public void scrollY(PreviewContext context, double value) {
-		if (vScrollBar == null)
-			vScrollBar = Utils.findVScrollBar(scrollPane);
-		if (vScrollBar == null)
-			return;
+		if (vScrollBar == null) vScrollBar = Utils.findVScrollBar(scrollPane);
+		if (vScrollBar == null) return;
 
 		double maxValue = vScrollBar.maxProperty().get();
 		vScrollBar.setValue(maxValue * value);
 	}
 
-	//---- selection highlighting ---------------------------------------------
+	// ---- selection highlighting ---------------------------------------------
 
-	private static final Collection<String> STYLE_SELECTION = Collections.singleton("selection");
+	private static final Collection<String> STYLE_SELECTION = Collections
+		.singleton("selection");
 
-	private final HashMap<Integer, StyleSpans<Collection<String>>> oldSelectionStylesMap = new HashMap<>();
+	private final HashMap<Integer, StyleSpans<Collection<String>>> oldSelectionStylesMap =
+		new HashMap<>();
 
 	@Override
 	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
-		if (range.equals(lastEditorSelection))
-			return;
+		if (range.equals(lastEditorSelection)) return;
 		lastEditorSelection = range;
 
-		List<Range> sequences = context.getRenderer().findSequences(range.getStart(), range.getEnd());
+		List<Range> sequences = context.getRenderer().findSequences(range
+			.getStart(), range.getEnd());
 
 		// restore old styles
-		for (Map.Entry<Integer, StyleSpans<Collection<String>>> e : oldSelectionStylesMap.entrySet())
+		for (Map.Entry<Integer, StyleSpans<Collection<String>>> e : oldSelectionStylesMap
+			.entrySet())
 			textArea.setStyleSpans(e.getKey(), e.getValue());
 		oldSelectionStylesMap.clear();
 
@@ -158,8 +155,11 @@ class ASTPreview
 			while ((index = text.indexOf(rangeStr, index)) >= 0) {
 				int endIndex = index + rangeStr.length() + 1;
 				char after = text.charAt(endIndex - 1);
-				if ((after == ']' || after == ',') && !oldSelectionStylesMap.containsKey(index)) {
-					oldSelectionStylesMap.put(index, textArea.getStyleSpans(index, endIndex));
+				if ((after == ']' || after == ',') && !oldSelectionStylesMap
+					.containsKey(index))
+				{
+					oldSelectionStylesMap.put(index, textArea.getStyleSpans(index,
+						endIndex));
 					textArea.setStyle(index, endIndex, STYLE_SELECTION);
 				}
 				index = endIndex;
@@ -167,10 +167,12 @@ class ASTPreview
 		}
 	}
 
-	//---- syntax highlighting ------------------------------------------------
+	// ---- syntax highlighting ------------------------------------------------
 
-	private static final Pattern PATTERN = Pattern.compile("(?m)^\\s*(\\w+)(\\[.*$)");
-	private static final Pattern ATTRIBUTES = Pattern.compile("(?:(\\w+[=:])|(\"[^\"]*\")|(\\d+)|([\\[\\],]))");
+	private static final Pattern PATTERN = Pattern.compile(
+		"(?m)^\\s*(\\w+)(\\[.*$)");
+	private static final Pattern ATTRIBUTES = Pattern.compile(
+		"(?:(\\w+[=:])|(\"[^\"]*\")|(\\d+)|([\\[\\],]))");
 
 	// groups in PATTERN
 	private static final int GROUP_NODE_NAME = 1;
@@ -182,49 +184,56 @@ class ASTPreview
 	private static final int GROUP_ATTR_NUMBER = 3;
 	private static final int GROUP_ATTR_PUNCTATION = 4;
 
-	private static final Collection<String> STYLE_PUNCTATION = Arrays.asList("punctuation", "token");
-	private static final Collection<String> STYLE_NODE       = Arrays.asList("tag", "token");
-	private static final Collection<String> STYLE_ATTR_NAME  = Arrays.asList("attr-name", "token");
-	private static final Collection<String> STYLE_ATTR_VALUE = Arrays.asList("attr-value", "token");
+	private static final Collection<String> STYLE_PUNCTATION = Arrays.asList(
+		"punctuation", "token");
+	private static final Collection<String> STYLE_NODE = Arrays.asList("tag",
+		"token");
+	private static final Collection<String> STYLE_ATTR_NAME = Arrays.asList(
+		"attr-name", "token");
+	private static final Collection<String> STYLE_ATTR_VALUE = Arrays.asList(
+		"attr-value", "token");
 
-	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
+	private static StyleSpans<Collection<String>> computeHighlighting(
+		String text)
+	{
 		Matcher matcher = PATTERN.matcher(text);
 		int lastKwEnd = 0;
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-		while(matcher.find()) {
-			spansBuilder.add(Collections.emptyList(), matcher.start(GROUP_NODE_NAME) - lastKwEnd);
+		StyleSpansBuilder<Collection<String>> spansBuilder =
+			new StyleSpansBuilder<>();
+		while (matcher.find()) {
+			spansBuilder.add(Collections.emptyList(), matcher.start(GROUP_NODE_NAME) -
+				lastKwEnd);
 			spansBuilder.add(STYLE_NODE, groupLength(matcher, GROUP_NODE_NAME));
 
 			String attributesText = matcher.group(GROUP_ATTRS);
-			if(!attributesText.isEmpty()) {
+			if (!attributesText.isEmpty()) {
 				lastKwEnd = 0;
 
 				Matcher amatcher = ATTRIBUTES.matcher(attributesText);
-				while(amatcher.find()) {
-					if (amatcher.start() > lastKwEnd)
-						spansBuilder.add(Collections.emptyList(), amatcher.start() - lastKwEnd);
+				while (amatcher.find()) {
+					if (amatcher.start() > lastKwEnd) spansBuilder.add(Collections
+						.emptyList(), amatcher.start() - lastKwEnd);
 
 					Collection<String> style = null;
 					int length = amatcher.end() - amatcher.start();
 					if (amatcher.group(GROUP_ATTR_NAME) != null) {
 						style = STYLE_ATTR_NAME;
 						length--;
-					} else if (amatcher.group(GROUP_ATTR_STRING) != null)
-						style = STYLE_ATTR_VALUE;
-					else if (amatcher.group(GROUP_ATTR_NUMBER) != null)
-						style = STYLE_ATTR_VALUE;
-					else if (amatcher.group(GROUP_ATTR_PUNCTATION) != null)
-						style = STYLE_PUNCTATION;
-					else
-						style = Collections.emptyList();
+					}
+					else if (amatcher.group(GROUP_ATTR_STRING) != null) style =
+						STYLE_ATTR_VALUE;
+					else if (amatcher.group(GROUP_ATTR_NUMBER) != null) style =
+						STYLE_ATTR_VALUE;
+					else if (amatcher.group(GROUP_ATTR_PUNCTATION) != null) style =
+						STYLE_PUNCTATION;
+					else style = Collections.emptyList();
 					spansBuilder.add(style, length);
-					if (style == STYLE_ATTR_NAME)
-						spansBuilder.add(STYLE_PUNCTATION, 1);
+					if (style == STYLE_ATTR_NAME) spansBuilder.add(STYLE_PUNCTATION, 1);
 
 					lastKwEnd = amatcher.end();
 				}
-				if(attributesText.length() > lastKwEnd)
-					spansBuilder.add(Collections.emptyList(), attributesText.length() - lastKwEnd);
+				if (attributesText.length() > lastKwEnd) spansBuilder.add(Collections
+					.emptyList(), attributesText.length() - lastKwEnd);
 			}
 			lastKwEnd = matcher.end();
 		}
@@ -239,6 +248,6 @@ class ASTPreview
 	@Override
 	public void createPrintJob() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

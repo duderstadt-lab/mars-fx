@@ -70,22 +70,23 @@ import javafx.scene.control.Label;
  *
  * @author Karl Tauber
  */
-class ExternalPreview
-	implements MarkdownPreviewPane.Preview
-{
-	private static final boolean hasExternalPreview =
-		ServiceLoader.load(PreviewViewAddon.class).iterator().hasNext();
+class ExternalPreview implements MarkdownPreviewPane.Preview {
+
+	private static final boolean hasExternalPreview = ServiceLoader.load(
+		PreviewViewAddon.class).iterator().hasNext();
 
 	private PreviewViewAddon previewView;
 
 	ExternalPreview() {
-		// Not using a static field for service loader here because each instance of this class
+		// Not using a static field for service loader here because each instance of
+		// this class
 		// requires a new instance of PreviewViewAddon.
-		// This allows PreviewViewAddon implementations to store information in fields.
-		ServiceLoader<PreviewViewAddon> addons = ServiceLoader.load(PreviewViewAddon.class);
+		// This allows PreviewViewAddon implementations to store information in
+		// fields.
+		ServiceLoader<PreviewViewAddon> addons = ServiceLoader.load(
+			PreviewViewAddon.class);
 		Iterator<PreviewViewAddon> it = addons.iterator();
-		if (it.hasNext())
-			previewView = it.next();
+		if (it.hasNext()) previewView = it.next();
 	}
 
 	static boolean hasExternalPreview() {
@@ -94,33 +95,29 @@ class ExternalPreview
 
 	@Override
 	public javafx.scene.Node getNode() {
-		if (previewView != null)
-			return previewView.getNode();
-		else
-			return new Label(Messages.get("ExternalPreview.notAvailable"));
+		if (previewView != null) return previewView.getNode();
+		else return new Label(Messages.get("ExternalPreview.notAvailable"));
 	}
 
 	@Override
 	public void update(PreviewContext context, Renderer renderer) {
-		if (previewView != null)
-			previewView.update(context.getMarkdownText(), context.getPath());
+		if (previewView != null) previewView.update(context.getMarkdownText(),
+			context.getPath());
 	}
 
 	@Override
 	public void scrollY(PreviewContext context, double value) {
-		if (previewView != null)
-			previewView.scrollY(value);
+		if (previewView != null) previewView.scrollY(value);
 	}
 
 	@Override
 	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
-		if (previewView != null)
-			previewView.editorSelectionChanged(range);
+		if (previewView != null) previewView.editorSelectionChanged(range);
 	}
 
 	@Override
 	public void createPrintJob() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

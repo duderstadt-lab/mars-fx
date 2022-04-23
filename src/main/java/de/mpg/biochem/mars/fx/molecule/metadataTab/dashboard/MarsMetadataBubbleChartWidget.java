@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
 import java.io.IOException;
@@ -42,19 +43,24 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataBubbleChartWidget" )
-public class MarsMetadataBubbleChartWidget extends AbstractBubbleChartWidget implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MarsMetadataDashboardWidget.class,
+	name = "MarsMetadataBubbleChartWidget")
+public class MarsMetadataBubbleChartWidget extends AbstractBubbleChartWidget
+	implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected MarsMetadata marsMetadata;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("bubblechart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
-		} catch (IOException e) {
+			loadScript("bubblechart",
+				"#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -64,29 +70,35 @@ public class MarsMetadataBubbleChartWidget extends AbstractBubbleChartWidget imp
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
-		
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
-			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
-			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
 		}
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+
+	public void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
 		this.archive = archive;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
-	
+
 	public void setMetadata(MarsMetadata marsMetadata) {
 		this.marsMetadata = marsMetadata;
 	}
-	
+
 	public MarsMetadata getMetadata() {
 		return marsMetadata;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MarsMetadataBubbleChartWidget";

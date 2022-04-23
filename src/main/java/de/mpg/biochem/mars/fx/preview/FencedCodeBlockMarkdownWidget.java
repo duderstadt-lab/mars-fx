@@ -1,3 +1,4 @@
+
 package de.mpg.biochem.mars.fx.preview;
 
 import java.io.IOException;
@@ -38,46 +39,56 @@ public class FencedCodeBlockMarkdownWidget {
 
 	@Parameter
 	protected Context context;
-	
-	public static final String MARKDOWN_WIDGET_ERROR_KEY_PREFIX = "MARKDOWN_WIDGET_ERROR:";
-	
+
+	public static final String MARKDOWN_WIDGET_ERROR_KEY_PREFIX =
+		"MARKDOWN_WIDGET_ERROR:";
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	protected ScriptLanguage lang;
 
-	public FencedCodeBlockMarkdownWidget(final Context context, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, String language) {
+	public FencedCodeBlockMarkdownWidget(final Context context,
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		String language)
+	{
 		this.archive = archive;
 		context.inject(this);
 		lang = scriptService.getLanguageByName(language);
 	}
 
-	protected Map<String, Object> runScript(Map<String, Object> inputs, String script) {
+	protected Map<String, Object> runScript(Map<String, Object> inputs,
+		String script)
+	{
 		archive.getWindow().logln("Running fenced code block markdown widget...");
-		
+
 		String scriptName = "script";
 		if (lang.getLanguageName().equals("Groovy")) {
 			scriptName += ".groovy";
-		} else if (lang.getLanguageName().equals("Python")) {
+		}
+		else if (lang.getLanguageName().equals("Python")) {
 			scriptName += ".py";
 		}
 
-		ScriptInfo scriptInfo = new ScriptInfo(context, scriptName, new StringReader(script));
+		ScriptInfo scriptInfo = new ScriptInfo(context, scriptName,
+			new StringReader(script));
 		scriptInfo.setLanguage(lang);
-		
+
 		ScriptModule module = null;
 		try {
 			module = scriptInfo.createModule();
 			context.inject(module);
-		} catch (ModuleException e) {
+		}
+		catch (ModuleException e) {
 			return null;
 		}
-		
+
 		module.setInputs(inputs);
-		
+
 		StringBuffer std_sb = new StringBuffer();
 		StringBuffer error_sb = new StringBuffer();
-		
-		OutputConsole outputConsole = new OutputConsole(archive.getWindow(), std_sb);
+
+		OutputConsole outputConsole = new OutputConsole(archive.getWindow(),
+			std_sb);
 		PrintStream outputPS = new PrintStream(outputConsole, true);
 
 		ErrorConsole errorConsole = new ErrorConsole(archive.getWindow(), error_sb);
@@ -90,7 +101,8 @@ public class FencedCodeBlockMarkdownWidget {
 			Writer errorWriter = new OutputStreamWriter(errorPS, "UTF-8");
 			module.setErrorWriter(errorWriter);
 
-		} catch (UnsupportedEncodingException e1) {
+		}
+		catch (UnsupportedEncodingException e1) {
 			outputPS.close();
 			errorPS.close();
 			return null;
@@ -98,15 +110,19 @@ public class FencedCodeBlockMarkdownWidget {
 
 		try {
 			moduleService.run(module, false).get();
-		} catch (InterruptedException e) {
-			return null;
-		} catch (ExecutionException e) {
+		}
+		catch (InterruptedException e) {
 			return null;
 		}
-		
+		catch (ExecutionException e) {
+			return null;
+		}
+
 		if (errorConsole.errorsFound()) {
 			Map<String, Object> errorOutput = new HashMap<String, Object>();
-			errorOutput.put(MARKDOWN_WIDGET_ERROR_KEY_PREFIX, MARKDOWN_WIDGET_ERROR_KEY_PREFIX + std_sb.toString() + error_sb.toString());
+			errorOutput.put(MARKDOWN_WIDGET_ERROR_KEY_PREFIX,
+				MARKDOWN_WIDGET_ERROR_KEY_PREFIX + std_sb.toString() + error_sb
+					.toString());
 			return errorOutput;
 		}
 
@@ -115,7 +131,7 @@ public class FencedCodeBlockMarkdownWidget {
 
 		return module.getOutputs();
 	}
-	
+
 	class OutputConsole extends OutputStream {
 
 		private MoleculeArchiveWindow lockScreen;
@@ -154,7 +170,7 @@ public class FencedCodeBlockMarkdownWidget {
 				lockScreen.log(String.valueOf((char) i));
 			});
 		}
-		
+
 		public boolean errorsFound() {
 			return errorsFound;
 		}

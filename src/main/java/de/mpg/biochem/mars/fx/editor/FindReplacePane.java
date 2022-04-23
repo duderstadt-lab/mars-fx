@@ -103,16 +103,17 @@ import javafx.scene.layout.VBox;
 /**
  * @author Karl Tauber
  */
-class FindReplacePane
-{
+class FindReplacePane {
+
 	interface HitsChangeListener {
+
 		void hitsChanged();
 	}
 
 	private static PrefsBooleanProperty matchCase = new PrefsBooleanProperty(
-			MarsFxGlobalPreferences.getState(), "findMatchCase", false);
+		MarsFxGlobalPreferences.getState(), "findMatchCase", false);
 	private static PrefsBooleanProperty regex = new PrefsBooleanProperty(
-			MarsFxGlobalPreferences.getState(), "findRegex", false);
+		MarsFxGlobalPreferences.getState(), "findRegex", false);
 
 	private final List<HitsChangeListener> listeners = new ArrayList<>();
 	private final MarkdownTextArea textArea;
@@ -128,7 +129,10 @@ class FindReplacePane
 
 	// 'visible' property
 	private final SimpleBooleanProperty visible = new SimpleBooleanProperty();
-	ReadOnlyBooleanProperty visibleProperty() { return visible; }
+
+	ReadOnlyBooleanProperty visibleProperty() {
+		return visible;
+	}
 
 	void addListener(HitsChangeListener listener) {
 		listeners.add(listener);
@@ -187,15 +191,17 @@ class FindReplacePane
 				Matcher matcher = Pattern.compile(pattern).matcher(text);
 				while (matcher.find())
 					hits.add(new Range(matcher.start(), matcher.end()));
-			} catch (PatternSyntaxException ex) {
-				findInfoLabel.setText(Messages.get("FindReplacePane.infoLabel.regexError"));
 			}
-		} else {
+			catch (PatternSyntaxException ex) {
+				findInfoLabel.setText(Messages.get(
+					"FindReplacePane.infoLabel.regexError"));
+			}
+		}
+		else {
 			int fromIndex = 0;
 			int hitIndex;
-			while ((hitIndex = matchCase
-					? text.indexOf(find, fromIndex)
-					: StringUtils.indexOfIgnoreCase(text, find, fromIndex)) >= 0)
+			while ((hitIndex = matchCase ? text.indexOf(find, fromIndex) : StringUtils
+				.indexOfIgnoreCase(text, find, fromIndex)) >= 0)
 			{
 				hits.add(new Range(hitIndex, hitIndex + find.length()));
 				fromIndex = hitIndex + find.length();
@@ -210,21 +216,21 @@ class FindReplacePane
 
 		// find active hit index after current selection
 		int anchor = textArea.getAnchor();
-		int index = Collections.binarySearch(hits, new Range(anchor, anchor), (r1, r2) -> {
+		int index = Collections.binarySearch(hits, new Range(anchor, anchor), (r1,
+			r2) -> {
 			return r1.end - r2.start;
 		});
 		if (index < 0) {
 			index = -index - 1;
-			if (index >= hits.size())
-				index = 0; // wrap
+			if (index >= hits.size()) index = 0; // wrap
 		}
 		setActiveHitIndex(index, selectActiveHit);
 		updateOverviewRuler();
 	}
 
 	private void clearHits() {
-		//textArea.selectedTextProperty()
-		//TODO remove text selection
+		// textArea.selectedTextProperty()
+		// TODO remove text selection
 		findField.setText("");
 		hits.clear();
 		setActiveHitIndex(-1, false);
@@ -232,23 +238,19 @@ class FindReplacePane
 	}
 
 	void findPrevious() {
-		if (hits.size() < 1)
-			return;
+		if (hits.size() < 1) return;
 
 		int previous = activeHitIndex - 1;
-		if (previous < 0)
-			previous = hits.size() - 1;
+		if (previous < 0) previous = hits.size() - 1;
 
 		setActiveHitIndex(previous, true);
 	}
 
 	void findNext() {
-		if (hits.size() < 1)
-			return;
+		if (hits.size() < 1) return;
 
 		int next = activeHitIndex + 1;
-		if (next >= hits.size())
-			next = 0;
+		if (next >= hits.size()) next = 0;
 
 		setActiveHitIndex(next, true);
 	}
@@ -259,18 +261,16 @@ class FindReplacePane
 
 		update();
 
-		if (selectActiveHit)
-			selectActiveHit();
+		if (selectActiveHit) selectActiveHit();
 
-		if (oldActiveHitIndex < 0 && activeHitIndex < 0)
-			return; // not necessary to fire event
+		if (oldActiveHitIndex < 0 && activeHitIndex < 0) return; // not necessary to
+																															// fire event
 
 		fireHitsChanged();
 	}
 
 	private void selectActiveHit() {
-		if (activeHitIndex < 0)
-			return;
+		if (activeHitIndex < 0) return;
 
 		Range activeHit = getActiveHit();
 		SmartEdit.selectRange(textArea, activeHit.start, activeHit.end);
@@ -281,15 +281,13 @@ class FindReplacePane
 		replaceInfoLabel.setText(null);
 
 		Range activeHit = getActiveHit();
-		if (activeHit == null)
-			return;
+		if (activeHit == null) return;
 
 		String replace = replaceField.getText();
 		Pattern regexReplacePattern = regexReplacePattern();
 		if (regexReplacePattern != null) {
 			replace = regexReplace(regexReplacePattern, activeHit, replace);
-			if (replace == null)
-				return; // error
+			if (replace == null) return; // error
 		}
 		SmartEdit.replaceText(textArea, activeHit.start, activeHit.end, replace);
 
@@ -300,19 +298,18 @@ class FindReplacePane
 		Utils.error(replaceField, false);
 		replaceInfoLabel.setText(null);
 
-		if (hits.isEmpty())
-			return;
+		if (hits.isEmpty()) return;
 
 		final String replace = replaceField.getText();
 		Pattern regexReplacePattern = regexReplacePattern();
 
-		MultiChangeBuilder<?, ?, ?> multiChange = textArea.createMultiChange(hits.size());
+		MultiChangeBuilder<?, ?, ?> multiChange = textArea.createMultiChange(hits
+			.size());
 		for (Range hit : hits) {
 			String replace2 = replace;
 			if (regexReplacePattern != null) {
 				replace2 = regexReplace(regexReplacePattern, hit, replace);
-				if (replace2 == null)
-					return; // error
+				if (replace2 == null) return; // error
 			}
 			multiChange.replaceText(hit.start, hit.end, replace2);
 		}
@@ -322,8 +319,7 @@ class FindReplacePane
 	}
 
 	private Pattern regexReplacePattern() {
-		if (!regexButton.isSelected())
-			return null;
+		if (!regexButton.isSelected()) return null;
 
 		String replace = replaceField.getText();
 		if (replace.indexOf('$') < 0 && replace.indexOf('\\') < 0) {
@@ -336,16 +332,20 @@ class FindReplacePane
 		String pattern = matchCaseButton.isSelected() ? find : ("(?i)" + find);
 		try {
 			return Pattern.compile(pattern);
-		} catch (PatternSyntaxException ex) {
+		}
+		catch (PatternSyntaxException ex) {
 			return null;
 		}
 	}
 
-	private String regexReplace(Pattern regexReplacePattern, Range hit, String replace) {
+	private String regexReplace(Pattern regexReplacePattern, Range hit,
+		String replace)
+	{
 		try {
 			String text = textArea.getText(hit.start, hit.end);
 			return regexReplacePattern.matcher(text).replaceFirst(replace);
-		} catch (IllegalArgumentException|IndexOutOfBoundsException ex) {
+		}
+		catch (IllegalArgumentException | IndexOutOfBoundsException ex) {
 			Utils.error(replaceField, true);
 			replaceInfoLabel.setText(ex.getMessage());
 			return null;
@@ -354,16 +354,13 @@ class FindReplacePane
 
 	private void updateOverviewRuler() {
 		if (overviewRuler == null) {
-			if (hits.isEmpty())
-				return;
+			if (hits.isEmpty()) return;
 
 			ScrollBar vScrollBar = Utils.findVScrollBar(textArea.getParent());
-			if (vScrollBar == null)
-				return;
+			if (vScrollBar == null) return;
 
 			overviewRuler = (Region) vScrollBar.lookup(".track");
-			if (overviewRuler == null)
-				return;
+			if (overviewRuler == null) return;
 
 			overviewRuler.heightProperty().addListener((ob) -> updateOverviewRuler());
 		}
@@ -386,8 +383,7 @@ class FindReplacePane
 		for (Range hit : hits) {
 			int line = textArea.offsetToPosition(hit.start, Bias.Backward).getMajor();
 			int y = (int) (height * line / lineCount);
-			if (y < 0 || y == previousY)
-				continue; // avoid duplicates
+			if (y < 0 || y == previousY) continue; // avoid duplicates
 
 			if (y - 1 == previousY) {
 				// merge with previous
@@ -409,14 +405,12 @@ class FindReplacePane
 		buf.append("-fx-border-width: ");
 		if (hasMergedMarker) {
 			for (int i = 0; i < markerCount; i++) {
-				if (markerHeight[i] > 1)
-					buf.append(markerHeight[i]).append( " 0 0 0,");
+				if (markerHeight[i] > 1) buf.append(markerHeight[i]).append(" 0 0 0,");
 			}
 		}
-		buf.append( "1 0 0 0; -fx-border-color: ");
+		buf.append("1 0 0 0; -fx-border-color: ");
 		for (int i = 0; i < markerCount; i++) {
-			if (i > 0)
-				buf.append(',');
+			if (i > 0) buf.append(',');
 			buf.append("#FBC02D");
 		}
 
@@ -424,13 +418,11 @@ class FindReplacePane
 		buf.append("; -fx-border-insets: ");
 		if (hasMergedMarker) {
 			for (int i = 0; i < markerCount; i++) {
-				if (markerHeight[i] > 1)
-					buf.append(markerY[i]).append(" 0 0 0,");
+				if (markerHeight[i] > 1) buf.append(markerY[i]).append(" 0 0 0,");
 			}
 		}
 		for (int i = 0; i < markerCount; i++) {
-			if (markerHeight[i] == 1)
-				buf.append(markerY[i]).append(" 0 0 0,");
+			if (markerHeight[i] == 1) buf.append(markerY[i]).append(" 0 0 0,");
 		}
 		buf.setLength(buf.length() - 1); // remove last ','
 
@@ -438,11 +430,11 @@ class FindReplacePane
 	}
 
 	private void update() {
-		Utils.error(findField, activeHitIndex < 0 && !findField.getText().isEmpty());
+		Utils.error(findField, activeHitIndex < 0 && !findField.getText()
+			.isEmpty());
 
-		nOfHitCountLabel.setText(findField.getText().isEmpty()
-				? ""
-				: MessageFormat.format(nOfCountFormat, activeHitIndex + 1, hits.size()));
+		nOfHitCountLabel.setText(findField.getText().isEmpty() ? "" : MessageFormat
+			.format(nOfCountFormat, activeHitIndex + 1, hits.size()));
 
 		boolean disabled = hits.isEmpty();
 		previousButton.setDisable(disabled);
@@ -450,8 +442,7 @@ class FindReplacePane
 	}
 
 	Node getNode() {
-		if (pane != null)
-			return pane;
+		if (pane != null) return pane;
 
 		initComponents();
 
@@ -465,29 +456,39 @@ class FindReplacePane
 		findInfoLabel.getStyleClass().add("info");
 		replaceInfoLabel.getStyleClass().add("info");
 
-		previousButton.setGraphic(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHEVRON_UP));
-		nextButton.setGraphic(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CHEVRON_DOWN));
-		closeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.CLOSE));
+		previousButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.CHEVRON_UP));
+		nextButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.CHEVRON_DOWN));
+		closeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.CLOSE));
 
-		previousButton.setTooltip(new Tooltip(Messages.get("FindReplacePane.previousButton.tooltip")));
-		nextButton.setTooltip(new Tooltip(Messages.get("FindReplacePane.nextButton.tooltip")));
-		matchCaseButton.setTooltip(new Tooltip(Messages.get("FindReplacePane.matchCaseButton.tooltip")));
-		regexButton.setTooltip(new Tooltip(Messages.get("FindReplacePane.regexButton.tooltip")));
-		closeButton.setTooltip(new Tooltip(Messages.get("FindReplacePane.closeButton.tooltip")));
+		previousButton.setTooltip(new Tooltip(Messages.get(
+			"FindReplacePane.previousButton.tooltip")));
+		nextButton.setTooltip(new Tooltip(Messages.get(
+			"FindReplacePane.nextButton.tooltip")));
+		matchCaseButton.setTooltip(new Tooltip(Messages.get(
+			"FindReplacePane.matchCaseButton.tooltip")));
+		regexButton.setTooltip(new Tooltip(Messages.get(
+			"FindReplacePane.regexButton.tooltip")));
+		closeButton.setTooltip(new Tooltip(Messages.get(
+			"FindReplacePane.closeButton.tooltip")));
 
-		findField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
+		findField.setLeft(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.SEARCH));
 		findField.setRight(nOfHitCountLabel);
 		findField.textProperty().addListener((ov, o, n) -> findAll(true));
 		Nodes.addInputMap(findField, sequence(
-				// don't know why, but Ctrl+H (set in menubar) does not work if findField has focus
-				consume(keyPressed(H, SHORTCUT_DOWN), e -> show(true, false)),
-				// don't know why, but F3 (set in menubar) does not work if findField has focus
-				consume(keyPressed(F3),		e -> findNext()),
+			// don't know why, but Ctrl+H (set in menubar) does not work if findField
+			// has focus
+			consume(keyPressed(H, SHORTCUT_DOWN), e -> show(true, false)),
+			// don't know why, but F3 (set in menubar) does not work if findField has
+			// focus
+			consume(keyPressed(F3), e -> findNext()),
 
-				consume(keyPressed(UP),		e -> findPrevious()),
-				consume(keyPressed(DOWN),	e -> findNext()),
-				consume(keyPressed(ENTER),	e -> findNext()),
-				consume(keyPressed(ESCAPE),	e -> hide())));
+			consume(keyPressed(UP), e -> findPrevious()), consume(keyPressed(DOWN),
+				e -> findNext()), consume(keyPressed(ENTER), e -> findNext()), consume(
+					keyPressed(ESCAPE), e -> hide())));
 		previousButton.setOnAction(e -> findPrevious());
 		nextButton.setOnAction(e -> findNext());
 		closeButton.setOnAction(e -> hide());
@@ -495,7 +496,7 @@ class FindReplacePane
 		matchCaseButton.setOnAction(e -> {
 			findAll(true);
 			matchCase.set(matchCaseButton.isSelected());
-		} );
+		});
 		regexButton.setOnAction(e -> {
 			findAll(true);
 			regex.set(regexButton.isSelected());
@@ -505,19 +506,19 @@ class FindReplacePane
 
 		nOfCountFormat = nOfHitCountLabel.getText();
 
-
 		replacePane.setVisible(false);
 
-		replaceField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.RETWEET));
+		replaceField.setLeft(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.RETWEET));
 		Nodes.addInputMap(replaceField, sequence(
-				// don't know why, but F3 (set in menubar) does not work if replaceField has focus
-				consume(keyPressed(F3),		e -> findNext()),
+			// don't know why, but F3 (set in menubar) does not work if replaceField
+			// has focus
+			consume(keyPressed(F3), e -> findNext()),
 
-				consume(keyPressed(UP),		e -> findPrevious()),
-				consume(keyPressed(DOWN),	e -> findNext()),
-				consume(keyPressed(ENTER),	e -> replace()),
-				consume(keyPressed(ENTER, SHORTCUT_DOWN), e -> replaceAll()),
-				consume(keyPressed(ESCAPE),	e -> hide())));
+			consume(keyPressed(UP), e -> findPrevious()), consume(keyPressed(DOWN),
+				e -> findNext()), consume(keyPressed(ENTER), e -> replace()), consume(
+					keyPressed(ENTER, SHORTCUT_DOWN), e -> replaceAll()), consume(
+						keyPressed(ESCAPE), e -> hide())));
 		replaceButton.setOnAction(e -> replace());
 		replaceAllButton.setOnAction(e -> replaceAll());
 
@@ -529,12 +530,13 @@ class FindReplacePane
 	void show(boolean replace, boolean findSelection) {
 		if (replace) {
 			replacePane.setVisible(true);
-			if (!pane.getChildren().contains(replacePane)) 
-				pane.getChildren().add(replacePane);
-		} else {
+			if (!pane.getChildren().contains(replacePane)) pane.getChildren().add(
+				replacePane);
+		}
+		else {
 			replacePane.setVisible(false);
-			if (pane.getChildren().contains(replacePane))
-				pane.getChildren().remove(replacePane);
+			if (pane.getChildren().contains(replacePane)) pane.getChildren().remove(
+				replacePane);
 		}
 
 		boolean oldVisible = visible.get();
@@ -543,14 +545,12 @@ class FindReplacePane
 
 		if (findSelection) {
 			String selectedText = textArea.getSelectedText();
-			if (!selectedText.isEmpty() && selectedText.indexOf('\n') < 0)
-				findField.setText(selectedText);
+			if (!selectedText.isEmpty() && selectedText.indexOf('\n') < 0) findField
+				.setText(selectedText);
 		}
 
-		if (replace && oldVisible)
-			replaceField.requestFocus();
-		else
-			findField.requestFocus();
+		if (replace && oldVisible) replaceField.requestFocus();
+		else findField.requestFocus();
 	}
 
 	void hide() {
@@ -559,16 +559,17 @@ class FindReplacePane
 		clearHits();
 		textArea.requestFocus();
 	}
-	
+
 	public void closable(boolean closable) {
 		this.closable = closable;
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+		// JFormDesigner - Component initialization - DO NOT MODIFY
+		// //GEN-BEGIN:initComponents
 		pane = new VBox();
-		//pane.setStyle("-fx-background-color: #efefef");
-		//pane.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
+		// pane.setStyle("-fx-background-color: #efefef");
+		// pane.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
 		findField = new CustomTextField();
 		previousButton = new Button();
 		nextButton = new Button();
@@ -583,80 +584,86 @@ class FindReplacePane
 		replaceInfoLabel = new Label();
 		nOfHitCountLabel = new Label();
 
-		//======== pane ========
+		// ======== pane ========
 		{
-			//pane.setLayout("insets 0,hidemode 3");
-			//pane.setCols("[shrink 0,fill][fill]0[fill][pref:n,fill]1px[pref:n,fill][grow,fill][fill]");
-			//pane.setRows("[fill]0[]");
+			// pane.setLayout("insets 0,hidemode 3");
+			// pane.setCols("[shrink
+			// 0,fill][fill]0[fill][pref:n,fill]1px[pref:n,fill][grow,fill][fill]");
+			// pane.setRows("[fill]0[]");
 
 			BorderPane search = new BorderPane();
-			
+
 			FlowPane searchBoxSide = new FlowPane();
-			
-			//---- findField ----
-			findField.setPromptText(Messages.get("FindReplacePane.findField.promptText"));
+
+			// ---- findField ----
+			findField.setPromptText(Messages.get(
+				"FindReplacePane.findField.promptText"));
 			findField.setPrefColumnCount(15);
 			searchBoxSide.getChildren().add(findField);
 
-			//---- previousButton ----
+			// ---- previousButton ----
 			previousButton.setFocusTraversable(false);
 			searchBoxSide.getChildren().add(previousButton);
 
-			//---- nextButton ----
+			// ---- nextButton ----
 			nextButton.setFocusTraversable(false);
 			searchBoxSide.getChildren().add(nextButton);
 
-			//---- matchCaseButton ----
+			// ---- matchCaseButton ----
 			matchCaseButton.setText("Aa");
 			matchCaseButton.setFocusTraversable(false);
 			searchBoxSide.getChildren().add(matchCaseButton);
 
-			//---- regexButton ----
+			// ---- regexButton ----
 			regexButton.setText(".*");
 			regexButton.setFocusTraversable(false);
 			searchBoxSide.getChildren().add(regexButton);
 			searchBoxSide.getChildren().add(findInfoLabel);
 
 			search.setLeft(searchBoxSide);
-			
-			//---- closeButton ----
+
+			// ---- closeButton ----
 			closeButton.setFocusTraversable(false);
-			if (closable)
-				search.setRight(closeButton);
-			
+			if (closable) search.setRight(closeButton);
+
 			pane.getChildren().add(search);
 
-			//======== replacePane ========
+			// ======== replacePane ========
 			{
-				//replacePane.setLayout("insets rel 0 0 0");
-				//replacePane.setCols("[shrink 0,fill][pref:n,fill][pref:n,fill][grow,fill]");
-				//replacePane.setRows("[]");
+				// replacePane.setLayout("insets rel 0 0 0");
+				// replacePane.setCols("[shrink
+				// 0,fill][pref:n,fill][pref:n,fill][grow,fill]");
+				// replacePane.setRows("[]");
 
-				//---- replaceField ----
-				replaceField.setPromptText(Messages.get("FindReplacePane.replaceField.promptText"));
+				// ---- replaceField ----
+				replaceField.setPromptText(Messages.get(
+					"FindReplacePane.replaceField.promptText"));
 				replaceField.setPrefColumnCount(15);
 				replacePane.getChildren().add(replaceField);
 
-				//---- replaceButton ----
-				replaceButton.setText(Messages.get("FindReplacePane.replaceButton.text"));
+				// ---- replaceButton ----
+				replaceButton.setText(Messages.get(
+					"FindReplacePane.replaceButton.text"));
 				replaceButton.setFocusTraversable(false);
 				replacePane.getChildren().add(replaceButton);
 
-				//---- replaceAllButton ----
-				replaceAllButton.setText(Messages.get("FindReplacePane.replaceAllButton.text"));
+				// ---- replaceAllButton ----
+				replaceAllButton.setText(Messages.get(
+					"FindReplacePane.replaceAllButton.text"));
 				replaceAllButton.setFocusTraversable(false);
 				replacePane.getChildren().add(replaceAllButton);
 				replacePane.getChildren().add(replaceInfoLabel);
 			}
-			//pane.getChildren().add(replacePane);
+			// pane.getChildren().add(replacePane);
 		}
 
-		//---- nOfHitCountLabel ----
-		nOfHitCountLabel.setText(Messages.get("FindReplacePane.nOfHitCountLabel.text"));
-		// JFormDesigner - End of component initialization  //GEN-END:initComponents
+		// ---- nOfHitCountLabel ----
+		nOfHitCountLabel.setText(Messages.get(
+			"FindReplacePane.nOfHitCountLabel.text"));
+		// JFormDesigner - End of component initialization //GEN-END:initComponents
 	}
 
-	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+	// JFormDesigner - Variables declaration - DO NOT MODIFY //GEN-BEGIN:variables
 	private VBox pane;
 	private CustomTextField findField;
 	private Button previousButton;
@@ -671,7 +678,7 @@ class FindReplacePane
 	private Button replaceAllButton;
 	private Label replaceInfoLabel;
 	private Label nOfHitCountLabel;
-	// JFormDesigner - End of variables declaration  //GEN-END:variables
-	
+	// JFormDesigner - End of variables declaration //GEN-END:variables
+
 	private boolean closable = true;
 }

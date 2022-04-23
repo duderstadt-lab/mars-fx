@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Context;
@@ -44,21 +45,27 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-
 @Plugin(type = DisplayViewer.class, priority = Priority.HIGH)
-public class DnaMoleculeArchiveFxView extends AbstractDisplayViewer<DnaMoleculeArchive> implements DisplayViewer<DnaMoleculeArchive> {
-	
-	@Parameter
-    private Context context;
-	
-	//This method is called to create and display a window
-	//here we override it to make sure that calls like uiService.show( .. for MoleculeArchive 
-	//will use this method automatically..
-	@Override
-	public void view(final UserInterface ui, final Display<?> d) {	
-		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive = (MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>)d.get(0);
+public class DnaMoleculeArchiveFxView extends
+	AbstractDisplayViewer<DnaMoleculeArchive> implements
+	DisplayViewer<DnaMoleculeArchive>
+{
 
-		DnaMoleculeArchiveFxFrame dnaFrame = new DnaMoleculeArchiveFxFrame(archive, context);
+	@Parameter
+	private Context context;
+
+	// This method is called to create and display a window
+	// here we override it to make sure that calls like uiService.show( .. for
+	// MoleculeArchive
+	// will use this method automatically..
+	@Override
+	public void view(final UserInterface ui, final Display<?> d) {
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive =
+			(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>) d
+				.get(0);
+
+		DnaMoleculeArchiveFxFrame dnaFrame = new DnaMoleculeArchiveFxFrame(archive,
+			context);
 		dnaFrame.init();
 	}
 
@@ -66,11 +73,12 @@ public class DnaMoleculeArchiveFxView extends AbstractDisplayViewer<DnaMoleculeA
 	public boolean canView(final Display<?> d) {
 		if (d instanceof DnaMoleculeArchiveFxDisplay) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public DnaMoleculeArchiveFxDisplay getDisplay() {
 		return (DnaMoleculeArchiveFxDisplay) super.getDisplay();
@@ -78,7 +86,7 @@ public class DnaMoleculeArchiveFxView extends AbstractDisplayViewer<DnaMoleculeA
 
 	@Override
 	public boolean isCompatible(UserInterface arg0) {
-		//Needs to be updated if all contexts are to be enabled beyond ImageJ
+		// Needs to be updated if all contexts are to be enabled beyond ImageJ
 		return true;
 	}
 }

@@ -87,31 +87,32 @@ import javafx.scene.web.WebView;
  *
  * @author Karl Tauber
  */
-class WebViewPreview
-	implements MarkdownPreviewPane.Preview
-{
-	private static final HashMap<String, String> prismLangDependenciesMap = new HashMap<>();
+class WebViewPreview implements MarkdownPreviewPane.Preview {
+
+	private static final HashMap<String, String> prismLangDependenciesMap =
+		new HashMap<>();
 
 	static final DataHolder OPTIONS = new MutableDataSet().toImmutable();
-	
+
 	private WebView webView;
 	private final ArrayList<Runnable> runWhenLoadedList = new ArrayList<>();
 	private int lastScrollX;
 	private int lastScrollY;
 	private IndexRange lastEditorSelection;
-	
+
 	private DocumentEditor documentEditor;
 
 	WebViewPreview() {
-		//.set(Parser.EXTENSIONS
-		//MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer());
+		// .set(Parser.EXTENSIONS
+		// MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer());
 	}
 
 	private void createNodes() {
 		webView = new WebView();
 		webView.setFocusTraversable(false);
 
-		// disable WebView default drag and drop handler to allow dropping markdown files
+		// disable WebView default drag and drop handler to allow dropping markdown
+		// files
 		webView.setOnDragEntered(null);
 		webView.setOnDragExited(null);
 		webView.setOnDragOver(null);
@@ -119,7 +120,8 @@ class WebViewPreview
 		webView.setOnDragDetected(null);
 		webView.setOnDragDone(null);
 
-		webView.getEngine().getLoadWorker().stateProperty().addListener((ob,o,n) -> {
+		webView.getEngine().getLoadWorker().stateProperty().addListener((ob, o,
+			n) -> {
 			if (n == State.SUCCEEDED && !runWhenLoadedList.isEmpty()) {
 				ArrayList<Runnable> runnables = new ArrayList<>(runWhenLoadedList);
 				runWhenLoadedList.clear();
@@ -129,22 +131,20 @@ class WebViewPreview
 			}
 		});
 	}
-	
+
 	public void setDocumentEditor(DocumentEditor documentEditor) {
 		this.documentEditor = documentEditor;
 	}
 
 	private void runWhenLoaded(Runnable runnable) {
-		if (webView.getEngine().getLoadWorker().isRunning())
-			runWhenLoadedList.add(runnable);
-		else
-			runnable.run();
+		if (webView.getEngine().getLoadWorker().isRunning()) runWhenLoadedList.add(
+			runnable);
+		else runnable.run();
 	}
 
 	@Override
 	public javafx.scene.Node getNode() {
-		if (webView == null)
-			createNodes();
+		if (webView == null) createNodes();
 		return webView;
 	}
 
@@ -152,69 +152,56 @@ class WebViewPreview
 	public void update(PreviewContext context, Renderer renderer) {
 		if (!webView.getEngine().getLoadWorker().isRunning()) {
 			// get window.scrollX and window.scrollY from web engine,
-			// but only if no worker is running (in this case the result would be zero)
+			// but only if no worker is running (in this case the result would be
+			// zero)
 			Object scrollXobj = webView.getEngine().executeScript("window.scrollX");
 			Object scrollYobj = webView.getEngine().executeScript("window.scrollY");
-			lastScrollX = (scrollXobj instanceof Number) ? ((Number)scrollXobj).intValue() : 0;
-			lastScrollY = (scrollYobj instanceof Number) ? ((Number)scrollYobj).intValue() : 0;
+			lastScrollX = (scrollXobj instanceof Number) ? ((Number) scrollXobj)
+				.intValue() : 0;
+			lastScrollY = (scrollYobj instanceof Number) ? ((Number) scrollYobj)
+				.intValue() : 0;
 		}
 		lastEditorSelection = context.getEditorSelection();
 
 		Path path = context.getPath();
-		String base = (path != null)
-				? ("<base href=\"" + path.getParent().toUri().toString() + "\">\n")
-				: "";
+		String base = (path != null) ? ("<base href=\"" + path.getParent().toUri()
+			.toString() + "\">\n") : "";
 		String scrollScript = (lastScrollX > 0 || lastScrollY > 0)
-				? ("  onload='window.scrollTo("+lastScrollX+", "+lastScrollY+");'")
-				: "";
-		
-		webView.getEngine().loadContent(
-			"<!DOCTYPE html>\n"
-			+ "<html>\n"
-			+ "<head>\n"
-			+ "<link rel=\"stylesheet\" href=\"" + getClass().getResource("markdownpad-github.css") + "\">\n"
-			+ "<link rel=\"stylesheet\" href=\"" + getClass().getResource("katex.min.css") + "\">\n"
-			+ "<style>\n"
-			+ Utils.defaultIfEmpty(Options.getAdditionalCSS(), "") + "\n"
-			+ ".mwfx-editor-selection {\n"
-			+ "  border-right: 5px solid #f47806;\n"
-			+ "  margin-right: -5px;\n"
-			+ "  background-color: rgb(253, 247, 241);\n"
-			+ "}\n"
-			+ "</style>\n"
-			+ "<script src=\"" + getClass().getResource("katex.min.js") + "\"></script>\n"	
-			+ "<script src=\"" + getClass().getResource("mermaid.min.js") + "\"></script>\n"	
-			+ "<script src=\"" + getClass().getResource("preview.js") + "\"></script>\n"
-			+ prismSyntaxHighlighting(context.getMarkdownAST())
-			+ base
-			+ "</head>\n"
-			+ "<body" + scrollScript + ">\n"
-			+ renderer.getHtml(false, documentEditor)
-			+ "<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n"
-			+ "<script>" + anchorFixer() + "</script>\n"
-			+ "<script> (function () {"
-		    + "document.addEventListener(\"DOMContentLoaded\", function () {\n"
-		    + "var mathElems = document.getElementsByClassName(\"katex\");\n"
-		    + "var elems = [];\n"
-		    + "for (const i in mathElems) {if (mathElems.hasOwnProperty(i)) elems.push(mathElems[i]);}\n"
-		    + "elems.forEach(elem => {\n"
-		    + "katex.render(elem.textContent, elem, { throwOnError: false, displayMode: elem.nodeName !== \'SPAN\', });\n"
-		    + "});\n"
-		    + "});\n"
-		    + "})();\n"
-		    + "</script>\n"
-			+ "</body>\n"
-			+ "</html>");
+			? ("  onload='window.scrollTo(" + lastScrollX + ", " + lastScrollY +
+				");'") : "";
+
+		webView.getEngine().loadContent("<!DOCTYPE html>\n" + "<html>\n" +
+			"<head>\n" + "<link rel=\"stylesheet\" href=\"" + getClass().getResource(
+				"markdownpad-github.css") + "\">\n" +
+			"<link rel=\"stylesheet\" href=\"" + getClass().getResource(
+				"katex.min.css") + "\">\n" + "<style>\n" + Utils.defaultIfEmpty(Options
+					.getAdditionalCSS(), "") + "\n" + ".mwfx-editor-selection {\n" +
+			"  border-right: 5px solid #f47806;\n" + "  margin-right: -5px;\n" +
+			"  background-color: rgb(253, 247, 241);\n" + "}\n" + "</style>\n" +
+			"<script src=\"" + getClass().getResource("katex.min.js") +
+			"\"></script>\n" + "<script src=\"" + getClass().getResource(
+				"mermaid.min.js") + "\"></script>\n" + "<script src=\"" + getClass()
+					.getResource("preview.js") + "\"></script>\n" +
+			prismSyntaxHighlighting(context.getMarkdownAST()) + base + "</head>\n" +
+			"<body" + scrollScript + ">\n" + renderer.getHtml(false, documentEditor) +
+			"<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n" +
+			"<script>" + anchorFixer() + "</script>\n" + "<script> (function () {" +
+			"document.addEventListener(\"DOMContentLoaded\", function () {\n" +
+			"var mathElems = document.getElementsByClassName(\"katex\");\n" +
+			"var elems = [];\n" +
+			"for (const i in mathElems) {if (mathElems.hasOwnProperty(i)) elems.push(mathElems[i]);}\n" +
+			"elems.forEach(elem => {\n" +
+			"katex.render(elem.textContent, elem, { throwOnError: false, displayMode: elem.nodeName !== \'SPAN\', });\n" +
+			"});\n" + "});\n" + "})();\n" + "</script>\n" + "</body>\n" + "</html>");
 	}
 
 	public void createPrintJob() {
-        PrinterJob printerJob = PrinterJob.createPrinterJob();
-        if(printerJob != null)
-        {
-            printerJob.showPrintDialog(this.getNode().getScene().getWindow());
-            webView.getEngine().print(printerJob);
-            printerJob.endJob();
-        }                
+		PrinterJob printerJob = PrinterJob.createPrinterJob();
+		if (printerJob != null) {
+			printerJob.showPrintDialog(this.getNode().getScene().getWindow());
+			webView.getEngine().print(printerJob);
+			printerJob.endJob();
+		}
 	}
 
 	@Override
@@ -226,8 +213,7 @@ class WebViewPreview
 
 	@Override
 	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
-		if (range.equals(lastEditorSelection))
-			return;
+		if (range.equals(lastEditorSelection)) return;
 		lastEditorSelection = range;
 
 		runWhenLoaded(() -> {
@@ -238,19 +224,17 @@ class WebViewPreview
 	private String highlightNodesAt(IndexRange range) {
 		return "preview.highlightNodesAt(" + range.getEnd() + ")";
 	}
-	
+
 	private String anchorFixer() {
-		String anchorFixerScript = "  document.onclick = function (e) {\n" + 
-				"  e = e ||  window.event;\n" + 
-				"  var element = e.target || e.srcElement;\n" + 
-				"\n" + 
-				"  if (element.tagName == 'A') {\n" + 
-				"    if (element.href.charAt(0) == '#') {\n" + 
-				"      document.getElementById(element.href.substring(1,element.href.length)).scrollIntoView();\n" + 
-				"    }\n" + 
-				"    return false; // prevent default action and stop event propagation\n" + 
-				"  }\n" + 
-				"}\n";
+		String anchorFixerScript = "  document.onclick = function (e) {\n" +
+			"  e = e ||  window.event;\n" +
+			"  var element = e.target || e.srcElement;\n" + "\n" +
+			"  if (element.tagName == 'A') {\n" +
+			"    if (element.href.charAt(0) == '#') {\n" +
+			"      document.getElementById(element.href.substring(1,element.href.length)).scrollIntoView();\n" +
+			"    }\n" +
+			"    return false; // prevent default action and stop event propagation\n" +
+			"  }\n" + "}\n";
 		return anchorFixerScript;
 	}
 
@@ -260,37 +244,46 @@ class WebViewPreview
 		// check whether markdown contains fenced code blocks and remember languages
 		ArrayList<String> languages = new ArrayList<>();
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 			@Override
-			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+			public void processNode(Node node, boolean withChildren,
+				BiConsumer<Node, Visitor<Node>> processor)
+			{
 				if (node instanceof FencedCodeBlock) {
-					String language = ((FencedCodeBlock)node).getInfo().toString();
-					if (language.contains(language))
-						languages.add(language);
+					String language = ((FencedCodeBlock) node).getInfo().toString();
+					if (language.contains(language)) languages.add(language);
 
 					// dependencies
 					while ((language = prismLangDependenciesMap.get(language)) != null) {
-						if (language.contains(language))
-							languages.add(0, language); // dependencies must be loaded first
+						if (language.contains(language)) languages.add(0, language); // dependencies
+																																					// must
+																																					// be
+																																					// loaded
+																																					// first
 					}
-				} else
-					processChildren(node, processor);
+				}
+				else processChildren(node, processor);
 			}
 		};
 		visitor.visit(astRoot);
 
-		if (languages.isEmpty())
-			return "";
+		if (languages.isEmpty()) return "";
 
 		// build HTML (only load used languages)
-		// Note: not using Prism Autoloader plugin because it lazy loads/highlights, which causes flicker
-		//       during fast typing; it also does not work with "alias" languages (e.g. js, html, xml, svg, ...)
+		// Note: not using Prism Autoloader plugin because it lazy loads/highlights,
+		// which causes flicker
+		// during fast typing; it also does not work with "alias" languages (e.g.
+		// js, html, xml, svg, ...)
 		StringBuilder buf = new StringBuilder();
-		buf.append("<link rel=\"stylesheet\" href=\"").append(getClass().getResource("prism/prism.css")).append("\">\n");
-		buf.append("<script src=\"").append(getClass().getResource("prism/prism-core.min.js")).append("\"></script>\n");
+		buf.append("<link rel=\"stylesheet\" href=\"").append(getClass()
+			.getResource("prism/prism.css")).append("\">\n");
+		buf.append("<script src=\"").append(getClass().getResource(
+			"prism/prism-core.min.js")).append("\"></script>\n");
 		for (String language : languages) {
-			URL url = getClass().getResource("prism/components/prism-"+language+".min.js");
-			if (url != null)
-				buf.append("<script src=\"").append(url).append("\"></script>\n");
+			URL url = getClass().getResource("prism/components/prism-" + language +
+				".min.js");
+			if (url != null) buf.append("<script src=\"").append(url).append(
+				"\"></script>\n");
 		}
 		return buf.toString();
 	}
@@ -299,38 +292,39 @@ class WebViewPreview
 	 * load and parse prism/lang_dependencies.txt
 	 */
 	private static void initPrismLangDependencies() {
-		if (!prismLangDependenciesMap.isEmpty())
-			return;
+		if (!prismLangDependenciesMap.isEmpty()) return;
 
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-				WebViewPreview.class.getResourceAsStream("prism/lang_dependencies.txt"))))
+			WebViewPreview.class.getResourceAsStream("prism/lang_dependencies.txt"))))
 		{
 			String line;
 			while ((line = reader.readLine()) != null) {
-				if (!line.startsWith("{"))
-					continue;
+				if (!line.startsWith("{")) continue;
 
 				line = line.replaceAll("\\[([^\\]]+)\\]", "[not supported]");
 				line = trimDelim(line, "{", "}");
 				for (String str : line.split(",")) {
 					String[] parts = str.split(":");
-					if (parts[1].startsWith("["))
-						continue; // not supported
+					if (parts[1].startsWith("[")) continue; // not supported
 
 					String key = trimDelim(parts[0], "\"", "\"");
 					String value = trimDelim(parts[1], "\"", "\"");
 					prismLangDependenciesMap.put(key, value);
 				}
 			}
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			// ignore
 		}
 	}
 
-	private static String trimDelim(String str, String leadingDelim, String trailingDelim) {
+	private static String trimDelim(String str, String leadingDelim,
+		String trailingDelim)
+	{
 		str = str.trim();
 		if (!str.startsWith(leadingDelim) || !str.endsWith(trailingDelim))
 			throw new IllegalArgumentException(str);
-		return str.substring(leadingDelim.length(), str.length() - trailingDelim.length());
+		return str.substring(leadingDelim.length(), str.length() - trailingDelim
+			.length());
 	}
 }

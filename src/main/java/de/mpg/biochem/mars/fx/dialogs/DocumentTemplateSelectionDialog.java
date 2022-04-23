@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import java.io.File;
@@ -52,63 +53,67 @@ import javafx.stage.Window;
  *
  * @author Karl Duderstadt
  */
-public class DocumentTemplateSelectionDialog extends Dialog<DocumentTemplateSelectionDialog.SelectionResult> {
-	
+public class DocumentTemplateSelectionDialog extends
+	Dialog<DocumentTemplateSelectionDialog.SelectionResult>
+{
+
 	private File templateDirectory;
-	
-	public DocumentTemplateSelectionDialog(Window owner, String title, File templateDirectory) {
+
+	public DocumentTemplateSelectionDialog(Window owner, String title,
+		File templateDirectory)
+	{
 		this.templateDirectory = templateDirectory;
-		
+
 		setTitle(title);
 		initOwner(owner);
 		setResizable(true);
-		
+
 		DialogPane dialogPane = getDialogPane();
 		dialogPane.setMinWidth(250);
 		dialogPane.setMinHeight(250);
 		dialogPane.setPrefWidth(350);
 		dialogPane.setPrefHeight(350);
-		
+
 		VBox vBox = new VBox();
 		vBox.setPadding(new Insets(15, 20, 15, 20));
 		vBox.setSpacing(5);
-		
+
 		GridPane gridpane = new GridPane();
-		
+
 		Label nameLabel = new Label("Name");
 		gridpane.add(nameLabel, 0, 0);
 		GridPane.setMargin(nameLabel, new Insets(0, 5, 10, 5));
-		
+
 		TextField nameField = new TextField();
 		nameField.setText("report");
 		gridpane.add(nameField, 1, 0);
 		GridPane.setMargin(nameField, new Insets(0, 5, 10, 5));
 		vBox.getChildren().add(gridpane);
-		
+
 		vBox.getChildren().add(new Label("Select template"));
-		
+
 		ListView<String> templateList = new ListView<String>();
-		
+
 		if (templateDirectory != null) {
-			ObservableList<String> templateFiles = FXCollections.observableArrayList(templateDirectory.list());
+			ObservableList<String> templateFiles = FXCollections.observableArrayList(
+				templateDirectory.list());
 			templateFiles.add(0, "<none>");
 			templateList.setItems(templateFiles);
 		}
-		
+
 		VBox.setVgrow(templateList, Priority.ALWAYS);
 		vBox.getChildren().add(templateList);
-		
+
 		Button setTemplateButton = new Button("Set template directory");
 		setTemplateButton.setOnAction(e -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setTitle("Select template directory");
-			if (templateDirectory != null)
-				chooser.setInitialDirectory(templateDirectory);
+			if (templateDirectory != null) chooser.setInitialDirectory(
+				templateDirectory);
 			File selectedDirectory = chooser.showDialog(owner);
-			
-			if (selectedDirectory == null)
-				return;
-			
+
+			if (selectedDirectory == null) return;
+
 			FilenameFilter fileNameFilter = new FilenameFilter() {
 
 				@Override
@@ -119,47 +124,53 @@ public class DocumentTemplateSelectionDialog extends Dialog<DocumentTemplateSele
 					else return false;
 				}
 			};
-			
+
 			// Get all virtual archive folders
 			String[] fileList = selectedDirectory.list(fileNameFilter);
-			
-			ObservableList<String> templateFiles = FXCollections.observableArrayList(fileList);
+
+			ObservableList<String> templateFiles = FXCollections.observableArrayList(
+				fileList);
 			templateFiles.add(0, "<none>");
 			templateList.setItems(templateFiles);
 			this.templateDirectory = selectedDirectory;
 		});
-		
+
 		vBox.getChildren().add(setTemplateButton);
-		
+
 		dialogPane.setContent(vBox);
-		
+
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			String templateFileName = (templateList.getSelectionModel().getSelectedIndex() != 0) ? 
-					templateList.getSelectionModel().getSelectedItem() : null;
-			return (dialogButton == ButtonType.OK) ? new SelectionResult(nameField.getText(), templateFileName, this.templateDirectory) : null;
+			String templateFileName = (templateList.getSelectionModel()
+				.getSelectedIndex() != 0) ? templateList.getSelectionModel()
+					.getSelectedItem() : null;
+			return (dialogButton == ButtonType.OK) ? new SelectionResult(nameField
+				.getText(), templateFileName, this.templateDirectory) : null;
 		});
 	}
-	
+
 	public class SelectionResult {
+
 		public final String name, template;
 		public final File selectedDirectory;
-		
-		public SelectionResult(String name, String template, File selectedDirectory) {
+
+		public SelectionResult(String name, String template,
+			File selectedDirectory)
+		{
 			this.name = name;
 			this.template = template;
 			this.selectedDirectory = selectedDirectory;
 		}
-		
+
 		public String getName() {
 			return name;
 		}
-		
+
 		public String getTemplateFileName() {
 			return template;
 		}
-		
+
 		public File getSelectedDirectory() {
 			return selectedDirectory;
 		}

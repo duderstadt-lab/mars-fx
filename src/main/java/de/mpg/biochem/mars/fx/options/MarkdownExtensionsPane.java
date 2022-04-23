@@ -71,7 +71,9 @@ import javafx.scene.layout.VBox;
  * @author Karl Tauber
  */
 public class MarkdownExtensionsPane extends VBox {
+
 	private static class Ext {
+
 		final String id;
 		final String displayName;
 		ToggleSwitch toggleSwitch;
@@ -83,42 +85,41 @@ public class MarkdownExtensionsPane extends VBox {
 	}
 
 	private final Ext[] extensions;
-	private final ListProperty<String> enabledExtensions = new SimpleListProperty<>();
+	private final ListProperty<String> enabledExtensions =
+		new SimpleListProperty<>();
 
 	public MarkdownExtensionsPane() {
 		this(false);
 	}
 
 	public MarkdownExtensionsPane(boolean popover) {
-		//setLayout(popover ? "insets dialog" : "insets 0");
+		// setLayout(popover ? "insets dialog" : "insets 0");
 
 		// get IDs of all available extensions
 		String[] ids = MarkdownExtensions.ids();
 
 		// create sorted array of available extensions
-		extensions = Arrays.stream(ids)
-			.map(id -> new Ext(id, MarkdownExtensions.displayName(id)))
-			.sorted((e1, e2) -> e1.displayName.compareTo(e2.displayName))
-			.toArray(Ext[]::new);
-		
+		extensions = Arrays.stream(ids).map(id -> new Ext(id, MarkdownExtensions
+			.displayName(id))).sorted((e1, e2) -> e1.displayName.compareTo(
+				e2.displayName)).toArray(Ext[]::new);
+
 		// create toggle switches for all available extensions
 		RendererType rendererType = Options.getMarkdownRenderer();
 		for (Ext ext : extensions) {
 			boolean available = MarkdownExtensions.isAvailable(rendererType, ext.id);
-			if (popover && !available)
-				continue;
+			if (popover && !available) continue;
 
 			ext.toggleSwitch = new ToggleSwitch(ext.displayName);
-			ext.toggleSwitch.selectedProperty().addListener((ob, oldSelected, newSelected) -> {
+			ext.toggleSwitch.selectedProperty().addListener((ob, oldSelected,
+				newSelected) -> {
 				if (newSelected) {
-					if (!enabledExtensions.contains(ext.id))
-						enabledExtensions.add(ext.id);
-				} else
-					enabledExtensions.remove(ext.id);
+					if (!enabledExtensions.contains(ext.id)) enabledExtensions.add(
+						ext.id);
+				}
+				else enabledExtensions.remove(ext.id);
 			});
 
-			if (!popover && !available)
-				ext.toggleSwitch.setDisable(true);
+			if (!popover && !available) ext.toggleSwitch.setDisable(true);
 
 			getChildren().add(ext.toggleSwitch);
 		}
@@ -126,25 +127,27 @@ public class MarkdownExtensionsPane extends VBox {
 		// listener that updates toggle switch selection and option property
 		enabledExtensions.addListener((obs, oldExtensions, newExtensions) -> {
 			for (Ext ext : extensions) {
-				if (ext.toggleSwitch != null)
-					ext.toggleSwitch.setSelected(newExtensions.contains(ext.id));
+				if (ext.toggleSwitch != null) ext.toggleSwitch.setSelected(newExtensions
+					.contains(ext.id));
 			}
 
-			if (popover)
-				save();
+			if (popover) save();
 		});
 
 		// initialize from option property
-		enabledExtensions.set(FXCollections.observableArrayList(Options.getMarkdownExtensions()));
+		enabledExtensions.set(FXCollections.observableArrayList(Options
+			.getMarkdownExtensions()));
 	}
 
 	void rendererTypeChanged(RendererType rendererType) {
 		for (Ext ext : extensions)
-			ext.toggleSwitch.setDisable(!MarkdownExtensions.isAvailable(rendererType, ext.id));
+			ext.toggleSwitch.setDisable(!MarkdownExtensions.isAvailable(rendererType,
+				ext.id));
 	}
 
 	void save() {
-		String[] newMarkdownExtensions = enabledExtensions.get().sorted().toArray(new String[0]);
+		String[] newMarkdownExtensions = enabledExtensions.get().sorted().toArray(
+			new String[0]);
 		if (!Arrays.equals(newMarkdownExtensions, Options.getMarkdownExtensions()))
 			Options.setMarkdownExtensions(newMarkdownExtensions);
 	}

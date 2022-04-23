@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.options;
 
 import com.jfoenix.controls.JFXToggleButton;
@@ -34,28 +35,30 @@ import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 
 public class MarsOptionsPane {
+
 	private JFXToggleButton smileEncodingButton;
-	
+
 	private BorderPane rootPane;
-	
+
 	public MarsOptionsPane() {
-		//setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
-		
+		// setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
+
 		smileEncodingButton = new JFXToggleButton();
 		rootPane = new BorderPane();
 		rootPane.setCenter(smileEncodingButton);
-		
-		//setContent(rootPane);
+
+		// setContent(rootPane);
 	}
-	
+
 	public void handleToggleSmileEncoding() {
 		if (smileEncodingButton.isSelected()) {
-			//archive.setSMILEOutputEncoding();
-		} else {
-			//archive.unsetSMILEOutputEncoding();
+			// archive.setSMILEOutputEncoding();
+		}
+		else {
+			// archive.unsetSMILEOutputEncoding();
 		}
 	}
-	
+
 	public Node getNode() {
 		return this.rootPane;
 	}

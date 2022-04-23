@@ -26,13 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import org.scijava.Context;
 
 import de.mpg.biochem.mars.molecule.Molecule;
 
-public class DefaultMoleculePropertiesPane extends AbstractMoleculePropertiesPane<Molecule> {
+public class DefaultMoleculePropertiesPane extends
+	AbstractMoleculePropertiesPane<Molecule>
+{
+
 	public DefaultMoleculePropertiesPane(final Context context) {
 		super(context);
 	}

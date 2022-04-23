@@ -26,14 +26,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 
-public interface MarsMetadataTab<C extends MetadataSubPane, O extends MetadataSubPane> extends MoleculeArchiveTab {
+public interface MarsMetadataTab<C extends MetadataSubPane, O extends MetadataSubPane>
+	extends MoleculeArchiveTab
+{
+
 	public void saveCurrentRecord();
+
 	public void showProperties();
+
 	public void hideProperties();
+
 	public MarsMetadata getSelectedMetadata();
 }

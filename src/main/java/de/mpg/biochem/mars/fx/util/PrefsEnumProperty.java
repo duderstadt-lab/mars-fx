@@ -64,15 +64,15 @@ import javafx.beans.property.SimpleObjectProperty;
  *
  * @author Karl Tauber
  */
-public class PrefsEnumProperty<T extends Enum<T>>
-	extends SimpleObjectProperty<T>
+public class PrefsEnumProperty<T extends Enum<T>> extends
+	SimpleObjectProperty<T>
 {
+
 	private Preferences prefs;
 	private String key;
 	private T def;
 
-	public PrefsEnumProperty() {
-	}
+	public PrefsEnumProperty() {}
 
 	public PrefsEnumProperty(Preferences prefs, String key, T def) {
 		init(prefs, key, def);

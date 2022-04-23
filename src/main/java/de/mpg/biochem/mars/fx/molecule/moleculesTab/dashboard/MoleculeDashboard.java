@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
 import java.io.BufferedInputStream;
@@ -55,30 +56,39 @@ import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<MoleculeDashboardWidget> implements MoleculeSubPane {
-	
+public class MoleculeDashboard<M extends Molecule> extends
+	AbstractDashboard<MoleculeDashboardWidget> implements MoleculeSubPane
+{
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected M molecule;
-	
+
 	public MoleculeDashboard(final Context context) {
 		super(context);
-		
+
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-					archive = e.getArchive();
-			   		discoverWidgets();
-			   		e.consume();
-			   	}
-			} 
-        });
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						archive = e.getArchive();
+						discoverWidgets();
+						e.consume();
+					}
+				}
+			});
 	}
 
 	@Override
 	public MoleculeDashboardWidget createWidget(String widgetName) {
-		MoleculeDashboardWidget widget = (MoleculeDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MoleculeDashboardWidget widget =
+			(MoleculeDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setMolecule(molecule);
 		widget.setArchive(archive);
 		widget.setParent(this);
@@ -88,13 +98,11 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MoleculeCategoryChartWidget",
-	                    "MoleculeHistogramWidget",
-	                    "MoleculeXYChartWidget",
-	                    "MoleculeBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList("MoleculeCategoryChartWidget",
+			"MoleculeHistogramWidget", "MoleculeXYChartWidget",
+			"MoleculeBubbleChartWidget"));
 	}
-	
+
 	@Override
 	public void handle(MoleculeEvent event) {
 		event.invokeHandler(this);
@@ -109,23 +117,28 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MoleculeDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MoleculeDashboardWidget.class);
 	}
-	
+
 	@Override
 	public boolean importFromRoverFile(File roverFile) {
 		try {
-	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
-		   JsonFactory jfactory = new JsonFactory();
-		   JsonParser jParser = jfactory.createParser(inputStream);
-		   MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane", "moleculeDashboard");
-		   
-		   //Need for backward compatibility
-		   MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane", "moleculeDashboard");
-		   
-     	   jParser.close();
-     	   inputStream.close();
-		} catch (IOException e) {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane",
+				"moleculeDashboard");
+
+			// Need for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
+				"moleculeDashboard");
+
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
 			return false;
 		}
 		return true;

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import static javafx.scene.input.MouseButton.PRIMARY;
@@ -38,19 +39,23 @@ import javafx.scene.input.MouseEvent;
  */
 final class MouseEvents {
 
-    static boolean isOnlyPrimaryButtonDown(MouseEvent event) {
-        return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event.isSecondaryButtonDown();
-    }
+	static boolean isOnlyPrimaryButtonDown(MouseEvent event) {
+		return event.getButton() == PRIMARY && !event.isMiddleButtonDown() && !event
+			.isSecondaryButtonDown();
+	}
 
-    static boolean isOnlySecondaryButtonDown(MouseEvent event) {
-        return event.getButton() == SECONDARY && !event.isPrimaryButtonDown() && !event.isMiddleButtonDown();
-    }
+	static boolean isOnlySecondaryButtonDown(MouseEvent event) {
+		return event.getButton() == SECONDARY && !event.isPrimaryButtonDown() &&
+			!event.isMiddleButtonDown();
+	}
 
-    static boolean isOnlyCtrlModifierDown(MouseEvent event) {
-        return event.isControlDown() && !event.isAltDown() && !event.isMetaDown() && !event.isShiftDown();
-    }
+	static boolean isOnlyCtrlModifierDown(MouseEvent event) {
+		return event.isControlDown() && !event.isAltDown() && !event.isMetaDown() &&
+			!event.isShiftDown();
+	}
 
-    static boolean modifierKeysUp(MouseEvent event) {
-        return !event.isAltDown() && !event.isControlDown() && !event.isMetaDown() && !event.isShiftDown();
-    }
+	static boolean modifierKeysUp(MouseEvent event) {
+		return !event.isAltDown() && !event.isControlDown() && !event
+			.isMetaDown() && !event.isShiftDown();
+	}
 }

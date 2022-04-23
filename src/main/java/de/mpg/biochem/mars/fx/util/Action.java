@@ -67,8 +67,8 @@ import javafx.scene.input.KeyCombination;
  *
  * @author Karl Tauber
  */
-public class Action
-{
+public class Action {
+
 	public final String text;
 	public final KeyCombination accelerator;
 	public final GlyphIcons icon;
@@ -93,7 +93,8 @@ public class Action
 		BooleanProperty selected)
 	{
 		this.text = text;
-		this.accelerator = (accelerator != null) ? KeyCombination.valueOf(accelerator) : null;
+		this.accelerator = (accelerator != null) ? KeyCombination.valueOf(
+			accelerator) : null;
 		this.icon = icon;
 		this.action = action;
 		this.disable = disable;

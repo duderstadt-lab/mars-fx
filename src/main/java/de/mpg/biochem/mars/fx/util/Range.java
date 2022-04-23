@@ -58,8 +58,8 @@ package de.mpg.biochem.mars.fx.util;
 /**
  * @author Karl Tauber
  */
-public class Range
-{
+public class Range {
+
 	public final int start;
 	public final int end;
 

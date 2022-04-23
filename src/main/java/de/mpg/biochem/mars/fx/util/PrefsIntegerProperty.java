@@ -64,15 +64,13 @@ import javafx.beans.property.SimpleIntegerProperty;
  *
  * @author Karl Tauber
  */
-public class PrefsIntegerProperty
-	extends SimpleIntegerProperty
-{
+public class PrefsIntegerProperty extends SimpleIntegerProperty {
+
 	private Preferences prefs;
 	private String key;
 	private int def;
 
-	public PrefsIntegerProperty() {
-	}
+	public PrefsIntegerProperty() {}
 
 	public PrefsIntegerProperty(Preferences prefs, String key, int def) {
 		init(prefs, key, def);

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import javafx.scene.control.Alert;
@@ -42,23 +43,27 @@ import javafx.stage.Window;
  * @author Karl Duderstadt
  */
 public class RoverConfirmationDialog extends Alert {
-	
+
 	public RoverConfirmationDialog(Window owner, String message) {
 		super(AlertType.CONFIRMATION);
-	    initModality(Modality.WINDOW_MODAL);
-	    initOwner(owner);
-	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverSmile.png");
-	    ImageView imageView = new ImageView(image1);
-	    imageView.setFitWidth(80);
-	    imageView.setFitHeight(80);
-	    setGraphic(imageView);
-	    setHeaderText(null);
-	    setContentText(message);
+		initModality(Modality.WINDOW_MODAL);
+		initOwner(owner);
+		Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverSmile.png");
+		ImageView imageView = new ImageView(image1);
+		imageView.setFitWidth(80);
+		imageView.setFitHeight(80);
+		setGraphic(imageView);
+		setHeaderText(null);
+		setContentText(message);
 	}
-	
-	public RoverConfirmationDialog(Window owner, String message, String confirmationName, String cancelName) {
+
+	public RoverConfirmationDialog(Window owner, String message,
+		String confirmationName, String cancelName)
+	{
 		this(owner, message);
-	    ((Button) getDialogPane().lookupButton(ButtonType.OK)).setText(confirmationName);
-		((Button) getDialogPane().lookupButton(ButtonType.CANCEL)).setText(cancelName);
+		((Button) getDialogPane().lookupButton(ButtonType.OK)).setText(
+			confirmationName);
+		((Button) getDialogPane().lookupButton(ButtonType.CANCEL)).setText(
+			cancelName);
 	}
 }

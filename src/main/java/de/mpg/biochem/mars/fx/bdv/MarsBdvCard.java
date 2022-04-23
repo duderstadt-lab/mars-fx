@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.bdv;
 
 import javax.swing.JPanel;
@@ -41,12 +42,22 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-public interface MarsBdvCard extends SciJavaPlugin, JsonConvertibleRecord, Initializable {
+public interface MarsBdvCard extends SciJavaPlugin, JsonConvertibleRecord,
+	Initializable
+{
+
 	String getName();
+
 	JPanel getPanel();
+
 	void setMolecule(Molecule molecule);
-	void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive);
+
+	void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive);
+
 	BdvOverlay getBdvOverlay();
+
 	boolean isActive();
+
 	void setActive(boolean active);
 }

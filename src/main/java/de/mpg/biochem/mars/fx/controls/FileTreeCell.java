@@ -69,22 +69,21 @@ import javafx.scene.control.TreeItem;
  *
  * @author Karl Tauber
  */
-public class FileTreeCell
-	extends TreeCell<File>
-{
+public class FileTreeCell extends TreeCell<File> {
+
 	public FileTreeCell() {
 		// expand/collapse tree item with single click
 		setOnMouseReleased(event -> {
 			TreeItem<File> treeItem = getTreeItem();
-			if (treeItem != null &&
-				!treeItem.isLeaf() &&
-				(getDisclosureNode() == null || !getDisclosureNode().getBoundsInParent().contains(event.getX(), event.getY())))
+			if (treeItem != null && !treeItem.isLeaf() &&
+				(getDisclosureNode() == null || !getDisclosureNode().getBoundsInParent()
+					.contains(event.getX(), event.getY())))
 			{
 				treeItem.setExpanded(!treeItem.isExpanded());
 			}
 
-			if (getTreeView() instanceof FileTreeView)
-				((FileTreeView)getTreeView()).handleClicks(treeItem, event.getButton(), event.getClickCount());
+			if (getTreeView() instanceof FileTreeView) ((FileTreeView) getTreeView())
+				.handleClicks(treeItem, event.getButton(), event.getClickCount());
 		});
 	}
 
@@ -97,14 +96,14 @@ public class FileTreeCell
 		if (!empty && file != null) {
 			text = file.getName();
 			graphic = FontAwesomeIconFactory.get().createIcon(getTreeItem().isLeaf()
-				? fileIcon(text)
-				: FontAwesomeIcon.FOLDER_ALT);
+				? fileIcon(text) : FontAwesomeIcon.FOLDER_ALT);
 		}
 		setText(text);
 		setGraphic(graphic);
 	}
 
 	private FontAwesomeIcon fileIcon(String name) {
-		return Utils.isImage(name) ? FontAwesomeIcon.FILE_IMAGE_ALT : FontAwesomeIcon.FILE_TEXT_ALT;
+		return Utils.isImage(name) ? FontAwesomeIcon.FILE_IMAGE_ALT
+			: FontAwesomeIcon.FILE_TEXT_ALT;
 	}
 }

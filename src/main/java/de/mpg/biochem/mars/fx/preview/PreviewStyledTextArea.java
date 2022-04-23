@@ -68,15 +68,12 @@ import javafx.beans.WeakInvalidationListener;
 import javafx.scene.control.IndexRange;
 
 /**
- * A styled text area for preview.
- *
- * It uses the same font as the editor.
+ * A styled text area for preview. It uses the same font as the editor.
  *
  * @author Karl Tauber
  */
-class PreviewStyledTextArea
-	extends StyleClassedTextArea
-{
+class PreviewStyledTextArea extends StyleClassedTextArea {
+
 	private final InvalidationListener optionsListener;
 
 	PreviewStyledTextArea() {
@@ -88,37 +85,40 @@ class PreviewStyledTextArea
 		updateFont();
 
 		optionsListener = e -> updateFont();
-		WeakInvalidationListener weakOptionsListener = new WeakInvalidationListener(optionsListener);
+		WeakInvalidationListener weakOptionsListener = new WeakInvalidationListener(
+			optionsListener);
 		Options.fontFamilyProperty().addListener(weakOptionsListener);
 		Options.fontSizeProperty().addListener(weakOptionsListener);
 	}
 
 	private void updateFont() {
-		setStyle("-fx-font-family: '" + Options.getFontFamily()
-				+ "'; -fx-font-size: " + Options.getFontSize() );
+		setStyle("-fx-font-family: '" + Options.getFontFamily() +
+			"'; -fx-font-size: " + Options.getFontSize());
 	}
 
-	void replaceText(String text, StyleSpans<? extends Collection<String>> styleSpans) {
+	void replaceText(String text,
+		StyleSpans<? extends Collection<String>> styleSpans)
+	{
 		// remember old selection range and scrollY
 		IndexRange oldSelection = getSelection();
 		double oldScrollY = getEstimatedScrollY();
 
 		// replace text and styles
 		doReplaceText(text);
-		if (styleSpans != null)
-			setStyleSpans(0, styleSpans);
+		if (styleSpans != null) setStyleSpans(0, styleSpans);
 
 		// restore old selection range and scrollY
 		int newLength = getLength();
-		selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(oldSelection.getEnd(), newLength));
+		selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(
+			oldSelection.getEnd(), newLength));
 		Platform.runLater(() -> {
 			estimatedScrollYProperty().setValue(oldScrollY);
 		});
 	}
 
 	/**
-	 * Replaces whole text in text area, but reduces the change by removing
-	 * equal leading and trailing characters.
+	 * Replaces whole text in text area, but reduces the change by removing equal
+	 * leading and trailing characters.
 	 */
 	private void doReplaceText(String text) {
 		int start = 0;
@@ -131,8 +131,7 @@ class PreviewStyledTextArea
 
 		// trim leading equal characters
 		while (textStart < textLength && start < end) {
-			if (text.charAt(textStart) != oldText.charAt(textStart))
-				break;
+			if (text.charAt(textStart) != oldText.charAt(textStart)) break;
 			textStart++;
 			start++;
 		}
@@ -140,15 +139,13 @@ class PreviewStyledTextArea
 		// trim trailing equal characters
 		int oldIndex = oldText.length() - 1;
 		while (textEnd > textStart && end > start) {
-			if (text.charAt(textEnd - 1) != oldText.charAt(oldIndex))
-				break;
+			if (text.charAt(textEnd - 1) != oldText.charAt(oldIndex)) break;
 			textEnd--;
 			end--;
 			oldIndex--;
 		}
 
-		if (start == end && textStart == textEnd)
-			return;
+		if (start == end && textStart == textEnd) return;
 
 		replaceText(start, end, text.substring(textStart, textEnd));
 	}

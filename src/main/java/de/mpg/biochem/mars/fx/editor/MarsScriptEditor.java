@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.editor;
 
 import java.lang.reflect.Method;
@@ -60,64 +61,67 @@ import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 
 public class MarsScriptEditor extends CodeArea {
-	
+
 	// Delay for async formatting, in milliseconds
 	private static int delayMillis = 100;
-	
+
 	private Subscription cleanupWhenNoLongerNeedIt;
 
 	private final Collection<KeyCombination> suggestKey = Arrays.asList(
-		      new KeyCodeCombination(KeyCode.PERIOD));
-	
+		new KeyCodeCombination(KeyCode.PERIOD));
+
 	private static final Set<String> METHOD_NAMES = new HashSet<>();
 	static {
 		for (Method method : MoleculeArchive.class.getMethods()) {
 			METHOD_NAMES.add(method.getName());
 		}
 	}
-	
+
 	private ExecutorService executor = Executors.newSingleThreadExecutor();
-	
+
 	public MarsScriptEditor() {
 		super();
 		setParagraphGraphicFactory(LineNumberFactory.get(this));
-		
-		getStylesheets().add("de/mpg/biochem/mars/fx/syntaxhighlighter/java-keywords.css");
-		
-		cleanupWhenNoLongerNeedIt = this
-				.multiPlainChanges()
-				.successionEnds(Duration.ofMillis(delayMillis))
-				.supplyTask(() -> computeHighlightingAsync(this.getText()))
-				.awaitLatest(this.multiPlainChanges())
-				.filterMap(t -> {
+
+		getStylesheets().add(
+			"de/mpg/biochem/mars/fx/syntaxhighlighter/java-keywords.css");
+
+		cleanupWhenNoLongerNeedIt = this.multiPlainChanges().successionEnds(Duration
+			.ofMillis(delayMillis)).supplyTask(() -> computeHighlightingAsync(this
+				.getText())).awaitLatest(this.multiPlainChanges()).filterMap(t -> {
 					if (t.isSuccess()) {
 						return Optional.of(t.get());
-					} else {
+					}
+					else {
 						return Optional.empty();
 					}
-				})
-				.subscribe(change -> this.setStyleSpans(0, change));
-		
-		//Disable autocompletion for now. Needs more work. Currently not always stable and limited suggestions to specific words.
-		//InnerController innerController = new InnerController(this);
+				}).subscribe(change -> this.setStyleSpans(0, change));
+
+		// Disable autocompletion for now. Needs more work. Currently not always
+		// stable and limited suggestions to specific words.
+		// InnerController innerController = new InnerController(this);
 	}
-	
+
 	private boolean shouldSuggest(KeyEvent e) {
-	    if (suggestKey.stream().filter(c -> c.match(e)).count() > 0) {
-	      return true;
-	    } /*else if (keys.suggest().getValue().match(e)) {
-	      return true;
-	    } */else {
-	      return false;
-	    }
-	  }
-	
+		if (suggestKey.stream().filter(c -> c.match(e)).count() > 0) {
+			return true;
+		}
+		/*else if (keys.suggest().getValue().match(e)) {
+		return true;
+		} */else {
+			return false;
+		}
+	}
+
 	public void cleanup() {
 		cleanupWhenNoLongerNeedIt.unsubscribe();
 	}
-	
-	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync(final String text) {
+
+	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync(
+		final String text)
+	{
 		Task task = new Task<StyleSpans<Collection<String>>>() {
+
 			@Override
 			protected StyleSpans<Collection<String>> call() {
 				return JavaSyntaxHighlighter.computeHighlighting(text);
@@ -126,107 +130,113 @@ public class MarsScriptEditor extends CodeArea {
 		executor.execute(task);
 		return task;
 	}
-	
+
 	private class InnerController {
 
-	    CodeArea editor;
+		CodeArea editor;
 
-	    AutoCompletePopup<CompletionItem> popup = new AutoCompletePopup<>();
-	    
-	    GroovySuggestionGenerator groovySuggestionGenerator;
-	    
-	    String keyword;
+		AutoCompletePopup<CompletionItem> popup = new AutoCompletePopup<>();
 
-	    public InnerController(CodeArea editor) {
-	      this.editor = editor;
-	      
-	      popup.setMinWidth(450);
-	      
-	      popup.setConverter(new StringConverter<CompletionItem>() {
-	          @Override
-	          public String toString(CompletionItem object) {
-	              return object.getShortDescription();
-	          }
+		GroovySuggestionGenerator groovySuggestionGenerator;
 
-	          @Override
-	          public CompletionItem fromString(String string) {
-	              return null;
-	          }
-	      });
+		String keyword;
 
-	      groovySuggestionGenerator = GroovySuggestionGenerator.getInstance();
+		public InnerController(CodeArea editor) {
+			this.editor = editor;
 
-	      editor.textProperty().addListener((ob, o, n) -> {
-	        if (editor.isFocused() && popup.isShowing()) {
-	          showPopup();
-	        }
-	      });
-	      editor.focusedProperty().addListener((ob, o, n) -> {
-	        if (n == false) {
-	          hidePopup();
-	        }
-	      });
+			popup.setMinWidth(450);
 
-	      popup.setOnSuggestion(sce -> {
-	        completeUserInput(sce.getSuggestion().getCompletionText());
-	        hidePopup();
-	      });
+			popup.setConverter(new StringConverter<CompletionItem>() {
 
-	      editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
-	    	  if (shouldSuggest(e)) {
-	    		  if (!popup.isShowing()) {
-	    		  //String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)|(\\()|(\\))|(\\{)|(\\})|(\\[)|(\\])");
-	    		  String[] split = editor.getText().substring(0, editor.getCaretPosition()).split("(\\s+)");
-	    			if (split.length == 0)
-	    				keyword = "";
-	    			else
-	    				keyword = split[split.length-1].trim();
-	    		  }
-	    		  
-	    		  showPopup();
-	    	  }
-	      });
-	    }
+				@Override
+				public String toString(CompletionItem object) {
+					return object.getShortDescription();
+				}
 
-	    public void showPopup() {
-	      Collection<CompletionItem> suggestions = groovySuggestionGenerator.getSuggestions(editor.getText(), editor.getCaretPosition(), keyword);
-	      if (suggestions.isEmpty()) {
-	        hidePopup();
-	      } else {
-	        popup.getSuggestions().setAll(suggestions);
-	        
-	        selectFirstSuggestion(popup);
-	        if (editor.getCaretBounds().isPresent()) {	
-	        	popup.setX(editor.getCaretBounds().get().getMinX());
-	        	popup.setY(editor.getCaretBounds().get().getMinY());
-	        }
-	        
-	        if (popup.isShowing() == false) {
-	          popup.show(editor.getScene().getWindow());
-	        }
-	      }
-	    }
+				@Override
+				public CompletionItem fromString(String string) {
+					return null;
+				}
+			});
 
-	    public void hidePopup() {
-	      popup.hide();
-	    }
+			groovySuggestionGenerator = GroovySuggestionGenerator.getInstance();
 
-	    private void completeUserInput(String suggestion) {
-	      IndexRange range = groovySuggestionGenerator.getReplaceRange(editor.getText(), editor.getCaretPosition());
-	      editor.deleteText(range);
-	      editor.insertText(range.getStart(), suggestion);
-	      editor.moveTo(range.getStart() + suggestion.length());
-	    }
+			editor.textProperty().addListener((ob, o, n) -> {
+				if (editor.isFocused() && popup.isShowing()) {
+					showPopup();
+				}
+			});
+			editor.focusedProperty().addListener((ob, o, n) -> {
+				if (n == false) {
+					hidePopup();
+				}
+			});
 
-	    private void selectFirstSuggestion(AutoCompletePopup<?> autoCompletionPopup) {
-	      Skin<?> skin = autoCompletionPopup.getSkin();
-	      if (skin instanceof AutoCompletePopupSkin) {
-	        AutoCompletePopupSkin<?> au = (AutoCompletePopupSkin<?>) skin;
-	        ListView<?> li = (ListView<?>) au.getNode();
-	        if (li.getItems() != null && !li.getItems().isEmpty()) {
-	          li.getSelectionModel().select(0);
-	        }
-	      }
-	    }
+			popup.setOnSuggestion(sce -> {
+				completeUserInput(sce.getSuggestion().getCompletionText());
+				hidePopup();
+			});
+
+			editor.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
+				if (shouldSuggest(e)) {
+					if (!popup.isShowing()) {
+						// String[] split = editor.getText().substring(0,
+						// editor.getCaretPosition()).split("(\\s+)|(\\()|(\\))|(\\{)|(\\})|(\\[)|(\\])");
+						String[] split = editor.getText().substring(0, editor
+							.getCaretPosition()).split("(\\s+)");
+						if (split.length == 0) keyword = "";
+						else keyword = split[split.length - 1].trim();
+					}
+
+					showPopup();
+				}
+			});
+		}
+
+		public void showPopup() {
+			Collection<CompletionItem> suggestions = groovySuggestionGenerator
+				.getSuggestions(editor.getText(), editor.getCaretPosition(), keyword);
+			if (suggestions.isEmpty()) {
+				hidePopup();
+			}
+			else {
+				popup.getSuggestions().setAll(suggestions);
+
+				selectFirstSuggestion(popup);
+				if (editor.getCaretBounds().isPresent()) {
+					popup.setX(editor.getCaretBounds().get().getMinX());
+					popup.setY(editor.getCaretBounds().get().getMinY());
+				}
+
+				if (popup.isShowing() == false) {
+					popup.show(editor.getScene().getWindow());
+				}
+			}
+		}
+
+		public void hidePopup() {
+			popup.hide();
+		}
+
+		private void completeUserInput(String suggestion) {
+			IndexRange range = groovySuggestionGenerator.getReplaceRange(editor
+				.getText(), editor.getCaretPosition());
+			editor.deleteText(range);
+			editor.insertText(range.getStart(), suggestion);
+			editor.moveTo(range.getStart() + suggestion.length());
+		}
+
+		private void selectFirstSuggestion(
+			AutoCompletePopup<?> autoCompletionPopup)
+		{
+			Skin<?> skin = autoCompletionPopup.getSkin();
+			if (skin instanceof AutoCompletePopupSkin) {
+				AutoCompletePopupSkin<?> au = (AutoCompletePopupSkin<?>) skin;
+				ListView<?> li = (ListView<?>) au.getNode();
+				if (li.getItems() != null && !li.getItems().isEmpty()) {
+					li.getSelectionModel().select(0);
+				}
+			}
+		}
 	}
 }

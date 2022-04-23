@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
@@ -33,18 +34,20 @@ import de.mpg.biochem.mars.fx.molecule.AbstractParametersTable;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
 
-public class MoleculePropertiesTable extends AbstractParametersTable implements MoleculeSubPane {
+public class MoleculePropertiesTable extends AbstractParametersTable implements
+	MoleculeSubPane
+{
 
-    public MoleculePropertiesTable() {        
-        super();
-        getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-    }
-    
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
+	public MoleculePropertiesTable() {
+		super();
+		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
+	}
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+		event.consume();
+	}
 
 	@Override
 	public void fireEvent(Event event) {
@@ -54,6 +57,6 @@ public class MoleculePropertiesTable extends AbstractParametersTable implements 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.record = molecule;
-    	loadData();
+		loadData();
 	}
 }

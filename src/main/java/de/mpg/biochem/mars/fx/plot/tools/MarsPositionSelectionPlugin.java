@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot.tools;
 
 import java.util.Objects;
@@ -59,430 +60,460 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-
 /**
- * Position along X or Y axis.
- * 
- * Position selection - triggered on {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED}
- * event that is accepted by getPositionInMouseFilter() position-in filter. 
- * released.
+ * Position along X or Y axis. Position selection - triggered on
+ * {@link MouseEvent#MOUSE_PRESSED MOUSE_PRESSED} event that is accepted by
+ * getPositionInMouseFilter() position-in filter. released.
  * 
  * @author Karl Duderstadt
  */
-public class MarsPositionSelectionPlugin extends ChartPlugin implements MarsPlotPlugin {
-    /**
-     * Name of the CCS class of the region rectangle.
-     */
-    //private static final int FONT_SIZE = 20;
-    
-    private DatasetOptionsPane datasetOptionsPane;
-    
+public class MarsPositionSelectionPlugin extends ChartPlugin implements
+	MarsPlotPlugin
+{
 
-    //Tooltip variables
+	/**
+	 * Name of the CCS class of the region rectangle.
+	 */
+	// private static final int FONT_SIZE = 20;
 
-    public static final String STYLE_CLASS_LABEL = "chart-datapoint-tooltip-label";
+	private DatasetOptionsPane datasetOptionsPane;
 
-    private static final int LABEL_X_OFFSET = 15;
-    private static final int LABEL_Y_OFFSET = 5;
+	// Tooltip variables
 
-    private final Label label = new Label();
-    private final Circle circle = new Circle();
+	public static final String STYLE_CLASS_LABEL =
+		"chart-datapoint-tooltip-label";
 
-    private Point2D trackingDataPointScreen;
-    private DataPoint positionPoint = null;
-    private DataPoint currentTrackingDataPoint;
+	private static final int LABEL_X_OFFSET = 15;
+	private static final int LABEL_Y_OFFSET = 5;
 
-    private final EventHandler<MouseEvent> trackMouseMoveHandler = this::updateToolTip;
+	private final Label label = new Label();
+	private final Circle circle = new Circle();
 
-    /**
-     * Default region mouse filter passing on left mouse button (only).
-     */
-    public final Predicate<MouseEvent> defaultPositionSelectionMouseFilter = event -> MouseEventsHelper.isOnlyPrimaryButtonDown(
-            event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+	private Point2D trackingDataPointScreen;
+	private DataPoint positionPoint = null;
+	private DataPoint currentTrackingDataPoint;
 
-    private Predicate<MouseEvent> positionSelectionMouseFilter = defaultPositionSelectionMouseFilter;
+	private final EventHandler<MouseEvent> trackMouseMoveHandler =
+		this::updateToolTip;
 
-    private ObservableList<Axis> omitAxisregion = FXCollections.observableArrayList();
+	/**
+	 * Default region mouse filter passing on left mouse button (only).
+	 */
+	public final Predicate<MouseEvent> defaultPositionSelectionMouseFilter =
+		event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event) &&
+			MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(
+				event);
 
-    private final ObjectProperty<AxisMode> axisMode = new SimpleObjectProperty<AxisMode>(this, "axisMode",
-            AxisMode.XY) {
-        @Override
-        protected void invalidated() {
-            Objects.requireNonNull(get(), "The " + getName() + " must not be null");
-        }
-    };
+	private Predicate<MouseEvent> positionSelectionMouseFilter =
+		defaultPositionSelectionMouseFilter;
 
-    private final EventHandler<MouseEvent> positonSelectionHandler = event -> {
-        if (getPositionSelectionMouseFilter() == null || getPositionSelectionMouseFilter().test(event)) {
-            positionSelected(event);
-            event.consume();
-        }
-    };
-    
-    private final EventHandler<KeyEvent> keyPressedHandler = event -> {
-        if (event.getCode() == KeyCode.P && trackingDataPointScreen != null) {
-        	positionSelected(trackingDataPointScreen.getX(), trackingDataPointScreen.getY());
-            event.consume();
-        }
-    };
+	private ObservableList<Axis> omitAxisregion = FXCollections
+		.observableArrayList();
 
-    public MarsPositionSelectionPlugin() {
-        this(AxisMode.X);
-    }
+	private final ObjectProperty<AxisMode> axisMode =
+		new SimpleObjectProperty<AxisMode>(this, "axisMode", AxisMode.XY)
+		{
 
-    /**
-     * Creates a new instance of region selector with animation disabled.
-     *
-     * @param axisMode
-     *            initial value of {@link #axisModeProperty() regionMode} property
-     */
-    public MarsPositionSelectionPlugin(final AxisMode axisMode) {
-        super();
-        setAxisMode(axisMode);
-        registerEventHandlers();
-        
-        label.getStyleClass().add(MarsDataPointTracker.STYLE_CLASS_LABEL);
-        circle.setRadius(5.0f);
-        circle.setFill(Color.TRANSPARENT);
-        circle.setStroke(Color.RED);
-    }
+			@Override
+			protected void invalidated() {
+				Objects.requireNonNull(get(), "The " + getName() + " must not be null");
+			}
+		};
 
-    /**
-     * The mode defining axis along which the region can be performed. By default
-     * initialised to {@link AxisMode#XY}.
-     *
-     * @return the axis mode property
-     */
-    public final ObjectProperty<AxisMode> axisModeProperty() {
-        return axisMode;
-    }
+	private final EventHandler<MouseEvent> positonSelectionHandler = event -> {
+		if (getPositionSelectionMouseFilter() == null ||
+			getPositionSelectionMouseFilter().test(event))
+		{
+			positionSelected(event);
+			event.consume();
+		}
+	};
 
-    /**
-     * Returns the value of the {@link #axisModeProperty()}.
-     *
-     * @return current mode
-     */
-    public final AxisMode getAxisMode() {
-        return axisModeProperty().get();
-    }
+	private final EventHandler<KeyEvent> keyPressedHandler = event -> {
+		if (event.getCode() == KeyCode.P && trackingDataPointScreen != null) {
+			positionSelected(trackingDataPointScreen.getX(), trackingDataPointScreen
+				.getY());
+			event.consume();
+		}
+	};
 
-    /**
-     * Returns region-in mouse event filter.
-     *
-     * @return region-in mouse event filter
-     */
-    public Predicate<MouseEvent> getPositionSelectionMouseFilter() {
-        return positionSelectionMouseFilter;
-    }
+	public MarsPositionSelectionPlugin() {
+		this(AxisMode.X);
+	}
 
-    /**
-     * @return list of axes that shall be ignored when performing region-in or outs
-     */
-    public final ObservableList<Axis> omitAxisregionList() {
-        return omitAxisregion;
-    }
+	/**
+	 * Creates a new instance of region selector with animation disabled.
+	 *
+	 * @param axisMode initial value of {@link #axisModeProperty() regionMode}
+	 *          property
+	 */
+	public MarsPositionSelectionPlugin(final AxisMode axisMode) {
+		super();
+		setAxisMode(axisMode);
+		registerEventHandlers();
 
-    /**
-     * Sets the value of the {@link #axisModeProperty()}.
-     *
-     * @param mode
-     *            the mode to be used
-     */
-    public final void setAxisMode(final AxisMode mode) {
-        axisModeProperty().set(mode);
-    }
+		label.getStyleClass().add(MarsDataPointTracker.STYLE_CLASS_LABEL);
+		circle.setRadius(5.0f);
+		circle.setFill(Color.TRANSPARENT);
+		circle.setStroke(Color.RED);
+	}
 
-    /**
-     * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that
-     * should start region-in operation.
-     *
-     * @param positionSelectionMouseFilter
-     *            the filter to accept region-in mouse event. If {@code null} then
-     *            any DRAG_DETECTED event will start region-in operation. By
-     *            default it's set to defaultregionInMouseFilter.
-     */
-    public void setPositionSelectionMouseFilter(final Predicate<MouseEvent> positionSelectionMouseFilter) {
-        this.positionSelectionMouseFilter = positionSelectionMouseFilter;
-    }
+	/**
+	 * The mode defining axis along which the region can be performed. By default
+	 * initialised to {@link AxisMode#XY}.
+	 *
+	 * @return the axis mode property
+	 */
+	public final ObjectProperty<AxisMode> axisModeProperty() {
+		return axisMode;
+	}
 
-    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {	
-    	//Now sure why but sometimes this is fired...
-    	// and these are null.. For the moment we add this work around
-    	if (getChart() == null)
-    		return false;
-    	else if (getChart().getCanvas() == null)
-    		return false;
-    	
-    	//This will prevent creation of a new position during drag events.
-    	//drag events always originate from the Scene...
-    	if (!(mouseEvent.getSource() instanceof HiddenSidesPane)) {
-    		return false;
-    	}
-    	
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
+	/**
+	 * Returns the value of the {@link #axisModeProperty()}.
+	 *
+	 * @return current mode
+	 */
+	public final AxisMode getAxisMode() {
+		return axisModeProperty().get();
+	}
 
-    private void registerEventHandlers() {
-        registerInputEventHandler(MouseEvent.MOUSE_CLICKED, positonSelectionHandler);
-        
-        //Tracking
-        registerInputEventHandler(MouseEvent.MOUSE_MOVED, trackMouseMoveHandler);
+	/**
+	 * Returns region-in mouse event filter.
+	 *
+	 * @return region-in mouse event filter
+	 */
+	public Predicate<MouseEvent> getPositionSelectionMouseFilter() {
+		return positionSelectionMouseFilter;
+	}
 
-        //I will manually add this for the moment since the super class doesn't seem to handle
-        //key listeners very well :(
-        chartProperty().addListener((obs, oldChart, newChart) -> {
-            if (oldChart != null) {
-                if (oldChart.getPlotArea().getScene() != null) {
-                	oldChart.getPlotArea().getScene().removeEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
-                }
-            }
-            if (newChart != null) {
-            	newChart.getPlotArea().getScene().addEventHandler(KeyEvent.KEY_PRESSED, keyPressedHandler);
-            }
-        });
-    }
+	/**
+	 * @return list of axes that shall be ignored when performing region-in or
+	 *         outs
+	 */
+	public final ObservableList<Axis> omitAxisregionList() {
+		return omitAxisregion;
+	}
 
-    private void positionSelected(final MouseEvent event) {
-    	if (datasetOptionsPane.getTrackingSeries() == null || event == null)
-    		return;
+	/**
+	 * Sets the value of the {@link #axisModeProperty()}.
+	 *
+	 * @param mode the mode to be used
+	 */
+	public final void setAxisMode(final AxisMode mode) {
+		axisModeProperty().set(mode);
+	}
 
-    	// pixel coordinates w.r.t. plot area
-        final Point2D positionPlotCoordinate = getChart().toPlotArea(event.getX(), event.getY());
-        
-        Axis axis = ((XYChart) getChart()).getXAxis();
-        double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
-        
-        MarsPosition poi = new MarsPosition("Position");
-        poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
-        poi.setPosition(xPosition);
-        
-        //We add the region to the metadata if those indicators are selected.
-        //Otherwise we add it for molecule
-        //If None is selected we add nothing.
-        if (datasetOptionsPane.isMetadataIndicators())
-        	getChart().fireEvent(new NewMetadataPositionEvent(poi));
-        else if (datasetOptionsPane.isMoleculeIndicators())
-        	getChart().fireEvent(new NewMoleculePositionEvent(poi));
-        
-        event.consume();
-    }
-    
-    private void positionSelected(final double x, final double y) {
-    	if (datasetOptionsPane.getTrackingSeries() == null)
-    		return;
-    	
-    	positionPoint = this.currentTrackingDataPoint;//new Point2D(event.getX(), event.getY());
+	/**
+	 * Sets filter on {@link MouseEvent#DRAG_DETECTED DRAG_DETECTED} events that
+	 * should start region-in operation.
+	 *
+	 * @param positionSelectionMouseFilter the filter to accept region-in mouse
+	 *          event. If {@code null} then any DRAG_DETECTED event will start
+	 *          region-in operation. By default it's set to
+	 *          defaultregionInMouseFilter.
+	 */
+	public void setPositionSelectionMouseFilter(
+		final Predicate<MouseEvent> positionSelectionMouseFilter)
+	{
+		this.positionSelectionMouseFilter = positionSelectionMouseFilter;
+	}
 
-    	// pixel coordinates w.r.t. plot area
-        //final Point2D positionPlotCoordinate = getChart().toPlotArea(positionPoint.getX(), positionPoint.getY());
-        
-        //Axis axis = ((XYChart) getChart()).getXAxis();
-        //double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
-        if (positionPoint != null) {
-	        MarsPosition poi = new MarsPosition("Position");
-	        poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
-	        poi.setPosition(positionPoint.x);
-	        
-	        //We add the region to the metadata if those indicators are selected.
-	        //Otherwise we add it for molecule
-	        //If None is selected we add nothing.
-	        if (datasetOptionsPane.isMetadataIndicators())
-	        	getChart().fireEvent(new NewMetadataPositionEvent(poi));
-	        else if (datasetOptionsPane.isMoleculeIndicators())
-	        	getChart().fireEvent(new NewMoleculePositionEvent(poi));
-        }
-        positionPoint = null;
-    }
-    
-    private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
-        if (!plotAreaBounds.contains(event.getX(), event.getY())) {
-            return null;
-        }
+	private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+		// Now sure why but sometimes this is fired...
+		// and these are null.. For the moment we add this work around
+		if (getChart() == null) return false;
+		else if (getChart().getCanvas() == null) return false;
 
-        final Point2D mouseLocation = getLocationInPlotArea(event);
+		// This will prevent creation of a new position during drag events.
+		// drag events always originate from the Scene...
+		if (!(mouseEvent.getSource() instanceof HiddenSidesPane)) {
+			return false;
+		}
 
-        Chart chart = getChart();
-        
-        if (chart.getDatasets().size() == 0)
-        	return null;
-        
-        return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
-    }
+		final Canvas canvas = getChart().getCanvas();
+		// listen to only events within the canvas
+		final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent
+			.getScreenY());
+		final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
+		return screenBounds.contains(mouseLoc);
+	}
 
-    private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
-        if (!(chart instanceof XYChart)) {
-            return null;
-        }
-        final XYChart xyChart = (XYChart) chart;
+	private void registerEventHandlers() {
+		registerInputEventHandler(MouseEvent.MOUSE_CLICKED,
+			positonSelectionHandler);
 
-        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
+		// Tracking
+		registerInputEventHandler(MouseEvent.MOUSE_MOVED, trackMouseMoveHandler);
 
-        DataSet dataset = null;
-        if (this.datasetOptionsPane != null) {
-        	String datasetName =  datasetOptionsPane.getTrackingSeries().getYColumn() + " vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
-        	for (DataSet dataS : xyChart.getDatasets())
-        		if (dataS.getName().equals(datasetName))
-        			dataset = dataS;
-        } else {
-        	return null;
-        }
+		// I will manually add this for the moment since the super class doesn't
+		// seem to handle
+		// key listeners very well :(
+		chartProperty().addListener((obs, oldChart, newChart) -> {
+			if (oldChart != null) {
+				if (oldChart.getPlotArea().getScene() != null) {
+					oldChart.getPlotArea().getScene().removeEventHandler(
+						KeyEvent.KEY_PRESSED, keyPressedHandler);
+				}
+			}
+			if (newChart != null) {
+				newChart.getPlotArea().getScene().addEventHandler(KeyEvent.KEY_PRESSED,
+					keyPressedHandler);
+			}
+		});
+	}
 
-        return findNearestDataPoint(dataset, xValue);
-    }
-    
-    /**
-     * Handles series that have data sorted or not sorted with respect to X coordinate.
-     * 
-     * @param dataSet data set
-     * @param searchedX x coordinate
-     * @return return neighouring data points
-     */
-    private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
-    	if (dataSet == null)
-    		return null;
-    	
-        int prevIndex = -1;
-        int nextIndex = -1;
-        double prevX = Double.NEGATIVE_INFINITY;
-        double nextX = Double.POSITIVE_INFINITY;
+	private void positionSelected(final MouseEvent event) {
+		if (datasetOptionsPane.getTrackingSeries() == null || event == null) return;
 
-        final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
-        for (int i = 0, size = nDataCount; i < size; i++) {
-            final double currentX = dataSet.get(DataSet.DIM_X, i);
+		// pixel coordinates w.r.t. plot area
+		final Point2D positionPlotCoordinate = getChart().toPlotArea(event.getX(),
+			event.getY());
 
-            if (currentX < searchedX) {
-                if (prevX < currentX) {
-                    prevIndex = i;
-                    prevX = currentX;
-                }
-            } else if (nextX > currentX) {
-                nextIndex = i;
-                nextX = currentX;
-            }
-        }
-        final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
-                        dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
-        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+		Axis axis = ((XYChart) getChart()).getXAxis();
+		double xPosition = axis.getValueForDisplay(positionPlotCoordinate.getX());
 
-        if (prevPoint == null || nextPoint == null)
-         	return null;
-        
-        final double prevDistance = Math.abs(searchedX - prevPoint.x);
-        final double nextDistance = Math.abs(searchedX - nextPoint.x);
+		MarsPosition poi = new MarsPosition("Position");
+		poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+		poi.setPosition(xPosition);
 
-        if (prevDistance < nextDistance)
-        	return prevPoint;
-        else 
-        	return nextPoint;
-    }
+		// We add the region to the metadata if those indicators are selected.
+		// Otherwise we add it for molecule
+		// If None is selected we add nothing.
+		if (datasetOptionsPane.isMetadataIndicators()) getChart().fireEvent(
+			new NewMetadataPositionEvent(poi));
+		else if (datasetOptionsPane.isMoleculeIndicators()) getChart().fireEvent(
+			new NewMoleculePositionEvent(poi));
 
-    private String formatDataPoint(final DataPoint dataPoint) {
-        return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
-    }
+		event.consume();
+	}
 
-    protected String getDataLabelSafe(final DataSet dataSet, final int index) {
-        String lable = dataSet.getDataLabel(index);
-        if (lable == null) {
-            return getDefaultDataLabel(dataSet, index);
-        }
-        return lable;
-    }
+	private void positionSelected(final double x, final double y) {
+		if (datasetOptionsPane.getTrackingSeries() == null) return;
 
-    protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-    	return String.format("%s", dataSet.getName());
-    }
+		positionPoint = this.currentTrackingDataPoint;// new Point2D(event.getX(),
+																									// event.getY());
 
-    private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
-        label.setText(formatDataPoint(dataPoint));
-        final double width = label.prefWidth(-1);
-        final double height = label.prefHeight(width);
-        
-        final XYChart xyChart = (XYChart) getChart();
-        
-        final double dataPointX = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-        final double dataPointY = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+		// pixel coordinates w.r.t. plot area
+		// final Point2D positionPlotCoordinate =
+		// getChart().toPlotArea(positionPoint.getX(), positionPoint.getY());
 
-        double xLocation = dataPointX + MarsPositionSelectionPlugin.LABEL_X_OFFSET;
-        double yLocation = dataPointY - MarsPositionSelectionPlugin.LABEL_Y_OFFSET - height;
-        
-        trackingDataPointScreen = new Point2D(dataPointX, dataPointY);
-        currentTrackingDataPoint = dataPoint;
-        
-        circle.setCenterX(dataPointX);
-	    circle.setCenterY(dataPointY);
+		// Axis axis = ((XYChart) getChart()).getXAxis();
+		// double xPosition =
+		// axis.getValueForDisplay(positionPlotCoordinate.getX());
+		if (positionPoint != null) {
+			MarsPosition poi = new MarsPosition("Position");
+			poi.setColumn(datasetOptionsPane.getTrackingSeries().getXColumn());
+			poi.setPosition(positionPoint.x);
 
-        if (xLocation + width > plotAreaBounds.getMaxX()) {
-            xLocation = dataPointX - MarsPositionSelectionPlugin.LABEL_X_OFFSET - width;
-        }
-        if (yLocation < plotAreaBounds.getMinY()) {
-            yLocation = dataPointY + MarsPositionSelectionPlugin.LABEL_Y_OFFSET;
-        }
-        label.resizeRelocate(xLocation, yLocation, width, height);
-    }
+			// We add the region to the metadata if those indicators are selected.
+			// Otherwise we add it for molecule
+			// If None is selected we add nothing.
+			if (datasetOptionsPane.isMetadataIndicators()) getChart().fireEvent(
+				new NewMetadataPositionEvent(poi));
+			else if (datasetOptionsPane.isMoleculeIndicators()) getChart().fireEvent(
+				new NewMoleculePositionEvent(poi));
+		}
+		positionPoint = null;
+	}
 
-    private void updateToolTip(final MouseEvent event) {
-        final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
-        final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+	private DataPoint findDataPoint(final MouseEvent event,
+		final Bounds plotAreaBounds)
+	{
+		if (!plotAreaBounds.contains(event.getX(), event.getY())) {
+			return null;
+		}
 
-        if (dataPoint == null) {
-            getChartChildren().remove(label);
-            getChartChildren().remove(circle);
-            return;
-        }
-        
-        updateLabel(event, plotAreaBounds, dataPoint);
-        if (!getChartChildren().contains(label)) {
-            getChartChildren().add(label);
-            label.requestLayout();
-        }
-        if (!getChartChildren().contains(circle)) {
-            getChartChildren().add(circle);
-        }
-    }
+		final Point2D mouseLocation = getLocationInPlotArea(event);
 
-    protected class DataPoint {
+		Chart chart = getChart();
 
-        protected final Chart chart;
-        protected final double x;
-        protected final double y;
-        protected final String label;
-        protected double distanceFromMouse;
+		if (chart.getDatasets().size() == 0) return null;
 
-        protected DataPoint(final Chart chart, final double x, final double y, final String label) {
-            this.chart = chart;
-            this.x = x;
-            this.y = y;
-            this.label = label;
-        }
+		return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
+	}
 
-        public Chart getChart() {
-            return chart;
-        }
+	private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart,
+		final Point2D mouseLocation)
+	{
+		if (!(chart instanceof XYChart)) {
+			return null;
+		}
+		final XYChart xyChart = (XYChart) chart;
 
-        public double getDistanceFromMouse() {
-            return distanceFromMouse;
-        }
+		final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation
+			.getX());
 
-        public String getLabel() {
-            return label;
-        }
+		DataSet dataset = null;
+		if (this.datasetOptionsPane != null) {
+			String datasetName = datasetOptionsPane.getTrackingSeries().getYColumn() +
+				" vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
+			for (DataSet dataS : xyChart.getDatasets())
+				if (dataS.getName().equals(datasetName)) dataset = dataS;
+		}
+		else {
+			return null;
+		}
 
-        public double getX() {
-            return x;
-        }
+		return findNearestDataPoint(dataset, xValue);
+	}
 
-        public double getY() {
-            return y;
-        }
+	/**
+	 * Handles series that have data sorted or not sorted with respect to X
+	 * coordinate.
+	 * 
+	 * @param dataSet data set
+	 * @param searchedX x coordinate
+	 * @return return neighouring data points
+	 */
+	private DataPoint findNearestDataPoint(final DataSet dataSet,
+		final double searchedX)
+	{
+		if (dataSet == null) return null;
 
-    }
+		int prevIndex = -1;
+		int nextIndex = -1;
+		double prevX = Double.NEGATIVE_INFINITY;
+		double nextX = Double.POSITIVE_INFINITY;
+
+		final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+		for (int i = 0, size = nDataCount; i < size; i++) {
+			final double currentX = dataSet.get(DataSet.DIM_X, i);
+
+			if (currentX < searchedX) {
+				if (prevX < currentX) {
+					prevIndex = i;
+					prevX = currentX;
+				}
+			}
+			else if (nextX > currentX) {
+				nextIndex = i;
+				nextX = currentX;
+			}
+		}
+		final DataPoint prevPoint = prevIndex == -1 ? null : new DataPoint(
+			getChart(), dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(
+				DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
+		final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
+			: new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex), dataSet
+				.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
+
+		if (prevPoint == null || nextPoint == null) return null;
+
+		final double prevDistance = Math.abs(searchedX - prevPoint.x);
+		final double nextDistance = Math.abs(searchedX - nextPoint.x);
+
+		if (prevDistance < nextDistance) return prevPoint;
+		else return nextPoint;
+	}
+
+	private String formatDataPoint(final DataPoint dataPoint) {
+		return String.format("x: %.3f\ny: %.3f", dataPoint.x, dataPoint.y);
+	}
+
+	protected String getDataLabelSafe(final DataSet dataSet, final int index) {
+		String lable = dataSet.getDataLabel(index);
+		if (lable == null) {
+			return getDefaultDataLabel(dataSet, index);
+		}
+		return lable;
+	}
+
+	protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
+		return String.format("%s", dataSet.getName());
+	}
+
+	private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds,
+		final DataPoint dataPoint)
+	{
+		label.setText(formatDataPoint(dataPoint));
+		final double width = label.prefWidth(-1);
+		final double height = label.prefHeight(width);
+
+		final XYChart xyChart = (XYChart) getChart();
+
+		final double dataPointX = xyChart.getXAxis().getDisplayPosition(
+			dataPoint.x);
+		final double dataPointY = xyChart.getYAxis().getDisplayPosition(
+			dataPoint.y);
+
+		double xLocation = dataPointX + MarsPositionSelectionPlugin.LABEL_X_OFFSET;
+		double yLocation = dataPointY - MarsPositionSelectionPlugin.LABEL_Y_OFFSET -
+			height;
+
+		trackingDataPointScreen = new Point2D(dataPointX, dataPointY);
+		currentTrackingDataPoint = dataPoint;
+
+		circle.setCenterX(dataPointX);
+		circle.setCenterY(dataPointY);
+
+		if (xLocation + width > plotAreaBounds.getMaxX()) {
+			xLocation = dataPointX - MarsPositionSelectionPlugin.LABEL_X_OFFSET -
+				width;
+		}
+		if (yLocation < plotAreaBounds.getMinY()) {
+			yLocation = dataPointY + MarsPositionSelectionPlugin.LABEL_Y_OFFSET;
+		}
+		label.resizeRelocate(xLocation, yLocation, width, height);
+	}
+
+	private void updateToolTip(final MouseEvent event) {
+		final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+		final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+
+		if (dataPoint == null) {
+			getChartChildren().remove(label);
+			getChartChildren().remove(circle);
+			return;
+		}
+
+		updateLabel(event, plotAreaBounds, dataPoint);
+		if (!getChartChildren().contains(label)) {
+			getChartChildren().add(label);
+			label.requestLayout();
+		}
+		if (!getChartChildren().contains(circle)) {
+			getChartChildren().add(circle);
+		}
+	}
+
+	protected class DataPoint {
+
+		protected final Chart chart;
+		protected final double x;
+		protected final double y;
+		protected final String label;
+		protected double distanceFromMouse;
+
+		protected DataPoint(final Chart chart, final double x, final double y,
+			final String label)
+		{
+			this.chart = chart;
+			this.x = x;
+			this.y = y;
+			this.label = label;
+		}
+
+		public Chart getChart() {
+			return chart;
+		}
+
+		public double getDistanceFromMouse() {
+			return distanceFromMouse;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public double getX() {
+			return x;
+		}
+
+		public double getY() {
+			return y;
+		}
+
+	}
 
 	@Override
 	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {

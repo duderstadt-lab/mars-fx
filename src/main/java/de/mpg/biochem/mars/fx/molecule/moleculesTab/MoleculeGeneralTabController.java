@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import com.jfoenix.controls.JFXButton;
@@ -65,7 +66,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
 public class MoleculeGeneralTabController implements MoleculeSubPane {
-	
+
 	private ScrollPane rootPane;
 	private VBox vBox;
 	private BorderPane UIDIconContainer;
@@ -80,169 +81,181 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private JFXChipView<String> chipView;
 	private Label notes;
 	private TextArea notesTextArea;
-	//private JFXTextArea notesTextArea;
-	
+	// private JFXTextArea notesTextArea;
+
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
-	
+
 	private ListChangeListener<String> chipsListener;
 	private ChangeListener<String> notesListener;
-	
+
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	private MarsJFXChipViewSkin<String> skin;
-	
-    public MoleculeGeneralTabController() {
-    	rootPane = new ScrollPane();
-    	
-    	vBox = new VBox();
-    	vBox.setAlignment(Pos.CENTER);
-    	vBox.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
-    	
-    	UIDIconContainer = new BorderPane();
-    	UIDIconContainer.setPrefHeight(55.0);
-    	UIDIconContainer.setPrefWidth(60.0);
-    	UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
-    	vBox.getChildren().add(UIDIconContainer);
-    	
-    	UIDLabel = new JFXTextField();
-        UIDLabel.setPrefHeight(20.0);
-    	UIDLabel.setPrefWidth(180.0);
-    	UIDLabel.setText("UID");
-    	UIDLabel.setEditable(false);
-    	
-    	UIDClippyButton = new JFXButton();
-    	UIDClippyButton.setPrefHeight(20.0);
-    	UIDClippyButton.setPrefWidth(20.0);
-    	UIDClippyButton.setOnAction(e -> {
-    		ClipboardContent content = new ClipboardContent();
-    	    content.putString(UIDLabel.getText());
-    	    clipboard.setContent(content);
-    	});
-    	UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-    	
-    	HBox hbox1 = new HBox();
-    	hbox1.getChildren().add(UIDLabel);
-    	hbox1.getChildren().add(UIDClippyButton);
-    	hbox1.setAlignment(Pos.CENTER);
-    	vBox.getChildren().add(hbox1);
-    	
-    	metaUIDIconContainer = new BorderPane();
-    	metaUIDIconContainer.setPrefHeight(60.0);
-    	metaUIDIconContainer.setPrefWidth(70.0);
-    	Region microscopeIcon = new Region();
-        microscopeIcon.getStyleClass().add("microscopeIcon");
+
+	public MoleculeGeneralTabController() {
+		rootPane = new ScrollPane();
+
+		vBox = new VBox();
+		vBox.setAlignment(Pos.CENTER);
+		vBox.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
+
+		UIDIconContainer = new BorderPane();
+		UIDIconContainer.setPrefHeight(55.0);
+		UIDIconContainer.setPrefWidth(60.0);
+		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
+		vBox.getChildren().add(UIDIconContainer);
+
+		UIDLabel = new JFXTextField();
+		UIDLabel.setPrefHeight(20.0);
+		UIDLabel.setPrefWidth(180.0);
+		UIDLabel.setText("UID");
+		UIDLabel.setEditable(false);
+
+		UIDClippyButton = new JFXButton();
+		UIDClippyButton.setPrefHeight(20.0);
+		UIDClippyButton.setPrefWidth(20.0);
+		UIDClippyButton.setOnAction(e -> {
+			ClipboardContent content = new ClipboardContent();
+			content.putString(UIDLabel.getText());
+			clipboard.setContent(content);
+		});
+		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+
+		HBox hbox1 = new HBox();
+		hbox1.getChildren().add(UIDLabel);
+		hbox1.getChildren().add(UIDClippyButton);
+		hbox1.setAlignment(Pos.CENTER);
+		vBox.getChildren().add(hbox1);
+
+		metaUIDIconContainer = new BorderPane();
+		metaUIDIconContainer.setPrefHeight(60.0);
+		metaUIDIconContainer.setPrefWidth(70.0);
+		Region microscopeIcon = new Region();
+		microscopeIcon.getStyleClass().add("microscopeIcon");
 		metaUIDIconContainer.setCenter(microscopeIcon);
-    	vBox.getChildren().add(metaUIDIconContainer);
-    	
-    	metaUIDLabel = new JFXTextField();
-    	metaUIDLabel.setPrefHeight(20.0);
-    	metaUIDLabel.setPrefWidth(100.0);
-    	metaUIDLabel.setText("metaUID");
-    	metaUIDLabel.setEditable(false);
-    	
-    	metaUIDClippyButton = new JFXButton();
-    	metaUIDClippyButton.setPrefHeight(20.0);
-    	metaUIDClippyButton.setPrefWidth(20.0);
-    	metaUIDClippyButton.setOnAction(e -> {
-    		ClipboardContent content = new ClipboardContent();
-    	    content.putString(metaUIDLabel.getText());
-    	    clipboard.setContent(content);
-    	});
-    	metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-    	
-    	HBox hbox2 = new HBox();
-    	hbox2.getChildren().add(metaUIDLabel);
-    	hbox2.getChildren().add(metaUIDClippyButton);
-    	hbox2.setAlignment(Pos.CENTER);
-    	vBox.getChildren().add(hbox2);
-    	
-    	imageAndchannel = new TextFlow();
-    	iText = new Text("");
-    	iText.setStyle("-fx-font-weight:bold");
-    	iInt = new Text("");
-    	iInt.setStyle("-fx-font-weight:normal");
-    	cText = new Text("");
-    	cText.setStyle("-fx-font-weight:bold");
-    	cInt = new Text("");
-    	cInt.setStyle("-fx-font-weight:normal");
-    	imageAndchannel.getChildren().addAll(iText, iInt, cText, cInt);
-    	HBox hbox3 = new HBox();
-    	hbox3.getChildren().add(imageAndchannel);
-    	hbox3.setAlignment(Pos.CENTER);
-    	HBox.setMargin(imageAndchannel, new Insets(10, 10, 10, 10));
-    	vBox.getChildren().add(hbox3);
-    	
-    	tags = new Label();
-        tags.setText("Tags");
-        VBox.setMargin(tags, new Insets(5, 5, 5, 5));
-        vBox.getChildren().add(tags);
-    	
-    	chipView = new JFXChipView<String>();
-    	VBox.setMargin(chipView, new Insets(10, 10, 10, 10));
-    	chipView.setMinHeight(250.0);
-   	    vBox.getChildren().add(chipView);
-    	
-    	notes = new Label();
-        notes.setText("Notes");
-        VBox.setMargin(notes, new Insets(5, 5, 5, 5));
-    	vBox.getChildren().add(notes);
-    	
-    	notesTextArea = new TextArea();
-    	VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
-    	notesTextArea.setMinHeight(150.0);
-    	notesTextArea.setPromptText("none");
-    	notesTextArea.setWrapText(true);
-    	vBox.getChildren().add(notesTextArea);
-    	
-    	rootPane.setFitToWidth(true);
-    	rootPane.setContent(vBox);
-    	
+		vBox.getChildren().add(metaUIDIconContainer);
+
+		metaUIDLabel = new JFXTextField();
+		metaUIDLabel.setPrefHeight(20.0);
+		metaUIDLabel.setPrefWidth(100.0);
+		metaUIDLabel.setText("metaUID");
+		metaUIDLabel.setEditable(false);
+
+		metaUIDClippyButton = new JFXButton();
+		metaUIDClippyButton.setPrefHeight(20.0);
+		metaUIDClippyButton.setPrefWidth(20.0);
+		metaUIDClippyButton.setOnAction(e -> {
+			ClipboardContent content = new ClipboardContent();
+			content.putString(metaUIDLabel.getText());
+			clipboard.setContent(content);
+		});
+		metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(
+			de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
+
+		HBox hbox2 = new HBox();
+		hbox2.getChildren().add(metaUIDLabel);
+		hbox2.getChildren().add(metaUIDClippyButton);
+		hbox2.setAlignment(Pos.CENTER);
+		vBox.getChildren().add(hbox2);
+
+		imageAndchannel = new TextFlow();
+		iText = new Text("");
+		iText.setStyle("-fx-font-weight:bold");
+		iInt = new Text("");
+		iInt.setStyle("-fx-font-weight:normal");
+		cText = new Text("");
+		cText.setStyle("-fx-font-weight:bold");
+		cInt = new Text("");
+		cInt.setStyle("-fx-font-weight:normal");
+		imageAndchannel.getChildren().addAll(iText, iInt, cText, cInt);
+		HBox hbox3 = new HBox();
+		hbox3.getChildren().add(imageAndchannel);
+		hbox3.setAlignment(Pos.CENTER);
+		HBox.setMargin(imageAndchannel, new Insets(10, 10, 10, 10));
+		vBox.getChildren().add(hbox3);
+
+		tags = new Label();
+		tags.setText("Tags");
+		VBox.setMargin(tags, new Insets(5, 5, 5, 5));
+		vBox.getChildren().add(tags);
+
+		chipView = new JFXChipView<String>();
+		VBox.setMargin(chipView, new Insets(10, 10, 10, 10));
+		chipView.setMinHeight(250.0);
+		vBox.getChildren().add(chipView);
+
+		notes = new Label();
+		notes.setText("Notes");
+		VBox.setMargin(notes, new Insets(5, 5, 5, 5));
+		vBox.getChildren().add(notes);
+
+		notesTextArea = new TextArea();
+		VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
+		notesTextArea.setMinHeight(150.0);
+		notesTextArea.setPromptText("none");
+		notesTextArea.setWrapText(true);
+		vBox.getChildren().add(notesTextArea);
+
+		rootPane.setFitToWidth(true);
+		rootPane.setContent(vBox);
+
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new DefaultMoleculeArchiveEventHandler() {
-        	@Override
-        	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive) {
-        		archive = newArchive;
-        	}
-        });
-		
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new DefaultMoleculeArchiveEventHandler()
+			{
+
+				@Override
+				public void onInitializeMoleculeArchiveEvent(
+					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
+			{
+					archive = newArchive;
+				}
+			});
+
 		chipsListener = new ListChangeListener<String>() {
+
 			@Override
 			public void onChanged(Change<? extends String> c) {
-				if (molecule == null)
-					return;
-				
+				if (molecule == null) return;
+
 				while (c.next()) {
-		             if (c.wasRemoved()) {
-		                 molecule.removeTag(c.getRemoved().get(0));
-		             } else if (c.wasAdded()) {
-		            	 molecule.addTag(c.getAddedSubList().get(0));
-		             }
+					if (c.wasRemoved()) {
+						molecule.removeTag(c.getRemoved().get(0));
+					}
+					else if (c.wasAdded()) {
+						molecule.addTag(c.getAddedSubList().get(0));
+					}
 				}
 				getNode().fireEvent(new MoleculeTagsChangedEvent(molecule));
 			}
 		};
-		
+
 		if (notesListener == null) {
 			notesListener = new ChangeListener<String>() {
-			    @Override
-			    public void changed(final ObservableValue<? extends String> observable, final String oldValue, final String newValue) {
-			    	if (molecule == null)
-						return;
-			    	
-			        molecule.setNotes(notesTextArea.getText());
-			    }
+
+				@Override
+				public void changed(final ObservableValue<? extends String> observable,
+					final String oldValue, final String newValue)
+				{
+					if (molecule == null) return;
+
+					molecule.setNotes(notesTextArea.getText());
+				}
 			};
 		}
-		
+
 		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
-    }
-	
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
+	}
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+		event.consume();
+	}
 
 	@Override
 	public Node getNode() {
@@ -257,42 +270,43 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = molecule;
-		
+
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getMetadataUID());
 
 		if (molecule.getImage() > -1) {
 			iText.setText("I ");
 			iInt.setText(String.valueOf(molecule.getImage()) + " ");
-		} else {
+		}
+		else {
 			iText.setText("");
 			iInt.setText("");
 		}
-		
+
 		if (molecule.getChannel() > -1) {
 			cText.setText("C ");
 			cInt.setText(String.valueOf(molecule.getChannel()));
-		} else {
+		}
+		else {
 			cText.setText("");
 			cInt.setText("");
 		}
-		
-		if (!iText.getText().equals("") && !cText.getText().equals(""))
-			AnchorPane.setLeftAnchor(imageAndchannel, 79.0);
-		else
-			AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
-		
+
+		if (!iText.getText().equals("") && !cText.getText().equals("")) AnchorPane
+			.setLeftAnchor(imageAndchannel, 79.0);
+		else AnchorPane.setLeftAnchor(imageAndchannel, 87.0);
+
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
-		if (molecule.getTags().size() > 0)
-			chipView.getChips().addAll(molecule.getTags());
-		
+		if (molecule.getTags().size() > 0) chipView.getChips().addAll(molecule
+			.getTags());
+
 		chipView.getSuggestions().clear();
 		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
-		
+
 		notesTextArea.textProperty().removeListener(notesListener);
 		notesTextArea.setText(molecule.getNotes());
-		notesTextArea.textProperty().addListener(notesListener);		
+		notesTextArea.textProperty().addListener(notesListener);
 	}
 }

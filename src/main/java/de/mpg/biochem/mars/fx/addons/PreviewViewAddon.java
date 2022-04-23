@@ -62,10 +62,13 @@ import javafx.scene.control.IndexRange;
 /**
  * @author Karl Tauber
  */
-public interface PreviewViewAddon
-{
+public interface PreviewViewAddon {
+
 	javafx.scene.Node getNode();
+
 	void update(String markdown, Path path);
+
 	void scrollY(double value);
+
 	void editorSelectionChanged(IndexRange range);
 }

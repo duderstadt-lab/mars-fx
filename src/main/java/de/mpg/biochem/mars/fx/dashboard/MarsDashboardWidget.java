@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import org.scijava.command.Command;
@@ -34,7 +35,10 @@ import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.scene.Node;
 import net.imagej.ops.Initializable;
 
-public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {
+public interface MarsDashboardWidget extends Command, JsonConvertibleRecord,
+	Initializable
+{
+
 	public Node getNode();
 
 	public String getName();
@@ -46,9 +50,9 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Ini
 	public void setParent(MarsDashboard parent);
 
 	public MarsDashboard getParent();
-	
+
 	public double getWidth();
-	
+
 	public void setWidth(double width);
 
 	public boolean isRunning();

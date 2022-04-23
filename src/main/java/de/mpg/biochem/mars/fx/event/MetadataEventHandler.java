@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -33,6 +34,8 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 
 public interface MetadataEventHandler extends EventHandler<MetadataEvent> {
+
 	public void fireEvent(Event event);
+
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata);
 }

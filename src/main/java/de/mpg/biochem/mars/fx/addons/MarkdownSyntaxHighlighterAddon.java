@@ -60,12 +60,14 @@ import java.util.List;
 /**
  * @author Karl Tauber
  */
-public interface MarkdownSyntaxHighlighterAddon
-{
+public interface MarkdownSyntaxHighlighterAddon {
+
 	public interface Highlighter {
+
 		void highlight(int begin, int end, String style);
 	}
 
 	List<String> getStylesheets();
+
 	void highlight(String text, Highlighter highlighter);
 }

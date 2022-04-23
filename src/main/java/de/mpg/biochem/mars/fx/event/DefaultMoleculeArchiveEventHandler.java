@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -40,13 +41,17 @@ import javafx.event.Event;
  * Methods implements are left blank on purpose to allow for selective overriding.
  * 
  */
-public abstract class DefaultMoleculeArchiveEventHandler implements MoleculeArchiveEventHandler {
+public abstract class DefaultMoleculeArchiveEventHandler implements
+	MoleculeArchiveEventHandler
+{
 
 	@Override
 	public void fireEvent(Event event) {}
 
 	@Override
-	public void onInitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {}
+	public void onInitializeMoleculeArchiveEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{}
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {}

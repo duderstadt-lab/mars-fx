@@ -58,8 +58,8 @@ package de.mpg.biochem.mars.fx.addons;
 /**
  * @author Karl Tauber
  */
-public interface SmartFormatAddon
-{
+public interface SmartFormatAddon {
+
 	static char PROTECTED_SPACE = '\1';
 	static char PROTECTED_TAB = '\2';
 
@@ -71,5 +71,6 @@ public interface SmartFormatAddon
 	static String SPECIAL_INDENT = "\4";
 
 	String protect(String text);
+
 	String unprotect(String text);
 }

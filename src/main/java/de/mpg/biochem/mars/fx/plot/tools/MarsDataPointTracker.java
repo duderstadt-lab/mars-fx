@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot.tools;
 
 import java.util.LinkedList;
@@ -51,310 +52,339 @@ import javafx.scene.shape.Circle;
 import javafx.util.Pair;
 
 /**
- * A tool tip label appearing next to the mouse cursor when placed over a data point's symbol. If symbols are not
- * created/shown for given plot, the tool tip is shown for the closest data point that is within the
+ * A tool tip label appearing next to the mouse cursor when placed over a data
+ * point's symbol. If symbols are not created/shown for given plot, the tool tip
+ * is shown for the closest data point that is within the
  * pickingDistanceProperty() from the mouse cursor.
  * <p>
  * CSS style class name: {@value #STYLE_CLASS_LABEL}
  *
- * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic object and can also be overwritten with
- *         another implementation (&lt;-&gt; advanced interactor) additional add/remove listener are needed to
- *         edit/update the custom object based on DataPoint (for the time being private class)
- *         
- * @author Karl Duderstadt Added curve tracking based on DatasetOptionsPane and small bug fixes.
+ * @author Grzegorz Kruk TODO: extend so that label = new Label(); is a generic
+ *         object and can also be overwritten with another implementation
+ *         (&lt;-&gt; advanced interactor) additional add/remove listener are
+ *         needed to edit/update the custom object based on DataPoint (for the
+ *         time being private class)
+ * @author Karl Duderstadt Added curve tracking based on DatasetOptionsPane and
+ *         small bug fixes.
  */
 
-public class MarsDataPointTracker extends AbstractDataFormattingPlugin implements MarsPlotPlugin {
+public class MarsDataPointTracker extends AbstractDataFormattingPlugin
+	implements MarsPlotPlugin
+{
 
-    /**
-     * Name of the CSS class of the tool tip label.
-     */
-    public static final String STYLE_CLASS_LABEL = "chart-datapoint-tooltip-label";
+	/**
+	 * Name of the CSS class of the tool tip label.
+	 */
+	public static final String STYLE_CLASS_LABEL =
+		"chart-datapoint-tooltip-label";
 
-    /**
-     * The default distance between the data point coordinates and mouse cursor that triggers showing the tool tip
-     * label.
-     */
-    public static final int DEFAULT_PICKING_DISTANCE = 5;
+	/**
+	 * The default distance between the data point coordinates and mouse cursor
+	 * that triggers showing the tool tip label.
+	 */
+	public static final int DEFAULT_PICKING_DISTANCE = 5;
 
-    private static final int LABEL_X_OFFSET = 15;
-    private static final int LABEL_Y_OFFSET = 5;
+	private static final int LABEL_X_OFFSET = 15;
+	private static final int LABEL_Y_OFFSET = 5;
 
-    private final Label label = new Label();
-    
-    private final Circle circle = new Circle();
-    private DatasetOptionsPane datasetOptionsPane;
+	private final Label label = new Label();
 
-    private final EventHandler<MouseEvent> mouseMoveHandler = this::updateToolTip;
+	private final Circle circle = new Circle();
+	private DatasetOptionsPane datasetOptionsPane;
 
-    /**
-     * Creates a new instance of MarsDataPointTracker class with pickingDistanceProperty() picking distance
-     * initialized to {@value #DEFAULT_PICKING_DISTANCE}.
-     */
-    public MarsDataPointTracker() {
-        label.getStyleClass().add(MarsDataPointTracker.STYLE_CLASS_LABEL);
-        registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
-        circle.setRadius(5.0f);
-        circle.setFill(Color.TRANSPARENT);
-        circle.setStroke(Color.RED);
-    }
+	private final EventHandler<MouseEvent> mouseMoveHandler = this::updateToolTip;
 
-    private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
-    	if (!plotAreaBounds.contains(event.getX(), event.getY())) {
-            return null;
-        }
+	/**
+	 * Creates a new instance of MarsDataPointTracker class with
+	 * pickingDistanceProperty() picking distance initialized to
+	 * {@value #DEFAULT_PICKING_DISTANCE}.
+	 */
+	public MarsDataPointTracker() {
+		label.getStyleClass().add(MarsDataPointTracker.STYLE_CLASS_LABEL);
+		registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
+		circle.setRadius(5.0f);
+		circle.setFill(Color.TRANSPARENT);
+		circle.setStroke(Color.RED);
+	}
 
-        final Point2D mouseLocation = getLocationInPlotArea(event);
-        
-        Chart chart = getChart();
-        
-        if (chart.getDatasets().size() == 0)
-        	return null;
-        
-        return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
-    }
+	private DataPoint findDataPoint(final MouseEvent event,
+		final Bounds plotAreaBounds)
+	{
+		if (!plotAreaBounds.contains(event.getX(), event.getY())) {
+			return null;
+		}
 
-    private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
-        if (!(chart instanceof XYChart)) {
-            return null;
-        }
-        final XYChart xyChart = (XYChart) chart;
+		final Point2D mouseLocation = getLocationInPlotArea(event);
 
-        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
+		Chart chart = getChart();
 
-        DataSet dataset = null;
-        if (this.datasetOptionsPane != null && datasetOptionsPane.getTrackingSeries() != null) {
-        	String datasetName =  datasetOptionsPane.getTrackingSeries().getYColumn() + " vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
-        	for (DataSet dataS : xyChart.getDatasets())
-        		if (dataS.getName().equals(datasetName))
-        			dataset = dataS;
-        } else {
-        	DataPoint nearestDataPoint = null;
+		if (chart.getDatasets().size() == 0) return null;
 
-        	for (final DataPoint dataPoint : findNeighborPoints(xyChart, xValue)) {
-                    final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-                    final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
-                    final Point2D displayPoint = new Point2D(x, y);
-                    dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-                    
-                    if (displayPoint.distance(mouseLocation) <= 10 && (nearestDataPoint == null
-                            || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
-                        nearestDataPoint = dataPoint;
-                    }
-            }
-            return nearestDataPoint;
-        }
+		return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
+	}
 
-        return findNearestDataPoint(dataset, xValue);
-    }
-    
-    private List<DataPoint> findNeighborPoints(final XYChart chart, final double searchedX) {
-        final List<DataPoint> points = new LinkedList<>();
-        for (final DataSet dataSet : chart.getAllDatasets()) {
-            final Pair<DataPoint, DataPoint> neighborPoints = findNeighborPoints(dataSet, searchedX);
-            if (neighborPoints.getKey() != null) {
-                points.add(neighborPoints.getKey());
-            }
-            if (neighborPoints.getValue() != null) {
-                points.add(neighborPoints.getValue());
-            }
-        }
-        return points;
-    }
-    
-    /**
-     * Handles series that have data sorted or not sorted with respect to X coordinate.
-     * 
-     * @param dataSet data set
-     * @param searchedX x coordinate
-     * @return return neighouring data points
-     */
-    private Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
-        int prevIndex = -1;
-        int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
+	private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart,
+		final Point2D mouseLocation)
+	{
+		if (!(chart instanceof XYChart)) {
+			return null;
+		}
+		final XYChart xyChart = (XYChart) chart;
 
-        final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
-        for (int i = 0, size = nDataCount; i < size; i++) {
-            final double currentX = dataSet.get(DataSet.DIM_X, i);
+		final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation
+			.getX());
 
-            if (currentX < searchedX) {
-                if (prevX < currentX) {
-                    prevIndex = i;
-                    prevX = currentX;
-                }
-            } else if (nextX > currentX) {
-                nextIndex = i;
-                nextX = currentX;
-            }
-        }
-        final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
-                        dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
-        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
-        
-        return new Pair<>(prevPoint, nextPoint);
-    }
+		DataSet dataset = null;
+		if (this.datasetOptionsPane != null && datasetOptionsPane
+			.getTrackingSeries() != null)
+		{
+			String datasetName = datasetOptionsPane.getTrackingSeries().getYColumn() +
+				" vs " + datasetOptionsPane.getTrackingSeries().getXColumn();
+			for (DataSet dataS : xyChart.getDatasets())
+				if (dataS.getName().equals(datasetName)) dataset = dataS;
+		}
+		else {
+			DataPoint nearestDataPoint = null;
 
-    /**
-     * Handles series that have data sorted or not sorted with respect to X coordinate.
-     * 
-     * @param dataSet data set
-     * @param searchedX x coordinate
-     * @return return neighouring data points
-     */
-    private DataPoint findNearestDataPoint(final DataSet dataSet, final double searchedX) {
-    	if (dataSet == null)
-    		return null;
-    	
-        int prevIndex = -1;
-        int nextIndex = -1;
-        double prevX = Double.NEGATIVE_INFINITY;
-        double nextX = Double.POSITIVE_INFINITY;
+			for (final DataPoint dataPoint : findNeighborPoints(xyChart, xValue)) {
+				final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
+				final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+				final Point2D displayPoint = new Point2D(x, y);
+				dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
 
-        final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
-        for (int i = 0, size = nDataCount; i < size; i++) {
-            final double currentX = dataSet.get(DataSet.DIM_X, i);
+				if (displayPoint.distance(mouseLocation) <= 10 &&
+					(nearestDataPoint == null ||
+						dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse))
+				{
+					nearestDataPoint = dataPoint;
+				}
+			}
+			return nearestDataPoint;
+		}
 
-            if (currentX < searchedX) {
-                if (prevX < currentX) {
-                    prevIndex = i;
-                    prevX = currentX;
-                }
-            } else if (nextX > currentX) {
-                nextIndex = i;
-                nextX = currentX;
-            }
-        }
+		return findNearestDataPoint(dataset, xValue);
+	}
 
-        final DataPoint prevPoint = prevIndex == -1 ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex),
-                        dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
-        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex),
-                        dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
-        
-        if (nextPoint == null || prevPoint == null)
-        	return null;
-        
-        final double prevDistance = Math.abs(searchedX - prevPoint.x);
-        final double nextDistance = Math.abs(searchedX - nextPoint.x);
+	private List<DataPoint> findNeighborPoints(final XYChart chart,
+		final double searchedX)
+	{
+		final List<DataPoint> points = new LinkedList<>();
+		for (final DataSet dataSet : chart.getAllDatasets()) {
+			final Pair<DataPoint, DataPoint> neighborPoints = findNeighborPoints(
+				dataSet, searchedX);
+			if (neighborPoints.getKey() != null) {
+				points.add(neighborPoints.getKey());
+			}
+			if (neighborPoints.getValue() != null) {
+				points.add(neighborPoints.getValue());
+			}
+		}
+		return points;
+	}
 
-        if (prevDistance < nextDistance)
-        	return prevPoint;
-        else 
-        	return nextPoint;
-    }
-    
-    private String formatDataPoint(final DataPoint dataPoint) {
-    	return String.format("x: %.6f\ny: %.6f", dataPoint.x, dataPoint.y);
-    }
+	/**
+	 * Handles series that have data sorted or not sorted with respect to X
+	 * coordinate.
+	 * 
+	 * @param dataSet data set
+	 * @param searchedX x coordinate
+	 * @return return neighouring data points
+	 */
+	private Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet,
+		final double searchedX)
+	{
+		int prevIndex = -1;
+		int nextIndex = -1;
+		double prevX = Double.MIN_VALUE;
+		double nextX = Double.MAX_VALUE;
 
-    protected String getDataLabelSafe(final DataSet dataSet, final int index) {
-        String label = dataSet.getDataLabel(index);
-        if (label == null) {
-            return getDefaultDataLabel(dataSet, index);
-        }
-        return label;
-    }
+		final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+		for (int i = 0, size = nDataCount; i < size; i++) {
+			final double currentX = dataSet.get(DataSet.DIM_X, i);
 
-    protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-    	return String.format("%s", dataSet.getName());
-    }
+			if (currentX < searchedX) {
+				if (prevX < currentX) {
+					prevIndex = i;
+					prevX = currentX;
+				}
+			}
+			else if (nextX > currentX) {
+				nextIndex = i;
+				nextX = currentX;
+			}
+		}
+		final DataPoint prevPoint = prevIndex == -1 ? null : new DataPoint(
+			getChart(), dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(
+				DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
+		final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
+			: new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex), dataSet
+				.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
-    private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
-    	String dataPointLabel = null;
-    	if (dataPoint.getLabel() != null)
-    		dataPointLabel = dataPoint.getLabel();
-    	if (dataPointLabel != null)
-    		label.setText(dataPointLabel + "\n" + formatDataPoint(dataPoint));
-    	else 
-    		label.setText(formatDataPoint(dataPoint));
-        final double width = label.prefWidth(-1);
-        final double height = label.prefHeight(width);
-        
-        final XYChart xyChart = (XYChart) getChart();
-        
-        final double dataPointX = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-        final double dataPointY = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
+		return new Pair<>(prevPoint, nextPoint);
+	}
 
-        double xLocation = dataPointX + MarsDataPointTracker.LABEL_X_OFFSET;
-        double yLocation = dataPointY - MarsDataPointTracker.LABEL_Y_OFFSET - height;
-        
-        circle.setCenterX(dataPointX);
-	    circle.setCenterY(dataPointY);
+	/**
+	 * Handles series that have data sorted or not sorted with respect to X
+	 * coordinate.
+	 * 
+	 * @param dataSet data set
+	 * @param searchedX x coordinate
+	 * @return return neighouring data points
+	 */
+	private DataPoint findNearestDataPoint(final DataSet dataSet,
+		final double searchedX)
+	{
+		if (dataSet == null) return null;
 
-        if (xLocation + width > plotAreaBounds.getMaxX()) {
-            xLocation = dataPointX - MarsDataPointTracker.LABEL_X_OFFSET - width;
-        }
-        if (yLocation < plotAreaBounds.getMinY()) {
-            yLocation = dataPointY + MarsDataPointTracker.LABEL_Y_OFFSET;
-        }
-        label.resizeRelocate(xLocation, yLocation, width, height);
-    }
-    
-    private void updateToolTip(final MouseEvent event) {
-        final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
-        final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
-        
-        if (dataPoint == null) {
-            getChartChildren().remove(label);
-            getChartChildren().remove(circle);
-            return;
-        }
-        
-        updateLabel(event, plotAreaBounds, dataPoint);
-        if (!getChartChildren().contains(label)) {
-            getChartChildren().add(label);
-            label.requestLayout();
-        }
-        if (!getChartChildren().contains(circle)) {
-            getChartChildren().add(circle);
-        }
+		int prevIndex = -1;
+		int nextIndex = -1;
+		double prevX = Double.NEGATIVE_INFINITY;
+		double nextX = Double.POSITIVE_INFINITY;
 
-    }
-    @Override
-    public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
-    	this.datasetOptionsPane = datasetOptionsPane;
-    }
+		final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+		for (int i = 0, size = nDataCount; i < size; i++) {
+			final double currentX = dataSet.get(DataSet.DIM_X, i);
 
-    protected class DataPoint {
+			if (currentX < searchedX) {
+				if (prevX < currentX) {
+					prevIndex = i;
+					prevX = currentX;
+				}
+			}
+			else if (nextX > currentX) {
+				nextIndex = i;
+				nextX = currentX;
+			}
+		}
 
-        protected final Chart chart;
-        protected final double x;
-        protected final double y;
-        protected final String label;
-        protected double distanceFromMouse;
+		final DataPoint prevPoint = prevIndex == -1 ? null : new DataPoint(
+			getChart(), dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(
+				DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
+		final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
+			: new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex), dataSet
+				.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
 
-        protected DataPoint(final Chart chart, final double x, final double y, final String label) {
-            this.chart = chart;
-            this.x = x;
-            this.y = y;
-            this.label = label;
-        }
+		if (nextPoint == null || prevPoint == null) return null;
 
-        public Chart getChart() {
-            return chart;
-        }
+		final double prevDistance = Math.abs(searchedX - prevPoint.x);
+		final double nextDistance = Math.abs(searchedX - nextPoint.x);
 
-        public double getDistanceFromMouse() {
-            return distanceFromMouse;
-        }
+		if (prevDistance < nextDistance) return prevPoint;
+		else return nextPoint;
+	}
 
-        public String getLabel() {
-            return label;
-        }
+	private String formatDataPoint(final DataPoint dataPoint) {
+		return String.format("x: %.6f\ny: %.6f", dataPoint.x, dataPoint.y);
+	}
 
-        public double getX() {
-            return x;
-        }
+	protected String getDataLabelSafe(final DataSet dataSet, final int index) {
+		String label = dataSet.getDataLabel(index);
+		if (label == null) {
+			return getDefaultDataLabel(dataSet, index);
+		}
+		return label;
+	}
 
-        public double getY() {
-            return y;
-        }
+	protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
+		return String.format("%s", dataSet.getName());
+	}
 
-    }
+	private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds,
+		final DataPoint dataPoint)
+	{
+		String dataPointLabel = null;
+		if (dataPoint.getLabel() != null) dataPointLabel = dataPoint.getLabel();
+		if (dataPointLabel != null) label.setText(dataPointLabel + "\n" +
+			formatDataPoint(dataPoint));
+		else label.setText(formatDataPoint(dataPoint));
+		final double width = label.prefWidth(-1);
+		final double height = label.prefHeight(width);
+
+		final XYChart xyChart = (XYChart) getChart();
+
+		final double dataPointX = xyChart.getXAxis().getDisplayPosition(
+			dataPoint.x);
+		final double dataPointY = xyChart.getYAxis().getDisplayPosition(
+			dataPoint.y);
+
+		double xLocation = dataPointX + MarsDataPointTracker.LABEL_X_OFFSET;
+		double yLocation = dataPointY - MarsDataPointTracker.LABEL_Y_OFFSET -
+			height;
+
+		circle.setCenterX(dataPointX);
+		circle.setCenterY(dataPointY);
+
+		if (xLocation + width > plotAreaBounds.getMaxX()) {
+			xLocation = dataPointX - MarsDataPointTracker.LABEL_X_OFFSET - width;
+		}
+		if (yLocation < plotAreaBounds.getMinY()) {
+			yLocation = dataPointY + MarsDataPointTracker.LABEL_Y_OFFSET;
+		}
+		label.resizeRelocate(xLocation, yLocation, width, height);
+	}
+
+	private void updateToolTip(final MouseEvent event) {
+		final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+		final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+
+		if (dataPoint == null) {
+			getChartChildren().remove(label);
+			getChartChildren().remove(circle);
+			return;
+		}
+
+		updateLabel(event, plotAreaBounds, dataPoint);
+		if (!getChartChildren().contains(label)) {
+			getChartChildren().add(label);
+			label.requestLayout();
+		}
+		if (!getChartChildren().contains(circle)) {
+			getChartChildren().add(circle);
+		}
+
+	}
+
+	@Override
+	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane) {
+		this.datasetOptionsPane = datasetOptionsPane;
+	}
+
+	protected class DataPoint {
+
+		protected final Chart chart;
+		protected final double x;
+		protected final double y;
+		protected final String label;
+		protected double distanceFromMouse;
+
+		protected DataPoint(final Chart chart, final double x, final double y,
+			final String label)
+		{
+			this.chart = chart;
+			this.x = x;
+			this.y = y;
+			this.label = label;
+		}
+
+		public Chart getChart() {
+			return chart;
+		}
+
+		public double getDistanceFromMouse() {
+			return distanceFromMouse;
+		}
+
+		public String getLabel() {
+			return label;
+		}
+
+		public double getX() {
+			return x;
+		}
+
+		public double getY() {
+			return y;
+		}
+
+	}
 }

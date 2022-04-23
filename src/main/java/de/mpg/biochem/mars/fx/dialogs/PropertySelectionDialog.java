@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import java.util.Collection;
@@ -48,17 +49,23 @@ import javafx.stage.Window;
  *
  * @author Karl Duderstadt
  */
-public class PropertySelectionDialog extends Dialog<PropertySelectionDialog.SelectionResult> {
-	
-	public PropertySelectionDialog(Window owner, Collection<String> possibleItems, String title, String itemListLabel) {
+public class PropertySelectionDialog extends
+	Dialog<PropertySelectionDialog.SelectionResult>
+{
+
+	public PropertySelectionDialog(Window owner, Collection<String> possibleItems,
+		String title, String itemListLabel)
+	{
 		this(owner, possibleItems, title, itemListLabel, null);
-	}	
-	
-	public PropertySelectionDialog(Window owner, Collection<String> possibleItems, String title, String itemListLabel, String allLabel) {
+	}
+
+	public PropertySelectionDialog(Window owner, Collection<String> possibleItems,
+		String title, String itemListLabel, String allLabel)
+	{
 		setTitle(title);
 		initOwner(owner);
 		setResizable(true);
-		
+
 		DialogPane dialogPane = getDialogPane();
 		dialogPane.setMinWidth(250);
 
@@ -66,9 +73,9 @@ public class PropertySelectionDialog extends Dialog<PropertySelectionDialog.Sele
 		JFXChipView<String> chipView = new JFXChipView<String>();
 		Label removeWithNoTags = new Label(allLabel);
 		ToggleSwitch toggleSwitch = new ToggleSwitch();
-		
+
 		chipView.getSuggestions().addAll(possibleItems);
-		
+
 		VBox vBox = new VBox();
 		vBox.getChildren().add(itemList);
 		vBox.getChildren().add(chipView);
@@ -78,29 +85,31 @@ public class PropertySelectionDialog extends Dialog<PropertySelectionDialog.Sele
 			borderPane.setRight(toggleSwitch);
 			vBox.getChildren().add(borderPane);
 		}
-		
+
 		dialogPane.setContent(vBox);
-		
+
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			return (dialogButton == ButtonType.OK) ? new SelectionResult(chipView.getChips(), toggleSwitch.isSelected()) : null;
+			return (dialogButton == ButtonType.OK) ? new SelectionResult(chipView
+				.getChips(), toggleSwitch.isSelected()) : null;
 		});
 	}
-	
+
 	public class SelectionResult {
+
 		public final List<String> list;
 		public final boolean removeAll;
-		
+
 		public SelectionResult(List<String> list, boolean removeAll) {
 			this.list = list;
 			this.removeAll = removeAll;
 		}
-		
+
 		public List<String> getList() {
 			return this.list;
 		}
-		
+
 		public boolean removeAll() {
 			return this.removeAll;
 		}

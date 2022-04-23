@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table.dashboard;
 
 import java.io.IOException;
@@ -38,18 +39,21 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
 import de.mpg.biochem.mars.table.MarsTable;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MarsTableDashboardWidget.class, name = "MarsTableBeakerWidget" )
-public class MarsTableBeakerWidget extends AbstractBeakerWidget implements MarsTableDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MarsTableDashboardWidget.class, name = "MarsTableBeakerWidget")
+public class MarsTableBeakerWidget extends AbstractBeakerWidget implements
+	MarsTableDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MarsTable table;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
 			loadScript("beaker", "#@ Context scijavaContext\n#@ MarsTable table\n");
-		} catch (IOException e) {
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -58,21 +62,22 @@ public class MarsTableBeakerWidget extends AbstractBeakerWidget implements MarsT
 	protected void setScriptInputs(ScriptModule module) {
 		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
-		
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
-			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
-			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
 		}
 	}
-	
+
 	public void setTable(MarsTable table) {
 		this.table = table;
 	}
-	
+
 	public MarsTable getTable() {
 		return table;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MarsTableBeakerWidget";

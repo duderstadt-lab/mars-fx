@@ -82,8 +82,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.IndexRange;
 import javafx.scene.layout.BorderPane;
 
-public class LogPane
-{
+public class LogPane {
+
 	private final BorderPane borderPane;
 	private final MarkdownTextArea textArea;
 
@@ -96,10 +96,11 @@ public class LogPane
 		textArea = new MarkdownTextArea();
 		textArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
 		textArea.setEditable(false);
-		//textArea.setWrapText(true);
+		// textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
 		textArea.getStyleClass().add("markdown-editor");
-		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
+		textArea.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
 		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/prism.css");
 
 		textArea.textProperty().addListener((observable, oldText, newText) -> {
@@ -107,7 +108,8 @@ public class LogPane
 		});
 
 		// create scroll pane
-		VirtualizedScrollPane<MarkdownTextArea> scrollPane = new VirtualizedScrollPane<>(textArea);
+		VirtualizedScrollPane<MarkdownTextArea> scrollPane =
+			new VirtualizedScrollPane<>(textArea);
 
 		// create border pane
 		borderPane = new BorderPane();
@@ -122,21 +124,25 @@ public class LogPane
 		findHitsChangeListener = this::findHitsChanged;
 		findReplacePane.addListener(findHitsChangeListener);
 		findReplacePane.closable(false);
-		
+
 		borderPane.setTop(findReplacePane.getNode());
 
 		// workaround a problem with wrong selection after undo:
-		//   after undo the selection is 0-0, anchor is 0, but caret position is correct
-		//   --> set selection to caret position
-		textArea.selectionProperty().addListener((observable,oldSelection,newSelection) -> {
-			// use runLater because the wrong selection temporary occurs while edition
-			Platform.runLater(() -> {
-				IndexRange selection = textArea.getSelection();
-				int caretPosition = textArea.getCaretPosition();
-				if (selection.getStart() == 0 && selection.getEnd() == 0 && textArea.getAnchor() == 0 && caretPosition > 0)
-					textArea.selectRange(caretPosition, caretPosition);
+		// after undo the selection is 0-0, anchor is 0, but caret position is
+		// correct
+		// --> set selection to caret position
+		textArea.selectionProperty().addListener((observable, oldSelection,
+			newSelection) -> {
+				// use runLater because the wrong selection temporary occurs while
+				// edition
+				Platform.runLater(() -> {
+					IndexRange selection = textArea.getSelection();
+					int caretPosition = textArea.getCaretPosition();
+					if (selection.getStart() == 0 && selection.getEnd() == 0 && textArea
+						.getAnchor() == 0 && caretPosition > 0) textArea.selectRange(
+							caretPosition, caretPosition);
+				});
 			});
-		});
 	}
 
 	public javafx.scene.Node getNode() {
@@ -161,14 +167,16 @@ public class LogPane
 
 	public void requestFocus() {
 		Platform.runLater(() -> {
-			if (textArea.getScene() != null)
-				textArea.requestFocus();
+			if (textArea.getScene() != null) textArea.requestFocus();
 			else {
 				// text area still does not have a scene
 				// --> use listener on scene to make sure that text area receives focus
 				ChangeListener<Scene> l = new ChangeListener<Scene>() {
+
 					@Override
-					public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
+					public void changed(ObservableValue<? extends Scene> observable,
+						Scene oldValue, Scene newValue)
+					{
 						textArea.sceneProperty().removeListener(this);
 						textArea.requestFocus();
 					}
@@ -180,15 +188,16 @@ public class LogPane
 
 	private String getLineSeparatorOrDefault() {
 		String lineSeparator = Options.getLineSeparator();
-		return (lineSeparator != null) ? lineSeparator : System.getProperty( "line.separator", "\n" );
+		return (lineSeparator != null) ? lineSeparator : System.getProperty(
+			"line.separator", "\n");
 	}
 
 	private String determineLineSeparator(String str) {
 		int strLength = str.length();
 		for (int i = 0; i < strLength; i++) {
 			char ch = str.charAt(i);
-			if (ch == '\n')
-				return (i > 0 && str.charAt(i - 1) == '\r') ? "\r\n" : "\n";
+			if (ch == '\n') return (i > 0 && str.charAt(i - 1) == '\r') ? "\r\n"
+				: "\n";
 		}
 		return getLineSeparatorOrDefault();
 	}
@@ -196,10 +205,11 @@ public class LogPane
 	// 'markdown' property
 	public String getMarkdown() {
 		String markdown = textArea.getText();
-		if (!lineSeparator.equals("\n"))
-			markdown = markdown.replace("\n", lineSeparator);
+		if (!lineSeparator.equals("\n")) markdown = markdown.replace("\n",
+			lineSeparator);
 		return markdown;
 	}
+
 	public void setMarkdown(String markdown) {
 		// remember old selection range
 		IndexRange oldSelection = textArea.getSelection();
@@ -210,33 +220,67 @@ public class LogPane
 		textArea.replaceText(markdown);
 
 		// restore old selection range
-        int newLength = textArea.getLength();
-        textArea.selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(oldSelection.getEnd(), newLength));
+		int newLength = textArea.getLength();
+		textArea.selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(
+			oldSelection.getEnd(), newLength));
 	}
-	public ObservableValue<String> markdownProperty() { return textArea.textProperty(); }
+
+	public ObservableValue<String> markdownProperty() {
+		return textArea.textProperty();
+	}
 
 	// 'markdownText' property
-	private final ReadOnlyStringWrapper markdownText = new ReadOnlyStringWrapper();
-	public String getMarkdownText() { return markdownText.get(); }
-	public ReadOnlyStringProperty markdownTextProperty() { return markdownText.getReadOnlyProperty(); }
+	private final ReadOnlyStringWrapper markdownText =
+		new ReadOnlyStringWrapper();
+
+	public String getMarkdownText() {
+		return markdownText.get();
+	}
+
+	public ReadOnlyStringProperty markdownTextProperty() {
+		return markdownText.getReadOnlyProperty();
+	}
 
 	// 'markdownAST' property
-	private final ReadOnlyObjectWrapper<Node> markdownAST = new ReadOnlyObjectWrapper<>();
-	public Node getMarkdownAST() { return markdownAST.get(); }
-	public ReadOnlyObjectProperty<Node> markdownASTProperty() { return markdownAST.getReadOnlyProperty(); }
+	private final ReadOnlyObjectWrapper<Node> markdownAST =
+		new ReadOnlyObjectWrapper<>();
+
+	public Node getMarkdownAST() {
+		return markdownAST.get();
+	}
+
+	public ReadOnlyObjectProperty<Node> markdownASTProperty() {
+		return markdownAST.getReadOnlyProperty();
+	}
 
 	// 'selection' property
-	public ObservableValue<IndexRange> selectionProperty() { return textArea.selectionProperty(); }
+	public ObservableValue<IndexRange> selectionProperty() {
+		return textArea.selectionProperty();
+	}
 
 	// 'scrollY' property
-	public double getScrollY() { return textArea.scrollY.getValue(); }
-	public ObservableValue<Double> scrollYProperty() { return textArea.scrollY; }
+	public double getScrollY() {
+		return textArea.scrollY.getValue();
+	}
+
+	public ObservableValue<Double> scrollYProperty() {
+		return textArea.scrollY;
+	}
 
 	// 'path' property
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
-	public Path getPath() { return path.get(); }
-	public void setPath(Path path) { this.path.set(path); }
-	public ObjectProperty<Path> pathProperty() { return path; }
+
+	public Path getPath() {
+		return path.get();
+	}
+
+	public void setPath(Path path) {
+		this.path.set(path);
+	}
+
+	public ObjectProperty<Path> pathProperty() {
+		return path;
+	}
 
 	Path getParentPath() {
 		Path path = getPath();
@@ -250,8 +294,7 @@ public class LogPane
 			findReplacePane.addListener(findHitsChangeListener);
 		}
 
-		if (isReadOnly())
-			newText = "";
+		if (isReadOnly()) newText = "";
 
 		Node astRoot = parseMarkdown(newText);
 
@@ -274,10 +317,9 @@ public class LogPane
 
 	private void applyHighlighting(Node astRoot) {
 		List<ExtraStyledRanges> extraStyledRanges = findReplacePane.hasHits()
-			? Arrays.asList(
-				new ExtraStyledRanges("hit", findReplacePane.getHits()),
-				new ExtraStyledRanges("hit-active", Arrays.asList(findReplacePane.getActiveHit())))
-			: null;
+			? Arrays.asList(new ExtraStyledRanges("hit", findReplacePane.getHits()),
+				new ExtraStyledRanges("hit-active", Arrays.asList(findReplacePane
+					.getActiveHit()))) : null;
 
 		MarkdownSyntaxHighlighter.highlight(textArea, astRoot, extraStyledRanges);
 	}
@@ -290,11 +332,11 @@ public class LogPane
 		SmartEdit.selectRange(textArea, anchor, caretPosition);
 	}
 
-	//---- find/replace -------------------------------------------------------
+	// ---- find/replace -------------------------------------------------------
 
 	public void find(boolean replace) {
-		//if (borderPane.getBottom() == null)
-		//	borderPane.setBottom(findReplacePane.getNode());
+		// if (borderPane.getBottom() == null)
+		// borderPane.setBottom(findReplacePane.getNode());
 
 		findReplacePane.show(replace, true);
 	}
@@ -306,9 +348,7 @@ public class LogPane
 			return;
 		}
 
-		if (next)
-			findReplacePane.findNext();
-		else
-			findReplacePane.findPrevious();
+		if (next) findReplacePane.findNext();
+		else findReplacePane.findPrevious();
 	}
 }

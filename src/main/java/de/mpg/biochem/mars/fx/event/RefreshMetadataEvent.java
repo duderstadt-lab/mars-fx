@@ -26,23 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import javafx.event.EventType;
 
 public class RefreshMetadataEvent extends MetadataEvent {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public static final EventType<MetadataEvent> REFRESH_METADATA_EVENT = new EventType<>(METADATA_EVENT, "REFRESH_METADATA_EVENT");
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-	    public RefreshMetadataEvent() {
-	        super(REFRESH_METADATA_EVENT);
-	    }
+	public static final EventType<MetadataEvent> REFRESH_METADATA_EVENT =
+		new EventType<>(METADATA_EVENT, "REFRESH_METADATA_EVENT");
 
-	    @Override
-	    public void invokeHandler(MetadataEventHandler handler) {}
+	public RefreshMetadataEvent() {
+		super(REFRESH_METADATA_EVENT);
 	}
+
+	@Override
+	public void invokeHandler(MetadataEventHandler handler) {}
+}

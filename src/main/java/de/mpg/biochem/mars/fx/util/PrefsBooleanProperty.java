@@ -64,15 +64,13 @@ import javafx.beans.property.SimpleBooleanProperty;
  *
  * @author Karl Tauber
  */
-public class PrefsBooleanProperty
-	extends SimpleBooleanProperty
-{
+public class PrefsBooleanProperty extends SimpleBooleanProperty {
+
 	private Preferences prefs;
 	private String key;
 	private boolean def;
 
-	public PrefsBooleanProperty() {
-	}
+	public PrefsBooleanProperty() {}
 
 	public PrefsBooleanProperty(boolean initialValue) {
 		super(initialValue);

@@ -74,39 +74,37 @@ import javafx.scene.text.Text;
  *
  * @author Karl Tauber
  */
-class WhitespaceOverlayFactory
-	extends OverlayFactory
-{
+class WhitespaceOverlayFactory extends OverlayFactory {
+
 	private static final String SPACE = "\u00B7";
-	private static final String TAB   = "\u00BB";
-	private static final String EOL   = "\u00B6";
+	private static final String TAB = "\u00BB";
+	private static final String EOL = "\u00B6";
 
 	@Override
 	public List<Node> createOverlayNodes(int paragraphIndex) {
-		Paragraph<?, ?, Collection<String>> par = getTextArea().getParagraph(paragraphIndex);
+		Paragraph<?, ?, Collection<String>> par = getTextArea().getParagraph(
+			paragraphIndex);
 
 		ArrayList<Node> nodes = new ArrayList<>();
 		String text = par.getText();
 		int textLength = text.length();
 		for (int i = 0; i < textLength; i++) {
 			char ch = text.charAt(i);
-			if (ch != ' ' && ch != '\t')
-				continue;
+			if (ch != ' ' && ch != '\t') continue;
 
-			nodes.add(createTextNode(
-					(ch == ' ') ? SPACE : TAB,
-					par.getStyleOfChar(i),
-					i, i + 1));
+			nodes.add(createTextNode((ch == ' ') ? SPACE : TAB, par.getStyleOfChar(i),
+				i, i + 1));
 		}
 
-		nodes.add(createTextNode(EOL,
-				par.getStyleAtPosition(textLength),
-				textLength - 1, textLength));
+		nodes.add(createTextNode(EOL, par.getStyleAtPosition(textLength),
+			textLength - 1, textLength));
 
 		return nodes;
 	}
 
-	private Text createTextNode(String text, Collection<String> styleClasses, int start, int end) {
+	private Text createTextNode(String text, Collection<String> styleClasses,
+		int start, int end)
+	{
 		Text t = new Text(text);
 		t.setTextOrigin(VPos.TOP);
 		t.getStyleClass().add("text");
@@ -123,15 +121,16 @@ class WhitespaceOverlayFactory
 		double topInsets = insets.getTop();
 
 		// all paragraphs except last one have line separators
-		boolean showEOL = (paragraphIndex < getTextArea().getParagraphs().size() - 1);
+		boolean showEOL = (paragraphIndex < getTextArea().getParagraphs().size() -
+			1);
 		Node eolNode = nodes.get(nodes.size() - 1);
-		if (eolNode.isVisible() != showEOL)
-			eolNode.setVisible(showEOL);
+		if (eolNode.isVisible() != showEOL) eolNode.setVisible(showEOL);
 
 		for (Node node : nodes) {
 			Range range = (Range) node.getUserData();
 			Rectangle2D bounds = getBounds(range.start, range.end);
-			node.setLayoutX(leftInsets + (node == eolNode ? bounds.getMaxX() : bounds.getMinX()));
+			node.setLayoutX(leftInsets + (node == eolNode ? bounds.getMaxX() : bounds
+				.getMinX()));
 			node.setLayoutY(topInsets + bounds.getMinY());
 		}
 	}

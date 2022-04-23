@@ -62,9 +62,8 @@ import org.fxmisc.richtext.model.SegmentOpsBase;
 /**
  * @author Karl Tauber
  */
-class EmbeddedImageOps<S>
-	extends SegmentOpsBase<EmbeddedImage, S>
-{
+class EmbeddedImageOps<S> extends SegmentOpsBase<EmbeddedImage, S> {
+
 	EmbeddedImageOps() {
 		super(new EmbeddedImage(null, null, ""));
 	}
@@ -86,13 +85,14 @@ class EmbeddedImageOps<S>
 
 	@Override
 	public EmbeddedImage realSubSequence(EmbeddedImage seg, int start, int end) {
-		return (start == 0 && end == seg.text.length())
-			? seg
-			: new EmbeddedImage(seg.basePath, seg.url, seg.text.substring(start, end));
+		return (start == 0 && end == seg.text.length()) ? seg : new EmbeddedImage(
+			seg.basePath, seg.url, seg.text.substring(start, end));
 	}
 
 	@Override
-	public Optional<EmbeddedImage> joinSeg(EmbeddedImage currentSeg, EmbeddedImage nextSeg) {
+	public Optional<EmbeddedImage> joinSeg(EmbeddedImage currentSeg,
+		EmbeddedImage nextSeg)
+	{
 		return Optional.empty();
 	}
 }

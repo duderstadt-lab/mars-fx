@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import javafx.geometry.Insets;
@@ -43,15 +44,15 @@ import javafx.stage.Window;
  * @author Karl Duderstadt
  */
 public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
-	
+
 	public ShowVideoDialog(Window owner) {
 		setTitle("BDV Setup");
 		initOwner(owner);
 		setResizable(true);
-		
+
 		DialogPane dialogPane = getDialogPane();
 		dialogPane.setMinWidth(250);
-		
+
 		GridPane gridpane = new GridPane();
 		gridpane.setMinWidth(250);
 		gridpane.setPrefWidth(250);
@@ -59,31 +60,32 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		Label viewsLabel = new Label("View number");
 		gridpane.add(viewsLabel, 0, 4);
 		GridPane.setMargin(viewsLabel, new Insets(5, 5, 5, 5));
-		
+
 		ComboBox<Integer> views = new ComboBox<Integer>();
-		for (int i=1; i<7; i++)
+		for (int i = 1; i < 7; i++)
 			views.getItems().add(i);
 		views.getSelectionModel().select(0);
 		gridpane.add(views, 1, 4);
 		GridPane.setMargin(views, new Insets(5, 5, 5, 5));
-		
+
 		dialogPane.setContent(gridpane);
-		
+
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			return (dialogButton == ButtonType.OK) ? new SelectionResult(
-					views.getSelectionModel().getSelectedItem()) : null;
+			return (dialogButton == ButtonType.OK) ? new SelectionResult(views
+				.getSelectionModel().getSelectedItem()) : null;
 		});
 	}
-	
+
 	public class SelectionResult {
+
 		public final int views;
-		
+
 		public SelectionResult(int views) {
 			this.views = views;
 		}
-		
+
 		public int getViewNumber() {
 			return views;
 		}

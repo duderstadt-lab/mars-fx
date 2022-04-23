@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS;
@@ -101,43 +102,45 @@ import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
 
-public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord implements PlotPane {
-	
-	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER = event -> MouseEvents
-		    .isOnlyPrimaryButtonDown(event) && MouseEvents.modifierKeysUp(event);
-	
+public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
+	implements PlotPane
+{
+
+	public static final Predicate<MouseEvent> PAN_MOUSE_FILTER =
+		event -> MouseEvents.isOnlyPrimaryButtonDown(event) && MouseEvents
+			.modifierKeysUp(event);
+
 	protected ArrayList<SubPlot> charts;
 	protected ArrayList<Action> tools;
 	protected ToolBar toolBar;
-	
+
 	protected BorderPane rootBorderPane;
 	protected SplitPane subPlotOptionsSplit;
 	protected ToggleGroup subPlotButtonGroup;
-	
+
 	protected VBox chartsPane;
-	
+
 	protected static StyleSheetUpdater styleSheetUpdater;
-	
+
 	protected BooleanProperty gridlines = new SimpleBooleanProperty();
 	protected BooleanProperty fixXBounds = new SimpleBooleanProperty();
 	protected BooleanProperty reducePoints = new SimpleBooleanProperty();
 	protected BooleanProperty downsample = new SimpleBooleanProperty();
-	
+
 	protected BooleanProperty trackSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomXSelected = new SimpleBooleanProperty();
 	protected BooleanProperty zoomYSelected = new SimpleBooleanProperty();
 	protected BooleanProperty panSelected = new SimpleBooleanProperty();
-	
-	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();	
+
+	protected DoubleProperty yAxisWidth = new SimpleDoubleProperty();
 	protected PlotOptionsPane plotOptionsPane;
-	
+
 	protected ButtonBase propertiesButton;
 
 	public AbstractPlotPane() {
-		if (styleSheetUpdater == null)
-			styleSheetUpdater = new StyleSheetUpdater();
-		
+		if (styleSheetUpdater == null) styleSheetUpdater = new StyleSheetUpdater();
+
 		rootBorderPane = new BorderPane();
 
 		plotOptionsPane = new PlotOptionsPane();
@@ -149,88 +152,99 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		SplitPane.setResizableWithParent(chartsPane, Boolean.FALSE);
 		subPlotOptionsSplit.getItems().add(chartsPane);
 		rootBorderPane.setCenter(subPlotOptionsSplit);
-		
+
 		subPlotButtonGroup = new ToggleGroup();
 		subPlotButtonGroup.selectedToggleProperty().addListener((t, o, n) -> {
 			if (n == null) {
 				hideSubPlotOptions();
 			}
 		});
-		
+
 		gridlines.setValue(true);
 		fixXBounds.setValue(false);
 		reducePoints.setValue(true);
 		downsample.setValue(true);
-		
+
 		buildTools();
 		rootBorderPane.setTop(createToolBar());
-		
+
 		rootBorderPane.setOnDragOver(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-            	if (event.getGestureSource() != rootBorderPane
-                        && event.getDragboard().hasFiles()) {
-                    event.acceptTransferModes(TransferMode.COPY);
-                }
-                event.consume();
-            }
-        });
-        
+
+			@Override
+			public void handle(DragEvent event) {
+				if (event.getGestureSource() != rootBorderPane && event.getDragboard()
+					.hasFiles())
+				{
+					event.acceptTransferModes(TransferMode.COPY);
+				}
+				event.consume();
+			}
+		});
+
 		rootBorderPane.setOnDragDropped(new EventHandler<DragEvent>() {
-            @Override
-            public void handle(DragEvent event) {
-                Dragboard db = event.getDragboard();
-                boolean success = false;
-                if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(".rover")) {
-                    success = importFromRoverFile(db.getFiles().get(0));
-                }
-                /* let the source know whether the string was successfully 
-                 * transferred and used */
-                event.setDropCompleted(success);
-                event.consume();
-            }
-        });
+
+			@Override
+			public void handle(DragEvent event) {
+				Dragboard db = event.getDragboard();
+				boolean success = false;
+				if (db.hasFiles() && db.getFiles().get(0).getName().endsWith(
+					".rover"))
+				{
+					success = importFromRoverFile(db.getFiles().get(0));
+				}
+				/* let the source know whether the string was successfully 
+				 * transferred and used */
+				event.setDropCompleted(success);
+				event.consume();
+			}
+		});
 	}
-	
+
 	protected void buildTools() {
-		
-		Action trackCursor = new Action("Track", null, CIRCLE_ALT, e -> setTool(trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), 
-				null, trackSelected);
+
+		Action trackCursor = new Action("Track", null, CIRCLE_ALT, e -> setTool(
+			trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), null,
+			trackSelected);
 		addTool(trackCursor);
-		
-		Action zoomXYCursor = new Action("Select XY region", null, ARROWS, e -> setTool(zoomXYSelected, () -> new MarsZoomer(false), Cursor.CROSSHAIR),
-				null, zoomXYSelected);
+
+		Action zoomXYCursor = new Action("Select XY region", null, ARROWS,
+			e -> setTool(zoomXYSelected, () -> new MarsZoomer(false),
+				Cursor.CROSSHAIR), null, zoomXYSelected);
 		addTool(zoomXYCursor);
-		
-		Action zoomXCursor = new Action("Select X region", null, ARROWS_H, e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, false), Cursor.H_RESIZE),
-				null, zoomXSelected);
+
+		Action zoomXCursor = new Action("Select X region", null, ARROWS_H,
+			e -> setTool(zoomXSelected, () -> new MarsZoomer(AxisMode.X, false),
+				Cursor.H_RESIZE), null, zoomXSelected);
 		addTool(zoomXCursor);
-		
-		Action zoomYCursor = new Action("Select Y region", null, ARROWS_V, e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, false), Cursor.V_RESIZE),
-				null, zoomYSelected);
+
+		Action zoomYCursor = new Action("Select Y region", null, ARROWS_V,
+			e -> setTool(zoomYSelected, () -> new MarsZoomer(AxisMode.Y, false),
+				Cursor.V_RESIZE), null, zoomYSelected);
 		addTool(zoomYCursor);
-		
-		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(panSelected, () -> {
-			Panner panner = new Panner();
-			panner.setMouseFilter(PAN_MOUSE_FILTER);
-			return panner;
-		}, Cursor.MOVE), null, panSelected);
+
+		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(
+			panSelected, () -> {
+				Panner panner = new Panner();
+				panner.setMouseFilter(PAN_MOUSE_FILTER);
+				return panner;
+			}, Cursor.MOVE), null, panSelected);
 		addTool(panCursor);
 	}
-	
+
 	protected void addTool(Action action) {
 		tools.add(action);
 	}
 
-	protected Node createToolBar() { 
+	protected Node createToolBar() {
 		ToggleButton[] toolButtons = new ToggleButton[tools.size()];
 		ToggleGroup toolGroup = new ToggleGroup();
-		
+
 		for (int i = 0; i < tools.size(); i++) {
-			 if (tools.get(i) != null) {
-				 toolButtons[i] = (ToggleButton) ActionUtils.createToolBarButton(tools.get(i));
-				 toolButtons[i].setToggleGroup(toolGroup);
-			 }
+			if (tools.get(i) != null) {
+				toolButtons[i] = (ToggleButton) ActionUtils.createToolBarButton(tools
+					.get(i));
+				toolButtons[i].setToggleGroup(toolGroup);
+			}
 		}
 
 		toolBar = new ToolBar(toolButtons);
@@ -239,14 +253,15 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 
 		Action resetXYZoom = new Action("Reset Zoom", null, EXPAND, e -> {
 			resetXYZoom();
-			
-			//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
-			//Somehow layoutChildren, even in a runLater block doesn't always work
-			//Needs further investigation. This should be removed once a solution is found.
-			//resetXYZoom();
+
+			// HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
+			// Somehow layoutChildren, even in a runLater block doesn't always work
+			// Needs further investigation. This should be removed once a solution is
+			// found.
+			// resetXYZoom();
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(resetXYZoom));
-		
+
 		Action reloadAction = new Action("Reload", null, REFRESH, e -> {
 			for (SubPlot subPlot : charts)
 				subPlot.update();
@@ -254,305 +269,342 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 		});
 
 		toolBar.getItems().add(ActionUtils.createToolBarButton(reloadAction));
-		
-		Action saveImageToDisk = new Action("Save image", null, IMAGE, e -> { 
+
+		Action saveImageToDisk = new Action("Save image", null, IMAGE, e -> {
 			FileChooser fileChooser = new FileChooser();
-			fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+			fileChooser.setInitialDirectory(new File(System.getProperty(
+				"user.home")));
 			fileChooser.setInitialFileName("snapshot.png");
-			
-			File outputPath = fileChooser.showSaveDialog(getNode().getScene().getWindow());
-			
-			if (outputPath == null)
-				return;
-			
+
+			File outputPath = fileChooser.showSaveDialog(getNode().getScene()
+				.getWindow());
+
+			if (outputPath == null) return;
+
 			WritableImage snapshot = pixelScaleAwareCanvasSnapshot(chartsPane, 2);
-			
+
 			try {
-				ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png", outputPath);
-			} catch (IOException e1) {
+				ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "png",
+					outputPath);
+			}
+			catch (IOException e1) {
 				e1.printStackTrace();
 			}
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(saveImageToDisk));
-		
-		//settings
-		propertiesButton = ActionUtils.createToolBarButton(new Action("Settings", "Shortcut+S", COG, e -> {
-			PopOver popOver = new PopOver();
-			popOver.setTitle("Plot Settings");
-			popOver.setHeaderAlwaysVisible(true);
-			popOver.setAutoHide(true);
-			popOver.setDetachable(false);
-			popOver.setCloseButtonEnabled(false);
-			//popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
-			
-			//Retrieve x and y bounds from first chart
-			plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
-			plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
-			
-			popOver.setContentNode(plotOptionsPane);
-			popOver.show(propertiesButton);				
-		}));
+
+		// settings
+		propertiesButton = ActionUtils.createToolBarButton(new Action("Settings",
+			"Shortcut+S", COG, e -> {
+				PopOver popOver = new PopOver();
+				popOver.setTitle("Plot Settings");
+				popOver.setHeaderAlwaysVisible(true);
+				popOver.setAutoHide(true);
+				popOver.setDetachable(false);
+				popOver.setCloseButtonEnabled(false);
+				// popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
+
+				// Retrieve x and y bounds from first chart
+				plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
+				plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
+
+				popOver.setContentNode(plotOptionsPane);
+				popOver.show(propertiesButton);
+			}));
 		toolBar.getItems().add(propertiesButton);
-		
+
 		// horizontal spacer
 		Region spacer = new Region();
 		HBox.setHgrow(spacer, Priority.ALWAYS);
 		toolBar.getItems().add(spacer);
-		
-		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action("Add Subplot", null, PLUS, e -> addChart()), "0.6em");
-		addSubPlot.setStyle(
-                "-fx-background-radius: 5em; " +
-                "-fx-min-width: 13px; " +
-                "-fx-min-height: 13px; " +
-                "-fx-max-width: 13px; " +
-                "-fx-max-height: 13px;"
-        );
-		ButtonBase removeSubPlot = ActionUtils.createToolBarButton(new Action("Remove Subplot", null, MINUS, e -> removeChart()), "0.6em");
-		removeSubPlot.setStyle(
-                "-fx-background-radius: 5em; " +
-                "-fx-min-width: 13px; " +
-                "-fx-min-height: 13px; " +
-                "-fx-max-width: 13px; " +
-                "-fx-max-height: 13px;"
-        );
-		
+
+		ButtonBase addSubPlot = ActionUtils.createToolBarButton(new Action(
+			"Add Subplot", null, PLUS, e -> addChart()), "0.6em");
+		addSubPlot.setStyle("-fx-background-radius: 5em; " +
+			"-fx-min-width: 13px; " + "-fx-min-height: 13px; " +
+			"-fx-max-width: 13px; " + "-fx-max-height: 13px;");
+		ButtonBase removeSubPlot = ActionUtils.createToolBarButton(new Action(
+			"Remove Subplot", null, MINUS, e -> removeChart()), "0.6em");
+		removeSubPlot.setStyle("-fx-background-radius: 5em; " +
+			"-fx-min-width: 13px; " + "-fx-min-height: 13px; " +
+			"-fx-max-width: 13px; " + "-fx-max-height: 13px;");
+
 		VBox plotManagementPane = new VBox(2);
 		plotManagementPane.getChildren().add(addSubPlot);
 		plotManagementPane.getChildren().add(removeSubPlot);
 		toolBar.getItems().add(plotManagementPane);
-		
+
 		return toolBar;
 	}
-	
-	protected void setTool(BooleanProperty selected, Supplier<ChartPlugin> supplier, Cursor cursor) {
+
+	protected void setTool(BooleanProperty selected,
+		Supplier<ChartPlugin> supplier, Cursor cursor)
+	{
 		for (SubPlot subPlot : charts) {
 			if (selected.get()) {
 				subPlot.setTool(supplier.get(), cursor);
-			} else {
+			}
+			else {
 				subPlot.removeTools();
 			}
 		}
 	}
-	
+
 	public void resetXYZoom() {
 		for (SubPlot subPlot : charts) {
-			if (subPlot.getPlotSeriesList().size() == 0)
-				continue;
-			
-			//Make sure the columns have been picked otherwise do nothing...
-			for (int i=0; i < subPlot.getPlotSeriesList().size(); i++) {
-				if (subPlot.getPlotSeriesList().get(i).getXColumn() == null || subPlot.getPlotSeriesList().get(i).getYColumn() == null)
-					return;
+			if (subPlot.getPlotSeriesList().size() == 0) continue;
+
+			// Make sure the columns have been picked otherwise do nothing...
+			for (int i = 0; i < subPlot.getPlotSeriesList().size(); i++) {
+				if (subPlot.getPlotSeriesList().get(i).getXColumn() == null || subPlot
+					.getPlotSeriesList().get(i).getYColumn() == null) return;
 			}
-			
-			if (reducePoints.get() && subPlot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
-				((SegmentDataSetRenderer) subPlot.getChart().getRenderers().get(0)).setMinRequiredReductionSize(plotOptionsPane.getMinRequiredReductionSize());
-	
+
+			if (reducePoints.get() && subPlot.getChart().getRenderers().get(
+				0) instanceof SegmentDataSetRenderer) ((SegmentDataSetRenderer) subPlot
+					.getChart().getRenderers().get(0)).setMinRequiredReductionSize(
+						plotOptionsPane.getMinRequiredReductionSize());
+
 			if (fixXBounds.get()) {
 				subPlot.getChart().getXAxis().setAutoRanging(false);
-				subPlot.getChart().getXAxis().set(plotOptionsPane.getXMin(), plotOptionsPane.getXMax());
-			} else
-				subPlot.getChart().getXAxis().setAutoRanging(true);
-			
+				subPlot.getChart().getXAxis().set(plotOptionsPane.getXMin(),
+					plotOptionsPane.getXMax());
+			}
+			else subPlot.getChart().getXAxis().setAutoRanging(true);
+
 			if (subPlot.getDatasetOptionsPane().fixYBounds().get()) {
 				subPlot.getChart().getYAxis().setAutoRanging(false);
-				subPlot.getChart().getYAxis().set(subPlot.getDatasetOptionsPane().getYMin(), subPlot.getDatasetOptionsPane().getYMax());
-			} else
-				subPlot.getChart().getYAxis().setAutoRanging(true);
-			
+				subPlot.getChart().getYAxis().set(subPlot.getDatasetOptionsPane()
+					.getYMin(), subPlot.getDatasetOptionsPane().getYMax());
+			}
+			else subPlot.getChart().getYAxis().setAutoRanging(true);
+
 			for (Axis a : subPlot.getChart().getAxes()) {
 				Platform.runLater(() -> {
 					a.forceRedraw();
 					subPlot.getChart().layoutChildren();
 				});
 			}
-			
-			//issues with updating here appear to be related to https://github.com/GSI-CS-CO/chart-fx/issues/23
-			//Still the plot area doesn't update together with the axis...
-			//Platform.runLater(() -> subPlot.getChart().layoutChildren());
+
+			// issues with updating here appear to be related to
+			// https://github.com/GSI-CS-CO/chart-fx/issues/23
+			// Still the plot area doesn't update together with the axis...
+			// Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
-		
-		//for (SubPlot subPlot : charts)
-		//	Platform.runLater(() -> subPlot.getChart().layoutChildren());
+
+		// for (SubPlot subPlot : charts)
+		// Platform.runLater(() -> subPlot.getChart().layoutChildren());
 	}
-	
+
 	public void reload() {
 		for (SubPlot subPlot : charts)
 			subPlot.update();
 		resetXYZoom();
 	}
-	
+
 	public abstract void addChart();
-	
+
 	public abstract boolean importFromRoverFile(File roverFile);
-	
+
 	public void addChart(SubPlot subplot) {
 		charts.add(subplot);
-		
+
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
-		
+
 		subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
 		subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
-		//subplot.getChart().animatedProperty().bind(animateZoom);
-		
-		if (subplot.getChart().getRenderers().get(0) instanceof SegmentDataSetRenderer)
-			((SegmentDataSetRenderer) subplot.getChart().getRenderers().get(0)).pointReductionProperty().bind(reducePoints);
-		
+		// subplot.getChart().animatedProperty().bind(animateZoom);
+
+		if (subplot.getChart().getRenderers().get(
+			0) instanceof SegmentDataSetRenderer) ((SegmentDataSetRenderer) subplot
+				.getChart().getRenderers().get(0)).pointReductionProperty().bind(
+					reducePoints);
+
 		for (SubPlot otherSubPlot : charts) {
-			
+
 			otherSubPlot.getYAxis().setMinWidth(50);
-			
-			if (subplot.equals(otherSubPlot))
-				continue;
-			
+
+			if (subplot.equals(otherSubPlot)) continue;
+
 			subplot.getXAxis().setAutoRanging(false);
-			
-			if (subplot.getXAxis().getMax() > otherSubPlot.getXAxis().getMin() || subplot.getXAxis().getMin() > otherSubPlot.getXAxis().getMin()) {
-				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot.getXAxis().minProperty());
-				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot.getXAxis().maxProperty());
-			} else {
-				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot.getXAxis().maxProperty());
-				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot.getXAxis().minProperty());
+
+			if (subplot.getXAxis().getMax() > otherSubPlot.getXAxis().getMin() ||
+				subplot.getXAxis().getMin() > otherSubPlot.getXAxis().getMin())
+			{
+				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot
+					.getXAxis().minProperty());
+				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot
+					.getXAxis().maxProperty());
+			}
+			else {
+				subplot.getXAxis().maxProperty().bindBidirectional(otherSubPlot
+					.getXAxis().maxProperty());
+				subplot.getXAxis().minProperty().bindBidirectional(otherSubPlot
+					.getXAxis().minProperty());
 			}
 		}
-		
-		//Ensures autoranging is turned off when zoom, pan etc are used
-		//Then all linked plots moved together. Otherwise, one plot can lock the movement of another..
-		subplot.getChart().getCanvas().setOnMousePressed(new EventHandler<MouseEvent>() {
-		    @Override
-		    public void handle(MouseEvent me) {
-		      for (SubPlot subPlot : charts) {
-		    	  subPlot.getXAxis().setAutoRanging(false);
-		    	  subPlot.getYAxis().setAutoRanging(false);
-		      }
-		    }
-		  });
-			
-		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot.getDatasetOptionsButton());
-		((ToggleButton) subplot.getDatasetOptionsButton().getControl()).setToggleGroup(subPlotButtonGroup);
-		
-		subplot.getYAxis().widthProperty().addListener(new ChangeListener<Number>(){
+
+		// Ensures autoranging is turned off when zoom, pan etc are used
+		// Then all linked plots moved together. Otherwise, one plot can lock the
+		// movement of another..
+		subplot.getChart().getCanvas().setOnMousePressed(
+			new EventHandler<MouseEvent>()
+			{
+
+				@Override
+				public void handle(MouseEvent me) {
+					for (SubPlot subPlot : charts) {
+						subPlot.getXAxis().setAutoRanging(false);
+						subPlot.getYAxis().setAutoRanging(false);
+					}
+				}
+			});
+
+		toolBar.getItems().add(toolBar.getItems().size() - 1, subplot
+			.getDatasetOptionsButton());
+		((ToggleButton) subplot.getDatasetOptionsButton().getControl())
+			.setToggleGroup(subPlotButtonGroup);
+
+		subplot.getYAxis().widthProperty().addListener(
+			new ChangeListener<Number>()
+			{
+
+				@Override
+				public void changed(ObservableValue<? extends Number> observable,
+					Number oldValue, Number newValue)
+			{
+					updatePlotWidths();
+				}
+			});
+
+		subplot.getXAxis().minProperty().addListener(new ChangeListener<Number>() {
+
 			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
-				updatePlotWidths();
-			}
-	      });
-		
-		subplot.getXAxis().minProperty().addListener(new ChangeListener<Number>(){
-			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			public void changed(ObservableValue<? extends Number> observable,
+				Number oldValue, Number newValue)
+			{
 				subplot.getChart().layout();
 			}
-	      });
-		
-		subplot.getXAxis().maxProperty().addListener(new ChangeListener<Number>(){
+		});
+
+		subplot.getXAxis().maxProperty().addListener(new ChangeListener<Number>() {
+
 			@Override
-			public void changed(ObservableValue<? extends Number> observable, Number oldValue, Number newValue) {
+			public void changed(ObservableValue<? extends Number> observable,
+				Number oldValue, Number newValue)
+			{
 				subplot.getChart().layout();
 			}
-	      });
+		});
 
 		updateSubPlotBadges();
 	}
-	
+
 	public void updatePlotWidths() {
 		if (charts.size() > 1) {
 			double globalYAxisWidth = 0;
 			for (SubPlot subPlot : charts) {
 				double calcWidth = Math.ceil(subPlot.getYAxis().calculateWidth());
-				if (calcWidth > globalYAxisWidth)
-					globalYAxisWidth = calcWidth;
+				if (calcWidth > globalYAxisWidth) globalYAxisWidth = calcWidth;
 			}
-			
+
 			for (SubPlot subPlot : charts) {
 				double width = subPlot.getYAxis().widthProperty().get();
-				if (width != globalYAxisWidth)
-					subPlot.getYAxis().setMinWidth(globalYAxisWidth);
+				if (width != globalYAxisWidth) subPlot.getYAxis().setMinWidth(
+					globalYAxisWidth);
 			}
 		}
 	}
-	
+
 	public void removeChart() {
 		if (charts.size() > 1) {
-			((ToggleButton) charts.get(charts.size() - 1).getDatasetOptionsButton().getControl()).setToggleGroup(null);
+			((ToggleButton) charts.get(charts.size() - 1).getDatasetOptionsButton()
+				.getControl()).setToggleGroup(null);
 			charts.remove(charts.size() - 1);
 			chartsPane.getChildren().remove(chartsPane.getChildren().size() - 1);
-			
+
 			toolBar.getItems().remove(toolBar.getItems().size() - 2);
 		}
 		updateSubPlotBadges();
 	}
-	
-	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane) {
-		if (subPlotOptionsSplit.getItems().size() > 1)
-			subPlotOptionsSplit.getItems().remove(1);
 
-		SplitPane.setResizableWithParent(datasetOptionsPane, Boolean.FALSE);		
+	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane) {
+		if (subPlotOptionsSplit.getItems().size() > 1) subPlotOptionsSplit
+			.getItems().remove(1);
+
+		SplitPane.setResizableWithParent(datasetOptionsPane, Boolean.FALSE);
 		subPlotOptionsSplit.getItems().add(datasetOptionsPane);
 	}
-	
+
 	public void hideSubPlotOptions() {
-		if (subPlotOptionsSplit.getItems().size() > 1)
-			subPlotOptionsSplit.getItems().remove(1);
+		if (subPlotOptionsSplit.getItems().size() > 1) subPlotOptionsSplit
+			.getItems().remove(1);
 	}
-	
+
 	protected void updateSubPlotBadges() {
 		if (charts.size() > 1) {
-			for (int num=1; num <= charts.size(); num++) {
-				charts.get(num-1).getDatasetOptionsButton().setEnabled(true);
-				charts.get(num-1).getDatasetOptionsButton().setText("" + num);
-				charts.get(num-1).getDatasetOptionsButton().refreshBadge();
+			for (int num = 1; num <= charts.size(); num++) {
+				charts.get(num - 1).getDatasetOptionsButton().setEnabled(true);
+				charts.get(num - 1).getDatasetOptionsButton().setText("" + num);
+				charts.get(num - 1).getDatasetOptionsButton().refreshBadge();
 			}
-		} else {
+		}
+		else {
 			charts.get(0).getDatasetOptionsButton().setEnabled(false);
 			charts.get(0).getDatasetOptionsButton().refreshBadge();
 		}
-	}	
-	
+	}
+
 	public StyleSheetUpdater getStyleSheetUpdater() {
 		return styleSheetUpdater;
 	}
-	
-	public static WritableImage pixelScaleAwareCanvasSnapshot(Node node, double pixelScale) {
-	    WritableImage writableImage = new WritableImage((int)Math.rint(pixelScale*node.getBoundsInParent().getWidth()), (int)Math.rint(pixelScale*node.getBoundsInParent().getHeight()));
-	    SnapshotParameters spa = new SnapshotParameters();
-	    spa.setTransform(Transform.scale(pixelScale, pixelScale));
-	    return node.snapshot(spa, writableImage);     
+
+	public static WritableImage pixelScaleAwareCanvasSnapshot(Node node,
+		double pixelScale)
+	{
+		WritableImage writableImage = new WritableImage((int) Math.rint(pixelScale *
+			node.getBoundsInParent().getWidth()), (int) Math.rint(pixelScale * node
+				.getBoundsInParent().getHeight()));
+		SnapshotParameters spa = new SnapshotParameters();
+		spa.setTransform(Transform.scale(pixelScale, pixelScale));
+		return node.snapshot(spa, writableImage);
 	}
 
 	@Override
 	public Node getNode() {
 		return rootBorderPane;
 	}
-	
+
 	@Override
 	public void fireEvent(Event event) {
 		getNode().fireEvent(event);
 	}
-	
+
 	@Override
 	public ArrayList<SubPlot> getCharts() {
 		return charts;
 	}
-	
+
 	@Override
 	public BooleanProperty fixXBoundsProperty() {
 		return fixXBounds;
 	}
-	
+
 	@Override
 	public PlotOptionsPane getPlotOptionsPane() {
 		return plotOptionsPane;
 	}
-	
-	class PlotOptionsPane extends VBox  {
-		private TextField minReductionTextField, minDownsampleTextField, xMinTextField, xMaxTextField;
-		
+
+	class PlotOptionsPane extends VBox {
+
+		private TextField minReductionTextField, minDownsampleTextField,
+				xMinTextField, xMaxTextField;
+
 		public PlotOptionsPane() {
 			setAlignment(Pos.CENTER_LEFT);
-			
-			//gridlines control
+
+			// gridlines control
 			BorderPane gridBorderPane = new BorderPane();
 			ToggleSwitch gridlineSwitch = new ToggleSwitch();
 			gridlineSwitch.selectedProperty().bindBidirectional(gridlines);
@@ -561,8 +613,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			gridBorderPane.setLeft(gridlinesLabel);
 			gridBorderPane.setRight(gridlineSwitch);
 			getChildren().add(gridBorderPane);
-			
-			//Data Reducer
+
+			// Data Reducer
 			BorderPane reducerBorderPane = new BorderPane();
 			ToggleSwitch reducerSwitch = new ToggleSwitch();
 			reducerSwitch.selectedProperty().bindBidirectional(reducePoints);
@@ -571,10 +623,10 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			reducerBorderPane.setLeft(pointReducer);
 			reducerBorderPane.setRight(reducerSwitch);
 			getChildren().add(reducerBorderPane);
-			
-			//For reference...
-			//Insets(double top, double right, double bottom, double left)
-			
+
+			// For reference...
+			// Insets(double top, double right, double bottom, double left)
+
 			BorderPane minReductionBorderPane = new BorderPane();
 			minReductionTextField = new TextField();
 			minReductionTextField.setText(String.valueOf(500));
@@ -584,8 +636,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			minReductionBorderPane.setLeft(reduceAbove);
 			minReductionBorderPane.setRight(minReductionTextField);
 			getChildren().add(minReductionBorderPane);
-			
-			//Downsampler
+
+			// Downsampler
 			BorderPane downsamplerBorderPane = new BorderPane();
 			ToggleSwitch downsampleSwitch = new ToggleSwitch();
 			downsampleSwitch.selectedProperty().bindBidirectional(downsample);
@@ -594,7 +646,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			downsamplerBorderPane.setLeft(downsampleLabel);
 			downsamplerBorderPane.setRight(downsampleSwitch);
 			getChildren().add(downsamplerBorderPane);
-			
+
 			BorderPane maxDownsamplerBorderPane = new BorderPane();
 			minDownsampleTextField = new TextField();
 			minDownsampleTextField.setText(String.valueOf(100_000));
@@ -604,8 +656,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			maxDownsamplerBorderPane.setLeft(downsampleAbove);
 			maxDownsamplerBorderPane.setRight(minDownsampleTextField);
 			getChildren().add(maxDownsamplerBorderPane);
-			
-			//X Bounds
+
+			// X Bounds
 			BorderPane fixXBoundsBorderPane = new BorderPane();
 			ToggleSwitch fixXBoundsSwitch = new ToggleSwitch();
 			fixXBoundsSwitch.selectedProperty().bindBidirectional(fixXBounds);
@@ -614,21 +666,24 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			fixXBoundsBorderPane.setLeft(fixXBoundsLabel);
 			fixXBoundsBorderPane.setRight(fixXBoundsSwitch);
 			getChildren().add(fixXBoundsBorderPane);
-			
+
 			EventHandler<KeyEvent> handleXFieldEnter = new EventHandler<KeyEvent>() {
-		        @Override
-		        public void handle(KeyEvent ke) {
-		            if (ke.getCode().equals(KeyCode.ENTER)) {
-		            	if (!fixXBounds.get())
-		            		fixXBounds.set(true);
-		            	resetXYZoom();
-		            	
-		            	//HACK - Fixes problem where y-axis doesn't refresh on rare occasions.
-		    			//Somehow layoutChildren, even in a runLater block doesn't always work
-		    			//Needs further investigation. This should be removed once a solution is found.
-		    			//resetXYZoom();
-		            }
-		        }
+
+				@Override
+				public void handle(KeyEvent ke) {
+					if (ke.getCode().equals(KeyCode.ENTER)) {
+						if (!fixXBounds.get()) fixXBounds.set(true);
+						resetXYZoom();
+
+						// HACK - Fixes problem where y-axis doesn't refresh on rare
+						// occasions.
+						// Somehow layoutChildren, even in a runLater block doesn't always
+						// work
+						// Needs further investigation. This should be removed once a
+						// solution is found.
+						// resetXYZoom();
+					}
+				}
 			};
 
 			BorderPane xMinBorderPane = new BorderPane();
@@ -637,55 +692,55 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord imp
 			xMinBorderPane.setRight(xMinTextField);
 			xMinTextField.setOnKeyPressed(handleXFieldEnter);
 			getChildren().add(xMinBorderPane);
-			
+
 			BorderPane xMaxBorderPane = new BorderPane();
 			xMaxTextField = new TextField();
 			xMaxBorderPane.setLeft(new Label("X Max"));
 			xMaxBorderPane.setRight(xMaxTextField);
 			xMaxTextField.setOnKeyPressed(handleXFieldEnter);
 			getChildren().add(xMaxBorderPane);
-			
+
 			this.setPrefWidth(250);
 			this.setSpacing(5);
 			this.setPadding(new Insets(10, 10, 10, 10));
 		}
-		
+
 		void setXMin(double xMin) {
 			xMinTextField.setText(String.valueOf(xMin));
 		}
-		
+
 		double getXMin() {
 			return Double.valueOf(xMinTextField.getText());
 		}
-		
+
 		void setXMax(double xMax) {
 			xMaxTextField.setText(String.valueOf(xMax));
 		}
-		
+
 		double getXMax() {
 			return Double.valueOf(xMaxTextField.getText());
 		}
-		
+
 		void setMinRequiredReductionSize(int minRequiredReductionSize) {
 			minReductionTextField.setText(String.valueOf(minRequiredReductionSize));
 		}
-		
+
 		int getMinRequiredReductionSize() {
 			return Integer.valueOf(minReductionTextField.getText());
 		}
-		
+
 		boolean reducePoints() {
 			return reducePoints.get();
 		}
-		
+
 		boolean downsample() {
 			return downsample.get();
 		}
-		
+
 		void setMinDownsamplePoints(int minDownsamplePoints) {
 			minDownsampleTextField.setText(String.valueOf(minDownsamplePoints));
 		}
-		
+
 		int getMinDownsamplePoints() {
 			return Integer.valueOf(minDownsampleTextField.getText());
 		}

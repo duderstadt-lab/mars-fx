@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import java.io.BufferedInputStream;
@@ -42,27 +43,33 @@ import com.fasterxml.jackson.core.JsonParser;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.util.MarsUtil;
 
-public class DefaultMoleculePlotPane extends AbstractMoleculePlotPane<Molecule, DefaultMoleculeSubPlot> {
-	
+public class DefaultMoleculePlotPane extends
+	AbstractMoleculePlotPane<Molecule, DefaultMoleculeSubPlot>
+{
+
 	public DefaultMoleculePlotPane(final Context context) {
 		super(context);
 	}
-	
+
 	@Override
 	public boolean importFromRoverFile(File roverFile) {
 		try {
-	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
-		   JsonFactory jfactory = new JsonFactory();
-		   JsonParser jParser = jfactory.createParser(inputStream);
-		   MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane", "plotPane");
-		   
-		   //Needed for backward compatibility
-		   MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane", "plotPane");
-		   
-		   reload();
-     	   jParser.close();
-     	   inputStream.close();
-		} catch (IOException e) {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane",
+				"plotPane");
+
+			// Needed for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
+				"plotPane");
+
+			reload();
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
 			return false;
 		}
 		return true;

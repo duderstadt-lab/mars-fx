@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOOK;
@@ -74,7 +75,9 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import net.imagej.ops.Initializable;
 
-public abstract class AbstractScriptableWidget extends AbstractDashboardWidget implements Initializable {
+public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
+	implements Initializable
+{
 
 	@Parameter
 	protected ScriptService scriptService;
@@ -96,27 +99,35 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected ToggleGroup languageGroup;
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
-	
-	//Used for Conda Python 3 widgets
+
+	// Used for Conda Python 3 widgets
 	protected String imgsrc;
 
 	@Override
 	public void initialize() {
 		super.initialize();
-		
-		//Here Python becomes Conda Python 3... So we have to implement a workaround
-		//lang = scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
-		
-		String languageName = marsDashboardWidgetService.getDefaultScriptingLanguage();
-		
+
+		// Here Python becomes Conda Python 3... So we have to implement a
+		// workaround
+		// lang =
+		// scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
+
+		String languageName = marsDashboardWidgetService
+			.getDefaultScriptingLanguage();
+
 		if (languageName.equals("Groovy")) {
-			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Groovy")).findFirst().get();
-		} else if (languageName.equals("Python")) {
-			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Python")).findFirst().get();
-		} else if (languageName.equals("Conda Python 3")) {
-			lang = scriptService.getLanguages().stream().filter(l -> l.getLanguageName().equals("Conda Python 3")).findFirst().get();
+			lang = scriptService.getLanguages().stream().filter(l -> l
+				.getLanguageName().equals("Groovy")).findFirst().get();
 		}
-		
+		else if (languageName.equals("Python")) {
+			lang = scriptService.getLanguages().stream().filter(l -> l
+				.getLanguageName().equals("Python")).findFirst().get();
+		}
+		else if (languageName.equals("Conda Python 3")) {
+			lang = scriptService.getLanguages().stream().filter(l -> l
+				.getLanguageName().equals("Conda Python 3")).findFirst().get();
+		}
+
 		// Script Pane
 		Tab scriptTab = new Tab();
 		scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
@@ -129,9 +140,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			if (KE.getCode() == KeyCode.ENTER) {
 				int caretPosition = codeArea.getCaretPosition();
 				int currentParagraph = codeArea.getCurrentParagraph();
-				Matcher m0 = whiteSpace.matcher(codeArea.getParagraph(currentParagraph - 1).getSegments().get(0));
-				if (m0.find())
-					Platform.runLater(() -> codeArea.insertText(caretPosition, m0.group()));
+				Matcher m0 = whiteSpace.matcher(codeArea.getParagraph(currentParagraph -
+					1).getSegments().get(0));
+				if (m0.find()) Platform.runLater(() -> codeArea.insertText(
+					caretPosition, m0.group()));
 			}
 		});
 
@@ -141,7 +153,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		langLabel = new Label(lang.getLanguageName());
 		langLabel.setPadding(new Insets(5, 5, 5, 5));
 		scriptBorder.setTop(langLabel);
-		
+
 		scriptTab.setContent(scriptBorder);
 		getTabPane().getTabs().add(scriptTab);
 
@@ -169,7 +181,10 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		String scriptName = "script";
 		if (lang.getLanguageName().equals("Groovy")) {
 			scriptName += ".groovy";
-		} else if (lang.getLanguageName().equals("Python") || lang.getLanguageName().equals("Conda Python 3")) {
+		}
+		else if (lang.getLanguageName().equals("Python") || lang.getLanguageName()
+			.equals("Conda Python 3"))
+		{
 			scriptName += ".py";
 		}
 
@@ -180,7 +195,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		try {
 			module = scriptInfo.createModule();
 			context.inject(module);
-		} catch (ModuleException e) {
+		}
+		catch (ModuleException e) {
 			return null;
 		}
 
@@ -199,7 +215,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 			Writer errorWriter = new OutputStreamWriter(errorPS, "UTF-8");
 			module.setErrorWriter(errorWriter);
 
-		} catch (UnsupportedEncodingException e1) {
+		}
+		catch (UnsupportedEncodingException e1) {
 			outputPS.close();
 			errorPS.close();
 			return null;
@@ -209,14 +226,15 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 
 		try {
 			moduleService.run(module, false).get();
-		} catch (InterruptedException e) {
+		}
+		catch (InterruptedException e) {
 			return null;
-		} catch (ExecutionException e) {
+		}
+		catch (ExecutionException e) {
 			return null;
 		}
 
-		if (errorConsole.errorsFound())
-			return null;
+		if (errorConsole.errorsFound()) return null;
 
 		outputPS.close();
 		errorPS.close();
@@ -230,63 +248,72 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 		loadScript(name, null);
 	}
 
-	protected void loadScript(String name, String inputParameters) throws IOException {
+	protected void loadScript(String name, String inputParameters)
+		throws IOException
+	{
 		if (lang.getLanguageName().equals("Groovy")) {
 			name += ".groovy";
-		} else if (lang.getLanguageName().equals("Python")) {
+		}
+		else if (lang.getLanguageName().equals("Python")) {
 			name += ".py";
-		} else if (lang.getLanguageName().equals("Conda Python 3")) {
+		}
+		else if (lang.getLanguageName().equals("Conda Python 3")) {
 			name += "_conda.py";
 		}
-		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class.getResourceAsStream(name);
-		String scriptTemplate = (inputParameters != null) ? 
-				inputParameters + IOUtils.toString(is, "UTF-8") : IOUtils.toString(is, "UTF-8");
+		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class
+			.getResourceAsStream(name);
+		String scriptTemplate = (inputParameters != null) ? inputParameters +
+			IOUtils.toString(is, "UTF-8") : IOUtils.toString(is, "UTF-8");
 		is.close();
 		codeArea.replaceText(scriptTemplate);
 	}
-	
-	private void updateImageViewSize(ImageView imageView, double HtoWratio) {		 
-		 double rootWidth = rootPane.getWidth() - 30;
-		 double rootHeight = rootPane.getHeight() - 30;
 
-		 if (rootWidth*HtoWratio < rootHeight) {
-			 imageView.setFitWidth(rootWidth);
-		 } else {
-			 imageView.setFitHeight(rootHeight);
-		 }
+	private void updateImageViewSize(ImageView imageView, double HtoWratio) {
+		double rootWidth = rootPane.getWidth() - 30;
+		double rootHeight = rootPane.getHeight() - 30;
+
+		if (rootWidth * HtoWratio < rootHeight) {
+			imageView.setFitWidth(rootWidth);
+		}
+		else {
+			imageView.setFitHeight(rootHeight);
+		}
 	}
-	
+
 	protected void loadImage() {
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				try {
-					if (imgsrc == null)
-						return;
+					if (imgsrc == null) return;
 					String base64string = imgsrc.substring(22);
-					
-		            byte[] imageByte = Base64.decodeBase64(base64string);
-		            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-		            Image image = new Image(bis);
+
+					byte[] imageByte = Base64.decodeBase64(base64string);
+					ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+					Image image = new Image(bis);
 					bis.close();
-		            ImageView imageView = new ImageView();
+					ImageView imageView = new ImageView();
 					imageView.setImage(image);
-	
+
 					rootPane.widthProperty().addListener((obs, oldVal, newVal) -> {
-						updateImageViewSize(imageView, image.getHeight()/image.getWidth());		 
+						updateImageViewSize(imageView, image.getHeight() / image
+							.getWidth());
 					});
 					rootPane.heightProperty().addListener((obs, oldVal, newVal) -> {
-						updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
+						updateImageViewSize(imageView, image.getHeight() / image
+							.getWidth());
 					});
-	
+
 					imageView.setPreserveRatio(true);
-	
+
 					BorderPane borderPane = new BorderPane();
 					setContent(borderPane);
 					borderPane.setCenter(imageView);
-	
-					updateImageViewSize(imageView, image.getHeight()/image.getWidth());	
-				} catch (IOException e) {
+
+					updateImageViewSize(imageView, image.getHeight() / image.getWidth());
+				}
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -297,31 +324,23 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget i
 	protected void createIOMaps() {
 		super.createIOMaps();
 
-		setJsonField("Language", 
-			jGenerator -> {
-				jGenerator.writeStringField("Language", lang.getLanguageName());
-			},
-			jParser -> {
-				String language = jParser.getText();
-				langLabel.setText(language);
-				lang = scriptService.getLanguageByName(language);
-			});
-			
-			
-		setJsonField("Script", 
-			jGenerator -> {
-				jGenerator.writeStringField("Script", codeArea.getText());
-			}, 
-			jParser -> {
-				codeArea.replaceText(jParser.getText());
-			});
-		
-		setJsonField("imgsrc", 
-			jGenerator -> {
-				if (imgsrc != null)
-					jGenerator.writeStringField("imgsrc", imgsrc);
-			},
-			jParser -> imgsrc = jParser.getText());
+		setJsonField("Language", jGenerator -> {
+			jGenerator.writeStringField("Language", lang.getLanguageName());
+		}, jParser -> {
+			String language = jParser.getText();
+			langLabel.setText(language);
+			lang = scriptService.getLanguageByName(language);
+		});
+
+		setJsonField("Script", jGenerator -> {
+			jGenerator.writeStringField("Script", codeArea.getText());
+		}, jParser -> {
+			codeArea.replaceText(jParser.getText());
+		});
+
+		setJsonField("imgsrc", jGenerator -> {
+			if (imgsrc != null) jGenerator.writeStringField("imgsrc", imgsrc);
+		}, jParser -> imgsrc = jParser.getText());
 	}
 
 	@Override

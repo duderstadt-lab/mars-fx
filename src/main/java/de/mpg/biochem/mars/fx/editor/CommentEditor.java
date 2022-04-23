@@ -52,6 +52,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package de.mpg.biochem.mars.fx.editor;
 
 import java.nio.file.Path;
@@ -79,18 +80,18 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 
 /**
- * Editor for MoleculeArchive comments
- *
- * Original author - Karl Tauber from markdownwriterfx
- * Modifications by Karl Duderstadt adapted for MoleculeArchive comments editing.
+ * Editor for MoleculeArchive comments Original author - Karl Tauber from
+ * markdownwriterfx Modifications by Karl Duderstadt adapted for MoleculeArchive
+ * comments editing.
  */
 public class CommentEditor extends AnchorPane {
+
 	private SplitPane splitPane;
 	private MarkdownEditorPane markdownEditorPane;
 	private MarkdownPreviewPane markdownPreviewPane;
 
 	final PrefsBooleanProperty editMode = new PrefsBooleanProperty(false);
-	
+
 	final PrefsBooleanProperty previewVisible = new PrefsBooleanProperty(true);
 	final PrefsBooleanProperty htmlSourceVisible = new PrefsBooleanProperty();
 	final PrefsBooleanProperty markdownAstVisible = new PrefsBooleanProperty();
@@ -98,14 +99,16 @@ public class CommentEditor extends AnchorPane {
 
 	public CommentEditor() {
 		@SuppressWarnings("rawtypes")
-		ChangeListener previewTypeListener = (observable, oldValue, newValue) -> updatePreviewType();
-		
+		ChangeListener previewTypeListener = (observable, oldValue,
+			newValue) -> updatePreviewType();
+
 		Options.markdownRendererProperty().addListener(previewTypeListener);
 		previewVisible.addListener(previewTypeListener);
-		
-		ChangeListener editModeListener = (observable, oldValue, newValue) -> updateEditMode();
+
+		ChangeListener editModeListener = (observable, oldValue,
+			newValue) -> updateEditMode();
 		editMode.addListener(editModeListener);
-		
+
 		initialize();
 	}
 
@@ -114,41 +117,71 @@ public class CommentEditor extends AnchorPane {
 	}
 
 	// 'editor' property
-	private final ObjectProperty<MarkdownEditorPane> editor = new SimpleObjectProperty<>();
-	ReadOnlyObjectProperty<MarkdownEditorPane> editorProperty() { return editor; }
+	private final ObjectProperty<MarkdownEditorPane> editor =
+		new SimpleObjectProperty<>();
+
+	ReadOnlyObjectProperty<MarkdownEditorPane> editorProperty() {
+		return editor;
+	}
 
 	// 'path' property
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
-	Path getPath() { return path.get(); }
-	void setPath(Path path) { this.path.set(path); }
-	ObjectProperty<Path> pathProperty() { return path; }
+
+	Path getPath() {
+		return path.get();
+	}
+
+	void setPath(Path path) {
+		this.path.set(path);
+	}
+
+	ObjectProperty<Path> pathProperty() {
+		return path;
+	}
 
 	// 'readOnly' property
 	private final ReadOnlyBooleanWrapper readOnly = new ReadOnlyBooleanWrapper();
-	boolean isReadOnly() { return readOnly.get(); }
-	ReadOnlyBooleanProperty readOnlyProperty() { return readOnly.getReadOnlyProperty(); }
+
+	boolean isReadOnly() {
+		return readOnly.get();
+	}
+
+	ReadOnlyBooleanProperty readOnlyProperty() {
+		return readOnly.getReadOnlyProperty();
+	}
 
 	// 'modified' property
 	private final ReadOnlyBooleanWrapper modified = new ReadOnlyBooleanWrapper();
-	boolean isModified() { return modified.get(); }
-	ReadOnlyBooleanProperty modifiedProperty() { return modified.getReadOnlyProperty(); }
+
+	boolean isModified() {
+		return modified.get();
+	}
+
+	ReadOnlyBooleanProperty modifiedProperty() {
+		return modified.getReadOnlyProperty();
+	}
 
 	// 'canUndo' property
 	private final BooleanProperty canUndo = new SimpleBooleanProperty();
-	BooleanProperty canUndoProperty() { return canUndo; }
+
+	BooleanProperty canUndoProperty() {
+		return canUndo;
+	}
 
 	// 'canRedo' property
 	private final BooleanProperty canRedo = new SimpleBooleanProperty();
-	BooleanProperty canRedoProperty() { return canRedo; }
+
+	BooleanProperty canRedoProperty() {
+		return canRedo;
+	}
 
 	private boolean updatePreviewTypePending;
+
 	private void updatePreviewType() {
-		if (markdownPreviewPane == null)
-			return;
+		if (markdownPreviewPane == null) return;
 
 		// avoid too many (and useless) runLater() invocations
-		if (updatePreviewTypePending)
-			return;
+		if (updatePreviewTypePending) return;
 		updatePreviewTypePending = true;
 
 		Platform.runLater(() -> {
@@ -163,26 +196,24 @@ public class CommentEditor extends AnchorPane {
 			ObservableList<Node> splitItems = splitPane.getItems();
 			Node previewPane = markdownPreviewPane.getNode();
 			if (previewType != Type.None) {
-				if (!splitItems.contains(previewPane))
-					splitItems.add(previewPane);
-			} else
-				splitItems.remove(previewPane);
+				if (!splitItems.contains(previewPane)) splitItems.add(previewPane);
+			}
+			else splitItems.remove(previewPane);
 		});
 	}
-	
+
 	private boolean updateEditModePending;
+
 	private void updateEditMode() {
-		if (markdownPreviewPane == null)
-			return;
+		if (markdownPreviewPane == null) return;
 
 		// avoid too many (and useless) runLater() invocations
-		if (updateEditModePending)
-			return;
+		if (updateEditModePending) return;
 		updateEditModePending = true;
-		
+
 		Platform.runLater(() -> {
 			updateEditModePending = false;
-			
+
 			MarkdownPreviewPane.Type previewType = getPreviewType();
 
 			markdownPreviewPane.setRendererType(Options.getMarkdownRenderer());
@@ -192,13 +223,14 @@ public class CommentEditor extends AnchorPane {
 			ObservableList<Node> splitItems = splitPane.getItems();
 			Node previewPane = markdownPreviewPane.getNode();
 			if (!splitItems.contains(markdownEditorPane.getNode())) {
-				showEditor();				
-			} else {
+				showEditor();
+			}
+			else {
 				showPreview();
 			}
 		});
 	}
-	
+
 	public void showPreview() {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		Node previewPane = markdownPreviewPane.getNode();
@@ -209,24 +241,23 @@ public class CommentEditor extends AnchorPane {
 		if (splitItems.contains(markdownEditorPane.getNode())) {
 			splitItems.remove(markdownEditorPane.getNode());
 			markdownPreviewPane.editorSelectionProperty().unbind();
-			markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+			markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1, -1));
 		}
 	}
-	
+
 	public void showEditor() {
 		ObservableList<Node> splitItems = splitPane.getItems();
 		if (!splitItems.contains(markdownEditorPane.getNode())) {
 			splitItems.add(0, markdownEditorPane.getNode());
-			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());				
+			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane
+				.selectionProperty());
 		}
 	}
 
 	private MarkdownPreviewPane.Type getPreviewType() {
 		MarkdownPreviewPane.Type previewType = Type.None;
-		if (previewVisible.get())
-			previewType = MarkdownPreviewPane.Type.Web;
-		else 
-			previewType = Type.None;
+		if (previewVisible.get()) previewType = MarkdownPreviewPane.Type.Web;
+		else previewType = Type.None;
 		return previewType;
 	}
 
@@ -241,11 +272,15 @@ public class CommentEditor extends AnchorPane {
 
 		// bind preview to editor
 		markdownPreviewPane.pathProperty().bind(pathProperty());
-		markdownPreviewPane.markdownTextProperty().bind(markdownEditorPane.markdownTextProperty());
-		markdownPreviewPane.markdownASTProperty().bind(markdownEditorPane.markdownASTProperty());
-		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane.selectionProperty());
-		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane.scrollYProperty());
-		
+		markdownPreviewPane.markdownTextProperty().bind(markdownEditorPane
+			.markdownTextProperty());
+		markdownPreviewPane.markdownASTProperty().bind(markdownEditorPane
+			.markdownASTProperty());
+		markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane
+			.selectionProperty());
+		markdownPreviewPane.scrollYProperty().bind(markdownEditorPane
+			.scrollYProperty());
+
 		// bind properties
 		readOnly.bind(markdownEditorPane.readOnlyProperty());
 
@@ -255,25 +290,25 @@ public class CommentEditor extends AnchorPane {
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 
-		//splitPane = new SplitPane(markdownEditorPane.getNode());
-		if (getPreviewType() != MarkdownPreviewPane.Type.None)
-			splitPane = new SplitPane(markdownPreviewPane.getNode());
-		
+		// splitPane = new SplitPane(markdownEditorPane.getNode());
+		if (getPreviewType() != MarkdownPreviewPane.Type.None) splitPane =
+			new SplitPane(markdownPreviewPane.getNode());
+
 		getChildren().add(splitPane);
-        AnchorPane.setTopAnchor(splitPane, 0.0);
-        AnchorPane.setBottomAnchor(splitPane, 0.0);
-        AnchorPane.setRightAnchor(splitPane, 0.0);
-        AnchorPane.setLeftAnchor(splitPane, 0.0);
+		AnchorPane.setTopAnchor(splitPane, 0.0);
+		AnchorPane.setBottomAnchor(splitPane, 0.0);
+		AnchorPane.setRightAnchor(splitPane, 0.0);
+		AnchorPane.setLeftAnchor(splitPane, 0.0);
 
 		updatePreviewType();
 		markdownEditorPane.requestFocus();
 
 		// update 'editor' property
 		editor.set(markdownEditorPane);
-		
-		//We unbind selections until edit mode is activated.
+
+		// We unbind selections until edit mode is activated.
 		markdownPreviewPane.editorSelectionProperty().unbind();
-		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1,-1));
+		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1, -1));
 	}
 
 	public void setComments(String comments) {
@@ -287,4 +322,3 @@ public class CommentEditor extends AnchorPane {
 		return comments;
 	}
 }
-

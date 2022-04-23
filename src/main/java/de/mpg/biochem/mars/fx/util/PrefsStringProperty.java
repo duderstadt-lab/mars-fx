@@ -65,16 +65,14 @@ import javafx.beans.property.SimpleStringProperty;
  *
  * @author Karl Tauber
  */
-public class PrefsStringProperty
-	extends SimpleStringProperty
-{
+public class PrefsStringProperty extends SimpleStringProperty {
+
 	private Preferences prefs;
 	private String key;
 	private String def;
 	private Function<String, String> loadConverter;
 
-	public PrefsStringProperty() {
-	}
+	public PrefsStringProperty() {}
 
 	public PrefsStringProperty(Preferences prefs, String key, String def) {
 		init(prefs, key, def);
@@ -84,7 +82,9 @@ public class PrefsStringProperty
 		init(prefs, key, def, value -> value);
 	}
 
-	public void init(Preferences prefs, String key, String def, Function<String, String> loadConverter) {
+	public void init(Preferences prefs, String key, String def,
+		Function<String, String> loadConverter)
+	{
 		this.key = key;
 		this.def = def;
 		this.loadConverter = loadConverter;

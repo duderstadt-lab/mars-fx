@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.util.HashMap;
@@ -65,7 +66,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 /**
- * Inspired by FXML Controller class from Hadrien Mary. 
+ * Inspired by FXML Controller class from Hadrien Mary.
  * 
  * @author Karl Duderstadt
  */
@@ -76,32 +77,36 @@ public class MarsOMEView {
 
 	@Parameter
 	private ConvertService convert;
-	
+
 	private AnchorPane rootAnchorPane;
 
 	private TreeView testTree;
-	
+
 	private CustomTextField filterField;
 
 	private TableView<String> imageTable;
 	private Map<String, String> imageData = new HashMap<String, String>();
-	private ObservableList<String> imageFieldNameList = FXCollections.observableArrayList();
-	private FilteredList<String> filteredImageFieldNameList = new FilteredList<>(imageFieldNameList, p -> true);
+	private ObservableList<String> imageFieldNameList = FXCollections
+		.observableArrayList();
+	private FilteredList<String> filteredImageFieldNameList = new FilteredList<>(
+		imageFieldNameList, p -> true);
 
 	private TableView<String> planeTable;
 	private Map<String, String> planeData = new HashMap<String, String>();
-	private ObservableList<String> planeFieldNameList = FXCollections.observableArrayList();
-	private FilteredList<String> filteredPlaneFieldNameList = new FilteredList<>(planeFieldNameList, p -> true);
+	private ObservableList<String> planeFieldNameList = FXCollections
+		.observableArrayList();
+	private FilteredList<String> filteredPlaneFieldNameList = new FilteredList<>(
+		planeFieldNameList, p -> true);
 
 	public MarsOMEView(final Context context) {
 		context.inject(this);
-		
-		//Global container
+
+		// Global container
 		rootAnchorPane = new AnchorPane();
 		rootAnchorPane.setPrefSize(841.0, 743.0);
 		rootAnchorPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-		
-		//Global SplitPane
+
+		// Global SplitPane
 		SplitPane splitPane = new SplitPane();
 		splitPane.setDividerPositions(0.4525);
 		splitPane.setLayoutX(206.0);
@@ -112,13 +117,13 @@ public class MarsOMEView {
 		AnchorPane.setRightAnchor(splitPane, 0.0);
 		AnchorPane.setLeftAnchor(splitPane, 0.0);
 		rootAnchorPane.getChildren().add(splitPane);
-		
-		//PlaneIndex Left...
+
+		// PlaneIndex Left...
 		AnchorPane planeIndexPane = new AnchorPane();
 		planeIndexPane.setPrefSize(88.0, 190.0);
 		planeIndexPane.setMinWidth(0.0);
 		planeIndexPane.setMinHeight(0.0);
-		
+
 		testTree = new TreeView();
 		testTree.setLayoutX(4.0);
 		testTree.setLayoutY(56.0);
@@ -128,20 +133,20 @@ public class MarsOMEView {
 		AnchorPane.setLeftAnchor(testTree, 0.0);
 		AnchorPane.setRightAnchor(testTree, 0.0);
 		planeIndexPane.getChildren().add(testTree);
-		
+
 		splitPane.getItems().add(planeIndexPane);
-		
-		//Global Right side container
-		//AnchorPane planeDetailsPane = new AnchorPane();
-		//planeDetailsPane.minHeight(0.0);
-		//planeDetailsPane.minWidth(0.0);
-		//planeDetailsPane.prefHeight(520.0);
-		//planeDetailsPane.prefWidth(320.0);
-		//planeDetailsPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-		
-		//splitPane.getItems().add(planeDetailsPane);
-		
-		//Right side vertical splitpane
+
+		// Global Right side container
+		// AnchorPane planeDetailsPane = new AnchorPane();
+		// planeDetailsPane.minHeight(0.0);
+		// planeDetailsPane.minWidth(0.0);
+		// planeDetailsPane.prefHeight(520.0);
+		// planeDetailsPane.prefWidth(320.0);
+		// planeDetailsPane.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
+
+		// splitPane.getItems().add(planeDetailsPane);
+
+		// Right side vertical splitpane
 		SplitPane planeSplitPane = new SplitPane();
 		planeSplitPane.setDividerPositions(0.4);
 		planeSplitPane.setOrientation(Orientation.VERTICAL);
@@ -151,14 +156,14 @@ public class MarsOMEView {
 		AnchorPane.setTopAnchor(planeSplitPane, 0.0);
 		AnchorPane.setLeftAnchor(planeSplitPane, 0.0);
 		AnchorPane.setRightAnchor(planeSplitPane, 0.0);
-		
-		//Right Top container
+
+		// Right Top container
 		AnchorPane imageAnchorPane = new AnchorPane();
 		imageAnchorPane.minHeight(0.0);
 		imageAnchorPane.minWidth(0.0);
 		imageAnchorPane.prefHeight(308.0);
 		imageAnchorPane.prefWidth(328.0);
-		
+
 		VBox vbox = new VBox();
 		vbox.setPrefSize(499.0, 261.0);
 		AnchorPane.setBottomAnchor(vbox, 0.0);
@@ -167,17 +172,18 @@ public class MarsOMEView {
 		AnchorPane.setLeftAnchor(vbox, 0.0);
 		vbox.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
 		vbox.getChildren().add(new Label("Image"));
-		
+
 		Separator separator = new Separator();
 		separator.prefWidth(200.0);
 		VBox.setMargin(separator, new Insets(10.0, 0.0, 10.0, 0.0));
 		vbox.getChildren().add(separator);
-		
+
 		imageTable = new TableView<String>();
 		VBox.setVgrow(imageTable, Priority.ALWAYS);
-		imageTable.setItems(filteredImageFieldNameList);	
-		
-		TableColumn<String, String> imageNameColumn = new TableColumn<String, String>();
+		imageTable.setItems(filteredImageFieldNameList);
+
+		TableColumn<String, String> imageNameColumn =
+			new TableColumn<String, String>();
 		imageNameColumn.setEditable(false);
 		imageNameColumn.setPrefWidth(135.0);
 		imageNameColumn.setSortable(false);
@@ -186,8 +192,9 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(field.getValue());
 		});
 		imageTable.getColumns().add(imageNameColumn);
-		
-		TableColumn<String, String> imageValueColumn = new TableColumn<String, String>();
+
+		TableColumn<String, String> imageValueColumn =
+			new TableColumn<String, String>();
 		imageValueColumn.setEditable(false);
 		imageValueColumn.setPrefWidth(135.0);
 		imageValueColumn.setSortable(false);
@@ -196,17 +203,17 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(imageData.get(field.getValue()));
 		});
 		imageTable.getColumns().add(imageValueColumn);
-		
+
 		vbox.getChildren().add(imageTable);
 		imageAnchorPane.getChildren().add(vbox);
 		planeSplitPane.getItems().add(imageAnchorPane);
-		
-		//Right bottom container
+
+		// Right bottom container
 		AnchorPane positionAnchorPane = new AnchorPane();
 		positionAnchorPane.minHeight(0.0);
 		positionAnchorPane.minWidth(0.0);
 		positionAnchorPane.setPrefSize(160.0, 100.0);
-		
+
 		VBox vBoxBottom = new VBox();
 		vBoxBottom.setPrefSize(437.0, 394.0);
 		AnchorPane.setBottomAnchor(vBoxBottom, 0.0);
@@ -215,17 +222,18 @@ public class MarsOMEView {
 		AnchorPane.setRightAnchor(vBoxBottom, 0.0);
 		vBoxBottom.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
 		vBoxBottom.getChildren().add(new Label("Plane"));
-		
+
 		Separator separator2 = new Separator();
 		separator2.prefWidth(200.0);
 		VBox.setMargin(separator2, new Insets(10.0, 0.0, 10.0, 0.0));
 		vBoxBottom.getChildren().add(separator2);
-		
+
 		planeTable = new TableView<String>();
 		VBox.setVgrow(planeTable, Priority.ALWAYS);
 		planeTable.setItems(filteredPlaneFieldNameList);
-		
-		TableColumn<String, String> tiffDataNameColumn = new TableColumn<String, String>();
+
+		TableColumn<String, String> tiffDataNameColumn =
+			new TableColumn<String, String>();
 		tiffDataNameColumn.setEditable(false);
 		tiffDataNameColumn.setPrefWidth(135.0);
 		tiffDataNameColumn.setSortable(false);
@@ -234,8 +242,9 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(field.getValue());
 		});
 		planeTable.getColumns().add(tiffDataNameColumn);
-		
-		TableColumn<String, String> tiffDataValueColumn = new TableColumn<String, String>();
+
+		TableColumn<String, String> tiffDataValueColumn =
+			new TableColumn<String, String>();
 		tiffDataValueColumn.setEditable(false);
 		tiffDataValueColumn.setPrefWidth(135.0);
 		tiffDataValueColumn.setSortable(false);
@@ -244,47 +253,46 @@ public class MarsOMEView {
 			return new ReadOnlyStringWrapper(planeData.get(field.getValue()));
 		});
 		planeTable.getColumns().add(tiffDataValueColumn);
-		
+
 		vBoxBottom.getChildren().add(planeTable);
 		positionAnchorPane.getChildren().add(vBoxBottom);
 		planeSplitPane.getItems().add(positionAnchorPane);
-		
-		BorderPane borderPane = new BorderPane();
-		
-		filterField = new CustomTextField();
-        filterField.setLeft(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.SEARCH));
-        filterField.getStyleClass().add("find");        
-        filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-        	//If we don't clear the selection while we are searching the table will
-        	//steal the focus after every letter we type.
-        	imageTable.getSelectionModel().clearSelection();
-        	filteredImageFieldNameList.setPredicate(name -> {
-        		// If filter text is empty, display everything.
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-                
-                return name.contains(newValue);
-        	});
-        	
-        	planeTable.getSelectionModel().clearSelection();
-        	filteredPlaneFieldNameList.setPredicate(name -> {
-        		// If filter text is empty, display everything.
-                if (newValue == null || newValue.isEmpty()) {
-                    return true;
-                }
-        		
-        		return name.contains(newValue);
-        	});
-        });
-        
-		filterField.setStyle(
-              "-fx-background-radius: 2em; "
-        );
 
-        borderPane.setTop(filterField);
-        BorderPane.setMargin(filterField, new Insets(5));
-		
+		BorderPane borderPane = new BorderPane();
+
+		filterField = new CustomTextField();
+		filterField.setLeft(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.SEARCH));
+		filterField.getStyleClass().add("find");
+		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
+			// If we don't clear the selection while we are searching the table will
+			// steal the focus after every letter we type.
+			imageTable.getSelectionModel().clearSelection();
+			filteredImageFieldNameList.setPredicate(name -> {
+				// If filter text is empty, display everything.
+				if (newValue == null || newValue.isEmpty()) {
+					return true;
+				}
+
+				return name.contains(newValue);
+			});
+
+			planeTable.getSelectionModel().clearSelection();
+			filteredPlaneFieldNameList.setPredicate(name -> {
+				// If filter text is empty, display everything.
+				if (newValue == null || newValue.isEmpty()) {
+					return true;
+				}
+
+				return name.contains(newValue);
+			});
+		});
+
+		filterField.setStyle("-fx-background-radius: 2em; ");
+
+		borderPane.setTop(filterField);
+		BorderPane.setMargin(filterField, new Insets(5));
+
 		borderPane.setCenter(planeSplitPane);
 		splitPane.getItems().add(borderPane);
 	}
@@ -295,26 +303,28 @@ public class MarsOMEView {
 		testTree.setShowRoot(false);
 
 		// Build and populate the tree
-		//for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++) {
+		// for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++)
+		// {
 		meta.images().forEach(image -> {
 			TreeItem<GenericModel> imageItem = new TreeItem<>(image);
 			root.getChildren().add(imageItem);
 
 			image.planes().forEach(plane -> {
-					TreeItem<GenericModel> dataItem = new TreeItem<>(plane);
-					imageItem.getChildren().add(dataItem);
-				});
+				TreeItem<GenericModel> dataItem = new TreeItem<>(plane);
+				imageItem.getChildren().add(dataItem);
+			});
 		});
 
 		// Handle selection in the tree
-		testTree.getSelectionModel().selectedItemProperty()
-				.addListener((ObservableValue obs, Object oldValue, Object newValue) -> {
-					TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
-					
-					if (selectedItem != null && selectedItem.getValue() instanceof MarsOMEPlane)
-						populateTiffDataInformations((MarsOMEPlane) selectedItem.getValue());
-				});
-		
+		testTree.getSelectionModel().selectedItemProperty().addListener((
+			ObservableValue obs, Object oldValue, Object newValue) -> {
+			TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
+
+			if (selectedItem != null && selectedItem
+				.getValue() instanceof MarsOMEPlane) populateTiffDataInformations(
+					(MarsOMEPlane) selectedItem.getValue());
+		});
+
 		imageData.clear();
 		imageFieldNameList.clear();
 		planeData.clear();
@@ -323,7 +333,7 @@ public class MarsOMEView {
 
 	private void populateTiffDataInformations(MarsOMEPlane plane) {
 		MarsOMEImage imageModel = plane.getImage();
-		
+
 		imageData.clear();
 		imageFieldNameList.clear();
 		for (List<String> row : imageModel.getInformationsRow()) {
@@ -338,7 +348,7 @@ public class MarsOMEView {
 			planeFieldNameList.add(row.get(0));
 		}
 	}
-	
+
 	public Node getNode() {
 		return rootAnchorPane;
 	}

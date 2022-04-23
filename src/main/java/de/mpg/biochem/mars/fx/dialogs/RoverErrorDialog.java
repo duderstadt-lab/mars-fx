@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import javafx.geometry.Insets;
@@ -43,25 +44,26 @@ import javafx.stage.Window;
  * @author Karl Duderstadt
  */
 public class RoverErrorDialog extends Alert {
+
 	public RoverErrorDialog(Window owner, String message) {
 		super(AlertType.ERROR);
-	    initModality(Modality.WINDOW_MODAL);
-	    initOwner(owner);
-	    Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
-	    ImageView imageView = new ImageView(image1);
-	    imageView.setFitWidth(80);
-	    imageView.setFitHeight(80);
-	    setGraphic(imageView);
-	    setHeaderText(null);
-	    setResizable(true);
-	    setContentText(message);
-	    Text text = new Text(message);
-	    text.setWrappingWidth(400);
-	    final AnchorPane anchorPane = new AnchorPane();
-	    anchorPane.setPadding(new Insets(15, 25, 15, 15));
-	    AnchorPane.setTopAnchor(text, 0.0);
-	    AnchorPane.setLeftAnchor(text, 0.0);
-	    anchorPane.getChildren().add(text);
-	    getDialogPane().setContent(anchorPane);
+		initModality(Modality.WINDOW_MODAL);
+		initOwner(owner);
+		Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
+		ImageView imageView = new ImageView(image1);
+		imageView.setFitWidth(80);
+		imageView.setFitHeight(80);
+		setGraphic(imageView);
+		setHeaderText(null);
+		setResizable(true);
+		setContentText(message);
+		Text text = new Text(message);
+		text.setWrappingWidth(400);
+		final AnchorPane anchorPane = new AnchorPane();
+		anchorPane.setPadding(new Insets(15, 25, 15, 15));
+		AnchorPane.setTopAnchor(text, 0.0);
+		AnchorPane.setLeftAnchor(text, 0.0);
+		anchorPane.getChildren().add(text);
+		getDialogPane().setContent(anchorPane);
 	}
 }

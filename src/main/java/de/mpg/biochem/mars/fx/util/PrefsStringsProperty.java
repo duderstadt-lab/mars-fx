@@ -64,14 +64,12 @@ import javafx.beans.property.SimpleObjectProperty;
  *
  * @author Karl Tauber
  */
-public class PrefsStringsProperty
-	extends SimpleObjectProperty<String[]>
-{
+public class PrefsStringsProperty extends SimpleObjectProperty<String[]> {
+
 	private Preferences prefs;
 	private String key;
 
-	public PrefsStringsProperty() {
-	}
+	public PrefsStringsProperty() {}
 
 	public PrefsStringsProperty(Preferences prefs, String key) {
 		init(prefs, key);

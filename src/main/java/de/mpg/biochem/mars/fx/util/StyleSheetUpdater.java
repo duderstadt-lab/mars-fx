@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.util;
 
 import java.io.ByteArrayInputStream;
@@ -43,55 +44,65 @@ import java.net.URLStreamHandlerFactory;
 public class StyleSheetUpdater {
 
 	private String css;
-	
+
 	private static StringURLStreamHandlerFactory urlFactory;
-	
-    public StyleSheetUpdater() {
-    	if (urlFactory == null) {
-    		urlFactory = new StringURLStreamHandlerFactory();
-        	URL.setURLStreamHandlerFactory(urlFactory);
-    	}
-    }
-    /*
-    public void addStyleSheet(Parent parent, String css) {
-    	this.css = css;
-    	
-    	parent.getStylesheets().add("internal:"+System.nanoTime()+"stylesheet.css");
-    }
-    */
-    public String getStyleSheetURL(String css) {
-    	this.css = css;
-    	
-    	return "internal:"+System.nanoTime()+"stylesheet.css";
-    }
-    
-	private class StringURLConnection extends URLConnection {
-	    public StringURLConnection(URL url){
-	        super(url);
-	    }
 
-	    @Override public void connect() throws IOException {}
-
-	    @Override public InputStream getInputStream() throws IOException {
-	        return new ByteArrayInputStream(css.getBytes("UTF-8"));
-	    }
+	public StyleSheetUpdater() {
+		if (urlFactory == null) {
+			urlFactory = new StringURLStreamHandlerFactory();
+			URL.setURLStreamHandlerFactory(urlFactory);
+		}
 	}
 
-	private class StringURLStreamHandlerFactory implements URLStreamHandlerFactory {
-	    URLStreamHandler streamHandler = new URLStreamHandler(){
-	        @Override protected URLConnection openConnection(URL url) throws IOException {
-	            if (url.toString().toLowerCase().endsWith(".css")) {
-	                return new StringURLConnection(url);
-	            }
-	            throw new FileNotFoundException();
-	        }
-	    };
-	    @Override public URLStreamHandler createURLStreamHandler(String protocol) {
-	        if ("internal".equals(protocol)) {
-	            return streamHandler;
-	        }
-	        return null;
-	    }
+	/*
+	public void addStyleSheet(Parent parent, String css) {
+		this.css = css;
+		
+		parent.getStylesheets().add("internal:"+System.nanoTime()+"stylesheet.css");
+	}
+	*/
+	public String getStyleSheetURL(String css) {
+		this.css = css;
+
+		return "internal:" + System.nanoTime() + "stylesheet.css";
+	}
+
+	private class StringURLConnection extends URLConnection {
+
+		public StringURLConnection(URL url) {
+			super(url);
+		}
+
+		@Override
+		public void connect() throws IOException {}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return new ByteArrayInputStream(css.getBytes("UTF-8"));
+		}
+	}
+
+	private class StringURLStreamHandlerFactory implements
+		URLStreamHandlerFactory
+	{
+
+		URLStreamHandler streamHandler = new URLStreamHandler() {
+
+			@Override
+			protected URLConnection openConnection(URL url) throws IOException {
+				if (url.toString().toLowerCase().endsWith(".css")) {
+					return new StringURLConnection(url);
+				}
+				throw new FileNotFoundException();
+			}
+		};
+
+		@Override
+		public URLStreamHandler createURLStreamHandler(String protocol) {
+			if ("internal".equals(protocol)) {
+				return streamHandler;
+			}
+			return null;
+		}
 	}
 }
-

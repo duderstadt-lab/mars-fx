@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.bdv;
 
 import java.util.function.Supplier;
@@ -41,51 +42,48 @@ import net.imglib2.cache.volatiles.LoadingStrategy;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.numeric.NumericType;
 
-public class MarsN5VolatileSource< T extends NumericType< T >, V extends Volatile< T > & NumericType< V > > extends AbstractSource< V > {
+public class MarsN5VolatileSource<T extends NumericType<T>, V extends Volatile<T> & NumericType<V>>
+	extends AbstractSource<V>
+{
 
-    private final MarsN5Source< T > source;
+	private final MarsN5Source<T> source;
 
-    private SharedQueue queue;
+	private SharedQueue queue;
 
-    public MarsN5VolatileSource(
-            final MarsN5Source< T > source,
-            final V type,
-            final SharedQueue queue )
-    {
-        super( type, source.getName() );
-        this.source = source;
-        this.queue = queue;
-    }
+	public MarsN5VolatileSource(final MarsN5Source<T> source, final V type,
+		final SharedQueue queue)
+	{
+		super(type, source.getName());
+		this.source = source;
+		this.queue = queue;
+	}
 
-    public MarsN5VolatileSource(
-            final MarsN5Source< T > source,
-            final Supplier< V > typeSupplier,
-            final SharedQueue queue )
-    {
-        this( source, typeSupplier.get(), queue );
-    }
+	public MarsN5VolatileSource(final MarsN5Source<T> source,
+		final Supplier<V> typeSupplier, final SharedQueue queue)
+	{
+		this(source, typeSupplier.get(), queue);
+	}
 
-    @Override
-    public RandomAccessibleInterval< V > getSource(final int t, final int level )
-    {
-        return VolatileViews.wrapAsVolatile( source.getSource( t, level ), queue, new CacheHints( LoadingStrategy.VOLATILE, level, true ) );
-    }
+	@Override
+	public RandomAccessibleInterval<V> getSource(final int t, final int level) {
+		return VolatileViews.wrapAsVolatile(source.getSource(t, level), queue,
+			new CacheHints(LoadingStrategy.VOLATILE, level, true));
+	}
 
-    @Override
-    public synchronized void getSourceTransform( final int t, final int level, final AffineTransform3D transform )
-    {
-        source.getSourceTransform( t, level, transform );
-    }
+	@Override
+	public synchronized void getSourceTransform(final int t, final int level,
+		final AffineTransform3D transform)
+	{
+		source.getSourceTransform(t, level, transform);
+	}
 
-    @Override
-    public VoxelDimensions getVoxelDimensions()
-    {
-        return source.getVoxelDimensions();
-    }
+	@Override
+	public VoxelDimensions getVoxelDimensions() {
+		return source.getVoxelDimensions();
+	}
 
-    @Override
-    public int getNumMipmapLevels()
-    {
-        return source.getNumMipmapLevels();
-    }
+	@Override
+	public int getNumMipmapLevels() {
+		return source.getNumMipmapLevels();
+	}
 }

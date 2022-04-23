@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.ArrayList;
@@ -48,7 +49,8 @@ import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
-		implements MarsDashboardWidget, Initializable {
+	implements MarsDashboardWidget, Initializable
+{
 
 	protected XYChart histChart;
 	protected MarsNumericAxis xAxis, yAxis;
@@ -58,7 +60,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	protected ArrayList<DefaultErrorDataSet> datasets;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
-			Arrays.asList("xlabel", "ylabel", "title", "bins"));
+		Arrays.asList("xlabel", "ylabel", "title", "bins"));
 
 	@Override
 	public void initialize() {
@@ -66,7 +68,8 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 		if (lang.getLanguageName().equals("Conda Python 3")) {
 			setContent(getIcon(), new BorderPane());
-		} else {
+		}
+		else {
 			xAxis = new MarsNumericAxis("");
 			// xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
 			xAxis.minorTickVisibleProperty().set(false);
@@ -77,30 +80,30 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 			yAxis.setForceZeroInRange(true);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
-	
+
 			histChart = new XYChart(xAxis, yAxis);
 			histChart.setAnimated(false);
 			histChart.getRenderers().clear();
-	
+
 			outlineHistogramRenderer = new ErrorDataSetRenderer();
 			outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
 			outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
 			outlineHistogramRenderer.pointReductionProperty().set(false);
-	
+
 			datasets = new ArrayList<DefaultErrorDataSet>();
-	
+
 			histChart.getRenderers().add(outlineHistogramRenderer);
 			histChart.setLegend(null);
 			histChart.horizontalGridLinesVisibleProperty().set(false);
 			histChart.verticalGridLinesVisibleProperty().set(false);
-			
+
 			histChart.setTriggerDistance(0);
-			
+
 			histChart.setPrefSize(100, 100);
 			histChart.setPadding(new Insets(10, 20, 10, 10));
 			setContent(getIcon(), histChart);
 		}
-		
+
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
 	}
@@ -109,15 +112,14 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	public void run() {
 		Map<String, Object> outputs = runScript();
 
-		if (outputs == null)
-			return;
-		
+		if (outputs == null) return;
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;
 			}
-			
+
 			imgsrc = (String) outputs.get("imgsrc");
 			loadImage();
 			return;
@@ -143,55 +145,49 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 				series.add(outputName.substring(0, index));
 			}
 		}
-		
+
 		Double xmin = Double.valueOf(0);
-		if (outputs.containsKey("xmin"))
-			xmin = (Double) outputs.get("xmin");
+		if (outputs.containsKey("xmin")) xmin = (Double) outputs.get("xmin");
 		else {
 			double tempXmin = Double.MAX_VALUE;
 			for (String seriesName : series)
 				if (outputs.containsKey(seriesName + "_" + "values")) {
 					Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
-					for (int i=0; i< values.length; i++)
-						if (values[i] < tempXmin)
-							tempXmin = values[i];
-						
+					for (int i = 0; i < values.length; i++)
+						if (values[i] < tempXmin) tempXmin = values[i];
+
 				}
-			if (tempXmin != Double.MAX_VALUE)
-			 xmin = Double.valueOf(tempXmin);
+			if (tempXmin != Double.MAX_VALUE) xmin = Double.valueOf(tempXmin);
 		}
-		
+
 		Double xmax = Double.valueOf(1);
-		if (outputs.containsKey("xmax"))
-			xmax = (Double) outputs.get("xmax");
+		if (outputs.containsKey("xmax")) xmax = (Double) outputs.get("xmax");
 		else {
-			double tempXmax = Double.MIN_VALUE;		
+			double tempXmax = Double.MIN_VALUE;
 			for (String seriesName : series)
 				if (outputs.containsKey(seriesName + "_" + "values")) {
 					Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
-					for (int i=0; i< values.length; i++)
-						if (values[i] > tempXmax)
-							tempXmax = values[i];
-						
+					for (int i = 0; i < values.length; i++)
+						if (values[i] > tempXmax) tempXmax = values[i];
+
 				}
-			if (tempXmax != Double.MIN_VALUE)
-			 xmax = Double.valueOf(tempXmax);
+			if (tempXmax != Double.MIN_VALUE) xmax = Double.valueOf(tempXmax);
 		}
-		
 
 		for (String seriesName : series) {
-			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName, bins.intValue(), xmin.doubleValue(), xmax.doubleValue());
-			if (dataset != null)
-				datasets.add(dataset);
+			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName, bins
+				.intValue(), xmin.doubleValue(), xmax.doubleValue());
+			if (dataset != null) datasets.add(dataset);
 			else {
 				return;
 			}
 		}
-		
+
 		final double finalXMin = xmin;
 		final double finalXMax = xmax;
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				xAxis.setName(xlabel);
@@ -205,11 +201,13 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 					yAxis.setAutoRanging(false);
 					yAxis.setMin((Double) outputs.get("ymin"));
 					yAxis.setMax((Double) outputs.get("ymax"));
-				} else if (outputs.containsKey("ymax")) {
+				}
+				else if (outputs.containsKey("ymax")) {
 					yAxis.setAutoRanging(false);
 					yAxis.setMin(0.0);
 					yAxis.setMax((Double) outputs.get("ymax"));
-				} else if (outputs.containsKey("ymin")) {
+				}
+				else if (outputs.containsKey("ymin")) {
 					yAxis.setAutoRanging(true);
 				}
 
@@ -217,56 +215,62 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 				outlineHistogramRenderer.getDatasets().clear();
 				outlineHistogramRenderer.getDatasets().addAll(datasets);
-				
+
 				Platform.runLater(() -> histChart.layoutChildren());
 			}
 		});
 	}
-	
-	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs, String seriesName, int bins, double minX, double maxX) {
+
+	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs,
+		String seriesName, int bins, double minX, double maxX)
+	{
 		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
-		
+
 		double binWidth = (maxX - minX) / bins;
 
 		double[] yvalues = new double[bins];
 		double[] xvalues = new double[bins];
-		
-		for (int bin=0; bin<bins; bin++) {
+
+		for (int bin = 0; bin < bins; bin++) {
 			yvalues[bin] = 0;
-			xvalues[bin] = minX + (0.5 + bin)*binWidth;
+			xvalues[bin] = minX + (0.5 + bin) * binWidth;
 		}
-		
+
 		if (outputs.containsKey(seriesName + "_" + "values")) {
 			Double[] values = (Double[]) outputs.get(seriesName + "_" + "values");
 
 			for (double value : values) {
-				for (int bin=0; bin<bins; bin++) {
-					if (value >= minX + bin*binWidth && value < minX + (bin + 1)*binWidth) {
+				for (int bin = 0; bin < bins; bin++) {
+					if (value >= minX + bin * binWidth && value < minX + (bin + 1) *
+						binWidth)
+					{
 						yvalues[bin]++;
 						break;
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			writeToLog("Required field " + seriesName + "_values is missing.");
 			return null;
 		}
 
 		for (int index = 0; index < yvalues.length; index++)
 			dataset.add(xvalues[index], yvalues[index]);
-		
+
 		String styleString = "";
-		if (outputs.containsKey(seriesName + "_" + "strokeColor"))
-			styleString += "strokeColor=" + (String) outputs.get(seriesName + "_" + "strokeColor") + "; ";
-		if (outputs.containsKey(seriesName + "_" + "strokeWidth"))
-			styleString += "strokeWidth=" + ((Integer) outputs.get(seriesName + "_" + "strokeWidth")).intValue();
-		
-		
+		if (outputs.containsKey(seriesName + "_" + "strokeColor")) styleString +=
+			"strokeColor=" + (String) outputs.get(seriesName + "_" + "strokeColor") +
+				"; ";
+		if (outputs.containsKey(seriesName + "_" + "strokeWidth")) styleString +=
+			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_" + "strokeWidth"))
+				.intValue();
+
 		dataset.setStyle(styleString);
-		
+
 		return dataset;
 	}
-	
+
 	@Override
 	public Node getIcon() {
 		Region barchartIcon = new Region();

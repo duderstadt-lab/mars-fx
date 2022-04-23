@@ -85,12 +85,13 @@ import javafx.scene.shape.Polyline;
 /**
  * @author Karl Tauber
  */
-class EmbeddedImage
-{
+class EmbeddedImage {
+
 	private static final int MAX_SIZE = 200;
 	private static final int ERROR_SIZE = 16;
 
-	private static final HashMap<String, SoftReference<Image>> imageCache = new HashMap<>();
+	private static final HashMap<String, SoftReference<Image>> imageCache =
+		new HashMap<>();
 
 	final Path basePath;
 	final String url;
@@ -105,31 +106,30 @@ class EmbeddedImage
 	javafx.scene.Node createNode() {
 		String imageUrl;
 		try {
-			imageUrl = (basePath != null)
-				? basePath.resolve(url).toUri().toString()
+			imageUrl = (basePath != null) ? basePath.resolve(url).toUri().toString()
 				: "file:" + url;
-		} catch (InvalidPathException ex) {
+		}
+		catch (InvalidPathException ex) {
 			return createErrorNode();
 		}
 
 		// load image
 		Image image = loadImage(imageUrl);
-		if (image.isError())
-			return createErrorNode(); // loading failed
+		if (image.isError()) return createErrorNode(); // loading failed
 
 		// create image view
 		ImageView view = new ImageView(image);
 		view.setPreserveRatio(true);
-		view.setFitWidth(Math.min(image.getWidth(),MAX_SIZE));
-		view.setFitHeight(Math.min(image.getHeight(),MAX_SIZE));
+		view.setFitWidth(Math.min(image.getWidth(), MAX_SIZE));
+		view.setFitHeight(Math.min(image.getHeight(), MAX_SIZE));
 		return view;
 	}
 
 	private javafx.scene.Node createErrorNode() {
-		Polyline errorNode = new Polyline(
-			0, 0,  ERROR_SIZE, 0,  ERROR_SIZE, ERROR_SIZE,  0, ERROR_SIZE,  0, 0,	// rectangle
-			ERROR_SIZE, ERROR_SIZE,  0, ERROR_SIZE,  ERROR_SIZE, 0);				// cross
-		errorNode.setStroke(Color.RED); //TODO use CSS
+		Polyline errorNode = new Polyline(0, 0, ERROR_SIZE, 0, ERROR_SIZE,
+			ERROR_SIZE, 0, ERROR_SIZE, 0, 0, // rectangle
+			ERROR_SIZE, ERROR_SIZE, 0, ERROR_SIZE, ERROR_SIZE, 0); // cross
+		errorNode.setStroke(Color.RED); // TODO use CSS
 		return errorNode;
 	}
 
@@ -138,8 +138,7 @@ class EmbeddedImage
 
 		Image image = null;
 		SoftReference<Image> imageRef = imageCache.get(imageUrl);
-		if (imageRef != null)
-			image = imageRef.get();
+		if (imageRef != null) image = imageRef.get();
 		if (image == null) {
 			image = new Image(imageUrl);
 			imageCache.put(imageUrl, new SoftReference<>(image));
@@ -150,47 +149,51 @@ class EmbeddedImage
 	private static void cleanUpImageCache() {
 		Iterator<SoftReference<Image>> it = imageCache.values().iterator();
 		while (it.hasNext()) {
-			if (it.next().get() == null)
-				it.remove();
+			if (it.next().get() == null) it.remove();
 		}
 	}
 
-	static void replaceImageSegments(MarkdownTextArea textArea, Node astRoot, Path basePath) {
+	static void replaceImageSegments(MarkdownTextArea textArea, Node astRoot,
+		Path basePath)
+	{
 		// remember current selection (because textArea.replace() changes selection)
 		IndexRange selection = textArea.getSelection();
 
 		// replace first character of image markup with an EmbeddedImage object
 		HashSet<EmbeddedImage> addedImages = new HashSet<>();
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 			@Override
-			protected void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+			protected void processNode(Node node, boolean withChildren,
+				BiConsumer<Node, Visitor<Node>> processor)
+			{
 				if (node instanceof com.vladsch.flexmark.ast.Image ||
 					node instanceof ImageRef)
 				{
-					LinkNodeBase linkNode = (node instanceof ImageRef)
-						? ((ImageRef)node).getReferenceNode(astRoot.getDocument())
+					LinkNodeBase linkNode = (node instanceof ImageRef) ? ((ImageRef) node)
+						.getReferenceNode(astRoot.getDocument())
 						: (com.vladsch.flexmark.ast.Image) node;
-					if (linkNode == null)
-						return; // reference not found
+					if (linkNode == null) return; // reference not found
 
 					String url = linkNode.getUrl().toString();
-					if (url.startsWith("http:") || url.startsWith("https:"))
-						return; // do not embed external images
+					if (url.startsWith("http:") || url.startsWith("https:")) return; // do
+																																						// not
+																																						// embed
+																																						// external
+																																						// images
 
 					int start = node.getStartOffset();
 					int end = start + 1;
 
-					EmbeddedImage embeddedImage = new EmbeddedImage(basePath,
-							url, textArea.getText(start, end));
+					EmbeddedImage embeddedImage = new EmbeddedImage(basePath, url,
+						textArea.getText(start, end));
 					addedImages.add(embeddedImage);
 
-					textArea.replace(start, end, ReadOnlyStyledDocument.fromSegment(
-							Either.right(embeddedImage),
-							Collections.<String>emptyList(),
-							Collections.<String>emptyList(),
-							textArea.getSegOps()));
-				} else
-					visitChildren(node);
+					textArea.replace(start, end, ReadOnlyStyledDocument.fromSegment(Either
+						.right(embeddedImage), Collections.<String> emptyList(), Collections
+							.<String> emptyList(), textArea.getSegOps()));
+				}
+				else visitChildren(node);
 			}
 		};
 		visitor.visit(astRoot);
@@ -199,23 +202,28 @@ class EmbeddedImage
 		removeImageSegments(textArea, image -> !addedImages.contains(image));
 
 		// restore selection
-		if (!selection.equals(textArea.getSelection()))
-			textArea.selectRange(selection.getStart(), selection.getEnd());
+		if (!selection.equals(textArea.getSelection())) textArea.selectRange(
+			selection.getStart(), selection.getEnd());
 	}
 
 	static void removeAllImageSegments(MarkdownTextArea textArea) {
 		removeImageSegments(textArea, image -> true);
 	}
 
-	private static void removeImageSegments(MarkdownTextArea textArea, Predicate<EmbeddedImage> filter) {
+	private static void removeImageSegments(MarkdownTextArea textArea,
+		Predicate<EmbeddedImage> filter)
+	{
 		HashMap<Integer, String> removedImages = new HashMap<>();
 		int index = 0;
-		for (Paragraph<?, Either<String, EmbeddedImage>, ?> par : textArea.getDocument().getParagraphs()) {
+		for (Paragraph<?, Either<String, EmbeddedImage>, ?> par : textArea
+			.getDocument().getParagraphs())
+		{
 			for (Either<String, EmbeddedImage> seg : par.getSegments()) {
-				if (seg.isRight() && filter.test(seg.getRight()))
-					removedImages.put(index, seg.getRight().text);
+				if (seg.isRight() && filter.test(seg.getRight())) removedImages.put(
+					index, seg.getRight().text);
 
-				index += seg.isLeft() ? seg.getLeft().length() : seg.getRight().text.length();
+				index += seg.isLeft() ? seg.getLeft().length() : seg.getRight().text
+					.length();
 			}
 			index++;
 		}

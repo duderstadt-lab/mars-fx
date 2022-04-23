@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.HashSet;
@@ -38,41 +39,50 @@ import de.mpg.biochem.mars.table.MarsTable;
 import javafx.event.Event;
 
 public class MarsTableSubPlot extends AbstractSubPlot {
+
 	protected MarsTable table;
-	
-	public MarsTableSubPlot(PlotPane plotPane, String plotTitle, MarsTable table) {
+
+	public MarsTableSubPlot(PlotPane plotPane, String plotTitle,
+		MarsTable table)
+	{
 		super(plotPane, plotTitle);
 		this.table = table;
-		getDatasetOptionsPane().setColumns(new HashSet<String>(table.getColumnHeadingList()));
+		getDatasetOptionsPane().setColumns(new HashSet<String>(table
+			.getColumnHeadingList()));
 		update();
 	}
-	
+
 	public void addDataSet(PlotSeries plotSeries) {
 		String xColumn = plotSeries.getXColumn();
 		String yColumn = plotSeries.getYColumn();
-		
-		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(yColumn))
-			return;
-		
+
+		if (!getDataTable().hasColumn(xColumn) || !getDataTable().hasColumn(
+			yColumn)) return;
+
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
-		
-		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn + " vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getLineStyle());
-		
+
+		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn +
+			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries
+				.getLineStyle());
+
 		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
 		DoubleColumn yCol = (DoubleColumn) getDataTable().get(yColumn);
 		int realCount = 0;
-		for (int row=0;row<getDataTable().getRowCount();row++) {
-			if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row)));
-				realCount++;
+		for (int row = 0; row < getDataTable().getRowCount(); row++) {
+			if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(
+				row)));
+			realCount++;
 		}
 		if (realCount < getDataTable().getRowCount()) {
-			//There are NaN values in this dataset we must make a copy without NaNs
-			//to ensure a continuous plot
+			// There are NaN values in this dataset we must make a copy without NaNs
+			// to ensure a continuous plot
 			double[] xColumnCopy = new double[realCount];
 			double[] yColumnCopy = new double[realCount];
 			int count = 0;
-			for (int row=0;row<getDataTable().getRowCount();row++) {
-				if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(row))) {
+			for (int row = 0; row < getDataTable().getRowCount(); row++) {
+				if (!Double.isNaN(xCol.getValue(row)) && !Double.isNaN(yCol.getValue(
+					row)))
+				{
 					xColumnCopy[count] = xCol.getValue(row);
 					yColumnCopy[count] = yCol.getValue(row);
 					count++;
@@ -83,20 +93,21 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 			DoubleColumn noNaNyCol = new DoubleColumn();
 			noNaNyCol.fill(yColumnCopy);
 			dataset.add(noNaNxCol, noNaNyCol);
-		} else 
-			dataset.add((DoubleColumn) getDataTable().get(xColumn), (DoubleColumn) getDataTable().get(yColumn));
+		}
+		else dataset.add((DoubleColumn) getDataTable().get(xColumn),
+			(DoubleColumn) getDataTable().get(yColumn));
 
 		dataset.setStyle(plotSeries.getType());
-		if (plotPane.getPlotOptionsPane().downsample())
-			dataset.downsample(xAxis, plotPane.getPlotOptionsPane().getMinDownsamplePoints());
-		getChart().getDatasets().add(dataset);	
+		if (plotPane.getPlotOptionsPane().downsample()) dataset.downsample(xAxis,
+			plotPane.getPlotOptionsPane().getMinDownsamplePoints());
+		getChart().getDatasets().add(dataset);
 	}
-	
+
 	@Override
 	protected DatasetOptionsPane createDatasetOptionsPane(Set<String> columns) {
 		return new DatasetOptionsPane(columns, this, true);
 	}
-	
+
 	@Override
 	protected MarsTable getDataTable() {
 		return table;
@@ -104,7 +115,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 
 	@Override
 	public void fireEvent(Event event) {
-		// TODO Auto-generated method stub	
+		// TODO Auto-generated method stub
 	}
 
 	@Override

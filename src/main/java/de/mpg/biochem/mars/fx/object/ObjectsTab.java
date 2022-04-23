@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.object;
 
 import org.scijava.Context;
@@ -36,23 +37,30 @@ import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculePropertiesPan
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.scene.layout.Region;
 
-public class ObjectsTab extends AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane> {
+public class ObjectsTab extends
+	AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane>
+{
+
 	public ObjectsTab(final Context context) {
 		super(context);
-		
+
 		Region objectIcon = new Region();
 		objectIcon.getStyleClass().add("objectIcon");
-        
-        setIcon(objectIcon);
+
+		setIcon(objectIcon);
 	}
 
 	@Override
-	public DefaultMoleculeCenterPane createMoleculeCenterPane(final Context context) {
+	public DefaultMoleculeCenterPane createMoleculeCenterPane(
+		final Context context)
+	{
 		return new DefaultMoleculeCenterPane(context);
 	}
 
 	@Override
-	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(final Context context) {
+	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(
+		final Context context)
+	{
 		return new DefaultMoleculePropertiesPane(context);
 	}
 }

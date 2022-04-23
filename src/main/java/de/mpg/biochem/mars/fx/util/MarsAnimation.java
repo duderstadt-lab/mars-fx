@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.util;
 
 import java.time.Instant;
@@ -60,155 +61,163 @@ import javafx.scene.text.Text;
 import javafx.util.Duration;
 
 public class MarsAnimation extends BorderPane {
-	
+
 	private TranslateTransition animation;
 	private double progress = -1;
 	private Instant startTime;
 	private Timeline timeline;
 	private VBox vbox;
-	
+
 	public MarsAnimation() {
 		Image image = new Image("de/mpg/biochem/mars/fx/molecule/mars.jpg");
-		
+
 		ImageView imageView1 = new ImageView(image);
 		ImageView imageView2 = new ImageView(image);
-		
+
 		imageView1.setFitHeight(100);
 		imageView1.setFitWidth(200);
 		imageView2.setFitHeight(100);
 		imageView2.setFitWidth(200);
 		imageView2.setX(200);
-        
-		Group imageGroup = new Group(imageView1, imageView2);
-		
-        animation = new TranslateTransition(
-                Duration.seconds(2.5), imageGroup
-        );
-        animation.setCycleCount(Animation.INDEFINITE);
-        animation.setInterpolator(Interpolator.LINEAR);
-        
-        //Needs to be shifted by one whole image
-        //Then it looks continuous...
-        animation.setFromX(-200);
-        animation.setToX(0);
-        
-        //InnerShadow(BlurType blurType, Color color, double radius, double choke, double offsetX, double offsetY)
-		InnerShadow atmosphere = new InnerShadow(BlurType.THREE_PASS_BOX, Color.valueOf("rgba(255,255,255,.2)"), 10, -1, 5, 0); 
-		InnerShadow innerShadow = new InnerShadow(BlurType.GAUSSIAN, Color.valueOf("black"), 25, 0, -35, 10);	
-		innerShadow.setInput(atmosphere);
-		
-		//DropShadow(BlurType blurType, Color color, double radius, double spread, double offsetX, double offsetY)
-		DropShadow dropShadow = new DropShadow(BlurType.THREE_PASS_BOX, Color.valueOf("#c07158"), 1, -1, -1, 0);
-        dropShadow.setInput(innerShadow);
-        
-        Pane pane = new Pane();
-        pane.getChildren().add(imageGroup);
-        pane.setClip(new Circle(50, 50, 50));
-        pane.setMaxSize(100, 100);
-        
-        StackPane stack = new StackPane();
-        stack.getChildren().add(pane);
-        stack.setRotate(25.2);
-        stack.setPrefSize(100,  100);
-        stack.setEffect(dropShadow);
-        
-        //RadialGradient( focusAngle, focusDistance, centerX, centerY, radius, proportional,CycleMethod cycleMethod, Stop... stops)
-        RadialGradient shadePaint = new RadialGradient(
-                0, 0, 0.3, 0.65, 0.25, true, CycleMethod.NO_CYCLE,
-                new Stop(1, Color.valueOf("rgba(100,100,100,0.3)")),
-                new Stop(0, Color.valueOf("rgba(100,100,100,0.1)"))
-        );
-    	
-    	Circle c0 = new Circle(50, 50, 50);
-    	c0.setFill(shadePaint);
-    	stack.getChildren().add(c0);
 
-    	setPrefSize(125, 100);
+		Group imageGroup = new Group(imageView1, imageView2);
+
+		animation = new TranslateTransition(Duration.seconds(2.5), imageGroup);
+		animation.setCycleCount(Animation.INDEFINITE);
+		animation.setInterpolator(Interpolator.LINEAR);
+
+		// Needs to be shifted by one whole image
+		// Then it looks continuous...
+		animation.setFromX(-200);
+		animation.setToX(0);
+
+		// InnerShadow(BlurType blurType, Color color, double radius, double choke,
+		// double offsetX, double offsetY)
+		InnerShadow atmosphere = new InnerShadow(BlurType.THREE_PASS_BOX, Color
+			.valueOf("rgba(255,255,255,.2)"), 10, -1, 5, 0);
+		InnerShadow innerShadow = new InnerShadow(BlurType.GAUSSIAN, Color.valueOf(
+			"black"), 25, 0, -35, 10);
+		innerShadow.setInput(atmosphere);
+
+		// DropShadow(BlurType blurType, Color color, double radius, double spread,
+		// double offsetX, double offsetY)
+		DropShadow dropShadow = new DropShadow(BlurType.THREE_PASS_BOX, Color
+			.valueOf("#c07158"), 1, -1, -1, 0);
+		dropShadow.setInput(innerShadow);
+
+		Pane pane = new Pane();
+		pane.getChildren().add(imageGroup);
+		pane.setClip(new Circle(50, 50, 50));
+		pane.setMaxSize(100, 100);
+
+		StackPane stack = new StackPane();
+		stack.getChildren().add(pane);
+		stack.setRotate(25.2);
+		stack.setPrefSize(100, 100);
+		stack.setEffect(dropShadow);
+
+		// RadialGradient( focusAngle, focusDistance, centerX, centerY, radius,
+		// proportional,CycleMethod cycleMethod, Stop... stops)
+		RadialGradient shadePaint = new RadialGradient(0, 0, 0.3, 0.65, 0.25, true,
+			CycleMethod.NO_CYCLE, new Stop(1, Color.valueOf("rgba(100,100,100,0.3)")),
+			new Stop(0, Color.valueOf("rgba(100,100,100,0.1)")));
+
+		Circle c0 = new Circle(50, 50, 50);
+		c0.setFill(shadePaint);
+		stack.getChildren().add(c0);
+
+		setPrefSize(125, 100);
 		setCenter(stack);
-		
+
 		Text countdownLabel = new Text("");
 		countdownLabel.setFont(Font.font("Courier", 14));
 		countdownLabel.setFill(Color.valueOf("#f5f5f5"));
 
 		ProgressBar progress = new ProgressBar();
-		progress.setStyle("-fx-accent: #f5f5f5; "
-				+ "-fx-control-inner-background: black; "
-				+ "-fx-background-color: black; "
-				+ "-fx-border-width: 1;"
-				);
-		
-		timeline = new Timeline(new KeyFrame(Duration.millis(1), new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				countdownLabel.setText(getTimeEstimate());
-				updateProgress(progress);
-			}
-		}));
+		progress.setStyle("-fx-accent: #f5f5f5; " +
+			"-fx-control-inner-background: black; " +
+			"-fx-background-color: black; " + "-fx-border-width: 1;");
+
+		timeline = new Timeline(new KeyFrame(Duration.millis(1),
+			new EventHandler<ActionEvent>()
+			{
+
+				@Override
+				public void handle(ActionEvent event) {
+					countdownLabel.setText(getTimeEstimate());
+					updateProgress(progress);
+				}
+			}));
 		timeline.setCycleCount(Timeline.INDEFINITE);
 		timeline.setAutoReverse(false);
-		
+
 		vbox = new VBox();
 		vbox.setSpacing(10);
 		vbox.setAlignment(Pos.CENTER);
 		vbox.getChildren().add(countdownLabel);
 
 		setBottom(vbox);
-		//Insets(double top, double right, double bottom, double left)
-		BorderPane.setMargin(vbox, new Insets(10,0,0,0));
+		// Insets(double top, double right, double bottom, double left)
+		BorderPane.setMargin(vbox, new Insets(10, 0, 0, 0));
 		BorderPane.setAlignment(vbox, Pos.CENTER);
 	}
-	
+
 	private String getHumanReadableTimeString(int seconds) {
-		int hours = (int)Math.floor((seconds/60)/60);
-		seconds = seconds - hours*60*60;
-		int minutes = (int)Math.floor(seconds/60);
-		seconds = seconds - minutes*60;
+		int hours = (int) Math.floor((seconds / 60) / 60);
+		seconds = seconds - hours * 60 * 60;
+		int minutes = (int) Math.floor(seconds / 60);
+		seconds = seconds - minutes * 60;
 		if (hours > 0) {
-			return (((hours/10) == 0) ? "0" : "") + hours + ":"
-				+ (((minutes/10) == 0) ? "0" : "") + minutes + ":"
-				 + (((seconds/10) == 0) ? "0" : "") + seconds;
-		} else if (minutes > 0) {
-			return (((minutes/10) == 0) ? "0" : "") + minutes + ":"
-					 + (((seconds/10) == 0) ? "0" : "") + seconds;
-		} else if (seconds > 0) {
-			return (((seconds/10) == 0) ? "0" : "") + seconds;
-		} else 
-			return "";
-    }
+			return (((hours / 10) == 0) ? "0" : "") + hours + ":" + (((minutes /
+				10) == 0) ? "0" : "") + minutes + ":" + (((seconds / 10) == 0) ? "0"
+					: "") + seconds;
+		}
+		else if (minutes > 0) {
+			return (((minutes / 10) == 0) ? "0" : "") + minutes + ":" + (((seconds /
+				10) == 0) ? "0" : "") + seconds;
+		}
+		else if (seconds > 0) {
+			return (((seconds / 10) == 0) ? "0" : "") + seconds;
+		}
+		else return "";
+	}
 
 	private void updateProgress(ProgressBar progressBar) {
 		if (progress >= 0) {
-			if (!vbox.getChildren().contains(progressBar))
-				vbox.getChildren().add(progressBar);
+			if (!vbox.getChildren().contains(progressBar)) vbox.getChildren().add(
+				progressBar);
 			progressBar.setProgress(progress);
-		} else if (vbox.getChildren().contains(progressBar))
-			vbox.getChildren().remove(progressBar);
+		}
+		else if (vbox.getChildren().contains(progressBar)) vbox.getChildren()
+			.remove(progressBar);
 	}
-	
+
 	String getTimeEstimate() {
-        if (startTime == null || progress <= 0 || progress >= 1) {
-            return "";
-        } else {
-            Instant now = Instant.now();
-            java.time.Duration elapsedTime = java.time.Duration.between(startTime, now);
-            double elapsedTimeS = elapsedTime.getSeconds();
-            double totalTimeS = elapsedTimeS/progress;
-            double remainingTimeS = totalTimeS-elapsedTimeS;
-            return getHumanReadableTimeString((int)remainingTimeS);
-        }
-    }
-	
+		if (startTime == null || progress <= 0 || progress >= 1) {
+			return "";
+		}
+		else {
+			Instant now = Instant.now();
+			java.time.Duration elapsedTime = java.time.Duration.between(startTime,
+				now);
+			double elapsedTimeS = elapsedTime.getSeconds();
+			double totalTimeS = elapsedTimeS / progress;
+			double remainingTimeS = totalTimeS - elapsedTimeS;
+			return getHumanReadableTimeString((int) remainingTimeS);
+		}
+	}
+
 	public void setProgress(double progress) {
 		this.progress = progress;
 	}
-	
+
 	public void play() {
 		startTime = Instant.now();
 		animation.play();
 		progress = -1;
 		timeline.play();
 	}
-	
+
 	public void stop() {
 		animation.stop();
 		timeline.stop();

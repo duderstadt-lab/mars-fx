@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
 import java.io.IOException;
@@ -42,19 +43,24 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBubbleChartWidget" )
-public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MoleculeDashboardWidget.class,
+	name = "MoleculeBubbleChartWidget")
+public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget
+	implements MoleculeDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected Molecule molecule;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("bubblechart", "#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
-		} catch (IOException e) {
+			loadScript("bubblechart",
+				"#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -64,29 +70,35 @@ public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget impleme
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
-		
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
-			module.setInput("width", Float.valueOf((float)rootPane.getWidth()/72));
-			module.setInput("height", Float.valueOf((float)(rootPane.getHeight() - 65)/72));
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
 		}
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+
+	public void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
 		this.archive = archive;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
-	
+
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
 	}
-	
+
 	public Molecule getMolecule() {
 		return molecule;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MoleculeBubbleChartWidget";

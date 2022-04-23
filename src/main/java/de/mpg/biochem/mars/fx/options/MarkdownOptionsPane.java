@@ -68,51 +68,58 @@ import javafx.scene.text.Font;
  * @author Karl Tauber
  */
 class MarkdownOptionsPane extends FlowPane {
+
 	MarkdownOptionsPane() {
 		initComponents();
 
 		markdownRendererChoiceBox.getItems().addAll(RendererType.values());
-		markdownRendererChoiceBox.getSelectionModel().selectedItemProperty().addListener((ob, o, n) -> {
-			markdownExtensionsPane.rendererTypeChanged(n);
-		});
+		markdownRendererChoiceBox.getSelectionModel().selectedItemProperty()
+			.addListener((ob, o, n) -> {
+				markdownExtensionsPane.rendererTypeChanged(n);
+			});
 
 		markdownExtensionsLabel.setFont(Font.font(16));
 	}
 
 	void load() {
-		markdownRendererChoiceBox.getSelectionModel().select(Options.getMarkdownRenderer());
+		markdownRendererChoiceBox.getSelectionModel().select(Options
+			.getMarkdownRenderer());
 	}
 
 	void save() {
-		Options.setMarkdownRenderer(markdownRendererChoiceBox.getSelectionModel().getSelectedItem());
+		Options.setMarkdownRenderer(markdownRendererChoiceBox.getSelectionModel()
+			.getSelectedItem());
 		markdownExtensionsPane.save();
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY  //GEN-BEGIN:initComponents
+		// JFormDesigner - Component initialization - DO NOT MODIFY
+		// //GEN-BEGIN:initComponents
 		markdownRendererLabel = new Label();
 		markdownRendererChoiceBox = new ChoiceBox<>();
 		markdownExtensionsLabel = new Label();
 		markdownExtensionsPane = new MarkdownExtensionsPane();
 
-		//======== this ========
+		// ======== this ========
 
-		//---- markdownRendererLabel ----
-		markdownRendererLabel.setText(Messages.get("MarkdownOptionsPane.markdownRendererLabel.text"));
+		// ---- markdownRendererLabel ----
+		markdownRendererLabel.setText(Messages.get(
+			"MarkdownOptionsPane.markdownRendererLabel.text"));
 		getChildren().add(markdownRendererLabel);
 		getChildren().add(markdownRendererChoiceBox);
 
-		//---- markdownExtensionsLabel ----
-		markdownExtensionsLabel.setText(Messages.get("MarkdownOptionsPane.markdownExtensionsLabel.text"));
+		// ---- markdownExtensionsLabel ----
+		markdownExtensionsLabel.setText(Messages.get(
+			"MarkdownOptionsPane.markdownExtensionsLabel.text"));
 		getChildren().add(markdownExtensionsLabel);
 		getChildren().add(markdownExtensionsPane);
-		// JFormDesigner - End of component initialization  //GEN-END:initComponents
+		// JFormDesigner - End of component initialization //GEN-END:initComponents
 	}
 
-	// JFormDesigner - Variables declaration - DO NOT MODIFY  //GEN-BEGIN:variables
+	// JFormDesigner - Variables declaration - DO NOT MODIFY //GEN-BEGIN:variables
 	private Label markdownRendererLabel;
 	private ChoiceBox<de.mpg.biochem.mars.fx.options.Options.RendererType> markdownRendererChoiceBox;
 	private Label markdownExtensionsLabel;
 	private MarkdownExtensionsPane markdownExtensionsPane;
-	// JFormDesigner - End of variables declaration  //GEN-END:variables
+	// JFormDesigner - End of variables declaration //GEN-END:variables
 }

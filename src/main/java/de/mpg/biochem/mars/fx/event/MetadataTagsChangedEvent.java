@@ -26,33 +26,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.EventType;
 
 public class MetadataTagsChangedEvent extends MetadataEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MetadataEvent> TAGS_CHANGED = new EventType<>(METADATA_EVENT, "TAGS_CHANGED");
+	public static final EventType<MetadataEvent> TAGS_CHANGED = new EventType<>(
+		METADATA_EVENT, "TAGS_CHANGED");
 
 	private final MarsMetadata marsImageMetadata;
 
 	public MetadataTagsChangedEvent(MarsMetadata marsImageMetadata) {
-        super(TAGS_CHANGED);
-        this.marsImageMetadata = marsImageMetadata;
-    }
-	
+		super(TAGS_CHANGED);
+		this.marsImageMetadata = marsImageMetadata;
+	}
+
 	public MarsMetadata getImageMetadata() {
 		return this.marsImageMetadata;
 	}
 
-    @Override
-    public void invokeHandler(MetadataEventHandler handler) {
-    }
+	@Override
+	public void invokeHandler(MetadataEventHandler handler) {}
 }
-

@@ -1,3 +1,4 @@
+
 package de.mpg.biochem.mars.fx.preview;
 
 import org.jetbrains.annotations.NotNull;
@@ -10,24 +11,29 @@ import com.vladsch.flexmark.util.data.DataHolder;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
-public class FencedCodeWidgetNodePostProcessorFactory extends NodePostProcessorFactory {
+public class FencedCodeWidgetNodePostProcessorFactory extends
+	NodePostProcessorFactory
+{
+
 	private DocumentEditor documentEditor;
-	
-	public FencedCodeWidgetNodePostProcessorFactory(DocumentEditor documentEditor) {
+
+	public FencedCodeWidgetNodePostProcessorFactory(
+		DocumentEditor documentEditor)
+	{
 		super(false);
 		this.documentEditor = documentEditor;
 		addNodes(FencedCodeBlock.class);
 	}
-	
-    public FencedCodeWidgetNodePostProcessorFactory(DataHolder options) {
-        super(false);
 
-        addNodes(FencedCodeBlock.class);
-    }
+	public FencedCodeWidgetNodePostProcessorFactory(DataHolder options) {
+		super(false);
 
-    @NotNull
-    @Override
-    public NodePostProcessor apply(@NotNull Document document) {
-        return new FencedCodeWidgetNodePostProcessor(document, documentEditor);
-    }
+		addNodes(FencedCodeBlock.class);
+	}
+
+	@NotNull
+	@Override
+	public NodePostProcessor apply(@NotNull Document document) {
+		return new FencedCodeWidgetNodePostProcessor(document, documentEditor);
+	}
 }

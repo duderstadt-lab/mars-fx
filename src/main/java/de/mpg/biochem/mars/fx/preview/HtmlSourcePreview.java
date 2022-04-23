@@ -77,15 +77,13 @@ import javafx.scene.control.ScrollBar;
  *
  * @author Karl Tauber
  */
-class HtmlSourcePreview
-	implements MarkdownPreviewPane.Preview
-{
+class HtmlSourcePreview implements MarkdownPreviewPane.Preview {
+
 	private PreviewStyledTextArea textArea;
 	private VirtualizedScrollPane<StyleClassedTextArea> scrollPane;
 	private ScrollBar vScrollBar;
 
-	HtmlSourcePreview() {
-	}
+	HtmlSourcePreview() {}
 
 	private void createNodes() {
 		textArea = new PreviewStyledTextArea();
@@ -97,8 +95,7 @@ class HtmlSourcePreview
 
 	@Override
 	public javafx.scene.Node getNode() {
-		if (scrollPane == null)
-			createNodes();
+		if (scrollPane == null) createNodes();
 		return scrollPane;
 	}
 
@@ -110,25 +107,28 @@ class HtmlSourcePreview
 
 	@Override
 	public void scrollY(PreviewContext context, double value) {
-		if (vScrollBar == null)
-			vScrollBar = Utils.findVScrollBar(scrollPane);
-		if (vScrollBar == null)
-			return;
+		if (vScrollBar == null) vScrollBar = Utils.findVScrollBar(scrollPane);
+		if (vScrollBar == null) return;
 
 		double maxValue = vScrollBar.maxProperty().get();
 		vScrollBar.setValue(maxValue * value);
 	}
 
 	@Override
-	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
-	}
+	public void editorSelectionChanged(PreviewContext context,
+		IndexRange range)
+	{}
 
-	//---- selection highlighting ---------------------------------------------
+	// ---- selection highlighting ---------------------------------------------
 
-	private static final HashMap<String, Collection<String>> spanStyleCache = new HashMap<>();
+	private static final HashMap<String, Collection<String>> spanStyleCache =
+		new HashMap<>();
 
-	private static StyleSpans<Collection<String>> computeHighlighting(String text) {
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+	private static StyleSpans<Collection<String>> computeHighlighting(
+		String text)
+	{
+		StyleSpansBuilder<Collection<String>> spansBuilder =
+			new StyleSpansBuilder<>();
 		SyntaxHighlighter.highlight(text, "html", (length, style) -> {
 			spansBuilder.add(toSpanStyle(style), length);
 		});
@@ -136,8 +136,7 @@ class HtmlSourcePreview
 	}
 
 	private static Collection<String> toSpanStyle(String style) {
-		if (style == null)
-			return Collections.emptyList();
+		if (style == null) return Collections.emptyList();
 
 		Collection<String> spanStyle = spanStyleCache.get(style);
 		if (spanStyle == null) {
@@ -150,6 +149,6 @@ class HtmlSourcePreview
 	@Override
 	public void createPrintJob() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }

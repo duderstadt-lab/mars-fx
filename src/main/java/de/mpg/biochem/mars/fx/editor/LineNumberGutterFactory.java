@@ -67,11 +67,10 @@ import javafx.scene.control.Label;
 /**
  * @author Karl Tauber
  */
-class LineNumberGutterFactory
-	implements IntFunction<Node>
-{
-    private final MarkdownTextArea textArea;
-    private final Val<Integer> lineCount;
+class LineNumberGutterFactory implements IntFunction<Node> {
+
+	private final MarkdownTextArea textArea;
+	private final Val<Integer> lineCount;
 
 	LineNumberGutterFactory(MarkdownTextArea textArea) {
 		this.textArea = textArea;
@@ -82,7 +81,8 @@ class LineNumberGutterFactory
 	public Node apply(int paragraphIndex) {
 		int lineNo = paragraphIndex + 1;
 		Val<String> text = lineCount.map(n -> {
-			int digits = Math.max(3, (int) Math.floor(Math.log10(textArea.getParagraphs().size())) + 1);
+			int digits = Math.max(3, (int) Math.floor(Math.log10(textArea
+				.getParagraphs().size())) + 1);
 			return String.format("%" + digits + "d", lineNo);
 		});
 

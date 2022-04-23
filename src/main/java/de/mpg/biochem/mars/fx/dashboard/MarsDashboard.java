@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.ArrayList;
@@ -36,20 +37,21 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 public interface MarsDashboard<W extends MarsDashboardWidget> {
+
 	void runWidget(W widget);
 
 	void stopWidget(W widget);
 
 	void removeWidget(W widget);
-	
+
 	Node getNode();
-	
+
 	MarsJFXMasonryPane getWidgetPane();
 
 	ObservableList<W> getWidgets();
-	
+
 	void addWidget(W widget);
-	
+
 	W createWidget(String widgetName);
 
 	ArrayList<String> getWidgetToolbarOrder();

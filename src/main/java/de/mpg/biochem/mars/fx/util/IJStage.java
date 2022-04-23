@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.util;
 
 import java.awt.Frame;
@@ -35,7 +36,7 @@ import javafx.application.Platform;
 import javafx.stage.Stage;
 
 public class IJStage extends Frame {
-	
+
 	private Stage stage;
 
 	public IJStage(Stage stage) throws HeadlessException {
@@ -47,7 +48,7 @@ public class IJStage extends Frame {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
+
 	public Stage getStage() {
 		return stage;
 	}
@@ -55,6 +56,7 @@ public class IJStage extends Frame {
 	@Override
 	public void toFront() {
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				if (stage != null) stage.toFront();

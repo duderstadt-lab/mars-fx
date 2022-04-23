@@ -56,15 +56,14 @@
 package de.mpg.biochem.mars.fx.util;
 
 /**
- * Simple item for a ChoiceBox, ComboBox or ListView.
- * Consists of a string name and a value object.
- * toString() returns the name.
- * equals() compares the value and hashCode() returns the hash code of the value.
+ * Simple item for a ChoiceBox, ComboBox or ListView. Consists of a string name
+ * and a value object. toString() returns the name. equals() compares the value
+ * and hashCode() returns the hash code of the value.
  *
  * @author Karl Tauber
  */
-public class Item<V>
-{
+public class Item<V> {
+
 	public final String name;
 	public final V value;
 
@@ -75,11 +74,9 @@ public class Item<V>
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Item))
-			return false;
-		return Utils.safeEquals(value, ((Item<?>)obj).value);
+		if (this == obj) return true;
+		if (!(obj instanceof Item)) return false;
+		return Utils.safeEquals(value, ((Item<?>) obj).value);
 	}
 
 	@Override

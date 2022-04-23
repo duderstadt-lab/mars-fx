@@ -78,9 +78,11 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Karl Tauber
  */
-public class MarkdownPreviewPane
-{
-	public enum Type { None, Web, Source, Ast, External };
+public class MarkdownPreviewPane {
+
+	public enum Type {
+			None, Web, Source, Ast, External
+	};
 
 	private final BorderPane pane = new BorderPane();
 	private final WebViewPreview webViewPreview = new WebViewPreview();
@@ -92,30 +94,45 @@ public class MarkdownPreviewPane
 	private RendererType activeRendererType;
 	private Renderer activeRenderer;
 	private Preview activePreview;
-	
+
 	private DocumentEditor documentEditor;
 
 	interface Renderer {
+
 		void update(String markdownText, Node astRoot, Path path);
+
 		String getHtml(boolean source);
+
 		String getHtml(boolean source, DocumentEditor documentEditor);
+
 		String getAST();
+
 		List<Range> findSequences(int startOffset, int endOffset);
 	}
 
 	interface Preview {
+
 		javafx.scene.Node getNode();
+
 		void update(PreviewContext context, Renderer renderer);
+
 		void createPrintJob();
+
 		void scrollY(PreviewContext context, double value);
+
 		void editorSelectionChanged(PreviewContext context, IndexRange range);
 	}
 
 	interface PreviewContext {
+
 		Renderer getRenderer();
+
 		String getMarkdownText();
+
 		Node getMarkdownAST();
+
 		Path getPath();
+
 		IndexRange getEditorSelection();
 	}
 
@@ -123,27 +140,49 @@ public class MarkdownPreviewPane
 		pane.getStyleClass().add("preview-pane");
 
 		previewContext = new PreviewContext() {
-			@Override public Renderer getRenderer() { return activeRenderer; }
-			@Override public String getMarkdownText() { return markdownText.get(); }
-			@Override public Node getMarkdownAST() { return markdownAST.get(); }
-			@Override public Path getPath() { return path.get(); }
-			@Override public IndexRange getEditorSelection() { return editorSelection.get(); }
+
+			@Override
+			public Renderer getRenderer() {
+				return activeRenderer;
+			}
+
+			@Override
+			public String getMarkdownText() {
+				return markdownText.get();
+			}
+
+			@Override
+			public Node getMarkdownAST() {
+				return markdownAST.get();
+			}
+
+			@Override
+			public Path getPath() {
+				return path.get();
+			}
+
+			@Override
+			public IndexRange getEditorSelection() {
+				return editorSelection.get();
+			}
 		};
 
-		path.addListener((observable, oldValue, newValue) -> update() );
-		markdownText.addListener((observable, oldValue, newValue) -> update() );
-		markdownAST.addListener((observable, oldValue, newValue) -> update() );
+		path.addListener((observable, oldValue, newValue) -> update());
+		markdownText.addListener((observable, oldValue, newValue) -> update());
+		markdownAST.addListener((observable, oldValue, newValue) -> update());
 		scrollY.addListener((observable, oldValue, newValue) -> scrollY());
-		editorSelection.addListener((observable, oldValue, newValue) -> editorSelectionChanged());
+		editorSelection.addListener((observable, oldValue,
+			newValue) -> editorSelectionChanged());
 
-		Options.additionalCSSProperty().addListener((observable, oldValue, newValue) -> update() );
+		Options.additionalCSSProperty().addListener((observable, oldValue,
+			newValue) -> update());
 	}
-	
+
 	public MarkdownPreviewPane(DocumentEditor documentEditor) {
 		this();
 		this.documentEditor = documentEditor;
-		if (documentEditor != null)
-			webViewPreview.setDocumentEditor(documentEditor);
+		if (documentEditor != null) webViewPreview.setDocumentEditor(
+			documentEditor);
 	}
 
 	public static boolean hasExternalPreview() {
@@ -183,32 +222,31 @@ public class MarkdownPreviewPane
 			return;
 		
 		preview = webViewPreview;
-
+		
 		activePreview = preview;
 		*/
-		
+
 		Preview preview = webViewPreview;
-		
+
 		activePreview = preview;
-		
+
 		pane.setCenter((preview != null) ? preview.getNode() : null);
 
 		update();
 		scrollY();
 	}
-	
+
 	public void createPrintJob() {
 		activePreview.createPrintJob();
 	}
 
 	private boolean updateRunLaterPending;
+
 	private void update() {
-		if (activePreview == null)
-			return;
+		if (activePreview == null) return;
 
 		// avoid too many (and useless) runLater() invocations
-		if (updateRunLaterPending)
-			return;
+		if (updateRunLaterPending) return;
 		updateRunLaterPending = true;
 
 		Platform.runLater(() -> {
@@ -220,13 +258,12 @@ public class MarkdownPreviewPane
 	}
 
 	private boolean scrollYrunLaterPending;
+
 	private void scrollY() {
-		if (activePreview == null)
-			return;
+		if (activePreview == null) return;
 
 		// avoid too many (and useless) runLater() invocations
-		if (scrollYrunLaterPending)
-			return;
+		if (scrollYrunLaterPending) return;
 		scrollYrunLaterPending = true;
 
 		Platform.runLater(() -> {
@@ -236,43 +273,61 @@ public class MarkdownPreviewPane
 	}
 
 	private boolean editorSelectionChangedRunLaterPending;
+
 	private void editorSelectionChanged() {
-		if (activePreview == null)
-			return;
+		if (activePreview == null) return;
 
 		// avoid too many (and useless) runLater() invocations
-		if (editorSelectionChangedRunLaterPending)
-			return;
+		if (editorSelectionChangedRunLaterPending) return;
 		editorSelectionChangedRunLaterPending = true;
 
 		Platform.runLater(() -> {
 			editorSelectionChangedRunLaterPending = false;
 
-			// use another runLater() to make sure that activePreview.editorSelectionChanged()
-			// is invoked after activePreview.update(), so that it can work on already updated text
+			// use another runLater() to make sure that
+			// activePreview.editorSelectionChanged()
+			// is invoked after activePreview.update(), so that it can work on already
+			// updated text
 			Platform.runLater(() -> {
-				activePreview.editorSelectionChanged(previewContext, editorSelection.get());
+				activePreview.editorSelectionChanged(previewContext, editorSelection
+					.get());
 			});
 		});
 	}
 
 	// 'path' property
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
-	public ObjectProperty<Path> pathProperty() { return path; }
+
+	public ObjectProperty<Path> pathProperty() {
+		return path;
+	}
 
 	// 'markdownText' property
 	private final SimpleStringProperty markdownText = new SimpleStringProperty();
-	public SimpleStringProperty markdownTextProperty() { return markdownText; }
+
+	public SimpleStringProperty markdownTextProperty() {
+		return markdownText;
+	}
 
 	// 'markdownAST' property
 	private final ObjectProperty<Node> markdownAST = new SimpleObjectProperty<>();
-	public ObjectProperty<Node> markdownASTProperty() { return markdownAST; }
+
+	public ObjectProperty<Node> markdownASTProperty() {
+		return markdownAST;
+	}
 
 	// 'scrollY' property
 	private final DoubleProperty scrollY = new SimpleDoubleProperty();
-	public DoubleProperty scrollYProperty() { return scrollY; }
+
+	public DoubleProperty scrollYProperty() {
+		return scrollY;
+	}
 
 	// 'editorSelection' property
-	private final ObjectProperty<IndexRange> editorSelection = new SimpleObjectProperty<>();
-	public ObjectProperty<IndexRange> editorSelectionProperty() { return editorSelection; }
+	private final ObjectProperty<IndexRange> editorSelection =
+		new SimpleObjectProperty<>();
+
+	public ObjectProperty<IndexRange> editorSelectionProperty() {
+		return editorSelection;
+	}
 }

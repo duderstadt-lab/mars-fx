@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
 import java.io.BufferedInputStream;
@@ -55,30 +56,39 @@ import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashboard<MarsMetadataDashboardWidget> implements MetadataSubPane {
-	
+public class MarsMetadataDashboard<I extends MarsMetadata> extends
+	AbstractDashboard<MarsMetadataDashboardWidget> implements MetadataSubPane
+{
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected I marsMetadata;
-	
+
 	public MarsMetadataDashboard(final Context context) {
 		super(context);
-		
+
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-					archive = e.getArchive();
-			   		discoverWidgets();
-			   		e.consume();
-			   	}
-			} 
-        });
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						archive = e.getArchive();
+						discoverWidgets();
+						e.consume();
+					}
+				}
+			});
 	}
 
 	@Override
 	public MarsMetadataDashboardWidget createWidget(String widgetName) {
-		MarsMetadataDashboardWidget widget = (MarsMetadataDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MarsMetadataDashboardWidget widget =
+			(MarsMetadataDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setMetadata(marsMetadata);
 		widget.setArchive(archive);
 		widget.setParent(this);
@@ -88,13 +98,11 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MarsMetadataCategoryChartWidget",
-	                    "MarsMetadataHistogramWidget",
-	                    "MarsMetadataXYChartWidget",
-	                    "MarsMetadataBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList(
+			"MarsMetadataCategoryChartWidget", "MarsMetadataHistogramWidget",
+			"MarsMetadataXYChartWidget", "MarsMetadataBubbleChartWidget"));
 	}
-	
+
 	@Override
 	public void handle(MetadataEvent event) {
 		event.invokeHandler(this);
@@ -109,23 +117,28 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MarsMetadataDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MarsMetadataDashboardWidget.class);
 	}
-	
+
 	@Override
 	public boolean importFromRoverFile(File roverFile) {
 		try {
-	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
-		   JsonFactory jfactory = new JsonFactory();
-		   JsonParser jParser = jfactory.createParser(inputStream);
-		   MarsUtil.readJsonObject(jParser, this, "metadataTab", "centerPane", "marsMetadataDashboard");
-		   
-		   //Need for backward compatibility
-		   MarsUtil.readJsonObject(jParser, this, "MetadataTab", "centerPane", "marsMetadataDashboard");
-		   
-     	   jParser.close();
-     	   inputStream.close();
-		} catch (IOException e) {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "metadataTab", "centerPane",
+				"marsMetadataDashboard");
+
+			// Need for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MetadataTab", "centerPane",
+				"marsMetadataDashboard");
+
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
 			return false;
 		}
 		return true;

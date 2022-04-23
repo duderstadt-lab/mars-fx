@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Priority;
@@ -36,14 +37,18 @@ import org.scijava.plugin.Plugin;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 /**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
- * call the view method in MoleculeArchiveView to make our custom window with custom menus.
+ * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a
+ * MoleculeArchive will automatically be detected and call the view method in
+ * MoleculeArchiveView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
 @Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
-	
+public class MoleculeArchiveFxDisplay extends
+	AbstractDisplay<MoleculeArchive<?, ?, ?, ?>> implements
+	Display<MoleculeArchive<?, ?, ?, ?>>
+{
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public MoleculeArchiveFxDisplay() {
 		super((Class) MoleculeArchive.class);
@@ -55,11 +60,12 @@ public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,
 	public boolean canDisplay(final Class<?> c) {
 		if (c.equals(MoleculeArchive.class)) {
 			return true;
-		} else { 
+		}
+		else {
 			return super.canDisplay(c);
 		}
 	}
-	
+
 	@Override
 	public boolean isDisplaying(final Object o) {
 		return false;

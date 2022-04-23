@@ -70,18 +70,20 @@ import de.mpg.biochem.mars.fx.options.Options.RendererType;
  *
  * @author Karl Tauber
  */
-public class MarkdownExtensions
-{
+public class MarkdownExtensions {
+
 	static final HashMap<String, String> displayNames = new HashMap<>();
-	//static final HashMap<String, String> commonmarkExtClasses = new HashMap<>();
+	// static final HashMap<String, String> commonmarkExtClasses = new
+	// HashMap<>();
 	static final HashMap<String, String> flexmarkExtClasses = new HashMap<>();
 
 	static {
-		ResourceBundle bundle = ResourceBundle.getBundle("de.mpg.biochem.mars.fx.MarkdownExtensions");
+		ResourceBundle bundle = ResourceBundle.getBundle(
+			"de.mpg.biochem.mars.fx.MarkdownExtensions");
 		for (String key : bundle.keySet()) {
 			String value = bundle.getString(key);
-			if (key.startsWith("flexmark.ext."))
-				flexmarkExtClasses.put(key.substring("flexmark.ext.".length()), value);
+			if (key.startsWith("flexmark.ext.")) flexmarkExtClasses.put(key.substring(
+				"flexmark.ext.".length()), value);
 		}
 
 		HashSet<String> ids = new HashSet<>();
@@ -100,28 +102,35 @@ public class MarkdownExtensions
 
 	public static boolean isAvailable(RendererType rendererType, String id) {
 		switch (rendererType) {
-			case FlexMark:		return flexmarkExtClasses.containsKey(id);
-			default:			return false;
+			case FlexMark:
+				return flexmarkExtClasses.containsKey(id);
+			default:
+				return false;
 		}
 	}
 
-	public static List<com.vladsch.flexmark.util.misc.Extension> getFlexmarkExtensions() {
+	public static List<com.vladsch.flexmark.util.misc.Extension>
+		getFlexmarkExtensions()
+	{
 		return createdExtensions(flexmarkExtClasses, null);
 	}
 
-	public static List<com.vladsch.flexmark.util.misc.Extension> getFlexmarkExtensions(RendererType rendererType) {
+	public static List<com.vladsch.flexmark.util.misc.Extension>
+		getFlexmarkExtensions(RendererType rendererType)
+	{
 		return createdExtensions(flexmarkExtClasses, rendererType);
 	}
 
-	private static <E> ArrayList<E> createdExtensions(HashMap<String, String> extClasses, RendererType rendererType) {
+	private static <E> ArrayList<E> createdExtensions(
+		HashMap<String, String> extClasses, RendererType rendererType)
+	{
 		ArrayList<E> extensions = new ArrayList<>();
 		for (String markdownExtension : Options.getMarkdownExtensions()) {
 			if (rendererType != null && !isAvailable(rendererType, markdownExtension))
 				continue;
 
 			String extClassName = extClasses.get(markdownExtension);
-			if (extClassName == null)
-				continue; // extension not supported by renderer
+			if (extClassName == null) continue; // extension not supported by renderer
 
 			try {
 				Class<?> cls = Class.forName(extClassName);
@@ -129,7 +138,8 @@ public class MarkdownExtensions
 				@SuppressWarnings("unchecked")
 				E extension = (E) createMethod.invoke(null);
 				extensions.add(extension);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

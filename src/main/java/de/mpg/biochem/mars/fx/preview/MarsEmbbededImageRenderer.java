@@ -1,3 +1,4 @@
+
 package de.mpg.biochem.mars.fx.preview;
 
 import java.util.HashSet;
@@ -14,26 +15,33 @@ import com.vladsch.flexmark.util.sequence.BasedSequence;
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
 public class MarsEmbbededImageRenderer implements NodeRenderer {
+
 	private DocumentEditor documentEditor;
-	
-    public MarsEmbbededImageRenderer(DataHolder options, DocumentEditor documentEditor) {
-    	this.documentEditor = documentEditor;
-    }
 
-    @Override
-    public Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
-        Set<NodeRenderingHandler<?>> set = new HashSet<>();
-        set.add(new NodeRenderingHandler<>(Image.class, this::render));
-        return set;
-    }
+	public MarsEmbbededImageRenderer(DataHolder options,
+		DocumentEditor documentEditor)
+	{
+		this.documentEditor = documentEditor;
+	}
 
-    private void render(Image node, NodeRendererContext context, HtmlWriter html) {
-    	String mediaData = node.getUrl().toString();
-    	if (documentEditor != null && documentEditor.getDocument().getMediaIDs().contains(mediaData)) {
-    		documentEditor.addActiveMediaID(mediaData);
-    		mediaData = documentEditor.getDocument().getMedia(mediaData);
-    		node.setUrl(BasedSequence.of(mediaData));
-    	}
-    	context.delegateRender();
-    }
+	@Override
+	public Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
+		Set<NodeRenderingHandler<?>> set = new HashSet<>();
+		set.add(new NodeRenderingHandler<>(Image.class, this::render));
+		return set;
+	}
+
+	private void render(Image node, NodeRendererContext context,
+		HtmlWriter html)
+	{
+		String mediaData = node.getUrl().toString();
+		if (documentEditor != null && documentEditor.getDocument().getMediaIDs()
+			.contains(mediaData))
+		{
+			documentEditor.addActiveMediaID(mediaData);
+			mediaData = documentEditor.getDocument().getMedia(mediaData);
+			node.setUrl(BasedSequence.of(mediaData));
+		}
+		context.delegateRender();
+	}
 }

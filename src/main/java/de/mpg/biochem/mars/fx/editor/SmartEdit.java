@@ -121,14 +121,17 @@ import javafx.scene.input.KeyEvent;
  *
  * @author Karl Tauber
  */
-public class SmartEdit
-{
+public class SmartEdit {
+
 	private static final String TASK_LIST_MARKER = "(?:\\[[ xX]\\]\\s+|)";
-	private static final String BULLET_LIST_MARKER = "\\s*[*+-]\\s+" + TASK_LIST_MARKER;
-	private static final String ORDERED_LIST_MARKER = "\\s*[0-9]+\\.\\s+" + TASK_LIST_MARKER;
+	private static final String BULLET_LIST_MARKER = "\\s*[*+-]\\s+" +
+		TASK_LIST_MARKER;
+	private static final String ORDERED_LIST_MARKER = "\\s*[0-9]+\\.\\s+" +
+		TASK_LIST_MARKER;
 	private static final String BLOCK_QUOTE_MARKER = "\\s*(?:>\\s*)+";
-	private static final Pattern AUTO_INDENT_PATTERN = Pattern.compile(
-			"(" + BULLET_LIST_MARKER + "|" + ORDERED_LIST_MARKER + "|" + BLOCK_QUOTE_MARKER + "|\\s+)(.*)");
+	private static final Pattern AUTO_INDENT_PATTERN = Pattern.compile("(" +
+		BULLET_LIST_MARKER + "|" + ORDERED_LIST_MARKER + "|" + BLOCK_QUOTE_MARKER +
+		"|\\s+)(.*)");
 
 	private final MarkdownEditorPane editor;
 	private final MarkdownTextArea textArea;
@@ -139,73 +142,70 @@ public class SmartEdit
 		this.textArea = textArea;
 		this.smartFormat = new SmartFormat(editor, textArea);
 
-		Nodes.addInputMap(textArea, sequence(
-			consume(keyPressed(ENTER),							this::enterPressed),
-			consume(keyPressed(TAB),							this::tabPressed),
-			consume(keyPressed(TAB, SHIFT_DOWN),				this::shiftTabPressed),
-			consume(keyPressed(BACK_SPACE),						this::backspacePressed),
-			consume(keyPressed(D, SHORTCUT_DOWN),				this::deleteLine),
-			consume(keyPressed(UP, ALT_DOWN),					this::moveLinesUp),
-			consume(keyPressed(DOWN, ALT_DOWN),					this::moveLinesDown),
-			consume(keyPressed(UP, SHORTCUT_DOWN, ALT_DOWN),	this::duplicateLinesUp),
-			consume(keyPressed(DOWN, SHORTCUT_DOWN, ALT_DOWN),	this::duplicateLinesDown),
+		Nodes.addInputMap(textArea, sequence(consume(keyPressed(ENTER),
+			this::enterPressed), consume(keyPressed(TAB), this::tabPressed), consume(
+				keyPressed(TAB, SHIFT_DOWN), this::shiftTabPressed), consume(keyPressed(
+					BACK_SPACE), this::backspacePressed), consume(keyPressed(D,
+						SHORTCUT_DOWN), this::deleteLine), consume(keyPressed(UP, ALT_DOWN),
+							this::moveLinesUp), consume(keyPressed(DOWN, ALT_DOWN),
+								this::moveLinesDown), consume(keyPressed(UP, SHORTCUT_DOWN,
+									ALT_DOWN), this::duplicateLinesUp), consume(keyPressed(DOWN,
+										SHORTCUT_DOWN, ALT_DOWN), this::duplicateLinesDown),
 
-			consume(keyPressed(F, SHORTCUT_DOWN, SHIFT_DOWN),	smartFormat::format),
-			consume(keyPressed(F, SHORTCUT_DOWN, SHIFT_DOWN, ALT_DOWN),	smartFormat::format)
-		));
+			consume(keyPressed(F, SHORTCUT_DOWN, SHIFT_DOWN), smartFormat::format),
+			consume(keyPressed(F, SHORTCUT_DOWN, SHIFT_DOWN, ALT_DOWN),
+				smartFormat::format)));
 
 //		textArea.selectionProperty().addListener((ob, o, n) ->
 //			System.out.println(findNodes(n.getStart(), n.getEnd(), (s, e, node) -> true, true)));
 
-		editor.markdownASTProperty().addListener((ob, o, n) -> updateStateProperties());
-		textArea.selectionProperty().addListener((ob, o, n) -> updateStateProperties());
+		editor.markdownASTProperty().addListener((ob, o,
+			n) -> updateStateProperties());
+		textArea.selectionProperty().addListener((ob, o,
+			n) -> updateStateProperties());
 	}
 
-	//---- properties ---------------------------------------------------------
+	// ---- properties ---------------------------------------------------------
 
 	private boolean updateStatePropertiesRunLaterPending;
+
 	private void updateStateProperties() {
 		// avoid too many (and useless) runLater() invocations
-		if (updateStatePropertiesRunLaterPending)
-			return;
+		if (updateStatePropertiesRunLaterPending) return;
 		updateStatePropertiesRunLaterPending = true;
 
 		Platform.runLater(() -> {
 			updateStatePropertiesRunLaterPending = false;
 
-			List<Node> nodesAtSelection = findNodesAtSelection((s, e, n) -> true, true, false);
+			List<Node> nodesAtSelection = findNodesAtSelection((s, e, n) -> true,
+				true, false);
 
 			boolean bold = false;
- 			boolean italic = false;
- 			boolean code = false;
- 			boolean link = false;
- 			boolean image = false;
- 			boolean unorderedList = false;
- 			boolean orderedList = false;
- 			boolean blockquote = false;
- 			boolean fencedCode = false;
- 			boolean header = false;
+			boolean italic = false;
+			boolean code = false;
+			boolean link = false;
+			boolean image = false;
+			boolean unorderedList = false;
+			boolean orderedList = false;
+			boolean blockquote = false;
+			boolean fencedCode = false;
+			boolean header = false;
 			for (Node node : nodesAtSelection) {
-				if (!bold && node instanceof StrongEmphasis)
-					bold = true;
-				else if (!italic && node instanceof Emphasis)
-					italic = true;
-				else if (!code && node instanceof Code)
-					code = true;
+				if (!bold && node instanceof StrongEmphasis) bold = true;
+				else if (!italic && node instanceof Emphasis) italic = true;
+				else if (!code && node instanceof Code) code = true;
 				else if (!link && (node instanceof Link || node instanceof LinkRef))
 					link = true;
 				else if (!image && (node instanceof Image || node instanceof ImageRef))
 					image = true;
 				else if (!unorderedList && node instanceof BulletListItem)
 					unorderedList = true;
-				else if (!orderedList && node instanceof OrderedListItem)
-					orderedList = true;
-				else if (!blockquote && node instanceof BlockQuote)
-					blockquote = true;
-				else if (!fencedCode && node instanceof FencedCodeBlock)
-					fencedCode = true;
-				else if (!header && node instanceof Heading)
-					header = true;
+				else if (!orderedList && node instanceof OrderedListItem) orderedList =
+					true;
+				else if (!blockquote && node instanceof BlockQuote) blockquote = true;
+				else if (!fencedCode && node instanceof FencedCodeBlock) fencedCode =
+					true;
+				else if (!header && node instanceof Heading) header = true;
 			}
 			this.bold.set(bold);
 			this.italic.set(italic);
@@ -221,36 +221,66 @@ public class SmartEdit
 	}
 
 	private final BooleanProperty bold = new SimpleBooleanProperty();
-	public BooleanProperty boldProperty() { return bold; }
+
+	public BooleanProperty boldProperty() {
+		return bold;
+	}
 
 	private final BooleanProperty italic = new SimpleBooleanProperty();
-	public BooleanProperty italicProperty() { return italic; }
+
+	public BooleanProperty italicProperty() {
+		return italic;
+	}
 
 	private final BooleanProperty code = new SimpleBooleanProperty();
-	public BooleanProperty codeProperty() { return code; }
+
+	public BooleanProperty codeProperty() {
+		return code;
+	}
 
 	private final BooleanProperty link = new SimpleBooleanProperty();
-	public BooleanProperty linkProperty() { return link; }
+
+	public BooleanProperty linkProperty() {
+		return link;
+	}
 
 	private final BooleanProperty image = new SimpleBooleanProperty();
-	public BooleanProperty imageProperty() { return image; }
+
+	public BooleanProperty imageProperty() {
+		return image;
+	}
 
 	private final BooleanProperty unorderedList = new SimpleBooleanProperty();
-	public BooleanProperty unorderedListProperty() { return unorderedList; }
+
+	public BooleanProperty unorderedListProperty() {
+		return unorderedList;
+	}
 
 	private final BooleanProperty orderedList = new SimpleBooleanProperty();
-	public BooleanProperty orderedListProperty() { return orderedList; }
+
+	public BooleanProperty orderedListProperty() {
+		return orderedList;
+	}
 
 	private final BooleanProperty blockquote = new SimpleBooleanProperty();
-	public BooleanProperty blockquoteProperty() { return blockquote; }
+
+	public BooleanProperty blockquoteProperty() {
+		return blockquote;
+	}
 
 	private final BooleanProperty fencedCode = new SimpleBooleanProperty();
-	public BooleanProperty fencedCodeProperty() { return fencedCode; }
+
+	public BooleanProperty fencedCodeProperty() {
+		return fencedCode;
+	}
 
 	private final BooleanProperty header = new SimpleBooleanProperty();
-	public BooleanProperty headerProperty() { return header; }
 
-	//---- enter  -------------------------------------------------------------
+	public BooleanProperty headerProperty() {
+		return header;
+	}
+
+	// ---- enter -------------------------------------------------------------
 
 	private void enterPressed(KeyEvent e) {
 		String currentLine = textArea.getText(textArea.getCurrentParagraph());
@@ -259,36 +289,40 @@ public class SmartEdit
 		Matcher matcher = AUTO_INDENT_PATTERN.matcher(currentLine);
 		if (matcher.matches()) {
 			if (!matcher.group(2).isEmpty()) {
-				// indent new line with same whitespace characters and auto-indentable markers as current line
+				// indent new line with same whitespace characters and auto-indentable
+				// markers as current line
 				String indent = matcher.group(1);
 				int caretColumn = textArea.getCaretColumn();
-				if (caretColumn >= indent.length())
-					newText = newText.concat(indent);
-				else if (caretColumn > 0)
-					newText = newText.concat(indent.substring(0, caretColumn));
-			} else {
-				// current line contains only whitespace characters and auto-indentable markers
+				if (caretColumn >= indent.length()) newText = newText.concat(indent);
+				else if (caretColumn > 0) newText = newText.concat(indent.substring(0,
+					caretColumn));
+			}
+			else {
+				// current line contains only whitespace characters and auto-indentable
+				// markers
 				// --> empty current line
 				int caretPosition = textArea.getCaretPosition();
-				selectRange(textArea, caretPosition - currentLine.length(), caretPosition);
+				selectRange(textArea, caretPosition - currentLine.length(),
+					caretPosition);
 			}
 		}
 
-		// Note: not using replaceSelection(MarkdownTextArea, String) to allow undo merging in this case
+		// Note: not using replaceSelection(MarkdownTextArea, String) to allow undo
+		// merging in this case
 		textArea.replaceSelection(newText);
 		textArea.requestFollowCaret();
 	}
 
-	//---- indent -------------------------------------------------------------
+	// ---- indent -------------------------------------------------------------
 
 	private void tabPressed(KeyEvent e) {
 		List<Node> nodes;
-		if (!(nodes = findIndentableNodesAtSelection()).isEmpty())
-			indentNodes(nodes, true);
-		else if (isIndentSelection())
-			indentSelectedLines(true);
+		if (!(nodes = findIndentableNodesAtSelection()).isEmpty()) indentNodes(
+			nodes, true);
+		else if (isIndentSelection()) indentSelectedLines(true);
 		else {
-			// Note: not using replaceSelection(MarkdownTextArea, String) to allow undo merging in this case
+			// Note: not using replaceSelection(MarkdownTextArea, String) to allow
+			// undo merging in this case
 			textArea.replaceSelection("\t");
 			textArea.requestFollowCaret();
 		}
@@ -296,10 +330,9 @@ public class SmartEdit
 
 	private void shiftTabPressed(KeyEvent e) {
 		List<Node> nodes;
-		if (!(nodes = findIndentableNodesAtSelection()).isEmpty())
-			indentNodes(nodes, false);
-		else
-			indentSelectedLines(false);
+		if (!(nodes = findIndentableNodesAtSelection()).isEmpty()) indentNodes(
+			nodes, false);
+		else indentSelectedLines(false);
 	}
 
 	private void backspacePressed(KeyEvent e) {
@@ -309,23 +342,32 @@ public class SmartEdit
 		if (selection.getLength() > 0) {
 			// selection is not empty --> delete selected text
 			deleteText(textArea, start, end);
-		} else {
+		}
+		else {
 			// selection is empty
 			int startLine = offsetToLine(start);
 			int startLineOffset = lineToStartOffset(startLine);
-			if (start > startLineOffset && textArea.getText(startLineOffset, start).trim().isEmpty()) {
+			if (start > startLineOffset && textArea.getText(startLineOffset, start)
+				.trim().isEmpty())
+			{
 				// selection is empty and caret is in leading whitespace of a line,
 				// but not at the beginning of a line --> unindent line
 				indentSelectedLines(false);
-			} else {
+			}
+			else {
 				String line = textArea.getText(startLine);
 				int startLineEndOffset = startLineOffset + line.length();
-				Matcher matcher = (start == startLineEndOffset) ? AUTO_INDENT_PATTERN.matcher(line) : null;
-				if (matcher != null && matcher.matches() && matcher.group(2).isEmpty()) {
-					// caret is at end of line and line contains only whitespace characters
+				Matcher matcher = (start == startLineEndOffset) ? AUTO_INDENT_PATTERN
+					.matcher(line) : null;
+				if (matcher != null && matcher.matches() && matcher.group(2)
+					.isEmpty())
+				{
+					// caret is at end of line and line contains only whitespace
+					// characters
 					// and auto-indentable markers --> empty line
 					deleteText(textArea, startLineOffset, startLineEndOffset);
-				} else if (start > 0) {
+				}
+				else if (start > 0) {
 					// delete character before caret
 					deleteText(textArea, start - 1, start);
 				}
@@ -334,24 +376,22 @@ public class SmartEdit
 	}
 
 	/**
-	 * Returns whether an indent operation should used for the selection.
-	 *
-	 * Returns true if:
-	 *  - selection spans multiple lines
-	 *  - selection is empty and caret is in leading whitespace of a line
-	 *  - a single line is completely selected (excluding line separator)
+	 * Returns whether an indent operation should used for the selection. Returns
+	 * true if: - selection spans multiple lines - selection is empty and caret is
+	 * in leading whitespace of a line - a single line is completely selected
+	 * (excluding line separator)
 	 */
 	private boolean isIndentSelection() {
 		IndexRange selection = textArea.getSelection();
 		int start = selection.getStart();
 		int startLine = offsetToLine(start);
-		if (selection.getLength() == 0)
-			return textArea.getText(lineToStartOffset(startLine), start).trim().isEmpty();
+		if (selection.getLength() == 0) return textArea.getText(lineToStartOffset(
+			startLine), start).trim().isEmpty();
 		else {
 			int end = selection.getEnd();
 			int endLine = offsetToLine(end);
-			return endLine > startLine ||
-				   lineToStartOffset(startLine) == start && lineToEndOffset(startLine) == end;
+			return endLine > startLine || lineToStartOffset(startLine) == start &&
+				lineToEndOffset(startLine) == end;
 		}
 	}
 
@@ -369,47 +409,47 @@ public class SmartEdit
 		String[] lines = str.split("\n");
 
 		String indent = "    ";
-		StringBuilder buf = new StringBuilder(str.length() + (right ? (indent.length() * lines.length) : 0));
+		StringBuilder buf = new StringBuilder(str.length() + (right ? (indent
+			.length() * lines.length) : 0));
 		for (int i = 0; i < lines.length; i++) {
-			if (i > 0)
-				buf.append('\n');
+			if (i > 0) buf.append('\n');
 
 			String line = lines[i];
 			if (right) {
-				if (line.isEmpty() && lines.length > 1)
-					continue; // do not indent empty lines if multiple lines are selected
+				if (line.isEmpty() && lines.length > 1) continue; // do not indent empty
+																													// lines if multiple
+																													// lines are selected
 
 				buf.append(indent).append(line);
-			} else {
+			}
+			else {
 				int j = 0;
-				while (j < line.length() && j < 4 && Character.isWhitespace(line.charAt(j)))
+				while (j < line.length() && j < 4 && Character.isWhitespace(line.charAt(
+					j)))
 					j++;
 				buf.append(line.substring(j));
 			}
 		}
 
-		// String.split("\n") ignores '\n' at the end of the string --> append '\n' to result
-		if (str.endsWith("\n"))
-			buf.append('\n');
+		// String.split("\n") ignores '\n' at the end of the string --> append '\n'
+		// to result
+		if (str.endsWith("\n")) buf.append('\n');
 
 		return buf.toString();
 	}
 
 	/**
-	 * Experiment: indent whole list items (including sub lists)
-	 *
-	 * Disabled because the user experience is not that good
-	 * and it is questionable whether this feature makes sense at all.
+	 * Experiment: indent whole list items (including sub lists) Disabled because
+	 * the user experience is not that good and it is questionable whether this
+	 * feature makes sense at all.
 	 */
 	private final boolean indentNodes = false;
 
 	private List<Node> findIndentableNodesAtSelection() {
-		if (!indentNodes)
-			return Collections.emptyList();
+		if (!indentNodes) return Collections.emptyList();
 
 		return findNodesAtSelectedLines((start, end, node) -> {
-			if (!(node instanceof ListItem))
-				return false;
+			if (!(node instanceof ListItem)) return false;
 
 			// match only if one non-ListBlock child is in range
 			for (Node child : node.getChildren()) {
@@ -424,8 +464,8 @@ public class SmartEdit
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < nodes.size(); i++) {
 			Node node = nodes.get(i);
-			if (i > 0)
-				buf.append(textArea.getText(nodes.get(i - 1).getEndOffset(), node.getStartOffset()));
+			if (i > 0) buf.append(textArea.getText(nodes.get(i - 1).getEndOffset(),
+				node.getStartOffset()));
 
 			// indent list items
 			if (node instanceof ListItem) {
@@ -444,6 +484,7 @@ public class SmartEdit
 	}
 
 	private static class IndentSelection {
+
 		int startLine;
 		int endLine;
 		int startOffsetFromEnd;
@@ -458,37 +499,38 @@ public class SmartEdit
 		int end = selection.getEnd();
 		isel.startLine = offsetToLine(start);
 		isel.endLine = offsetToLine(end);
-		isel.startOffsetFromEnd = (start == end || start - lineToStartOffset(isel.startLine) > 0)
-				? lineToEndOffset(isel.startLine) - start
-				: -1; // beginning of line
+		isel.startOffsetFromEnd = (start == end || start - lineToStartOffset(
+			isel.startLine) > 0) ? lineToEndOffset(isel.startLine) - start : -1; // beginning
+																																						// of
+																																						// line
 		isel.endOffsetFromEnd = lineToEndOffset(isel.endLine) - end;
 
 		return isel;
 	}
 
 	private void selectAfterIndent(IndentSelection isel) {
-		int start = (isel.startOffsetFromEnd != -1)
-				? Math.max(lineToEndOffset(isel.startLine) - isel.startOffsetFromEnd, lineToStartOffset(isel.startLine))
-				: lineToStartOffset(isel.startLine);
-		int end = Math.max(lineToEndOffset(isel.endLine) - isel.endOffsetFromEnd, lineToStartOffset(isel.endLine));
+		int start = (isel.startOffsetFromEnd != -1) ? Math.max(lineToEndOffset(
+			isel.startLine) - isel.startOffsetFromEnd, lineToStartOffset(
+				isel.startLine)) : lineToStartOffset(isel.startLine);
+		int end = Math.max(lineToEndOffset(isel.endLine) - isel.endOffsetFromEnd,
+			lineToStartOffset(isel.endLine));
 		selectRange(textArea, start, end);
 	}
 
-	//---- delete -------------------------------------------------------------
+	// ---- delete -------------------------------------------------------------
 
 	private void deleteLine(KeyEvent e) {
 		IndexRange selRange = getSelectedLinesRange(true);
 		deleteText(textArea, selRange.getStart(), selRange.getEnd());
 	}
 
-	//---- move lines ---------------------------------------------------------
+	// ---- move lines ---------------------------------------------------------
 
 	private void moveLinesUp(KeyEvent e) {
 		IndexRange selRange = getSelectedLinesRange(true);
 		int selStart = selRange.getStart();
 		int selEnd = selRange.getEnd();
-		if (selStart == 0)
-			return;
+		if (selStart == 0) return;
 
 		int before = offsetToLine(selStart - 1);
 		IndexRange beforeRange = linesToRange(before, before, true);
@@ -499,11 +541,12 @@ public class SmartEdit
 		String selText = textArea.getText(selStart, selEnd);
 		if (!selText.endsWith("\n")) {
 			selText += "\n";
-			if (beforeText.endsWith("\n"))
-				beforeText = beforeText.substring(0, beforeText.length() - 1);
+			if (beforeText.endsWith("\n")) beforeText = beforeText.substring(0,
+				beforeText.length() - 1);
 		}
 
-		// Note: using single textArea.replaceText() to avoid multiple changes in undo history
+		// Note: using single textArea.replaceText() to avoid multiple changes in
+		// undo history
 		replaceText(textArea, beforeStart, selEnd, selText + beforeText);
 		selectRange(textArea, beforeStart, beforeStart + selText.length());
 	}
@@ -512,8 +555,7 @@ public class SmartEdit
 		IndexRange selRange = getSelectedLinesRange(true);
 		int selStart = selRange.getStart();
 		int selEnd = selRange.getEnd();
-		if (selEnd == textArea.getLength())
-			return;
+		if (selEnd == textArea.getLength()) return;
 
 		int after = offsetToLine(selEnd);
 		IndexRange afterRange = linesToRange(after, after, true);
@@ -524,11 +566,12 @@ public class SmartEdit
 		String afterText = textArea.getText(afterStart, afterEnd);
 		if (!afterText.endsWith("\n")) {
 			afterText += "\n";
-			if (selText.endsWith("\n"))
-				selText = selText.substring(0, selText.length() - 1);
+			if (selText.endsWith("\n")) selText = selText.substring(0, selText
+				.length() - 1);
 		}
 
-		// Note: using single textArea.replaceText() to avoid multiple changes in undo history
+		// Note: using single textArea.replaceText() to avoid multiple changes in
+		// undo history
 		replaceText(textArea, selStart, afterEnd, afterText + selText);
 
 		int newSelStart = selStart + afterText.length();
@@ -536,7 +579,7 @@ public class SmartEdit
 		selectRange(textArea, newSelStart, newSelEnd);
 	}
 
-	//---- duplicate lines ----------------------------------------------------
+	// ---- duplicate lines ----------------------------------------------------
 
 	private void duplicateLinesUp(KeyEvent e) {
 		duplicateLines(true);
@@ -552,23 +595,20 @@ public class SmartEdit
 		int selEnd = selRange.getEnd();
 
 		String selText = textArea.getText(selStart, selEnd);
-		if (!selText.endsWith("\n"))
-			selText += "\n";
+		if (!selText.endsWith("\n")) selText += "\n";
 
 		replaceText(textArea, selStart, selStart, selText);
 
-		if (up)
-			selectRange(textArea, selStart, selStart + selText.length() - 1);
+		if (up) selectRange(textArea, selStart, selStart + selText.length() - 1);
 		else {
 			int newSelStart = selStart + selText.length();
 			int newSelEnd = newSelStart + selText.length();
-			if (selText.endsWith("\n"))
-				newSelEnd--;
+			if (selText.endsWith("\n")) newSelEnd--;
 			selectRange(textArea, newSelStart, newSelEnd);
 		}
 	}
 
-	//---- surround -----------------------------------------------------------
+	// ---- surround -----------------------------------------------------------
 
 	public void surroundSelection(String leading, String trailing) {
 		surroundSelection(leading, trailing, null);
@@ -578,9 +618,11 @@ public class SmartEdit
 		surroundSelection(leading, trailing, hint, false);
 	}
 
-	public void surroundSelection(String leading, String trailing, String hint, boolean selectWordIfEmpty) {
+	public void surroundSelection(String leading, String trailing, String hint,
+		boolean selectWordIfEmpty)
+	{
 		// Note: not using textArea.insertText() to insert leading and trailing
-		//       because this would add two changes to undo history
+		// because this would add two changes to undo history
 
 		IndexRange selection = textArea.getSelection();
 		int start = selection.getStart();
@@ -613,19 +655,17 @@ public class SmartEdit
 		}
 
 		// remove leading whitespaces from leading text if selection starts at zero
-		if (start == 0)
-			leading = Utils.ltrim(leading);
+		if (start == 0) leading = Utils.ltrim(leading);
 
-		// remove trailing whitespaces from trailing text if selection ends at text end
-		if (end == textArea.getLength())
-			trailing = Utils.rtrim(trailing);
+		// remove trailing whitespaces from trailing text if selection ends at text
+		// end
+		if (end == textArea.getLength()) trailing = Utils.rtrim(trailing);
 
 		// remove leading line separators from leading text
 		// if there are line separators before the selected text
 		if (leading.startsWith("\n")) {
 			for (int i = start - 1; i >= 0 && leading.startsWith("\n"); i--) {
-				if (!"\n".equals(textArea.getText(i, i + 1)))
-					break;
+				if (!"\n".equals(textArea.getText(i, i + 1))) break;
 				leading = leading.substring(1);
 			}
 		}
@@ -636,14 +676,11 @@ public class SmartEdit
 		String str = trailingIsEmpty ? leading : trailing;
 		if (str.endsWith("\n")) {
 			for (int i = end; i < textArea.getLength() && str.endsWith("\n"); i++) {
-				if (!"\n".equals(textArea.getText(i, i + 1)))
-					break;
+				if (!"\n".equals(textArea.getText(i, i + 1))) break;
 				str = str.substring(0, str.length() - 1);
 			}
-			if (trailingIsEmpty)
-				leading = str;
-			else
-				trailing = str;
+			if (trailingIsEmpty) leading = str;
+			else trailing = str;
 		}
 
 		int selStart = start + leading.length();
@@ -660,8 +697,9 @@ public class SmartEdit
 		selectRange(textArea, selStart, selEnd);
 	}
 
-	private void surroundSelectionAndReplaceMarker(String leading, String trailing, String hint,
-			DelimitedNode node, String newOpeningMarker, String newClosingMarker)
+	private void surroundSelectionAndReplaceMarker(String leading,
+		String trailing, String hint, DelimitedNode node, String newOpeningMarker,
+		String newClosingMarker)
 	{
 		IndexRange selection = textArea.getSelection();
 		int start = selection.getStart();
@@ -679,7 +717,8 @@ public class SmartEdit
 		BasedSequence openingMarker = node.getOpeningMarker();
 		BasedSequence closingMarker = node.getClosingMarker();
 
-		int selStart = start + leading.length() + (newOpeningMarker.length() - openingMarker.length());
+		int selStart = start + leading.length() + (newOpeningMarker.length() -
+			openingMarker.length());
 		int selEnd = selStart + trimmedSelectedText.length();
 
 		// insert hint text if selection is empty
@@ -689,26 +728,28 @@ public class SmartEdit
 		}
 
 		// replace text and update selection
-		// Note: using single textArea.replaceText() to avoid multiple changes in undo history
+		// Note: using single textArea.replaceText() to avoid multiple changes in
+		// undo history
 		String before = textArea.getText(openingMarker.getEndOffset(), start);
 		String after = textArea.getText(end, closingMarker.getStartOffset());
-		replaceText(textArea, openingMarker.getStartOffset(), closingMarker.getEndOffset(),
-				newOpeningMarker + before + leading + trimmedSelectedText + trailing + after + newClosingMarker );
+		replaceText(textArea, openingMarker.getStartOffset(), closingMarker
+			.getEndOffset(), newOpeningMarker + before + leading +
+				trimmedSelectedText + trailing + after + newClosingMarker);
 		selectRange(textArea, selStart, selEnd);
 	}
 
 	private void surroundSelectionInCode(String openCloseMarker, String hint) {
 		Code codeNode = findNodeAtSelection((s, e, n) -> n instanceof Code);
-		if (codeNode != null)
-			surroundSelectionAndReplaceMarker(openCloseMarker, openCloseMarker, hint, codeNode, "<code>", "</code>");
-		else
-			surroundSelection(openCloseMarker, openCloseMarker, hint, true);
+		if (codeNode != null) surroundSelectionAndReplaceMarker(openCloseMarker,
+			openCloseMarker, hint, codeNode, "<code>", "</code>");
+		else surroundSelection(openCloseMarker, openCloseMarker, hint, true);
 	}
 
-	//---- delimited inlines --------------------------------------------------
+	// ---- delimited inlines --------------------------------------------------
 
 	public void insertBold(String hint) {
-		insertDelimited(StrongEmphasis.class, Options.getStrongEmphasisMarker(), hint);
+		insertDelimited(StrongEmphasis.class, Options.getStrongEmphasisMarker(),
+			hint);
 	}
 
 	public void insertItalic(String hint) {
@@ -723,27 +764,33 @@ public class SmartEdit
 		insertDelimited(Code.class, "`", hint);
 	}
 
-	private void insertDelimited(Class<? extends Node> cls, String openCloseMarker, String hint) {
-		List<? extends Node> nodes = findNodesAtSelection((s, e, n) -> cls.isInstance(n), false, false);
+	private void insertDelimited(Class<? extends Node> cls,
+		String openCloseMarker, String hint)
+	{
+		List<? extends Node> nodes = findNodesAtSelection((s, e, n) -> cls
+			.isInstance(n), false, false);
 		if (nodes.size() > 0) {
-			// there is delimited text in current selection --> change them to plain text
-			if (nodes.size() == 1 && hint.equals(((DelimitedNode)nodes.get(0)).getText().toString())) {
+			// there is delimited text in current selection --> change them to plain
+			// text
+			if (nodes.size() == 1 && hint.equals(((DelimitedNode) nodes.get(0))
+				.getText().toString()))
+			{
 				// delete node including hint text
 				Node node = nodes.get(0);
 				deleteText(textArea, node.getStartOffset(), node.getEndOffset());
-			} else
-				removeDelimiters(nodes);
-		} else
-			surroundSelectionInCode(openCloseMarker, hint);
+			}
+			else removeDelimiters(nodes);
+		}
+		else surroundSelectionInCode(openCloseMarker, hint);
 	}
 
 	private <T extends Node> void removeDelimiters(List<T> nodes) {
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < nodes.size(); i++) {
 			T node = nodes.get(i);
-			if (i > 0)
-				buf.append(textArea.getText(nodes.get(i - 1).getEndOffset(), node.getStartOffset()));
-			buf.append(((DelimitedNode)node).getText());
+			if (i > 0) buf.append(textArea.getText(nodes.get(i - 1).getEndOffset(),
+				node.getStartOffset()));
+			buf.append(((DelimitedNode) node).getText());
 		}
 
 		int start = nodes.get(0).getStartOffset();
@@ -752,35 +799,39 @@ public class SmartEdit
 		selectRange(textArea, start, start + buf.length());
 	}
 
-	//---- links --------------------------------------------------------------
+	// ---- links --------------------------------------------------------------
 
 	public void insertLink() {
 		LinkNode linkNode = findNodeAtSelection((s, e, n) -> n instanceof LinkNode);
-		if (linkNode != null && !(linkNode instanceof Link) && !(linkNode instanceof AutoLink) && !(linkNode instanceof MailLink)) {
+		if (linkNode != null && !(linkNode instanceof Link) &&
+			!(linkNode instanceof AutoLink) && !(linkNode instanceof MailLink))
+		{
 			// link node at caret is not supported --> insert link before or after
-			if (textArea.getCaretPosition() != linkNode.getStartOffset())
-				selectRange(textArea, linkNode.getEndOffset(), linkNode.getEndOffset());
+			if (textArea.getCaretPosition() != linkNode.getStartOffset()) selectRange(
+				textArea, linkNode.getEndOffset(), linkNode.getEndOffset());
 			linkNode = null;
 		}
 
-		if (linkNode != null)
-			selectRange(textArea, linkNode.getStartOffset(), linkNode.getEndOffset());
+		if (linkNode != null) selectRange(textArea, linkNode.getStartOffset(),
+			linkNode.getEndOffset());
 
-		LinkDialog dialog = new LinkDialog(editor.getNode().getScene().getWindow(), editor.getParentPath());
+		LinkDialog dialog = new LinkDialog(editor.getNode().getScene().getWindow(),
+			editor.getParentPath());
 		if (linkNode instanceof Link) {
 			Link link = (Link) linkNode;
-			dialog.init(link.getUrl().toString(), link.getText().toString(), link.getTitle().toString());
-		} else if (linkNode instanceof AutoLink)
-			dialog.init(((AutoLink) linkNode).getText().toString(), "", "");
-		else if (linkNode instanceof MailLink)
-			dialog.init(((MailLink) linkNode).getText().toString(), "", "");
+			dialog.init(link.getUrl().toString(), link.getText().toString(), link
+				.getTitle().toString());
+		}
+		else if (linkNode instanceof AutoLink) dialog.init(((AutoLink) linkNode)
+			.getText().toString(), "", "");
+		else if (linkNode instanceof MailLink) dialog.init(((MailLink) linkNode)
+			.getText().toString(), "", "");
 
 		LinkNode linkNode2 = linkNode;
 		dialog.showAndWait().ifPresent(result -> {
-			if (linkNode2 != null)
-				replaceText(textArea, linkNode2.getStartOffset(), linkNode2.getEndOffset(), result);
-			else
-				replaceSelection(textArea, result);
+			if (linkNode2 != null) replaceText(textArea, linkNode2.getStartOffset(),
+				linkNode2.getEndOffset(), result);
+			else replaceSelection(textArea, result);
 		});
 	}
 
@@ -788,30 +839,31 @@ public class SmartEdit
 		LinkNode linkNode = findNodeAtSelection((s, e, n) -> n instanceof LinkNode);
 		if (linkNode != null && !(linkNode instanceof Image)) {
 			// link node at caret is not supported --> insert image before or after
-			if (textArea.getCaretPosition() != linkNode.getStartOffset())
-				selectRange(textArea, linkNode.getEndOffset(), linkNode.getEndOffset());
+			if (textArea.getCaretPosition() != linkNode.getStartOffset()) selectRange(
+				textArea, linkNode.getEndOffset(), linkNode.getEndOffset());
 			linkNode = null;
 		}
 
 		Image image = (Image) linkNode;
-		if (image != null)
-			selectRange(textArea, image.getStartOffset(), image.getEndOffset());
+		if (image != null) selectRange(textArea, image.getStartOffset(), image
+			.getEndOffset());
 
-		ImageDialog dialog = new ImageDialog(editor.getNode().getScene().getWindow(), editor.getParentPath());
-		if (image != null)
-			dialog.init(image.getUrl().toString(), image.getText().toString(), image.getTitle().toString());
+		ImageDialog dialog = new ImageDialog(editor.getNode().getScene()
+			.getWindow(), editor.getParentPath());
+		if (image != null) dialog.init(image.getUrl().toString(), image.getText()
+			.toString(), image.getTitle().toString());
 		dialog.showAndWait().ifPresent(result -> {
-			if (image != null)
-				replaceText(textArea, image.getStartOffset(), image.getEndOffset(), result);
-			else
-				replaceSelection(textArea, result);
+			if (image != null) replaceText(textArea, image.getStartOffset(), image
+				.getEndOffset(), result);
+			else replaceSelection(textArea, result);
 		});
 	}
 
 	public void insertLinkOrImage(int position, Path path) {
 		int end = position;
 
-		LinkNode linkNode = findNodeAt(position, (s, e, n) -> n instanceof LinkNode);
+		LinkNode linkNode = findNodeAt(position, (s, e,
+			n) -> n instanceof LinkNode);
 		if (linkNode != null && position > linkNode.getStartOffset()) {
 			// if dropping on an existing link or image, then replace it
 			position = linkNode.getStartOffset();
@@ -821,26 +873,29 @@ public class SmartEdit
 		Path basePath = editor.getParentPath();
 		String newUrl;
 		try {
-			newUrl = (basePath != null) ? basePath.relativize(path).toString() : path.toString();
-		} catch (IllegalArgumentException ex) {
+			newUrl = (basePath != null) ? basePath.relativize(path).toString() : path
+				.toString();
+		}
+		catch (IllegalArgumentException ex) {
 			newUrl = path.toString();
 		}
 		newUrl = newUrl.replace('\\', '/');
 
 		String newText = path.getName(path.getNameCount() - 1).toString();
 
-		String linkOrImage = (Utils.isImage(path.toString()) ? "!" : "")
-			+ "[" + newText.replace("[", "\\[").replace("]", "\\]")
-			+ "](" + newUrl.replace("(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
+		String linkOrImage = (Utils.isImage(path.toString()) ? "!" : "") + "[" +
+			newText.replace("[", "\\[").replace("]", "\\]") + "](" + newUrl.replace(
+				"(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
 
 		replaceText(textArea, position, end, linkOrImage);
 		selectRange(textArea, position, position + linkOrImage.length());
 	}
-	
+
 	public void insertEmbbedImageKey(int position, String name, String imageKey) {
 		int end = position;
 
-		LinkNode linkNode = findNodeAt(position, (s, e, n) -> n instanceof LinkNode);
+		LinkNode linkNode = findNodeAt(position, (s, e,
+			n) -> n instanceof LinkNode);
 		if (linkNode != null && position > linkNode.getStartOffset()) {
 			// if dropping on an existing link or image, then replace it
 			position = linkNode.getStartOffset();
@@ -849,68 +904,85 @@ public class SmartEdit
 
 		imageKey = imageKey.replace('\\', '/');
 
-		String linkOrImage = "![" + name.replace("[", "\\[").replace("]", "\\]")
-			+ "](" + imageKey.replace("(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
-		//	+ "](" + newUrl.replace("(", "\\(").replace(")", "\\)").replace(" ", "%20") + ")";
+		String linkOrImage = "![" + name.replace("[", "\\[").replace("]", "\\]") +
+			"](" + imageKey.replace("(", "\\(").replace(")", "\\)").replace(" ",
+				"%20") + ")";
+		// + "](" + newUrl.replace("(", "\\(").replace(")", "\\)").replace(" ",
+		// "%20") + ")";
 
 		replaceText(textArea, position, end, linkOrImage);
 		selectRange(textArea, position, position + linkOrImage.length());
 	}
 
-	//---- heading ------------------------------------------------------------
+	// ---- heading ------------------------------------------------------------
 
 	public void insertHeading(int level, String hint) {
 		int caretPosition = textArea.getCaretPosition();
-		Heading heading = findNodeAtLine(caretPosition, (s, e, n) -> n instanceof Heading);
+		Heading heading = findNodeAtLine(caretPosition, (s, e,
+			n) -> n instanceof Heading);
 		if (heading != null) {
-			// there is already a heading at current line --> remove heading or change level
+			// there is already a heading at current line --> remove heading or change
+			// level
 			if (level == heading.getLevel()) {
 				// same heading level --> remove heading
-				if (heading.isAtxHeading())
-					deleteText(textArea, heading.getOpeningMarker().getStartOffset(), heading.getText().getStartOffset());
-				else if (heading.isSetextHeading())
-					deleteText(textArea, heading.getText().getEndOffset(), heading.getClosingMarker().getEndOffset());
-			} else {
+				if (heading.isAtxHeading()) deleteText(textArea, heading
+					.getOpeningMarker().getStartOffset(), heading.getText()
+						.getStartOffset());
+				else if (heading.isSetextHeading()) deleteText(textArea, heading
+					.getText().getEndOffset(), heading.getClosingMarker().getEndOffset());
+			}
+			else {
 				// different heading level --> change heading level
 				if (heading.isAtxHeading()) {
 					// replace ATX opening marker
 					String marker = StringUtils.repeat('#', level);
 					BasedSequence openingMarker = heading.getOpeningMarker();
-					replaceText(textArea, openingMarker.getStartOffset(), openingMarker.getEndOffset(), marker);
+					replaceText(textArea, openingMarker.getStartOffset(), openingMarker
+						.getEndOffset(), marker);
 
 					// move caret to end of line
 					selectEndOfLine(openingMarker.getStartOffset());
-				} else if (heading.isSetextHeading()) {
+				}
+				else if (heading.isSetextHeading()) {
 					BasedSequence closingMarker = heading.getClosingMarker();
 					if (level > 2) {
-						// new level too large for setext --> change from setext to ATX header
-						// Note: using single textArea.replaceText() to avoid multiple changes in undo history
-						String newHeading = StringUtils.repeat('#', level) + " " + heading.getText();
-						replaceText(textArea, heading.getStartOffset(), heading.getEndOffset(), newHeading);
-					} else {
+						// new level too large for setext --> change from setext to ATX
+						// header
+						// Note: using single textArea.replaceText() to avoid multiple
+						// changes in undo history
+						String newHeading = StringUtils.repeat('#', level) + " " + heading
+							.getText();
+						replaceText(textArea, heading.getStartOffset(), heading
+							.getEndOffset(), newHeading);
+					}
+					else {
 						// replace setext closing marker
-						String marker = StringUtils.repeat(level == 1 ? '=' : '-', closingMarker.length());
-						replaceText(textArea, closingMarker.getStartOffset(), closingMarker.getEndOffset(), marker);
+						String marker = StringUtils.repeat(level == 1 ? '=' : '-',
+							closingMarker.length());
+						replaceText(textArea, closingMarker.getStartOffset(), closingMarker
+							.getEndOffset(), marker);
 					}
 				}
 			}
-		} else {
+		}
+		else {
 			// new heading
 			int lineStartOffset = caretPosition - textArea.getCaretColumn();
 			String marker = StringUtils.repeat('#', level);
 			String currentLine = textArea.getText(textArea.getCurrentParagraph());
 			if (currentLine.trim().isEmpty()) {
 				// current line is empty --> insert opening marker and hint
-				replaceText(textArea, lineStartOffset, lineStartOffset + currentLine.length(), marker + " " + hint);
+				replaceText(textArea, lineStartOffset, lineStartOffset + currentLine
+					.length(), marker + " " + hint);
 
 				// select hint
 				int selStart = lineStartOffset + marker.length() + 1;
 				int selEnd = selStart + hint.length();
 				selectRange(textArea, selStart, selEnd);
-			} else {
+			}
+			else {
 				// current line contains text --> insert opening marker
-				if (!currentLine.startsWith(" "))
-					marker += " ";
+				if (!currentLine.startsWith(" ")) marker += " ";
 				insertText(textArea, lineStartOffset, marker);
 
 				// move caret to end of line
@@ -919,24 +991,26 @@ public class SmartEdit
 		}
 	}
 
-	//---- lists --------------------------------------------------------------
+	// ---- lists --------------------------------------------------------------
 
 	public void insertUnorderedList() {
 		surroundSelection("\n\n" + Options.getBulletListMarker() + " ", "");
 	}
 
-	//---- format -------------------------------------------------------------
+	// ---- format -------------------------------------------------------------
 
 	public void format(boolean formatSelectionOnly, String oldMarkdown) {
 		smartFormat.format(formatSelectionOnly, oldMarkdown);
 	}
 
-	//---- text modification --------------------------------------------------
+	// ---- text modification --------------------------------------------------
 
 	/**
 	 * Run runnable and prevent undo merging with previous and following changes.
 	 */
-	static void runInPreventUndoMerge(MarkdownTextArea textArea, Runnable runnable) {
+	static void runInPreventUndoMerge(MarkdownTextArea textArea,
+		Runnable runnable)
+	{
 		// prevent undo merging with previous text entered by user
 		textArea.getUndoManager().preventMerge();
 
@@ -950,7 +1024,9 @@ public class SmartEdit
 	/**
 	 * Central method to commit multi-change in editor that prevents undo merging.
 	 */
-	static void commitMultiChange(MarkdownTextArea textArea, MultiChangeBuilder<?, ?, ?> multiChange) {
+	static void commitMultiChange(MarkdownTextArea textArea,
+		MultiChangeBuilder<?, ?, ?> multiChange)
+	{
 		runInPreventUndoMerge(textArea, () -> {
 			// commit multi-change
 			textArea.scrollY.suspendWhile(() -> {
@@ -962,14 +1038,18 @@ public class SmartEdit
 	/**
 	 * Central method to replace text in editor that prevents undo merging.
 	 */
-	static void replaceText(MarkdownTextArea textArea, int start, int end, String text) {
+	static void replaceText(MarkdownTextArea textArea, int start, int end,
+		String text)
+	{
 		runInPreventUndoMerge(textArea, () -> {
 			// replace text
 			textArea.replaceText(start, end, text);
 		});
 
-		// textArea.replaceText() moves the caret to the end of the selected text, which may
-		// it make necessary to scroll if large text is inserted and selectRange() is not called
+		// textArea.replaceText() moves the caret to the end of the selected text,
+		// which may
+		// it make necessary to scroll if large text is inserted and selectRange()
+		// is not called
 		textArea.requestFollowCaret();
 	}
 
@@ -986,12 +1066,14 @@ public class SmartEdit
 		replaceText(textArea, start, end, "");
 	}
 
-	//---- text selection -----------------------------------------------------
+	// ---- text selection -----------------------------------------------------
 
 	/**
 	 * Central method to select text in editor that scrolls to the caret.
 	 */
-	static void selectRange(MarkdownTextArea textArea, int anchor, int caretPosition) {
+	static void selectRange(MarkdownTextArea textArea, int anchor,
+		int caretPosition)
+	{
 		textArea.selectRange(anchor, caretPosition);
 		textArea.requestFollowCaret();
 	}
@@ -1005,68 +1087,79 @@ public class SmartEdit
 		selectRange(textArea, caretPos, caretPos);
 	}
 
-	//---- find nodes ---------------------------------------------------------
+	// ---- find nodes ---------------------------------------------------------
 
 	/**
-	 * Find single node that completely encloses the current selection and match a predicate.
+	 * Find single node that completely encloses the current selection and match a
+	 * predicate.
 	 */
 	private <T extends Node> T findNodeAtSelection(FindNodePredicate predicate) {
 		IndexRange selection = textArea.getSelection();
 		int start = selection.getStart();
 		int end = selection.getEnd();
 		List<T> nodes = findNodes(start, end, predicate, false, false);
-		if (nodes.size() != 1)
-			return null;
+		if (nodes.size() != 1) return null;
 
 		T node = nodes.get(0);
-		BasedSequence text = (node instanceof DelimitedNode) ? ((DelimitedNode)node).getText() : node.getChars();
-		return (start >= text.getStartOffset() && end <= text.getEndOffset()) ? node : null;
+		BasedSequence text = (node instanceof DelimitedNode)
+			? ((DelimitedNode) node).getText() : node.getChars();
+		return (start >= text.getStartOffset() && end <= text.getEndOffset()) ? node
+			: null;
 	}
 
 	/**
 	 * Find all nodes that are within the current selection and match a predicate.
 	 */
-	private <T> List<T> findNodesAtSelection(FindNodePredicate predicate, boolean allowNested, boolean deepest) {
+	private <T> List<T> findNodesAtSelection(FindNodePredicate predicate,
+		boolean allowNested, boolean deepest)
+	{
 		IndexRange selection = textArea.getSelection();
-		return findNodes(selection.getStart(), selection.getEnd(), predicate, allowNested, deepest);
+		return findNodes(selection.getStart(), selection.getEnd(), predicate,
+			allowNested, deepest);
 	}
 
 	/**
-	 * Find all nodes that are within the current (partly) selected line(s) and match a predicate.
+	 * Find all nodes that are within the current (partly) selected line(s) and
+	 * match a predicate.
 	 */
-	private <T> List<T> findNodesAtSelectedLines(FindNodePredicate predicate, boolean allowNested, boolean deepest) {
+	private <T> List<T> findNodesAtSelectedLines(FindNodePredicate predicate,
+		boolean allowNested, boolean deepest)
+	{
 		IndexRange selRange = getSelectedLinesRange(false);
-		return findNodes(selRange.getStart(), selRange.getEnd(), predicate, allowNested, deepest);
+		return findNodes(selRange.getStart(), selRange.getEnd(), predicate,
+			allowNested, deepest);
 	}
 
 	/**
 	 * Find all nodes that are within the given range and match a predicate.
 	 */
-	private <T> List<T> findNodes(int start, int end, FindNodePredicate predicate, boolean allowNested, boolean deepest) {
+	private <T> List<T> findNodes(int start, int end, FindNodePredicate predicate,
+		boolean allowNested, boolean deepest)
+	{
 		Node markdownAST = editor.getMarkdownAST();
-		if (markdownAST == null)
-			return Collections.emptyList();
+		if (markdownAST == null) return Collections.emptyList();
 
 		ArrayList<T> nodes = new ArrayList<>();
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 			@SuppressWarnings("unchecked")
 			@Override
-			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+			public void processNode(Node node, boolean withChildren,
+				BiConsumer<Node, Visitor<Node>> processor)
+			{
 				if (isInNode(start, end, node) && predicate.test(start, end, node)) {
 					if (deepest) {
 						int oldNodesSize = nodes.size();
 						processChildren(node, processor);
 
 						// add only if no other child was added
-						if (nodes.size() == oldNodesSize)
-							nodes.add((T) node);
+						if (nodes.size() == oldNodesSize) nodes.add((T) node);
 						return;
 					}
 
 					nodes.add((T) node);
 
-					if (!allowNested)
-						return; // do not visit children
+					if (!allowNested) return; // do not visit children
 				}
 
 				processChildren(node, processor);
@@ -1077,12 +1170,12 @@ public class SmartEdit
 	}
 
 	private interface FindNodePredicate {
-	    boolean test(int start, int end, Node node);
+
+		boolean test(int start, int end, Node node);
 	}
 
 	private boolean isInNode(int start, int end, Node node) {
-		if (end == start)
-			end++;
+		if (end == start) end++;
 		return start < node.getEndOffset() && end > node.getStartOffset();
 	}
 
@@ -1102,36 +1195,42 @@ public class SmartEdit
 		return nodes.size() > 0 ? nodes.get(0) : null;
 	}
 
-	//---- offset/line conversion -------------------------------------------
+	// ---- offset/line conversion -------------------------------------------
 
 	/**
-	 * Returns the line indices of the first and last line that are (partly) selected.
+	 * Returns the line indices of the first and last line that are (partly)
+	 * selected.
 	 */
 	private IndexRange getSelectedLines() {
 		IndexRange selection = textArea.getSelection();
 		int start = selection.getStart();
-		int end = Math.max(selection.getEnd() - 1, start); // excluding line separator
+		int end = Math.max(selection.getEnd() - 1, start); // excluding line
+																												// separator
 		return new IndexRange(offsetToLine(start), offsetToLine(end));
 	}
 
 	/**
-	 * Returns start and end character offsets of the lines that are (partly) selected.
-	 * The end offset includes the line separator if includeLastLineSeparator is true.
+	 * Returns start and end character offsets of the lines that are (partly)
+	 * selected. The end offset includes the line separator if
+	 * includeLastLineSeparator is true.
 	 */
 	IndexRange getSelectedLinesRange(boolean includeLastLineSeparator) {
 		IndexRange selection = getSelectedLines();
-		return linesToRange(selection.getStart(), selection.getEnd(), includeLastLineSeparator);
+		return linesToRange(selection.getStart(), selection.getEnd(),
+			includeLastLineSeparator);
 	}
 
 	/**
-	 * Returns start and end character offsets of the given lines range.
-	 * The end offset includes the line separator if includeLastLineSeparator is true.
+	 * Returns start and end character offsets of the given lines range. The end
+	 * offset includes the line separator if includeLastLineSeparator is true.
 	 */
-	private IndexRange linesToRange(int firstLine, int lastLine, boolean includeLastLineSeparator) {
+	private IndexRange linesToRange(int firstLine, int lastLine,
+		boolean includeLastLineSeparator)
+	{
 		int start = lineToStartOffset(firstLine);
 		int end = lineToEndOffset(lastLine);
-		if (includeLastLineSeparator && end < textArea.getLength())
-			end++; // line separator
+		if (includeLastLineSeparator && end < textArea.getLength()) end++; // line
+																																				// separator
 
 		return new IndexRange(start, end);
 	}

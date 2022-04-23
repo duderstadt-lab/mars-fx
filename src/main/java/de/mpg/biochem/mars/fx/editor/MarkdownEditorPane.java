@@ -114,14 +114,13 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.input.TransferMode;
 
 /**
- * Markdown editor pane.
- *
- * Uses flexmark-java (https://github.com/vsch/flexmark-java) for parsing markdown.
+ * Markdown editor pane. Uses flexmark-java
+ * (https://github.com/vsch/flexmark-java) for parsing markdown.
  *
  * @author Karl Tauber
  */
-public class MarkdownEditorPane
-{
+public class MarkdownEditorPane {
+
 	private final BottomSlidePane borderPane;
 	private final MarkdownTextArea textArea;
 	private final ParagraphOverlayGraphicFactory overlayGraphicFactory;
@@ -136,7 +135,7 @@ public class MarkdownEditorPane
 	private Parser parser;
 	private final InvalidationListener optionsListener;
 	private String lineSeparator = getLineSeparatorOrDefault();
-	
+
 	private DocumentEditor documentEditor;
 
 	public MarkdownEditorPane() {
@@ -144,14 +143,16 @@ public class MarkdownEditorPane
 		textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
 		textArea.getStyleClass().add("markdown-editor");
-		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
+		textArea.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
 		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/prism.css");
 
 		textArea.textProperty().addListener((observable, oldText, newText) -> {
 			textChanged(newText);
 		});
 
-		textArea.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED, this::showContextMenu);
+		textArea.addEventHandler(ContextMenuEvent.CONTEXT_MENU_REQUESTED,
+			this::showContextMenu);
 		textArea.addEventHandler(MouseEvent.MOUSE_PRESSED, this::hideContextMenu);
 		textArea.setOnDragEntered(this::onDragEntered);
 		textArea.setOnDragExited(this::onDragExited);
@@ -160,16 +161,16 @@ public class MarkdownEditorPane
 
 		smartEdit = new SmartEdit(this, textArea);
 
-		Nodes.addInputMap(textArea, sequence(
-			consume(keyPressed(PLUS, SHORTCUT_DOWN),	this::increaseFontSize),
-			consume(keyPressed(MINUS, SHORTCUT_DOWN),	this::decreaseFontSize),
-			consume(keyPressed(DIGIT0, SHORTCUT_DOWN),	this::resetFontSize),
-			consume(keyPressed(W, ALT_DOWN),			this::showWhitespace),
-			consume(keyPressed(I, ALT_DOWN),			this::showImagesEmbedded)
-		));
+		Nodes.addInputMap(textArea, sequence(consume(keyPressed(PLUS,
+			SHORTCUT_DOWN), this::increaseFontSize), consume(keyPressed(MINUS,
+				SHORTCUT_DOWN), this::decreaseFontSize), consume(keyPressed(DIGIT0,
+					SHORTCUT_DOWN), this::resetFontSize), consume(keyPressed(W, ALT_DOWN),
+						this::showWhitespace), consume(keyPressed(I, ALT_DOWN),
+							this::showImagesEmbedded)));
 
 		// create scroll pane
-		VirtualizedScrollPane<MarkdownTextArea> scrollPane = new VirtualizedScrollPane<>(textArea);
+		VirtualizedScrollPane<MarkdownTextArea> scrollPane =
+			new VirtualizedScrollPane<>(textArea);
 
 		// create border pane
 		borderPane = new BottomSlidePane(scrollPane);
@@ -188,65 +189,69 @@ public class MarkdownEditorPane
 		findReplacePane = new FindReplacePane(textArea);
 		findHitsChangeListener = this::findHitsChanged;
 		findReplacePane.addListener(findHitsChangeListener);
-		findReplacePane.visibleProperty().addListener((ov, oldVisible, newVisible) -> {
-			if (!newVisible)
-				borderPane.setBottom(null);
+		findReplacePane.visibleProperty().addListener((ov, oldVisible,
+			newVisible) -> {
+			if (!newVisible) borderPane.setBottom(null);
 		});
 
 		// listen to option changes
 		optionsListener = e -> {
-			if (textArea.getScene() == null)
-				return; // editor closed but not yet GCed
+			if (textArea.getScene() == null) return; // editor closed but not yet GCed
 
 			if (e == Options.fontFamilyProperty() || e == Options.fontSizeProperty())
 				updateFont();
-			else if (e == Options.showLineNoProperty())
-				updateShowLineNo();
-			else if (e == Options.showWhitespaceProperty())
-				updateShowWhitespace();
-			//else if (e == Options.showImagesEmbeddedProperty())
-			//	updateShowImagesEmbedded();
-			else if (e == Options.markdownRendererProperty() || e == Options.markdownExtensionsProperty()) {
+			else if (e == Options.showLineNoProperty()) updateShowLineNo();
+			else if (e == Options.showWhitespaceProperty()) updateShowWhitespace();
+			// else if (e == Options.showImagesEmbeddedProperty())
+			// updateShowImagesEmbedded();
+			else if (e == Options.markdownRendererProperty() || e == Options
+				.markdownExtensionsProperty())
+			{
 				// re-process markdown if markdown extensions option changes
 				parser = null;
 				textChanged(textArea.getText());
 			}
 		};
-		WeakInvalidationListener weakOptionsListener = new WeakInvalidationListener(optionsListener);
+		WeakInvalidationListener weakOptionsListener = new WeakInvalidationListener(
+			optionsListener);
 		Options.fontFamilyProperty().addListener(weakOptionsListener);
 		Options.fontSizeProperty().addListener(weakOptionsListener);
 		Options.markdownRendererProperty().addListener(weakOptionsListener);
 		Options.markdownExtensionsProperty().addListener(weakOptionsListener);
 		Options.showLineNoProperty().addListener(weakOptionsListener);
 		Options.showWhitespaceProperty().addListener(weakOptionsListener);
-		//Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
+		// Options.showImagesEmbeddedProperty().addListener(weakOptionsListener);
 
 		// workaround a problem with wrong selection after undo:
-		//   after undo the selection is 0-0, anchor is 0, but caret position is correct
-		//   --> set selection to caret position
-		textArea.selectionProperty().addListener((observable,oldSelection,newSelection) -> {
-			// use runLater because the wrong selection temporary occurs while edition
-			Platform.runLater(() -> {
-				IndexRange selection = textArea.getSelection();
-				int caretPosition = textArea.getCaretPosition();
-				if (selection.getStart() == 0 && selection.getEnd() == 0 && textArea.getAnchor() == 0 && caretPosition > 0)
-					textArea.selectRange(caretPosition, caretPosition);
+		// after undo the selection is 0-0, anchor is 0, but caret position is
+		// correct
+		// --> set selection to caret position
+		textArea.selectionProperty().addListener((observable, oldSelection,
+			newSelection) -> {
+				// use runLater because the wrong selection temporary occurs while
+				// edition
+				Platform.runLater(() -> {
+					IndexRange selection = textArea.getSelection();
+					int caretPosition = textArea.getCaretPosition();
+					if (selection.getStart() == 0 && selection.getEnd() == 0 && textArea
+						.getAnchor() == 0 && caretPosition > 0) textArea.selectRange(
+							caretPosition, caretPosition);
+				});
 			});
-		});
 	}
-	
+
 	public MarkdownEditorPane(DocumentEditor documentEditor) {
 		this();
 		this.documentEditor = documentEditor;
 	}
-	
+
 	public DocumentEditor getDocumentEditor() {
 		return documentEditor;
 	}
 
 	private void updateFont() {
-		textArea.setStyle("-fx-font-family: '" + Options.getFontFamily()
-				+ "'; -fx-font-size: " + Options.getFontSize() );
+		textArea.setStyle("-fx-font-family: '" + Options.getFontFamily() +
+			"'; -fx-font-size: " + Options.getFontSize());
 	}
 
 	public javafx.scene.Node getNode() {
@@ -275,14 +280,16 @@ public class MarkdownEditorPane
 
 	public void requestFocus() {
 		Platform.runLater(() -> {
-			if (textArea.getScene() != null)
-				textArea.requestFocus();
+			if (textArea.getScene() != null) textArea.requestFocus();
 			else {
 				// text area still does not have a scene
 				// --> use listener on scene to make sure that text area receives focus
 				ChangeListener<Scene> l = new ChangeListener<Scene>() {
+
 					@Override
-					public void changed(ObservableValue<? extends Scene> observable, Scene oldValue, Scene newValue) {
+					public void changed(ObservableValue<? extends Scene> observable,
+						Scene oldValue, Scene newValue)
+					{
 						textArea.sceneProperty().removeListener(this);
 						textArea.requestFocus();
 					}
@@ -294,15 +301,16 @@ public class MarkdownEditorPane
 
 	private String getLineSeparatorOrDefault() {
 		String lineSeparator = Options.getLineSeparator();
-		return (lineSeparator != null) ? lineSeparator : System.getProperty( "line.separator", "\n" );
+		return (lineSeparator != null) ? lineSeparator : System.getProperty(
+			"line.separator", "\n");
 	}
 
 	private String determineLineSeparator(String str) {
 		int strLength = str.length();
 		for (int i = 0; i < strLength; i++) {
 			char ch = str.charAt(i);
-			if (ch == '\n')
-				return (i > 0 && str.charAt(i - 1) == '\r') ? "\r\n" : "\n";
+			if (ch == '\n') return (i > 0 && str.charAt(i - 1) == '\r') ? "\r\n"
+				: "\n";
 		}
 		return getLineSeparatorOrDefault();
 	}
@@ -310,10 +318,11 @@ public class MarkdownEditorPane
 	// 'markdown' property
 	public String getMarkdown() {
 		String markdown = textArea.getText();
-		if (!lineSeparator.equals("\n"))
-			markdown = markdown.replace("\n", lineSeparator);
+		if (!lineSeparator.equals("\n")) markdown = markdown.replace("\n",
+			lineSeparator);
 		return markdown;
 	}
+
 	public void setMarkdown(String markdown) {
 		// remember old selection range
 		IndexRange oldSelection = textArea.getSelection();
@@ -323,45 +332,89 @@ public class MarkdownEditorPane
 		textArea.replaceText(markdown);
 
 		// restore old selection range
-        int newLength = textArea.getLength();
-        textArea.selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(oldSelection.getEnd(), newLength));
+		int newLength = textArea.getLength();
+		textArea.selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(
+			oldSelection.getEnd(), newLength));
 	}
-	public ObservableValue<String> markdownProperty() { return textArea.textProperty(); }
+
+	public ObservableValue<String> markdownProperty() {
+		return textArea.textProperty();
+	}
 
 	// 'markdownText' property
-	private final ReadOnlyStringWrapper markdownText = new ReadOnlyStringWrapper();
-	public String getMarkdownText() { return markdownText.get(); }
-	public ReadOnlyStringProperty markdownTextProperty() { return markdownText.getReadOnlyProperty(); }
+	private final ReadOnlyStringWrapper markdownText =
+		new ReadOnlyStringWrapper();
+
+	public String getMarkdownText() {
+		return markdownText.get();
+	}
+
+	public ReadOnlyStringProperty markdownTextProperty() {
+		return markdownText.getReadOnlyProperty();
+	}
 
 	// 'markdownAST' property
-	private final ReadOnlyObjectWrapper<Node> markdownAST = new ReadOnlyObjectWrapper<>();
-	public Node getMarkdownAST() { return markdownAST.get(); }
-	public ReadOnlyObjectProperty<Node> markdownASTProperty() { return markdownAST.getReadOnlyProperty(); }
+	private final ReadOnlyObjectWrapper<Node> markdownAST =
+		new ReadOnlyObjectWrapper<>();
+
+	public Node getMarkdownAST() {
+		return markdownAST.get();
+	}
+
+	public ReadOnlyObjectProperty<Node> markdownASTProperty() {
+		return markdownAST.getReadOnlyProperty();
+	}
 
 	// 'selection' property
-	public ObservableValue<IndexRange> selectionProperty() { return textArea.selectionProperty(); }
+	public ObservableValue<IndexRange> selectionProperty() {
+		return textArea.selectionProperty();
+	}
 
 	// 'scrollY' property
-	public double getScrollY() { return textArea.scrollY.getValue(); }
-	public ObservableValue<Double> scrollYProperty() { return textArea.scrollY; }
+	public double getScrollY() {
+		return textArea.scrollY.getValue();
+	}
+
+	public ObservableValue<Double> scrollYProperty() {
+		return textArea.scrollY;
+	}
 
 	// 'path' property
 	private final ObjectProperty<Path> path = new SimpleObjectProperty<>();
-	public Path getPath() { return path.get(); }
-	public void setPath(Path path) { this.path.set(path); }
-	public ObjectProperty<Path> pathProperty() { return path; }
-	
+
+	public Path getPath() {
+		return path.get();
+	}
+
+	public void setPath(Path path) {
+		this.path.set(path);
+	}
+
+	public ObjectProperty<Path> pathProperty() {
+		return path;
+	}
+
 	// 'visible' property
-	private final ReadOnlyBooleanWrapper visible = new ReadOnlyBooleanWrapper(false);
-	public boolean isVisible() { return visible.get(); }
-	public void setVisible(boolean visible) { this.visible.set(visible); }
-	public ReadOnlyBooleanProperty visibleProperty() { return visible.getReadOnlyProperty(); }
+	private final ReadOnlyBooleanWrapper visible = new ReadOnlyBooleanWrapper(
+		false);
+
+	public boolean isVisible() {
+		return visible.get();
+	}
+
+	public void setVisible(boolean visible) {
+		this.visible.set(visible);
+	}
+
+	public ReadOnlyBooleanProperty visibleProperty() {
+		return visible.getReadOnlyProperty();
+	}
 
 	Path getParentPath() {
 		Path path = getPath();
 		return (path != null) ? path.getParent() : null;
 	}
-	
+
 	public void textChanged() {
 		textChanged(textArea.getText());
 	}
@@ -373,13 +426,12 @@ public class MarkdownEditorPane
 			findReplacePane.addListener(findHitsChangeListener);
 		}
 
-		if (isReadOnly())
-			newText = "";
+		if (isReadOnly()) newText = "";
 
 		Node astRoot = parseMarkdown(newText);
 
-		//if (Options.isShowImagesEmbedded())
-		//	EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
+		// if (Options.isShowImagesEmbedded())
+		// EmbeddedImage.replaceImageSegments(textArea, astRoot, getParentPath());
 
 		applyHighlighting(astRoot);
 
@@ -393,19 +445,17 @@ public class MarkdownEditorPane
 
 	Node parseMarkdown(String text) {
 		if (parser == null) {
-			parser = Parser.builder()
-				.extensions(MarkdownExtensions.getFlexmarkExtensions(Options.getMarkdownRenderer()))
-				.build();
+			parser = Parser.builder().extensions(MarkdownExtensions
+				.getFlexmarkExtensions(Options.getMarkdownRenderer())).build();
 		}
 		return parser.parse(text);
 	}
 
 	private void applyHighlighting(Node astRoot) {
 		List<ExtraStyledRanges> extraStyledRanges = findReplacePane.hasHits()
-			? Arrays.asList(
-				new ExtraStyledRanges("hit", findReplacePane.getHits()),
-				new ExtraStyledRanges("hit-active", Arrays.asList(findReplacePane.getActiveHit())))
-			: null;
+			? Arrays.asList(new ExtraStyledRanges("hit", findReplacePane.getHits()),
+				new ExtraStyledRanges("hit-active", Arrays.asList(findReplacePane
+					.getActiveHit()))) : null;
 
 		MarkdownSyntaxHighlighter.highlight(textArea, astRoot, extraStyledRanges);
 	}
@@ -435,7 +485,8 @@ public class MarkdownEditorPane
 		if (showLineNo && lineNumberGutterFactory == null) {
 			lineNumberGutterFactory = new LineNumberGutterFactory(textArea);
 			overlayGraphicFactory.addGutterFactory(lineNumberGutterFactory);
-		} else if (!showLineNo && lineNumberGutterFactory != null) {
+		}
+		else if (!showLineNo && lineNumberGutterFactory != null) {
 			overlayGraphicFactory.removeGutterFactory(lineNumberGutterFactory);
 			lineNumberGutterFactory = null;
 		}
@@ -446,18 +497,20 @@ public class MarkdownEditorPane
 		if (showWhitespace && whitespaceOverlayFactory == null) {
 			whitespaceOverlayFactory = new WhitespaceOverlayFactory();
 			overlayGraphicFactory.addOverlayFactory(whitespaceOverlayFactory);
-		} else if (!showWhitespace && whitespaceOverlayFactory != null) {
+		}
+		else if (!showWhitespace && whitespaceOverlayFactory != null) {
 			overlayGraphicFactory.removeOverlayFactory(whitespaceOverlayFactory);
 			whitespaceOverlayFactory = null;
 		}
 	}
 
-	//private void updateShowImagesEmbedded() {
-	//	if (Options.isShowImagesEmbedded())
-	//		EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(), getParentPath());
-	//	else
-	//		EmbeddedImage.removeAllImageSegments(textArea);
-	//}
+	// private void updateShowImagesEmbedded() {
+	// if (Options.isShowImagesEmbedded())
+	// EmbeddedImage.replaceImageSegments(textArea, getMarkdownAST(),
+	// getParentPath());
+	// else
+	// EmbeddedImage.removeAllImageSegments(textArea);
+	// }
 
 	public void undo() {
 		textArea.getUndoManager().undo();
@@ -487,11 +540,10 @@ public class MarkdownEditorPane
 		SmartEdit.selectRange(textArea, anchor, caretPosition);
 	}
 
-	//---- context menu -------------------------------------------------------
+	// ---- context menu -------------------------------------------------------
 
 	private void showContextMenu(ContextMenuEvent e) {
-		if (e.isConsumed())
-			return;
+		if (e.isConsumed()) return;
 
 		// create context menu
 		if (contextMenu == null) {
@@ -501,10 +553,10 @@ public class MarkdownEditorPane
 
 		// update context menu
 		CharacterHit hit = textArea.hit(e.getX(), e.getY());
-		updateContextMenu(hit.getCharacterIndex().orElse(-1), hit.getInsertionIndex());
+		updateContextMenu(hit.getCharacterIndex().orElse(-1), hit
+			.getInsertionIndex());
 
-		if (contextMenu.getItems().isEmpty())
-			return;
+		if (contextMenu.getItems().isEmpty()) return;
 
 		// show context menu
 		contextMenu.show(textArea, e.getScreenX(), e.getScreenY());
@@ -512,8 +564,7 @@ public class MarkdownEditorPane
 	}
 
 	private void hideContextMenu(MouseEvent e) {
-		if (contextMenu != null)
-			contextMenu.hide();
+		if (contextMenu != null) contextMenu.hide();
 	}
 
 	private void initContextMenu() {
@@ -524,11 +575,11 @@ public class MarkdownEditorPane
 		SmartEditActions.updateContextMenu(this, contextMenu, characterIndex);
 	}
 
-	//---- find/replace -------------------------------------------------------
+	// ---- find/replace -------------------------------------------------------
 
 	public void find(boolean replace) {
-		if (borderPane.getBottom() == null)
-			borderPane.setBottom(findReplacePane.getNode());
+		if (borderPane.getBottom() == null) borderPane.setBottom(findReplacePane
+			.getNode());
 
 		findReplacePane.show(replace, true);
 	}
@@ -540,13 +591,11 @@ public class MarkdownEditorPane
 			return;
 		}
 
-		if (next)
-			findReplacePane.findNext();
-		else
-			findReplacePane.findPrevious();
+		if (next) findReplacePane.findNext();
+		else findReplacePane.findPrevious();
 	}
 
-	//---- drag & drop --------------------------------------------------------
+	// ---- drag & drop --------------------------------------------------------
 
 	private void onDragEntered(DragEvent event) {
 		// create drag caret
@@ -557,7 +606,7 @@ public class MarkdownEditorPane
 		}
 
 		// show drag caret
-        dragCaret.setShowCaret(CaretVisibility.ON);
+		dragCaret.setShowCaret(CaretVisibility.ON);
 	}
 
 	private void onDragExited(DragEvent event) {
@@ -568,8 +617,8 @@ public class MarkdownEditorPane
 	private void onDragOver(DragEvent event) {
 		// check whether we can accept a drop
 		Dragboard db = event.getDragboard();
-		if (db.hasString() || db.hasFiles())
-			event.acceptTransferModes(TransferMode.COPY);
+		if (db.hasString() || db.hasFiles()) event.acceptTransferModes(
+			TransferMode.COPY);
 
 		// move drag caret to mouse location
 		if (event.isAccepted()) {
@@ -586,34 +635,40 @@ public class MarkdownEditorPane
 			// drop files (e.g. from project file tree)
 			List<File> files = db.getFiles();
 			if (!files.isEmpty()) {
-						
+
 				String encodedString;
 				try {
 					byte[] fileContent = FileUtils.readFileToByteArray(files.get(0));
 					encodedString = Base64.getEncoder().encodeToString(fileContent);
-				} catch (IOException e) {
+				}
+				catch (IOException e) {
 					// TODO Auto-generated catch block
-					//e.printStackTrace();
+					// e.printStackTrace();
 					encodedString = "IOException";
 				}
-				
+
 				String dataPrefix = "";
-				if (files.get(0).getName().endsWith("png")) 
-					dataPrefix = "data:image/png;base64,";
-				else if (files.get(0).getName().endsWith("jpg"))
-					dataPrefix = "data:image/jpg;base64,";
-				
-				String imageKey = dataPrefix + encodedString.substring(0, Math.min(encodedString.length(), 25)) + "..." + encodedString.substring(Math.max(0, encodedString.length() - 25));
+				if (files.get(0).getName().endsWith("png")) dataPrefix =
+					"data:image/png;base64,";
+				else if (files.get(0).getName().endsWith("jpg")) dataPrefix =
+					"data:image/jpg;base64,";
+
+				String imageKey = dataPrefix + encodedString.substring(0, Math.min(
+					encodedString.length(), 25)) + "..." + encodedString.substring(Math
+						.max(0, encodedString.length() - 25));
 				encodedString = dataPrefix + encodedString;
 				documentEditor.getDocument().putMedia(imageKey, encodedString);
-				smartEdit.insertEmbbedImageKey(dragCaret.getPosition(), files.get(0).getName(), imageKey);
+				smartEdit.insertEmbbedImageKey(dragCaret.getPosition(), files.get(0)
+					.getName(), imageKey);
 			}
-		} else if (db.hasString()) {
+		}
+		else if (db.hasString()) {
 			// drop text
 			String newText = db.getString();
 			int insertPosition = dragCaret.getPosition();
 			SmartEdit.insertText(textArea, insertPosition, newText);
-			SmartEdit.selectRange(textArea, insertPosition, insertPosition + newText.length());
+			SmartEdit.selectRange(textArea, insertPosition, insertPosition + newText
+				.length());
 		}
 
 		textArea.requestFocus();

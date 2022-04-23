@@ -52,6 +52,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package de.mpg.biochem.mars.fx.dialogs;
 
 import java.util.HashMap;
@@ -71,52 +72,59 @@ import javafx.stage.Window;
  *
  * @author Karl Duderstadt
  */
-public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDialog.SelectionResult> {
-	
-	protected HashMap<String,List<String>> tabNameToSegmentName;
-	
-	public SegmentTableSelectionDialog(Window owner, Set<List<String>> segmentTableNames, String title) {
+public class SegmentTableSelectionDialog extends
+	Dialog<SegmentTableSelectionDialog.SelectionResult>
+{
+
+	protected HashMap<String, List<String>> tabNameToSegmentName;
+
+	public SegmentTableSelectionDialog(Window owner,
+		Set<List<String>> segmentTableNames, String title)
+	{
 		setTitle(title);
 		initOwner(owner);
 		setResizable(true);
-		
+
 		DialogPane dialogPane = getDialogPane();
 		dialogPane.setMinWidth(200);
-		
+
 		HBox hbox = new HBox();
 		hbox.getChildren().add(new Label("Segment table "));
 		ComboBox<String> table = new ComboBox<String>();
-		
+
 		tabNameToSegmentName = new HashMap<String, List<String>>();
-		
+
 		for (List<String> segmentTableName : segmentTableNames) {
 			String tabName;
-			if (segmentTableName.get(2).equals(""))
-				tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
-			else 
-				tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
+			if (segmentTableName.get(2).equals("")) tabName = segmentTableName.get(
+				1) + " vs " + segmentTableName.get(0);
+			else tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(
+				0) + " - " + segmentTableName.get(2);
 			tabNameToSegmentName.put(tabName, segmentTableName);
 		}
-		
+
 		table.getItems().addAll(tabNameToSegmentName.keySet());
 		hbox.getChildren().add(table);
-		
+
 		dialogPane.setContent(hbox);
-		
+
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			return (dialogButton == ButtonType.OK && table.getSelectionModel().getSelectedItem() != null) ? new SelectionResult(table.getSelectionModel().getSelectedItem()) : null;
+			return (dialogButton == ButtonType.OK && table.getSelectionModel()
+				.getSelectedItem() != null) ? new SelectionResult(table
+					.getSelectionModel().getSelectedItem()) : null;
 		});
 	}
-	
+
 	public class SelectionResult {
+
 		public final String tableName;
-		
+
 		public SelectionResult(String tableName) {
 			this.tableName = tableName;
 		}
-		
+
 		public List<String> getSegmentTableName() {
 			return tabNameToSegmentName.get(tableName);
 		}

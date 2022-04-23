@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import javafx.event.Event;
@@ -37,11 +38,12 @@ public abstract class MoleculeEvent extends Event {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final EventType<MoleculeEvent> MOLECULE_EVENT = new EventType<>(ANY, "MOLECULE_EVENT");
+	public static final EventType<MoleculeEvent> MOLECULE_EVENT = new EventType<>(
+		ANY, "MOLECULE_EVENT");
 
-    public MoleculeEvent(EventType<? extends Event> eventType) {
-        super(eventType);
-    }
+	public MoleculeEvent(EventType<? extends Event> eventType) {
+		super(eventType);
+	}
 
-    public abstract void invokeHandler(MoleculeEventHandler handler);
+	public abstract void invokeHandler(MoleculeEventHandler handler);
 }

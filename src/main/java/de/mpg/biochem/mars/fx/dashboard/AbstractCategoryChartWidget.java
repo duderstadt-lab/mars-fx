@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.ArrayList;
@@ -47,15 +48,16 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
-public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidget
-		implements MarsDashboardWidget, Initializable {
+public abstract class AbstractCategoryChartWidget extends
+	AbstractScriptableWidget implements MarsDashboardWidget, Initializable
+{
 
 	protected XYChart barChart;
 	protected MarsCategoryAxis xAxis;
 	protected MarsNumericAxis yAxis;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
-			Arrays.asList("xlabel", "ylabel", "title", "xvalues", "yvalues"));
+		Arrays.asList("xlabel", "ylabel", "title", "xvalues", "yvalues"));
 
 	@Override
 	public void initialize() {
@@ -63,10 +65,11 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 
 		if (lang.getLanguageName().equals("Conda Python 3")) {
 			setContent(getIcon(), new BorderPane());
-		} else {
+		}
+		else {
 			xAxis = new MarsCategoryAxis("Categories");
 			xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-	
+
 			yAxis = new MarsNumericAxis();
 			yAxis.setName("Frequency");
 			yAxis.setMinorTickVisible(false);
@@ -74,7 +77,7 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
 			// yAxis.setTickLabelFormatter(new MarsIntegerFormatter());
-	
+
 			barChart = new XYChart(xAxis, yAxis);
 			barChart.setAnimated(false);
 			barChart.getRenderers().clear();
@@ -83,22 +86,23 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 			renderer.setDrawBars(true);
 			renderer.setBarWidthPercentage(70);
 			renderer.setDrawMarker(false);
-	
-			// Make sure this is set to false. Otherwise second to last points seems to be
+
+			// Make sure this is set to false. Otherwise second to last points seems
+			// to be
 			// lost :(...
 			renderer.pointReductionProperty().set(false);
 			barChart.getRenderers().add(renderer);
 			barChart.setLegend(null);
 			barChart.horizontalGridLinesVisibleProperty().set(false);
 			barChart.verticalGridLinesVisibleProperty().set(false);
-			
+
 			barChart.setTriggerDistance(0);
-			
+
 			barChart.setPrefSize(100, 100);
 			barChart.setPadding(new Insets(10, 20, 10, 10));
 			setContent(getIcon(), barChart);
 		}
-		
+
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
 	}
@@ -107,20 +111,19 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 	public void run() {
 		Map<String, Object> outputs = runScript();
 
-		if (outputs == null)
-			return;
+		if (outputs == null) return;
 
 		if (lang.getLanguageName().equals("Conda Python 3")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;
 			}
-			
+
 			imgsrc = (String) outputs.get("imgsrc");
 			loadImage();
 			return;
 		}
-		
+
 		for (String field : requiredGlobalFields)
 			if (!outputs.containsKey(field)) {
 				writeToLog("required output " + field + " is missing.");
@@ -140,8 +143,8 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 
 		final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
 
-		if (outputs.containsKey("color"))
-			dataSet.setStyle("fillColor:" + (String) outputs.get("color") + ";");
+		if (outputs.containsKey("color")) dataSet.setStyle("fillColor:" +
+			(String) outputs.get("color") + ";");
 
 		List<String> categories = new ArrayList<String>();
 
@@ -151,6 +154,7 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 		}
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				xAxis.setName(xLabel);
@@ -160,11 +164,13 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 					yAxis.setAutoRanging(false);
 					yAxis.setMin((Double) outputs.get("ymin"));
 					yAxis.setMax((Double) outputs.get("ymax"));
-				} else if (outputs.containsKey("ymax")) {
+				}
+				else if (outputs.containsKey("ymax")) {
 					yAxis.setAutoRanging(false);
 					yAxis.setMin(0.0);
 					yAxis.setMax((Double) outputs.get("ymax"));
-				} else if (outputs.containsKey("ymin")) {
+				}
+				else if (outputs.containsKey("ymin")) {
 					yAxis.setAutoRanging(true);
 				}
 
@@ -172,7 +178,7 @@ public abstract class AbstractCategoryChartWidget extends AbstractScriptableWidg
 				barChart.setTitle(title);
 				barChart.getDatasets().clear();
 				barChart.getDatasets().add(dataSet);
-				
+
 				Platform.runLater(() -> barChart.layoutChildren());
 			}
 		});

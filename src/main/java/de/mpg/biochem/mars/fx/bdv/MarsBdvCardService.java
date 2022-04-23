@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.bdv;
 
 import java.util.HashMap;
@@ -44,7 +45,10 @@ import org.scijava.service.Service;
 import net.imagej.ImageJService;
 
 @Plugin(type = Service.class)
-public class MarsBdvCardService extends AbstractPTService<MarsBdvCard> implements ImageJService {
+public class MarsBdvCardService extends AbstractPTService<MarsBdvCard>
+	implements ImageJService
+{
+
 	@Parameter
 	private PluginService plugins;
 
@@ -73,8 +77,7 @@ public class MarsBdvCardService extends AbstractPTService<MarsBdvCard> implement
 		for (String name : cards.keySet()) {
 			final PluginInfo<MarsBdvCard> info = cards.get(name);
 
-			if (info.getPluginType().equals(clazz))
-				cardsOfType.add(name);
+			if (info.getPluginType().equals(clazz)) cardsOfType.add(name);
 		}
 		return cardsOfType;
 	}

@@ -70,25 +70,23 @@ import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 /**
- * Lays out children in center and bottom positions.
- * Uses animation to slide-in bottom node.
+ * Lays out children in center and bottom positions. Uses animation to slide-in
+ * bottom node.
  *
  * @author Karl Tauber
  */
-public class BottomSlidePane
-	extends Pane
-{
+public class BottomSlidePane extends Pane {
+
 	private final DoubleProperty bottomVisibility = new SimpleDoubleProperty(1);
 
 	public BottomSlidePane() {
-		ChangeListener<? super Node> addRemoveChildListener = (ov, oldNode, newNode) -> {
-			if (oldNode != null)
-				getChildren().remove(oldNode);
+		ChangeListener<? super Node> addRemoveChildListener = (ov, oldNode,
+			newNode) -> {
+			if (oldNode != null) getChildren().remove(oldNode);
 			if (newNode != null) {
 				getChildren().add(newNode);
 
-				if (ov == bottomProperty())
-					showBottom();
+				if (ov == bottomProperty()) showBottom();
 			}
 		};
 		centerProperty().addListener(addRemoveChildListener);
@@ -103,22 +101,39 @@ public class BottomSlidePane
 
 	// 'center' property
 	private final ObjectProperty<Node> center = new SimpleObjectProperty<>();
-	public Node getCenter() { return center.get(); }
-	public void setCenter(Node center) { this.center.set(center); }
-	public ObjectProperty<Node> centerProperty() { return center; }
+
+	public Node getCenter() {
+		return center.get();
+	}
+
+	public void setCenter(Node center) {
+		this.center.set(center);
+	}
+
+	public ObjectProperty<Node> centerProperty() {
+		return center;
+	}
 
 	// 'bottom' property
 	private final ObjectProperty<Node> bottom = new SimpleObjectProperty<>();
-	public Node getBottom() { return bottom.get(); }
-	public void setBottom(Node bottom) { this.bottom.set(bottom); }
-	public ObjectProperty<Node> bottomProperty() { return bottom; }
+
+	public Node getBottom() {
+		return bottom.get();
+	}
+
+	public void setBottom(Node bottom) {
+		this.bottom.set(bottom);
+	}
+
+	public ObjectProperty<Node> bottomProperty() {
+		return bottom;
+	}
 
 	private void showBottom() {
 		bottomVisibility.set(0);
 		KeyValue keyValue = new KeyValue(bottomVisibility, 1);
 		Duration duration = Duration.millis(100);
-		new Timeline(new KeyFrame(duration, keyValue))
-			.play();
+		new Timeline(new KeyFrame(duration, keyValue)).play();
 	}
 
 	@Override
@@ -134,10 +149,11 @@ public class BottomSlidePane
 			double bottomPrefHeight = bottom.prefHeight(-1);
 			bottomHeight = bottomPrefHeight * bottomVisibility.get();
 
-			layoutInArea(bottom, 0, height - bottomHeight, width, bottomPrefHeight, 0, HPos.LEFT, VPos.BOTTOM);
+			layoutInArea(bottom, 0, height - bottomHeight, width, bottomPrefHeight, 0,
+				HPos.LEFT, VPos.BOTTOM);
 		}
 
-		if (center != null)
-			layoutInArea(center, 0, 0, width, height - bottomHeight, 0, HPos.CENTER, VPos.CENTER);
+		if (center != null) layoutInArea(center, 0, 0, width, height - bottomHeight,
+			0, HPos.CENTER, VPos.CENTER);
 	}
 }

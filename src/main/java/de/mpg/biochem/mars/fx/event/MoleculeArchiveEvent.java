@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -42,18 +43,24 @@ public abstract class MoleculeArchiveEvent extends Event {
 	 * , I extends MarsImageMetadata, P extends MoleculeArchiveProperties
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_EVENT = new EventType<>(ANY, "MOLECULE_ARCHIVE_EVENT");
-	
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_EVENT =
+		new EventType<>(ANY, "MOLECULE_ARCHIVE_EVENT");
+
 	protected final MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
-    public MoleculeArchiveEvent(EventType<? extends Event> eventType, MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-        super(eventType);
-        this.archive = archive;
-    }
+	public MoleculeArchiveEvent(EventType<? extends Event> eventType,
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		super(eventType);
+		this.archive = archive;
+	}
 
-    public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
-    	return archive;
-    }
-    
-    public abstract void invokeHandler(MoleculeArchiveEventHandler handler);
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
+		return archive;
+	}
+
+	public abstract void invokeHandler(MoleculeArchiveEventHandler handler);
 }

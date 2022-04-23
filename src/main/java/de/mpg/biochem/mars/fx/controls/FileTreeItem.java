@@ -68,16 +68,16 @@ import javafx.scene.control.TreeItem;
 
 /**
  * The {@link TreeItem} type used with the {@link FileTreeView} control.
- *
  * Refreshes its children recursively when expanding this item.
  *
  * @author Karl Tauber
  */
-public class FileTreeItem
-	extends TreeItem<File>
-{
-	private static final Comparator<File> FILE_COMPARATOR = (f1, f2) -> f1.getName().compareToIgnoreCase(f2.getName());
-	private static final Comparator<TreeItem<File>> ITEM_COMPARATOR = (i1, i2) -> FILE_COMPARATOR.compare(i1.getValue(), i2.getValue());
+public class FileTreeItem extends TreeItem<File> {
+
+	private static final Comparator<File> FILE_COMPARATOR = (f1, f2) -> f1
+		.getName().compareToIgnoreCase(f2.getName());
+	private static final Comparator<TreeItem<File>> ITEM_COMPARATOR = (i1,
+		i2) -> FILE_COMPARATOR.compare(i1.getValue(), i2.getValue());
 
 	private final FilenameFilter filter;
 
@@ -104,9 +104,9 @@ public class FileTreeItem
 			// add expanded listener only to non-leafs (to safe memory)
 			if (!leaf && !expandedListenerAdded) {
 				expandedListenerAdded = true;
-				expandedProperty().addListener((observable, oldExpanded, newExpanded) -> {
-					if (newExpanded)
-						refresh();
+				expandedProperty().addListener((observable, oldExpanded,
+					newExpanded) -> {
+					if (newExpanded) refresh();
 				});
 			}
 		}
@@ -139,7 +139,8 @@ public class FileTreeItem
 
 	public void refresh() {
 		if (leafInitialized) {
-			// check whether file has changed from directory to normal file or vice versa
+			// check whether file has changed from directory to normal file or vice
+			// versa
 			boolean oldLeaf = leaf;
 			leafInitialized = false;
 			boolean newLeaf = isLeaf();
@@ -150,8 +151,7 @@ public class FileTreeItem
 			}
 		}
 
-		if (!childrenInitialized || isLeaf())
-			return;
+		if (!childrenInitialized || isLeaf()) return;
 
 		// get current files
 		ObservableList<TreeItem<File>> children = super.getChildren();
@@ -166,22 +166,20 @@ public class FileTreeItem
 		HashSet<File> addedFiles = new HashSet<>(Arrays.asList(newFiles));
 		ArrayList<TreeItem<File>> removedFiles = new ArrayList<>();
 		for (TreeItem<File> item : children) {
-			if (!addedFiles.remove(item.getValue()))
-				removedFiles.add(item);
+			if (!addedFiles.remove(item.getValue())) removedFiles.add(item);
 		}
 
 		// remove files
-		if (!removedFiles.isEmpty())
-			children.removeAll(removedFiles);
+		if (!removedFiles.isEmpty()) children.removeAll(removedFiles);
 
 		// add files
 		for (File file : addedFiles)
-			Utils.addSorted(children, new FileTreeItem(file, filter), ITEM_COMPARATOR);
+			Utils.addSorted(children, new FileTreeItem(file, filter),
+				ITEM_COMPARATOR);
 
 		// refresh loaded children
 		for (TreeItem<File> item : children) {
-			if (item instanceof FileTreeItem)
-				((FileTreeItem)item).refresh();
+			if (item instanceof FileTreeItem) ((FileTreeItem) item).refresh();
 		}
 	}
 }

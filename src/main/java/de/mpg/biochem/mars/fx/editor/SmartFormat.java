@@ -96,15 +96,13 @@ import javafx.scene.input.KeyEvent;
 /**
  * Smart Markdown text formatting methods.
  *
- * @author Karl Tauber
- * 
- * Small update for compatability with flexmark 0.62.2
- * 
+ * @author Karl Tauber Small update for compatability with flexmark 0.62.2
  * @author Karl Duderstadt
  */
-class SmartFormat
-{
-	private static final ServiceLoader<SmartFormatAddon> addons = ServiceLoader.load(SmartFormatAddon.class);
+class SmartFormat {
+
+	private static final ServiceLoader<SmartFormatAddon> addons = ServiceLoader
+		.load(SmartFormatAddon.class);
 
 	private final MarkdownEditorPane editor;
 	private final MarkdownTextArea textArea;
@@ -120,36 +118,40 @@ class SmartFormat
 
 	void format(boolean formatSelectionOnly, String oldMarkdown) {
 		Node markdownAST = editor.getMarkdownAST();
-		if (markdownAST == null)
-			return;
+		if (markdownAST == null) return;
 
 		// find paragraphs in old markdown
 		HashSet<BasedSequence> oldParagraphs = new HashSet<>();
 		if (oldMarkdown != null) {
 			Node oldMarkdownAST = editor.parseMarkdown(oldMarkdown);
 			NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 				@Override
-				 public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
-				     if (node instanceof Paragraph || node instanceof HtmlBlock) {
+				public void processNode(Node node, boolean withChildren,
+					BiConsumer<Node, Visitor<Node>> processor)
+				{
+					if (node instanceof Paragraph || node instanceof HtmlBlock) {
 						oldParagraphs.add(node.getChars());
-					} else if (withChildren)
-						processChildren(node, processor);
-				 }
+					}
+					else if (withChildren) processChildren(node, processor);
+				}
 			};
 			visitor.visit(oldMarkdownAST);
 		}
 
-		IndexRange selectedLinesRange = formatSelectionOnly ? editor.getSmartEdit().getSelectedLinesRange(false) : null;
+		IndexRange selectedLinesRange = formatSelectionOnly ? editor.getSmartEdit()
+			.getSelectedLinesRange(false) : null;
 		IndexRange selection = textArea.getSelection();
 		int wrapLength = Options.getWrapLineLength();
 
 		// find and format paragraphs
-		List<Pair<Block, String>> formattedParagraphs = formatParagraphs(markdownAST, wrapLength, selectedLinesRange, oldParagraphs);
-		if (formattedParagraphs.isEmpty())
-			return;
+		List<Pair<Block, String>> formattedParagraphs = formatParagraphs(
+			markdownAST, wrapLength, selectedLinesRange, oldParagraphs);
+		if (formattedParagraphs.isEmpty()) return;
 
 		// replace text of formatted paragraphs
-		MultiChangeBuilder<?, ?, ?> multiChange = textArea.createMultiChange(formattedParagraphs.size());
+		MultiChangeBuilder<?, ?, ?> multiChange = textArea.createMultiChange(
+			formattedParagraphs.size());
 		for (Pair<Block, String> pair : formattedParagraphs) {
 			Block paragraph = pair.getFirst();
 			String newText = pair.getSecond();
@@ -162,33 +164,37 @@ class SmartFormat
 		SmartEdit.commitMultiChange(textArea, multiChange);
 
 		// make sure that selection is not out of bounds if text becomes shorter
-		SmartEdit.selectRange(textArea, Math.min(selection.getStart(), textArea.getLength()), Math.min(selection.getEnd(), textArea.getLength()));
+		SmartEdit.selectRange(textArea, Math.min(selection.getStart(), textArea
+			.getLength()), Math.min(selection.getEnd(), textArea.getLength()));
 	}
 
-	/*private*/ List<Pair<Block, String>> formatParagraphs(Node markdownAST, int wrapLength, IndexRange selection, HashSet<BasedSequence> oldParagraphs) {
+	/*private*/ List<Pair<Block, String>> formatParagraphs(Node markdownAST,
+		int wrapLength, IndexRange selection, HashSet<BasedSequence> oldParagraphs)
+	{
 		ArrayList<Pair<Block, String>> formattedParagraphs = new ArrayList<>();
-		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {			
+		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 			@Override
-			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+			public void processNode(Node node, boolean withChildren,
+				BiConsumer<Node, Visitor<Node>> processor)
+			{
 				if (node instanceof Paragraph || node instanceof HtmlBlock) {
-					if (selection != null && !isNodeSelected(node, selection))
-						return;
+					if (selection != null && !isNodeSelected(node, selection)) return;
 
 					if (oldParagraphs != null && oldParagraphs.contains(node.getChars()))
 						return; // ignore unmodified paragraphs
 
-					String newText = (node instanceof Paragraph)
-						? formatParagraph((Paragraph) node, wrapLength)
-						: formatHtmlBlock((HtmlBlock) node, wrapLength);
+					String newText = (node instanceof Paragraph) ? formatParagraph(
+						(Paragraph) node, wrapLength) : formatHtmlBlock((HtmlBlock) node,
+							wrapLength);
 
 					// append trailing line separator (if necessary)
-					if (node.getChars().endsWith("\n"))
-						newText += "\n";
+					if (node.getChars().endsWith("\n")) newText += "\n";
 
-					if (!node.getChars().equals(newText, false))
-						formattedParagraphs.add(new Pair<>((Block) node, newText));
-				} else if (withChildren)
-					processChildren(node, processor);
+					if (!node.getChars().equals(newText, false)) formattedParagraphs.add(
+						new Pair<>((Block) node, newText));
+				}
+				else if (withChildren) processChildren(node, processor);
 			}
 		};
 		visitor.visit(markdownAST);
@@ -196,7 +202,8 @@ class SmartFormat
 	}
 
 	private boolean isNodeSelected(Node node, IndexRange selection) {
-		return node.getStartOffset() <= selection.getEnd() && node.getEndOffset() > selection.getStart();
+		return node.getStartOffset() <= selection.getEnd() && node
+			.getEndOffset() > selection.getStart();
 	}
 
 	private String formatParagraph(Paragraph paragraph, int wrapLength) {
@@ -207,8 +214,8 @@ class SmartFormat
 			char[] chars = new char[firstindent.length()];
 			Arrays.fill(chars, ' ');
 			indent = new String(chars);
-		} else if (block instanceof BlockQuote)
-			indent = firstindent;
+		}
+		else if (block instanceof BlockQuote) indent = firstindent;
 
 		// collect the paragraph text
 		StringBuilder buf = new StringBuilder(paragraph.getTextLength());
@@ -230,42 +237,44 @@ class SmartFormat
 	}
 
 	/**
-	 * Returns the indent of the paragraph, which is the characters between
-	 * the start of the line and the first character of the paragraph.
+	 * Returns the indent of the paragraph, which is the characters between the
+	 * start of the line and the first character of the paragraph.
 	 */
 	private String paragraphIndent(Paragraph paragraph) {
 		int paraStartOffset = paragraph.getStartOffset();
-		int paraLineStartOffset = paragraph.getDocument().getChars().startOfLine(paraStartOffset);
-		return (paraStartOffset > paraLineStartOffset)
-			? paragraph.getDocument().getChars().subSequence(paraLineStartOffset, paraStartOffset).toString()
+		int paraLineStartOffset = paragraph.getDocument().getChars().startOfLine(
+			paraStartOffset);
+		return (paraStartOffset > paraLineStartOffset) ? paragraph.getDocument()
+			.getChars().subSequence(paraLineStartOffset, paraStartOffset).toString()
 			: "";
 	}
 
 	/**
-	 * Collects the text of a single paragraph.
-	 *
-	 * Replaces:
-	 *   - tabs with spaces
-	 *   - newlines with spaces (may occur in Code nodes)
-	 *   - soft line breaks with spaces
-	 *   - hard line breaks with special marker characters
-	 *   - spaces and tabs in special nodes, that should not formatted, with marker characters
+	 * Collects the text of a single paragraph. Replaces: - tabs with spaces -
+	 * newlines with spaces (may occur in Code nodes) - soft line breaks with
+	 * spaces - hard line breaks with special marker characters - spaces and tabs
+	 * in special nodes, that should not formatted, with marker characters
 	 */
 	private void collectFormattableText(StringBuilder buf, Node node) {
 		for (Node n = node.getFirstChild(); n != null; n = n.getNext()) {
 			if (n instanceof Text) {
-				buf.append(n.getChars().toString().replace('\t', ' ').replace('\n', ' '));
-			} else if (n instanceof DelimitedNode) {
+				buf.append(n.getChars().toString().replace('\t', ' ').replace('\n',
+					' '));
+			}
+			else if (n instanceof DelimitedNode) {
 				// italic, bold and code
 				buf.append(((DelimitedNode) n).getOpeningMarker());
 				collectFormattableText(buf, n);
 				buf.append(((DelimitedNode) n).getClosingMarker());
-			} else if (n instanceof SoftLineBreak) {
+			}
+			else if (n instanceof SoftLineBreak) {
 				buf.append(' ');
-			} else if (n instanceof HardLineBreak) {
+			}
+			else if (n instanceof HardLineBreak) {
 				buf.append(' ').append(n.getChars().startsWith("\\")
 					? HARD_LINE_BREAK_BACKSLASH : HARD_LINE_BREAK_SPACES).append(' ');
-			} else {
+			}
+			else {
 				// other text that should be not wrapped or formatted
 				buf.append(protectWhitespace(n.getChars().toString()));
 			}
@@ -281,10 +290,12 @@ class SmartFormat
 	}
 
 	/**
-	 * Formats the given text by merging multiple spaces into one space
-	 * and wrapping lines.
+	 * Formats the given text by merging multiple spaces into one space and
+	 * wrapping lines.
 	 */
-	private String formatText(String text, int wrapLength, String indent, int firstIndent) {
+	private String formatText(String text, int wrapLength, String indent,
+		int firstIndent)
+	{
 		String[] words = text.split(" +");
 
 		StringBuilder buf = new StringBuilder(text.length());
@@ -300,24 +311,23 @@ class SmartFormat
 
 			if (word.startsWith(LINE_BREAK)) {
 				// hard line break ("two spaces" or "backslash") or soft line break
-				buf.append(word.equals(HARD_LINE_BREAK_SPACES) ? "  \n"
-						: (word.equals(HARD_LINE_BREAK_BACKSLASH) ? "\\\n" : "\n"));
+				buf.append(word.equals(HARD_LINE_BREAK_SPACES) ? "  \n" : (word.equals(
+					HARD_LINE_BREAK_BACKSLASH) ? "\\\n" : "\n"));
 				lineLength = 0;
 				firstWord = true;
 				specialFirstLine = word.equals(SOFT_LINE_BREAK);
 				continue;
 			}
 
-			if (!firstWord &&
-				lineLength > indent.length() &&
-				lineLength + 1 + word.length() > wrapLength &&
-				allowWrapBeforeWord(word))
+			if (!firstWord && lineLength > indent.length() && lineLength + 1 + word
+				.length() > wrapLength && allowWrapBeforeWord(word))
 			{
 				// wrap
 				buf.append('\n');
 				lineLength = 0;
 				firstWord = true;
-			} else if (!firstWord && lineLength > indent.length()) {
+			}
+			else if (!firstWord && lineLength > indent.length()) {
 				// add space before word
 				buf.append(' ');
 				lineLength++;
@@ -328,10 +338,8 @@ class SmartFormat
 				int indentSize = 0;
 
 				if (specialIndent > 0) {
-					if (!specialFirstLine)
-						indentSize += specialIndent;
-					else if (indent.length() == 0)
-						indentSize += firstIndent;
+					if (!specialFirstLine) indentSize += specialIndent;
+					else if (indent.length() == 0) indentSize += firstIndent;
 				}
 
 				buf.append(indent);
@@ -352,12 +360,10 @@ class SmartFormat
 
 	private boolean allowWrapBeforeWord(String word) {
 		// avoid wrapping before '>' because this would create a blockquote
-		if (word.startsWith(">"))
-			return false;
+		if (word.startsWith(">")) return false;
 
 		// avoid wrapping before list markers
-		if (word.equals("-") || word.equals("+") || word.equals("*"))
-			return false;
+		if (word.equals("-") || word.equals("+") || word.equals("*")) return false;
 
 		// avoid wrapping before numbered list markers
 		if (Character.isDigit(word.charAt(0)) && word.matches("[0-9]+\\."))

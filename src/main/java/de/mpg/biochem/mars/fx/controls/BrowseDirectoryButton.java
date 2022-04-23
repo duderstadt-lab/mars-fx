@@ -65,25 +65,26 @@ import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
 
 /**
- * Button that opens a directory chooser to select a local directory for a URL in markdown.
+ * Button that opens a directory chooser to select a local directory for a URL
+ * in markdown.
  *
  * @author Karl Tauber
  */
-public class BrowseDirectoryButton
-	extends BrowseFileButton
-{
+public class BrowseDirectoryButton extends BrowseFileButton {
+
 	public BrowseDirectoryButton() {
-		setGraphic(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FOLDER_ALT, "1.2em"));
+		setGraphic(FontAwesomeIconFactory.get().createIcon(
+			FontAwesomeIcon.FOLDER_ALT, "1.2em"));
 		setTooltip(new Tooltip(Messages.get("BrowseDirectoryButton.tooltip")));
 	}
 
 	@Override
 	protected void browse(ActionEvent e) {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(Messages.get("BrowseDirectoryButton.chooser.title"));
+		directoryChooser.setTitle(Messages.get(
+			"BrowseDirectoryButton.chooser.title"));
 		directoryChooser.setInitialDirectory(getInitialDirectory());
 		File result = directoryChooser.showDialog(getScene().getWindow());
-		if (result != null)
-			updateUrl(result);
+		if (result != null) updateUrl(result);
 	}
 }

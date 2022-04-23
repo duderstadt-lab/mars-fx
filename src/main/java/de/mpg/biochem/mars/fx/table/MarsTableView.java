@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table;
 
 import java.util.Collection;
@@ -42,67 +43,65 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 
 public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
+
 	private MarsTable table;
-	
+
 	public MarsTableView(MarsTable table) {
 		this.table = table;
 		buildTableView();
 	}
-	
-	private void buildTableView() {
-		//first add index
-        TableColumn<MarsTableView.MarsTableRowObject, Object> rowIndexCol = new TableColumn<>("Index");
-        rowIndexCol.setCellValueFactory(param ->
-                new ReadOnlyObjectWrapper<>(param.getValue().getRowNumber())
-        );
-        rowIndexCol.setSortable(false);
-        getColumns().add(rowIndexCol);
-        
-        this.setItems(FXCollections.observableList(new MarsTableRowList()));
 
-        // add columns
-        for (int col = 0; col < table.getColumnCount(); col++) {
-        	String header = table.get(col).getHeader();
-            //final int finalIdx = col+1;
-            TableColumn<MarsTableView.MarsTableRowObject, Object> column = new TableColumn<>(header);
-            
-            if (table.get(col) instanceof DoubleColumn)
-	            column.setCellValueFactory(row ->
-	                    new ReadOnlyObjectWrapper<>(row.getValue().getValue(header))
-	            );
-            else
-            	column.setCellValueFactory(row ->
-                	new ReadOnlyObjectWrapper<>(row.getValue().getStringValue(header))
-            	);
-            
-            column.setSortable(false);
-            getColumns().add(column);
-        }
+	private void buildTableView() {
+		// first add index
+		TableColumn<MarsTableView.MarsTableRowObject, Object> rowIndexCol =
+			new TableColumn<>("Index");
+		rowIndexCol.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param
+			.getValue().getRowNumber()));
+		rowIndexCol.setSortable(false);
+		getColumns().add(rowIndexCol);
+
+		this.setItems(FXCollections.observableList(new MarsTableRowList()));
+
+		// add columns
+		for (int col = 0; col < table.getColumnCount(); col++) {
+			String header = table.get(col).getHeader();
+			// final int finalIdx = col+1;
+			TableColumn<MarsTableView.MarsTableRowObject, Object> column =
+				new TableColumn<>(header);
+
+			if (table.get(col) instanceof DoubleColumn) column.setCellValueFactory(
+				row -> new ReadOnlyObjectWrapper<>(row.getValue().getValue(header)));
+			else column.setCellValueFactory(row -> new ReadOnlyObjectWrapper<>(row
+				.getValue().getStringValue(header)));
+
+			column.setSortable(false);
+			getColumns().add(column);
+		}
 	}
-	
+
 	class MarsTableRowObject {
-		
+
 		private final int row;
-		
+
 		MarsTableRowObject(final int row) {
 			this.row = row;
 		}
-		
+
 		double getValue(String header) {
 			return table.getValue(header, row);
 		}
-		
+
 		String getStringValue(String header) {
 			return table.getStringValue(header, row);
 		}
-		
+
 		int getRowNumber() {
 			return row;
 		}
 	}
-	
+
 	class MarsTableRowList implements List<MarsTableRowObject> {
-		
+
 		public MarsTableRowList() {}
 
 		@Override
@@ -164,7 +163,9 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 		}
 
 		@Override
-		public boolean addAll(int index, Collection<? extends MarsTableRowObject> c) {
+		public boolean addAll(int index,
+			Collection<? extends MarsTableRowObject> c)
+		{
 			// TODO Auto-generated method stub
 			return false;
 		}
@@ -184,7 +185,7 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 		@Override
 		public void clear() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -201,7 +202,7 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 		@Override
 		public void add(int index, MarsTableRowObject element) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
@@ -237,23 +238,24 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 			return null;
 		}
 	}
-	
+
 	class MarsTableRowObjectListItr implements ListIterator<MarsTableRowObject> {
-	    private int index;
 
-	    MarsTableRowObjectListItr(int index) {
-	        this.index = index;
-	    }
+		private int index;
 
-	    public boolean hasNext() {
-	        return index < table.getRowCount();
-	    }
+		MarsTableRowObjectListItr(int index) {
+			this.index = index;
+		}
 
-	    public MarsTableRowObject next() {
-	        MarsTableRowObject obj = new MarsTableRowObject(index);
-	        index++;
-	        return obj;
-	    }
+		public boolean hasNext() {
+			return index < table.getRowCount();
+		}
+
+		public MarsTableRowObject next() {
+			MarsTableRowObject obj = new MarsTableRowObject(index);
+			index++;
+			return obj;
+		}
 
 		@Override
 		public boolean hasPrevious() {
@@ -262,7 +264,7 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 
 		@Override
 		public MarsTableRowObject previous() {
-			return new MarsTableRowObject(index-1);
+			return new MarsTableRowObject(index - 1);
 		}
 
 		@Override
@@ -278,19 +280,19 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 		@Override
 		public void remove() {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void set(MarsTableRowObject e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 
 		@Override
 		public void add(MarsTableRowObject e) {
 			// TODO Auto-generated method stub
-			
+
 		}
 	}
 

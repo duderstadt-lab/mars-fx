@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
@@ -38,13 +39,22 @@ import javafx.event.Event;
 import javafx.scene.Node;
 
 public interface PlotPane extends JsonConvertibleRecord {
+
 	public StyleSheetUpdater getStyleSheetUpdater();
+
 	public Node getNode();
+
 	public ArrayList<SubPlot> getCharts();
+
 	public ArrayList<String> getColumnNames();
+
 	public BooleanProperty fixXBoundsProperty();
+
 	public PlotOptionsPane getPlotOptionsPane();
+
 	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane);
+
 	public void hideSubPlotOptions();
+
 	public void fireEvent(Event event);
 }

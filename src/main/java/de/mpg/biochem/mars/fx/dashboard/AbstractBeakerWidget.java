@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
@@ -41,7 +42,8 @@ import javafx.scene.layout.BorderPane;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
-		implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+	implements MarsDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected Node node;
 
@@ -66,15 +68,14 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 	public void run() {
 		Map<String, Object> outputs = runScript();
 
-		if (outputs == null)
-			return;
-		
+		if (outputs == null) return;
+
 		if (lang.getLanguageName().equals("Conda Python 3")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;
 			}
-			
+
 			imgsrc = (String) outputs.get("imgsrc");
 			loadImage();
 			return;
@@ -88,6 +89,7 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 		node = (Node) outputs.get("node");
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				setContent(node);

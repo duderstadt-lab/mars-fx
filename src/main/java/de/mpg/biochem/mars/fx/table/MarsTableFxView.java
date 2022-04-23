@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table;
 
 import org.scijava.Context;
@@ -40,20 +41,24 @@ import org.scijava.ui.viewer.DisplayViewer;
 import de.mpg.biochem.mars.table.MarsTable;
 
 @Plugin(type = DisplayViewer.class, priority = Priority.NORMAL)
-public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements DisplayViewer<MarsTable> {
-	
+public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements
+	DisplayViewer<MarsTable>
+{
+
 	@Parameter
-    private Context context;
-	
-	//This method is called to create and display a window
-	//here we override it to make sure that calls like uiService.show( .. for MarsTable 
-	//will use this method automatically..
+	private Context context;
+
+	// This method is called to create and display a window
+	// here we override it to make sure that calls like uiService.show( .. for
+	// MarsTable
+	// will use this method automatically..
 	@Override
 	public void view(final UserInterface ui, final Display<?> d) {
-		MarsTable results = (MarsTable)d.get(0);
-		
-		//We also create a new window since we assume it is a new table...
-		MarsTableFxFrame marsTableFxFrame = new MarsTableFxFrame(results.getName(), results, context);
+		MarsTable results = (MarsTable) d.get(0);
+
+		// We also create a new window since we assume it is a new table...
+		MarsTableFxFrame marsTableFxFrame = new MarsTableFxFrame(results.getName(),
+			results, context);
 		marsTableFxFrame.init();
 	}
 
@@ -61,11 +66,12 @@ public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements
 	public boolean canView(final Display<?> d) {
 		if (d instanceof MarsTableFxDisplay) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public MarsTableFxDisplay getDisplay() {
 		return (MarsTableFxDisplay) super.getDisplay();
@@ -73,7 +79,7 @@ public class MarsTableFxView extends AbstractDisplayViewer<MarsTable> implements
 
 	@Override
 	public boolean isCompatible(UserInterface arg0) {
-		//Needs to be updated if all contexts are to be enabled beyond ImageJ
+		// Needs to be updated if all contexts are to be enabled beyond ImageJ
 		return true;
 	}
 }

@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Context;
@@ -34,18 +35,25 @@ import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculeCenterPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.DefaultMoleculePropertiesPane;
 import de.mpg.biochem.mars.molecule.Molecule;
 
-public class DefaultMoleculesTab extends AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane> {
+public class DefaultMoleculesTab extends
+	AbstractMoleculesTab<Molecule, DefaultMoleculeCenterPane, DefaultMoleculePropertiesPane>
+{
+
 	public DefaultMoleculesTab(final Context context) {
 		super(context);
 	}
 
 	@Override
-	public DefaultMoleculeCenterPane createMoleculeCenterPane(final Context context) {
+	public DefaultMoleculeCenterPane createMoleculeCenterPane(
+		final Context context)
+	{
 		return new DefaultMoleculeCenterPane(context);
 	}
 
 	@Override
-	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(final Context context) {
+	public DefaultMoleculePropertiesPane createMoleculePropertiesPane(
+		final Context context)
+	{
 		return new DefaultMoleculePropertiesPane(context);
 	}
 }

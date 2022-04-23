@@ -76,13 +76,11 @@ import javafx.scene.paint.Color;
  * @author Karl Tauber
  * @author Karl Duderstadt
  */
-public class Utils
-{
+public class Utils {
+
 	public static boolean safeEquals(Object o1, Object o2) {
-		if (o1 == o2)
-			return true;
-		if (o1 == null || o2 == null)
-			return false;
+		if (o1 == o2) return true;
+		if (o1 == null || o2 == null) return false;
 		return o1.equals(o2);
 	}
 
@@ -90,9 +88,10 @@ public class Utils
 		return isNullOrEmpty(value) ? defaultValue : value;
 	}
 
-	public static String trimAndDefaultIfEmpty(String value, String defaultValue) {
-		if (value != null)
-			value = value.trim();
+	public static String trimAndDefaultIfEmpty(String value,
+		String defaultValue)
+	{
+		if (value != null) value = value.trim();
 		return defaultIfEmpty(value, defaultValue);
 	}
 
@@ -114,46 +113,47 @@ public class Utils
 		return s.substring(0, i + 1);
 	}
 
-	public static void putPrefs(Preferences prefs, String key, String value, String def) {
-		if (value != def && !value.equals(def))
-			prefs.put(key, value);
-		else
-			prefs.remove(key);
+	public static void putPrefs(Preferences prefs, String key, String value,
+		String def)
+	{
+		if (value != def && !value.equals(def)) prefs.put(key, value);
+		else prefs.remove(key);
 	}
 
-	public static void putPrefsInt(Preferences prefs, String key, int value, int def) {
-		if (value != def)
-			prefs.putInt(key, value);
-		else
-			prefs.remove(key);
+	public static void putPrefsInt(Preferences prefs, String key, int value,
+		int def)
+	{
+		if (value != def) prefs.putInt(key, value);
+		else prefs.remove(key);
 	}
 
-	public static void putPrefsDouble(Preferences prefs, String key, double value, double def) {
-		if (value != def)
-			prefs.putDouble(key, value);
-		else
-			prefs.remove(key);
+	public static void putPrefsDouble(Preferences prefs, String key, double value,
+		double def)
+	{
+		if (value != def) prefs.putDouble(key, value);
+		else prefs.remove(key);
 	}
 
-	public static void putPrefsBoolean(Preferences prefs, String key, boolean value, boolean def) {
-		if (value != def)
-			prefs.putBoolean(key, value);
-		else
-			prefs.remove(key);
+	public static void putPrefsBoolean(Preferences prefs, String key,
+		boolean value, boolean def)
+	{
+		if (value != def) prefs.putBoolean(key, value);
+		else prefs.remove(key);
 	}
 
 	public static String[] getPrefsStrings(Preferences prefs, String key) {
 		ArrayList<String> arr = new ArrayList<>();
 		for (int i = 0; i < 10000; i++) {
 			String s = prefs.get(key + (i + 1), null);
-			if (s == null)
-				break;
+			if (s == null) break;
 			arr.add(s);
 		}
 		return arr.toArray(new String[arr.size()]);
 	}
 
-	public static void putPrefsStrings(Preferences prefs, String key, String[] strings) {
+	public static void putPrefsStrings(Preferences prefs, String key,
+		String[] strings)
+	{
 		for (int i = 0; i < strings.length; i++)
 			prefs.put(key + (i + 1), strings[i]);
 
@@ -162,36 +162,38 @@ public class Utils
 	}
 
 	@SuppressWarnings("unchecked")
-	public static <T extends Enum<T>> T getPrefsEnum(Preferences prefs, String key, T def) {
+	public static <T extends Enum<T>> T getPrefsEnum(Preferences prefs,
+		String key, T def)
+	{
 		String s = prefs.get(key, null);
-		if (s == null)
-			return def;
+		if (s == null) return def;
 		try {
 			return (T) Enum.valueOf(def.getClass(), s);
-		} catch (IllegalArgumentException ex) {
+		}
+		catch (IllegalArgumentException ex) {
 			return def;
 		}
 	}
 
-	public static <T extends Enum<T>> void putPrefsEnum(Preferences prefs, String key, T value, T def) {
-		if (value != def)
-			prefs.put(key, value.name());
-		else
-			prefs.remove(key);
+	public static <T extends Enum<T>> void putPrefsEnum(Preferences prefs,
+		String key, T value, T def)
+	{
+		if (value != def) prefs.put(key, value.name());
+		else prefs.remove(key);
 	}
 
 	public static <T> void addSorted(List<T> list, T element, Comparator<T> c) {
 		int index = Collections.binarySearch(list, element, c);
-		list.add((index < 0) ? ((-index)-1) : index, element);
+		list.add((index < 0) ? ((-index) - 1) : index, element);
 	}
 
 	public static boolean isImage(String filename) {
 		int sepIndex = filename.lastIndexOf('.');
-		if (sepIndex < 0 || (filename.length() - sepIndex - 1) != 3)
-			return false;
+		if (sepIndex < 0 || (filename.length() - sepIndex - 1) != 3) return false;
 
 		String ext = filename.substring(sepIndex + 1).toLowerCase();
-		return ext.equals("png") || ext.equals("gif") || ext.equals("jpg") || ext.equals("svg");
+		return ext.equals("png") || ext.equals("gif") || ext.equals("jpg") || ext
+			.equals("svg");
 	}
 
 	public static ScrollBar findVScrollBar(Node node) {
@@ -205,28 +207,29 @@ public class Utils
 	private static ScrollBar findScrollBar(Node node, Orientation orientation) {
 		Set<Node> scrollBars = node.lookupAll(".scroll-bar");
 		for (Node scrollBar : scrollBars) {
-			if (scrollBar instanceof ScrollBar &&
-				((ScrollBar)scrollBar).getOrientation() == orientation)
-			  return (ScrollBar) scrollBar;
+			if (scrollBar instanceof ScrollBar && ((ScrollBar) scrollBar)
+				.getOrientation() == orientation) return (ScrollBar) scrollBar;
 		}
 		return null;
 	}
 
 	public static void error(TextField textField, boolean error) {
-		textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("error"), error);
+		textField.pseudoClassStateChanged(PseudoClass.getPseudoClass("error"),
+			error);
 	}
 
 	public static void fixSpaceAfterDeadKey(Scene scene) {
-		scene.addEventFilter( KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
+		scene.addEventFilter(KeyEvent.KEY_TYPED, new EventHandler<KeyEvent>() {
+
 			private String lastCharacter;
 
 			@Override
 			public void handle(KeyEvent e) {
 				String character = e.getCharacter();
-				if(" ".equals(character) &&
-					("\u00B4".equals(lastCharacter) ||  // Acute accent
-					 "`".equals(lastCharacter) ||       // Grave accent
-					 "^".equals(lastCharacter)))        // Circumflex accent
+				if (" ".equals(character) && ("\u00B4".equals(lastCharacter) || // Acute
+																																				// accent
+					"`".equals(lastCharacter) || // Grave accent
+					"^".equals(lastCharacter))) // Circumflex accent
 				{
 					// avoid that the space character is inserted
 					e.consume();
@@ -236,12 +239,12 @@ public class Utils
 			}
 		});
 	}
-	
-	//convert transpart color to solid color...
+
+	// convert transpart color to solid color...
 	public static Color rgba2rgb(int red, int green, int blue, double alpha) {
-		return Color.web(String.format("rgb(%d, %d, %d)", 
-				(int) Math.floor((1 - alpha) * 255 + alpha * red + 0.5), 
-				(int) Math.floor((1 - alpha) * 255 + alpha * green + 0.5), 
-				(int) Math.floor((1 - alpha) * 255 + alpha * blue + 0.5)));
+		return Color.web(String.format("rgb(%d, %d, %d)", (int) Math.floor((1 -
+			alpha) * 255 + alpha * red + 0.5), (int) Math.floor((1 - alpha) * 255 +
+				alpha * green + 0.5), (int) Math.floor((1 - alpha) * 255 + alpha *
+					blue + 0.5)));
 	}
 }

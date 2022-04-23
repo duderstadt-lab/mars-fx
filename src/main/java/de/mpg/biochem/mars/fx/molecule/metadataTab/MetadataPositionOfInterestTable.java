@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
@@ -34,11 +35,13 @@ import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.Event;
 
-public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestTable implements MetadataSubPane {
+public class MetadataPositionOfInterestTable extends
+	AbstractPositionOfInterestTable implements MetadataSubPane
+{
 
-    public MetadataPositionOfInterestTable() {        
-        super();
-    }
+	public MetadataPositionOfInterestTable() {
+		super();
+	}
 
 	@Override
 	public void fireEvent(Event event) {
@@ -47,7 +50,8 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 
 	@Override
 	protected void fireIndicatorChangedEvent() {
-		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsMetadata) record));
+		getNode().fireEvent(new MetadataIndicatorChangedEvent(
+			(MarsMetadata) record));
 	}
 
 	@Override
@@ -58,12 +62,12 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.record = marsImageMetadata;
-    	loadData();
+		loadData();
 	}
 
 	@Override
 	public void handle(MetadataEvent event) {
 		event.invokeHandler(this);
-        event.consume();
+		event.consume();
 	}
 }

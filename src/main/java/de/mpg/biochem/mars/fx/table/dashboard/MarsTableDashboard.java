@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table.dashboard;
 
 import java.io.BufferedInputStream;
@@ -46,20 +47,24 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsUtil;
 
-public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidget> {
-	
+public class MarsTableDashboard extends
+	AbstractDashboard<MarsTableDashboardWidget>
+{
+
 	protected MarsTable table;
-	
+
 	public MarsTableDashboard(final Context context, MarsTable table) {
 		super(context);
 		this.table = table;
-		
+
 		discoverWidgets();
 	}
-	
+
 	@Override
 	public MarsTableDashboardWidget createWidget(String widgetName) {
-		MarsTableDashboardWidget widget = (MarsTableDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MarsTableDashboardWidget widget =
+			(MarsTableDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setTable(table);
 		widget.setParent(this);
 		widget.initialize();
@@ -68,35 +73,36 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MarsTableCategoryChartWidget",
-	                    "MarsTableHistogramWidget",
-	                    "MarsTableXYChartWidget",
-	                    "MarsTableBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList("MarsTableCategoryChartWidget",
+			"MarsTableHistogramWidget", "MarsTableXYChartWidget",
+			"MarsTableBubbleChartWidget"));
 	}
-	
+
 	public void setTable(MarsTable table) {
 		this.table = table;
 	}
-	
+
 	public MarsTable getTable() {
 		return table;
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MarsTableDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MarsTableDashboardWidget.class);
 	}
-	
+
 	@Override
 	public boolean importFromRoverFile(File roverFile) {
 		try {
-	 	   InputStream inputStream = new BufferedInputStream(new FileInputStream(roverFile));
-		   JsonFactory jfactory = new JsonFactory();
-		   JsonParser jParser = jfactory.createParser(inputStream);
-		   MarsUtil.readJsonObject(jParser, this, "marsTableDashboard");
-     	   jParser.close();
-     	   inputStream.close();
-		} catch (IOException e) {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "marsTableDashboard");
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
 			return false;
 		}
 		return true;

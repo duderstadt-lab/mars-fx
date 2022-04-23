@@ -26,13 +26,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import org.scijava.Context;
 
 import de.mpg.biochem.mars.metadata.MarsOMEMetadata;
 
-public class DefaultMetadataCenterPane extends AbstractMetadataCenterPane<MarsOMEMetadata> {
+public class DefaultMetadataCenterPane extends
+	AbstractMetadataCenterPane<MarsOMEMetadata>
+{
+
 	public DefaultMetadataCenterPane(final Context context) {
 		super(context);
 	}

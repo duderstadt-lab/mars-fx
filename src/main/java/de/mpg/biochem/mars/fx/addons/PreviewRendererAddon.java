@@ -60,8 +60,9 @@ import java.nio.file.Path;
 /**
  * @author Karl Tauber
  */
-public interface PreviewRendererAddon
-{
-    String preParse(String markdown, Path path);
-    String postRender(String html, Path path);
+public interface PreviewRendererAddon {
+
+	String preParse(String markdown, Path path);
+
+	String postRender(String html, Path path);
 }

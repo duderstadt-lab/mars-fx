@@ -62,21 +62,20 @@ import javafx.scene.control.Spinner;
  *
  * @author Karl Tauber
  */
-public class IntSpinner
-	extends Spinner<Integer>
-{
+public class IntSpinner extends Spinner<Integer> {
+
 	public IntSpinner() {
 		setEditable(true);
 		focusedProperty().addListener((ob, oldFocused, newFocused) -> {
-			if (!newFocused)
-				commit();
+			if (!newFocused) commit();
 		});
 	}
 
 	private void commit() {
 		try {
 			getValueFactory().setValue(Integer.parseInt(getEditor().getText()));
-		} catch (NumberFormatException ex) {
+		}
+		catch (NumberFormatException ex) {
 			// ignore
 		}
 	}

@@ -83,49 +83,56 @@ import javafx.scene.control.IndexRange;
  *
  * @author Karl Tauber
  */
-class MarkdownTextArea
-	extends GenericStyledArea<Collection<String>, Either<String, EmbeddedImage>, Collection<String>>
+class MarkdownTextArea extends
+	GenericStyledArea<Collection<String>, Either<String, EmbeddedImage>, Collection<String>>
 {
-	// suspendable scrollY value to reduce enormous amount of change events on estimatedScrollY and totalHeightEstimate
+
+	// suspendable scrollY value to reduce enormous amount of change events on
+	// estimatedScrollY and totalHeightEstimate
 	final SuspendableVal<Double> scrollY;
 	private Guard scrollYguard;
 
 	public MarkdownTextArea() {
-		super(
-			/* initialParagraphStyle */ Collections.<String>emptyList(),
-			/* applyParagraphStyle */ (paragraph, styleClasses) -> paragraph.getStyleClass().addAll(styleClasses),
-			/* initialTextStyle */ Collections.<String>emptyList(),
-			/* textOps */ SegmentOps.<Collection<String>>styledTextOps()._or(new EmbeddedImageOps<Collection<String>>(), (s1, s2) -> Optional.empty()),
-			/* preserveStyle */ false,
-			/* nodeFactory */ seg -> createNode(seg,
-				(text, styleClasses) -> text.getStyleClass().addAll(styleClasses))
-			);
+		super(/* initialParagraphStyle */ Collections.<String> emptyList(),
+			/* applyParagraphStyle */ (paragraph, styleClasses) -> paragraph
+				.getStyleClass().addAll(styleClasses),
+			/* initialTextStyle */ Collections.<String> emptyList(),
+			/* textOps */ SegmentOps.<Collection<String>> styledTextOps()._or(
+				new EmbeddedImageOps<Collection<String>>(), (s1, s2) -> Optional
+					.empty()), /* preserveStyle */ false,
+			/* nodeFactory */ seg -> createNode(seg, (text, styleClasses) -> text
+				.getStyleClass().addAll(styleClasses)));
 
 		// compute scrollY
 		scrollY = Val.create(() -> {
 			double value = estimatedScrollYProperty().getValue().doubleValue();
-			double maxValue = totalHeightEstimateProperty().getOrElse(0.).doubleValue() - getHeight();
+			double maxValue = totalHeightEstimateProperty().getOrElse(0.)
+				.doubleValue() - getHeight();
 			return (maxValue > 0) ? Math.min(Math.max(value / maxValue, 0), 1) : 0;
 		}, estimatedScrollYProperty(), totalHeightEstimateProperty()).suspendable();
 	}
 
-	private static Node createNode(StyledSegment<Either<String, EmbeddedImage>, Collection<String>> seg,
-			BiConsumer<? super TextExt, Collection<String>> applyStyle)
+	private static Node createNode(
+		StyledSegment<Either<String, EmbeddedImage>, Collection<String>> seg,
+		BiConsumer<? super TextExt, Collection<String>> applyStyle)
 	{
-		return seg.getSegment().unify(
-				text -> StyledTextArea.createStyledTextNode(text, seg.getStyle(), applyStyle),
-				EmbeddedImage::createNode);
+		return seg.getSegment().unify(text -> StyledTextArea.createStyledTextNode(
+			text, seg.getStyle(), applyStyle), EmbeddedImage::createNode);
 	}
 
 	@Override
-	public void replace(int start, int end, StyledDocument<Collection<String>, Either<String, EmbeddedImage>, Collection<String>> replacement) {
+	public void replace(int start, int end,
+		StyledDocument<Collection<String>, Either<String, EmbeddedImage>, Collection<String>> replacement)
+	{
 		suspendScrollYUntilLayout(() -> {
 			super.replace(start, end, replacement);
 		});
 	}
 
 	@Override
-	public void setStyleSpans(int from, StyleSpans<? extends Collection<String>> styleSpans) {
+	public void setStyleSpans(int from,
+		StyleSpans<? extends Collection<String>> styleSpans)
+	{
 		suspendScrollYUntilLayout(() -> {
 			super.setStyleSpans(from, styleSpans);
 		});
@@ -143,7 +150,8 @@ class MarkdownTextArea
 
 		try {
 			runnable.run();
-		} finally {
+		}
+		finally {
 			// release scrollY only if no layout pass is needed
 			// otherwise scrollY will be released in layoutChildren()
 			if (!isNeedsLayout()) {
@@ -158,10 +166,10 @@ class MarkdownTextArea
 		scrollY.suspendWhile(() -> {
 			super.layoutChildren();
 
-			// also layout children here to avoid unnecessary scrollY events when laying out VirtualFlow
+			// also layout children here to avoid unnecessary scrollY events when
+			// laying out VirtualFlow
 			for (Node child : getChildren()) {
-				if (child instanceof Parent)
-					((Parent)child).layout();
+				if (child instanceof Parent) ((Parent) child).layout();
 			}
 		});
 
@@ -181,14 +189,15 @@ class MarkdownTextArea
 	public void copy() {
 		IndexRange oldSelection = selectLineIfEmpty();
 		super.copy();
-		if (oldSelection != null)
-			selectRange(oldSelection.getStart(), oldSelection.getEnd());
+		if (oldSelection != null) selectRange(oldSelection.getStart(), oldSelection
+			.getEnd());
 	}
 
 	@Override
 	public void undo() {
 		@SuppressWarnings("unchecked")
-		List<PlainTextChange> nextUndo = (List<PlainTextChange>) getUndoManager().getNextUndo();
+		List<PlainTextChange> nextUndo = (List<PlainTextChange>) getUndoManager()
+			.getNextUndo();
 		if (nextUndo != null && !nextUndo.isEmpty()) {
 			PlainTextChange change = findFirstChange(nextUndo);
 			int selStart = change.getPosition();
@@ -199,15 +208,17 @@ class MarkdownTextArea
 			});
 
 			// select first change
-			selectRange(Math.min(selStart, getLength()), Math.min(selEnd, getLength()));
-		} else
-			super.undo();
+			selectRange(Math.min(selStart, getLength()), Math.min(selEnd,
+				getLength()));
+		}
+		else super.undo();
 	}
 
 	@Override
 	public void redo() {
 		@SuppressWarnings("unchecked")
-		List<PlainTextChange> nextRedo = (List<PlainTextChange>) getUndoManager().getNextRedo();
+		List<PlainTextChange> nextRedo = (List<PlainTextChange>) getUndoManager()
+			.getNextRedo();
 		if (nextRedo != null && !nextRedo.isEmpty()) {
 			PlainTextChange change = findFirstChange(nextRedo);
 			int selStart = change.getPosition();
@@ -218,16 +229,17 @@ class MarkdownTextArea
 			});
 
 			// select first change
-			selectRange(Math.min(selStart, getLength()), Math.min(selEnd, getLength()));
-		} else
-			super.redo();
+			selectRange(Math.min(selStart, getLength()), Math.min(selEnd,
+				getLength()));
+		}
+		else super.redo();
 	}
 
 	private PlainTextChange findFirstChange(List<PlainTextChange> changes) {
 		PlainTextChange firstChange = null;
 		for (PlainTextChange change : changes) {
-			if (firstChange == null || change.getPosition() < firstChange.getPosition())
-				firstChange = change;
+			if (firstChange == null || change.getPosition() < firstChange
+				.getPosition()) firstChange = change;
 		}
 		return firstChange;
 	}
@@ -247,20 +259,18 @@ class MarkdownTextArea
 		super.wordBreaksForwards(n, selectionPolicy);
 
 		// change behavior of Ctrl+RIGHT:
-		//   old behavior: move caret to the end of the current word
-		//   new behavior: move caret to the beginning of the next word
+		// old behavior: move caret to the end of the current word
+		// new behavior: move caret to the beginning of the next word
 		String text = getText();
 		int caretPosition = getCaretPosition();
 		int newCaretPosition = caretPosition;
 		for (int i = caretPosition; i < text.length(); i++) {
 			char ch = text.charAt(i);
-			if (ch == ' ' || ch == '\t')
-				newCaretPosition++;
-			else
-				break;
+			if (ch == ' ' || ch == '\t') newCaretPosition++;
+			else break;
 		}
-		if (newCaretPosition != caretPosition)
-			moveTo(newCaretPosition, selectionPolicy);
+		if (newCaretPosition != caretPosition) moveTo(newCaretPosition,
+			selectionPolicy);
 	}
 
 	@Override
@@ -268,8 +278,9 @@ class MarkdownTextArea
 		disableFollowCaret = true;
 
 		// change behavior of PAGE_UP key:
-		//   old behavior: move caret visible lines count up (scrolling depends on caret position)
-		//   new behavior: scroll one page up and move caret visible lines count up
+		// old behavior: move caret visible lines count up (scrolling depends on
+		// caret position)
+		// new behavior: scroll one page up and move caret visible lines count up
 		try {
 			int firstVisible = firstVisibleParToAllParIndex();
 			int lastVisible = lastVisibleParToAllParIndex();
@@ -279,12 +290,15 @@ class MarkdownTextArea
 			showParagraphAtBottom(firstVisible - 1);
 
 			// TODO improve handling of wrapped lines and tabs
-			int newCaretParagraph = Math.max(firstVisible - (lastVisible - caretParagraph), 0);
+			int newCaretParagraph = Math.max(firstVisible - (lastVisible -
+				caretParagraph), 0);
 			if (caretParagraph == lastVisible && newCaretParagraph > 0)
 				newCaretParagraph--;
-			int newCaretColumn = Math.min(caretColumn, getParagraphLength(newCaretParagraph));
+			int newCaretColumn = Math.min(caretColumn, getParagraphLength(
+				newCaretParagraph));
 			moveTo(newCaretParagraph, newCaretColumn, selectionPolicy);
-		} catch (AssertionError e) {
+		}
+		catch (AssertionError e) {
 			// may be thrown in textArea.visibleParToAllParIndex()
 			// occurs if the last line is empty and and the text fits into
 			// the visible area (no vertical scroll bar shown)
@@ -298,8 +312,10 @@ class MarkdownTextArea
 		disableFollowCaret = true;
 
 		// change behavior of PAGE_DOWN key:
-		//   old behavior: move caret visible lines count down (scrolling depends on caret position)
-		//   new behavior: scroll one page down and move caret visible lines count down
+		// old behavior: move caret visible lines count down (scrolling depends on
+		// caret position)
+		// new behavior: scroll one page down and move caret visible lines count
+		// down
 		try {
 			int firstVisible = firstVisibleParToAllParIndex();
 			int lastVisible = lastVisibleParToAllParIndex();
@@ -309,10 +325,13 @@ class MarkdownTextArea
 			showParagraphAtTop(lastVisible);
 
 			// TODO improve handling of wrapped lines and tabs
-			int newCaretParagraph = Math.min(lastVisible + (caretParagraph - firstVisible), getParagraphs().size() - 1);
-			int newCaretColumn = Math.min(caretColumn, getParagraphLength(newCaretParagraph));
+			int newCaretParagraph = Math.min(lastVisible + (caretParagraph -
+				firstVisible), getParagraphs().size() - 1);
+			int newCaretColumn = Math.min(caretColumn, getParagraphLength(
+				newCaretParagraph));
 			moveTo(newCaretParagraph, newCaretColumn, selectionPolicy);
-		} catch (AssertionError e) {
+		}
+		catch (AssertionError e) {
 			// may be thrown in textArea.visibleParToAllParIndex()
 			// occurs if the last line is empty and and the text fits into
 			// the visible area (no vertical scroll bar shown)
@@ -328,7 +347,7 @@ class MarkdownTextArea
 		if (disableFollowCaret) {
 			disableFollowCaret = false;
 			requestLayout();
-		} else
-			super.requestFollowCaret();
+		}
+		else super.requestFollowCaret();
 	}
 }

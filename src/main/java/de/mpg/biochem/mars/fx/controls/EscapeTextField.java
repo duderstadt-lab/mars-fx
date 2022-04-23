@@ -66,40 +66,66 @@ import javafx.util.StringConverter;
  *
  * @author Karl Tauber
  */
-public class EscapeTextField
-	extends TextField
-{
+public class EscapeTextField extends TextField {
+
 	public EscapeTextField() {
-		escapedText.bindBidirectional(textProperty(), new StringConverter<String>() {
-			@Override public String toString(String object) { return escape(object); }
-			@Override public String fromString(String string) { return unescape(string); }
-		});
-		escapeCharacters.addListener(e -> escapedText.set(escape(textProperty().get())));
+		escapedText.bindBidirectional(textProperty(),
+			new StringConverter<String>()
+			{
+
+				@Override
+				public String toString(String object) {
+					return escape(object);
+				}
+
+				@Override
+				public String fromString(String string) {
+					return unescape(string);
+				}
+			});
+		escapeCharacters.addListener(e -> escapedText.set(escape(textProperty()
+			.get())));
 	}
 
 	// 'escapedText' property
 	private final StringProperty escapedText = new SimpleStringProperty();
-	public String getEscapedText() { return escapedText.get(); }
-	public void setEscapedText(String escapedText) { this.escapedText.set(escapedText); }
-	public StringProperty escapedTextProperty() { return escapedText; }
+
+	public String getEscapedText() {
+		return escapedText.get();
+	}
+
+	public void setEscapedText(String escapedText) {
+		this.escapedText.set(escapedText);
+	}
+
+	public StringProperty escapedTextProperty() {
+		return escapedText;
+	}
 
 	// 'escapeCharacters' property
 	private final StringProperty escapeCharacters = new SimpleStringProperty();
-	public String getEscapeCharacters() { return escapeCharacters.get(); }
-	public void setEscapeCharacters(String escapeCharacters) { this.escapeCharacters.set(escapeCharacters); }
-	public StringProperty escapeCharactersProperty() { return escapeCharacters; }
+
+	public String getEscapeCharacters() {
+		return escapeCharacters.get();
+	}
+
+	public void setEscapeCharacters(String escapeCharacters) {
+		this.escapeCharacters.set(escapeCharacters);
+	}
+
+	public StringProperty escapeCharactersProperty() {
+		return escapeCharacters;
+	}
 
 	private String escape(String s) {
 		String escapeChars = getEscapeCharacters();
-		return !Utils.isNullOrEmpty(escapeChars)
-				? s.replaceAll("([" + escapeChars.replaceAll("(.)", "\\\\$1") + "])", "\\\\$1")
-				: s;
+		return !Utils.isNullOrEmpty(escapeChars) ? s.replaceAll("([" + escapeChars
+			.replaceAll("(.)", "\\\\$1") + "])", "\\\\$1") : s;
 	}
 
 	private String unescape(String s) {
 		String escapeChars = getEscapeCharacters();
-		return !Utils.isNullOrEmpty(escapeChars)
-				? s.replaceAll("\\\\([" + escapeChars.replaceAll("(.)", "\\\\$1") + "])", "$1")
-				: s;
+		return !Utils.isNullOrEmpty(escapeChars) ? s.replaceAll("\\\\([" +
+			escapeChars.replaceAll("(.)", "\\\\$1") + "])", "$1") : s;
 	}
 }

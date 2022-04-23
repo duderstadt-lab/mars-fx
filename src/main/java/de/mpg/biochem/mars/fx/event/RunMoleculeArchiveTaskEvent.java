@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -36,7 +37,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.EventType;
 
 public class RunMoleculeArchiveTaskEvent extends MoleculeArchiveEvent {
-	
+
 	/**
 	 * 
 	 */
@@ -44,24 +45,28 @@ public class RunMoleculeArchiveTaskEvent extends MoleculeArchiveEvent {
 	private final Runnable process;
 	private final String message;
 
-	public static final EventType<MoleculeArchiveEvent> RUN_MOLECULE_ARCHIVE_TASK = new EventType<>(MOLECULE_ARCHIVE_EVENT, "RUN_MOLECULE_ARCHIVE_TASK");
+	public static final EventType<MoleculeArchiveEvent> RUN_MOLECULE_ARCHIVE_TASK =
+		new EventType<>(MOLECULE_ARCHIVE_EVENT, "RUN_MOLECULE_ARCHIVE_TASK");
 
-    public RunMoleculeArchiveTaskEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, Runnable process, String message) {
-        super(RUN_MOLECULE_ARCHIVE_TASK, archive);
-        this.process = process;
-        this.message = message;
-    }
-    
-    public Runnable getTask() {
-    	return process;
-    }
-    
-    public String getMessage() {
-    	return message;
-    }
+	public RunMoleculeArchiveTaskEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		Runnable process, String message)
+	{
+		super(RUN_MOLECULE_ARCHIVE_TASK, archive);
+		this.process = process;
+		this.message = message;
+	}
 
-    @Override
-    public void invokeHandler(MoleculeArchiveEventHandler handler) {
-        //Not used..
-    }
+	public Runnable getTask() {
+		return process;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	@Override
+	public void invokeHandler(MoleculeArchiveEventHandler handler) {
+		// Not used..
+	}
 }

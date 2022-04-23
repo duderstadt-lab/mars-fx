@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -36,21 +37,24 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.EventType;
 
 public class MoleculeArchiveSavedEvent extends MoleculeArchiveEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVED = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVED");
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVED =
+		new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVED");
 
-    public MoleculeArchiveSavedEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-        super(MOLECULE_ARCHIVE_SAVED, archive);
-    }
+	public MoleculeArchiveSavedEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		super(MOLECULE_ARCHIVE_SAVED, archive);
+	}
 
-    @Override
-    public void invokeHandler(MoleculeArchiveEventHandler handler) {
-        handler.onMoleculeArchiveSavedEvent();
-    }
+	@Override
+	public void invokeHandler(MoleculeArchiveEventHandler handler) {
+		handler.onMoleculeArchiveSavedEvent();
+	}
 
 }
