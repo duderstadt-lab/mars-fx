@@ -3,20 +3,21 @@
 #@OUTPUT String imgsrc
 
 import marspylib as mars
-import matplotlib
-matplotlib.use('agg')
-from matplotlib.figure import Figure
+import seaborn as sns
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Data for plotting
-t = np.arange(0.0, 2.0, 0.01)
-s = 1 + np.sin(2 * np.pi * t)
+df = pd.DataFrame()
+df['Position'] = np.concatenate((np.random.normal(0, 1, 1000), np.random.normal(5, 1, 1000), np.random.normal(-5, 1, 1000)))
+df['group'] = np.concatenate((np.repeat(0, 1000), np.repeat(1, 1000), np.repeat(2, 1000)))
 
-fig = Figure()
-ax = fig.subplots()
-ax.plot(t,s)
-ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-       title='Title')
-ax.grid()
+sns.set_theme(style="white")
+ax = sns.histplot(data=df, x="Position", bins=100, hue="group", element="step", 
+		  fill=False, palette=sns.color_palette("husl", 3)).set(title="Histogram")
+
+fig = plt.gcf()
 fig.set_size_inches(width, height)
+fig.tight_layout()
+
 imgsrc = mars.figure_to_imgsrc(fig)
