@@ -47,6 +47,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.imagej.ops.Initializable;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.fxmisc.flowless.VirtualizedScrollPane;
@@ -73,7 +75,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
-import net.imagej.ops.Initializable;
 
 public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 	implements Initializable
@@ -269,8 +270,8 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 	}
 
 	private void updateImageViewSize(ImageView imageView, double HtoWratio) {
-		double rootWidth = rootPane.getWidth() - 30;
-		double rootHeight = rootPane.getHeight() - 30;
+		double rootWidth = rootPane.getWidth();
+		double rootHeight = rootPane.getHeight();
 
 		if (rootWidth * HtoWratio < rootHeight) {
 			imageView.setFitWidth(rootWidth);
