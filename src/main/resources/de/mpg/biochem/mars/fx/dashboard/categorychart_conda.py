@@ -11,7 +11,7 @@ data = {'Categories': ['Triangles', 'Squares', 'Circles'], 'Frequency': [20, 50,
 
 sns.set_theme(style="whitegrid")
 df = pd.DataFrame(data)  
-ax = sns.barplot(x="Categories", y="Frequency", data=df)
+ax = sns.barplot(x="Categories", y="Frequency", data=df).set(title="Category Chart")
 
 fig = plt.gcf()
 fig.set_size_inches(width, height)
