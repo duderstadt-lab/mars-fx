@@ -17,4 +17,4 @@ fig = plt.gcf()
 fig.set_size_inches(width, height)
 fig.tight_layout()
 
-imgsrc = mars.figure_to_imgsrc(plt.gcf())
+imgsrc = mars.figure_to_imgsrc(fig)
