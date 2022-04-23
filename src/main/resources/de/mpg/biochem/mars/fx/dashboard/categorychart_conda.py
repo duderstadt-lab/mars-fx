@@ -3,21 +3,18 @@
 #@OUTPUT String imgsrc
 
 import marspylib as mars
-import matplotlib
-matplotlib.use('agg')
-from matplotlib.figure import Figure
-import numpy as np
+import seaborn as sns
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Data for plotting
-t = np.arange(0.0, 2.0, 0.01)
-s = 1 + np.sin(2 * np.pi * t)
+data = {'Categories': ['Triangles', 'Squares', 'Circles'], 'Frequency': [20, 50, 30]}  
 
-fig = Figure()
-ax = fig.subplots()
-ax.plot(t,s)
-ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-       title='Title')
-ax.grid()
+sns.set_theme(style="whitegrid")
+df = pd.DataFrame(data)  
+ax = sns.barplot(x="Categories", y="Frequency", data=df)
+
+fig = plt.gcf()
 fig.set_size_inches(width, height)
-imgsrc = mars.figure_to_imgsrc(fig)
+fig.tight_layout()
 
+imgsrc = mars.figure_to_imgsrc(plt.gcf())
