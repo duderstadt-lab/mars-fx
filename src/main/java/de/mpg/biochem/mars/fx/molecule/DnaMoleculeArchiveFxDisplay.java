@@ -67,6 +67,6 @@ public class DnaMoleculeArchiveFxDisplay extends
 
 	@Override
 	public boolean isDisplaying(final Object o) {
-		return false;
+		return super.isDisplaying(o);
 	}
 }
