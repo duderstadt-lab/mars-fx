@@ -32,6 +32,14 @@ package de.mpg.biochem.mars.fx.molecule;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jfoenix.controls.JFXTabPane;
+
 import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -56,14 +64,6 @@ import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 import org.scijava.ui.UIService;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jfoenix.controls.JFXTabPane;
 
 import bdv.util.BdvHandle;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -221,7 +221,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 */
 	public void init() {
 		new JFXPanel(); // initializes JavaFX environment
-
+		
 		// The call to runLater() avoid a mix between JavaFX thread and Swing
 		// thread.
 		// Allows multiple runLaters in the same session...
@@ -245,7 +245,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				buildScene();
 			}
 		});
-
 	}
 
 	protected Scene buildScene() {
@@ -836,13 +835,28 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Task<Void> task = new Task<Void>() {
 
 			@Override
-			public Void call() throws Exception {
+			public Void call() {
 				process.run();
+				Platform.runLater(new Runnable() {
+					@Override
+					public void run() {
+						unlockFX();
+					}
+				});
 				return null;
 			}
 		};
-
-		task.setOnSucceeded(event -> unlockFX());
+		task.setOnFailed(event -> { 
+			RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+				.getWindow(), message + " did not finish normally.");
+			alert.show();
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					unlockFX();
+				}
+			}); 
+		});
 
 		new Thread(task).start();
 	}
@@ -951,7 +965,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 					archive.setFile(newFileWithExtension);
 					archive.setName(newFileWithExtension.getName());
-					stage.setTitle(newFileWithExtension.getName());
+					Platform.runLater(new Runnable() {
+						@Override
+						public void run() {
+							stage.setTitle(newFileWithExtension.getName());
+						}
+					});
 
 					moleculeArchiveService.addArchive(archive);
 				}
@@ -1284,7 +1303,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (!archiveLocked.get()) return;
 
 		Platform.runLater(new Runnable() {
-
 			@Override
 			public void run() {
 				unlockFX();
