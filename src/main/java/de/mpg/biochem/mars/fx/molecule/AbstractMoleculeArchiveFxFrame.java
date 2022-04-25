@@ -221,7 +221,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 */
 	public void init() {
 		new JFXPanel(); // initializes JavaFX environment
-		
+
 		// The call to runLater() avoid a mix between JavaFX thread and Swing
 		// thread.
 		// Allows multiple runLaters in the same session...
@@ -838,6 +838,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			public Void call() {
 				process.run();
 				Platform.runLater(new Runnable() {
+
 					@Override
 					public void run() {
 						unlockFX();
@@ -846,16 +847,17 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				return null;
 			}
 		};
-		task.setOnFailed(event -> { 
+		task.setOnFailed(event -> {
 			RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
 				.getWindow(), message + " did not finish normally.");
 			alert.show();
 			Platform.runLater(new Runnable() {
+
 				@Override
 				public void run() {
 					unlockFX();
 				}
-			}); 
+			});
 		});
 
 		new Thread(task).start();
@@ -966,6 +968,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					archive.setFile(newFileWithExtension);
 					archive.setName(newFileWithExtension.getName());
 					Platform.runLater(new Runnable() {
+
 						@Override
 						public void run() {
 							stage.setTitle(newFileWithExtension.getName());
@@ -1303,6 +1306,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (!archiveLocked.get()) return;
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				unlockFX();
