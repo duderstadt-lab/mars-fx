@@ -3,20 +3,21 @@
 #@OUTPUT String imgsrc
 
 import marspylib as mars
-import matplotlib
-matplotlib.use('agg')
-from matplotlib.figure import Figure
+import seaborn as sns
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Data for plotting
-t = np.arange(0.0, 2.0, 0.01)
-s = 1 + np.sin(2 * np.pi * t)
+sns.set_theme(style="ticks")
 
-fig = Figure()
-ax = fig.subplots()
-ax.plot(t,s)
-ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-       title='Title')
-ax.grid()
+rs = np.random.RandomState(11)
+x = rs.gamma(2, size=1000)
+y = -.5 * x + rs.normal(size=1000)
+
+sns.jointplot(x=x, y=y, kind="hex", color="#4CB391")
+
+fig = plt.gcf()
 fig.set_size_inches(width, height)
-imgsrc = mars.figure_to_imgsrc(fig)
+fig.tight_layout()
+
+imgsrc = mars.figure_to_imgsrc(fig) 
