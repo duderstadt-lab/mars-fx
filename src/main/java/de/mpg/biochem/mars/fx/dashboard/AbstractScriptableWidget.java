@@ -160,6 +160,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 
 		logArea = new InlineCssTextArea("");
 		logArea.setEditable(false);
+		logArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
 
 		BorderPane borderPane = new BorderPane();
 		borderPane.setCenter(new VirtualizedScrollPane<>(logArea));
