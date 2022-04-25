@@ -3,20 +3,24 @@
 #@OUTPUT String imgsrc
 
 import marspylib as mars
-import matplotlib
-matplotlib.use('agg')
-from matplotlib.figure import Figure
+import seaborn as sns
+import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 
-# Data for plotting
-t = np.arange(0.0, 2.0, 0.01)
-s = 1 + np.sin(2 * np.pi * t)
+df = pd.DataFrame()
+df['X'] = np.random.normal(0, 1, 30)
+df['Y'] = np.random.normal(0, 1, 30)
+df['size'] = np.random.randint(2, 6, 30)
 
-fig = Figure()
-ax = fig.subplots()
-ax.plot(t,s)
-ax.set(xlabel='time (s)', ylabel='voltage (mV)',
-       title='Title')
-ax.grid()
+ax = sns.scatterplot(
+    data=df, x="X", y="Y", hue="size", size="size",
+    sizes=(20, 200), hue_norm=(0, 13), legend="full")
+    
+ax.set(title="Bubble chart")
+
+fig = plt.gcf()
 fig.set_size_inches(width, height)
-imgsrc = mars.figure_to_imgsrc(fig)
+fig.tight_layout()
+
+imgsrc = mars.figure_to_imgsrc(fig) 
