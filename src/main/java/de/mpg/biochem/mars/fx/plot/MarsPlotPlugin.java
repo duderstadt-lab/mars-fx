@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,8 +26,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 public interface MarsPlotPlugin {
+
 	public void setDatasetOptionsPane(DatasetOptionsPane datasetOptionsPane);
 }

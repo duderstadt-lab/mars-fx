@@ -1,3 +1,8 @@
+.progress-bar > .bar {
+	-fx-padding: 0.50em;
+	-fx-background-radius: 0, 0, 0;
+}
+
 .jfx-tab-pane {
     -fx-base: white;
     -fx-color: -fx-base;
@@ -33,6 +38,16 @@
 
 .log-text-area .scroll-bar:vertical:disabled {
     -fx-opacity: 0;
+}
+
+.log-text-area .list-cell {
+	-fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.log-text-area .list-view {
+	-fx-text-fill: white;
+    -fx-background-color: transparent;
 }
 
 /*******************************************************************************

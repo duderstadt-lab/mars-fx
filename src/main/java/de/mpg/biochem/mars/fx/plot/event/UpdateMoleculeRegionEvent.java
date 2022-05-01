@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,30 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot.event;
 
 import de.mpg.biochem.mars.util.MarsRegion;
 import javafx.event.EventType;
 
 public class UpdateMoleculeRegionEvent extends PlotEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	private final MarsRegion roi;
 
-	public static final EventType<PlotEvent> UPDATE_MOLECULE_REGION = new EventType<>(PLOT_EVENT, "UPDATE_MOLECULE_REGION");
+	public static final EventType<PlotEvent> UPDATE_MOLECULE_REGION =
+		new EventType<>(PLOT_EVENT, "UPDATE_MOLECULE_REGION");
 
-    public UpdateMoleculeRegionEvent(MarsRegion roi) {
-        super(UPDATE_MOLECULE_REGION);
-        this.roi = roi;
-    }
-    
-    public MarsRegion getRegion() {
-    	return roi;
-    }
+	public UpdateMoleculeRegionEvent(MarsRegion roi) {
+		super(UPDATE_MOLECULE_REGION);
+		this.roi = roi;
+	}
 
-    @Override
-    public void invokeHandler(PlotEventHandler handler) {}
+	public MarsRegion getRegion() {
+		return roi;
+	}
+
+	@Override
+	public void invokeHandler(PlotEventHandler handler) {}
 }

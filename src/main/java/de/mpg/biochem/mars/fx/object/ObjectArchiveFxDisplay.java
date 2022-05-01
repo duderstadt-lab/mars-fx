@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.object;
 
 import org.scijava.Priority;
@@ -33,18 +34,21 @@ import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.molecule.DnaMoleculeArchive;
 import de.mpg.biochem.mars.object.ObjectArchive;
 
 /**
- * Display for {@link DnaMoleculeArchive}. This ensures that uiService.show() for a DnaMoleculeArchive will automatically be detected and 
- * call the view method in MoleculeArchiveView to make our custom window with custom menus.
+ * Display for {@link DnaMoleculeArchive}. This ensures that uiService.show()
+ * for a DnaMoleculeArchive will automatically be detected and call the view
+ * method in MoleculeArchiveView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
 @Plugin(type = Display.class, priority = Priority.HIGH)
-public class ObjectArchiveFxDisplay extends AbstractDisplay<ObjectArchive> implements Display<ObjectArchive> {
-	
+public class ObjectArchiveFxDisplay extends AbstractDisplay<ObjectArchive>
+	implements Display<ObjectArchive>
+{
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public ObjectArchiveFxDisplay() {
 		super((Class) ObjectArchive.class);
@@ -56,11 +60,12 @@ public class ObjectArchiveFxDisplay extends AbstractDisplay<ObjectArchive> imple
 	public boolean canDisplay(final Class<?> c) {
 		if (c.equals(ObjectArchive.class)) {
 			return true;
-		} else { 
+		}
+		else {
 			return super.canDisplay(c);
 		}
 	}
-	
+
 	@Override
 	public boolean isDisplaying(final Object o) {
 		return false;

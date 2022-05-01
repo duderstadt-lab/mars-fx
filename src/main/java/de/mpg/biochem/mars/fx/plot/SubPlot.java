@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.Set;
@@ -33,33 +34,47 @@ import java.util.Set;
 import com.jfoenix.controls.JFXBadge;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.ToggleButton;
 
 public interface SubPlot {
+
 	public MarsNumericAxis getXAxis();
+
 	public void setXLabel(String xAxisLabel);
+
 	public MarsNumericAxis getYAxis();
+
 	public void setYLabel(String yAxisLabel);
+
 	public DatasetOptionsPane getDatasetOptionsPane();
+
 	public ObservableList<PlotSeries> getPlotSeriesList();
+
 	public JFXBadge getDatasetOptionsButton();
+
 	public BooleanProperty getDatasetOptionsSelected();
+
 	public void setTool(ChartPlugin plugin, Cursor cursor);
+
 	public void removeTools();
+
 	public XYChart getChart();
+
 	public void removeIndicators();
+
 	public void addIndicators(Set<String> AxisList, Set<String> yAxisList);
+
 	public void addDataSet(PlotSeries plotSeries);
+
 	public Node getNode();
+
 	public void fireEvent(Event event);
+
 	public void update();
 }

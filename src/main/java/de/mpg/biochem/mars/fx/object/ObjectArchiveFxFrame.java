@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,25 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.object;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.scijava.Context;
 
+import com.fasterxml.jackson.core.JsonParser;
+
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
+import de.mpg.biochem.mars.fx.molecule.DefaultMarsMetadataTab;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
-import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
-import de.mpg.biochem.mars.fx.bdv.ObjectCard;
-import de.mpg.biochem.mars.fx.molecule.*;
 
-public class ObjectArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, ObjectsTab> {
-	public ObjectArchiveFxFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, final Context context) {
+public class ObjectArchiveFxFrame extends
+	AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, ObjectsTab>
+{
+
+	public ObjectArchiveFxFrame(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		final Context context)
+	{
 		super(archive, context);
 	}
 
@@ -61,7 +71,27 @@ public class ObjectArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<Default
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
-		cards.add(new ObjectCard(archive));
-		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile, cards);
+		ObjectCard card = new ObjectCard();
+		card.setArchive(archive);
+		card.initialize();
+		cards.add(card);
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
+			useVolatile, cards, context);
+	}
+
+	@Override
+	public MarsBdvFrame createMarsBdvFrame(JsonParser jParser,
+		boolean useVolatile)
+	{
+		try {
+			return new MarsBdvFrame(jParser, archive, moleculesTab
+				.getSelectedMolecule(), useVolatile, context);
+		}
+		catch (IOException e) {
+			// have a nice error dialog show up to alert the user there is an issue.
+
+			// Results frame with defaults
+			return createMarsBdvFrame(useVolatile);
+		}
 	}
 }

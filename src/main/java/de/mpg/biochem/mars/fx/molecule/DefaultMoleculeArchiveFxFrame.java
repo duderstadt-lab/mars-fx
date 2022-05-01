@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,15 +26,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.fx.bdv.LocationCard;
-import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
+import com.fasterxml.jackson.core.JsonParser;
+
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -42,8 +42,14 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
-public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DefaultMoleculesTab> {
-	public DefaultMoleculeArchiveFxFrame(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive, final Context context) {
+public class DefaultMoleculeArchiveFxFrame extends
+	AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DefaultMoleculesTab>
+{
+
+	public DefaultMoleculeArchiveFxFrame(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		final Context context)
+	{
 		super(archive, context);
 	}
 
@@ -59,7 +65,25 @@ public class DefaultMoleculeArchiveFxFrame extends AbstractMoleculeArchiveFxFram
 
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
-		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(), useVolatile);
+		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
+			useVolatile, context);
+	}
+
+	@Override
+	public MarsBdvFrame createMarsBdvFrame(JsonParser jParser,
+		boolean useVolatile)
+	{
+		try {
+			return new MarsBdvFrame(jParser, archive, moleculesTab
+				.getSelectedMolecule(), useVolatile, context);
+		}
+		catch (IOException e) {
+			// have a nice error dialog show up to alert the user there is an issue.
+
+			// Results frame with defaults
+			return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
+				useVolatile, context);
+		}
 	}
 
 }

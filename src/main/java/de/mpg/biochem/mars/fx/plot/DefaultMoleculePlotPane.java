@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,16 +26,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.molecule.Molecule;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 
-public class DefaultMoleculePlotPane extends AbstractMoleculePlotPane<Molecule, DefaultMoleculeSubPlot> {
-	
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.util.MarsUtil;
+
+public class DefaultMoleculePlotPane extends
+	AbstractMoleculePlotPane<Molecule, DefaultMoleculeSubPlot>
+{
+
 	public DefaultMoleculePlotPane(final Context context) {
 		super(context);
+	}
+
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane",
+				"plotPane");
+
+			// Needed for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
+				"plotPane");
+
+			reload();
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

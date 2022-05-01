@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,31 +26,32 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-import com.jfoenix.controls.JFXMasonryPane;
-
+import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 
 public interface MarsDashboard<W extends MarsDashboardWidget> {
+
 	void runWidget(W widget);
 
 	void stopWidget(W widget);
 
 	void removeWidget(W widget);
-	
+
 	Node getNode();
-	
-	JFXMasonryPane getWidgetPane();
+
+	MarsJFXMasonryPane getWidgetPane();
 
 	ObservableList<W> getWidgets();
-	
+
 	void addWidget(W widget);
-	
+
 	W createWidget(String widgetName);
 
 	ArrayList<String> getWidgetToolbarOrder();

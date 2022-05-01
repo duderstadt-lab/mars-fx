@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,25 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractRegionOfInterestTable;
 import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.fx.event.MoleculeIndicatorChangedEvent;
 import javafx.event.Event;
 
-public class MoleculeRegionOfInterestTable extends AbstractRegionOfInterestTable implements MoleculeSubPane {
+public class MoleculeRegionOfInterestTable extends AbstractRegionOfInterestTable
+	implements MoleculeSubPane
+{
 
-    public MoleculeRegionOfInterestTable() {        
-        super();
-    }
-    
-    @Override
-    public void handle(MoleculeEvent event) {
-        event.invokeHandler(this);
-        event.consume();
-    }
+	public MoleculeRegionOfInterestTable() {
+		super();
+	}
+
+	@Override
+	public void handle(MoleculeEvent event) {
+		event.invokeHandler(this);
+		event.consume();
+	}
 
 	@Override
 	public void fireEvent(Event event) {
@@ -54,7 +57,7 @@ public class MoleculeRegionOfInterestTable extends AbstractRegionOfInterestTable
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.record = molecule;
-    	loadData();
+		loadData();
 	}
 
 	@Override

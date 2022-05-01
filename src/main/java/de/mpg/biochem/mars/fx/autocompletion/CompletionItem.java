@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.autocompletion;
 
 import java.lang.reflect.Method;
@@ -43,50 +44,53 @@ public class CompletionItem {
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
 	 */
-	public CompletionItem(Method method, String completionText){
+	public CompletionItem(Method method, String completionText) {
 		this(method, completionText, null);
 	}
 
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
-	 * @param shortDesc A short description of the completion.  This will be
-	 *        displayed in the completion list.  This may be <code>null</code>.
+	 * @param shortDesc A short description of the completion. This will be
+	 *          displayed in the completion list. This may be <code>null</code>.
 	 */
 	public CompletionItem(Method method, String completionText,
-							String shortDesc) {
+		String shortDesc)
+	{
 		this(method, completionText, shortDesc, null);
 	}
-
 
 	/**
 	 * Constructor.
 	 *
+	 * @param method The method.
 	 * @param completionText The text to replace.
-	 * @param shortDesc A short description of the completion.  This will be
-	 *        displayed in the completion list.  This may be <code>null</code>.
-	 * @param summary The summary of this completion.  This should be HTML.
-	 *        This may be <code>null</code>.
+	 * @param shortDesc A short description of the completion. This will be
+	 *          displayed in the completion list. This may be <code>null</code>.
+	 * @param summary The summary of this completion. This should be HTML. This
+	 *          may be <code>null</code>.
 	 */
-	public CompletionItem(Method method, String completionText,
-							String shortDesc, String summary) {
+	public CompletionItem(Method method, String completionText, String shortDesc,
+		String summary)
+	{
 		this.method = method;
 		this.completionText = completionText;
 		this.shortDesc = shortDesc;
 		this.summary = summary;
 	}
 
-
 	public String getCompletionText() {
 		return completionText;
 	}
 
 	/**
-	 * Returns the short description of this completion, usually used in
-	 * the completion choices list.
+	 * Returns the short description of this completion, usually used in the
+	 * completion choices list.
 	 *
 	 * @return The short description, or <code>null</code> if there is none.
 	 * @see #setShortDescription(String)
@@ -95,11 +99,10 @@ public class CompletionItem {
 		return shortDesc;
 	}
 
-
 	public String getSummary() {
 		return summary;
 	}
-	
+
 	public Method getMethod() {
 		return this.method;
 	}
@@ -113,7 +116,6 @@ public class CompletionItem {
 	public void setShortDescription(String shortDesc) {
 		this.shortDesc = shortDesc;
 	}
-
 
 	/**
 	 * Sets the summary for this completion.

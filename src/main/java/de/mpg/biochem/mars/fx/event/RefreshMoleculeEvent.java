@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,24 +26,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
-import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.EventType;
 
 public class RefreshMoleculeEvent extends MoleculeEvent {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public static final EventType<MoleculeEvent> REFRESH_MOLECULE_EVENT = new EventType<>(MOLECULE_EVENT, "REFRESH_MOLECULE_EVENT");
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-	    public RefreshMoleculeEvent() {
-	        super(REFRESH_MOLECULE_EVENT);
-	    }
+	public static final EventType<MoleculeEvent> REFRESH_MOLECULE_EVENT =
+		new EventType<>(MOLECULE_EVENT, "REFRESH_MOLECULE_EVENT");
 
-	    @Override
-	    public void invokeHandler(MoleculeEventHandler handler) {}
+	public RefreshMoleculeEvent() {
+		super(REFRESH_MOLECULE_EVENT);
 	}
+
+	@Override
+	public void invokeHandler(MoleculeEventHandler handler) {}
+}

@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -52,75 +52,80 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  ******************************************************************************/
+
 package de.mpg.biochem.mars.fx.dialogs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.DialogPane;
 import javafx.scene.control.Label;
-import javafx.stage.Window;
-
-import javafx.scene.control.ComboBox;
-
 import javafx.scene.layout.HBox;
+import javafx.stage.Window;
 
 /**
  * Segment table selection dialog.
  *
  * @author Karl Duderstadt
  */
-public class SegmentTableSelectionDialog extends Dialog<SegmentTableSelectionDialog.SelectionResult> {
-	
-	protected HashMap<String,ArrayList<String>> tabNameToSegmentName;
-	
-	public SegmentTableSelectionDialog(Window owner, Set<ArrayList<String>> segmentTableNames, String title) {
+public class SegmentTableSelectionDialog extends
+	Dialog<SegmentTableSelectionDialog.SelectionResult>
+{
+
+	protected HashMap<String, List<String>> tabNameToSegmentName;
+
+	public SegmentTableSelectionDialog(Window owner,
+		Set<List<String>> segmentTableNames, String title)
+	{
 		setTitle(title);
 		initOwner(owner);
 		setResizable(true);
-		
+
 		DialogPane dialogPane = getDialogPane();
 		dialogPane.setMinWidth(200);
-		
+
 		HBox hbox = new HBox();
 		hbox.getChildren().add(new Label("Segment table "));
 		ComboBox<String> table = new ComboBox<String>();
-		
-		tabNameToSegmentName = new HashMap<String, ArrayList<String>>();
-		
-		for (ArrayList<String> segmentTableName : segmentTableNames) {
+
+		tabNameToSegmentName = new HashMap<String, List<String>>();
+
+		for (List<String> segmentTableName : segmentTableNames) {
 			String tabName;
-			if (segmentTableName.get(2).equals(""))
-				tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0);
-			else 
-				tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(0) + " - " + segmentTableName.get(2);
+			if (segmentTableName.get(2).equals("")) tabName = segmentTableName.get(
+				1) + " vs " + segmentTableName.get(0);
+			else tabName = segmentTableName.get(1) + " vs " + segmentTableName.get(
+				0) + " - " + segmentTableName.get(2);
 			tabNameToSegmentName.put(tabName, segmentTableName);
 		}
-		
+
 		table.getItems().addAll(tabNameToSegmentName.keySet());
 		hbox.getChildren().add(table);
-		
+
 		dialogPane.setContent(hbox);
-		
+
 		dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
 		setResultConverter(dialogButton -> {
-			return (dialogButton == ButtonType.OK) ? new SelectionResult(table.getSelectionModel().getSelectedItem()) : null;
+			return (dialogButton == ButtonType.OK && table.getSelectionModel()
+				.getSelectedItem() != null) ? new SelectionResult(table
+					.getSelectionModel().getSelectedItem()) : null;
 		});
 	}
-	
+
 	public class SelectionResult {
+
 		public final String tableName;
-		
+
 		public SelectionResult(String tableName) {
 			this.tableName = tableName;
 		}
-		
-		public ArrayList<String> getSegmentTableName() {
+
+		public List<String> getSegmentTableName() {
 			return tabNameToSegmentName.get(tableName);
 		}
 	}

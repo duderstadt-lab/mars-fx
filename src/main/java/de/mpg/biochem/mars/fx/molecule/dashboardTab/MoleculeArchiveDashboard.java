@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,49 +26,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 
 import org.scijava.Context;
-import org.scijava.plugin.Parameter;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.event.Event;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.EventHandler;
 
-public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveDashboardWidget> {
-	
+public class MoleculeArchiveDashboard extends
+	AbstractDashboard<MoleculeArchiveDashboardWidget>
+{
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
-	
+
 	public MoleculeArchiveDashboard(final Context context) {
 		super(context);
-		
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-					archive = e.getArchive();
-			   		discoverWidgets();
-			   		e.consume();
-			   	}
-			} 
-	    });
+
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						archive = e.getArchive();
+						discoverWidgets();
+						e.consume();
+					}
+				}
+			});
 	}
 
 	@Override
 	public MoleculeArchiveDashboardWidget createWidget(String widgetName) {
-		MoleculeArchiveDashboardWidget widget = (MoleculeArchiveDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MoleculeArchiveDashboardWidget widget =
+			(MoleculeArchiveDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setArchive(archive);
 		widget.setParent(this);
 		widget.initialize();
@@ -77,16 +92,35 @@ public class MoleculeArchiveDashboard extends AbstractDashboard<MoleculeArchiveD
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("ArchivePropertiesWidget", 
-	                    "TagFrequencyWidget", 
-	                    "CategoryChartWidget",
-	                    "HistogramWidget",
-	                    "XYChartWidget",
-	                    "BubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList("ArchivePropertiesWidget",
+			"TagFrequencyWidget", "CategoryChartWidget", "HistogramWidget",
+			"XYChartWidget", "BubbleChartWidget"));
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MoleculeArchiveDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MoleculeArchiveDashboardWidget.class);
+	}
+
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "dashboardTab");
+
+			// Need for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "DashboardTab");
+
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 }

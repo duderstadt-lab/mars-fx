@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,32 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
-import javafx.event.EventType;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import javafx.event.EventType;
 
 public class MoleculeArchiveSavingEvent extends MoleculeArchiveEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVING = new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVING");
+	public static final EventType<MoleculeArchiveEvent> MOLECULE_ARCHIVE_SAVING =
+		new EventType<>(MOLECULE_ARCHIVE_EVENT, "MOLECULE_ARCHIVE_SAVING");
 
-    public MoleculeArchiveSavingEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-        super(MOLECULE_ARCHIVE_SAVING, archive);
-    }
+	public MoleculeArchiveSavingEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		super(MOLECULE_ARCHIVE_SAVING, archive);
+	}
 
-    @Override
-    public void invokeHandler(MoleculeArchiveEventHandler handler) {
-        handler.onMoleculeArchiveSavingEvent();
-    }
+	@Override
+	public void invokeHandler(MoleculeArchiveEventHandler handler) {
+		handler.onMoleculeArchiveSavingEvent();
+	}
 
 }
-

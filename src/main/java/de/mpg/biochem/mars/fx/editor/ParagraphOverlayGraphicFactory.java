@@ -1,3 +1,31 @@
+/*-
+ * #%L
+ * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
+ * %%
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
+ * %%
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
 /*
  * Copyright (c) 2015 Karl Tauber <karl at jformdesigner dot com>
  * All rights reserved.
@@ -33,6 +61,7 @@ import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.function.IntFunction;
+
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
@@ -48,17 +77,15 @@ import javafx.scene.shape.PathElement;
 
 /**
  * A paragraph graphic factory for StyleClassedTextArea that is able to lay out
- * nodes over paragraph texts.
- *
- * Normally paragraph graphics are displayed left to the paragraph text.
- * E.g. used for line numbers. This factory creates a zero size graphic node,
- * which lays out (outside of its bounds) its unmanaged children over paragraph text.
+ * nodes over paragraph texts. Normally paragraph graphics are displayed left to
+ * the paragraph text. E.g. used for line numbers. This factory creates a zero
+ * size graphic node, which lays out (outside of its bounds) its unmanaged
+ * children over paragraph text.
  *
  * @author Karl Tauber
  */
-class ParagraphOverlayGraphicFactory
-	implements IntFunction<Node>
-{
+class ParagraphOverlayGraphicFactory implements IntFunction<Node> {
+
 	private final MarkdownTextArea textArea;
 	private final List<OverlayFactory> overlayFactories = new ArrayList<>();
 	private final List<IntFunction<Node>> gutterFactories = new ArrayList<>();
@@ -96,20 +123,18 @@ class ParagraphOverlayGraphicFactory
 
 	@Override
 	public Node apply(int paragraphIndex) {
-		return overlayFactories.isEmpty() && gutterFactories.isEmpty()
-				? null
-				: new ParagraphGraphic(paragraphIndex);
+		return overlayFactories.isEmpty() && gutterFactories.isEmpty() ? null
+			: new ParagraphGraphic(paragraphIndex);
 	}
 
-	//---- class ParagraphGraphic ---------------------------------------------
+	// ---- class ParagraphGraphic ---------------------------------------------
 
-	private class ParagraphGraphic
-		extends Pane
-	{
+	private class ParagraphGraphic extends Pane {
+
 		private final int paragraphIndex;
 		private final Node gutter;
-		private final IdentityHashMap<OverlayFactory, List<Node>> overlayNodesMap
-			= new IdentityHashMap<>(overlayFactories.size());
+		private final IdentityHashMap<OverlayFactory, List<Node>> overlayNodesMap =
+			new IdentityHashMap<>(overlayFactories.size());
 		private Node paragraphTextNode;
 
 		ParagraphGraphic(int paragraphIndex) {
@@ -123,19 +148,19 @@ class ParagraphOverlayGraphicFactory
 					for (IntFunction<Node> gutterFactory : gutterFactories)
 						gutterBox.getChildren().add(gutterFactory.apply(paragraphIndex));
 					gutter = gutterBox;
-				} else
-					gutter = gutterFactories.get(0).apply(paragraphIndex);
+				}
+				else gutter = gutterFactories.get(0).apply(paragraphIndex);
 				gutter.getStyleClass().add("gutter");
 				getChildren().add(gutter);
-			} else
-				gutter = null;
+			}
+			else gutter = null;
 
 			parentProperty().addListener((observable, oldParent, newParent) -> {
 				// this node also "need layout" if parent "needs layout"
-				if (newParent != null) {
+				if (newParent != null)
+				{
 					newParent.needsLayoutProperty().addListener((ob, o, n) -> {
-						if (n)
-							setNeedsLayout(true);
+						if (n) setNeedsLayout(true);
 					});
 				}
 			});
@@ -156,7 +181,8 @@ class ParagraphOverlayGraphicFactory
 			// layout gutter
 			if (gutter != null) {
 				double gutterWidth = gutter.prefWidth(-1);
-				layoutInArea(gutter, 0, 0, gutterWidth, getHeight(), -1, null, true, true, HPos.LEFT, VPos.TOP);
+				layoutInArea(gutter, 0, 0, gutterWidth, getHeight(), -1, null, true,
+					true, HPos.LEFT, VPos.TOP);
 			}
 
 			// create overlay nodes
@@ -186,21 +212,24 @@ class ParagraphOverlayGraphicFactory
 		private void layoutOverlayNodes() {
 			for (OverlayFactory overlayFactory : overlayFactories) {
 				overlayFactory.init(textArea, paragraphTextNode, gutter);
-				overlayFactory.layoutOverlayNodes(paragraphIndex, overlayNodesMap.get(overlayFactory));
+				overlayFactory.layoutOverlayNodes(paragraphIndex, overlayNodesMap.get(
+					overlayFactory));
 			}
 		}
 	}
 
-	//---- class OverlayFactory -----------------------------------------------
+	// ---- class OverlayFactory -----------------------------------------------
 
-	static abstract class OverlayFactory
-	{
+	static abstract class OverlayFactory {
+
 		private MarkdownTextArea textArea;
 		private Node paragraphTextNode;
 		private Node gutter;
 		private double gutterWidth;
 
-		private void init(MarkdownTextArea textArea, Node paragraphTextNode, Node gutter) {
+		private void init(MarkdownTextArea textArea, Node paragraphTextNode,
+			Node gutter)
+		{
 			this.textArea = textArea;
 			this.paragraphTextNode = paragraphTextNode;
 			this.gutter = gutter;
@@ -208,6 +237,7 @@ class ParagraphOverlayGraphicFactory
 		}
 
 		abstract List<Node> createOverlayNodes(int paragraphIndex);
+
 		abstract void layoutOverlayNodes(int paragraphIndex, List<Node> nodes);
 
 		protected MarkdownTextArea getTextArea() {
@@ -215,7 +245,8 @@ class ParagraphOverlayGraphicFactory
 		}
 
 		protected PathElement[] getShape(int start, int end) {
-			return (PathElement[]) invoke(mGetRangeShape, paragraphTextNode, start, end);
+			return (PathElement[]) invoke(mGetRangeShape, paragraphTextNode, start,
+				end);
 		}
 
 		protected Rectangle2D getBounds(int start, int end) {
@@ -226,7 +257,8 @@ class ParagraphOverlayGraphicFactory
 					MoveTo moveTo = (MoveTo) pathElement;
 					minX = maxX = moveTo.getX();
 					minY = maxY = moveTo.getY();
-				} else if (pathElement instanceof LineTo) {
+				}
+				else if (pathElement instanceof LineTo) {
 					LineTo lineTo = (LineTo) pathElement;
 					double x = lineTo.getX();
 					double y = lineTo.getY();
@@ -240,17 +272,17 @@ class ParagraphOverlayGraphicFactory
 		}
 
 		protected Insets getInsets() {
-			Insets insets = ((Region)paragraphTextNode).getInsets();
+			Insets insets = ((Region) paragraphTextNode).getInsets();
 			if (gutter != null) {
-				if (gutterWidth < 0)
-					gutterWidth = gutter.prefWidth(-1);
-				insets = new Insets(insets.getTop(), insets.getRight(), insets.getBottom(), gutterWidth + insets.getLeft());
+				if (gutterWidth < 0) gutterWidth = gutter.prefWidth(-1);
+				insets = new Insets(insets.getTop(), insets.getRight(), insets
+					.getBottom(), gutterWidth + insets.getLeft());
 			}
 			return insets;
 		}
 	}
 
-	//---- reflection utilities -----------------------------------------------
+	// ---- reflection utilities -----------------------------------------------
 
 	private static Method mGetChildren;
 	private static Method mGetRangeShape;
@@ -260,10 +292,15 @@ class ParagraphOverlayGraphicFactory
 			mGetChildren = Parent.class.getDeclaredMethod("getChildren");
 			mGetChildren.setAccessible(true);
 
-			Class<?> textFlowExtClass = Class.forName("org.fxmisc.richtext.TextFlowExt");
-			mGetRangeShape = textFlowExtClass.getDeclaredMethod("getRangeShape", int.class, int.class);
+			Class<?> textFlowExtClass = Class.forName(
+				"org.fxmisc.richtext.TextFlowExt");
+			mGetRangeShape = textFlowExtClass.getDeclaredMethod("getRangeShape",
+				int.class, int.class);
 			mGetRangeShape.setAccessible(true);
-		} catch (ClassNotFoundException | NoSuchMethodException | SecurityException ex) {
+		}
+		catch (ClassNotFoundException | NoSuchMethodException
+				| SecurityException ex)
+		{
 			throw new RuntimeException(ex);
 		}
 	}
@@ -271,7 +308,10 @@ class ParagraphOverlayGraphicFactory
 	private static Object invoke(Method m, Object obj, Object... args) {
 		try {
 			return m.invoke(obj, args);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+		}
+		catch (IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException ex)
+		{
 			throw new RuntimeException(ex);
 		}
 	}

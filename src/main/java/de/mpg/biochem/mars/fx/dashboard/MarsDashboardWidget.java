@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,21 +26,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.scene.Node;
-
 import org.scijava.command.Command;
-import java.util.concurrent.RunnableFuture;
+
+import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import javafx.scene.Node;
 import net.imagej.ops.Initializable;
 
-public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Initializable {
+public interface MarsDashboardWidget extends Command, JsonConvertibleRecord,
+	Initializable
+{
+
 	public Node getNode();
 
 	public String getName();
@@ -52,9 +50,9 @@ public interface MarsDashboardWidget extends Command, JsonConvertibleRecord, Ini
 	public void setParent(MarsDashboard parent);
 
 	public MarsDashboard getParent();
-	
+
 	public double getWidth();
-	
+
 	public void setWidth(double width);
 
 	public boolean isRunning();

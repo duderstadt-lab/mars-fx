@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,35 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table.dashboard;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
-
 import java.util.Set;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.table.MarsTable;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 
-public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidget> {
-	
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsUtil;
+
+public class MarsTableDashboard extends
+	AbstractDashboard<MarsTableDashboardWidget>
+{
+
 	protected MarsTable table;
-	
+
 	public MarsTableDashboard(final Context context, MarsTable table) {
 		super(context);
 		this.table = table;
-		
+
 		discoverWidgets();
 	}
-	
+
 	@Override
 	public MarsTableDashboardWidget createWidget(String widgetName) {
-		MarsTableDashboardWidget widget = (MarsTableDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MarsTableDashboardWidget widget =
+			(MarsTableDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setTable(table);
 		widget.setParent(this);
 		widget.initialize();
@@ -63,22 +73,38 @@ public class MarsTableDashboard extends AbstractDashboard<MarsTableDashboardWidg
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MarsTableCategoryChartWidget",
-	                    "MarsTableHistogramWidget",
-	                    "MarsTableXYChartWidget",
-	                    "MarsTableBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList("MarsTableCategoryChartWidget",
+			"MarsTableHistogramWidget", "MarsTableXYChartWidget",
+			"MarsTableBubbleChartWidget"));
 	}
-	
+
 	public void setTable(MarsTable table) {
 		this.table = table;
 	}
-	
+
 	public MarsTable getTable() {
 		return table;
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MarsTableDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MarsTableDashboardWidget.class);
+	}
+
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "marsTableDashboard");
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 }

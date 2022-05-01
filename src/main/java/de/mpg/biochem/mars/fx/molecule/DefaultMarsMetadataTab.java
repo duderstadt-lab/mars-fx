@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Context;
@@ -34,19 +35,25 @@ import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataCenterPane;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.DefaultMetadataPropertiesPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 
-public class DefaultMarsMetadataTab extends AbstractMarsMetadataTab<MarsMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane> {
-	
+public class DefaultMarsMetadataTab extends
+	AbstractMarsMetadataTab<MarsMetadata, DefaultMetadataCenterPane, DefaultMetadataPropertiesPane>
+{
+
 	public DefaultMarsMetadataTab(final Context context) {
 		super(context);
 	}
 
 	@Override
-	public DefaultMetadataCenterPane createMetadataCenterPane(final Context context) {
+	public DefaultMetadataCenterPane createMetadataCenterPane(
+		final Context context)
+	{
 		return new DefaultMetadataCenterPane(context);
 	}
 
 	@Override
-	public DefaultMetadataPropertiesPane createMetadataPropertiesPane(final Context context) {
+	public DefaultMetadataPropertiesPane createMetadataPropertiesPane(
+		final Context context)
+	{
 		return new DefaultMetadataPropertiesPane(context);
 	}
 }

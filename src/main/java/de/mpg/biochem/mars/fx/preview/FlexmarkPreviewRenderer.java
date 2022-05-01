@@ -1,3 +1,31 @@
+/*-
+ * #%L
+ * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
+ * %%
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
+ * %%
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
 /*
  * Copyright (c) 2016 Karl Tauber <karl at jformdesigner dot com>
  * All rights reserved.
@@ -36,33 +64,33 @@ import java.util.function.BiConsumer;
 
 import org.jetbrains.annotations.NotNull;
 
-import de.mpg.biochem.mars.fx.addons.PreviewRendererAddon;
-import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
-import de.mpg.biochem.mars.fx.util.Range;
-
 import com.vladsch.flexmark.ast.Heading;
-import com.vladsch.flexmark.util.ast.Node;
-import com.vladsch.flexmark.util.ast.NodeVisitor;
-import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.html.AttributeProvider;
 import com.vladsch.flexmark.html.HtmlRenderer;
 import com.vladsch.flexmark.html.IndependentAttributeProviderFactory;
 import com.vladsch.flexmark.html.renderer.AttributablePart;
 import com.vladsch.flexmark.html.renderer.LinkResolverContext;
 import com.vladsch.flexmark.parser.Parser;
-import com.vladsch.flexmark.util.html.Attributes;
+import com.vladsch.flexmark.util.ast.Node;
+import com.vladsch.flexmark.util.ast.NodeVisitor;
+import com.vladsch.flexmark.util.ast.Visitor;
 import com.vladsch.flexmark.util.html.MutableAttributes;
 import com.vladsch.flexmark.util.sequence.BasedSequence;
+
+import de.mpg.biochem.mars.fx.addons.PreviewRendererAddon;
+import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
+import de.mpg.biochem.mars.fx.util.Range;
 
 /**
  * flexmark-java preview.
  *
  * @author Karl Tauber
  */
-class FlexmarkPreviewRenderer
-	implements MarkdownPreviewPane.Renderer
-{
-	private static final ServiceLoader<PreviewRendererAddon> addons = ServiceLoader.load(PreviewRendererAddon.class);
+class FlexmarkPreviewRenderer implements MarkdownPreviewPane.Renderer {
+
+	private static final ServiceLoader<PreviewRendererAddon> addons =
+		ServiceLoader.load(PreviewRendererAddon.class);
 
 	private String markdownText;
 	private Node astRoot;
@@ -78,8 +106,7 @@ class FlexmarkPreviewRenderer
 		assert markdownText != null;
 		assert astRoot != null;
 
-		if (this.astRoot == astRoot)
-			return;
+		if (this.astRoot == astRoot) return;
 
 		this.markdownText = markdownText;
 		this.astRoot = astRoot;
@@ -94,20 +121,30 @@ class FlexmarkPreviewRenderer
 	@Override
 	public String getHtml(boolean source) {
 		if (source) {
-			if (htmlSource == null)
-				htmlSource = toHtml(true);
+			if (htmlSource == null) htmlSource = toHtml(true);
 			return htmlSource;
-		} else {
-			if (htmlPreview == null)
-				htmlPreview = toHtml(false);
+		}
+		else {
+			if (htmlPreview == null) htmlPreview = toHtml(false);
+			return htmlPreview;
+		}
+	}
+
+	@Override
+	public String getHtml(boolean source, DocumentEditor documentEditor) {
+		if (source) {
+			if (htmlSource == null) htmlSource = toHtml(true, documentEditor);
+			return htmlSource;
+		}
+		else {
+			if (htmlPreview == null) htmlPreview = toHtml(false, documentEditor);
 			return htmlPreview;
 		}
 	}
 
 	@Override
 	public String getAST() {
-		if (ast == null)
-			ast = printTree();
+		if (ast == null) ast = printTree();
 		return ast;
 	}
 
@@ -116,19 +153,21 @@ class FlexmarkPreviewRenderer
 		ArrayList<Range> sequences = new ArrayList<>();
 
 		Node astRoot = toAstRoot();
-		if (astRoot == null)
-			return sequences;
+		if (astRoot == null) return sequences;
 
 		NodeVisitor visitor = new NodeVisitor(Collections.emptyList()) {
+
 			@Override
-			public void processNode(Node node, boolean withChildren, BiConsumer<Node, Visitor<Node>> processor) {
+			public void processNode(Node node, boolean withChildren,
+				BiConsumer<Node, Visitor<Node>> processor)
+			{
 				BasedSequence chars = node.getChars();
-				if (isInSequence(startOffset, endOffset, chars))
-					sequences.add(new Range(chars.getStartOffset(), chars.getEndOffset()));
+				if (isInSequence(startOffset, endOffset, chars)) sequences.add(
+					new Range(chars.getStartOffset(), chars.getEndOffset()));
 
 				for (BasedSequence segment : node.getSegments()) {
-					if (isInSequence(startOffset, endOffset, segment))
-						sequences.add(new Range(segment.getStartOffset(), segment.getEndOffset()));
+					if (isInSequence(startOffset, endOffset, segment)) sequences.add(
+						new Range(segment.getStartOffset(), segment.getEndOffset()));
 				}
 
 				processChildren(node, processor);
@@ -139,60 +178,69 @@ class FlexmarkPreviewRenderer
 	}
 
 	private boolean isInSequence(int start, int end, BasedSequence sequence) {
-		if (end == start)
-			end++;
+		if (end == start) end++;
 		return start < sequence.getEndOffset() && end > sequence.getStartOffset();
 	}
 
 	private Node parseMarkdown(String text) {
-		Parser parser = Parser.builder()
-				.extensions(MarkdownExtensions.getFlexmarkExtensions())
-				.build();
+		Parser parser = Parser.builder().extensions(MarkdownExtensions
+			.getFlexmarkExtensions()).build();
 		return parser.parse(text);
 	}
 
 	private Node toAstRoot() {
-		if (!addons.iterator().hasNext())
-			return astRoot; // no addons --> use AST from editor
+		if (!addons.iterator().hasNext()) return astRoot; // no addons --> use AST
+																											// from editor
 
-		if (astRoot2 == null)
-			astRoot2 = parseMarkdown(markdownText);
+		if (astRoot2 == null) astRoot2 = parseMarkdown(markdownText);
 		return astRoot2;
 	}
 
 	private String toHtml(boolean source) {
+		return toHtml(source, null);
+	}
+
+	private String toHtml(boolean source, DocumentEditor documentEditor) {
 		Node astRoot;
 		if (addons.iterator().hasNext()) {
 			String text = markdownText;
 
-		    for (PreviewRendererAddon addon : addons)
-	            text = addon.preParse(text, path);
+			for (PreviewRendererAddon addon : addons)
+				text = addon.preParse(text, path);
 
-		    astRoot = parseMarkdown(text);
-		} else {
+			astRoot = parseMarkdown(text);
+		}
+		else {
 			// no addons --> use cached AST
 			astRoot = toAstRoot();
 		}
 
-		if (astRoot == null)
-			return "";
+		if (astRoot == null) return "";
 
-		HtmlRenderer.Builder builder = HtmlRenderer.builder()
-				.extensions(MarkdownExtensions.getFlexmarkExtensions());
-		if (!source)
-			builder.attributeProviderFactory(new MyAttributeProvider.Factory());
+		HtmlRenderer.Builder builder = HtmlRenderer.builder().extensions(
+			MarkdownExtensions.getFlexmarkExtensions());
+		if (!source) builder.attributeProviderFactory(
+			new MyAttributeProvider.Factory());
+
+		if (documentEditor != null) {
+			documentEditor.removeAllActiveMediaIDs();
+			builder.nodeRendererFactory(new FencedCodeWidgetRendererFactory(
+				documentEditor));
+			builder.nodeRendererFactory(new MarsEmbbedImageRendererFactory(
+				documentEditor));
+		}
+
 		String html = builder.build().render(astRoot);
 
-        for (PreviewRendererAddon addon : addons)
-            html = addon.postRender(html, path);
+		for (PreviewRendererAddon addon : addons)
+			html = addon.postRender(html, path);
 
-        return html;
+		return html;
 	}
 
 	private String printTree() {
 		Node astRoot = toAstRoot();
-		if (astRoot == null)
-			return "";
+		if (astRoot == null) return "";
 
 		StringBuilder buf = new StringBuilder(100);
 		printNode(buf, "", astRoot);
@@ -206,37 +254,40 @@ class FlexmarkPreviewRenderer
 		buf.append('\n');
 
 		indent += "    ";
-		for (Node child = node.getFirstChild(); child != null; child = child.getNext())
+		for (Node child = node.getFirstChild(); child != null; child = child
+			.getNext())
 			printNode(buf, indent, child);
 	}
 
 	private void printAttributes(StringBuilder buf, Node node) {
-		if (node instanceof Heading)
-			printAttribute(buf, "level", ((Heading)node).getLevel());
+		if (node instanceof Heading) printAttribute(buf, "level", ((Heading) node)
+			.getLevel());
 	}
 
 	private void printAttribute(StringBuilder buf, String name, Object value) {
 		buf.append(' ').append(name).append(':').append(value);
 	}
 
-	//---- class MyAttributeProvider ------------------------------------------
+	// ---- class MyAttributeProvider ------------------------------------------
 
-	private static class MyAttributeProvider
-		implements AttributeProvider
-	{
-		private static class Factory
-			extends IndependentAttributeProviderFactory
-		{
+	private static class MyAttributeProvider implements AttributeProvider {
+
+		private static class Factory extends IndependentAttributeProviderFactory {
+
 			@Override
-			public @NotNull AttributeProvider apply(@NotNull LinkResolverContext context) {
+			public @NotNull AttributeProvider apply(
+				@NotNull LinkResolverContext context)
+			{
 				return new MyAttributeProvider();
 			}
 		}
-		
+
 		@Override
-		public void setAttributes(@NotNull Node node, @NotNull AttributablePart part,
-				@NotNull MutableAttributes attributes) {
-			attributes.addValue("data-pos", node.getStartOffset() + ":" + node.getEndOffset());
+		public void setAttributes(@NotNull Node node,
+			@NotNull AttributablePart part, @NotNull MutableAttributes attributes)
+		{
+			attributes.addValue("data-pos", node.getStartOffset() + ":" + node
+				.getEndOffset());
 		}
 	}
 }

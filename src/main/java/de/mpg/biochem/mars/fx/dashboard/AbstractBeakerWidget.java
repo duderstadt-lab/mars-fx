@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,36 +26,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import de.gsi.dataset.spi.DefaultErrorDataSet;
+import org.scijava.plugin.SciJavaPlugin;
+
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.application.Platform;
 import javafx.scene.Node;
-
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-import org.scijava.script.ScriptModule;
-
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
-		implements MarsDashboardWidget, SciJavaPlugin, Initializable {
+	implements MarsDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected Node node;
 
@@ -80,8 +68,18 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 	public void run() {
 		Map<String, Object> outputs = runScript();
 
-		if (outputs == null)
+		if (outputs == null) return;
+
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			if (!outputs.containsKey("imgsrc")) {
+				writeToLog("required output imgsrc is missing.");
+				return;
+			}
+
+			imgsrc = (String) outputs.get("imgsrc");
+			loadImage();
 			return;
+		}
 
 		if (!outputs.containsKey("node")) {
 			writeToLog("required output node is missing.");
@@ -91,6 +89,7 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 		node = (Node) outputs.get("node");
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				setContent(node);

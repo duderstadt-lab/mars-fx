@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,19 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataIndicatorChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.AbstractPositionOfInterestTable;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.Event;
 
-public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestTable implements MetadataSubPane {
+public class MetadataPositionOfInterestTable extends
+	AbstractPositionOfInterestTable implements MetadataSubPane
+{
 
-    public MetadataPositionOfInterestTable() {        
-        super();
-    }
+	public MetadataPositionOfInterestTable() {
+		super();
+	}
 
 	@Override
 	public void fireEvent(Event event) {
@@ -47,7 +50,8 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 
 	@Override
 	protected void fireIndicatorChangedEvent() {
-		getNode().fireEvent(new MetadataIndicatorChangedEvent((MarsMetadata) record));
+		getNode().fireEvent(new MetadataIndicatorChangedEvent(
+			(MarsMetadata) record));
 	}
 
 	@Override
@@ -58,12 +62,12 @@ public class MetadataPositionOfInterestTable extends AbstractPositionOfInterestT
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.record = marsImageMetadata;
-    	loadData();
+		loadData();
 	}
 
 	@Override
 	public void handle(MetadataEvent event) {
 		event.invokeHandler(this);
-        event.consume();
+		event.consume();
 	}
 }

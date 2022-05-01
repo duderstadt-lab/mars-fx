@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table.dashboard;
 
 import java.io.IOException;
@@ -38,35 +39,47 @@ import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
 import de.mpg.biochem.mars.table.MarsTable;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MarsTableDashboardWidget.class, name = "MarsTableBubbleChartWidget" )
-public class MarsTableBubbleChartWidget extends AbstractBubbleChartWidget implements MarsTableDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MarsTableDashboardWidget.class,
+	name = "MarsTableBubbleChartWidget")
+public class MarsTableBubbleChartWidget extends AbstractBubbleChartWidget
+	implements MarsTableDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MarsTable table;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("bubblechart", "#@ MarsTable table\n");
-		} catch (IOException e) {
+			loadScript("bubblechart",
+				"#@ Context scijavaContext\n#@ MarsTable table\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
+
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
+		}
 	}
-	
+
 	public void setTable(MarsTable table) {
 		this.table = table;
 	}
-	
+
 	public MarsTable getTable() {
 		return table;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MarsTableBubbleChartWidget";

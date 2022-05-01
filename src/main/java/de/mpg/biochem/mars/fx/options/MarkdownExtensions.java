@@ -1,3 +1,31 @@
+/*-
+ * #%L
+ * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
+ * %%
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
+ * %%
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice,
+ *    this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ * #L%
+ */
 /*
  * Copyright (c) 2016 Karl Tauber <karl at jformdesigner dot com>
  * All rights reserved.
@@ -42,18 +70,20 @@ import de.mpg.biochem.mars.fx.options.Options.RendererType;
  *
  * @author Karl Tauber
  */
-public class MarkdownExtensions
-{
+public class MarkdownExtensions {
+
 	static final HashMap<String, String> displayNames = new HashMap<>();
-	//static final HashMap<String, String> commonmarkExtClasses = new HashMap<>();
+	// static final HashMap<String, String> commonmarkExtClasses = new
+	// HashMap<>();
 	static final HashMap<String, String> flexmarkExtClasses = new HashMap<>();
 
 	static {
-		ResourceBundle bundle = ResourceBundle.getBundle("de.mpg.biochem.mars.fx.MarkdownExtensions");
+		ResourceBundle bundle = ResourceBundle.getBundle(
+			"de.mpg.biochem.mars.fx.MarkdownExtensions");
 		for (String key : bundle.keySet()) {
 			String value = bundle.getString(key);
-			if (key.startsWith("flexmark.ext."))
-				flexmarkExtClasses.put(key.substring("flexmark.ext.".length()), value);
+			if (key.startsWith("flexmark.ext.")) flexmarkExtClasses.put(key.substring(
+				"flexmark.ext.".length()), value);
 		}
 
 		HashSet<String> ids = new HashSet<>();
@@ -72,28 +102,35 @@ public class MarkdownExtensions
 
 	public static boolean isAvailable(RendererType rendererType, String id) {
 		switch (rendererType) {
-			case FlexMark:		return flexmarkExtClasses.containsKey(id);
-			default:			return false;
+			case FlexMark:
+				return flexmarkExtClasses.containsKey(id);
+			default:
+				return false;
 		}
 	}
 
-	public static List<com.vladsch.flexmark.util.misc.Extension> getFlexmarkExtensions() {
+	public static List<com.vladsch.flexmark.util.misc.Extension>
+		getFlexmarkExtensions()
+	{
 		return createdExtensions(flexmarkExtClasses, null);
 	}
 
-	public static List<com.vladsch.flexmark.util.misc.Extension> getFlexmarkExtensions(RendererType rendererType) {
+	public static List<com.vladsch.flexmark.util.misc.Extension>
+		getFlexmarkExtensions(RendererType rendererType)
+	{
 		return createdExtensions(flexmarkExtClasses, rendererType);
 	}
 
-	private static <E> ArrayList<E> createdExtensions(HashMap<String, String> extClasses, RendererType rendererType) {
+	private static <E> ArrayList<E> createdExtensions(
+		HashMap<String, String> extClasses, RendererType rendererType)
+	{
 		ArrayList<E> extensions = new ArrayList<>();
 		for (String markdownExtension : Options.getMarkdownExtensions()) {
 			if (rendererType != null && !isAvailable(rendererType, markdownExtension))
 				continue;
 
 			String extClassName = extClasses.get(markdownExtension);
-			if (extClassName == null)
-				continue; // extension not supported by renderer
+			if (extClassName == null) continue; // extension not supported by renderer
 
 			try {
 				Class<?> cls = Class.forName(extClassName);
@@ -101,7 +138,8 @@ public class MarkdownExtensions
 				@SuppressWarnings("unchecked")
 				E extension = (E) createMethod.invoke(null);
 				extensions.add(extension);
-			} catch (Exception e) {
+			}
+			catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,22 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.plot;
 
 import java.util.ArrayList;
-import java.util.Set;
 
+import de.mpg.biochem.mars.fx.plot.AbstractPlotPane.PlotOptionsPane;
 import de.mpg.biochem.mars.fx.util.StyleSheetUpdater;
 import de.mpg.biochem.mars.molecule.JsonConvertibleRecord;
+import javafx.beans.property.BooleanProperty;
 import javafx.event.Event;
 import javafx.scene.Node;
 
 public interface PlotPane extends JsonConvertibleRecord {
+
 	public StyleSheetUpdater getStyleSheetUpdater();
+
 	public Node getNode();
+
 	public ArrayList<SubPlot> getCharts();
+
 	public ArrayList<String> getColumnNames();
+
+	public BooleanProperty fixXBoundsProperty();
+
+	public PlotOptionsPane getPlotOptionsPane();
+
 	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane);
+
 	public void hideSubPlotOptions();
+
 	public void fireEvent(Event event);
 }

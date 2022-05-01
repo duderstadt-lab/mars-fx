@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,47 +26,39 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.mpg.biochem.mars.fx.options;
 
-import java.util.ArrayList;
+package de.mpg.biochem.mars.fx.options;
 
 import com.jfoenix.controls.JFXToggleButton;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.*;
-
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.event.Event;
 import javafx.scene.Node;
-import javafx.scene.control.Menu;
 import javafx.scene.layout.BorderPane;
 
 public class MarsOptionsPane {
+
 	private JFXToggleButton smileEncodingButton;
-	
+
 	private BorderPane rootPane;
-	
+
 	public MarsOptionsPane() {
-		//setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
-		
+		// setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.3em"));
+
 		smileEncodingButton = new JFXToggleButton();
 		rootPane = new BorderPane();
 		rootPane.setCenter(smileEncodingButton);
-		
-		//setContent(rootPane);
+
+		// setContent(rootPane);
 	}
-	
+
 	public void handleToggleSmileEncoding() {
 		if (smileEncodingButton.isSelected()) {
-			//archive.setSMILEOutputEncoding();
-		} else {
-			//archive.unsetSMILEOutputEncoding();
+			// archive.setSMILEOutputEncoding();
+		}
+		else {
+			// archive.unsetSMILEOutputEncoding();
 		}
 	}
-	
+
 	public Node getNode() {
 		return this.rootPane;
 	}

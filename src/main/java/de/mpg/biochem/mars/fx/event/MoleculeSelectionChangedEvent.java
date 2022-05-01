@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,33 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.EventType;
 
 public class MoleculeSelectionChangedEvent extends MoleculeEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeEvent> MOLECULE_SELECTION_CHANGED = new EventType<>(MOLECULE_EVENT, "MOLECULE_SELECTION_CHANGED");
+	public static final EventType<MoleculeEvent> MOLECULE_SELECTION_CHANGED =
+		new EventType<>(MOLECULE_EVENT, "MOLECULE_SELECTION_CHANGED");
 
-    private final Molecule molecule;
+	private final Molecule molecule;
 
-    public MoleculeSelectionChangedEvent(Molecule molecule) {
-        super(MOLECULE_SELECTION_CHANGED);
-        this.molecule = molecule;
-    }
-    
-    public Molecule getMolecule() {
-    	return molecule;
-    }
+	public MoleculeSelectionChangedEvent(Molecule molecule) {
+		super(MOLECULE_SELECTION_CHANGED);
+		this.molecule = molecule;
+	}
 
-    @Override
-    public void invokeHandler(MoleculeEventHandler handler) {
-        handler.onMoleculeSelectionChangedEvent(molecule);
-    }
+	public Molecule getMolecule() {
+		return molecule;
+	}
+
+	@Override
+	public void invokeHandler(MoleculeEventHandler handler) {
+		handler.onMoleculeSelectionChangedEvent(molecule);
+	}
 }

@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,42 +26,45 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
-import org.scijava.plugin.Parameter;
-import org.scijava.ui.UIService;
 import org.scijava.Context;
-
+import org.scijava.Priority;
 import org.scijava.display.Display;
-import org.scijava.display.DisplayService;
-import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.ui.UIService;
 import org.scijava.ui.UserInterface;
 import org.scijava.ui.viewer.AbstractDisplayViewer;
 import org.scijava.ui.viewer.DisplayViewer;
-import org.scijava.Priority;
 
-import net.imagej.display.WindowService;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.*;
-
+import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 
 @Plugin(type = DisplayViewer.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive<?,?,?,?>> implements DisplayViewer<MoleculeArchive<?,?,?,?>> {
-	
-	@Parameter
-    private Context context;
-	
-	//This method is called to create and display a window
-	//here we override it to make sure that calls like uiService.show( .. for MoleculeArchive 
-	//will use this method automatically..
-	@Override
-	public void view(final UserInterface ui, final Display<?> d) {	
-		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive = (MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>)d.get(0);
+public class MoleculeArchiveFxView extends
+	AbstractDisplayViewer<MoleculeArchive<?, ?, ?, ?>> implements
+	DisplayViewer<MoleculeArchive<?, ?, ?, ?>>
+{
 
-		DefaultMoleculeArchiveFxFrame moleculeFrame = new DefaultMoleculeArchiveFxFrame(archive, context);
+	@Parameter
+	private Context context;
+
+	// This method is called to create and display a window
+	// here we override it to make sure that calls like uiService.show( .. for
+	// MoleculeArchive
+	// will use this method automatically..
+	@Override
+	public void view(final UserInterface ui, final Display<?> d) {
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive =
+			(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>) d
+				.get(0);
+
+		DefaultMoleculeArchiveFxFrame moleculeFrame =
+			new DefaultMoleculeArchiveFxFrame(archive, context);
 		moleculeFrame.init();
 	}
 
@@ -69,11 +72,12 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 	public boolean canView(final Display<?> d) {
 		if (d instanceof MoleculeArchiveFxDisplay) {
 			return true;
-		} else {
+		}
+		else {
 			return false;
 		}
 	}
-	
+
 	@Override
 	public MoleculeArchiveFxDisplay getDisplay() {
 		return (MoleculeArchiveFxDisplay) super.getDisplay();
@@ -81,7 +85,7 @@ public class MoleculeArchiveFxView extends AbstractDisplayViewer<MoleculeArchive
 
 	@Override
 	public boolean isCompatible(UserInterface arg0) {
-		//Needs to be updated if all contexts are to be enabled beyond ImageJ
+		// Needs to be updated if all contexts are to be enabled beyond ImageJ
 		return true;
 	}
 }

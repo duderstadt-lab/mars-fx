@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,33 +26,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.EventType;
 
 public class MetadataSelectionChangedEvent extends MetadataEvent {
-		
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 
-		public static final EventType<MetadataEvent> METADATA_SELECTION_CHANGED = new EventType<>(METADATA_EVENT, "METADATA_SELECTION_CHANGED");
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
-	    private final MarsMetadata marsImageMetadata;
+	public static final EventType<MetadataEvent> METADATA_SELECTION_CHANGED =
+		new EventType<>(METADATA_EVENT, "METADATA_SELECTION_CHANGED");
 
-	    public MetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
-	        super(METADATA_SELECTION_CHANGED);
-	        this.marsImageMetadata = marsImageMetadata;
-	    }
-	    
-		public MarsMetadata getImageMetadata() {
-			return this.marsImageMetadata;
-		}
+	private final MarsMetadata marsImageMetadata;
 
-	    @Override
-	    public void invokeHandler(MetadataEventHandler handler) {
-	        handler.onMetadataSelectionChangedEvent(marsImageMetadata);
-	    }
+	public MetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
+		super(METADATA_SELECTION_CHANGED);
+		this.marsImageMetadata = marsImageMetadata;
 	}
+
+	public MarsMetadata getImageMetadata() {
+		return this.marsImageMetadata;
+	}
+
+	@Override
+	public void invokeHandler(MetadataEventHandler handler) {
+		handler.onMetadataSelectionChangedEvent(marsImageMetadata);
+	}
+}

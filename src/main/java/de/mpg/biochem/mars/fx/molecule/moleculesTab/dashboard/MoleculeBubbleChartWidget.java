@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,17 +26,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
 import java.io.IOException;
 
-import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractBubbleChartWidget;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -44,45 +43,62 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import net.imagej.ops.Initializable;
 
-@Plugin( type = MoleculeDashboardWidget.class, name = "MoleculeBubbleChartWidget" )
-public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget implements MoleculeDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MoleculeDashboardWidget.class,
+	name = "MoleculeBubbleChartWidget")
+public class MoleculeBubbleChartWidget extends AbstractBubbleChartWidget
+	implements MoleculeDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected Molecule molecule;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("bubblechart", "#@ MoleculeArchive archive\n#@ Molecule molecule\n");
-		} catch (IOException e) {
+			loadScript("bubblechart",
+				"#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ Molecule molecule\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
+
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
+		}
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+
+	public void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
 		this.archive = archive;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
-	
+
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
 	}
-	
+
 	public Molecule getMolecule() {
 		return molecule;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MoleculeBubbleChartWidget";

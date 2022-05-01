@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,57 +26,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
-import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
-import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeEvent;
-import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
-import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboardWidget;
 import java.util.Set;
 
 import org.scijava.Context;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
+import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.plot.SubPlot;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<MoleculeDashboardWidget> implements MoleculeSubPane {
-	
+public class MoleculeDashboard<M extends Molecule> extends
+	AbstractDashboard<MoleculeDashboardWidget> implements MoleculeSubPane
+{
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected M molecule;
-	
+
 	public MoleculeDashboard(final Context context) {
 		super(context);
-		
+
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-					archive = e.getArchive();
-			   		discoverWidgets();
-			   		e.consume();
-			   	}
-			} 
-        });
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						archive = e.getArchive();
+						discoverWidgets();
+						e.consume();
+					}
+				}
+			});
 	}
 
 	@Override
 	public MoleculeDashboardWidget createWidget(String widgetName) {
-		MoleculeDashboardWidget widget = (MoleculeDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MoleculeDashboardWidget widget =
+			(MoleculeDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setMolecule(molecule);
 		widget.setArchive(archive);
 		widget.setParent(this);
@@ -86,13 +98,11 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MoleculeCategoryChartWidget",
-	                    "MoleculeHistogramWidget",
-	                    "MoleculeXYChartWidget",
-	                    "MoleculeBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList("MoleculeCategoryChartWidget",
+			"MoleculeHistogramWidget", "MoleculeXYChartWidget",
+			"MoleculeBubbleChartWidget"));
 	}
-	
+
 	@Override
 	public void handle(MoleculeEvent event) {
 		event.invokeHandler(this);
@@ -107,7 +117,31 @@ public class MoleculeDashboard<M extends Molecule> extends AbstractDashboard<Mol
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MoleculeDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MoleculeDashboardWidget.class);
+	}
+
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane",
+				"moleculeDashboard");
+
+			// Need for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
+				"moleculeDashboard");
+
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

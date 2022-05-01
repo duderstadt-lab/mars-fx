@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -52,6 +52,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package de.mpg.biochem.mars.fx;
 
 import java.text.MessageFormat;
@@ -60,17 +61,17 @@ import java.util.ResourceBundle;
 /**
  * @author Karl Tauber
  */
-public class Messages
-{
-	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.fx.messages";
-	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle.getBundle(BUNDLE_NAME);
+public class Messages {
 
-	private Messages() {
-	}
+	private static final String BUNDLE_NAME = "de.mpg.biochem.mars.fx.messages";
+	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
+		.getBundle(BUNDLE_NAME);
+
+	private Messages() {}
 
 	public static String get(String key) {
 //		try {
-			return RESOURCE_BUNDLE.getString(key);
+		return RESOURCE_BUNDLE.getString(key);
 //		} catch (MissingResourceException e) {
 //			return '!' + key + '!';
 //		}

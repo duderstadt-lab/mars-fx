@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,23 +26,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.table;
 
 import org.scijava.Priority;
 import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
-import de.mpg.biochem.mars.table.*;
+
+import de.mpg.biochem.mars.table.MarsTable;
 
 /**
- * Display for {@link MarsTable}. This ensures that uiService.show() for a MarsTable will automatically be detected and 
- * call the view method in MarsTableFxView to make our custom window with custom menus.
+ * Display for {@link MarsTable}. This ensures that uiService.show() for a
+ * MarsTable will automatically be detected and call the view method in
+ * MarsTableFxView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
 @Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MarsTableFxDisplay extends AbstractDisplay<MarsTable> implements Display<MarsTable> {
-	
+public class MarsTableFxDisplay extends AbstractDisplay<MarsTable> implements
+	Display<MarsTable>
+{
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public MarsTableFxDisplay() {
 		super((Class) MarsTable.class);
@@ -54,14 +59,14 @@ public class MarsTableFxDisplay extends AbstractDisplay<MarsTable> implements Di
 	public boolean canDisplay(final Class<?> c) {
 		if (c.equals(MarsTable.class)) {
 			return true;
-		} else { 
+		}
+		else {
 			return super.canDisplay(c);
 		}
 	}
-	
+
 	@Override
 	public boolean isDisplaying(final Object o) {
-		return false;
+		return super.isDisplaying(o);
 	}
-
 }

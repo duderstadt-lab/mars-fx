@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule;
 
 import org.scijava.Priority;
@@ -33,17 +34,21 @@ import org.scijava.display.AbstractDisplay;
 import org.scijava.display.Display;
 import org.scijava.plugin.Plugin;
 
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
 
 /**
- * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a MoleculeArchive will automatically be detected and 
- * call the view method in MoleculeArchiveView to make our custom window with custom menus.
+ * Display for {@link MoleculeArchive}. This ensures that uiService.show() for a
+ * MoleculeArchive will automatically be detected and call the view method in
+ * MoleculeArchiveView to make our custom window with custom menus.
  * 
  * @author Karl Duderstadt
  */
 @Plugin(type = Display.class, priority = Priority.NORMAL)
-public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,?,?,?>> implements Display<MoleculeArchive<?,?,?,?>> {
-	
+public class MoleculeArchiveFxDisplay extends
+	AbstractDisplay<MoleculeArchive<?, ?, ?, ?>> implements
+	Display<MoleculeArchive<?, ?, ?, ?>>
+{
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public MoleculeArchiveFxDisplay() {
 		super((Class) MoleculeArchive.class);
@@ -55,13 +60,14 @@ public class MoleculeArchiveFxDisplay extends AbstractDisplay<MoleculeArchive<?,
 	public boolean canDisplay(final Class<?> c) {
 		if (c.equals(MoleculeArchive.class)) {
 			return true;
-		} else { 
+		}
+		else {
 			return super.canDisplay(c);
 		}
 	}
-	
+
 	@Override
 	public boolean isDisplaying(final Object o) {
-		return false;
+		return super.isDisplaying(o);
 	}
 }

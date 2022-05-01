@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
 import java.io.IOException;
@@ -34,53 +35,70 @@ import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
-import net.imagej.ops.Initializable;
 import de.mpg.biochem.mars.fx.dashboard.AbstractBeakerWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import net.imagej.ops.Initializable;
 
-@Plugin( type = MarsMetadataDashboardWidget.class, name = "MarsMetadataBeakerWidget" )
-public class MarsMetadataBeakerWidget extends AbstractBeakerWidget implements MarsMetadataDashboardWidget, SciJavaPlugin, Initializable {
+@Plugin(type = MarsMetadataDashboardWidget.class,
+	name = "MarsMetadataBeakerWidget")
+public class MarsMetadataBeakerWidget extends AbstractBeakerWidget implements
+	MarsMetadataDashboardWidget, SciJavaPlugin, Initializable
+{
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected MarsMetadata marsMetadata;
-	
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		try {
-			loadScript("beaker", "#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
-		} catch (IOException e) {
+			loadScript("beaker",
+				"#@ Context scijavaContext\n#@ MoleculeArchive archive\n#@ MarsMetadata marsMetadata\n");
+		}
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	protected void setScriptInputs(ScriptModule module) {
+		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 		module.setInput("marsMetadata", marsMetadata);
+
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
+			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
+				65) / 72));
+		}
 	}
-	
-	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+
+	public void setArchive(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
 		this.archive = archive;
 	}
-	
-	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+
+	public
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>>
+		getArchive()
+	{
 		return archive;
 	}
-	
+
 	public void setMetadata(MarsMetadata marsMetadata) {
 		this.marsMetadata = marsMetadata;
 	}
-	
+
 	public MarsMetadata getMetadata() {
 		return marsMetadata;
 	}
-	
+
 	@Override
 	public String getName() {
 		return "MarsMetadataBeakerWidget";

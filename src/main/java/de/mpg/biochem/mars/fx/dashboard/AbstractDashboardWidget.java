@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,59 +26,50 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUESTION_CIRCLE_ALT;
+import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 
-import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.scijava.plugin.Parameter;
+
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
-import de.mpg.biochem.mars.util.MarsUtil;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.animation.Animation;
+import javafx.animation.Interpolator;
+import javafx.animation.RotateTransition;
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Border;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.BorderStroke;
 import javafx.scene.layout.BorderStrokeStyle;
 import javafx.scene.layout.BorderWidths;
 import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-
-import de.jensd.fx.glyphs.GlyphIcons;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import javafx.scene.layout.AnchorPane;
-
-import javafx.animation.RotateTransition;
 import javafx.util.Duration;
-import javafx.animation.Interpolator;
-import javafx.animation.Animation;
-
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TabPane.TabClosingPolicy;
-
 import net.imagej.ops.Initializable;
-import org.scijava.plugin.Parameter;
 
-public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRecord
-		implements MarsDashboardWidget, Initializable {
+public abstract class AbstractDashboardWidget extends
+	AbstractJsonConvertibleRecord implements MarsDashboardWidget, Initializable
+{
 
 	protected AnchorPane rootPane;
 	protected TabPane tabs;
@@ -88,8 +79,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected Tab contentTab;
 
 	protected static final int RESIZE_REGION = 2;
-	protected double MINIMUM_WIDTH = 250;
-	protected double MINIMUM_HEIGHT = 250;
+	public static final double MINIMUM_WIDTH = 250;
+	public static final double MINIMUM_HEIGHT = 250;
 	protected double y, x;
 	protected AtomicBoolean running = new AtomicBoolean(false);
 	protected boolean initHeight, initWidth;
@@ -97,6 +88,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected boolean dragY = false;
 	protected RotateTransition rt;
 	protected Button closeButton, loadButton;
+	protected Text syncIcon;
 
 	@Parameter
 	protected MarsDashboard parent;
@@ -108,21 +100,23 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabs.setStyle("");
 		tabs.getStylesheets().clear();
-		tabs.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/WidgetTabPane.css");
+		tabs.getStylesheets().add(
+			"de/mpg/biochem/mars/fx/molecule/WidgetTabPane.css");
 
 		AnchorPane.setTopAnchor(tabs, 0.0);
 		AnchorPane.setLeftAnchor(tabs, 0.0);
 		AnchorPane.setRightAnchor(tabs, 0.0);
 		AnchorPane.setBottomAnchor(tabs, 0.0);
 
-		tabs.setBorder(new Border(
-				new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.NONE, new CornerRadii(5), new BorderWidths(1))));
+		tabs.setBorder(new Border(new BorderStroke(Color.TRANSPARENT,
+			BorderStrokeStyle.NONE, new CornerRadii(5), new BorderWidths(1))));
 
-		rootPane.setBorder(new Border(
-				new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
+		rootPane.setBorder(new Border(new BorderStroke(Color.BLACK,
+			BorderStrokeStyle.SOLID, new CornerRadii(5), new BorderWidths(1))));
 
 		// Add capture image button and resize button...
-		// resize button will open a dialog that allows entering a custom size for the
+		// resize button will open a dialog that allows entering a custom size for
+		// the
 		// widget...
 
 		Text closeIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
@@ -140,14 +134,14 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		closeButton.setPrefWidth(20);
 		closeButton.setPrefHeight(20);
 
-		Text syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
+		syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
 		loadButton = new Button();
 		loadButton.setGraphic(syncIcon);
 		loadButton.setCenterShape(true);
 		loadButton.getStyleClass().add("icon-button");
 		loadButton.setAlignment(Pos.CENTER);
 
-		rt = new RotateTransition(Duration.millis(500), loadButton);
+		rt = new RotateTransition(Duration.millis(500), syncIcon);
 		rt.setInterpolator(Interpolator.LINEAR);
 		rt.setByAngle(0);
 		rt.setByAngle(360);
@@ -157,7 +151,8 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 			if (getParent() != null) {
 				if (isRunning()) {
 					getParent().stopWidget(this);
-				} else {
+				}
+				else {
 					rt.play();
 					getParent().runWidget(this);
 				}
@@ -174,6 +169,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		getTabPane().getTabs().add(contentTab);
 
 		rootPane.setOnMousePressed(new EventHandler<MouseEvent>() {
+
 			@Override
 			public void handle(MouseEvent event) {
 				mousePressed(event);
@@ -181,24 +177,28 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 		});
 
 		rootPane.setOnMouseDragged(new EventHandler<MouseEvent>() {
+
 			@Override
 			public void handle(MouseEvent event) {
 				mouseDragged(event);
 			}
 		});
 		rootPane.setOnMouseMoved(new EventHandler<MouseEvent>() {
+
 			@Override
 			public void handle(MouseEvent event) {
 				mouseOver(event);
 			}
 		});
 		tabs.setOnMouseMoved(new EventHandler<MouseEvent>() {
+
 			@Override
 			public void handle(MouseEvent event) {
 				mouseOver(event);
 			}
 		});
 		rootPane.setOnMouseReleased(new EventHandler<MouseEvent>() {
+
 			@Override
 			public void handle(MouseEvent event) {
 				mouseReleased(event);
@@ -215,9 +215,11 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected void mouseOver(MouseEvent event) {
 		if (isInDraggableY(event)) {
 			rootPane.setCursor(Cursor.S_RESIZE);
-		} else if (isInDraggableX(event)) {
+		}
+		else if (isInDraggableX(event)) {
 			rootPane.setCursor(Cursor.E_RESIZE);
-		} else {
+		}
+		else {
 			rootPane.setCursor(Cursor.DEFAULT);
 		}
 	}
@@ -231,10 +233,10 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	}
 
 	protected void mouseDragged(MouseEvent event) {
-		if (!dragX && !dragY)
-			return;
-		
-		Bounds boundsInScene = parent.getNode().localToScene(parent.getNode().getBoundsInLocal());
+		if (!dragX && !dragY) return;
+
+		Bounds boundsInScene = parent.getNode().localToScene(parent.getNode()
+			.getBoundsInLocal());
 		if (!boundsInScene.contains(event.getSceneX(), event.getSceneY())) {
 			return;
 		}
@@ -251,7 +253,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 		if (dragX) {
 			double mousex = event.getX();
-			
+
 			double newWidth = rootPane.getMinWidth() + (mousex - x);
 			if (newWidth > MINIMUM_WIDTH) {
 				rootPane.setMinWidth(newWidth);
@@ -259,15 +261,18 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 				x = mousex;
 			}
 
-			//int hCells = (int)((parent.getWidgetPane().getWidth() - 20) / parent.getWidgetPane().getCellWidth());
-			int hCells = (int)(parent.getWidgetPane().getWidth() / parent.getWidgetPane().getCellWidth());
-			double containerWidth = hCells*parent.getWidgetPane().getCellWidth();
-			
-			if (rootPane.getMinWidth() > containerWidth 
-					&& rootPane.getMaxWidth() > containerWidth) {
+			// int hCells = (int)((parent.getWidgetPane().getWidth() - 20) /
+			// parent.getWidgetPane().getCellWidth());
+			int hCells = (int) (parent.getWidgetPane().getWidth() / parent
+				.getWidgetPane().getCellWidth());
+			double containerWidth = hCells * parent.getWidgetPane().getCellWidth();
+
+			if (rootPane.getMinWidth() > containerWidth && rootPane
+				.getMaxWidth() > containerWidth)
+			{
 				setWidth(containerWidth);
 			}
-			
+
 		}
 
 		parent.getWidgetPane().clearLayout();
@@ -277,10 +282,11 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	protected void mousePressed(MouseEvent event) {
 		if (isInDraggableX(event)) {
 			dragX = true;
-		} else if (isInDraggableY(event)) {
+		}
+		else if (isInDraggableY(event)) {
 			dragY = true;
-		} else
-			return;
+		}
+		else return;
 
 		if (!initHeight) {
 			rootPane.setMinHeight(rootPane.getHeight());
@@ -305,11 +311,13 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	public void stopSpinning() {
 		rt.stop();
+		syncIcon.setRotate(0);
 	}
 
 	@Override
 	public Node getIcon() {
-		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT, "1.0em");
+		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT,
+			"1.0em");
 	}
 
 	@Override
@@ -323,8 +331,7 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	public void setContent(Node icon, Node node) {
 		contentTab.setContent(node);
-		if (icon != null)
-			getContentTab().setGraphic(icon);
+		if (icon != null) getContentTab().setGraphic(icon);
 	}
 
 	protected Tab getContentTab() {
@@ -334,15 +341,14 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	public TabPane getTabPane() {
 		return tabs;
 	}
-	
+
 	public double getWidth() {
 		return rootPane.getMinWidth();
 	}
-	
+
 	public void setWidth(double width) {
-		if (width < MINIMUM_WIDTH)
-			return;
-		
+		if (width < MINIMUM_WIDTH) return;
+
 		rootPane.setMinWidth(width);
 		rootPane.setMaxWidth(width);
 	}
@@ -360,7 +366,13 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 	@Override
 	public void close() {
 		rt.stop();
-		if (parent != null) {
+		syncIcon.setRotate(0);
+
+		RoverConfirmationDialog alert = new RoverConfirmationDialog(getNode()
+			.getScene().getWindow(), "Are you sure you want to remove the widget?");
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK && parent != null) {
 			parent.stopWidget(this);
 			parent.removeWidget(this);
 		}
@@ -378,26 +390,21 @@ public abstract class AbstractDashboardWidget extends AbstractJsonConvertibleRec
 
 	@Override
 	protected void createIOMaps() {
-		
-		setJsonField("Width", 
-			jGenerator -> {
-				jGenerator.writeNumberField("Width", rootPane.getWidth());
-			}, 
-			jParser -> {
-				rootPane.setMinWidth(jParser.getDoubleValue());
-				rootPane.setMaxWidth(jParser.getDoubleValue());
-			});
-			
-			
-		setJsonField("Height", 
-			jGenerator -> {
-				jGenerator.writeNumberField("Height", rootPane.getHeight());
-			}, 
-			jParser -> {
-				rootPane.setMinHeight(jParser.getDoubleValue());
-				rootPane.setMaxHeight(jParser.getDoubleValue());
-			});
-		
+
+		setJsonField("Width", jGenerator -> {
+			jGenerator.writeNumberField("Width", rootPane.getWidth());
+		}, jParser -> {
+			rootPane.setMinWidth(jParser.getDoubleValue());
+			rootPane.setMaxWidth(jParser.getDoubleValue());
+		});
+
+		setJsonField("Height", jGenerator -> {
+			jGenerator.writeNumberField("Height", rootPane.getHeight());
+		}, jParser -> {
+			rootPane.setMinHeight(jParser.getDoubleValue());
+			rootPane.setMaxHeight(jParser.getDoubleValue());
+		});
+
 	}
 
 	public abstract String getName();

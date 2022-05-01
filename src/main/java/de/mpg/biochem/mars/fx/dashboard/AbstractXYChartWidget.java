@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,35 +26,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.dashboard;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.molecule.DashboardTab;
-import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
-import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
-
-import org.scijava.plugin.Plugin;
-import org.scijava.plugin.SciJavaPlugin;
-
-import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,14 +36,23 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.scijava.Cancelable;
-import org.scijava.ItemIO;
-import org.scijava.plugin.Parameter;
-
+import de.gsi.chart.XYChart;
+import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
+import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import net.imagej.ops.Initializable;
 
 public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
-		implements MarsDashboardWidget, Initializable {
+	implements MarsDashboardWidget, Initializable
+{
 
 	protected XYChart xyChart;
 	protected MarsNumericAxis xAxis, yAxis;
@@ -79,52 +62,57 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 	protected ArrayList<DefaultErrorDataSet> datasets;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
-			Arrays.asList("xlabel", "ylabel", "title"));
-	
+		Arrays.asList("xlabel", "ylabel", "title"));
+
 	protected boolean drawErrorBars = false;
 
 	@Override
 	public void initialize() {
 		super.initialize();
 
-		xAxis = new MarsNumericAxis("");
-		xAxis.minorTickVisibleProperty().set(false);
-		xAxis.setAutoRanging(true);
-		xAxis.setAutoRangeRounding(false);
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			setContent(getIcon(), new BorderPane());
+		}
+		else {
+			xAxis = new MarsNumericAxis("");
+			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setAutoRanging(true);
+			xAxis.setAutoRangeRounding(false);
 
-		yAxis = new MarsNumericAxis("");
-		yAxis.setMinorTickVisible(false);
-		yAxis.setAutoRanging(true);
-		yAxis.setAutoRangeRounding(false);
+			yAxis = new MarsNumericAxis("");
+			yAxis.setMinorTickVisible(false);
+			yAxis.setAutoRanging(true);
+			yAxis.setAutoRangeRounding(false);
 
-		xyChart = new XYChart(xAxis, yAxis);
-		xyChart.setAnimated(false);
-		xyChart.getRenderers().clear();
+			xyChart = new XYChart(xAxis, yAxis);
+			xyChart.setAnimated(false);
+			xyChart.getRenderers().clear();
 
-		xyChart.getPlugins().add(new MarsDataPointTracker());
-		// Zoomer zoom = new Zoomer();
-		// xyChart.getPlugins().add(zoom);
+			xyChart.getPlugins().add(new MarsDataPointTracker());
+			// Zoomer zoom = new Zoomer();
+			// xyChart.getPlugins().add(zoom);
 
-		datasets = new ArrayList<DefaultErrorDataSet>();
+			datasets = new ArrayList<DefaultErrorDataSet>();
 
-		renderer = new ErrorDataSetRenderer();
-		renderer.setMarkerSize(5);
-		renderer.setPolyLineStyle(LineStyle.NORMAL);
-		renderer.setErrorType(ErrorStyle.NONE);
-		renderer.setDrawMarker(false);
-		renderer.setAssumeSortedData(false);
-		renderer.pointReductionProperty().set(false);
+			renderer = new ErrorDataSetRenderer();
+			renderer.setMarkerSize(5);
+			renderer.setPolyLineStyle(LineStyle.NORMAL);
+			renderer.setErrorType(ErrorStyle.NONE);
+			renderer.setDrawMarker(false);
+			renderer.setAssumeSortedData(false);
+			renderer.pointReductionProperty().set(false);
 
-		xyChart.getRenderers().add(renderer);
-		xyChart.setLegend(null);
-		xyChart.horizontalGridLinesVisibleProperty().set(false);
-		xyChart.verticalGridLinesVisibleProperty().set(false);
+			xyChart.getRenderers().add(renderer);
+			xyChart.setLegend(null);
+			xyChart.horizontalGridLinesVisibleProperty().set(false);
+			xyChart.verticalGridLinesVisibleProperty().set(false);
 
-		xyChart.setTriggerDistance(0);
-		
-		xyChart.setPrefSize(100, 100);
-		xyChart.setPadding(new Insets(10, 20, 10, 10));
-		setContent(getIcon(), xyChart);
+			xyChart.setTriggerDistance(0);
+
+			xyChart.setPrefSize(100, 100);
+			xyChart.setPadding(new Insets(10, 20, 10, 10));
+			setContent(getIcon(), xyChart);
+		}
 
 		rootPane.setMinSize(250, 250);
 		rootPane.setMaxSize(250, 250);
@@ -136,6 +124,17 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 		if (outputs == null) {
 			writeToLog("No outputs were generated by this script.");
+			return;
+		}
+
+		if (lang.getLanguageName().equals("Conda Python 3")) {
+			if (!outputs.containsKey("imgsrc")) {
+				writeToLog("required output imgsrc is missing.");
+				return;
+			}
+
+			imgsrc = (String) outputs.get("imgsrc");
+			loadImage();
 			return;
 		}
 
@@ -155,13 +154,16 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		final boolean autoXRanging;
 		if (outputs.containsKey("xmin") && outputs.containsKey("xmax")) {
 			autoXRanging = false;
-		} else if (outputs.containsKey("xmin")) {
+		}
+		else if (outputs.containsKey("xmin")) {
 			writeToLog("required output xmax is missing.");
 			return;
-		} else if (outputs.containsKey("xmax")) {
+		}
+		else if (outputs.containsKey("xmax")) {
 			writeToLog("required output xmin is missing.");
 			return;
-		} else {
+		}
+		else {
 			autoXRanging = true;
 		}
 
@@ -169,13 +171,16 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		final boolean autoYRanging;
 		if (outputs.containsKey("ymin") && outputs.containsKey("ymax")) {
 			autoYRanging = false;
-		} else if (outputs.containsKey("ymin")) {
+		}
+		else if (outputs.containsKey("ymin")) {
 			writeToLog("required output ymax is missing.");
 			return;
-		} else if (outputs.containsKey("ymax")) {
+		}
+		else if (outputs.containsKey("ymax")) {
 			writeToLog("required output ymin is missing.");
 			return;
-		} else {
+		}
+		else {
 			autoYRanging = true;
 		}
 
@@ -189,24 +194,25 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 		List<String> series = new ArrayList<String>(seriesSet);
 		Collections.sort(series);
-		
+
 		drawErrorBars = false;
 		for (String seriesName : series) {
 			DefaultErrorDataSet dataset = buildDataSet(outputs, seriesName);
-			if (dataset != null)
-				datasets.add(dataset);
+			if (dataset != null) datasets.add(dataset);
 			else {
 				return;
 			}
 		}
 
 		Platform.runLater(new Runnable() {
+
 			@Override
 			public void run() {
 				xAxis.setName(xlabel);
 				if (autoXRanging) {
 					xAxis.setAutoRanging(true);
-				} else {
+				}
+				else {
 					xAxis.setAutoRanging(false);
 					xAxis.setMin((Double) outputs.get("xmin"));
 					xAxis.setMax((Double) outputs.get("xmax"));
@@ -215,33 +221,36 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 				yAxis.setName(ylabel);
 				if (autoYRanging) {
 					yAxis.setAutoRanging(true);
-				} else {
+				}
+				else {
 					yAxis.setAutoRanging(false);
 					yAxis.setMin((Double) outputs.get("ymin"));
 					yAxis.setMax((Double) outputs.get("ymax"));
 				}
 
 				xyChart.setTitle(title);
-				
-				if (drawErrorBars)
-					renderer.setErrorType(ErrorStyle.ERRORBARS);
-				else 
-					renderer.setErrorType(ErrorStyle.NONE);
+
+				if (drawErrorBars) renderer.setErrorType(ErrorStyle.ERRORBARS);
+				else renderer.setErrorType(ErrorStyle.NONE);
 
 				xyChart.getDatasets().clear();
 				xyChart.getDatasets().addAll(datasets);
-				
-				xyChart.layout();
+
+				Platform.runLater(() -> xyChart.layoutChildren());
 			}
 		});
 	}
 
-	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs, String seriesName) {
+	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs,
+		String seriesName)
+	{
 		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
 
 		int dataPointCount = 0;
 
-		if (outputs.containsKey(seriesName + "_xvalues") && outputs.containsKey(seriesName + "_yvalues")) {
+		if (outputs.containsKey(seriesName + "_xvalues") && outputs.containsKey(
+			seriesName + "_yvalues"))
+		{
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
 
@@ -255,7 +264,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			dataPointCount = xvalues.length;
 
 			if (xvalues.length != yvalues.length) {
-				writeToLog(seriesName + "_xvalues and " + seriesName + "_yvalues do not have the same dimensions.");
+				writeToLog(seriesName + "_xvalues and " + seriesName +
+					"_yvalues do not have the same dimensions.");
 				return null;
 			}
 
@@ -268,7 +278,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 				}
 
 				if (error.length != dataPointCount) {
-					writeToLog(seriesName + "_yvalues and " + seriesName + "_error do not have the same dimensions.");
+					writeToLog(seriesName + "_yvalues and " + seriesName +
+						"_error do not have the same dimensions.");
 					return null;
 				}
 			}
@@ -276,30 +287,35 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			if (error != null) {
 				drawErrorBars = true;
 				for (int index = 0; index < xvalues.length; index++)
-					dataset.add(xvalues[index], yvalues[index], error[index], error[index]);
-			} else {
+					dataset.add(xvalues[index], yvalues[index], error[index],
+						error[index]);
+			}
+			else {
 				for (int index = 0; index < xvalues.length; index++)
 					dataset.add(xvalues[index], yvalues[index], 0, 0);
 			}
 
-		} else if (outputs.containsKey(seriesName + "_xvalues")) {
+		}
+		else if (outputs.containsKey(seriesName + "_xvalues")) {
 			writeToLog("required output " + seriesName + "_yvalues" + " is missing");
 			return null;
-		} else if (outputs.containsKey(seriesName + "_yvalues")) {
+		}
+		else if (outputs.containsKey(seriesName + "_yvalues")) {
 			writeToLog("required output " + seriesName + "_xvalues" + " is missing");
 			return null;
 		}
 
 		String styleString = "";
 
-		if (outputs.containsKey(seriesName + "_strokeColor"))
-			styleString += "strokeColor=" + (String) outputs.get(seriesName + "_strokeColor") + "; ";
+		if (outputs.containsKey(seriesName + "_strokeColor")) styleString +=
+			"strokeColor=" + (String) outputs.get(seriesName + "_strokeColor") + "; ";
 
-		if (outputs.containsKey(seriesName + "_fillColor"))
-			styleString += "fillColor=" + (String) outputs.get(seriesName + "_fillColor") + "; ";
+		if (outputs.containsKey(seriesName + "_fillColor")) styleString +=
+			"fillColor=" + (String) outputs.get(seriesName + "_fillColor") + "; ";
 
-		if (outputs.containsKey(seriesName + "_strokeWidth"))
-			styleString += "strokeWidth=" + ((Integer) outputs.get(seriesName + "_strokeWidth")).intValue();
+		if (outputs.containsKey(seriesName + "_strokeWidth")) styleString +=
+			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_strokeWidth"))
+				.intValue();
 
 		dataset.setStyle(styleString);
 

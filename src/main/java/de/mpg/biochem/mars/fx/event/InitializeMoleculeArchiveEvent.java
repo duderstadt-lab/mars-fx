@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,6 +26,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.event;
 
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -36,20 +37,23 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import javafx.event.EventType;
 
 public class InitializeMoleculeArchiveEvent extends MoleculeArchiveEvent {
-	
+
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public static final EventType<MoleculeArchiveEvent> INITIALIZE_MOLECULE_ARCHIVE = new EventType<>(MOLECULE_ARCHIVE_EVENT, "INITIALIZE_MOLECULE_ARCHIVE");
+	public static final EventType<MoleculeArchiveEvent> INITIALIZE_MOLECULE_ARCHIVE =
+		new EventType<>(MOLECULE_ARCHIVE_EVENT, "INITIALIZE_MOLECULE_ARCHIVE");
 
-    public InitializeMoleculeArchiveEvent(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-        super(INITIALIZE_MOLECULE_ARCHIVE, archive);
-    }
+	public InitializeMoleculeArchiveEvent(
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
+	{
+		super(INITIALIZE_MOLECULE_ARCHIVE, archive);
+	}
 
-    @Override
-    public void invokeHandler(MoleculeArchiveEventHandler handler) {
-        handler.onInitializeMoleculeArchiveEvent(archive);
-    }
+	@Override
+	public void invokeHandler(MoleculeArchiveEventHandler handler) {
+		handler.onInitializeMoleculeArchiveEvent(archive);
+	}
 }

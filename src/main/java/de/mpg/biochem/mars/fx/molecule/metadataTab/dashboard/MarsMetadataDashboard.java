@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,10 +26,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Set;
+
+import org.scijava.Context;
+
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
@@ -40,38 +52,43 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-
-import java.util.Set;
-
-import org.scijava.Context;
-
+import de.mpg.biochem.mars.util.MarsUtil;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 
-public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashboard<MarsMetadataDashboardWidget> implements MetadataSubPane {
-	
+public class MarsMetadataDashboard<I extends MarsMetadata> extends
+	AbstractDashboard<MarsMetadataDashboardWidget> implements MetadataSubPane
+{
+
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	protected I marsMetadata;
-	
+
 	public MarsMetadataDashboard(final Context context) {
 		super(context);
-		
+
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
-		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT, new EventHandler<MoleculeArchiveEvent>() {
-			@Override
-			public void handle(MoleculeArchiveEvent e) {
-				if (e.getEventType().getName().equals("INITIALIZE_MOLECULE_ARCHIVE")) {
-					archive = e.getArchive();
-			   		discoverWidgets();
-			   		e.consume();
-			   	}
-			} 
-        });
+		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			{
+						archive = e.getArchive();
+						discoverWidgets();
+						e.consume();
+					}
+				}
+			});
 	}
 
 	@Override
 	public MarsMetadataDashboardWidget createWidget(String widgetName) {
-		MarsMetadataDashboardWidget widget = (MarsMetadataDashboardWidget) marsDashboardWidgetService.createWidget(widgetName);
+		MarsMetadataDashboardWidget widget =
+			(MarsMetadataDashboardWidget) marsDashboardWidgetService.createWidget(
+				widgetName);
 		widget.setMetadata(marsMetadata);
 		widget.setArchive(archive);
 		widget.setParent(this);
@@ -81,13 +98,11 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 
 	@Override
 	public ArrayList<String> getWidgetToolbarOrder() {
-		return new ArrayList<String>( 
-	            Arrays.asList("MarsMetadataCategoryChartWidget",
-	                    "MarsMetadataHistogramWidget",
-	                    "MarsMetadataXYChartWidget",
-	                    "MarsMetadataBubbleChartWidget"));
+		return new ArrayList<String>(Arrays.asList(
+			"MarsMetadataCategoryChartWidget", "MarsMetadataHistogramWidget",
+			"MarsMetadataXYChartWidget", "MarsMetadataBubbleChartWidget"));
 	}
-	
+
 	@Override
 	public void handle(MetadataEvent event) {
 		event.invokeHandler(this);
@@ -102,7 +117,31 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends AbstractDashb
 	}
 
 	public Set<String> getWidgetNames() {
-		return marsDashboardWidgetService.getWidgetNames(MarsMetadataDashboardWidget.class);
+		return marsDashboardWidgetService.getWidgetNames(
+			MarsMetadataDashboardWidget.class);
+	}
+
+	@Override
+	public boolean importFromRoverFile(File roverFile) {
+		try {
+			InputStream inputStream = new BufferedInputStream(new FileInputStream(
+				roverFile));
+			JsonFactory jfactory = new JsonFactory();
+			JsonParser jParser = jfactory.createParser(inputStream);
+			MarsUtil.readJsonObject(jParser, this, "metadataTab", "centerPane",
+				"marsMetadataDashboard");
+
+			// Need for backward compatibility
+			MarsUtil.readJsonObject(jParser, this, "MetadataTab", "centerPane",
+				"marsMetadataDashboard");
+
+			jParser.close();
+			inputStream.close();
+		}
+		catch (IOException e) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override

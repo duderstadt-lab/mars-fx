@@ -2,9 +2,17 @@
 
 import javafx.scene.control.Label
 import javafx.scene.layout.BorderPane
+import javafx.application.Platform
 
-def label = new Label("Hello Martians")
-def borderPane = new BorderPane()
-borderPane.setCenter(label)
+node = new BorderPane()
 
-node = borderPane
+//Everything done on node needs to be done on the javafx thread
+//Placing it inside the run method below accomplishes that
+//Otherwise, it would run on the swing thread and might throw an error.
+Platform.runLater(new Runnable() {
+    @Override
+    public void run() {
+		def label = new Label("Hello Martians")
+		node.setCenter(label)
+    }
+})

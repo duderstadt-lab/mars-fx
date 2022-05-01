@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2021 Karl Duderstadt
+ * Copyright (C) 2018 - 2022 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -26,41 +26,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+
 package de.mpg.biochem.mars.fx.util;
 
 import javafx.scene.input.KeyCombination;
 
 public class HotKeyEntry {
+
 	KeyCombination shortcut;
 	String tag;
-	
+
 	public HotKeyEntry(KeyCombination shortcut) {
 		this.shortcut = shortcut;
 		this.tag = "tag";
 	}
-	
+
 	public HotKeyEntry(KeyCombination shortcut, String tag) {
 		this.shortcut = shortcut;
 		this.tag = tag;
 	}
-	
-	//Getters and Setters
+
+	// Getters and Setters
 	public KeyCombination getShortcut() {
 		return shortcut;
 	}
-	
+
 	public String getShortcutString() {
 		return shortcut.toString();
 	}
-	
+
 	public void setShortcut(KeyCombination shortcut) {
 		this.shortcut = shortcut;
 	}
-	
+
 	public String getTag() {
 		return tag;
 	}
-	
+
 	public void setTag(String tag) {
 		this.tag = tag;
 	}
