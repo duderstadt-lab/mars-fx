@@ -306,7 +306,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		borderPane.setCenter(tabsContainer);
 		Scene scene = new Scene(maskerStackPane);
 
-		scene.getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
+		if (prefService.getBoolean(SettingsTab.class, "useDarkTheme", false)) scene.getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
 		
 		stage.setScene(scene);
 
