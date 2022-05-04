@@ -48,6 +48,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Menu;
 import javafx.scene.control.Tab;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
 public abstract class AbstractMoleculeArchiveTab extends
@@ -87,12 +88,13 @@ public abstract class AbstractMoleculeArchiveTab extends
 		tab.closableProperty().set(false);
 	}
 
-	protected void setIcon(Node icon) {
+	protected void setIcon(Node icon, String tooltip) {
 		BorderPane tabPane = new BorderPane();
 		tabPane.setRotate(90.0);
 		tabPane.setMaxWidth(tabWidth);
 		tabPane.setCenter(icon);
 		tab.setGraphic(tabPane);
+		tab.setTooltip(new Tooltip(tooltip));
 	}
 
 	public abstract ArrayList<Menu> getMenus();

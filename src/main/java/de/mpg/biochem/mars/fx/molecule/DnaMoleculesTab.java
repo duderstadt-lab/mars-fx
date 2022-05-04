@@ -46,7 +46,7 @@ public class DnaMoleculesTab extends
 		Region dnaIcon = new Region();
 		dnaIcon.getStyleClass().add("dnaIcon");
 
-		setIcon(dnaIcon);
+		setIcon(dnaIcon, "DNA molecules");
 	}
 
 	@Override

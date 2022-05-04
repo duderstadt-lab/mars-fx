@@ -137,7 +137,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 		Region bookIcon = new Region();
 		bookIcon.getStyleClass().add("bookIcon");
-		setIcon(bookIcon);
+		setIcon(bookIcon, "comments");
 
 		Options.load(getOptions());
 

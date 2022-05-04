@@ -29,14 +29,14 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
-
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
@@ -65,7 +65,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 		super(context);
 
 		setIcon(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"));
+			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"), "dashboard");
 
 		dashboardPane = new MoleculeArchiveDashboard(context);
 

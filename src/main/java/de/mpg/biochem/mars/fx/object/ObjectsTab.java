@@ -47,7 +47,7 @@ public class ObjectsTab extends
 		Region objectIcon = new Region();
 		objectIcon.getStyleClass().add("objectIcon");
 
-		setIcon(objectIcon);
+		setIcon(objectIcon, "objects");
 	}
 
 	@Override

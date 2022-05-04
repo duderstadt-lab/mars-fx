@@ -91,7 +91,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 	public SettingsTab(final Context context) {
 		super(context);
 
-		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.083em"));
+		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.083em"), "settings");
 
 		rootPane = new VBox();
 

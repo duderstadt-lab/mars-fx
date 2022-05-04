@@ -94,7 +94,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		Region microscopeIcon = new Region();
 		microscopeIcon.getStyleClass().add("microscopeIcon");
 
-		setIcon(microscopeIcon);
+		setIcon(microscopeIcon, "metadata");
 
 		rootPane = new SplitPane();
 

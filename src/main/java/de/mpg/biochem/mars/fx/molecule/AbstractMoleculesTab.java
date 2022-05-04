@@ -114,7 +114,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		Region moleculeIcon = new Region();
 		moleculeIcon.getStyleClass().add("moleculeIcon");
 
-		setIcon(moleculeIcon);
+		setIcon(moleculeIcon, "molecules");
 
 		rootPane = new SplitPane();
 
