@@ -160,6 +160,10 @@ public class SegmentDataSetRenderer extends
 				color = ((MarsWrappedDoubleDataSet) dataSet).getColor();
 				width = ((MarsWrappedDoubleDataSet) dataSet).getWidth();
 				lineStyle = ((MarsWrappedDoubleDataSet) dataSet).getLineStyle();
+			} else if (dataSet instanceof MarsDoubleDataSet) {
+				color = ((MarsDoubleDataSet) dataSet).getColor();
+				width = ((MarsDoubleDataSet) dataSet).getWidth();
+				lineStyle = ((MarsDoubleDataSet) dataSet).getLineStyle();
 			}
 
 			int indexMin;
