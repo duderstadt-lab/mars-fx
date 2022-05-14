@@ -181,41 +181,44 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MoleculeEvent e) {
+					//If there are no molecule records do nothing...
+					if (archive.getNumberOfMolecules() == 0) return;
+					
 					if (e.getEventType().getName().equals("INDICATOR_CHANGED")) {
 						moleculeCenterPane.fireEvent(new UpdatePlotAreaEvent());
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(
 						"REFRESH_MOLECULE_EVENT"))
-			{
-				// Reload molecule due to changes in the virtual store copy on the
-				// disk..
-				molecule = (M) archive.get(molecule.getUID());
-
-				moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(
-					molecule));
-				moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
-					molecule));
-				Platform.runLater(() -> {
-					moleculeIndexTable.requestFocus();
-				});
-				e.consume();
-			}
-					else if (e.getEventType().getName().equals(
-						"REFRESH_MOLECULE_PROPERTIES_EVENT"))
-			{
-				moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
-					molecule));
-				Platform.runLater(() -> {
-					moleculeIndexTable.requestFocus();
-				});
-				e.consume();
-			}
-					else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
-						moleculeIndexTable.refresh();
+					{
+						// Reload molecule due to changes in the virtual store copy on the
+						// disk..
+						molecule = (M) archive.get(molecule.getUID());
+		
+						moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(
+							molecule));
+						moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
+							molecule));
+						Platform.runLater(() -> {
+							moleculeIndexTable.requestFocus();
+						});
 						e.consume();
 					}
-				};
+							else if (e.getEventType().getName().equals(
+								"REFRESH_MOLECULE_PROPERTIES_EVENT"))
+					{
+						moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
+							molecule));
+						Platform.runLater(() -> {
+							moleculeIndexTable.requestFocus();
+						});
+						e.consume();
+					}
+							else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
+								moleculeIndexTable.refresh();
+								e.consume();
+					}
+				}
 			});
 
 		getTab().setContent(rootPane);
