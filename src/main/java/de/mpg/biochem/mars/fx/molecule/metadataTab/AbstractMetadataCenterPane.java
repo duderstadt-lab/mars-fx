@@ -203,7 +203,8 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 	}
 
 	protected void loadLog() {
-		logPane.setMarkdown(marsMetadata.getLog());
+		if (marsMetadata != null)
+			logPane.setMarkdown(marsMetadata.getLog());
 	}
 
 	@SuppressWarnings("unchecked")
