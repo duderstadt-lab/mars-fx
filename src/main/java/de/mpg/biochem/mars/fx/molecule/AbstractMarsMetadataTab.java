@@ -122,6 +122,9 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MetadataEvent e) {
+					//If there are no metadata records do nothing...
+					if (archive.getNumberOfMetadatas() == 0) return;
+					
 					if (e.getEventType().getName().equals("REFRESH_METADATA_EVENT")) {
 						// We reload the record from the archive.. If virtual this will
 						// reload from disk...
@@ -140,14 +143,14 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 					}
 					else if (e.getEventType().getName().equals(
 						"REFRESH_METADATA_PROPERTIES_EVENT"))
-			{
-				metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(
-					marsMetadata));
-				Platform.runLater(() -> {
-					metaIndexTable.requestFocus();
-				});
-				e.consume();
-			}
+					{
+						metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(
+							marsMetadata));
+						Platform.runLater(() -> {
+							metaIndexTable.requestFocus();
+						});
+						e.consume();
+					}
 					else if (e.getEventType().getName().equals("TAGS_CHANGED")) {
 						metaIndexTable.refresh();
 						e.consume();
