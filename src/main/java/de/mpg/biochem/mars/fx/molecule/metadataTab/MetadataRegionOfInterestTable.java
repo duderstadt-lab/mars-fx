@@ -56,6 +56,8 @@ public class MetadataRegionOfInterestTable extends AbstractRegionOfInterestTable
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
+		if (marsImageMetadata == null) return;
+		
 		this.record = marsImageMetadata;
 		loadData();
 	}
