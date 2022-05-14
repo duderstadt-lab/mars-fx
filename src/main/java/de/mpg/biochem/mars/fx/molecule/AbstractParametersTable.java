@@ -29,15 +29,17 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import com.jfoenix.controls.JFXCheckBox;
+
 import java.util.LinkedHashMap;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
-import com.jfoenix.controls.JFXCheckBox;
-
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.util.EditCell;
 import de.mpg.biochem.mars.molecule.MarsRecord;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -294,6 +296,16 @@ public abstract class AbstractParametersTable {
 			"-fx-min-width: 18px; " + "-fx-min-height: 18px; " +
 			"-fx-max-width: 18px; " + "-fx-max-height: 18px;");
 		addButton.setOnAction(e -> {
+			if (record == null) {
+				Platform.runLater(() -> {
+					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+						.getWindow(),
+						"No record selected for the parameter.");
+					alert.show();
+				});
+				return;
+			}
+			
 			switch (buttonType) {
 				case 0:
 					record.setParameter(addParameterField.getText(), Double.NaN);

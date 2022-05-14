@@ -29,15 +29,16 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import com.jfoenix.controls.JFXColorPicker;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
-import com.jfoenix.controls.JFXColorPicker;
-
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -47,6 +48,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.util.MarsRegion;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -281,6 +283,16 @@ public abstract class AbstractRegionOfInterestTable {
 			"-fx-max-width: 18px; " + "-fx-max-height: 18px;");
 		addButton.setOnAction(e -> {
 			if (!addRegionNameField.getText().equals("")) {
+				if (record == null) {
+					Platform.runLater(() -> {
+						RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+							.getWindow(),
+							"No record selected for the region.");
+						alert.show();
+					});
+					return;
+				}
+				
 				MarsRegion regionOfInterest = new MarsRegion(addRegionNameField
 					.getText());
 				record.putRegion(regionOfInterest);
