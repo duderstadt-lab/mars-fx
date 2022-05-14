@@ -269,6 +269,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		if (molecule == null) return;
+		
 		this.molecule = molecule;
 
 		UIDLabel.setText(molecule.getUID());

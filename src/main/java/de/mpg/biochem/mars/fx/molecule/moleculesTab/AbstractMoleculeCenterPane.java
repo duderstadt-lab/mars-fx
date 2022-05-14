@@ -227,6 +227,8 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		if (molecule == null) return;
+		
 		this.molecule = (M) molecule;
 		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
 			molecule));

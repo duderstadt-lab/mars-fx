@@ -32,10 +32,10 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 
+import com.jfoenix.controls.JFXTabPane;
+
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
-
-import com.jfoenix.controls.JFXTabPane;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
@@ -255,6 +255,8 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		if (molecule == null) return;
+		
 		this.molecule = (M) molecule;
 
 		Tab selectedTab = tabsContainer.getSelectionModel().selectedItemProperty()

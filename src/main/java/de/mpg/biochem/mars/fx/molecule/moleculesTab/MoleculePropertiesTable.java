@@ -56,6 +56,8 @@ public class MoleculePropertiesTable extends AbstractParametersTable implements
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		if (molecule == null) return;
+		
 		this.record = molecule;
 		loadData();
 	}
