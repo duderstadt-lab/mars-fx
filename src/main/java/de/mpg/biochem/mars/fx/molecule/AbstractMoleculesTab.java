@@ -522,7 +522,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				jParser.getText()));
 
 		setJsonField("moleculeSelectionUID", jGenerator -> jGenerator
-			.writeStringField("moleculeSelectionUID", molecule.getUID()), jParser -> {
+			.writeStringField("moleculeSelectionUID", (molecule != null) ? molecule.getUID() : ""), jParser -> {
 				String moleculeSelectionUID = jParser.getText();
 				for (int index = 0; index < filteredData.size(); index++) {
 					if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {

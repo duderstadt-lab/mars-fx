@@ -309,7 +309,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 				jParser.getText()));
 
 		setJsonField("marsMetadataSelectionUID", jGenerator -> jGenerator
-			.writeStringField("marsMetadataSelectionUID", marsMetadata.getUID()),
+			.writeStringField("marsMetadataSelectionUID", (marsMetadata != null) ? marsMetadata.getUID() : ""),
 			jParser -> {
 				String moleculeSelectionUID = jParser.getText();
 				for (int index = 0; index < filteredData.size(); index++) {
