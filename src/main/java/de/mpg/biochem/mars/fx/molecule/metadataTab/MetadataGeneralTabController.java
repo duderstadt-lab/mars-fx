@@ -208,6 +208,8 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
+		if (marsImageMetadata == null) return;
+		
 		this.marsMetadata = marsImageMetadata;
 
 		UIDLabel.setText(marsMetadata.getUID());
