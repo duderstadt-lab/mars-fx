@@ -179,6 +179,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 	}
 
 	protected void loadOMEMetadata() {
+		if (marsMetadata == null) return;
 		OMEView.fill(marsMetadata);
 	}
 
