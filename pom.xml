@@ -99,7 +99,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-31</mars-core.version>
+		<mars-core.version>1.0.0-beta-34</mars-core.version>
 
 		<chartfx.version>8.1.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
