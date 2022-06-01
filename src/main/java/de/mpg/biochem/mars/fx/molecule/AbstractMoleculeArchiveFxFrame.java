@@ -1235,21 +1235,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	@Override
-	public void addLogMessage(String message) {
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				lockLogAreaStrings.add(message);
-				lockLogArea.scrollTo(lockLogAreaStrings.size());
-				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
-					".scroll-bar:vertical");
-				if (scroll != null) scroll.setDisable(true);
-			}
-		});
-	}
-
-	@Override
 	public void logln(String message) {
 		Platform.runLater(new Runnable() {
 
@@ -1326,12 +1311,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		archiveLocked.set(false);
 	}
 
-	@Override
-	public void update() {
-		unlock();
-	}
-
-	@Override
 	public void close() {
 		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
