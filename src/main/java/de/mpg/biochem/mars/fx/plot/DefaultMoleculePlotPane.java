@@ -29,6 +29,9 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,9 +39,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.scijava.Context;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.util.MarsUtil;
@@ -62,8 +62,8 @@ public class DefaultMoleculePlotPane extends
 				"plotPane");
 
 			// Needed for backward compatibility
-			MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
-				"plotPane");
+			//MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
+			//	"plotPane");
 
 			reload();
 			jParser.close();
