@@ -61,10 +61,6 @@ public class DefaultMoleculePlotPane extends
 			MarsUtil.readJsonObject(jParser, this, "moleculesTab", "centerPane",
 				"plotPane");
 
-			// Needed for backward compatibility
-			//MarsUtil.readJsonObject(jParser, this, "MoleculesTab", "centerPane",
-			//	"plotPane");
-
 			reload();
 			jParser.close();
 			inputStream.close();

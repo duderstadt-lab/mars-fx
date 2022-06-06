@@ -29,6 +29,9 @@
 
 package de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,9 +42,6 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.scijava.Context;
-
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboard;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
@@ -129,10 +129,6 @@ public class MarsMetadataDashboard<I extends MarsMetadata> extends
 			JsonFactory jfactory = new JsonFactory();
 			JsonParser jParser = jfactory.createParser(inputStream);
 			MarsUtil.readJsonObject(jParser, this, "metadataTab", "centerPane",
-				"marsMetadataDashboard");
-
-			// Need for backward compatibility
-			MarsUtil.readJsonObject(jParser, this, "MetadataTab", "centerPane",
 				"marsMetadataDashboard");
 
 			jParser.close();
