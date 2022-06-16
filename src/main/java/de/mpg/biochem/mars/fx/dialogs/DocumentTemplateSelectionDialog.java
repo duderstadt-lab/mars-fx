@@ -94,7 +94,7 @@ public class DocumentTemplateSelectionDialog extends
 
 		ListView<String> templateList = new ListView<String>();
 
-		if (templateDirectory != null) {
+		if (templateDirectory != null && templateDirectory.exists() && templateDirectory.isDirectory()) {
 			ObservableList<String> templateFiles = FXCollections.observableArrayList(
 				templateDirectory.list());
 			templateFiles.add(0, "<none>");
@@ -108,8 +108,8 @@ public class DocumentTemplateSelectionDialog extends
 		setTemplateButton.setOnAction(e -> {
 			DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setTitle("Select template directory");
-			if (templateDirectory != null) chooser.setInitialDirectory(
-				templateDirectory);
+			if (templateDirectory != null && templateDirectory.exists() && templateDirectory.isDirectory()) 
+				chooser.setInitialDirectory(templateDirectory);
 			File selectedDirectory = chooser.showDialog(owner);
 
 			if (selectedDirectory == null) return;
