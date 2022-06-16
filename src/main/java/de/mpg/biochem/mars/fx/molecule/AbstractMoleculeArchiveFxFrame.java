@@ -310,19 +310,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		try {
 			loadState();
-
-			if (!windowStateLoaded) {
-				stage.setWidth(800);
-				stage.setHeight(600);
-				stage.show();
-			}
 		}
 		catch (IOException e) {
+			e.printStackTrace();
 			logService.warn("A problem was encountered when loading the rover file " +
 				archive.getFile().getAbsolutePath() + ".rover" +
-				" containing the mars-fx display settings. " +
+				" containing the mars-fx display settings. \n" +
 				"Please check the file to make sure the syntax is correct." +
 				"Aborting and opening with the default settings.");
+		}
+		
+		if (!windowStateLoaded) {
+			stage.setWidth(800);
+			stage.setHeight(600);
+			stage.show();
 		}
 
 		updateAccelerators();
