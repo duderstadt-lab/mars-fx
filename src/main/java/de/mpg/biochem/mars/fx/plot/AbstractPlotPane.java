@@ -292,24 +292,26 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 			}
 		});
 		toolBar.getItems().add(ActionUtils.createToolBarButton(saveImageToDisk));
-
+		
+		PopOver popOver = new PopOver();
+		popOver.setTitle("Plot Settings");
+		popOver.setHeaderAlwaysVisible(true);
+		popOver.setAutoHide(true);
+		popOver.setDetachable(false);
+		popOver.setCloseButtonEnabled(false);
+		popOver.setContentNode(plotOptionsPane);
+		
 		// settings
 		propertiesButton = ActionUtils.createToolBarButton(new Action("Settings",
-			"Shortcut+S", COG, e -> {
-				PopOver popOver = new PopOver();
-				popOver.setTitle("Plot Settings");
-				popOver.setHeaderAlwaysVisible(true);
-				popOver.setAutoHide(true);
-				popOver.setDetachable(false);
-				popOver.setCloseButtonEnabled(false);
-				// popOver.setArrowLocation(ArrowLocation.TOP_CENTER);
-
-				// Retrieve x and y bounds from first chart
-				plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
-				plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
-
-				popOver.setContentNode(plotOptionsPane);
-				popOver.show(propertiesButton);
+			null, COG, e -> {
+				if (!popOver.isShowing()) {
+					// Retrieve x and y bounds from first chart
+					if (charts.size() > 0) {
+						plotOptionsPane.setXMin(charts.get(0).getChart().getXAxis().getMin());
+						plotOptionsPane.setXMax(charts.get(0).getChart().getXAxis().getMax());
+					}
+					popOver.show(propertiesButton);
+				} else popOver.hide();
 			}));
 		toolBar.getItems().add(propertiesButton);
 
