@@ -153,6 +153,7 @@ public class MarsWrappedDoubleDataSet extends
 	}
 
 	public void downsample(final MarsNumericAxis axis, final int maxPointCount) {
+		if (xValues.size() < 2) return;
 		this.downsampling = true;
 		this.axis = axis;
 		this.maxPointCount = maxPointCount;
