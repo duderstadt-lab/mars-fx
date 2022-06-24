@@ -255,7 +255,13 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 	@SuppressWarnings("unchecked")
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		if (molecule == null) return;
+		if (molecule == null) {
+			moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(null));
+			moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(null));
+			regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(null));
+			positionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(null));
+			return;
+		}
 		
 		this.molecule = (M) molecule;
 

@@ -323,6 +323,11 @@ public abstract class AbstractPositionOfInterestTable {
 	}
 
 	public void loadData() {
+		if (record == null) {
+			positionRowList.clear();
+			return;
+		}
+		
 		positionRowList.setAll(record.getPositionNames().stream().map(name -> record
 			.getPosition(name)).collect(Collectors.toList()));
 	}

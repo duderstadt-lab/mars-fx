@@ -50,6 +50,7 @@ import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
+import de.mpg.biochem.mars.table.MarsTable;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -163,6 +164,13 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	public void refreshSelectedTab() {
 		Tab selectedTab = tabPane.getSelectionModel().selectedItemProperty().get();
 		String tabName = selectedTab.getText();
+		
+		if (molecule == null) {
+			dataTableContainer.setCenter(new MarsTableView(new MarsTable()));
+			plotPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			return;
+		}
 
 		// Tab has already been refreshed
 		if (refreshedTabs.contains(tabName)) return;
@@ -202,6 +210,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected void updateSegmentTables() {
 		// Build new segment table list
 		Set<List<String>> newSegmentTableNames = new HashSet<List<String>>();
+		if (molecule == null) {
+			segmentTableNames = newSegmentTableNames;
+			return;
+		}
+		
 		for (List<String> segmentTableName : molecule.getSegmentsTableNames())
 			newSegmentTableNames.add(segmentTableName);
 
@@ -227,8 +240,6 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		if (molecule == null) return;
-		
 		this.molecule = (M) molecule;
 		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
 			molecule));

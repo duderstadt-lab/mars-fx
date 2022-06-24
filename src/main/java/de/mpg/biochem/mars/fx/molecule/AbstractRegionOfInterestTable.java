@@ -339,6 +339,11 @@ public abstract class AbstractRegionOfInterestTable {
 	}
 
 	public void loadData() {
+		if (record == null) {
+			regionRowList.clear();
+			return;
+		}
+		
 		regionRowList.setAll(record.getRegionNames().stream().map(name -> record
 			.getRegion(name)).collect(Collectors.toList()));
 	}

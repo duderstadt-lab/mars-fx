@@ -378,6 +378,8 @@ public abstract class AbstractParametersTable {
 
 	public void loadData() {
 		parameterRowList.clear();
+		
+		if (record == null) return;
 
 		for (String parameter : record.getParameters().keySet()) {
 			if (record.getParameters().get(parameter) instanceof Double) {

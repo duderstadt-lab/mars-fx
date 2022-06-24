@@ -193,6 +193,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 					{
 						// Reload molecule due to changes in the virtual store copy on the
 						// disk..
+						if (molecule == null) return;
 						molecule = (M) archive.get(molecule.getUID());
 		
 						moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(
@@ -627,6 +628,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public void onMoleculeArchiveUnlockEvent() {
 		moleculeIndexTable.getSelectionModel().selectedItemProperty()
 			.removeListener(moleculeIndexTableListener);
+		//Check if the current molecule was deleted, if so set molecule = null
+		if (molecule != null && !archive.contains(molecule.getUID())) {
+			molecule = null; 
+			moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+		}
 		String currentUID = "";
 		if (molecule != null) currentUID = molecule.getUID();
 		moleculeRowList.clear();

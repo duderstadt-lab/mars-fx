@@ -56,8 +56,6 @@ public class MoleculeRegionOfInterestTable extends AbstractRegionOfInterestTable
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		if (molecule == null) return;
-		
 		this.record = molecule;
 		loadData();
 	}

@@ -269,7 +269,18 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		if (molecule == null) return;
+		if (molecule == null) {
+			molecule = null;
+			iText.setText("");
+			iInt.setText("");
+			cText.setText("");
+			cInt.setText("");
+			chipView.getChips().clear();
+			notesTextArea.setText("");
+			UIDLabel.setText("");
+			metaUIDLabel.setText("");
+			return;
+		}
 		
 		this.molecule = molecule;
 

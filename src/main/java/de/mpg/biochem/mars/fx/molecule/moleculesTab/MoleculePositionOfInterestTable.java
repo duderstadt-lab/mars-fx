@@ -56,8 +56,6 @@ public class MoleculePositionOfInterestTable extends
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
-		if (molecule == null) return;
-		
 		this.record = molecule;
 		loadData();
 	}
