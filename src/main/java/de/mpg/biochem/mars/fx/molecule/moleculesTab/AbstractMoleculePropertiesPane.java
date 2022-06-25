@@ -256,6 +256,7 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		if (molecule == null) {
+			this.molecule = null;
 			moleculeGeneralTabController.fireEvent(new MoleculeSelectionChangedEvent(null));
 			moleculePropertiesTable.fireEvent(new MoleculeSelectionChangedEvent(null));
 			regionOfInterestTable.fireEvent(new MoleculeSelectionChangedEvent(null));

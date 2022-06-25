@@ -344,7 +344,12 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
-		update();
+		if (molecule != null) update();
+		else {
+			removeIndicators();
+			chartPane.getDatasets().clear();
+			chartPane.layout();
+		}
 	}
 
 	@Override
