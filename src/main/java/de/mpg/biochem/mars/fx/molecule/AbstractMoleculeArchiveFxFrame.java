@@ -353,10 +353,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		
 		imageMetadataTab = createImageMetadataTab(context);
 		tabSet.add(imageMetadataTab);
-		/*
+		
 		moleculesTab = createMoleculesTab(context);
 		tabSet.add(moleculesTab);
-
+		/*
 		commentsTab = new CommentsTab(context);
 		tabSet.add(commentsTab);
 */
@@ -1586,7 +1586,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	public void fireEvent(Event event) {
 		dashboardTab.fireEvent(event);
 		imageMetadataTab.fireEvent(event);
-		//moleculesTab.fireEvent(event);
+		moleculesTab.fireEvent(event);
 		//commentsTab.fireEvent(event);
 		settingsTab.fireEvent(event);
 	}

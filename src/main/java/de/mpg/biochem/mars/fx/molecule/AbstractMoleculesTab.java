@@ -181,6 +181,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MoleculeEvent e) {
+					if (molecule == null) return;
 					//If there are no molecule records do nothing...
 					if (archive.getNumberOfMolecules() == 0) return;
 					
@@ -200,9 +201,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 							molecule));
 						moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
 							molecule));
-						Platform.runLater(() -> {
-							moleculeIndexTable.requestFocus();
-						});
+						Platform.runLater(() -> moleculeIndexTable.requestFocus());
 						e.consume();
 					}
 							else if (e.getEventType().getName().equals(
@@ -500,8 +499,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		super.onInitializeMoleculeArchiveEvent(archive);
 
 		moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
-		moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(
-			archive));
+		moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+		if (archive == null) {
+			molecule = null;
+			moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			return;
+		}
 		onMoleculeArchiveUnlockEvent();
 	}
 

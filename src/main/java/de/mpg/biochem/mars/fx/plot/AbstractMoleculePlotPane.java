@@ -32,11 +32,11 @@ package de.mpg.biochem.mars.fx.plot;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
 import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.core.JsonToken;
+
 import java.util.ArrayList;
 
 import org.scijava.Context;
-
-import com.fasterxml.jackson.core.JsonToken;
 
 import de.gsi.chart.axes.AxisMode;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -101,9 +101,10 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 						"INITIALIZE_MOLECULE_ARCHIVE"))
 			{
 						archive = e.getArchive();
-						for (SubPlot subplot : charts)
-							subplot.getDatasetOptionsPane().setColumns(archive.properties()
-								.getColumnSet());
+						if (archive != null)
+							for (SubPlot subplot : charts)
+								subplot.getDatasetOptionsPane().setColumns(archive.properties()
+									.getColumnSet());
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(
@@ -303,7 +304,12 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
 		chartsPane.getChildren().clear();
-
+		if (archive == null) {
+			for (SubPlot subPlot : charts) 
+				subPlot.fireEvent(new MoleculeSelectionChangedEvent(null));
+			charts.clear();
+			return;
+		}
 		for (SubPlot subPlot : charts) {
 			subPlot.getDatasetOptionsPane().setColumns(archive.properties()
 				.getColumnSet());

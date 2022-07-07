@@ -77,7 +77,15 @@ public class MoleculeDashboard<M extends Molecule> extends
 						"INITIALIZE_MOLECULE_ARCHIVE"))
 			{
 						archive = e.getArchive();
-						discoverWidgets();
+
+						if (archive != null) discoverWidgets();
+						if (archive == null) {
+							widgets.stream().forEach(widget -> {
+								widget.setArchive(null);
+								widget.setMolecule(null);
+								molecule = null;
+							});
+						}
 						e.consume();
 					}
 				}

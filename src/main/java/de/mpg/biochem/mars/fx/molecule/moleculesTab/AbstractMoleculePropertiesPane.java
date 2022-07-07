@@ -124,14 +124,9 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
 			{
 					archive = newArchive;
+					if (archive == null) molecule = null;
 					moleculeGeneralTabController.fireEvent(
 						new InitializeMoleculeArchiveEvent(newArchive));
-					moleculePropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
-					regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
-					positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
 				}
 			});
 

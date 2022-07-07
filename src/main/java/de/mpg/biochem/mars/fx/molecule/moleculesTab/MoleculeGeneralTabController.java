@@ -210,8 +210,9 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 				@Override
 				public void onInitializeMoleculeArchiveEvent(
 					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-			{
+				{
 					archive = newArchive;
+					if (archive == null) molecule = null;
 				}
 			});
 
@@ -269,8 +270,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	@Override
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
+		this.molecule = molecule;
 		if (molecule == null) {
-			molecule = null;
 			iText.setText("");
 			iInt.setText("");
 			cText.setText("");
@@ -281,8 +282,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			metaUIDLabel.setText("");
 			return;
 		}
-		
-		this.molecule = molecule;
 
 		UIDLabel.setText(molecule.getUID());
 		metaUIDLabel.setText(molecule.getMetadataUID());

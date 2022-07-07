@@ -144,6 +144,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 							.getArchive()));
 						moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e
 							.getArchive()));
+						if (e.getArchive() == null) molecule = null;
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(
