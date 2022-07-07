@@ -36,6 +36,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import net.imagej.ops.Initializable;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
@@ -48,7 +50,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import net.imagej.ops.Initializable;
 
 public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 	implements MarsDashboardWidget, Initializable
@@ -70,7 +71,7 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 	public void initialize() {
 		super.initialize();
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			setContent(getIcon(), new BorderPane());
 		}
 		else {
@@ -127,7 +128,7 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			return;
 		}
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;

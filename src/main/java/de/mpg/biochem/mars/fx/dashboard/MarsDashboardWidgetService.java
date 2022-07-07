@@ -33,6 +33,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.imagej.ImageJService;
+
 import org.scijava.command.CommandService;
 import org.scijava.plugin.AbstractPTService;
 import org.scijava.plugin.Parameter;
@@ -41,8 +43,6 @@ import org.scijava.plugin.PluginInfo;
 import org.scijava.plugin.PluginService;
 import org.scijava.prefs.PrefService;
 import org.scijava.service.Service;
-
-import net.imagej.ImageJService;
 
 @Plugin(type = Service.class)
 public class MarsDashboardWidgetService extends
@@ -116,7 +116,7 @@ public class MarsDashboardWidgetService extends
 		if (prefService.get(MarsDashboardWidgetService.class,
 			"DefaultScriptingLanguage") != null) return prefService.get(
 				MarsDashboardWidgetService.class, "DefaultScriptingLanguage");
-		else return "Python";
+		else return "Groovy";
 	}
 
 	@Override

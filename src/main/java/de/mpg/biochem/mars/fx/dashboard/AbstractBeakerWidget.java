@@ -33,13 +33,14 @@ import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
 
 import java.util.Map;
 
+import net.imagej.ops.Initializable;
+
 import org.scijava.plugin.SciJavaPlugin;
 
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
-import net.imagej.ops.Initializable;
 
 public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 	implements MarsDashboardWidget, SciJavaPlugin, Initializable
@@ -70,7 +71,7 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 
 		if (outputs == null) return;
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;
