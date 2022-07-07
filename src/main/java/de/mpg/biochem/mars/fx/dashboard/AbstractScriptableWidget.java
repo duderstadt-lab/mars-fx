@@ -101,7 +101,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
 
-	// Used for Conda Python 3 widgets
+	// Used for Python (PyImageJ) widgets
 	protected String imgsrc;
 
 	@Override

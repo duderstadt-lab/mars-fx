@@ -33,6 +33,8 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOMB;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STOP;
 
+import com.fasterxml.jackson.core.JsonToken;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,8 +48,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.scijava.Context;
 import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
-
-import com.fasterxml.jackson.core.JsonToken;
 
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.util.Action;
@@ -151,8 +151,8 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 		widgetScriptLanguage.setFocusTraversable(false);
 		ArrayList<String> languages = new ArrayList<>();
 		languages.add("Groovy");
-		languages.add("Python");
-		languages.add("Conda Python 3");
+		languages.add("Python (Jython)");
+		languages.add("Python (PyImageJ)");
 		widgetScriptLanguage.getItems().addAll(languages);
 		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener(
 			(ob, o, n) -> {
