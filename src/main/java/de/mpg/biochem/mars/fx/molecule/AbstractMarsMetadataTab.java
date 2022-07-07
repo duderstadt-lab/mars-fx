@@ -122,6 +122,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MetadataEvent e) {
+					if (marsMetadata == null) return;		
 					//If there are no metadata records do nothing...
 					if (archive.getNumberOfMetadatas() == 0) return;
 					
@@ -135,10 +136,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 							marsMetadata));
 						metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(
 							marsMetadata));
-						Platform.runLater(() -> {
-							metaIndexTable.requestFocus();
-							// metaIndexTable.getSelectionModel().select(metaIndexTable.getSelectionModel().selectedItemProperty().get());
-						});
+						Platform.runLater(() -> metaIndexTable.requestFocus());
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(
@@ -286,8 +284,13 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		super.onInitializeMoleculeArchiveEvent(archive);
 
 		metadataCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
-		metadataPropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(
-			archive));
+		metadataPropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+		if (archive == null) {
+			marsMetadata = null;
+			metadataCenterPane.fireEvent(new MetadataSelectionChangedEvent(null));
+			metadataPropertiesPane.fireEvent(new MetadataSelectionChangedEvent(null));
+			return;
+		}
 		onMoleculeArchiveUnlockEvent();
 	}
 

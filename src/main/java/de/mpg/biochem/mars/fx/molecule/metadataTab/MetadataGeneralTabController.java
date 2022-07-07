@@ -156,8 +156,9 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 				@Override
 				public void onInitializeMoleculeArchiveEvent(
 					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-			{
+			  {
 					archive = newArchive;
+					if (archive == null) marsMetadata = null;
 				}
 			});
 
@@ -208,9 +209,9 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
-		if (marsImageMetadata == null) return;
-		
 		this.marsMetadata = marsImageMetadata;
+		
+		if (marsImageMetadata == null) return;
 
 		UIDLabel.setText(marsMetadata.getUID());
 

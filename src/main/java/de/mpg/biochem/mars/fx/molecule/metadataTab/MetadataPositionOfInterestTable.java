@@ -61,8 +61,6 @@ public class MetadataPositionOfInterestTable extends
 
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
-		if (marsImageMetadata == null) return;
-		
 		this.record = marsImageMetadata;
 		loadData();
 	}

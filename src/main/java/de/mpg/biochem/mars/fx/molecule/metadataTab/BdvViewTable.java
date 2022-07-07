@@ -389,6 +389,10 @@ public class BdvViewTable implements MetadataEventHandler {
 	@Override
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.marsImageMetadata = marsImageMetadata;
+		if (marsImageMetadata == null) {
+			bdvSourceOptionsPane.setMarsBdvSource(null);
+			return;
+		}
 		loadBdvSources();
 	}
 }

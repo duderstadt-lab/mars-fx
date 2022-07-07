@@ -144,6 +144,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 			{
 						marsMetadataDashboardPane.fireEvent(
 							new InitializeMoleculeArchiveEvent(e.getArchive()));
+						if (e.getArchive() == null) marsMetadata = null;
 						e.consume();
 					}
 				}
@@ -214,7 +215,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 		this.marsMetadata = (I) marsMetadata;
 		// all tabs are now stale
 		refreshedTabs.clear();
-
+		
 		refreshSelectedTab();
 
 		bdvViewTable.fireEvent(new MetadataSelectionChangedEvent(marsMetadata));

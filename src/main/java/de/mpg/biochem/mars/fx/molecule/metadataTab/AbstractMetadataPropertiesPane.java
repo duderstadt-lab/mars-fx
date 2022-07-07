@@ -32,9 +32,9 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
 import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 
-import org.scijava.Context;
-
 import com.jfoenix.controls.JFXTabPane;
+
+import org.scijava.Context;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
@@ -119,14 +119,9 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
 			{
 					archive = newArchive;
+					if (archive == null) marsImageMetadata = null;
 					metadataGeneralTabController.fireEvent(
 						new InitializeMoleculeArchiveEvent(newArchive));
-					metadataPropertiesTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
-					regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
-					positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
-						newArchive));
 				}
 			});
 
