@@ -55,6 +55,8 @@
 
 package de.mpg.biochem.mars.fx.editor;
 
+import com.vladsch.flexmark.parser.Parser;
+
 import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
@@ -63,8 +65,6 @@ import java.util.Set;
 import org.fxmisc.undo.UndoManager;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
-
-import com.vladsch.flexmark.parser.Parser;
 
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
@@ -489,6 +489,10 @@ public class DocumentEditor extends AnchorPane {
 			markdownPreviewPane.editorSelectionProperty().bind(markdownEditorPane
 				.selectionProperty());
 		}
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
 	}
 
 	public void save() {

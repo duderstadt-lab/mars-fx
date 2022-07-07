@@ -596,6 +596,11 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 	{
 		super.onInitializeMoleculeArchiveEvent(archive);
 		this.archive = archive;
+		if (archive == null) {
+			for (Tab tab : tabPane.getTabs())
+				((DocumentEditor) tab.getUserData()).setArchive(null);
+			return;
+		}
 		for (String name : archive.properties().getDocumentNames()) {
 			DocumentEditor editor = newEditor(name);
 			if (name.equals("Comments")) {

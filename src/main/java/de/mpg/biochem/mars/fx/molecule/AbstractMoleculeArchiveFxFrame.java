@@ -350,16 +350,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		dashboardTab = new DashboardTab(context);
 		dashboardTab.getTab().setStyle("-fx-background-color: -fx-focus-color;");
 		tabSet.add(dashboardTab);
-		
+				
 		imageMetadataTab = createImageMetadataTab(context);
 		tabSet.add(imageMetadataTab);
 		
 		moleculesTab = createMoleculesTab(context);
 		tabSet.add(moleculesTab);
-		/*
+
 		commentsTab = new CommentsTab(context);
 		tabSet.add(commentsTab);
-*/
+
 		settingsTab = new SettingsTab(context);
 		tabSet.add(settingsTab);
 
@@ -1587,7 +1587,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		dashboardTab.fireEvent(event);
 		imageMetadataTab.fireEvent(event);
 		moleculesTab.fireEvent(event);
-		//commentsTab.fireEvent(event);
+		commentsTab.fireEvent(event);
 		settingsTab.fireEvent(event);
 	}
 }
