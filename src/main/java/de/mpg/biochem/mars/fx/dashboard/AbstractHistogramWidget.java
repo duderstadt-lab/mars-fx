@@ -35,6 +35,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import net.imagej.ops.Initializable;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
@@ -46,7 +48,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
-import net.imagej.ops.Initializable;
 
 public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	implements MarsDashboardWidget, Initializable
@@ -66,7 +67,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 	public void initialize() {
 		super.initialize();
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			setContent(getIcon(), new BorderPane());
 		}
 		else {
@@ -114,7 +115,7 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 		if (outputs == null) return;
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;

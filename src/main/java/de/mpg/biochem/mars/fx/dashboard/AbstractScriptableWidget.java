@@ -108,11 +108,6 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 	public void initialize() {
 		super.initialize();
 
-		// Here Python becomes Conda Python 3... So we have to implement a
-		// workaround
-		// lang =
-		// scriptService.getLanguageByName(marsDashboardWidgetService.getDefaultScriptingLanguage());
-
 		String languageName = marsDashboardWidgetService
 			.getDefaultScriptingLanguage();
 
@@ -120,13 +115,19 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 			lang = scriptService.getLanguages().stream().filter(l -> l
 				.getLanguageName().equals("Groovy")).findFirst().get();
 		}
-		else if (languageName.equals("Python")) {
-			lang = scriptService.getLanguages().stream().filter(l -> l
-				.getLanguageName().equals("Python")).findFirst().get();
+		else if (languageName.equals("Python (Jython)")) {
+			if (scriptService.getLanguages().stream().filter(l -> l
+				.getLanguageName().equals("Python")).findFirst().isPresent())
+				lang = scriptService.getLanguages().stream().filter(l -> l
+					.getLanguageName().equals("Python")).findFirst().get();
+			else if (scriptService.getLanguages().stream().filter(l -> l
+				.getLanguageName().equals("Python (Jython)")).findFirst().isPresent())
+				lang = scriptService.getLanguages().stream().filter(l -> l
+					.getLanguageName().equals("Python (Jython)")).findFirst().get();
 		}
-		else if (languageName.equals("Conda Python 3")) {
+		else if (languageName.equals("Python (PyImageJ)")) {
 			lang = scriptService.getLanguages().stream().filter(l -> l
-				.getLanguageName().equals("Conda Python 3")).findFirst().get();
+				.getLanguageName().equals("Python (PyImageJ)")).findFirst().get();
 		}
 
 		// Script Pane
@@ -172,7 +173,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
 		getTabPane().getTabs().add(logTab);
 
-		if (lang.getLanguageName().equals("Conda Python 3")) loadImage();
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) loadImage();
 	}
 
 	protected Map<String, Object> runScript() {
@@ -184,8 +185,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		if (lang.getLanguageName().equals("Groovy")) {
 			scriptName += ".groovy";
 		}
-		else if (lang.getLanguageName().equals("Python") || lang.getLanguageName()
-			.equals("Conda Python 3"))
+		else if (lang.getLanguageName().equals("Python") || 
+				     lang.getLanguageName().equals("Python (Jython)") ||
+				     lang.getLanguageName().equals("Python (PyImageJ)"))
 		{
 			scriptName += ".py";
 		}
@@ -256,11 +258,11 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		if (lang.getLanguageName().equals("Groovy")) {
 			name += ".groovy";
 		}
-		else if (lang.getLanguageName().equals("Python")) {
+		else if (lang.getLanguageName().equals("Python") || lang.getLanguageName().equals("Python (Jython)")) {
 			name += ".py";
 		}
-		else if (lang.getLanguageName().equals("Conda Python 3")) {
-			name += "_conda.py";
+		else if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+			name += "_pyimagej.py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class
 			.getResourceAsStream(name);

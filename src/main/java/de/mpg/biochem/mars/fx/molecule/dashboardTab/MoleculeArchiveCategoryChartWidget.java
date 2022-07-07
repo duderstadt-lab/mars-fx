@@ -31,6 +31,8 @@ package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
 import java.io.IOException;
 
+import net.imagej.ops.Initializable;
+
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -42,7 +44,6 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import net.imagej.ops.Initializable;
 
 @Plugin(type = MoleculeArchiveDashboardWidget.class,
 	name = "CategoryChartWidget")
@@ -72,7 +73,7 @@ public class MoleculeArchiveCategoryChartWidget extends
 		module.setInput("scijavaContext", context);
 		module.setInput("archive", archive);
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
 			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
 				65) / 72));

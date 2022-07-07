@@ -29,16 +29,16 @@
 
 package de.mpg.biochem.mars.fx.preview;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.jetbrains.annotations.NotNull;
-
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.block.NodePostProcessor;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeTracker;
 import com.vladsch.flexmark.util.data.DataHolder;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
@@ -58,10 +58,10 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 			FencedCodeBlock fencedCodeBlockNode = (FencedCodeBlock) node;
 
 			if (fencedCodeBlockNode.getInfo().equals("python-image-widget"))
-				processFencedCodeBlockWidget(fencedCodeBlockNode, "Conda Python 3",
+				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (PyImageJ)",
 					"imgsrc");
 			else if (fencedCodeBlockNode.getInfo().equals("python-html-widget"))
-				processFencedCodeBlockWidget(fencedCodeBlockNode, "Conda Python 3",
+				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (PyImageJ)",
 					"html");
 			else if (fencedCodeBlockNode.getInfo().equals("groovy-image-widget"))
 				processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "imgsrc");

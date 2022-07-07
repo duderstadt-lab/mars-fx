@@ -31,13 +31,14 @@ package de.mpg.biochem.mars.fx.table.dashboard;
 
 import java.io.IOException;
 
+import net.imagej.ops.Initializable;
+
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 import org.scijava.script.ScriptModule;
 
 import de.mpg.biochem.mars.fx.dashboard.AbstractXYChartWidget;
 import de.mpg.biochem.mars.table.MarsTable;
-import net.imagej.ops.Initializable;
 
 @Plugin(type = MarsTableDashboardWidget.class, name = "MarsTableXYChartWidget")
 public class MarsTableXYChartWidget extends AbstractXYChartWidget implements
@@ -63,7 +64,7 @@ public class MarsTableXYChartWidget extends AbstractXYChartWidget implements
 		module.setInput("scijavaContext", context);
 		module.setInput("table", table);
 
-		if (lang.getLanguageName().equals("Conda Python 3")) {
+		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
 			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
 			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
 				65) / 72));
