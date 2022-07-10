@@ -39,7 +39,6 @@ import org.controlsfx.control.textfield.CustomTextField;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
-import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
@@ -52,6 +51,7 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -320,14 +320,17 @@ public abstract class AbstractRegionOfInterestTable {
 		BorderPane.setMargin(addRegionNameField, insets);
 
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
-			new DefaultMoleculeArchiveEventHandler()
+			new EventHandler<MoleculeArchiveEvent>()
 			{
-
 				@Override
-				public void onInitializeMoleculeArchiveEvent(
-					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-			{
-					archive = newArchive;
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			    {
+						archive = e.getArchive();
+						if (archive == null) record = null;
+						e.consume();
+					}
 				}
 			});
 

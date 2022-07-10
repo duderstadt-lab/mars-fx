@@ -134,12 +134,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
 			new EventHandler<MoleculeArchiveEvent>()
 			{
-
 				@Override
 				public void handle(MoleculeArchiveEvent e) {
 					if (e.getEventType().getName().equals(
 						"INITIALIZE_MOLECULE_ARCHIVE"))
-			{
+			    {
 						plotPane.fireEvent(new InitializeMoleculeArchiveEvent(e
 							.getArchive()));
 						moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e

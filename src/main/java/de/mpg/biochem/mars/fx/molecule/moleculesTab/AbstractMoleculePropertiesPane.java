@@ -38,7 +38,6 @@ import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
@@ -50,6 +49,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -116,19 +116,27 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
-			new DefaultMoleculeArchiveEventHandler()
+			new EventHandler<MoleculeArchiveEvent>()
 			{
-
 				@Override
-				public void onInitializeMoleculeArchiveEvent(
-					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-			{
-					archive = newArchive;
-					if (archive == null) molecule = null;
-					moleculeGeneralTabController.fireEvent(
-						new InitializeMoleculeArchiveEvent(newArchive));
+				public void handle(MoleculeArchiveEvent e) {
+					if (e.getEventType().getName().equals(
+						"INITIALIZE_MOLECULE_ARCHIVE"))
+			    {
+						archive = e.getArchive();
+						if (archive == null) molecule = null;
+						moleculeGeneralTabController.fireEvent(
+							new InitializeMoleculeArchiveEvent(e.getArchive()));
+						regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
+							e.getArchive()));
+						positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
+							e.getArchive()));
+						e.consume();
+					}
 				}
 			});
+		
+		
 
 		configureTabs();
 	}

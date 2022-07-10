@@ -35,7 +35,6 @@ import com.jfoenix.controls.JFXTextField;
 
 import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
-import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
@@ -49,6 +48,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -204,17 +204,19 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
-			new DefaultMoleculeArchiveEventHandler()
-			{
-
-				@Override
-				public void onInitializeMoleculeArchiveEvent(
-					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-				{
-					archive = newArchive;
+			new EventHandler<MoleculeArchiveEvent>()
+		{
+			@Override
+			public void handle(MoleculeArchiveEvent e) {
+				if (e.getEventType().getName().equals(
+					"INITIALIZE_MOLECULE_ARCHIVE"))
+		    {
+					archive = e.getArchive();
 					if (archive == null) molecule = null;
+					e.consume();
 				}
-			});
+			}
+		});
 
 		chipsListener = new ListChangeListener<String>() {
 
