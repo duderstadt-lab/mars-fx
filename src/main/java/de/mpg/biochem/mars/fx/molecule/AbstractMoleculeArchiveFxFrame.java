@@ -255,6 +255,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		lockLogArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt");
 		lockLogArea.setItems(lockLogAreaStrings);
 		lockLogArea.setVisible(false);
+		lockLogArea.setFixedCellSize(30);
 
 		masker = new MaskerPane();
 		masker.setVisible(false);
@@ -1238,17 +1239,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	@Override
 	public void logln(String message) {
 		Platform.runLater(new Runnable() {
-
 			@Override
 			public void run() {
 				lockLogAreaStrings.add(message);
-				if (lockLogAreaStrings.size() - 1 > 0) lockLogArea.scrollTo(
-					lockLogAreaStrings.size() - 1);
+				if (lockLogAreaStrings.size() > 0) lockLogArea.scrollTo(lockLogAreaStrings.size() - 1);
 				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
 					".scroll-bar:vertical");
 				if (scroll != null) scroll.setDisable(true);
 			}
 		});
+
 	}
 
 	@Override
