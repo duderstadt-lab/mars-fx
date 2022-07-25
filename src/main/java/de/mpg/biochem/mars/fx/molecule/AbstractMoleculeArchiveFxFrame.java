@@ -1241,7 +1241,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Platform.runLater(new Runnable() {
 			@Override
 			public void run() {
-				lockLogAreaStrings.add(message);
+				lockLogAreaStrings.addAll(message.split("\\n"));
 				if (lockLogAreaStrings.size() > 0) lockLogArea.scrollTo(lockLogAreaStrings.size() - 1);
 				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
 					".scroll-bar:vertical");
@@ -1263,7 +1263,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					lockLogAreaStrings.set(index, oldMessage + message);
 					lockLogArea.scrollTo(index);
 				}
-				else lockLogAreaStrings.add(message);
+				else lockLogAreaStrings.addAll(message.split("\\n"));
 
 				ScrollBar scroll = (ScrollBar) lockLogArea.lookup(
 					".scroll-bar:vertical");
