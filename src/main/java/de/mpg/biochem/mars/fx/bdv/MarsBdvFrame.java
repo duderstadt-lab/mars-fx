@@ -32,9 +32,14 @@ package de.mpg.biochem.mars.fx.bdv;
 import static bdv.ui.BdvDefaultCards.DEFAULT_SOURCEGROUPS_CARD;
 import static bdv.ui.BdvDefaultCards.DEFAULT_VIEWERMODES_CARD;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,15 +50,44 @@ import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.Dimensions;
+import net.imglib2.Interval;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealRandomAccessible;
+import net.imglib2.histogram.DiscreteFrequencyDistribution;
+import net.imglib2.histogram.Histogram1d;
+import net.imglib2.histogram.Real1dBinMapper;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.loops.LoopBuilder;
+import net.imglib2.realtransform.AffineGet;
+import net.imglib2.realtransform.AffineRandomAccessible;
+import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.realtransform.RealViews;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.NumericType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.volatiles.VolatileUnsignedShortType;
+import net.imglib2.util.Fraction;
+import net.imglib2.util.Intervals;
+import net.imglib2.util.LinAlgHelpers;
+import net.imglib2.util.Util;
+import net.imglib2.view.Views;
+
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer;
 import org.janelia.saalfeldlab.n5.imglib2.N5Utils;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.ui.UIService;
-
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
 
 import bdv.SpimSource;
 import bdv.spimdata.SpimDataMinimal;
@@ -87,37 +121,6 @@ import javafx.application.Platform;
 import mpicbg.spim.data.SpimDataException;
 import mpicbg.spim.data.registration.ViewRegistration;
 import mpicbg.spim.data.sequence.ViewId;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.Dimensions;
-import net.imglib2.Interval;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealRandomAccessible;
-import net.imglib2.histogram.DiscreteFrequencyDistribution;
-import net.imglib2.histogram.Histogram1d;
-import net.imglib2.histogram.Real1dBinMapper;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgFactory;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.loops.LoopBuilder;
-import net.imglib2.realtransform.AffineGet;
-import net.imglib2.realtransform.AffineRandomAccessible;
-import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.realtransform.RealViews;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.Type;
-import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.volatiles.VolatileUnsignedShortType;
-import net.imglib2.util.Fraction;
-import net.imglib2.util.Intervals;
-import net.imglib2.util.LinAlgHelpers;
-import net.imglib2.util.Util;
-import net.imglib2.view.Views;
 
 public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	AbstractJsonConvertibleRecord
@@ -213,6 +216,12 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		frame.setPreferredSize(new Dimension(800, 600));
 		frame.pack();
+		frame.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+          releaseMemory();
+      }
+		});
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		initializeMolecule();
@@ -269,6 +278,12 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		if (!windowStateLoaded) frame.setPreferredSize(new Dimension(800, 600));
 		frame.pack();
+		frame.addWindowListener(new WindowAdapter() {
+      @Override
+      public void windowClosing(WindowEvent e) {
+      	releaseMemory();
+      }
+		});
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		initializeMolecule();
@@ -881,6 +896,16 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			converterSetup.setDisplayRange(settings.min, settings.max);
 		}
 	}
+	
+	public void releaseMemory() {
+ 		archive = null;
+ 		if (locationCard != null)
+ 			locationCard.setArchive(null);
+ 		for (MarsBdvCard card : cards)
+ 			card.setArchive(null);
+ 		if (molecule != null) molecule.setParent(null);
+ 		molecule = null;
+ 	}
 
 	private class SourceDisplaySettings extends AbstractJsonConvertibleRecord {
 

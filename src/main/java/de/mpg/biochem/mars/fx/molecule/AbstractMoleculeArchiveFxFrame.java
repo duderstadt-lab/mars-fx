@@ -41,6 +41,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jfoenix.controls.JFXTabPane;
 
 import java.awt.Rectangle;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -621,17 +623,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 						handles, true);
 
 					for (int i = 0; i < marsBdvFrames.length; i++) {
-						marsBdvFrames[i].getFrame().addWindowListener(
-							new java.awt.event.WindowAdapter()
-							{
-
-								@Override
-								public void windowClosing(
-									java.awt.event.WindowEvent windowEvent)
-							{
-									super.windowClosing(windowEvent);
+						marsBdvFrames[i].getFrame().addWindowListener(new WindowAdapter() {
+				      @Override
+				      public void windowClosing(WindowEvent e) {
 									for (int i = 0; i < marsBdvFrames.length; i++)
 										if (marsBdvFrames[i] != null) {
+											marsBdvFrames[i].releaseMemory();
 											marsBdvFrames[i].getFrame().dispose();
 											marsBdvFrames[i] = null;
 										}
@@ -1330,6 +1327,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (marsBdvFrames != null) {
 			for (int i = 0; i < marsBdvFrames.length; i++)
 				if (marsBdvFrames[i] != null) {
+					marsBdvFrames[i].releaseMemory();
 					marsBdvFrames[i].getFrame().dispose();
 					marsBdvFrames[i] = null;
 				}
