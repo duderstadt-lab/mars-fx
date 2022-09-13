@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>32.0.0</version>
+		<version>33.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -99,7 +99,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0-beta-36</mars-core.version>
+		<mars-core.version>1.0.0-beta-37</mars-core.version>
 
 		<chartfx.version>8.1.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
