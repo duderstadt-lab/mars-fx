@@ -454,7 +454,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		final AffineTransform3D imageTransform = new AffineTransform3D();
 		//We must give the dialog the image transform. This should be no transform 
-		//because we alway build the view around one channel that is not transformed.
+		//because we always build the view around one channel that is not transformed.
 		imageTransform.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 		
 		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
@@ -466,7 +466,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 					Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
 																	(long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
 		
-		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(metaUID).getImage(0).getSizeX(), archive.getMetadata(metaUID).getImage(0).getSizeY(), numTimePoints );
+		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(metaUID).getImage(0).getSizeX(), archive.getMetadata(metaUID).getImage(0).getSizeY(), 0 );
 		backgroundThread.submit(() -> {
 			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
 				  bdv,
@@ -474,13 +474,15 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 					initialInterval,
 					rangeInterval,
 					BoxSelectionOptions.options()
-							.title( "Select region" ) );
-			if (result.isValid()) exportView(result.getInterval());
+							.title( "Select region" )
+							.selectTimepointRange()
+							.initialTimepointRange( 0, numTimePoints - 1));
+			if (result.isValid()) exportView(result.getInterval(), result.getMinTimepoint(), result.getMaxTimepoint());
 		});
 		backgroundThread.shutdown();
 	}
 
-	public void exportView(Interval interval) {
+	public void exportView(Interval interval, int minTimePoint, int maxTimePoint) {
 		int numSources = bdvSourcesForExport.get(metaUID).size();
 
 		if (bdvSourcesForExport.get(metaUID).stream().map(source -> source.getType()
@@ -508,7 +510,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 				new ArrayList<RandomAccessibleInterval<T>>();
 			Source<T> bdvSource = bdvSourcesForExport.get(metaUID).get(i);
 
-			for (int t = 0; t < numTimePoints; t++) {
+			for (int t = minTimePoint; t <= maxTimePoint; t++) {
 
 				// t, level, interpolation
 				final RealRandomAccessible<T> raiRaw =
