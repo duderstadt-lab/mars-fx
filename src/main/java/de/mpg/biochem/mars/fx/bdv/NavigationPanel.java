@@ -30,15 +30,13 @@
 package de.mpg.biochem.mars.fx.bdv;
 
 import java.awt.Color;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 
-import bdv.viewer.ViewerState;
-import ij.gui.GenericDialog;
 import net.miginfocom.swing.MigLayout;
+
+import bdv.viewer.ViewerState;
 
 public class NavigationPanel extends JPanel {
 
@@ -73,27 +71,8 @@ public class NavigationPanel extends JPanel {
 
 		fullView.addActionListener(e -> marsBdvFrame.setFullView());
 
-		exportImagePlus.addActionListener(e -> {
-			GenericDialog dialog = new GenericDialog("Export to ImagePlus");
-			dialog.addNumericField("x0", -10, 2);
-			dialog.addNumericField("y0", -10, 2);
-			dialog.addNumericField("width", 20, 2);
-			dialog.addNumericField("height", 60, 2);
-			dialog.showDialog();
-
-			if (dialog.wasCanceled()) return;
-
-			int x0 = (int) dialog.getNextNumber();
-			int y0 = (int) dialog.getNextNumber();
-			int width = (int) dialog.getNextNumber();
-			int height = (int) dialog.getNextNumber();
-
-			ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
-			backgroundThread.submit(() -> marsBdvFrame.exportView(x0, y0, width,
-				height));
-			backgroundThread.shutdown();
-		});
-
+		exportImagePlus.addActionListener(e -> marsBdvFrame.exportView());
+		
 		help.addActionListener(e -> marsBdvFrame.showHelp(true));
 
 		autoContrast.addActionListener(e -> MarsBdvFrame.initBrightness(0.001,

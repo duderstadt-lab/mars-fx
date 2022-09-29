@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -93,6 +95,8 @@ import bdv.SpimSource;
 import bdv.spimdata.SpimDataMinimal;
 import bdv.spimdata.XmlIoSpimDataMinimal;
 import bdv.tools.HelpDialog;
+import bdv.tools.boundingbox.BoxSelectionOptions;
+import bdv.tools.boundingbox.TransformedBoxSelectionDialog;
 import bdv.tools.brightness.ConverterSetup;
 import bdv.util.Affine3DHelpers;
 import bdv.util.Bdv;
@@ -440,16 +444,44 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		viewer.state().setViewerTransform(viewerTransform);
 	}
 
-	public void exportView(int x0, int y0, int width, int height) {
+	public void exportView() {
+		double moleculeXCenter = getXLocation();
+		double moleculeYCenter = getYLocation();
+		
+		final Interval viewInterval = currentViewImageCoordinates();
+		long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
+		long viewHeight = (long) (viewInterval.max(1) - viewInterval.min(1));
+
+		final AffineTransform3D imageTransform = new AffineTransform3D();
+		//We must give the dialog the image transform. This should be no transform 
+		//because we alway build the view around one channel that is not transformed.
+		imageTransform.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+		
+		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+		
+		
+		final Interval initialInterval = (locationCard.roverSync() && !Double.isNaN(moleculeXCenter) && !Double.isNaN(moleculeYCenter)) ? 
+					Intervals.createMinMax( (long) (moleculeXCenter - viewWidth*0.6/2), (long) (moleculeYCenter - viewHeight*0.6/2), 0, 
+																	(long) (moleculeXCenter + viewWidth*0.6/2), (long) (moleculeYCenter + viewHeight*0.6/2), 0) :
+					Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
+																	(long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
+		
+		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(metaUID).getImage(0).getSizeX(), archive.getMetadata(metaUID).getImage(0).getSizeY(), numTimePoints );
+		backgroundThread.submit(() -> {
+			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
+				  bdv,
+					imageTransform,
+					initialInterval,
+					rangeInterval,
+					BoxSelectionOptions.options()
+							.title( "Select region" ) );
+			if (result.isValid()) exportView(result.getInterval());
+		});
+		backgroundThread.shutdown();
+	}
+
+	public void exportView(Interval interval) {
 		int numSources = bdvSourcesForExport.get(metaUID).size();
-
-		double xCenter = getXLocation();
-		double yCenter = getYLocation();
-
-		if (Double.isNaN(xCenter) || Double.isNaN(yCenter)) return;
-
-		int TOP_left_x0 = (int) xCenter + x0;
-		int TOP_left_y0 = (int) yCenter + y0;
 
 		if (bdvSourcesForExport.get(metaUID).stream().map(source -> source.getType()
 			.getClass()).distinct().count() > 1)
@@ -489,8 +521,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 				final AffineRandomAccessible<T, AffineGet> rai = RealViews.affine(
 					raiRaw, affine);
 				RandomAccessibleInterval<T> view = Views.interval(Views.raster(rai),
-					new long[] { TOP_left_x0, TOP_left_y0, 0 }, new long[] { TOP_left_x0 +
-						width, TOP_left_y0 + height, 0 });
+					new long[] { interval.min(0), interval.min(1), 0 }, new long[] { interval.max(0), interval.max(1), 0 });
 
 				raiList.add(Views.hyperSlice(view, 2, 0));
 			}
@@ -501,7 +532,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		}
 
 		String title = (molecule != null) ? "molecule " + molecule.getUID()
-			: "BDV export (" + xCenter + ", " + yCenter + ")";
+			: "BDV export (" + interval.min(0) + ", " + interval.min(1) + ", " + interval.max(0) + ", " + interval.max(1) + ")";
 
 		AxisType[] axInfo = (numSources > 1) ? new AxisType[] { Axes.X, Axes.Y,
 			Axes.TIME, Axes.CHANNEL } : new AxisType[] { Axes.X, Axes.Y, Axes.TIME };
@@ -574,7 +605,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		int tSize = (int) image.dimension(image.numDimensions() - 1);
 
 		if (tSize > numTimePoints) numTimePoints = tSize;
-
+			
 		@SuppressWarnings("rawtypes")
 		final RandomAccessibleInterval[] images = new RandomAccessibleInterval[1];
 		images[0] = image;
@@ -711,7 +742,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			if (spimData.getSequenceDescription().getTimePoints()
 				.size() > numTimePoints) numTimePoints = spimData
 					.getSequenceDescription().getTimePoints().size();
-
+			
 			return new SpimSource<T>(spimData, 0, source.getName());
 		}
 		catch (SpimDataException e) {
@@ -770,6 +801,33 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		affine.set(affine.get(1, 3) - target[1] + dim.getHeight() / 2, 1, 3);
 
 		bdv.getViewerPanel().state().setViewerTransform(affine);
+	}
+	
+	public final Interval currentViewImageCoordinates() {
+		Dimension dim = bdv.getViewerPanel().getDisplay().getSize();
+		AffineTransform3D affine = bdv.getViewerPanel().state().getViewerTransform();
+		
+		double[] source = new double[]{0, 0, 0};
+		double[] target = new double[]{0, 0, 0};
+
+		affine.applyInverse(source, target);
+
+		long x0 = (long) source[0];
+		long y0 = (long) source[1];
+		
+		source[0] = 0;
+		source[1] = 0;
+		source[2] = 0;
+		target[0] = dim.getWidth();
+		target[1] = dim.getHeight();
+		target[2] = 0;
+		
+		affine.applyInverse(source, target);
+		
+		long x1 = (long) source[0];
+		long y1 = (long) source[1];
+
+		return Intervals.createMinMax(x0, y0, x1, y1);
 	}
 
 	@Override
