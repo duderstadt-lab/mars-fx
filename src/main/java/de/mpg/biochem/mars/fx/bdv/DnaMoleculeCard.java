@@ -37,6 +37,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -48,6 +50,7 @@ import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
+import org.scijava.Context;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -85,6 +88,9 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	
 	@Parameter
 	protected ModuleService moduleService;
+	
+	@Parameter
+	protected Context context;
 
 	@Override
 	public void initialize() {
@@ -108,14 +114,18 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		dnaFinderButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
 					MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
+					dnaFinderCommand.setContext(context);
 					try {
 						moduleService.run(dnaFinderCommand, true, "marsBdvFrame", marsBdvFrame, "archive", archive).get();
 					}
 					catch (InterruptedException | ExecutionException exc) {
-						// TODO Auto-generated catch block
 						exc.printStackTrace();
 					}
+				});
+				backgroundThread.shutdown();
 			}
 		});
 		panel.add(dnaFinderButton);
