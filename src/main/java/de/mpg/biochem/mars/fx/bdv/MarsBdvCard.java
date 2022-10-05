@@ -31,6 +31,8 @@ package de.mpg.biochem.mars.fx.bdv;
 
 import javax.swing.JPanel;
 
+import net.imagej.ops.Initializable;
+
 import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;
@@ -40,7 +42,6 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import net.imagej.ops.Initializable;
 
 public interface MarsBdvCard extends SciJavaPlugin, JsonConvertibleRecord,
 	Initializable
@@ -54,6 +55,8 @@ public interface MarsBdvCard extends SciJavaPlugin, JsonConvertibleRecord,
 
 	void setArchive(
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive);
+	
+	void setBdvFrame(MarsBdvFrame marsBdvFrame);
 
 	BdvOverlay getBdvOverlay();
 

@@ -34,26 +34,33 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.ExecutionException;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import net.imagej.ops.Initializable;
+import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.type.numeric.ARGBType;
+
+import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import net.imagej.ops.Initializable;
-import net.imglib2.realtransform.AffineTransform2D;
-import net.imglib2.type.numeric.ARGBType;
 
 @Plugin(type = MarsBdvCard.class, name = "DNA-Overlay")
 public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
@@ -72,6 +79,12 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Parameter
+	protected MarsBdvFrame marsBdvFrame;
+	
+	@Parameter
+	protected ModuleService moduleService;
 
 	@Override
 	public void initialize() {
@@ -90,6 +103,31 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		dnaThickness.setMinimumSize(dimScaleField);
 
 		panel.add(dnaThickness);
+		
+		JButton dnaFinderButton = new JButton("Find DNA");
+		dnaFinderButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+					MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
+					try {
+						moduleService.run(dnaFinderCommand, true, "marsBdvFrame", marsBdvFrame, "archive", archive).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						// TODO Auto-generated catch block
+						exc.printStackTrace();
+					}
+			}
+		});
+		panel.add(dnaFinderButton);
+		
+		JButton peakTrackerButton = new JButton("Add Track");
+		peakTrackerButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+
+			}
+		});
+		panel.add(peakTrackerButton);
 	}
 
 	@Override
@@ -125,6 +163,11 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
 	{
 		this.archive = archive;
+	}
+	
+	@Override
+	public void setBdvFrame(MarsBdvFrame marsBdvFrame) {
+		this.marsBdvFrame = marsBdvFrame;
 	}
 
 	@Override

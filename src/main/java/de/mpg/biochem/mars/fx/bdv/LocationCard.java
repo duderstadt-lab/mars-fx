@@ -49,6 +49,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import net.imagej.ops.Initializable;
+import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.type.numeric.ARGBType;
+
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -61,9 +65,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTableRow;
-import net.imagej.ops.Initializable;
-import net.imglib2.realtransform.AffineTransform2D;
-import net.imglib2.type.numeric.ARGBType;
 
 @Plugin(type = MarsBdvCard.class, name = "Location")
 public class LocationCard extends AbstractJsonConvertibleRecord implements
@@ -87,6 +88,9 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Parameter
+	protected MarsBdvFrame marsBdvFrame;
 
 	@Override
 	public void initialize() {
@@ -317,6 +321,11 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
 	{
 		this.archive = archive;
+	}
+	
+	@Override
+	public void setBdvFrame(MarsBdvFrame marsBdvFrame) {
+		this.marsBdvFrame = marsBdvFrame;
 	}
 
 	@Override

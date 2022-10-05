@@ -41,12 +41,17 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import net.imagej.ops.Initializable;
+import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.type.numeric.ARGBType;
+
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.image.PeakShape;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
@@ -55,9 +60,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.object.MartianObject;
-import net.imagej.ops.Initializable;
-import net.imglib2.realtransform.AffineTransform2D;
-import net.imglib2.type.numeric.ARGBType;
 
 @Plugin(type = MarsBdvCard.class, name = "Object-Overlay")
 public class ObjectCard extends AbstractJsonConvertibleRecord implements
@@ -78,6 +80,9 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 
 	@Parameter
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
+	
+	@Parameter
+	protected MarsBdvFrame marsBdvFrame;
 
 	@Override
 	public void initialize() {
@@ -112,6 +117,11 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive)
 	{
 		this.archive = archive;
+	}
+	
+	@Override
+	public void setBdvFrame(MarsBdvFrame marsBdvFrame) {
+		this.marsBdvFrame = marsBdvFrame;
 	}
 
 	@Override

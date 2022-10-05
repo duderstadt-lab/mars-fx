@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -274,9 +275,11 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			locationCard.getPanel(), true);
 
 		// Add custom cards
-		for (MarsBdvCard card : cards)
+		for (MarsBdvCard card : cards) {
+			card.setBdvFrame(this);
 			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(),
 				card.getPanel(), true);
+		}
 
 		frame.add(bdv.getSplitPanel(), BorderLayout.CENTER);
 
@@ -765,6 +768,14 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		return bdv;
 	}
 
+	public List<String> getSourceNames() {
+		return bdvSources.get(metaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
+	}
+	
+	public Source<T> getSource(String name) {
+		return bdvSources.get(metaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
+	}
+	
 	public void goTo(double x, double y) {
 		setFullView();
 
@@ -772,14 +783,9 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		viewerTransform = bdv.getViewerPanel().state().getViewerTransform();
 		AffineTransform3D affine = viewerTransform;
 
-		double[] source = new double[3];
-		source[0] = 0;
-		source[1] = 0;
-		source[2] = 0;
-		double[] target = new double[3];
-		target[0] = 0;
-		target[1] = 0;
-		target[2] = 0;
+		double[] source = new double[] {0, 0, 0};
+		double[] target = new double[] {0, 0, 0};
+
 
 		viewerTransform.apply(source, target);
 
@@ -787,8 +793,6 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		affine.set(affine.get(1, 3) - target[1], 1, 3);
 
 		double scale = locationCard.getMagnification();
-
-		// check it was set correctly?
 
 		// scale
 		affine.scale(scale);
