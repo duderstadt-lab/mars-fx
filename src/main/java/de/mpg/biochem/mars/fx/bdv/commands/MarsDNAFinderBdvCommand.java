@@ -373,11 +373,12 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 				molecule.setParameter("Dna_Top_Y1", segment.getY1());
 				molecule.setParameter("Dna_Bottom_X2", segment.getX2());
 				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
-				
 				//add to archive
 				archive.put(molecule);
+				logService.info("Added DnaMolecule record " + molecule.getUID());
 			}
 			archive.getWindow().unlock();
+			//((AbstractMoleculeArchiveFxFrame) archive.getWindow()).
 		}
 	}
 	
