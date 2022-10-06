@@ -776,6 +776,14 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		return bdvSources.get(metaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
 	}
 	
+	public int getNumberTimePoints() {
+		return numTimePoints;
+	}
+	
+	public String getMetadataUID() {
+		return metaUID;
+	}
+	
 	public void goTo(double x, double y) {
 		setFullView();
 

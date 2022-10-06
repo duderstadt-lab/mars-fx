@@ -29,55 +29,62 @@
 
 package de.mpg.biochem.mars.fx.bdv.commands;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import net.imagej.ops.Initializable;
 import net.imagej.ops.OpService;
+import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.realtransform.AffineTransform2D;
+import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.roi.IterableRegion;
+import net.imglib2.roi.RealMask;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BoolType;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
+import net.imglib2.util.Intervals;
+import net.imglib2.view.Views;
 
-import org.decimal4j.util.DoubleRounder;
 import org.scijava.ItemVisibility;
-import org.scijava.app.StatusService;
 import org.scijava.command.Command;
-import org.scijava.command.DynamicCommand;
+import org.scijava.command.InteractiveCommand;
 import org.scijava.command.Previewable;
 import org.scijava.convert.ConvertService;
 import org.scijava.log.LogService;
 import org.scijava.module.MutableModuleItem;
-import org.scijava.platform.PlatformService;
 import org.scijava.plugin.Parameter;
-import org.scijava.ui.DialogPrompt.MessageType;
-import org.scijava.ui.DialogPrompt.OptionType;
+import org.scijava.plugin.Plugin;
+import org.scijava.table.DoubleColumn;
 import org.scijava.ui.UIService;
-import org.scijava.widget.ChoiceWidget;
-import org.scijava.widget.NumberWidget;
+import org.scijava.widget.Button;
 
+import bdv.tools.boundingbox.BoxSelectionOptions;
+import bdv.tools.boundingbox.TransformedBoxSelectionDialog;
+import bdv.util.Bdv;
+import bdv.util.BdvFunctions;
+import bdv.util.BdvOverlay;
+import bdv.util.BdvOverlaySource;
 import bdv.viewer.Source;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.image.DNAFinder;
 import de.mpg.biochem.mars.image.DNASegment;
+import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.table.MarsTableService;
-import de.mpg.biochem.mars.util.LogBuilder;
-import ij.gui.Line;
-import ij.gui.Overlay;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.MarsMath;
+import ij.gui.Roi;
 
 /**
  * Finds the location of vertically aligned DNA molecules within the specified
@@ -92,7 +99,8 @@ import ij.gui.Overlay;
  *
  * @author Karl Duderstadt
  */
-public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
+@Plugin(type = Command.class, label = "Bdv DNA Finder")
+public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Command,
 	Initializable, Previewable
 {
 
@@ -107,18 +115,9 @@ public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
 
 	@Parameter
 	private UIService uiService;
-
-	@Parameter
-	private StatusService statusService;
-
-	@Parameter
-	private MarsTableService marsTableService;
-
+	
 	@Parameter
 	private ConvertService convertService;
-
-	@Parameter
-	private PlatformService platformService;
 
 	/**
 	 * IMAGE
@@ -144,14 +143,19 @@ public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
 	@Parameter(visibility = ItemVisibility.MESSAGE, style = "image, group:Input",
 		persist = false)
 	private String inputFigure = "DNAImageInput.png";
-
-	@Parameter(visibility = ItemVisibility.MESSAGE,
-			style = "group:Input, align:center", persist = false)
-	private String region = "[roi]";
 	
 	@Parameter(label = "Source", choices = { "a", "b", "c" },
 		style = "group:Input", persist = false)
 	private String source = "";
+	
+	@Parameter(visibility = ItemVisibility.MESSAGE,
+			style = "group:Input, align:center", persist = false)
+	private String region = "";
+	
+	@Parameter(label = "Select region", style = "group:Input, align:center",
+			description = "Select region to search for DNAs",
+			callback = "setSelectionRegion", persist = false)
+	private Button regionSelectionButton;
 
 	/**
 	 * FINDER SETTINGS
@@ -212,85 +216,59 @@ public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
 	private int fitRadius = 4;
 
 	/**
-	 * OUTPUT SETTINGS
-	 */
-	@Parameter(visibility = ItemVisibility.MESSAGE, style = "groupLabel")
-	private String outputGroup = "Output";
-
-	@Parameter(label = "Threads", required = false, min = "1", max = "120",
-		style = "group:Output")
-	private int nThreads = Runtime.getRuntime().availableProcessors();
-
-	/**
 	 * PREVIEW SETTINGS
 	 */
 
-	@Parameter(visibility = ItemVisibility.MESSAGE, style = "groupLabel")
-	private String previewGroup = "Preview";
-
 	@Parameter(visibility = ItemVisibility.INVISIBLE, persist = false,
-		callback = "previewChanged", style = "group:Preview")
+		callback = "previewChanged")
 	private boolean preview = false;
+	
+	@Parameter(label = "Create DNA molecule records",
+			description = "Creates records for the DNA molecules",
+			callback = "createDNAmoleculeRecords", persist = false)
+	private Button addDNAsButton;
 
-	@Parameter(label = "Label", style = ChoiceWidget.RADIO_BUTTON_VERTICAL_STYLE +
-		", group:Preview", choices = { "Median intensity", "Variance intensity" })
-	private String previewLabelType;
+	//@Parameter(label = "Label", style = ChoiceWidget.RADIO_BUTTON_VERTICAL_STYLE +
+	//	", group:Preview", choices = { "Median intensity", "Variance intensity" })
+	//private String previewLabelType;
 
-	@Parameter(label = "T", min = "0", max = "100", style = NumberWidget.SCROLL_BAR_STYLE +
-		", group:Preview", persist = false)
-	private int theT;
-
-	@Parameter(label = "Timeout (s)", style = "group:Preview")
-	private int previewTimeout = 10;
-
-	// A map with peak lists for each slice for an image stack
-	private ConcurrentMap<Integer, List<DNASegment>> dnaStack;
+	//@Parameter(label = "Timeout (s)", style = "group:Preview")
+	//private int previewTimeout = 10;
+	
+	private Interval interval;
+	private DnaMoleculePreviewOverlay previewOverlay;
+	private BdvOverlaySource<?> overlaySource;
+	private boolean activeOverlay = false;
+	private List<DNASegment> segments;
 
 	@Override
 	public void initialize() {
 		final MutableModuleItem<String> channelItems = getInfo().getMutableInput(
 			"source", String.class);
 		channelItems.setChoices(marsBdvFrame.getSourceNames());
-
-		//final MutableModuleItem<Integer> preFrame = getInfo().getMutableInput(
-		//	"theT", Integer.class);
-		//preFrame.setValue(this, marsBdvFrame.getBdvHandle().getViewerPanel());
-		//preFrame.setMaximumValue();
+		
+		if (marsBdvFrame != null) {
+			final Interval viewInterval = marsBdvFrame.currentViewImageCoordinates();
+			long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
+			long viewHeight = (long) (viewInterval.max(1) - viewInterval.min(1));
+			interval = Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
+								                         (long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
+		}
 	}
 
 	@Override
 	public void run() {
-
-		// Build log
-		LogBuilder builder = new LogBuilder();
-		String log = LogBuilder.buildTitleBlock("DNA Finder");
-		addInputParameterLog(builder);
-		log += builder.buildParameterList();
-		logService.info(log);
-
-		// Used to store dna list for multiframe search
-		dnaStack = new ConcurrentHashMap<>();
-
-		double starttime = System.currentTimeMillis();
-		logService.info("Finding DNAs...");
-		
-		//dnaStack.put(theT, findDNAsInT(Integer.valueOf(channel), theT, rois, nThreads));
-
-		logService.info("Time: " + DoubleRounder.round((System.currentTimeMillis() -
-			starttime) / 60000, 2) + " minutes.");
-
-		logService.info("Finished in " + DoubleRounder.round((System
-			.currentTimeMillis() - starttime) / 60000, 2) + " minutes.");
-		logService.info(LogBuilder.endBlock(true));
+		//DNA finding is triggered when the timepoint is changed in the overlay.
+		//the overlay is added when preview is on.
 	}
 
 	@SuppressWarnings("unchecked")
-	private <T extends RealType<T> & NativeType<T>> List<DNASegment> findDNAsInT(int t, int numTheads)
+	private <T extends RealType<T> & NativeType<T>> List<DNASegment> findDNAsInT(int t)
 	{
-
 		Source<T> bdvSource = marsBdvFrame.getSource(source);
 		
-		RandomAccessibleInterval<T> img = bdvSource.getSource(theT, 0);
+		//Remove the Z dimension
+		RandomAccessibleInterval<T> img = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
 
 		DNAFinder<T> dnaFinder = new DNAFinder<>(opService);
 		dnaFinder.setGaussianSigma(gaussSigma);
@@ -311,123 +289,171 @@ public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
 
 		List<IterableRegion<BoolType>> regionList =
 			new ArrayList<IterableRegion<BoolType>>();
-		/*		for (int i = 0; i < processingRois.length; i++) {
-			// Convert from Roi to IterableInterval
-			RealMask roiMask = convertService.convert(processingRois[i],
-				RealMask.class);
-			IterableRegion<BoolType> iterableROI = MarsImageUtils.toIterableRegion(
-				roiMask, img);
-			regionList.add(iterableROI);
-		}
-*/
-		return dnaFinder.findDNAs(img, regionList, t, numTheads);
+		//TODO This is really ugly... There should be a method that just accepts the interval directly in addition to the RealMask option...
+		RealMask roiMask = convertService.convert(new Roi(new Rectangle((int) interval.min(0), (int) interval.min(1), 
+											(int)(interval.max(0) - interval.min(0)), (int)(interval.max(1) - interval.min(1)))), RealMask.class);
+		 
+		IterableRegion<BoolType> iterableROI = MarsImageUtils.toIterableRegion(
+			roiMask, img);
+		regionList.add(iterableROI);
+		
+		return dnaFinder.findDNAs(img, regionList, t, 1);
 	}
 
 	@Override
 	public void preview() {
 		if (preview) {
-			ExecutorService es = Executors.newSingleThreadExecutor();
-			try {
-				es.submit(() -> {
-
-					List<DNASegment> segments = findDNAsInT(theT, Runtime.getRuntime().availableProcessors());
-
-					if (Thread.currentThread().isInterrupted()) return;
-
-					Overlay overlay = new Overlay();
-					if (segments.size() > 0) {
-						for (DNASegment segment : segments) {
-							Line line = new Line(segment.getX1(), segment.getY1(), segment
-								.getX2(), segment.getY2());
-
-							double value = Double.NaN;
-							if (previewLabelType.equals("Variance intensity")) value = segment
-								.getVariance();
-							else if (previewLabelType.equals("Median intensity")) value =
-								segment.getMedianIntensity();
-
-							if (Double.isNaN(value)) line.setName("");
-							if (value > 1_000_000) line.setName(DoubleRounder.round(value /
-								1_000_000, 2) + " m");
-							else if (value > 1000) line.setName(DoubleRounder.round(value /
-								1000, 2) + " k");
-							else line.setName((int) value + "");
-
-							overlay.add(line);
-							if (Thread.currentThread().isInterrupted()) return;
-						}
-						overlay.drawLabels(true);
-						overlay.drawNames(true);
-						overlay.setLabelColor(new Color(255, 255, 255));
-					}
-
-					final String countString = "count: " + segments.size();
-					final MutableModuleItem<String> preFrameCount = getInfo()
-						.getMutableInput("tDNACount", String.class);
-					preFrameCount.setValue(this, countString);
-				}).get(previewTimeout, TimeUnit.SECONDS);
+			if (previewOverlay == null) previewOverlay = new DnaMoleculePreviewOverlay();
+			if (!activeOverlay) {
+				overlaySource = BdvFunctions.showOverlay(previewOverlay, "DNA-Preview", Bdv
+								                    .options().addTo(marsBdvFrame.getBdvHandle()));
+				activeOverlay = true;
 			}
-			catch (TimeoutException e1) {
-				es.shutdownNow();
-				uiService.showDialog(
-					"Preview took too long. Try a smaller region, a higher threshold, or try again with a longer delay before preview timeout.",
-					MessageType.ERROR_MESSAGE, OptionType.DEFAULT_OPTION);
-				cancel();
-			}
-			catch (InterruptedException | ExecutionException e2) {
-				es.shutdownNow();
-				cancel();
-			}
-			es.shutdownNow();
 		}
 	}
-
+	
 	@Override
 	public void cancel() {
-		//
+		if (overlaySource != null) overlaySource.removeFromBdv();
+		if (previewOverlay != null) marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().overlays().remove( previewOverlay );
+		activeOverlay = false;
 	}
-
+	
 	/** Called when the {@link #preview} parameter value changes. */
 	protected void previewChanged() {
-		// When preview box is unchecked, reset the Roi back to how it was before...
 		if (!preview) cancel();
 	}
+	
+	protected void setSelectionRegion() {
+		final Interval viewInterval = marsBdvFrame.currentViewImageCoordinates();
+		long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
+		long viewHeight = (long) (viewInterval.max(1) - viewInterval.min(1));
 
-	private void addInputParameterLog(LogBuilder builder) {
+		final AffineTransform3D imageTransform = new AffineTransform3D();
+		//We must give the dialog the image transform. This should be no transform 
+		//because we always build the view around one channel that is not transformed.
+		imageTransform.set(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 		
-		//builder.addParameter("Dataset name", dataset.getName());
-		//builder.addParameter("Channel", channel);
-		builder.addParameter("Gaussian smoothing sigma", String.valueOf(
-			this.gaussSigma));
-		builder.addParameter("DoG filter", String.valueOf(useDogFilter));
-		builder.addParameter("DoG radius", String.valueOf(dogFilterRadius));
-		builder.addParameter("Threshold", String.valueOf(threshold));
-		builder.addParameter("Minimum distance", String.valueOf(minimumDistance));
-		builder.addParameter("Optimal DNA length", String.valueOf(
-			optimalDNALength));
-		builder.addParameter("DNA end search radius Y", String.valueOf(
-			yDNAEndSearchRadius));
-		builder.addParameter("DNA end search radius X", String.valueOf(
-			xDNAEndSearchRadius));
-		builder.addParameter("Filter by median intensity", String.valueOf(
-			medianIntensityFilter));
-		builder.addParameter("Median intensity lower bound", String.valueOf(
-			medianIntensityLowerBound));
-		builder.addParameter("Filter by variance", String.valueOf(varianceFilter));
-		builder.addParameter("Intensity variance upper bound", String.valueOf(
-			varianceUpperBound));
-		builder.addParameter("Fit peaks", String.valueOf(fit));
-		builder.addParameter("Fit radius", String.valueOf(fitRadius));
-		builder.addParameter("Fit 2nd order", String.valueOf(fitSecondOrder));
-		builder.addParameter("Thread count", nThreads);
+		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+		final Interval initialInterval = Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
+																	                           (long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
+		
+		//TODO make sure the currently selected Metadata is the one whose size is retrieved in the future.. This assumes all metadata records would be for images of similar sizes...
+		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(0).getImage(0).getSizeX(), archive.getMetadata(0).getImage(0).getSizeY(), 0 );
+		backgroundThread.submit(() -> {
+			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
+				  marsBdvFrame.getBdvHandle(),
+					imageTransform,
+					initialInterval,
+					rangeInterval,
+					BoxSelectionOptions.options()
+							.title( "Select region" ));
+			if (result.isValid()) {
+				interval = result.getInterval();
+			}
+		});
+		backgroundThread.shutdown();
 	}
-
-	public void setT(int theT) {
-		this.theT = theT;
+	
+	protected void createDNAmoleculeRecords() {
+		if (archive != null) {
+			archive.getWindow().lock();
+			for (DNASegment segment : segments) {
+				//Build table with timepoint index
+				MarsTable table = new MarsTable("table");
+				DoubleColumn col = new DoubleColumn("T");
+				for (double t=0; t<marsBdvFrame.getNumberTimePoints(); t++) col.add(t);
+				table.add(col);
+				
+				//Build molecule record with DNA location
+				Molecule molecule = archive.createMolecule(MarsMath.getUUID58(), table);
+				molecule.setMetadataUID(marsBdvFrame.getMetadataUID());
+				molecule.setImage(archive.getMetadata(marsBdvFrame.getMetadataUID()).getImage(0).getImageID());
+				molecule.setParameter("Dna_Top_X1", segment.getX1());
+				molecule.setParameter("Dna_Top_Y1", segment.getY1());
+				molecule.setParameter("Dna_Bottom_X2", segment.getX2());
+				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
+				
+				//add to archive
+				archive.put(molecule);
+			}
+			archive.getWindow().unlock();
+		}
 	}
+	
+	public class DnaMoleculePreviewOverlay extends BdvOverlay {
+		private Color intersectionFillColor = new Color( 0x88994499, true );
+		//https://github.com/bigdataviewer/bigdataviewer-core/blob/9d54b96f2b789ccd21e828db17cd41944bd18704/src/main/java/bdv/tools/boundingbox/TransformedBoxOverlay.java
+		
+		public DnaMoleculePreviewOverlay() {}
 
-	public int getT() {
-		return theT;
+		@Override
+		protected void draw(Graphics2D g) {
+			AffineTransform2D transform = new AffineTransform2D();
+			getCurrentTransform2D(transform);
+			
+			Interval selection = selectionToViewTransform(transform);
+			g.setPaint( intersectionFillColor );
+			g.fillRect((int) selection.min(0), (int) selection.min(1), (int)(selection.max(0) - selection.min(0)), (int)(selection.max(1) - selection.min(1)));
+			
+		  segments = findDNAsInT(info.getTimePointIndex());
+		  
+			if (segments.size() > 0) {
+				for (DNASegment segment : segments) {
+					if (Double.isNaN(segment.getX1()) || Double.isNaN(segment.getY1()) || Double.isNaN(segment
+						.getX2()) || Double.isNaN(segment.getY2())) return;
+	
+					final double[] globalCoords = new double[] { segment.getX1(), segment.getY1() };
+					final double[] viewerCoords = new double[2];
+					transform.apply(globalCoords, viewerCoords);
+	
+					int xSource = (int) Math.round(viewerCoords[0]);
+					int ySource = (int) Math.round(viewerCoords[1]);
+	
+					final double[] globalCoords2 = new double[] { segment
+						.getX2(), segment.getY2() };
+					final double[] viewerCoords2 = new double[2];
+					transform.apply(globalCoords2, viewerCoords2);
+	
+					int xTarget = (int) Math.round(viewerCoords2[0]);
+					int yTarget = (int) Math.round(viewerCoords2[1]);
+	
+					g.setColor(getColor());
+					g.setStroke(new BasicStroke(2));
+					g.drawLine(xSource, ySource, xTarget, yTarget);
+				}
+			}
+		}
+		
+		private Interval selectionToViewTransform(AffineTransform2D transform) {
+			final double[] globalCoords = new double[] {interval.min(0), interval.min(1)};
+			final double[] viewerCoords = new double[2];
+			transform.apply(globalCoords, viewerCoords);
+
+			int x1 = (int) Math.round(viewerCoords[0]);
+			int y1 = (int) Math.round(viewerCoords[1]);
+
+			final double[] globalCoords2 = new double[] { interval.max(0), interval.max(1) };
+			final double[] viewerCoords2 = new double[2];
+			transform.apply(globalCoords2, viewerCoords2);
+
+			int x2 = (int) Math.round(viewerCoords2[0]);
+			int y2 = (int) Math.round(viewerCoords2[1]);
+			
+			return Intervals.createMinMax( (long) x1, (long) y1, 
+        														 (long) x2, (long) y2);
+		}
+
+		private Color getColor() {
+			int alpha = (int) info.getDisplayRangeMax();
+
+			if (alpha > 255 || alpha < 0) alpha = 255;
+
+			final int r = ARGBType.red(info.getColor().get());
+			final int g = ARGBType.green(info.getColor().get());
+			final int b = ARGBType.blue(info.getColor().get());
+			return new Color(r, g, b, alpha);
+		}
 	}
 
 	public void setGaussianSigma(double gaussSigma) {
@@ -540,13 +566,5 @@ public class MarsDNAFinderBdvCommand extends DynamicCommand implements Command,
 
 	public int getFitRadius() {
 		return fitRadius;
-	}
-
-	public void setThreads(int nThreads) {
-		this.nThreads = nThreads;
-	}
-
-	public int getThreads() {
-		return this.nThreads;
 	}
 }
