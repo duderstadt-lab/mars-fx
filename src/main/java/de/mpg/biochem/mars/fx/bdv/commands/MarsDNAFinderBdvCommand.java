@@ -122,10 +122,8 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	/**
 	 * IMAGE
 	 */
-	@Parameter
-	protected MarsBdvFrame marsBdvFrame;
+	private MarsBdvFrame marsBdvFrame;
 	
-	@Parameter(label = "Molecule Archive")
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	/**
@@ -216,7 +214,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	private int fitRadius = 4;
 
 	/**
-	 * PREVIEW SETTINGS
+	 * Global Settings
 	 */
 
 	@Parameter(visibility = ItemVisibility.INVISIBLE, persist = false,
@@ -455,6 +453,22 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 			final int b = ARGBType.blue(info.getColor().get());
 			return new Color(r, g, b, alpha);
 		}
+	}
+	
+	public void setMarsBdvFrame(MarsBdvFrame marsBdvFrame) {
+		this.marsBdvFrame = marsBdvFrame;
+	}
+	
+	public MarsBdvFrame getMarsBdvFrame() {
+		return marsBdvFrame;
+	}
+	
+	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
+		this.archive = archive;
+	}
+	
+	public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
+		return archive;
 	}
 
 	public void setGaussianSigma(double gaussSigma) {

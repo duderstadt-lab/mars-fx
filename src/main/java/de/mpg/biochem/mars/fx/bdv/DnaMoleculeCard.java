@@ -58,6 +58,7 @@ import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsPeakTrackerBdvCommand;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -118,8 +119,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 				backgroundThread.submit(() -> {
 					MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
 					dnaFinderCommand.setContext(context);
+					
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					dnaFinderCommand.setMarsBdvFrame(marsBdvFrame);
+					dnaFinderCommand.setArchive(archive);
 					try {
-						moduleService.run(dnaFinderCommand, true, "marsBdvFrame", marsBdvFrame, "archive", archive).get();
+						moduleService.run(dnaFinderCommand, true).get();
 					}
 					catch (InterruptedException | ExecutionException exc) {
 						exc.printStackTrace();
@@ -134,7 +140,23 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		peakTrackerButton.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					MarsPeakTrackerBdvCommand peakTrackerCommand = new MarsPeakTrackerBdvCommand();
+					peakTrackerCommand.setContext(context);
+					
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					peakTrackerCommand.setMarsBdvFrame(marsBdvFrame);
+					peakTrackerCommand.setArchive(archive);
+					try {
+						moduleService.run(peakTrackerCommand, true).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						exc.printStackTrace();
+					}
+				});
+				backgroundThread.shutdown();
 			}
 		});
 		panel.add(peakTrackerButton);
