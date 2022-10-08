@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import net.imagej.ops.Initializable;
 import net.imagej.ops.OpService;
@@ -60,6 +59,7 @@ import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.image.Peak;
 import de.mpg.biochem.mars.image.PeakTracker;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.metadata.MarsOMEMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
@@ -243,7 +243,7 @@ Initializable, Previewable
 	
 	@Override
 	public void run() {
-	
+		//command is run interactively using buttons.
 	}
 	
 	protected void addTracksToArchive() {
@@ -275,7 +275,7 @@ Initializable, Previewable
 			ConcurrentMap<Integer, List<Peak>> peaks = new ConcurrentHashMap<Integer, List<Peak>>();
 			
 			List<Integer> processTimePoints = new ArrayList<Integer>();
-			List<Runnable> tasks = new ArrayList<Runnable>();
+			//List<Runnable> tasks = new ArrayList<Runnable>();
 			for (int t = 0; t < timepoints; t++) {
 				boolean processedTimePoint = true;
 				for (int index = 0; index < excludeTimePoints.size(); index++)
@@ -287,12 +287,32 @@ Initializable, Previewable
 					}
 
 				if (processedTimePoint) {
-					processTimePoints.add(t);
-					final int theT = t;
-					tasks.add(() -> peaks.put(theT, findPeaksInT(theT, useDogFilter, integrate)));
+					List<Peak> peaksInT = findPeaksInT(t, useDogFilter, integrate);
+					if (peaksInT.size() > 0) {
+						processTimePoints.add(t);
+						peaks.put(t, peaksInT);
+					}
 				}
 			}
 			
+			/*		
+			processTimePoints.stream().forEach(
+				t -> {
+					// Remember this operation will change the order of the peaks in the
+					// Arraylists but that should not be a problem here...
+
+					// If you have a very small ROI and there are fames with no actual
+					// peaks in them.
+					// you need to skip that T.
+					if (peaks.containsKey(t))
+					{
+						KDTree<Peak> tree = new KDTree<Peak>(peakStack.get(t), peakStack
+							.get(t));
+						KDTreeStack.put(trackingTimePoints.indexOf(t), tree);
+					}
+				});
+			
+		
 			try {
 				ExecutorService threadPool = Executors.newFixedThreadPool(1);
 				tasks.forEach(task -> threadPool.submit(task));
@@ -303,14 +323,21 @@ Initializable, Previewable
 				// TODO Auto-generated catch block
 				exc.printStackTrace();
 			}
-
+*/
+			
 			PeakTracker tracker = new PeakTracker(maxDifferenceX, maxDifferenceY, maxDifferenceT,
 				minimumDistance, minTrajectoryLength, true, logService, 1);
 			
 			//Need to make a temporary SingleMoleculeArchive for the tracking results
 			SingleMoleculeArchive tracksArchive = new SingleMoleculeArchive("tracking results container");
-			tracksArchive.putMetadata(tracksArchive.createMetadata("null"));
-			tracker.track(peaks, tracksArchive, 0, processTimePoints, 1);
+			
+			
+			MarsOMEMetadata metadata = (MarsOMEMetadata) archive.getMetadata(marsBdvFrame.getMetadataUID());
+			//We set the metadata to point at the current metadata record. This will allow for setting dt correcting.
+			tracksArchive.putMetadata(metadata);
+			
+			//We are assuming the channel in N5 is the same as the channel from the original metadata hmmm.... 
+			tracker.track(peaks, tracksArchive, metadata.getBdvSource(source).getChannel(), processTimePoints, 1);
 			
 			MarsTable mergedTable = new MarsTable();
 			RadiusNeighborSearchOnKDTree<MoleculePosition> archive1PositionSearcher = getMoleculeSearcher(tracksArchive);
@@ -321,6 +348,7 @@ Initializable, Previewable
 			
 			ArrayList<SingleMolecule> moleculesOnDNA = findMoleculesOnDna(
 				archive1PositionSearcher, tracksArchive, dnaSegment);
+			
 			if (moleculesOnDNA.size() != 0) {
 				addToMergedTable(mergedTable, moleculesOnDNA, tracksArchive, source,
 					dnaSegment);
@@ -392,7 +420,7 @@ Initializable, Previewable
 	
 	private ArrayList<SingleMolecule> findMoleculesOnDna(
 		RadiusNeighborSearchOnKDTree<MoleculePosition> archivePositionSearcher,
-		SingleMoleculeArchive archive, DNASegment dnaSegment)
+		SingleMoleculeArchive tracksArchive, DNASegment dnaSegment)
 	{
 		ArrayList<SingleMolecule> moleculesLocated =
 			new ArrayList<SingleMolecule>();
@@ -443,9 +471,9 @@ Initializable, Previewable
 			}
 
 			// other conditions
-
+			System.out.println(distance + " < " + radius);
 			if (distance < radius) {
-				moleculesLocated.add(archive.get(moleculePosition.getUID()));
+				moleculesLocated.add(tracksArchive.get(moleculePosition.getUID()));
 			}
 		}
 
