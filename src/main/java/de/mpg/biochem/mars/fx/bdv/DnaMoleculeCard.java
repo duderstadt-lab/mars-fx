@@ -58,7 +58,7 @@ import org.scijava.plugin.SciJavaPlugin;
 
 import bdv.util.BdvOverlay;
 import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
-import de.mpg.biochem.mars.fx.bdv.commands.MarsPeakTrackerBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAPeakTrackerBdvCommand;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -142,7 +142,7 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			public void actionPerformed(ActionEvent e) {
 				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
 				backgroundThread.submit(() -> {
-					MarsPeakTrackerBdvCommand peakTrackerCommand = new MarsPeakTrackerBdvCommand();
+					MarsDNAPeakTrackerBdvCommand peakTrackerCommand = new MarsDNAPeakTrackerBdvCommand();
 					peakTrackerCommand.setContext(context);
 					
 					//We set these directly to avoid pre and post processors from running

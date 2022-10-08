@@ -6,14 +6,19 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import net.imagej.ops.Initializable;
 import net.imagej.ops.OpService;
 import net.imglib2.Interval;
+import net.imglib2.KDTree;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.RealLocalizable;
+import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.roi.IterableRegion;
@@ -27,6 +32,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
@@ -36,6 +42,7 @@ import org.scijava.log.LogService;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
+import org.scijava.table.DoubleColumn;
 import org.scijava.ui.UIService;
 import org.scijava.widget.Button;
 import org.scijava.widget.NumberWidget;
@@ -48,6 +55,7 @@ import bdv.util.BdvOverlay;
 import bdv.util.BdvOverlaySource;
 import bdv.viewer.Source;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.image.DNASegment;
 import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.image.Peak;
 import de.mpg.biochem.mars.image.PeakTracker;
@@ -56,10 +64,13 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.SingleMolecule;
+import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
+import de.mpg.biochem.mars.table.MarsTable;
 import ij.gui.Roi;
 
 @Plugin(type = Command.class, label = "Bdv Peak Tracker")
-public class MarsPeakTrackerBdvCommand extends InteractiveCommand implements Command,
+public class MarsDNAPeakTrackerBdvCommand extends InteractiveCommand implements Command,
 Initializable, Previewable
 {
 
@@ -101,9 +112,9 @@ Initializable, Previewable
 		style = "group:Input", persist = false)
 	private String source = "";
 		
-	@Parameter(visibility = ItemVisibility.MESSAGE,
-		style = "group:Input, align:center", persist = false)
-	private String region = "";
+	//@Parameter(visibility = ItemVisibility.MESSAGE,
+	//	style = "group:Input, align:center", persist = false)
+	//private String region = "";
 		
 	@Parameter(label = "Select region", style = "group:Input, align:center",
 		description = "Select region to search for DNAs",
@@ -180,19 +191,19 @@ Initializable, Previewable
 	@Parameter(visibility = ItemVisibility.MESSAGE, style = "groupLabel")
 	private String outputGroup = "Output";
 	
-	@Parameter(label = "Pixel length", style = "group:Output")
-	private double pixelLength = 1;
-	
-	@Parameter(label = "Pixel units", style = "group:Output", choices = { "pixel",
-		"µm", "nm" })
-	private String pixelUnits = "pixel";
-	
 	@Parameter(visibility = ItemVisibility.MESSAGE, style = "group:Output")
 	private final String excludeTitle =
 		"List of time points to exclude (T0, T1-T2, ...)";
 	
 	@Parameter(label = "Exclude", style = "group:Output", required = false)
 	private String excludeTimePointList = "";
+	
+	@Parameter(label = "DNA length in bps", style = "group:Search Parameters")
+	private int DNALength = 21236;
+	
+	@Parameter(label = "Search radius around DNA",
+			style = "group:Search Parameters")
+		private double radius;
 	
 	/**
 	 * Global Settings
@@ -209,13 +220,6 @@ Initializable, Previewable
 	
 	//@Parameter(label = "Timeout (s)", style = "group:Preview")
 	//private int previewTimeout = 10;
-	
-	/**
-	 * Map from T to label peak lists
-	 */
-	private List<ConcurrentMap<Integer, List<Peak>>> peakLabelsStack;
-	
-	private PeakTracker tracker;
 	
 	private Interval interval;
 	private PeakPreviewOverlay previewOverlay;
@@ -244,30 +248,6 @@ Initializable, Previewable
 	
 	protected void addTracksToArchive() {
 		if (archive != null) {
-			archive.getWindow().lock();
-			
-			/*
-			for (DNASegment segment : segments) {
-				//Build table with timepoint index
-				MarsTable table = new MarsTable("table");
-				DoubleColumn col = new DoubleColumn("T");
-				for (double t=0; t<marsBdvFrame.getNumberTimePoints(); t++) col.add(t);
-				table.add(col);
-				
-				//Build molecule record with DNA location
-				Molecule molecule = archive.createMolecule(MarsMath.getUUID58(), table);
-				molecule.setMetadataUID(marsBdvFrame.getMetadataUID());
-				molecule.setImage(archive.getMetadata(marsBdvFrame.getMetadataUID()).getImage(0).getImageID());
-				molecule.setParameter("Dna_Top_X1", segment.getX1());
-				molecule.setParameter("Dna_Top_Y1", segment.getY1());
-				molecule.setParameter("Dna_Bottom_X2", segment.getX2());
-				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
-				//add to archive
-				archive.put(molecule);
-				logService.info("Added DnaMolecule record " + molecule.getUID());
-			}
-			*/
-			
 			List<int[]> excludeTimePoints = new ArrayList<int[]>();
 			if (excludeTimePointList.length() > 0) {
 				try {
@@ -287,12 +267,16 @@ Initializable, Previewable
 					excludeTimePoints = new ArrayList<int[]>();
 				}
 			}
+			
+			long[] dims = marsBdvFrame.getSourceDimensions(source);
 		
-			int frameCount = 100;
+			long timepoints = dims[dims.length - 1];
+			
+			ConcurrentMap<Integer, List<Peak>> peaks = new ConcurrentHashMap<Integer, List<Peak>>();
 			
 			List<Integer> processTimePoints = new ArrayList<Integer>();
 			List<Runnable> tasks = new ArrayList<Runnable>();
-			for (int t = 0; t < frameCount; t++) {
+			for (int t = 0; t < timepoints; t++) {
 				boolean processedTimePoint = true;
 				for (int index = 0; index < excludeTimePoints.size(); index++)
 					if (excludeTimePoints.get(index)[0] <= t && t <= excludeTimePoints.get(
@@ -301,15 +285,171 @@ Initializable, Previewable
 						processedTimePoint = false;
 						break;
 					}
-		
-				
+
+				if (processedTimePoint) {
+					processTimePoints.add(t);
+					final int theT = t;
+					tasks.add(() -> peaks.put(theT, findPeaksInT(theT, useDogFilter, integrate)));
+				}
+			}
+			
+			try {
+				ExecutorService threadPool = Executors.newFixedThreadPool(1);
+				tasks.forEach(task -> threadPool.submit(task));
+				threadPool.shutdown();
+				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+			}
+			catch (InterruptedException exc) {
+				// TODO Auto-generated catch block
+				exc.printStackTrace();
+			}
+
+			PeakTracker tracker = new PeakTracker(maxDifferenceX, maxDifferenceY, maxDifferenceT,
+				minimumDistance, minTrajectoryLength, true, logService, 1);
+			
+			//Need to make a temporary SingleMoleculeArchive for the tracking results
+			SingleMoleculeArchive tracksArchive = new SingleMoleculeArchive("tracking results container");
+			tracksArchive.putMetadata(tracksArchive.createMetadata("null"));
+			tracker.track(peaks, tracksArchive, 0, processTimePoints, 1);
+			
+			MarsTable mergedTable = new MarsTable();
+			RadiusNeighborSearchOnKDTree<MoleculePosition> archive1PositionSearcher = getMoleculeSearcher(tracksArchive);
+			Molecule dnaMolecule = marsBdvFrame.getSelectedMolecule();
+			
+			DNASegment dnaSegment = new DNASegment(dnaMolecule.getParameter("Dna_Top_X1"), dnaMolecule.getParameter("Dna_Top_Y1"),
+																						 dnaMolecule.getParameter("Dna_Bottom_X2"), dnaMolecule.getParameter("Dna_Bottom_Y2"));
+			
+			ArrayList<SingleMolecule> moleculesOnDNA = findMoleculesOnDna(
+				archive1PositionSearcher, tracksArchive, dnaSegment);
+			if (moleculesOnDNA.size() != 0) {
+				addToMergedTable(mergedTable, moleculesOnDNA, tracksArchive, source,
+					dnaSegment);
 			}
 		
-			tracker = new PeakTracker(maxDifferenceX, maxDifferenceY, maxDifferenceT,
-				minimumDistance, minTrajectoryLength, true, logService, pixelLength);
+			archive.getWindow().lock();
+			
+			dnaMolecule.setParameter("Number_" + source, moleculesOnDNA.size());
+			dnaMolecule.setTable(mergedTable);
+			//The molecule is already in the archive but this updates indexes and could work in virtual mode.
+			archive.put(dnaMolecule);
 			
 			archive.getWindow().unlock();
 		}
+	}
+	
+	private void addToMergedTable(MarsTable mergedTable,
+		ArrayList<SingleMolecule> moleculesOnDNA, SingleMoleculeArchive archive,
+		String name, DNASegment dnaSegment)
+	{
+		int index = 1;
+		for (SingleMolecule molecule : moleculesOnDNA) {
+			MarsTable table = molecule.getTable().clone();
+
+			// We need to make sure to fill the table with Double.NaN values
+			// this will over write the scijava default value of 0.0.
+			if (!mergedTable.isEmpty() && mergedTable.getRowCount() < table
+				.getRowCount())
+			{
+				for (int row = mergedTable.getRowCount(); row < table
+					.getRowCount(); row++)
+				{
+					mergedTable.appendRow();
+					for (int col = 0; col < mergedTable.getColumnCount(); col++)
+						mergedTable.setValue(col, row, Double.NaN);
+				}
+			}
+			else if (!mergedTable.isEmpty() && mergedTable.getRowCount() > table
+				.getRowCount())
+			{
+				for (int row = table.getRowCount(); row < mergedTable
+					.getRowCount(); row++)
+				{
+					table.appendRow();
+					for (int col = 0; col < table.getColumnCount(); col++)
+						table.setValue(col, row, Double.NaN);
+				}
+			}
+
+			// Distance from the DNA top END
+			DoubleColumn dnaPositionColumn = new DoubleColumn(name + "_" + index +
+				"_Position_on_DNA");
+			for (int row = 0; row < table.getRowCount(); row++) {
+				dnaPositionColumn.add(dnaSegment.getPositionOnDNA(table.getValue(
+					Peak.X, row), table.getValue(Peak.Y, row), DNALength));
+			}
+
+			for (int col = 0; col < table.getColumnCount(); col++) {
+				table.get(col).setHeader(name + "_" + index + "_" + table.get(col)
+					.getHeader());
+				mergedTable.add(table.get(col));
+			}
+
+			mergedTable.add(dnaPositionColumn);
+
+			index++;
+		}
+	}
+	
+	private ArrayList<SingleMolecule> findMoleculesOnDna(
+		RadiusNeighborSearchOnKDTree<MoleculePosition> archivePositionSearcher,
+		SingleMoleculeArchive archive, DNASegment dnaSegment)
+	{
+		ArrayList<SingleMolecule> moleculesLocated =
+			new ArrayList<SingleMolecule>();
+
+		archivePositionSearcher.search(dnaSegment, radius + dnaSegment.getLength() / 2,
+			false);
+
+		// build DNA fit
+		double x1 = dnaSegment.getX1();
+		double y1 = dnaSegment.getY1();
+
+		double x2 = dnaSegment.getX2();
+		double y2 = dnaSegment.getY2();
+
+		for (int j = 0; j < archivePositionSearcher.numNeighbors(); j++) {
+			MoleculePosition moleculePosition = archivePositionSearcher.getSampler(j)
+				.get();
+
+			double distance;
+
+			// Before we add the the molecules we need to constrain positions to just
+			// within radius of DNA....
+			if (moleculePosition.getY() < y1) {
+				// the molecules is above the DNA
+				distance = Math.sqrt((moleculePosition.getX() - x1) * (moleculePosition
+					.getX() - x1) + (moleculePosition.getY() - y1) * (moleculePosition
+						.getY() - y1));
+			}
+			else if (moleculePosition.getY() > y2) {
+				distance = Math.sqrt((moleculePosition.getX() - x2) * (moleculePosition
+					.getX() - x2) + (moleculePosition.getY() - y2) * (moleculePosition
+						.getY() - y2));
+			}
+			else {
+				// find the x center position of the DNA for the molecule y position.
+
+				// If there is no intercept just take top x1.
+				double DNAx;
+				if (x1 == x2) DNAx = x1;
+				else {
+					SimpleRegression linearFit = new SimpleRegression(true);
+					linearFit.addData(x1, y1);
+					linearFit.addData(x2, y2);
+					DNAx = (moleculePosition.getY() - linearFit.getIntercept()) / linearFit.getSlope();
+				}
+
+				distance = Math.abs(moleculePosition.getX() - DNAx);
+			}
+
+			// other conditions
+
+			if (distance < radius) {
+				moleculesLocated.add(archive.get(moleculePosition.getUID()));
+			}
+		}
+
+		return moleculesLocated;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -317,7 +457,7 @@ Initializable, Previewable
 		int t, boolean useDogFilter, boolean integrate)
 	{
 		Source<T> bdvSource = marsBdvFrame.getSource(source);
-		
+
 		//Remove the Z dimension
 		RandomAccessibleInterval<T> img = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
 		
@@ -326,16 +466,7 @@ Initializable, Previewable
 		final AffineTransform3D bdvSourceTransform = new AffineTransform3D();
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 		
-		double[] minInterval = new double[] {interval.min(0), interval.min(1), 0};
-		double[] transformedMinInterval = new double[3];
-		bdvSourceTransform.applyInverse(transformedMinInterval, minInterval);
-		
-		double[] maxInterval = new double[] {interval.max(0), interval.max(1), 0};
-		double[] transformedMaxInterval = new double[3];
-		bdvSourceTransform.applyInverse(transformedMaxInterval, maxInterval);
-		
-		Interval transformedInterval = Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
-																											     (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
+		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
 
 		RandomAccessibleInterval<FloatType> filteredImg = null;
 		if (useDogFilter) filteredImg = MarsImageUtils.dogFilter(img,
@@ -372,6 +503,19 @@ Initializable, Previewable
 		return peaks;
 	}
 	
+	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
+		double[] minInterval = new double[] {inter.min(0), inter.min(1), 0};
+		double[] transformedMinInterval = new double[3];
+		transform.applyInverse(transformedMinInterval, minInterval);
+		
+		double[] maxInterval = new double[] {inter.max(0), inter.max(1), 0};
+		double[] transformedMaxInterval = new double[3];
+		transform.applyInverse(transformedMaxInterval, maxInterval);
+		
+		return Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
+																	 (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
+	}
+	
 	@Override
 	public void preview() {
 		if (preview) {
@@ -395,7 +539,7 @@ Initializable, Previewable
 	protected void previewChanged() {
 		if (!preview) cancel();
 	}
-	
+
 	protected void setSelectionRegion() {
 		final Interval viewInterval = marsBdvFrame.currentViewImageCoordinates();
 		long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
@@ -409,9 +553,8 @@ Initializable, Previewable
 		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
 		final Interval initialInterval = Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
 																	                           (long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
-		
-		//TODO make sure the currently selected Metadata is the one whose size is retrieved in the future.. This assumes all metadata records would be for images of similar sizes...
-		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(0).getImage(0).getSizeX(), archive.getMetadata(0).getImage(0).getSizeY(), 0 );
+		MarsMetadata metadata = archive.getMetadata(marsBdvFrame.getMetadataUID());
+		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, metadata.getImage(0).getSizeX(), metadata.getImage(0).getSizeY(), 0 );
 		backgroundThread.submit(() -> {
 			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
 				  marsBdvFrame.getBdvHandle(),
@@ -425,6 +568,22 @@ Initializable, Previewable
 			}
 		});
 		backgroundThread.shutdown();
+	}
+	
+	private RadiusNeighborSearchOnKDTree<MoleculePosition> getMoleculeSearcher(
+		SingleMoleculeArchive archive)
+	{
+		ArrayList<MoleculePosition> moleculePositionList =
+			new ArrayList<MoleculePosition>();
+
+		archive.molecules().forEach(molecule -> moleculePositionList.add(
+			new MoleculePosition(molecule.getUID(), molecule.getTable().median(
+				Peak.X), molecule.getTable().median(Peak.Y))));
+
+		KDTree<MoleculePosition> moleculesTree = new KDTree<MoleculePosition>(
+			moleculePositionList, moleculePositionList);
+
+		return new RadiusNeighborSearchOnKDTree<MoleculePosition>(moleculesTree);
 	}
 	
 	public class PeakPreviewOverlay extends BdvOverlay {
@@ -610,28 +769,83 @@ Initializable, Previewable
 		return integrationOuterRadius;
 	}
 	
-	public void setPixelLength(double pixelLength) {
-		this.pixelLength = pixelLength;
-	}
-	
-	public double getPixelLength() {
-		return this.pixelLength;
-	}
-	
-	public void setPixelUnits(String pixelUnits) {
-		this.pixelUnits = pixelUnits;
-	}
-	
-	public String getPixelUnits() {
-		return this.pixelUnits;
-	}
-	
 	public void setExcludedTimePointsList(String excludeTimePointList) {
 		this.excludeTimePointList = excludeTimePointList;
 	}
 	
 	public String getExcludedTimePointsList() {
 		return this.excludeTimePointList;
+	}
+	
+	class MoleculePosition implements RealLocalizable {
+
+		private String UID;
+
+		private double x, y;
+
+		public MoleculePosition(String UID, double x, double y) {
+			this.UID = UID;
+			this.x = x;
+			this.y = y;
+		}
+
+		public String getUID() {
+			return UID;
+		}
+
+		public double getX() {
+			return x;
+		}
+
+		public double getY() {
+			return y;
+		}
+
+		// Override from RealLocalizable interface.. so peaks can be passed to
+		// KDTree and other imglib2 functions.
+		@Override
+		public int numDimensions() {
+			// We make no effort to think beyond 2 dimensions !
+			return 2;
+		}
+
+		@Override
+		public double getDoublePosition(int arg0) {
+			if (arg0 == 0) {
+				return x;
+			}
+			else if (arg0 == 1) {
+				return y;
+			}
+			else {
+				return -1;
+			}
+		}
+
+		@Override
+		public float getFloatPosition(int arg0) {
+			if (arg0 == 0) {
+				return (float) x;
+			}
+			else if (arg0 == 1) {
+				return (float) y;
+			}
+			else {
+				return -1;
+			}
+		}
+
+		@Override
+		public void localize(float[] arg0) {
+			arg0[0] = (float) x;
+			arg0[1] = (float) y;
+		}
+
+		@Override
+		public void localize(double[] arg0) {
+			arg0[0] = x;
+			arg0[1] = y;
+		}
 	}
 }
 

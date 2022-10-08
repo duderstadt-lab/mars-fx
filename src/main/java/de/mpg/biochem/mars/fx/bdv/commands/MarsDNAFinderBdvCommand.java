@@ -284,18 +284,36 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		dnaFinder.setFit(fit);
 		dnaFinder.setFitSecondOrder(fitSecondOrder);
 		dnaFinder.setFitRadius(fitRadius);
+		
+		final AffineTransform3D bdvSourceTransform = new AffineTransform3D();
+		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
+		
+		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
 
 		List<IterableRegion<BoolType>> regionList =
 			new ArrayList<IterableRegion<BoolType>>();
 		//TODO This is really ugly... There should be a method that just accepts the interval directly in addition to the RealMask option...
-		RealMask roiMask = convertService.convert(new Roi(new Rectangle((int) interval.min(0), (int) interval.min(1), 
-											(int)(interval.max(0) - interval.min(0)), (int)(interval.max(1) - interval.min(1)))), RealMask.class);
+		RealMask roiMask = convertService.convert(new Roi(new Rectangle((int) transformedInterval.min(0), (int) transformedInterval.min(1), 
+											(int)(transformedInterval.max(0) - transformedInterval.min(0)), (int)(transformedInterval.max(1) - transformedInterval.min(1)))), RealMask.class);
 		 
 		IterableRegion<BoolType> iterableROI = MarsImageUtils.toIterableRegion(
 			roiMask, img);
 		regionList.add(iterableROI);
 		
 		return dnaFinder.findDNAs(img, regionList, t, 1);
+	}
+	
+	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
+		double[] minInterval = new double[] {inter.min(0), inter.min(1), 0};
+		double[] transformedMinInterval = new double[3];
+		transform.applyInverse(transformedMinInterval, minInterval);
+		
+		double[] maxInterval = new double[] {inter.max(0), inter.max(1), 0};
+		double[] transformedMaxInterval = new double[3];
+		transform.applyInverse(transformedMaxInterval, maxInterval);
+		
+		return Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
+																	 (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
 	}
 
 	@Override
@@ -360,7 +378,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 				//Build table with timepoint index
 				MarsTable table = new MarsTable("table");
 				DoubleColumn col = new DoubleColumn("T");
-				for (double t=0; t<marsBdvFrame.getNumberTimePoints(); t++) col.add(t);
+				for (double t=0; t<marsBdvFrame.getMaximumTimePoints(); t++) col.add(t);
 				table.add(col);
 				
 				//Build molecule record with DNA location

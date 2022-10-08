@@ -147,6 +147,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 	protected Map<String, List<Source<T>>> bdvSources;
 	protected Map<String, List<Source<T>>> bdvSourcesForExport;
+	protected Map<String, Map<String, long[]>> bdvSourceDimensions;
 	protected Map<String, SourceDisplaySettings> displaySettings;
 	protected Map<String, N5Reader> n5Readers;
 	protected List<MarsBdvCard> cards;
@@ -196,6 +197,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		bdvSourcesForExport = new HashMap<String, List<Source<T>>>();
+		bdvSourceDimensions = new HashMap<String, Map<String, long[]>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		displaySettings = new HashMap<String, SourceDisplaySettings>();
 
@@ -254,6 +256,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		bdvSources = new HashMap<String, List<Source<T>>>();
 		bdvSourcesForExport = new HashMap<String, List<Source<T>>>();
+		bdvSourceDimensions = new HashMap<String, Map<String, long[]>>();
 		n5Readers = new HashMap<String, N5Reader>();
 		displaySettings = new HashMap<String, SourceDisplaySettings>();
 
@@ -601,7 +604,15 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		// channel.
 		// XYZCT should also be supported
 		int dims = wholeImage.numDimensions();
-
+		long[] dimensions = new long[dims];
+		wholeImage.dimensions(dimensions);
+		
+		if (!bdvSourceDimensions.containsKey(meta.getUID())) {
+			Map<String, long[]> dimensionsMap = new HashMap<String, long[]>();
+			bdvSourceDimensions.put(meta.getUID(), dimensionsMap);
+		}
+		bdvSourceDimensions.get(meta.getUID()).put(source.getName(), dimensions);
+		
 		@SuppressWarnings("rawtypes")
 		final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(
 			wholeImage, wholeImage.numDimensions() - 2, source.getChannel())
@@ -672,6 +683,14 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		// channel.
 		// XYZCT should also be supported
 		int dims = wholeImage.numDimensions();
+		long[] dimensions = new long[dims];
+		wholeImage.dimensions(dimensions);
+		
+		if (!bdvSourceDimensions.containsKey(meta.getUID())) {
+			Map<String, long[]> dimensionsMap = new HashMap<String, long[]>();
+			bdvSourceDimensions.put(meta.getUID(), dimensionsMap);
+		}
+		bdvSourceDimensions.get(meta.getUID()).put(source.getName(), dimensions);
 
 		@SuppressWarnings("rawtypes")
 		final RandomAccessibleInterval image = (dims > 3) ? Views.hyperSlice(
@@ -748,7 +767,23 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 				.size() > numTimePoints) numTimePoints = spimData
 					.getSequenceDescription().getTimePoints().size();
 			
-			return new SpimSource<T>(spimData, 0, source.getName());
+			Source<T> spimSource = new SpimSource<T>(spimData, 0, source.getName());
+			
+			//There must be a better way to get the dimensions from a spimSource...
+			RandomAccessibleInterval<T> img = spimSource.getSource(0, 0);
+			
+			int dims = img.numDimensions();
+			long[] dimensions = new long[dims + 1];
+			img.dimensions(dimensions);
+			dimensions[dimensions.length - 1] = spimData.getSequenceDescription().getTimePoints().size();
+			
+			if (!bdvSourceDimensions.containsKey(meta.getUID())) {
+				Map<String, long[]> dimensionsMap = new HashMap<String, long[]>();
+				bdvSourceDimensions.put(meta.getUID(), dimensionsMap);
+			}
+			bdvSourceDimensions.get(meta.getUID()).put(source.getName(), dimensions);
+			
+			return spimSource;
 		}
 		catch (SpimDataException e) {
 			e.printStackTrace();
@@ -767,6 +802,10 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	public BdvHandle getBdvHandle() {
 		return bdv;
 	}
+	
+	public Molecule getSelectedMolecule() {
+		return molecule;
+	}
 
 	public List<String> getSourceNames() {
 		return bdvSources.get(metaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
@@ -776,7 +815,11 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		return bdvSources.get(metaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
 	}
 	
-	public int getNumberTimePoints() {
+	public long[] getSourceDimensions(String name) {
+		return bdvSourceDimensions.get(metaUID).get(name);
+	}
+	
+	public int getMaximumTimePoints() {
 		return numTimePoints;
 	}
 	
