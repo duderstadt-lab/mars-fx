@@ -3,13 +3,13 @@ package de.mpg.biochem.mars.fx.bdv.commands;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import net.imagej.ops.Initializable;
 import net.imagej.ops.OpService;
@@ -20,11 +20,7 @@ import net.imglib2.RealLocalizable;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.roi.IterableRegion;
-import net.imglib2.roi.RealMask;
-import net.imglib2.roi.Regions;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
@@ -67,7 +63,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.SingleMolecule;
 import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
 import de.mpg.biochem.mars.table.MarsTable;
-import ij.gui.Roi;
 
 @Plugin(type = Command.class, label = "Bdv Peak Tracker")
 public class MarsDNAPeakTrackerBdvCommand extends InteractiveCommand implements Command,
@@ -275,7 +270,7 @@ Initializable, Previewable
 			ConcurrentMap<Integer, List<Peak>> peaks = new ConcurrentHashMap<Integer, List<Peak>>();
 			
 			List<Integer> processTimePoints = new ArrayList<Integer>();
-			//List<Runnable> tasks = new ArrayList<Runnable>();
+			List<Runnable> tasks = new ArrayList<Runnable>();
 			for (int t = 0; t < timepoints; t++) {
 				boolean processedTimePoint = true;
 				for (int index = 0; index < excludeTimePoints.size(); index++)
@@ -290,29 +285,13 @@ Initializable, Previewable
 					List<Peak> peaksInT = findPeaksInT(t, useDogFilter, integrate);
 					if (peaksInT.size() > 0) {
 						processTimePoints.add(t);
-						peaks.put(t, peaksInT);
+						final int theT = t;
+						
+						tasks.add(() -> peaks.put(theT, peaksInT));
 					}
 				}
 			}
-			
-			/*		
-			processTimePoints.stream().forEach(
-				t -> {
-					// Remember this operation will change the order of the peaks in the
-					// Arraylists but that should not be a problem here...
 
-					// If you have a very small ROI and there are fames with no actual
-					// peaks in them.
-					// you need to skip that T.
-					if (peaks.containsKey(t))
-					{
-						KDTree<Peak> tree = new KDTree<Peak>(peakStack.get(t), peakStack
-							.get(t));
-						KDTreeStack.put(trackingTimePoints.indexOf(t), tree);
-					}
-				});
-			
-		
 			try {
 				ExecutorService threadPool = Executors.newFixedThreadPool(1);
 				tasks.forEach(task -> threadPool.submit(task));
@@ -320,10 +299,8 @@ Initializable, Previewable
 				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
 			}
 			catch (InterruptedException exc) {
-				// TODO Auto-generated catch block
 				exc.printStackTrace();
 			}
-*/
 			
 			PeakTracker tracker = new PeakTracker(maxDifferenceX, maxDifferenceY, maxDifferenceT,
 				minimumDistance, minTrajectoryLength, true, logService, 1);
@@ -471,7 +448,6 @@ Initializable, Previewable
 			}
 
 			// other conditions
-			System.out.println(distance + " < " + radius);
 			if (distance < radius) {
 				moleculesLocated.add(tracksArchive.get(moleculePosition.getUID()));
 			}
@@ -495,28 +471,20 @@ Initializable, Previewable
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 		
 		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
+		RandomAccessibleInterval<T> imgView = Views.interval(img, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1))); 
+		
+		RandomAccessibleInterval<FloatType> filteredImg = (useDogFilter) ? MarsImageUtils.dogFilter(imgView, dogFilterRadius, 1) : null;
 
-		RandomAccessibleInterval<FloatType> filteredImg = null;
-		if (useDogFilter) filteredImg = MarsImageUtils.dogFilter(img,
-			dogFilterRadius, 1);
-	
 		List<Peak> peaks = new ArrayList<Peak>();
+		
+		if (useDogFilter) peaks = MarsImageUtils.findPeaks(filteredImg, filteredImg, t, threshold, minimumDistance, false);
+		else peaks = MarsImageUtils.findPeaks(imgView, imgView, t, threshold, minimumDistance, false);
 
-		RealMask roiMask = convertService.convert(new Roi(new Rectangle((int) transformedInterval.min(0), (int) transformedInterval.min(1), 
-			(int)(transformedInterval.max(0) - transformedInterval.min(0)), (int)(transformedInterval.max(1) - transformedInterval.min(1)))), RealMask.class);
-		IterableRegion<BoolType> iterableROI = MarsImageUtils.toIterableRegion(
-			roiMask, img);
-
-		if (useDogFilter) peaks = MarsImageUtils.findPeaks(filteredImg, Regions
-			.sample(iterableROI, filteredImg), t, threshold, minimumDistance, false);
-		else peaks = MarsImageUtils.findPeaks(img, Regions.sample(iterableROI,
-			img), t, threshold, minimumDistance, false);
-
-		peaks = MarsImageUtils.fitPeaks(img, img, peaks, fitRadius,
+		peaks = MarsImageUtils.fitPeaks(imgView, imgView, peaks, fitRadius,
 			dogFilterRadius, false, RsquaredMin);
 		peaks = MarsImageUtils.removeNearestNeighbors(peaks, minimumDistance);
 
-		if (integrate) MarsImageUtils.integratePeaks(img, img, peaks,
+		if (integrate) MarsImageUtils.integratePeaks(imgView, imgView, peaks,
 			integrationInnerRadius, integrationOuterRadius);
 		
 		//Now we transform from the original image coordinates to the BDV view coordinates.
