@@ -32,8 +32,6 @@ package de.mpg.biochem.mars.fx.bdv.commands;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,10 +42,7 @@ import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
-import net.imglib2.roi.IterableRegion;
-import net.imglib2.roi.RealMask;
 import net.imglib2.type.NativeType;
-import net.imglib2.type.logic.BoolType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
@@ -76,7 +71,6 @@ import bdv.viewer.Source;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.image.DNAFinder;
 import de.mpg.biochem.mars.image.DNASegment;
-import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -84,7 +78,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsMath;
-import ij.gui.Roi;
 
 /**
  * Finds the location of vertically aligned DNA molecules within the specified
@@ -289,18 +282,26 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 		
 		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
-
-		List<IterableRegion<BoolType>> regionList =
-			new ArrayList<IterableRegion<BoolType>>();
-		//TODO This is really ugly... There should be a method that just accepts the interval directly in addition to the RealMask option...
-		RealMask roiMask = convertService.convert(new Roi(new Rectangle((int) transformedInterval.min(0), (int) transformedInterval.min(1), 
-											(int)(transformedInterval.max(0) - transformedInterval.min(0)), (int)(transformedInterval.max(1) - transformedInterval.min(1)))), RealMask.class);
-		 
-		IterableRegion<BoolType> iterableROI = MarsImageUtils.toIterableRegion(
-			roiMask, img);
-		regionList.add(iterableROI);
+		RandomAccessibleInterval<T> imgView = Views.interval(img, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1))); 
 		
-		return dnaFinder.findDNAs(img, regionList, t, 1);
+		List<DNASegment> dnas = dnaFinder.findDNAs(imgView, imgView, t, 1);
+		
+	  //Now we transform from the original image coordinates to the BDV view coordinates.
+		for (DNASegment dna : dnas) {
+			double[] source = new double[] { dna.getX1(), dna.getY1(), 0 };
+			double[] target = new double[3];
+			bdvSourceTransform.apply(source, target);
+			dna.setX1(target[0]);
+			dna.setY1(target[1]);
+			
+			source[0] = dna.getX2();
+			source[1] = dna.getY2();
+			bdvSourceTransform.apply(source, target);
+			dna.setX2(target[0]);
+			dna.setY2(target[1]);
+		}
+		
+		return dnas;
 	}
 	
 	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
