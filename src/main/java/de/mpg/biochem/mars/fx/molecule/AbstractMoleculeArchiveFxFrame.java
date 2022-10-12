@@ -642,6 +642,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					sync.run();
 
 					moleculesTab.setMarsBdvFrames(marsBdvFrames);
+					imageMetadataTab.setMarsBdvFrames(marsBdvFrames);
 				}
 			}
 		});
@@ -1557,6 +1558,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			}
 			sync.run();
 
+			if (imageMetadataTab.getSelectedMetadata() != null) imageMetadataTab
+				.setMarsBdvFrames(marsBdvFrames);
 			if (moleculesTab.getSelectedMolecule() != null) moleculesTab
 				.setMarsBdvFrames(marsBdvFrames);
 		});

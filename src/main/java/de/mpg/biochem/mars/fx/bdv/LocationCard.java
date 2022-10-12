@@ -43,10 +43,12 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
+import javax.swing.ButtonGroup;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import net.imagej.ops.Initializable;
@@ -72,14 +74,16 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 {
 
 	private JPanel panel;
+	private JRadioButton moleculeRoverSync, metadataRoverSync, noRoverSync;
+	private JLabel moleculeUID, metadataUID;
 	private JTextField magnificationField, radiusField;
-	private JCheckBox showCircle, showTrack, followTrack, showLabel, roverSync,
-			rainbowColor, showAll;
+	private JCheckBox showCircle, showTrack, followTrack, showLabel, rainbowColor, showAll;
 
 	private JComboBox<String> locationSource, tLocation, xLocation, yLocation;
 
 	private MoleculeLocationOverlay moleculeLocationOverlay;
 	private Molecule molecule;
+	private MarsMetadata metadataSelection;
 
 	private boolean active = false;
 
@@ -96,6 +100,32 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 	public void initialize() {
 		panel = new JPanel();
 		panel.setLayout(new GridLayout(0, 2));
+		
+		panel.add(new JLabel("Metadata"));
+		panel.add(new JLabel("Molecule"));
+		
+		metadataUID = new JLabel("");
+		panel.add(metadataUID);
+		
+		moleculeUID = new JLabel("");
+		panel.add(moleculeUID);
+		
+		ButtonGroup roverSyncGroup = new ButtonGroup();    
+		noRoverSync = new JRadioButton("none");
+		roverSyncGroup.add(noRoverSync);
+		moleculeRoverSync = new JRadioButton("molecules");
+		roverSyncGroup.add(moleculeRoverSync);
+		metadataRoverSync = new JRadioButton("metadata"); 
+		roverSyncGroup.add(metadataRoverSync);
+
+		noRoverSync.setSelected(true);
+		
+		panel.add(new JLabel("Rover Sync"));
+		panel.add(new JLabel(""));
+		panel.add(moleculeRoverSync);
+		panel.add(metadataRoverSync);
+		panel.add(noRoverSync);
+		panel.add(new JLabel(""));
 
 		Set<String> columnNames = archive.properties().getColumnSet();
 		Set<String> parameterNames = archive.properties().getParameterSet();
@@ -156,8 +186,6 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 		panel.add(followTrack);
 		showAll = new JCheckBox("all", false);
 		panel.add(showAll);
-		roverSync = new JCheckBox("rover sync", false);
-		panel.add(roverSync);
 		rainbowColor = new JCheckBox("rainbow", false);
 		panel.add(rainbowColor);
 		panel.add(new JPanel());
@@ -201,8 +229,12 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 		return showAll.isSelected();
 	}
 
-	public boolean roverSync() {
-		return roverSync.isSelected();
+	public boolean roverMoleculeSync() {
+		return moleculeRoverSync.isSelected();
+	}
+	
+	public boolean roverMetadataSync() {
+		return metadataRoverSync.isSelected();
 	}
 
 	public boolean rainbowColor() {
@@ -244,6 +276,28 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 	@Override
 	protected void createIOMaps() {
 
+		setJsonField("roverSyncMode", jGenerator -> {
+			String mode = "none";
+			if (metadataRoverSync.isSelected())
+				mode = "metadata";
+			else if(moleculeRoverSync.isSelected())
+				mode = "molecules";
+			
+			jGenerator.writeStringField("roverSyncMode", mode);
+		}, jParser -> {
+			if (jParser.getText().equals("metadata"))
+				metadataRoverSync.setSelected(true);
+			else if(jParser.getText().equals("molecules"))
+				moleculeRoverSync.setSelected(true);
+			else
+				noRoverSync.setSelected(true);
+		});
+
+		setJsonField("tLocation", jGenerator -> {
+			if (tLocation != null) jGenerator.writeStringField("tLocation",
+				(String) tLocation.getSelectedItem());
+		}, jParser -> tLocation.setSelectedItem(jParser.getText()));
+		
 		setJsonField("locationSource", jGenerator -> {
 			if (locationSource != null) jGenerator.writeStringField("locationSource",
 				(String) locationSource.getSelectedItem());
@@ -284,11 +338,6 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 				.isSelected());
 		}, jParser -> showLabel.setSelected(jParser.getBooleanValue()));
 
-		setJsonField("roverSync", jGenerator -> {
-			if (roverSync != null) jGenerator.writeBooleanField("roverSync", roverSync
-				.isSelected());
-		}, jParser -> roverSync.setSelected(jParser.getBooleanValue()));
-
 		setJsonField("rainbowColor", jGenerator -> {
 			if (rainbowColor != null) jGenerator.writeBooleanField("rainbowColor",
 				rainbowColor.isSelected());
@@ -309,11 +358,25 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 				radiusField.getText());
 		}, jParser -> radiusField.setText(jParser.getText()));
 
+		//Backwards compatibility...
+		setJsonField("roverSync", null, jParser -> moleculeRoverSync.setSelected(jParser.getBooleanValue()));
 	}
 
 	@Override
 	public void setMolecule(Molecule molecule) {
-		this.molecule = molecule;
+		if (roverMoleculeSync()) {
+			moleculeUID.setText(molecule.getUID());
+			metadataUID.setText(molecule.getMetadataUID());
+			this.molecule = molecule;
+		}
+	}
+	
+	public void setMetadata(MarsMetadata metadataSelection) {
+		if (roverMetadataSync()) {
+			moleculeUID.setText("");
+			metadataUID.setText(metadataSelection.getUID());
+			this.metadataSelection = metadataSelection;
+		}
 	}
 
 	@Override

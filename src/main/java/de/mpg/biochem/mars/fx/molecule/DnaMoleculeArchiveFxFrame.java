@@ -29,13 +29,13 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import com.fasterxml.jackson.core.JsonParser;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.scijava.Context;
-
-import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.bdv.DnaMoleculeCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
@@ -75,7 +75,7 @@ public class DnaMoleculeArchiveFxFrame extends
 		card.initialize();
 		cards.add(card);
 		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-			useVolatile, cards, context);
+			imageMetadataTab.getSelectedMetadata(), useVolatile, cards, context);
 	}
 
 	@Override
@@ -84,7 +84,7 @@ public class DnaMoleculeArchiveFxFrame extends
 	{
 		try {
 			return new MarsBdvFrame(jParser, archive, moleculesTab
-				.getSelectedMolecule(), useVolatile, context);
+				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(), useVolatile, context);
 		}
 		catch (IOException e) {
 			// have a nice error dialog show up to alert the user there is an issue.

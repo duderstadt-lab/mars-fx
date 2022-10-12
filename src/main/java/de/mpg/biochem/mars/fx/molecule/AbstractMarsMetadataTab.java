@@ -32,11 +32,14 @@ package de.mpg.biochem.mars.fx.molecule;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
@@ -83,6 +86,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		.observableArrayList();
 
 	protected FilteredList<MetaIndexRow> filteredData;
+	
+	protected MarsBdvFrame[] marsBdvFrames;
 
 	protected ChangeListener<MetaIndexRow> metaIndexTableListener;
 
@@ -199,6 +204,19 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 						new MetadataSelectionChangedEvent(marsMetadata));
 					metadataPropertiesPane.getNode().fireEvent(
 						new MetadataSelectionChangedEvent(marsMetadata));
+					if (marsBdvFrames != null) {
+						SwingUtilities.invokeLater(new Runnable() {
+
+							@Override
+							public void run() {
+								if (marsMetadata != null) for (int i =
+									0; i < marsBdvFrames.length; i++)
+									if (marsBdvFrames[i] != null) marsBdvFrames[i].setMetadata(
+										marsMetadata);
+							}
+						});
+					}
+					
 					Platform.runLater(() -> {
 						metaIndexTable.requestFocus();
 					});
@@ -302,6 +320,11 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	@Override
 	public ArrayList<Menu> getMenus() {
 		return new ArrayList<Menu>();
+	}
+	
+	@Override
+	public void setMarsBdvFrames(MarsBdvFrame[] marsBdvFrames) {
+		this.marsBdvFrames = marsBdvFrames;
 	}
 
 	@Override

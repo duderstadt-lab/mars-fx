@@ -29,6 +29,7 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 
@@ -43,4 +44,6 @@ public interface MarsMetadataTab<C extends MetadataSubPane, O extends MetadataSu
 	public void hideProperties();
 
 	public MarsMetadata getSelectedMetadata();
+	
+	public void setMarsBdvFrames(MarsBdvFrame[] marsBdvFrames);
 }

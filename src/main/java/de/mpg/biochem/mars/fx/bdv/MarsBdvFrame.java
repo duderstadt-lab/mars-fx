@@ -156,13 +156,13 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 	protected boolean windowStateLoaded = false;
 
-	protected String metaUID = "";
-
 	protected BdvHandlePanel bdv;
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
+	protected MarsMetadata metadataSelection;
 	protected Molecule molecule;
+	protected String activeMetaUID = "";
 
 	protected LocationCard locationCard;
 
@@ -170,14 +170,14 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 	public MarsBdvFrame(
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
-		Molecule molecule, boolean useVolatile, final Context context)
+		Molecule molecule, MarsMetadata metadataSelection, boolean useVolatile, final Context context)
 	{
-		this(archive, molecule, useVolatile, new ArrayList<MarsBdvCard>(), context);
+		this(archive, molecule, metadataSelection, useVolatile, new ArrayList<MarsBdvCard>(), context);
 	}
 
 	public MarsBdvFrame(
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
-		Molecule molecule, boolean useVolatile, List<MarsBdvCard> cards,
+		Molecule molecule, MarsMetadata metadataSelection, boolean useVolatile, List<MarsBdvCard> cards,
 		final Context context)
 	{
 		super();
@@ -185,6 +185,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		this.archive = archive;
 		this.molecule = molecule;
+		this.metadataSelection = metadataSelection;
 		this.useVolatile = useVolatile;
 		this.cards = cards;
 
@@ -231,19 +232,20 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		});
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		initializeMolecule();
+		initializeView();
 
 		frame.setVisible(true);
 	}
 
 	public MarsBdvFrame(JsonParser jParser,
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
-		Molecule molecule, boolean useVolatile, final Context context)
+		Molecule molecule, MarsMetadata metadataSelection, boolean useVolatile, final Context context)
 		throws IOException
 	{
 		context.inject(this);
 		this.archive = archive;
 		this.molecule = molecule;
+		this.metadataSelection = metadataSelection;
 		this.useVolatile = useVolatile;
 		this.cards = new ArrayList<MarsBdvCard>();
 
@@ -296,42 +298,55 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		});
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
-		initializeMolecule();
+		initializeView();
 
 		frame.setVisible(true);
 	}
 
-	public void initializeMolecule() {
-		if (molecule != null) {
-			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
-			metaUID = meta.getUID();
-			createView(meta);
-			applySourceDisplaySettings();
+	public void initializeView() {
+		MarsMetadata metadata;
+		if (locationCard.roverMoleculeSync() && molecule != null)
+			metadata = archive.getMetadata(molecule.getMetadataUID());
+		else if (locationCard.roverMetadataSync() &&  metadataSelection != null)
+			metadata = metadataSelection;
+		else if (metadataSelection != null)
+			metadata = metadataSelection;
+		else if (molecule != null) 
+			metadata = archive.getMetadata(molecule.getMetadataUID());
+		else 
+			return;
+		
+		createView(metadata);
+		applySourceDisplaySettings();
 
-			if (meta.getImage(0) != null && meta.getImage(0).getSizeX() != -1 && meta
-				.getImage(0).getSizeY() != -1) goTo(meta.getImage(0).getSizeX() / 2,
-					meta.getImage(0).getSizeY() / 2);
-			else goTo(0, 0);
-		}
-
-		setMolecule(molecule);
+		if (metadata.getImage(0) != null && metadata.getImage(0).getSizeX() != -1 && metadata
+			.getImage(0).getSizeY() != -1) goTo(metadata.getImage(0).getSizeX() / 2,
+				metadata.getImage(0).getSizeY() / 2);
+		else goTo(0, 0);
+		
+		if (locationCard.roverMoleculeSync() && molecule != null) setMolecule(molecule);
 	}
 
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
-		if (locationCard.roverSync()) {
+		if (locationCard.roverMoleculeSync()) {
 			updateView();
 			updateLocation();
+		}
+	}
+	
+	public void setMetadata(MarsMetadata metadataSelection) {
+		this.metadataSelection = metadataSelection;
+		if (locationCard.roverMetadataSync()) {
+			updateView();
 		}
 	}
 
 	public void updateView() {
 		saveSourceDisplaySettings();
-		if (molecule != null) {
-			MarsMetadata meta = archive.getMetadata(molecule.getMetadataUID());
-			if (!metaUID.equals(meta.getUID())) {
-				metaUID = meta.getUID();
-				createView(meta);
+		if (locationCard.roverMoleculeSync() && molecule != null) {
+			if (!activeMetaUID.equals(molecule.getMetadataUID())) {
+				createView(archive.getMetadata(molecule.getMetadataUID()));
 
 				// createView removes overlays.. this deactivates ensure they are
 				// readded below.
@@ -341,6 +356,32 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			}
 
 			locationCard.setMolecule(molecule);
+			if (locationCard.showLocationOverlay() && !locationCard.isActive()) {
+				BdvFunctions.showOverlay(locationCard.getBdvOverlay(), "Location", Bdv
+					.options().addTo(bdv));
+				locationCard.setActive(true);
+			}
+
+			for (MarsBdvCard card : cards) {
+				card.setMolecule(molecule);
+				if (!card.isActive()) {
+					BdvFunctions.showOverlay(card.getBdvOverlay(), card.getName(), Bdv
+						.options().addTo(bdv));
+					card.setActive(true);
+				}
+			}
+		} else if (locationCard.roverMetadataSync() && metadataSelection != null) {
+			if (!activeMetaUID.equals(metadataSelection.getUID())) {
+				createView(metadataSelection);
+
+				// createView removes overlays.. this deactivates ensure they are
+				// readded below.
+				locationCard.setActive(false);
+				for (MarsBdvCard card : cards)
+					card.setActive(false);
+			}
+
+			locationCard.setMetadata(metadataSelection);
 			if (locationCard.showLocationOverlay() && !locationCard.isActive()) {
 				BdvFunctions.showOverlay(locationCard.getBdvOverlay(), "Location", Bdv
 					.options().addTo(bdv));
@@ -391,6 +432,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	}
 
 	private void createView(MarsMetadata meta) {
+		activeMetaUID = meta.getUID();
 		if (!bdvSources.containsKey(meta.getUID())) {
 			try {
 				List<Source<T>> sources = new ArrayList<Source<T>>();
@@ -466,13 +508,13 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
 		
 		
-		final Interval initialInterval = (locationCard.roverSync() && !Double.isNaN(moleculeXCenter) && !Double.isNaN(moleculeYCenter)) ? 
+		final Interval initialInterval = (locationCard.roverMoleculeSync() && !Double.isNaN(moleculeXCenter) && !Double.isNaN(moleculeYCenter)) ? 
 					Intervals.createMinMax( (long) (moleculeXCenter - viewWidth*0.6/2), (long) (moleculeYCenter - viewHeight*0.6/2), 0, 
 																	(long) (moleculeXCenter + viewWidth*0.6/2), (long) (moleculeYCenter + viewHeight*0.6/2), 0) :
 					Intervals.createMinMax( (long) (viewInterval.min(0) + viewWidth*0.2 ), (long) (viewInterval.min(1) + viewHeight*0.2 ), 0, 
 																	(long) (viewInterval.min(0) + viewWidth*0.8 ), (long) (viewInterval.min(1) + viewHeight*0.8 ), 0);
 		
-		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(metaUID).getImage(0).getSizeX(), archive.getMetadata(metaUID).getImage(0).getSizeY(), 0 );
+		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(activeMetaUID).getImage(0).getSizeX(), archive.getMetadata(activeMetaUID).getImage(0).getSizeY(), 0 );
 		backgroundThread.submit(() -> {
 			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
 				  bdv,
@@ -489,9 +531,9 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	}
 
 	public void exportView(Interval interval, int minTimePoint, int maxTimePoint) {
-		int numSources = bdvSourcesForExport.get(metaUID).size();
+		int numSources = bdvSourcesForExport.get(activeMetaUID).size();
 
-		if (bdvSourcesForExport.get(metaUID).stream().map(source -> source.getType()
+		if (bdvSourcesForExport.get(activeMetaUID).stream().map(source -> source.getType()
 			.getClass()).distinct().count() > 1)
 		{
 			Platform.runLater(new Runnable() {
@@ -514,7 +556,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		for (int i = 0; i < numSources; i++) {
 			ArrayList<RandomAccessibleInterval<T>> raiList =
 				new ArrayList<RandomAccessibleInterval<T>>();
-			Source<T> bdvSource = bdvSourcesForExport.get(metaUID).get(i);
+			Source<T> bdvSource = bdvSourcesForExport.get(activeMetaUID).get(i);
 
 			for (int t = minTimePoint; t <= maxTimePoint; t++) {
 
@@ -808,15 +850,15 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	}
 
 	public List<String> getSourceNames() {
-		return bdvSourcesForExport.get(metaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
+		return bdvSourcesForExport.get(activeMetaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
 	}
 	
 	public Source<T> getSource(String name) {
-		return bdvSourcesForExport.get(metaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
+		return bdvSourcesForExport.get(activeMetaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
 	}
 	
 	public long[] getSourceDimensions(String name) {
-		return bdvSourceDimensions.get(metaUID).get(name);
+		return bdvSourceDimensions.get(activeMetaUID).get(name);
 	}
 	
 	public int getMaximumTimePoints() {
@@ -824,7 +866,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	}
 	
 	public String getMetadataUID() {
-		return metaUID;
+		return activeMetaUID;
 	}
 	
 	public void goTo(double x, double y) {

@@ -29,11 +29,11 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import com.fasterxml.jackson.core.JsonParser;
+
 import java.io.IOException;
 
 import org.scijava.Context;
-
-import com.fasterxml.jackson.core.JsonParser;
 
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -66,7 +66,7 @@ public class DefaultMoleculeArchiveFxFrame extends
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-			useVolatile, context);
+			imageMetadataTab.getSelectedMetadata(), useVolatile, context);
 	}
 
 	@Override
@@ -75,14 +75,14 @@ public class DefaultMoleculeArchiveFxFrame extends
 	{
 		try {
 			return new MarsBdvFrame(jParser, archive, moleculesTab
-				.getSelectedMolecule(), useVolatile, context);
+				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(), useVolatile, context);
 		}
 		catch (IOException e) {
 			// have a nice error dialog show up to alert the user there is an issue.
 
 			// Results frame with defaults
 			return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-				useVolatile, context);
+				imageMetadataTab.getSelectedMetadata(), useVolatile, context);
 		}
 	}
 
