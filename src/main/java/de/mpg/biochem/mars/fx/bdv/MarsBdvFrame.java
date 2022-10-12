@@ -157,6 +157,9 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	protected boolean windowStateLoaded = false;
 
 	protected BdvHandlePanel bdv;
+	
+	@Parameter
+	protected Context context;
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
@@ -216,9 +219,11 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			locationCard.getPanel(), true);
 
 		// Add custom cards
-		for (MarsBdvCard card : cards)
+		for (MarsBdvCard card : cards) {
+			card.setBdvFrame(this);
 			bdv.getBdvHandle().getCardPanel().addCard(card.getName(), card.getName(),
 				card.getPanel(), true);
+		}
 
 		frame.add(bdv.getSplitPanel(), BorderLayout.CENTER);
 

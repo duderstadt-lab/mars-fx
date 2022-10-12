@@ -72,6 +72,7 @@ public class ObjectArchiveFxFrame extends
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
 		ObjectCard card = new ObjectCard();
+		context.inject(card);
 		card.setArchive(archive);
 		card.initialize();
 		cards.add(card);

@@ -609,7 +609,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 			@Override
 			public void run() {
-				if (archive != null && moleculesTab.getSelectedMolecule() != null) {
+				if (archive != null) {
 					BdvHandle[] handles = new BdvHandle[views];
 					marsBdvFrames = new MarsBdvFrame[views];
 					for (int i = 0; i < views; i++) {

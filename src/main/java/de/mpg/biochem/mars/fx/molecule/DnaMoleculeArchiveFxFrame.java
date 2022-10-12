@@ -71,6 +71,7 @@ public class DnaMoleculeArchiveFxFrame extends
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
 		DnaMoleculeCard card = new DnaMoleculeCard();
+		context.inject(card);
 		card.setArchive(archive);
 		card.initialize();
 		cards.add(card);

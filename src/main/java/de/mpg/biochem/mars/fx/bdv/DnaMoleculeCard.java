@@ -117,14 +117,14 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			public void actionPerformed(ActionEvent e) {
 				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
 				backgroundThread.submit(() -> {
-					MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
-					dnaFinderCommand.setContext(context);
-					
-					//We set these directly to avoid pre and post processors from running
-					//we don't need that in this context
-					dnaFinderCommand.setMarsBdvFrame(marsBdvFrame);
-					dnaFinderCommand.setArchive(archive);
-					try {
+						MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
+						dnaFinderCommand.setContext(context);
+						
+						//We set these directly to avoid pre and post processors from running
+						//we don't need that in this context
+						dnaFinderCommand.setMarsBdvFrame(marsBdvFrame);
+						dnaFinderCommand.setArchive(archive);
+						try {
 						moduleService.run(dnaFinderCommand, true).get();
 					}
 					catch (InterruptedException | ExecutionException exc) {
