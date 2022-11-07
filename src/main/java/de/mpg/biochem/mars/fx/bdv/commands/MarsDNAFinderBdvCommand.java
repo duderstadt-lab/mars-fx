@@ -69,6 +69,7 @@ import bdv.util.BdvOverlay;
 import bdv.util.BdvOverlaySource;
 import bdv.viewer.Source;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
 import de.mpg.biochem.mars.image.DNAFinder;
 import de.mpg.biochem.mars.image.DNASegment;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -78,6 +79,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsMath;
+import javafx.application.Platform;
 
 /**
  * Finds the location of vertically aligned DNA molecules within the specified
@@ -375,6 +377,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	protected void createDNAmoleculeRecords() {
 		if (archive != null) {
 			archive.getWindow().lock();
+			String uid = "";
 			for (DNASegment segment : segments) {
 				//Build table with timepoint index
 				MarsTable table = new MarsTable("table");
@@ -390,12 +393,17 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 				molecule.setParameter("Dna_Top_Y1", segment.getY1());
 				molecule.setParameter("Dna_Bottom_X2", segment.getX2());
 				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
+				
+				molecule.addTag("Bdv DNA Finder");
+				molecule.setNotes("DnaMolecule created on " + new java.util.Date() + " by the MarsDNAFinderBdvCommand");
 				//add to archive
 				archive.put(molecule);
-				logService.info("Added DnaMolecule record " + molecule.getUID());
+				//should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());
+				uid = molecule.getUID();
 			}
 			archive.getWindow().unlock();
-			//((AbstractMoleculeArchiveFxFrame) archive.getWindow()).
+			final String lastUID = uid;
+			Platform.runLater(() -> ((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getMoleculesTab().setSelectedMolecule(lastUID));
 		}
 	}
 	

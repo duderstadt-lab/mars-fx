@@ -44,6 +44,10 @@ public interface MoleculesTab<C extends MoleculeSubPane, O extends MoleculeSubPa
 	public void hideProperties();
 
 	public Molecule getSelectedMolecule();
+	
+	public void setSelectedMolecule(String UID);
+	
+	public void setSelectedMolecule(Molecule molecule);
 
 	public void setMarsBdvFrames(MarsBdvFrame[] marsBdvFrames);
 }

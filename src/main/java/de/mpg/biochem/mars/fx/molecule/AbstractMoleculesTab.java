@@ -478,8 +478,24 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		if (molecule != null) archive.put(molecule);
 	}
 
+	@Override
 	public Molecule getSelectedMolecule() {
 		return molecule;
+	}
+	
+	@Override
+	public void setSelectedMolecule(String UID) {
+		for (int index = 0; index < filteredData.size(); index++) {
+			if (filteredData.get(index).getUID().equals(UID)) {
+				moleculeIndexTable.getSelectionModel().select(index);
+				moleculeIndexTable.scrollTo(index);
+			}
+		}
+	}
+	
+	@Override
+	public void setSelectedMolecule(Molecule molecule) {
+		setSelectedMolecule(molecule.getUID());
 	}
 
 	@Override

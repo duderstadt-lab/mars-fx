@@ -1160,8 +1160,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public abstract I createImageMetadataTab(final Context context);
+	
+	public I getMetadataTab() {
+		return imageMetadataTab;
+	}
 
 	public abstract M createMoleculesTab(final Context context);
+	
+	public M getMoleculesTab() {
+		return moleculesTab;
+	}
 
 	public abstract MarsBdvFrame createMarsBdvFrame(boolean useVolatile);
 
