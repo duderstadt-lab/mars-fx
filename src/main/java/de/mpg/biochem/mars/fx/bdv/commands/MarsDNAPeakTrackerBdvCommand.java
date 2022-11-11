@@ -66,6 +66,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.molecule.SingleMolecule;
 import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.LogBuilder;
 
 @Plugin(type = Command.class, label = "Bdv Peak Tracker")
 public class MarsDNAPeakTrackerBdvCommand extends InteractiveCommand implements Command,
@@ -338,11 +339,44 @@ Initializable, Previewable
 			
 			dnaMolecule.setParameter("Number_" + source, moleculesOnDNA.size());
 			dnaMolecule.setTable(mergedTable);
+			dnaMolecule.setNotes("Tracks added on " + new java.util.Date() + " by the MarsDNAPeakTrackerBdvCommand");
 			//The molecule is already in the archive but this updates indexes and could work in virtual mode.
 			archive.put(dnaMolecule);
 			
+			LogBuilder builder = new LogBuilder();
+			String log = LogBuilder.buildTitleBlock(getInfo().getLabel());
+			builder.addParameter("DnaMolecule UID", dnaMolecule.getUID());
+			builder.addParameter("Tracks added", moleculesOnDNA.size());
+			addInputParameterLog(builder);
+			log += builder.buildParameterList();
+			log += "\n" + LogBuilder.endBlock();
+			archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(log);
+			
 			archive.getWindow().unlock();
 		}
+	}
+	
+	private void addInputParameterLog(LogBuilder builder) {
+		builder.addParameter("Metadata UID", marsBdvFrame.getMetadataUID());
+		builder.addParameter("Region", "(" + interval.min(0) + ", " + interval.min(1) + ") to (" + interval.max(0) + ", " + interval.max(1) + ")");
+		builder.addParameter("Source", source);
+		builder.addParameter("Use DoG filter", String.valueOf(useDogFilter));
+		builder.addParameter("DoG filter radius", String.valueOf(dogFilterRadius));
+		builder.addParameter("Threshold", String.valueOf(threshold));
+		builder.addParameter("Minimum distance", String.valueOf(minimumDistance));
+		builder.addParameter("Fit radius", String.valueOf(fitRadius));
+		builder.addParameter("Minimum R-squared", String.valueOf(RsquaredMin));
+		builder.addParameter("Max difference X", String.valueOf(maxDifferenceX));
+		builder.addParameter("Max difference Y", String.valueOf(maxDifferenceY));
+		builder.addParameter("Max difference T", String.valueOf(maxDifferenceT));
+		builder.addParameter("Minimum track length", String.valueOf(
+			minTrajectoryLength));
+		builder.addParameter("Integrate", String.valueOf(integrate));
+		builder.addParameter("Integration inner radius", String.valueOf(
+			integrationInnerRadius));
+		builder.addParameter("Integration outer radius", String.valueOf(
+			integrationOuterRadius));
+		builder.addParameter("Exclude time points", excludeTimePointList);
 	}
 	
 	private void addToMergedTable(MarsTable mergedTable,
