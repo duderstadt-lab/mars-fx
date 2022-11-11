@@ -33,6 +33,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Window;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -81,6 +82,7 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.LogBuilder;
 import de.mpg.biochem.mars.util.MarsMath;
 import javafx.application.Platform;
 
@@ -396,7 +398,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		saveInputs();
 		if (archive != null) {
 			archive.getWindow().lock();
-			String uid = "";
+			List<String> uids = new ArrayList<>();
 			for (DNASegment segment : segments) {
 				//Build table with timepoint index
 				MarsTable table = new MarsTable("table");
@@ -418,12 +420,54 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 				//add to archive
 				archive.put(molecule);
 				//should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());
-				uid = molecule.getUID();
+				uids.add(molecule.getUID());
 			}
+			
+			LogBuilder builder = new LogBuilder();
+			String log = LogBuilder.buildTitleBlock(getInfo().getLabel());
+			
+			String uidList = uids.get(0);
+			for (int i=1; i<uids.size(); i++)
+				uidList = uidList + ", " + uids.get(i);
+			
+			builder.addParameter("Created DnaMolecules", uidList);
+			addInputParameterLog(builder);
+			log += builder.buildParameterList();
+			log += "\n" + LogBuilder.endBlock();
+			archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(log);
+			
 			archive.getWindow().unlock();
-			final String lastUID = uid;
+			final String lastUID = uids.get(uids.size() - 1);
 			Platform.runLater(() -> ((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getMoleculesTab().setSelectedMolecule(lastUID));
 		}
+	}
+	
+	private void addInputParameterLog(LogBuilder builder) {
+		builder.addParameter("Metadata UID", marsBdvFrame.getMetadataUID());
+		builder.addParameter("Region", "(" + interval.min(0) + ", " + interval.min(1) + ") to (" + interval.max(0) + ", " + interval.max(1) + ")");
+		builder.addParameter("Source", source);
+		builder.addParameter("Gaussian smoothing sigma", String.valueOf(
+			this.gaussSigma));
+		builder.addParameter("DoG filter", String.valueOf(useDogFilter));
+		builder.addParameter("DoG radius", String.valueOf(dogFilterRadius));
+		builder.addParameter("Threshold", String.valueOf(threshold));
+		builder.addParameter("Minimum distance", String.valueOf(minimumDistance));
+		builder.addParameter("Optimal DNA length", String.valueOf(
+			optimalDNALength));
+		builder.addParameter("DNA end search radius Y", String.valueOf(
+			yDNAEndSearchRadius));
+		builder.addParameter("DNA end search radius X", String.valueOf(
+			xDNAEndSearchRadius));
+		builder.addParameter("Filter by median intensity", String.valueOf(
+			medianIntensityFilter));
+		builder.addParameter("Median intensity lower bound", String.valueOf(
+			medianIntensityLowerBound));
+		builder.addParameter("Filter by variance", String.valueOf(varianceFilter));
+		builder.addParameter("Intensity variance upper bound", String.valueOf(
+			varianceUpperBound));
+		builder.addParameter("Fit peaks", String.valueOf(fit));
+		builder.addParameter("Fit radius", String.valueOf(fitRadius));
+		builder.addParameter("Fit 2nd order", String.valueOf(fitSecondOrder));
 	}
 	
 	public class DnaMoleculePreviewOverlay extends BdvOverlay {
