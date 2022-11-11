@@ -51,10 +51,10 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
-import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
+import org.scijava.Initializable;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -188,13 +188,12 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 		panel.add(showAll);
 		rainbowColor = new JCheckBox("rainbow", false);
 		panel.add(rainbowColor);
-		panel.add(new JPanel());
 
 		panel.add(new JLabel("Radius"));
 
 		radiusField = new JTextField(6);
 		radiusField.setText("5");
-		Dimension dimScaleField = new Dimension(100, 20);
+		Dimension dimScaleField = new Dimension(60, 20);
 		radiusField.setMinimumSize(dimScaleField);
 
 		panel.add(radiusField);
@@ -428,7 +427,7 @@ public class LocationCard extends AbstractJsonConvertibleRecord implements
 		}
 
 		private void drawMolecule(Graphics2D g, Molecule molecule) {
-			if (molecule != null) {
+			if (molecule != null && moleculeRoverSync.isSelected() ) {
 				Color color = (rainbowColor()) ? getMoleculeColor(molecule.getUID())
 					: getColor();
 				g.setColor(color);

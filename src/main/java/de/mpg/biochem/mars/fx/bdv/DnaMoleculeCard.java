@@ -34,6 +34,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.ExecutionException;
@@ -42,6 +43,7 @@ import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -51,6 +53,7 @@ import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
 import org.scijava.Context;
+import org.scijava.log.LogService;
 import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -91,6 +94,9 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	protected ModuleService moduleService;
 	
 	@Parameter
+	protected LogService logService;
+	
+	@Parameter
 	protected Context context;
 
 	@Override
@@ -120,16 +126,20 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 						MarsDNAFinderBdvCommand dnaFinderCommand = new MarsDNAFinderBdvCommand();
 						dnaFinderCommand.setContext(context);
 						
+						for (Window window : Window.getWindows())
+							if (window instanceof JDialog && ((JDialog) window).getTitle()
+								.equals(dnaFinderCommand.getInfo().getLabel())) return;
+						
 						//We set these directly to avoid pre and post processors from running
 						//we don't need that in this context
 						dnaFinderCommand.setMarsBdvFrame(marsBdvFrame);
 						dnaFinderCommand.setArchive(archive);
 						try {
-						moduleService.run(dnaFinderCommand, true).get();
-					}
-					catch (InterruptedException | ExecutionException exc) {
-						exc.printStackTrace();
-					}
+							moduleService.run(dnaFinderCommand, true).get();
+						}
+						catch (InterruptedException | ExecutionException exc) {
+							exc.printStackTrace();
+						}
 				});
 				backgroundThread.shutdown();
 			}
@@ -144,6 +154,10 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 				backgroundThread.submit(() -> {
 					MarsDNAPeakTrackerBdvCommand peakTrackerCommand = new MarsDNAPeakTrackerBdvCommand();
 					peakTrackerCommand.setContext(context);
+					
+					for (Window window : Window.getWindows())
+						if (window instanceof JDialog && ((JDialog) window).getTitle()
+							.equals(peakTrackerCommand.getInfo().getLabel())) return;
 					
 					//We set these directly to avoid pre and post processors from running
 					//we don't need that in this context

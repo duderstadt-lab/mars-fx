@@ -3,6 +3,7 @@ package de.mpg.biochem.mars.fx.bdv.commands;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,7 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import net.imagej.ops.Initializable;
+import javax.swing.JDialog;
+
 import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.KDTree;
@@ -28,6 +30,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
+import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
@@ -106,10 +109,6 @@ Initializable, Previewable
 	@Parameter(label = "Source", choices = { "a", "b", "c" },
 		style = "group:Input", persist = false)
 	private String source = "";
-		
-	//@Parameter(visibility = ItemVisibility.MESSAGE,
-	//	style = "group:Input, align:center", persist = false)
-	//private String region = "";
 		
 	@Parameter(label = "Select region", style = "group:Input, align:center",
 		description = "Select region to search for DNAs",
@@ -198,7 +197,7 @@ Initializable, Previewable
 	
 	@Parameter(label = "Search radius around DNA",
 			style = "group:Search Parameters")
-		private double radius;
+	private double radius;
 	
 	/**
 	 * Global Settings
@@ -220,6 +219,7 @@ Initializable, Previewable
 	private PeakPreviewOverlay previewOverlay;
 	private BdvOverlaySource<?> overlaySource;
 	private boolean activeOverlay = false;
+	private boolean selectionInProgress = false;
 	
 	@Override
 	public void initialize() {
@@ -242,6 +242,9 @@ Initializable, Previewable
 	}
 	
 	protected void addTracksToArchive() {
+		//save the current settings to the PrefService 
+		//so they are reloaded the next time the command is opened.
+		saveInputs();
 		if (archive != null) {
 			List<int[]> excludeTimePoints = new ArrayList<int[]>();
 			if (excludeTimePointList.length() > 0) {
@@ -521,13 +524,24 @@ Initializable, Previewable
 								                    .options().addTo(marsBdvFrame.getBdvHandle()));
 				activeOverlay = true;
 			}
+			
+			//HACK Find the frame and add window listener to make sure 
+			//the preview is removed when the window is closed.
+		  for (Window window : Window.getWindows())
+				if (window instanceof JDialog && ((JDialog) window).getTitle()
+					.equals(getInfo().getLabel())) window.addWindowListener(new java.awt.event.WindowAdapter() {
+						    @Override
+						    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+						        cancel();
+						    }
+						});
 		}
 	}
 	
 	@Override
 	public void cancel() {
-		if (overlaySource != null) overlaySource.removeFromBdv();
-		if (previewOverlay != null) marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().overlays().remove( previewOverlay );
+		if (activeOverlay && overlaySource != null) overlaySource.removeFromBdv();
+		if (activeOverlay && previewOverlay != null) marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().overlays().remove( previewOverlay );
 		activeOverlay = false;
 	}
 	
@@ -537,6 +551,7 @@ Initializable, Previewable
 	}
 
 	protected void setSelectionRegion() {
+		if (selectionInProgress) return;
 		final Interval viewInterval = marsBdvFrame.currentViewImageCoordinates();
 		long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
 		long viewHeight = (long) (viewInterval.max(1) - viewInterval.min(1));
@@ -552,6 +567,7 @@ Initializable, Previewable
 		MarsMetadata metadata = archive.getMetadata(marsBdvFrame.getMetadataUID());
 		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, metadata.getImage(0).getSizeX(), metadata.getImage(0).getSizeY(), 0 );
 		backgroundThread.submit(() -> {
+			selectionInProgress = true;
 			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
 				  marsBdvFrame.getBdvHandle(),
 					imageTransform,
@@ -559,9 +575,8 @@ Initializable, Previewable
 					rangeInterval,
 					BoxSelectionOptions.options()
 							.title( "Select region" ));
-			if (result.isValid()) {
-				interval = result.getInterval();
-			}
+			selectionInProgress = false;
+			if (result.isValid()) interval = result.getInterval();
 		});
 		backgroundThread.shutdown();
 	}

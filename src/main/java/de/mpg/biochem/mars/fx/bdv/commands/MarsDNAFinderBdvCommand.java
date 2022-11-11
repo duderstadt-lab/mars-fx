@@ -32,11 +32,13 @@ package de.mpg.biochem.mars.fx.bdv.commands;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Window;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import net.imagej.ops.Initializable;
+import javax.swing.JDialog;
+
 import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
@@ -48,6 +50,7 @@ import net.imglib2.type.numeric.RealType;
 import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 
+import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
@@ -231,6 +234,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	private Interval interval;
 	private DnaMoleculePreviewOverlay previewOverlay;
 	private BdvOverlaySource<?> overlaySource;
+	private boolean selectionInProgress = false;
 	private boolean activeOverlay = false;
 	private List<DNASegment> segments;
 
@@ -328,13 +332,24 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 								                    .options().addTo(marsBdvFrame.getBdvHandle()));
 				activeOverlay = true;
 			}
+			
+			//HACK Find the frame and add window listener to make sure 
+			//the preview is removed when the window is closed.
+		  for (Window window : Window.getWindows())
+				if (window instanceof JDialog && ((JDialog) window).getTitle()
+					.equals(getInfo().getLabel())) window.addWindowListener(new java.awt.event.WindowAdapter() {
+						    @Override
+						    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+						        cancel();
+						    }
+						});
 		}
 	}
 	
 	@Override
 	public void cancel() {
-		if (overlaySource != null) overlaySource.removeFromBdv();
-		if (previewOverlay != null) marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().overlays().remove( previewOverlay );
+		if (activeOverlay && overlaySource != null) overlaySource.removeFromBdv();
+		if (activeOverlay && previewOverlay != null) marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().overlays().remove( previewOverlay );
 		activeOverlay = false;
 	}
 	
@@ -344,6 +359,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	}
 	
 	protected void setSelectionRegion() {
+		if (selectionInProgress) return;
 		final Interval viewInterval = marsBdvFrame.currentViewImageCoordinates();
 		long viewWidth = (long) (viewInterval.max(0) - viewInterval.min(0));
 		long viewHeight = (long) (viewInterval.max(1) - viewInterval.min(1));
@@ -360,6 +376,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		//TODO make sure the currently selected Metadata is the one whose size is retrieved in the future.. This assumes all metadata records would be for images of similar sizes...
 		final Interval rangeInterval = Intervals.createMinMax( 0, 0, 0, archive.getMetadata(0).getImage(0).getSizeX(), archive.getMetadata(0).getImage(0).getSizeY(), 0 );
 		backgroundThread.submit(() -> {
+			selectionInProgress = true;
 			final TransformedBoxSelectionDialog.Result result = BdvFunctions.selectBox(
 				  marsBdvFrame.getBdvHandle(),
 					imageTransform,
@@ -367,14 +384,16 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 					rangeInterval,
 					BoxSelectionOptions.options()
 							.title( "Select region" ));
-			if (result.isValid()) {
-				interval = result.getInterval();
-			}
+			selectionInProgress = false;
+			if (result.isValid()) interval = result.getInterval();
 		});
 		backgroundThread.shutdown();
 	}
 	
 	protected void createDNAmoleculeRecords() {
+		//save the current settings to the PrefService 
+		//so they are reloaded the next time the command is opened.
+		saveInputs();
 		if (archive != null) {
 			archive.getWindow().lock();
 			String uid = "";
