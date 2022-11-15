@@ -193,6 +193,9 @@ Initializable, Previewable
 	@Parameter(label = "Exclude", style = "group:Output", required = false)
 	private String excludeTimePointList = "";
 	
+	@Parameter(label = "Replace all tracks", style = "group:Output")
+	private boolean replaceAllTracks = false;
+	
 	@Parameter(label = "DNA length in bps", style = "group:Search Parameters")
 	private int DNALength = 21236;
 	
@@ -320,9 +323,12 @@ Initializable, Previewable
 			//We are assuming the channel in N5 is the same as the channel from the original metadata hmmm.... 
 			tracker.track(peaks, tracksArchive, metadata.getBdvSource(source).getChannel(), processTimePoints, 1);
 			
-			MarsTable mergedTable = new MarsTable();
 			RadiusNeighborSearchOnKDTree<MoleculePosition> archive1PositionSearcher = getMoleculeSearcher(tracksArchive);
+			
+			archive.getWindow().lock();
+			
 			Molecule dnaMolecule = marsBdvFrame.getSelectedMolecule();
+			MarsTable dnaMoleculeTable = (replaceAllTracks) ? new MarsTable() : dnaMolecule.getTable();
 			
 			DNASegment dnaSegment = new DNASegment(dnaMolecule.getParameter("Dna_Top_X1"), dnaMolecule.getParameter("Dna_Top_Y1"),
 																						 dnaMolecule.getParameter("Dna_Bottom_X2"), dnaMolecule.getParameter("Dna_Bottom_Y2"));
@@ -331,14 +337,12 @@ Initializable, Previewable
 				archive1PositionSearcher, tracksArchive, dnaSegment);
 			
 			if (moleculesOnDNA.size() != 0) {
-				addToMergedTable(mergedTable, moleculesOnDNA, tracksArchive, source,
+				addToMergedTable(dnaMoleculeTable, moleculesOnDNA, tracksArchive, source,
 					dnaSegment);
 			}
-		
-			archive.getWindow().lock();
-			
+	
 			dnaMolecule.setParameter("Number_" + source, moleculesOnDNA.size());
-			dnaMolecule.setTable(mergedTable);
+			dnaMolecule.setTable(dnaMoleculeTable);
 			dnaMolecule.setNotes("Tracks added on " + new java.util.Date() + " by the MarsDNAPeakTrackerBdvCommand");
 			//The molecule is already in the archive but this updates indexes and could work in virtual mode.
 			archive.put(dnaMolecule);
@@ -377,12 +381,21 @@ Initializable, Previewable
 		builder.addParameter("Integration outer radius", String.valueOf(
 			integrationOuterRadius));
 		builder.addParameter("Exclude time points", excludeTimePointList);
+		builder.addParameter("Replace all tracks", replaceAllTracks);
 	}
 	
 	private void addToMergedTable(MarsTable mergedTable,
 		ArrayList<SingleMolecule> moleculesOnDNA, SingleMoleculeArchive archive,
 		String name, DNASegment dnaSegment)
 	{
+		//If we are not removing all tracks, we just need to remove all tracks for the current channel
+		if (mergedTable.getColumnCount() > 0) {
+			List<String> oldTrackColumnNames = new ArrayList<>();
+			mergedTable.stream().filter(col -> col.getHeader().startsWith(name + "_")).forEach(col -> oldTrackColumnNames.add(col.getHeader()));
+			for (String header : oldTrackColumnNames)
+				mergedTable.removeColumn(header);
+		}
+		
 		int index = 1;
 		for (SingleMolecule molecule : moleculesOnDNA) {
 			MarsTable table = molecule.getTable().clone();
