@@ -333,13 +333,10 @@ Initializable, Previewable
 			DNASegment dnaSegment = new DNASegment(dnaMolecule.getParameter("Dna_Top_X1"), dnaMolecule.getParameter("Dna_Top_Y1"),
 																						 dnaMolecule.getParameter("Dna_Bottom_X2"), dnaMolecule.getParameter("Dna_Bottom_Y2"));
 			
-			ArrayList<SingleMolecule> moleculesOnDNA = findMoleculesOnDna(
+			List<SingleMolecule> moleculesOnDNA = findMoleculesOnDna(
 				archive1PositionSearcher, tracksArchive, dnaSegment);
 			
-			if (moleculesOnDNA.size() != 0) {
-				addToMergedTable(dnaMoleculeTable, moleculesOnDNA, tracksArchive, source,
-					dnaSegment);
-			}
+			if (moleculesOnDNA.size() != 0) addTracksToDnaMoleculeTable(dnaMoleculeTable, moleculesOnDNA, source, dnaSegment);
 	
 			dnaMolecule.setParameter("Number_" + source, moleculesOnDNA.size());
 			dnaMolecule.setTable(dnaMoleculeTable);
@@ -384,8 +381,7 @@ Initializable, Previewable
 		builder.addParameter("Replace all tracks", replaceAllTracks);
 	}
 	
-	private void addToMergedTable(MarsTable mergedTable,
-		ArrayList<SingleMolecule> moleculesOnDNA, SingleMoleculeArchive archive,
+	private void addTracksToDnaMoleculeTable(MarsTable mergedTable, List<SingleMolecule> moleculesOnDNA,
 		String name, DNASegment dnaSegment)
 	{
 		//If we are not removing all tracks, we just need to remove all tracks for the current channel
@@ -396,25 +392,28 @@ Initializable, Previewable
 				mergedTable.removeColumn(header);
 		}
 		
+		int rows = mergedTable.getRowCount();
+		for (SingleMolecule molecule : moleculesOnDNA)
+			if(molecule.getTable().getRowCount() > rows)
+				rows = molecule.getTable().getRowCount();
+		
+	  // We need to make sure to fill the table with Double.NaN values
+		// this will over write the scijava default value of 0.0.
+		if (mergedTable.getRowCount() < rows)
+		{
+			for (int row = mergedTable.getRowCount(); row < rows; row++)
+			{
+				mergedTable.appendRow();
+				for (int col = 0; col < mergedTable.getColumnCount(); col++)
+					mergedTable.setValue(col, row, Double.NaN);
+			}
+		}
+		
 		int index = 1;
 		for (SingleMolecule molecule : moleculesOnDNA) {
 			MarsTable table = molecule.getTable().clone();
-
-			// We need to make sure to fill the table with Double.NaN values
-			// this will over write the scijava default value of 0.0.
-			if (!mergedTable.isEmpty() && mergedTable.getRowCount() < table
-				.getRowCount())
-			{
-				for (int row = mergedTable.getRowCount(); row < table
-					.getRowCount(); row++)
-				{
-					mergedTable.appendRow();
-					for (int col = 0; col < mergedTable.getColumnCount(); col++)
-						mergedTable.setValue(col, row, Double.NaN);
-				}
-			}
-			else if (!mergedTable.isEmpty() && mergedTable.getRowCount() > table
-				.getRowCount())
+			
+			if (rows > table.getRowCount())
 			{
 				for (int row = table.getRowCount(); row < mergedTable
 					.getRowCount(); row++)
@@ -428,17 +427,20 @@ Initializable, Previewable
 			// Distance from the DNA top END
 			DoubleColumn dnaPositionColumn = new DoubleColumn(name + "_" + index +
 				"_Position_on_DNA");
-			for (int row = 0; row < table.getRowCount(); row++) {
-				dnaPositionColumn.add(dnaSegment.getPositionOnDNA(table.getValue(
-					Peak.X, row), table.getValue(Peak.Y, row), DNALength));
+			for (int row = 0; row < rows; row++) {
+				if (row < table.getRowCount())
+					dnaPositionColumn.add(dnaSegment.getPositionOnDNA(table.getValue(
+						Peak.X, row), table.getValue(Peak.Y, row), DNALength));
+				else
+					dnaPositionColumn.add(Double.NaN);
 			}
-
+			
 			for (int col = 0; col < table.getColumnCount(); col++) {
 				table.get(col).setHeader(name + "_" + index + "_" + table.get(col)
 					.getHeader());
 				mergedTable.add(table.get(col));
 			}
-
+			
 			mergedTable.add(dnaPositionColumn);
 
 			index++;

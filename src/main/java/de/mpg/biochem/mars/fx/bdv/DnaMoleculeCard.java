@@ -128,7 +128,11 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 						
 						for (Window window : Window.getWindows())
 							if (window instanceof JDialog && ((JDialog) window).getTitle()
-								.equals(dnaFinderCommand.getInfo().getLabel())) return;
+								.equals(dnaFinderCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+										((JDialog) window).toFront();
+										((JDialog) window).repaint();
+										return;
+							}
 						
 						//We set these directly to avoid pre and post processors from running
 						//we don't need that in this context
@@ -157,7 +161,11 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 					
 					for (Window window : Window.getWindows())
 						if (window instanceof JDialog && ((JDialog) window).getTitle()
-							.equals(peakTrackerCommand.getInfo().getLabel())) return;
+							.equals(peakTrackerCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+									((JDialog) window).toFront();
+									((JDialog) window).repaint();
+									return;
+						}
 					
 					//We set these directly to avoid pre and post processors from running
 					//we don't need that in this context
