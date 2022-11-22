@@ -61,7 +61,6 @@ import org.scijava.log.LogService;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.table.DoubleColumn;
 import org.scijava.ui.UIService;
 import org.scijava.widget.Button;
 
@@ -400,11 +399,8 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 			archive.getWindow().lock();
 			List<String> uids = new ArrayList<>();
 			for (DNASegment segment : segments) {
-				//Build table with timepoint index
+				//Add an empty table...
 				MarsTable table = new MarsTable("table");
-				DoubleColumn col = new DoubleColumn("T");
-				for (double t=0; t<marsBdvFrame.getMaximumTimePoints(); t++) col.add(t);
-				table.add(col);
 				
 				//Build molecule record with DNA location
 				Molecule molecule = archive.createMolecule(MarsMath.getUUID58(), table);
