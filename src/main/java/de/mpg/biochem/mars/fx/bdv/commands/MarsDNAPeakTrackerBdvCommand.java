@@ -323,6 +323,12 @@ Initializable, Previewable
 			//We are assuming the channel in N5 is the same as the channel from the original metadata hmmm.... 
 			tracker.track(peaks, tracksArchive, metadata.getBdvSource(source).getChannel(), processTimePoints, 1);
 			
+			if (tracksArchive.getNumberOfMolecules() == 0) {
+				logService.info("MarsDNAPeakTrackerBdvCommand: No tracks found for current settings.");
+				logService.info("DnaMolecule " + marsBdvFrame.getSelectedMolecule().getUID() + " left unchanged.");
+				return;
+			}
+			
 			RadiusNeighborSearchOnKDTree<MoleculePosition> archive1PositionSearcher = getMoleculeSearcher(tracksArchive);
 			
 			archive.getWindow().lock();
