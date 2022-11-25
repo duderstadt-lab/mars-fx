@@ -253,7 +253,8 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 		@Override
 		protected void draw(Graphics2D g) {
-			if (showDNA.isSelected()) {
+			if (showDNA.isSelected() && molecule != null) {
+				
 				AffineTransform2D transform = new AffineTransform2D();
 				getCurrentTransform2D(transform);
 
