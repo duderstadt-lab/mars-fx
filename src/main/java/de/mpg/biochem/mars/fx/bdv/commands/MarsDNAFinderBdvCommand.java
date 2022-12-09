@@ -435,6 +435,7 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 			archive.getWindow().unlock();
 			final String lastUID = uids.get(uids.size() - 1);
 			Platform.runLater(() -> ((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getMoleculesTab().setSelectedMolecule(lastUID));
+			marsBdvFrame.setMolecule(archive.get(lastUID));
 		}
 	}
 	
