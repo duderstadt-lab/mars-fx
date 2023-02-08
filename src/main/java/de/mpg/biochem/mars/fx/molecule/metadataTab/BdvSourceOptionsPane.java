@@ -38,8 +38,10 @@ import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
 import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
 import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
@@ -66,8 +68,8 @@ import javafx.stage.FileChooser.ExtensionFilter;
 
 public class BdvSourceOptionsPane extends VBox {
 
-	private TextField m00, m01, m02, m10, m11, m12, cField, tField, pathField;
-	private Label datasetInfo, n5Dataset;
+	private TextField m00, m01, m02, m10, m11, m12, cField, tField, pathField, n5Dataset;
+	private Label datasetInfo;
 	private ToggleSwitch driftCorrectSwitch, oneTimePointSwitch;
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private BooleanProperty singleTimePoint = new SimpleBooleanProperty();
@@ -190,8 +192,8 @@ public class BdvSourceOptionsPane extends VBox {
 		pathBox.setAlignment(Pos.CENTER_LEFT);
 
 		Label filePathLabel = new Label("Path");
-		filePathLabel.setPrefWidth(30);
-		filePathLabel.setMaxWidth(30);
+		filePathLabel.setPrefWidth(45);
+		filePathLabel.setMaxWidth(45);
 		HBox.setMargin(filePathLabel, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(filePathLabel);
 
@@ -234,11 +236,14 @@ public class BdvSourceOptionsPane extends VBox {
 					public void run() {
 						DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
 							new N5ViewerReaderFun(), new N5BasePathFun(), path
-								.getAbsolutePath(), new N5MetadataParser[] {}, // no group
-																																// parsers
+								.getAbsolutePath(), new N5MetadataParser[] {}, // no
+																																			// group
+																																			// parsers
 							new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
 								new N5CosemMetadataParser(),
-								new N5SingleScaleMetadataParser() });
+								new N5SingleScaleMetadataParser(),
+								new CanonicalMetadataParser(),
+								new N5GenericSingleScaleMetadataParser() });
 
 						selectionDialog.setVirtualOption(false);
 						selectionDialog.setCropOption(false);
@@ -290,10 +295,14 @@ public class BdvSourceOptionsPane extends VBox {
 		n5OptionsHBox.setAlignment(Pos.CENTER_LEFT);
 
 		Label n5Label = new Label("Dataset");
+		n5Label.setPrefWidth(45);
+		n5Label.setMaxWidth(45);
 		HBox.setMargin(n5Label, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(n5Label);
 
-		n5Dataset = new Label("");
+		n5Dataset = new TextField();
+		n5Dataset.setPrefWidth(150);
+		n5Dataset.setMaxWidth(150);
 		HBox.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(n5Dataset);
 
@@ -309,6 +318,17 @@ public class BdvSourceOptionsPane extends VBox {
 		datasetValidation.setGraphic(times2);
 		HBox.setMargin(datasetValidation, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(datasetValidation);
+		
+		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (marsBdvSource == null) return;
+			
+			marsBdvSource.setN5Dataset(n5Dataset.getText());
+			
+			File file = new File(pathField.getText() + "/" + marsBdvSource
+				.getN5Dataset());
+			if (file.exists()) datasetValidation.setGraphic(check2);
+			else datasetValidation.setGraphic(times2);
+		});
 
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource == null) return;
