@@ -37,7 +37,7 @@ import java.util.List;
 
 import org.scijava.Context;
 
-import de.mpg.biochem.mars.fx.bdv.DnaMoleculeCard;
+import de.mpg.biochem.mars.fx.bdv.DnaMolecule.DnaMoleculeCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.metadata.MarsMetadata;

@@ -118,9 +118,6 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 	@Parameter
 	private ConvertService convertService;
 
-	/**
-	 * IMAGE
-	 */
 	private MarsBdvFrame marsBdvFrame;
 	
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;

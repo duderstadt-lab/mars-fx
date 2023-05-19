@@ -27,12 +27,9 @@
  * #L%
  */
 
-package de.mpg.biochem.mars.fx.bdv;
+package de.mpg.biochem.mars.fx.bdv.DnaMolecule;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -42,15 +39,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
+import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import net.imagej.ops.Initializable;
-import net.imglib2.realtransform.AffineTransform2D;
-import net.imglib2.type.numeric.ARGBType;
 
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -75,11 +71,10 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 {
 
 	private JTextField dnaThickness;
-	private JCheckBox showDNA;
 
 	private JPanel panel;
 
-	private DnaMoleculeOverlay dnaMoleculeOverlay;
+	private LineOverlay dnaMoleculeOverlay;
 	private Molecule molecule;
 
 	private boolean active = false;
@@ -104,14 +99,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		panel = new JPanel();
 		panel.setLayout(new GridLayout(0, 2));
 
-		showDNA = new JCheckBox("show", false);
-		panel.add(showDNA);
-		panel.add(new JPanel());
-
-		panel.add(new JLabel("thickness"));
-
+		panel.add(new JLabel("Thickness"));
 		dnaThickness = new JTextField(6);
 		dnaThickness.setText("5");
+		dnaThickness.addActionListener(e -> {
+			int thickness = Integer.valueOf(dnaThickness.getText());
+			if (dnaMoleculeOverlay != null && thickness > 0 && thickness < 100) dnaMoleculeOverlay.setThickness(thickness);
+		});
 		Dimension dimScaleField = new Dimension(100, 20);
 		dnaThickness.setMinimumSize(dimScaleField);
 
@@ -182,6 +176,20 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			}
 		});
 		panel.add(peakTrackerButton);
+
+		JButton dnaDrawButton = new JButton("Draw DNA");
+		dnaDrawButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					LineEditor lineEditor = new LineEditor(marsBdvFrame);
+					lineEditor.setArchive(archive);
+					lineEditor.install();
+				});
+				backgroundThread.shutdown();
+			}
+		});
+		panel.add(dnaDrawButton);
 	}
 
 	@Override
@@ -191,25 +199,19 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 	@Override
 	protected void createIOMaps() {
-
-		setJsonField("show", jGenerator -> {
-			if (showDNA != null) jGenerator.writeBooleanField("show", showDNA
-				.isSelected());
-		}, jParser -> showDNA.setSelected(jParser.getBooleanValue()));
-
 		setJsonField("thickness", jGenerator -> {
 			if (dnaThickness != null) jGenerator.writeStringField("thickness",
 				dnaThickness.getText());
 		}, jParser -> dnaThickness.setText(jParser.getText()));
 	}
 
-	public boolean showDNA() {
-		return showDNA.isSelected();
-	}
-
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
+		if (molecule != null && dnaMoleculeOverlay != null) dnaMoleculeOverlay.setLine(molecule.getParameter("Dna_Top_X1"),
+				molecule.getParameter("Dna_Top_Y1"),
+				molecule.getParameter("Dna_Bottom_X2"),
+				molecule.getParameter("Dna_Bottom_Y2"));
 	}
 
 	@Override
@@ -231,8 +233,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 	@Override
 	public BdvOverlay getBdvOverlay() {
-		if (dnaMoleculeOverlay == null) dnaMoleculeOverlay =
-			new DnaMoleculeOverlay();
+		if (molecule != null && dnaMoleculeOverlay == null) {
+			dnaMoleculeOverlay = new LineOverlay(molecule.getParameter("Dna_Top_X1"),
+					molecule.getParameter("Dna_Top_Y1"),
+					molecule.getParameter("Dna_Bottom_X2"),
+					molecule.getParameter("Dna_Bottom_Y2"));
+			dnaMoleculeOverlay.setThickness(Integer.valueOf(dnaThickness.getText()));
+		}
 
 		return dnaMoleculeOverlay;
 	}
@@ -245,56 +252,5 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	@Override
 	public void setActive(boolean active) {
 		this.active = active;
-	}
-
-	public class DnaMoleculeOverlay extends BdvOverlay {
-
-		public DnaMoleculeOverlay() {}
-
-		@Override
-		protected void draw(Graphics2D g) {
-			if (showDNA.isSelected() && molecule != null) {
-				
-				AffineTransform2D transform = new AffineTransform2D();
-				getCurrentTransform2D(transform);
-
-				double x1 = molecule.getParameter("Dna_Top_X1");
-				double y1 = molecule.getParameter("Dna_Top_Y1");
-				double x2 = molecule.getParameter("Dna_Bottom_X2");
-				double y2 = molecule.getParameter("Dna_Bottom_Y2");
-
-				if (Double.isNaN(x1) || Double.isNaN(y1) || Double.isNaN(x2) || Double
-					.isNaN(y2)) return;
-
-				final double[] globalCoords = new double[] { x1, y1 };
-				final double[] viewerCoords = new double[2];
-				transform.apply(globalCoords, viewerCoords);
-
-				int xSource = (int) Math.round(viewerCoords[0]);
-				int ySource = (int) Math.round(viewerCoords[1]);
-
-				final double[] globalCoords2 = new double[] { x2, y2 };
-				final double[] viewerCoords2 = new double[2];
-				transform.apply(globalCoords2, viewerCoords2);
-
-				int xTarget = (int) Math.round(viewerCoords2[0]);
-				int yTarget = (int) Math.round(viewerCoords2[1]);
-
-				g.setColor(getColor());
-				g.setStroke(new BasicStroke(Integer.valueOf(dnaThickness.getText())));
-				g.drawLine(xSource, ySource, xTarget, yTarget);
-			}
-		}
-
-		private Color getColor() {
-			int alpha = (int) info.getDisplayRangeMax();
-
-			if (alpha > 255 || alpha < 0) alpha = 255;
-
-			final int r = ARGBType.red(info.getColor().get());
-			final int g = ARGBType.green(info.getColor().get());
-			final int b = ARGBType.blue(info.getColor().get());
-			return new Color(r, g, b, alpha);
-		}
 	}
 }
