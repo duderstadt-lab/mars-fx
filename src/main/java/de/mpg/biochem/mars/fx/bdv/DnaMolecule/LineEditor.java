@@ -71,6 +71,8 @@ import bdv.tools.boundingbox.TransformedBoxOverlay.BoxDisplayMode;
 import bdv.viewer.AbstractViewerPanel;
 import bdv.viewer.ConverterSetups;
 
+import javax.swing.*;
+
 /**
  * Installs an interactive 2D line selection tool on a BDV.
  * <p>
@@ -91,8 +93,6 @@ public class LineEditor
 
     private BdvOverlaySource<?> overlaySource;
 
-    private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
-
     private MarsBdvFrame marsBdvFrame;
 
     private final MouseListener ml;
@@ -101,30 +101,31 @@ public class LineEditor
 
     private boolean lineSelectionActive;
 
+    private List<DNASegment> segments;
+
     public LineEditor(MarsBdvFrame marsBdvFrame)
     {
         this.marsBdvFrame = marsBdvFrame;
         final BdvHandle bdvHandle = marsBdvFrame.getBdvHandle();
+        segments = new ArrayList<>();
         ml = new MouseAdapter()
         {
             @Override
             public void mousePressed( final MouseEvent e )
             {
+                if (e.getButton() != MouseEvent.BUTTON1) return;
                 if (!lineSelectionActive) {
                     final RealPoint realPoint = new RealPoint(3);
                     bdvHandle.getViewerPanel().getGlobalMouseCoordinates(realPoint);
-                    lineOverlay.setXYStart(realPoint.getDoublePosition(0), realPoint.getDoublePosition(1));
-                    lineOverlay.setXYEnd(realPoint.getDoublePosition(0), realPoint.getDoublePosition(1));
+                    segments.add(new DNASegment(realPoint.getDoublePosition(0), realPoint.getDoublePosition(1),
+                            realPoint.getDoublePosition(0), realPoint.getDoublePosition(1)));
+                    lineOverlay.setSegments(segments);
                     lineSelectionActive = true;
                 } else {
                     final RealPoint realPoint = new RealPoint(3);
                     bdvHandle.getViewerPanel().getGlobalMouseCoordinates(realPoint);
-                    lineOverlay.setXYEnd(realPoint.getDoublePosition(0), realPoint.getDoublePosition(1));
-                    createDNAmoleculeRecord(new DNASegment(lineOverlay.getX1(),
-                            lineOverlay.getY1(),
-                            lineOverlay.getX2(),
-                            lineOverlay.getY2()));
-                    uninstall();
+                    segments.get(segments.size()-1).setX2(realPoint.getDoublePosition(0));
+                    segments.get(segments.size()-1).setY2(realPoint.getDoublePosition(1));
                     lineSelectionActive = false;
                 }
             }
@@ -132,9 +133,12 @@ public class LineEditor
             @Override
             public void mouseMoved( final MouseEvent e )
             {
-                final RealPoint realPoint = new RealPoint(3);
-                bdvHandle.getViewerPanel().getGlobalMouseCoordinates(realPoint);
-                lineOverlay.setXYEnd(realPoint.getDoublePosition(0), realPoint.getDoublePosition(1));
+                if (lineSelectionActive) {
+                    final RealPoint realPoint = new RealPoint(3);
+                    bdvHandle.getViewerPanel().getGlobalMouseCoordinates(realPoint);
+                    segments.get(segments.size() - 1).setX2(realPoint.getDoublePosition(0));
+                    segments.get(segments.size() - 1).setY2(realPoint.getDoublePosition(1));
+                }
             }
         };
 
@@ -159,6 +163,8 @@ public class LineEditor
 
     public void uninstall()
     {
+        lineOverlay.setSegments(new ArrayList<DNASegment>());
+        lineSelectionActive = false;
         unblock();
 
         marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().removeHandler(ml);
@@ -196,52 +202,12 @@ public class LineEditor
             blockMap.put( key, block );
     }
 
-    protected void createDNAmoleculeRecord(DNASegment segment) {
-        if (archive != null) {
-            archive.getWindow().lock();
-            List<String> uids = new ArrayList<>();
-            //Add an empty table...
-            MarsTable table = new MarsTable("table");
-
-            //Build molecule record with DNA location
-            Molecule molecule = archive.createMolecule(MarsMath.getUUID58(), table);
-            molecule.setMetadataUID(marsBdvFrame.getMetadataUID());
-            molecule.setImage(archive.getMetadata(marsBdvFrame.getMetadataUID()).getImage(0).getImageID());
-            molecule.setParameter("Dna_Top_X1", segment.getX1());
-            molecule.setParameter("Dna_Top_Y1", segment.getY1());
-            molecule.setParameter("Dna_Bottom_X2", segment.getX2());
-            molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
-
-            molecule.addTag("Bdv Draw DNA");
-            molecule.setNotes("DnaMolecule created on " + new java.util.Date() + " by the Bdv Draw DNA");
-            //add to archive
-            archive.put(molecule);
-            //should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());
-            uids.add(molecule.getUID());
-
-            LogBuilder builder = new LogBuilder();
-            String log = LogBuilder.buildTitleBlock("Bdv Draw DNA");
-
-            String uidList = uids.get(0);
-            for (int i=1; i<uids.size(); i++)
-                uidList = uidList + ", " + uids.get(i);
-
-            builder.addParameter("Created DnaMolecules", uidList);
-            addInputParameterLog(builder, segment);
-            log += builder.buildParameterList();
-            log += "\n" + LogBuilder.endBlock();
-            archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(log);
-
-            archive.getWindow().unlock();
-            final String lastUID = uids.get(uids.size() - 1);
-            Platform.runLater(() -> ((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getMoleculesTab().setSelectedMolecule(lastUID));
-            marsBdvFrame.setMolecule(archive.get(lastUID));
+    public List<DNASegment> getSegments() {
+        if (lineSelectionActive)  {
+            segments.remove(segments.size() - 1);
+            lineSelectionActive = false;
         }
-    }
-
-    private void addInputParameterLog(LogBuilder builder, DNASegment segment) {
-        builder.addParameter("Metadata UID", marsBdvFrame.getMetadataUID());
-        builder.addParameter("Line", "(" + segment.getX1() + ", " + segment.getY1() + ") to (" + segment.getX2() + ", " + segment.getY2() + ")");
+        return segments;
     }
 
     public void setMarsBdvFrame(MarsBdvFrame marsBdvFrame) {
@@ -250,13 +216,5 @@ public class LineEditor
 
     public MarsBdvFrame getMarsBdvFrame() {
         return marsBdvFrame;
-    }
-
-    public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
-        this.archive = archive;
-    }
-
-    public MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> getArchive() {
-        return archive;
     }
 }

@@ -39,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import javax.swing.JButton;
+import javax.swing.JToggleButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -46,6 +47,12 @@ import javax.swing.JTextField;
 
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
+import de.mpg.biochem.mars.image.DNASegment;
+import de.mpg.biochem.mars.table.MarsTable;
+import de.mpg.biochem.mars.util.LogBuilder;
+import de.mpg.biochem.mars.util.MarsMath;
+import javafx.application.Platform;
 import net.imagej.ops.Initializable;
 
 import org.scijava.Context;
@@ -64,6 +71,10 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.awt.event.ItemEvent;
 
 @Plugin(type = MarsBdvCard.class, name = "DNA-Overlay")
 public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
@@ -84,6 +95,8 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	
 	@Parameter
 	protected MarsBdvFrame marsBdvFrame;
+
+	protected LineEditor lineEditor;
 	
 	@Parameter
 	protected ModuleService moduleService;
@@ -177,18 +190,17 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		});
 		panel.add(peakTrackerButton);
 
-		JButton dnaDrawButton = new JButton("Draw DNA");
-		dnaDrawButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
-				backgroundThread.submit(() -> {
-					LineEditor lineEditor = new LineEditor(marsBdvFrame);
-					lineEditor.setArchive(archive);
+		JToggleButton dnaDrawButton = new JToggleButton("Draw DNA");
+		dnaDrawButton.addItemListener((ItemEvent ev) -> {
+				if(ev.getStateChange() == ItemEvent.SELECTED) {
+					if (lineEditor == null) lineEditor = new LineEditor(marsBdvFrame);
 					lineEditor.install();
-				});
-				backgroundThread.shutdown();
-			}
-		});
+				} else if(ev.getStateChange() == ItemEvent.DESELECTED) {
+					//confirmation dialog ?
+					createDNAmoleculeRecords(lineEditor.getSegments());
+					lineEditor.uninstall();
+				}
+			});
 		panel.add(dnaDrawButton);
 	}
 
@@ -208,10 +220,59 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
-		if (molecule != null && dnaMoleculeOverlay != null) dnaMoleculeOverlay.setLine(molecule.getParameter("Dna_Top_X1"),
-				molecule.getParameter("Dna_Top_Y1"),
-				molecule.getParameter("Dna_Bottom_X2"),
-				molecule.getParameter("Dna_Bottom_Y2"));
+		if (molecule != null && dnaMoleculeOverlay != null) {
+			List<DNASegment> segments = new ArrayList<DNASegment>();
+			segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
+					molecule.getParameter("Dna_Top_Y1"),
+					molecule.getParameter("Dna_Bottom_X2"),
+					molecule.getParameter("Dna_Bottom_Y2")));
+			dnaMoleculeOverlay.setSegments(segments);
+		}
+	}
+
+	protected void createDNAmoleculeRecords(List<DNASegment> segments) {
+		if (archive != null) {
+			archive.getWindow().lock();
+			List<String> uids = new ArrayList<>();
+			for (DNASegment segment : segments) {
+				//Add an empty table...
+				MarsTable table = new MarsTable("table");
+
+				//Build molecule record with DNA location
+				Molecule molecule = archive.createMolecule(MarsMath.getUUID58(), table);
+				molecule.setMetadataUID(marsBdvFrame.getMetadataUID());
+				molecule.setImage(archive.getMetadata(marsBdvFrame.getMetadataUID()).getImage(0).getImageID());
+				molecule.setParameter("Dna_Top_X1", segment.getX1());
+				molecule.setParameter("Dna_Top_Y1", segment.getY1());
+				molecule.setParameter("Dna_Bottom_X2", segment.getX2());
+				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
+
+				molecule.addTag("Bdv Draw DNA");
+				molecule.setNotes("DnaMolecule created on " + new java.util.Date() + " by the Bdv Draw DNA");
+				//add to archive
+				archive.put(molecule);
+				//should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());
+				uids.add(molecule.getUID());
+			}
+
+			LogBuilder builder = new LogBuilder();
+			String log = LogBuilder.buildTitleBlock("Bdv Draw DNA");
+
+			String uidList = uids.get(0);
+			for (int i = 1; i < uids.size(); i++)
+				uidList = uidList + ", " + uids.get(i);
+
+			builder.addParameter("Created DnaMolecules", uidList);
+			builder.addParameter("Metadata UID", marsBdvFrame.getMetadataUID());
+			log += builder.buildParameterList();
+			log += "\n" + LogBuilder.endBlock();
+			archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(log);
+
+			archive.getWindow().unlock();
+			final String lastUID = uids.get(uids.size() - 1);
+			Platform.runLater(() -> ((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getMoleculesTab().setSelectedMolecule(lastUID));
+			marsBdvFrame.setMolecule(archive.get(lastUID));
+		}
 	}
 
 	@Override
@@ -234,10 +295,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 	@Override
 	public BdvOverlay getBdvOverlay() {
 		if (molecule != null && dnaMoleculeOverlay == null) {
-			dnaMoleculeOverlay = new LineOverlay(molecule.getParameter("Dna_Top_X1"),
+			dnaMoleculeOverlay = new LineOverlay();
+			List<DNASegment> segments = new ArrayList<DNASegment>();
+			segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
 					molecule.getParameter("Dna_Top_Y1"),
 					molecule.getParameter("Dna_Bottom_X2"),
-					molecule.getParameter("Dna_Bottom_Y2"));
+					molecule.getParameter("Dna_Bottom_Y2")));
+			dnaMoleculeOverlay.setSegments(segments);
 			dnaMoleculeOverlay.setThickness(Integer.valueOf(dnaThickness.getText()));
 		}
 

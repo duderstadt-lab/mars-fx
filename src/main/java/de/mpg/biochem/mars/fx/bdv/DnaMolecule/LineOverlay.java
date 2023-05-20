@@ -29,25 +29,21 @@
 package de.mpg.biochem.mars.fx.bdv.DnaMolecule;
 
 import bdv.util.BdvOverlay;
+import de.mpg.biochem.mars.image.DNASegment;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LineOverlay extends BdvOverlay {
 
     private int thickness = 5;
-    private double x1, y1, x2, y2;
+    private List<DNASegment> segments;
 
     public LineOverlay() {
-        x1 = Double.NaN;
-        y1 = Double.NaN;
-        x2 = Double.NaN;
-        y2 = Double.NaN;
-    }
-
-    public LineOverlay(double x1, double y1, double x2, double y2) {
-        setLine(x1, y1, x2, y2);
+        segments = new ArrayList<DNASegment>();
     }
 
     @Override
@@ -55,63 +51,42 @@ public class LineOverlay extends BdvOverlay {
         AffineTransform2D transform = new AffineTransform2D();
         getCurrentTransform2D(transform);
 
-        if (Double.isNaN(x1) || Double.isNaN(y1) || Double.isNaN(x2) || Double
-                .isNaN(y2)) return;
+        if (segments.size() > 0) {
+            for (DNASegment segment : segments) {
+                if (Double.isNaN(segment.getX1()) || Double.isNaN(segment.getY1()) || Double.isNaN(segment.getX2()) || Double
+                        .isNaN(segment.getY2())) return;
 
-        final double[] globalCoords = new double[] { x1, y1 };
-        final double[] viewerCoords = new double[2];
-        transform.apply(globalCoords, viewerCoords);
+                final double[] globalCoords = new double[]{segment.getX1(), segment.getY1()};
+                final double[] viewerCoords = new double[2];
+                transform.apply(globalCoords, viewerCoords);
 
-        int xSource = (int) Math.round(viewerCoords[0]);
-        int ySource = (int) Math.round(viewerCoords[1]);
+                int xSource = (int) Math.round(viewerCoords[0]);
+                int ySource = (int) Math.round(viewerCoords[1]);
 
-        final double[] globalCoords2 = new double[] { x2, y2 };
-        final double[] viewerCoords2 = new double[2];
-        transform.apply(globalCoords2, viewerCoords2);
+                final double[] globalCoords2 = new double[]{segment.getX2(), segment.getY2()};
+                final double[] viewerCoords2 = new double[2];
+                transform.apply(globalCoords2, viewerCoords2);
 
-        int xTarget = (int) Math.round(viewerCoords2[0]);
-        int yTarget = (int) Math.round(viewerCoords2[1]);
+                int xTarget = (int) Math.round(viewerCoords2[0]);
+                int yTarget = (int) Math.round(viewerCoords2[1]);
 
-        g.setColor(getColor());
-        g.setStroke(new BasicStroke(thickness));
-        g.drawLine(xSource, ySource, xTarget, yTarget);
+                g.setColor(getColor());
+                g.setStroke(new BasicStroke(thickness));
+                g.drawLine(xSource, ySource, xTarget, yTarget);
+            }
+        }
     }
 
     public void setThickness(int thickness) {
         this.thickness = thickness;
     }
 
-    public void setLine(double x1, double y1, double x2, double y2) {
-        this.x1 = x1;
-        this.y1 = y1;
-        this.x2 = x2;
-        this.y2 = y2;
+    public void setSegments(List<DNASegment> segments) {
+        this.segments = segments;
     }
 
-    public void setXYStart(double x, double y) {
-        this.x1 = x;
-        this.y1 = y;
-    }
-
-    public void setXYEnd(double x, double y) {
-        this.x2 = x;
-        this.y2 = y;
-    }
-
-    public double getX1() {
-        return x1;
-    }
-
-    public double getY1() {
-        return y1;
-    }
-
-    public double getX2() {
-        return x2;
-    }
-
-    public double getY2() {
-        return y2;
+    public List<DNASegment> getSegments() {
+        return segments;
     }
 
     private Color getColor() {
