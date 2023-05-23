@@ -829,7 +829,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		});
 	}
 
-	protected void runTask(Runnable process, String message) {
+	public void runTask(Runnable process, String message) {
 		lockFX(message);
 
 		Task<Void> task = new Task<Void>() {

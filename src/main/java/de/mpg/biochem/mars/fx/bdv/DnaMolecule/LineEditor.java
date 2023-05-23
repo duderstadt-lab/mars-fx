@@ -57,6 +57,7 @@ import javafx.application.Platform;
 import net.imglib2.Interval;
 import net.imglib2.RealPoint;
 import net.imglib2.realtransform.AffineTransform3D;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.util.Intervals;
 import org.scijava.listeners.ChangeListener;
 import org.scijava.listeners.ListenableVar;
@@ -101,13 +102,12 @@ public class LineEditor
 
     private boolean lineSelectionActive;
 
-    private List<DNASegment> segments;
+    private List<DNASegment> segments = new ArrayList<>();
 
     public LineEditor(MarsBdvFrame marsBdvFrame)
     {
         this.marsBdvFrame = marsBdvFrame;
         final BdvHandle bdvHandle = marsBdvFrame.getBdvHandle();
-        segments = new ArrayList<>();
         ml = new MouseAdapter()
         {
             @Override
@@ -155,6 +155,7 @@ public class LineEditor
         if (lineOverlay == null) lineOverlay = new LineOverlay();
         overlaySource = BdvFunctions.showOverlay(lineOverlay, "Line-Preview", Bdv
                 .options().addTo(marsBdvFrame.getBdvHandle()));
+        overlaySource.setColor(new ARGBType(-13312));
         marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().addHandler(ml);
 
         refreshBlockMap();
@@ -163,6 +164,7 @@ public class LineEditor
 
     public void uninstall()
     {
+        segments = new ArrayList<>();
         lineOverlay.setSegments(new ArrayList<DNASegment>());
         lineSelectionActive = false;
         unblock();

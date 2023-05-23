@@ -47,6 +47,8 @@ import javax.swing.JTextField;
 
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
 import de.mpg.biochem.mars.image.DNASegment;
 import de.mpg.biochem.mars.table.MarsTable;
@@ -190,18 +192,53 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		});
 		panel.add(peakTrackerButton);
 
-		JToggleButton dnaDrawButton = new JToggleButton("Draw DNA");
+		panel.add(new JLabel("Drawing tools"));
+		panel.add(new JPanel());
+
+		JToggleButton dnaDrawButton = new JToggleButton("Draw DNAs");
 		dnaDrawButton.addItemListener((ItemEvent ev) -> {
 				if(ev.getStateChange() == ItemEvent.SELECTED) {
 					if (lineEditor == null) lineEditor = new LineEditor(marsBdvFrame);
 					lineEditor.install();
 				} else if(ev.getStateChange() == ItemEvent.DESELECTED) {
-					//confirmation dialog ?
-					createDNAmoleculeRecords(lineEditor.getSegments());
+					final List<DNASegment> segments = lineEditor.getSegments();
 					lineEditor.uninstall();
+					if (segments.size() > 0)
+						Platform.runLater(() -> {
+							RoverConfirmationDialog addDNAMoleculesToArchive =
+									new RoverConfirmationDialog(((AbstractMoleculeArchiveFxFrame) archive.getWindow()).getNode().getScene().getWindow(),
+											"Create DnaMolecule records from drawn DNAs?", "Yes", "No");
+							addDNAMoleculesToArchive.showAndWait().ifPresent(result -> {
+								if (result.getButtonData().isDefaultButton())
+									((AbstractMoleculeArchiveFxFrame) archive.getWindow())
+											.runTask(() -> createDNAmoleculeRecords(segments),
+													"Creating DnaMolecule records...");
+							});
+						});
 				}
 			});
 		panel.add(dnaDrawButton);
+
+		JButton removeLastDNA = new JButton("Remove last DNA");
+		removeLastDNA.addActionListener((ActionEvent e) -> {
+			if (lineEditor != null) {
+				List<DNASegment> segments = lineEditor.getSegments();
+				if (segments.size() > 0) {
+					segments.remove(segments.size() - 1);
+					marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().repaint();
+				}
+			}
+		});
+		panel.add(removeLastDNA);
+
+		JButton clearDNAs = new JButton("Clear");
+		clearDNAs.addActionListener((ActionEvent e) -> {
+			if (lineEditor != null) {
+				lineEditor.getSegments().clear();
+				marsBdvFrame.getBdvHandle().getViewerPanel().getDisplay().repaint();
+			}
+		});
+		panel.add(clearDNAs);
 	}
 
 	@Override
@@ -256,7 +293,7 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			}
 
 			LogBuilder builder = new LogBuilder();
-			String log = LogBuilder.buildTitleBlock("Bdv Draw DNA");
+			String log = LogBuilder.buildTitleBlock("Bdv Drawn DNA");
 
 			String uidList = uids.get(0);
 			for (int i = 1; i < uids.size(); i++)
