@@ -11,7 +11,7 @@
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.5.9-SNAPSHOT</version>
+	<version>0.5.10-SNAPSHOT</version>
 
 	<name>mars-fx</name>
 	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
