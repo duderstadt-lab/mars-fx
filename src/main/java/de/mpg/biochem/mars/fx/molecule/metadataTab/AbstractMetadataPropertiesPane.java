@@ -34,6 +34,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
 
 import com.jfoenix.controls.JFXTabPane;
 
+import javafx.event.EventHandler;
 import org.scijava.Context;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -111,19 +112,25 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
-			new DefaultMoleculeArchiveEventHandler()
-			{
-
-				@Override
-				public void onInitializeMoleculeArchiveEvent(
-					MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> newArchive)
-			{
-					archive = newArchive;
-					if (archive == null) marsImageMetadata = null;
-					metadataGeneralTabController.fireEvent(
-						new InitializeMoleculeArchiveEvent(newArchive));
-				}
-			});
+				new EventHandler<MoleculeArchiveEvent>()
+				{
+					@Override
+					public void handle(MoleculeArchiveEvent e) {
+						if (e.getEventType().getName().equals(
+								"INITIALIZE_MOLECULE_ARCHIVE"))
+						{
+							archive = e.getArchive();
+							if (archive == null) marsImageMetadata = null;
+							metadataGeneralTabController.fireEvent(
+									new InitializeMoleculeArchiveEvent(e.getArchive()));
+							regionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
+									e.getArchive()));
+							positionOfInterestTable.fireEvent(new InitializeMoleculeArchiveEvent(
+									e.getArchive()));
+							e.consume();
+						}
+					}
+				});
 
 		configureTabs();
 	}
