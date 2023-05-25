@@ -331,15 +331,17 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 	@Override
 	public BdvOverlay getBdvOverlay() {
-		if (molecule != null && dnaMoleculeOverlay == null) {
+		if (dnaMoleculeOverlay == null) {
 			dnaMoleculeOverlay = new LineOverlay();
-			List<DNASegment> segments = new ArrayList<DNASegment>();
-			segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
-					molecule.getParameter("Dna_Top_Y1"),
-					molecule.getParameter("Dna_Bottom_X2"),
-					molecule.getParameter("Dna_Bottom_Y2")));
-			dnaMoleculeOverlay.setSegments(segments);
 			dnaMoleculeOverlay.setThickness(Integer.valueOf(dnaThickness.getText()));
+			if (molecule != null) {
+				List<DNASegment> segments = new ArrayList<DNASegment>();
+				segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
+						molecule.getParameter("Dna_Top_Y1"),
+						molecule.getParameter("Dna_Bottom_X2"),
+						molecule.getParameter("Dna_Bottom_Y2")));
+				dnaMoleculeOverlay.setSegments(segments);
+			}
 		}
 
 		return dnaMoleculeOverlay;
