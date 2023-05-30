@@ -90,7 +90,7 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
 				return;
 			}
 			else if (node.getInfo().equals("python-image-widget") || node.getInfo()
-				.equals("groovy-markdown-widget"))
+				.equals("groovy-image-widget"))
 			{
 				html.attr("src", documentEditor.getDocument().getMedia(key)).withAttr()
 					.tag("img", true);
