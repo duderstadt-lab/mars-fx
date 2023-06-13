@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
+import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
@@ -251,10 +252,8 @@ public class BdvViewTable implements MetadataEventHandler {
 						@Override
 						public void run() {
 							DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-								new N5ViewerReaderFun(), new N5BasePathFun(), System
-									.getProperty("user.home"), new N5MetadataParser[] {}, // no
-																																				// group
-																																				// parsers
+								new MarsN5ViewerReaderFun(), new N5BasePathFun(), System
+									.getProperty("user.home"), new N5MetadataParser[] {},
 								new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
 									new N5CosemMetadataParser(),
 									new N5SingleScaleMetadataParser(),

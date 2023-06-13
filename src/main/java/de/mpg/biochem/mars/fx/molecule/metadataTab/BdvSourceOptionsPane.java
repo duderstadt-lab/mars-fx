@@ -322,28 +322,36 @@ public class BdvSourceOptionsPane extends VBox {
 		datasetValidation.setGraphic(times2);
 		HBox.setMargin(datasetValidation, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(datasetValidation);
-		
-		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
-			if (marsBdvSource == null) return;
-
-			boolean exists;
-			try {
-				exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).datasetExists(marsBdvSource
-						.getN5Dataset());
-			} catch (IOException e) {
-				exists = false;
-			}
-
-			if (exists) datasetValidation.setGraphic(check2);
-			else datasetValidation.setGraphic(times2);
-		});
 
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource == null) return;
 
-			boolean exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists(pathField.getText());
-			if (exists) pathValidation.setGraphic(check2);
-			else pathValidation.setGraphic(times2);
+			boolean exists;
+			try {
+				exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists("/");
+			} catch(Exception e) {
+				exists = false;
+			}
+
+			if (exists) {
+				pathValidation.setGraphic(check);
+				datasetValidation.setGraphic(check2);
+			} else {
+				pathValidation.setGraphic(times);
+				datasetValidation.setGraphic(times2);
+			}
+		});
+
+		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
+			if (marsBdvSource == null) return;
+			boolean exists;
+			try {
+				exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists(n5Dataset.getText());
+			} catch(Exception e) {
+				exists = false;
+			}
+			if (exists) datasetValidation.setGraphic(check2);
+			else datasetValidation.setGraphic(times2);
 		});
 
 		Label cLabel = new Label("C");

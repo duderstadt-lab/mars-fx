@@ -59,6 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingUtilities;
 
+import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.MaskerPane;
 import org.scijava.Context;
@@ -543,16 +544,21 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	protected void showVideo() {
-		/*
 		for (String metaUID : archive.getMetadataUIDs()) {
 			MarsMetadata meta = archive.getMetadata(metaUID);
 			for (String name : meta.getBdvSourceNames()) {
-				File path = (meta.getBdvSource(name).isN5()) ? new File(meta
-					.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name)
-						.getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
-				if (!path.exists()) {
+				//File path = (meta.getBdvSource(name).isN5()) ? new File(meta
+				//	.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name)
+				//		.getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
+				boolean exists;
+				try {
+					exists = new MarsN5ViewerReaderFun().apply(meta.getBdvSource(name).getPath()).exists("/");
+				} catch(Exception e) {
+					exists = false;
+				}
+				if (!exists) {
 					RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
-						.getWindow(), "The Bdv source path " + path.getAbsolutePath() +
+						.getWindow(), "The Bdv source path " + meta.getBdvSource(name).getPath() +
 							" of metadata record " + meta.getUID() + " does not exist. " +
 							"Please correct the path and try again.");
 					alert.show();
@@ -560,7 +566,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				}
 			}
 		}
-*/
 
 		boolean discoveredBdvFrameSettings = false;
 		if (archive.getFile() != null) {

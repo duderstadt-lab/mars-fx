@@ -345,7 +345,6 @@ public class MarsN5Factory implements Serializable {
             final String scheme = uri.getScheme();
             if (scheme == null);
             else if (scheme.equals("s3")) {
-                System.out.println("s3");
                 return openAWSS3Reader(url);
             } else if (scheme.equals("gs"))
                 return openGoogleCloudReader(url);
@@ -358,7 +357,6 @@ public class MarsN5Factory implements Serializable {
         } catch (final URISyntaxException e) {}
         if (isHDF5Reader(url))
             return openHDF5Reader(url);
-//		else if (url.matches("(?i).*\\.zarr"))
         else if (url.contains(".zarr"))
             return openZarrReader(url);
         else
