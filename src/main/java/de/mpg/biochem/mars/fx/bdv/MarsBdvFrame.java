@@ -639,7 +639,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			reader = n5Readers.get(source.getPath());
 		}
 		else {
-			reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
+			reader = new MarsN5ViewerReaderFun().apply(source.getPath());
 			n5Readers.put(source.getPath(), reader);
 		}
 
@@ -718,7 +718,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			reader = n5Readers.get(source.getPath());
 		}
 		else {
-			reader = new N5Importer.N5ViewerReaderFun().apply(source.getPath());
+			reader = new MarsN5ViewerReaderFun().apply(source.getPath());
 			n5Readers.put(source.getPath(), reader);
 		}
 

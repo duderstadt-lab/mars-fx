@@ -543,6 +543,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	protected void showVideo() {
+		/*
 		for (String metaUID : archive.getMetadataUIDs()) {
 			MarsMetadata meta = archive.getMetadata(metaUID);
 			for (String name : meta.getBdvSourceNames()) {
@@ -559,6 +560,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				}
 			}
 		}
+*/
 
 		boolean discoveredBdvFrameSettings = false;
 		if (archive.getFile() != null) {

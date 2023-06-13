@@ -30,13 +30,19 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
+import de.mpg.biochem.mars.fx.bdv.MarsN5Factory;
+import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
+import ij.IJ;
 import org.controlsfx.control.ToggleSwitch;
+import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
+import org.janelia.saalfeldlab.n5.ij.N5Importer;
 import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
@@ -235,10 +241,8 @@ public class BdvSourceOptionsPane extends VBox {
 					@Override
 					public void run() {
 						DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-							new N5ViewerReaderFun(), new N5BasePathFun(), path
-								.getAbsolutePath(), new N5MetadataParser[] {}, // no
-																																			// group
-																																			// parsers
+							new MarsN5ViewerReaderFun(), new N5BasePathFun(), path
+								.getAbsolutePath(), new N5MetadataParser[] {},
 							new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
 								new N5CosemMetadataParser(),
 								new N5SingleScaleMetadataParser(),
@@ -321,22 +325,25 @@ public class BdvSourceOptionsPane extends VBox {
 		
 		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource == null) return;
-			
-			marsBdvSource.setN5Dataset(n5Dataset.getText());
-			
-			File file = new File(pathField.getText() + "/" + marsBdvSource
-				.getN5Dataset());
-			if (file.exists()) datasetValidation.setGraphic(check2);
+
+			boolean exists;
+			try {
+				exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).datasetExists(marsBdvSource
+						.getN5Dataset());
+			} catch (IOException e) {
+				exists = false;
+			}
+
+			if (exists) datasetValidation.setGraphic(check2);
 			else datasetValidation.setGraphic(times2);
 		});
 
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource == null) return;
 
-			File file = new File(pathField.getText() + "/" + marsBdvSource
-				.getN5Dataset());
-			if (file.exists()) datasetValidation.setGraphic(check2);
-			else datasetValidation.setGraphic(times2);
+			boolean exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists(pathField.getText());
+			if (exists) pathValidation.setGraphic(check2);
+			else pathValidation.setGraphic(times2);
 		});
 
 		Label cLabel = new Label("C");
