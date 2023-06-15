@@ -114,6 +114,7 @@ import bdv.viewer.ViewerPanel;
 import bdv.viewer.ViewerState;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.molecule.AbstractMoleculeArchiveFxFrame;
+import de.mpg.biochem.mars.n5.*;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;

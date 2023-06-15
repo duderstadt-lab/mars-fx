@@ -36,8 +36,7 @@ import java.util.function.Function;
 
 import javax.swing.SwingUtilities;
 
-import de.mpg.biochem.mars.fx.bdv.MarsN5Factory;
-import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
+import de.mpg.biochem.mars.n5.*;
 import ij.IJ;
 import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.N5Reader;

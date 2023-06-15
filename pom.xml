@@ -100,6 +100,7 @@
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
 		<mars-core.version>1.0.0-beta-44</mars-core.version>
+		<mars-n5.version>0.1</mars-n5.version>
 
 		<chartfx.version>8.1.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
@@ -144,10 +145,16 @@
 	</properties>
 
 	<dependencies>
+		<!-- Mars dependencies -->
 		<dependency>
 			<groupId>de.mpg.biochem</groupId>
 			<artifactId>mars-core</artifactId>
 			<version>${mars-core.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>de.mpg.biochem</groupId>
+			<artifactId>mars-n5</artifactId>
+			<version>${mars-n5.version}</version>
 		</dependency>
 
 		<!-- ImageJ dependencies -->

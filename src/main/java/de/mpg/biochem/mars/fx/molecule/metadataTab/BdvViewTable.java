@@ -38,11 +38,10 @@ import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
-import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
+import de.mpg.biochem.mars.n5.*;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.ij.N5Importer.N5ViewerReaderFun;
 import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.N5DatasetMetadata;
 import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;

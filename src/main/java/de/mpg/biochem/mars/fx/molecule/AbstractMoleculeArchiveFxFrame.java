@@ -59,7 +59,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingUtilities;
 
-import de.mpg.biochem.mars.fx.bdv.MarsN5ViewerReaderFun;
+import de.mpg.biochem.mars.n5.*;
 import org.apache.commons.io.FileUtils;
 import org.controlsfx.control.MaskerPane;
 import org.scijava.Context;
