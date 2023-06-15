@@ -766,7 +766,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 				new MarsSingleTimePointN5Source<>((T) Util.getTypeFromInterval(image),
 					source.getName(), images, transforms, singleTimePoint);
 
-			return (Source<T>) n5Source.asVolatile(sharedQueue);
+			return (Source) n5Source.asVolatile(sharedQueue);
 		}
 		else {
 			AffineTransform3D[] transforms = new AffineTransform3D[tSize];
@@ -784,7 +784,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			final MarsN5Source<T> n5Source = new MarsN5Source<>((T) Util
 				.getTypeFromInterval(image), source.getName(), images, transforms);
 
-			return (Source<T>) n5Source.asVolatile(sharedQueue);
+			return (Source) n5Source.asVolatile(sharedQueue);
 		}
 	}
 
