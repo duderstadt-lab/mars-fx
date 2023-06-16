@@ -350,6 +350,9 @@ public class BdvSourceOptionsPane extends VBox {
 		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
 			datasetDetectionPause.setOnFinished(event -> {
 				if (marsBdvSource == null) return;
+
+				marsBdvSource.setN5Dataset(n5Dataset.getText());
+
 				boolean exists;
 				try {
 					exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists(n5Dataset.getText());
