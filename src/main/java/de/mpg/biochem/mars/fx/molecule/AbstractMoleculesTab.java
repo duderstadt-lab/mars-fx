@@ -424,7 +424,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 				String[] searchList = newValue.split(",");
 				for (String str : searchList) {
-					if (!molIndexRow.contains(str.trim())) return false;
+					if (str.trim().startsWith("!")) {
+						if (molIndexRow.contains(str.trim().substring(1)))
+							return false;
+					} else if (!molIndexRow.contains(str.trim())) return false;
 				}
 				return true;
 			});
