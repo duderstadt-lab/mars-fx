@@ -120,6 +120,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 
 		GridPane gridpane = new GridPane();
 
+		//N5 volatile view option
 		Label volatileLabel = new Label("Use N5 volatile view");
 		gridpane.add(volatileLabel, 0, 5);
 		GridPane.setMargin(volatileLabel, new Insets(5, 5, 5, 5));
@@ -133,6 +134,21 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 			prefService.put(SettingsTab.class, "useN5VolatileViews", n);
 		});
 		GridPane.setMargin(volatileSwitch, new Insets(5, 5, 5, 5));
+
+		//BDV synchronize windows option
+		Label synBdvLabel = new Label("Activate synchronized BDV windows");
+		gridpane.add(synBdvLabel, 0, 6);
+		GridPane.setMargin(synBdvLabel, new Insets(5, 5, 5, 5));
+
+		ToggleSwitch synBdvSwitch = new ToggleSwitch();
+		gridpane.add(synBdvSwitch, 1, 6);
+		synBdvSwitch.setSelected(prefService.getBoolean(SettingsTab.class,
+				"activateSynchronizedBdvWindows", false));
+		synBdvSwitch.selectedProperty().addListener((t, o, n) -> {
+			prefService.remove(SettingsTab.class, "activateSynchronizedBdvWindows");
+			prefService.put(SettingsTab.class, "activateSynchronizedBdvWindows", n);
+		});
+		GridPane.setMargin(synBdvSwitch, new Insets(5, 5, 5, 5));
 
 		rootPane.getChildren().add(gridpane);
 		VBox.setMargin(gridpane, new Insets(15, 15, 15, 15));

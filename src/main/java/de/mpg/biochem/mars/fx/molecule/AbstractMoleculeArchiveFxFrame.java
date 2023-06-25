@@ -547,9 +547,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		for (String metaUID : archive.getMetadataUIDs()) {
 			MarsMetadata meta = archive.getMetadata(metaUID);
 			for (String name : meta.getBdvSourceNames()) {
-				//File path = (meta.getBdvSource(name).isN5()) ? new File(meta
-				//	.getBdvSource(name).getPath() + "/" + meta.getBdvSource(name)
-				//		.getN5Dataset()) : new File(meta.getBdvSource(name).getPath());
 				boolean exists;
 				try {
 					exists = new MarsN5ViewerReaderFun().apply(meta.getBdvSource(name).getPath()).exists("/");
@@ -594,20 +591,26 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 						@Override
 						public void run() {
-							ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
-								.getWindow());
-							dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
-								.getViewNumber()));
+							if (prefService
+									.getBoolean(SettingsTab.class, "activateSynchronizedBdvWindows", false)) {
+								ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
+										.getWindow());
+								dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
+										.getViewNumber()));
+							} else buildBdvFrames(1);
 						}
 					});
 				}
 			});
 		}
 		else {
-			ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
-				.getWindow());
-			dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
-				.getViewNumber()));
+			if (prefService
+					.getBoolean(SettingsTab.class, "activateSynchronizedBdvWindows", false)) {
+				ShowVideoDialog dialog = new ShowVideoDialog(getNode().getScene()
+						.getWindow());
+				dialog.showAndWait().ifPresent(result2 -> buildBdvFrames(result2
+						.getViewNumber()));
+			} else buildBdvFrames(1);
 		}
 	}
 

@@ -51,18 +51,18 @@ public class ShowVideoDialog extends Dialog<ShowVideoDialog.SelectionResult> {
 		setResizable(true);
 
 		DialogPane dialogPane = getDialogPane();
-		dialogPane.setMinWidth(250);
+		dialogPane.setMinWidth(350);
 
 		GridPane gridpane = new GridPane();
-		gridpane.setMinWidth(250);
-		gridpane.setPrefWidth(250);
+		gridpane.setMinWidth(350);
+		gridpane.setPrefWidth(350);
 
-		Label viewsLabel = new Label("View number");
+		Label viewsLabel = new Label("Number of synchronized BDV windows");
 		gridpane.add(viewsLabel, 0, 4);
 		GridPane.setMargin(viewsLabel, new Insets(5, 5, 5, 5));
 
 		ComboBox<Integer> views = new ComboBox<Integer>();
-		for (int i = 1; i < 7; i++)
+		for (int i = 1; i < 5; i++)
 			views.getItems().add(i);
 		views.getSelectionModel().select(0);
 		gridpane.add(views, 1, 4);
