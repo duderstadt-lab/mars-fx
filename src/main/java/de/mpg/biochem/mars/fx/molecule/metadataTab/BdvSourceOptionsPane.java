@@ -30,7 +30,10 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
 
@@ -38,12 +41,10 @@ import de.mpg.biochem.mars.n5.*;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import org.controlsfx.control.ToggleSwitch;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
+import org.janelia.saalfeldlab.n5.metadata.*;
 import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
 import org.janelia.saalfeldlab.n5.ui.DataSelection;
@@ -251,8 +252,19 @@ public class BdvSourceOptionsPane extends VBox {
 
 								@Override
 								public void run() {
+									//Update the source
+									marsBdvSource.setPath(selectionDialog.getN5RootPath());
+									marsBdvSource.setN5Dataset(dataSelection.metadata.get(0)
+											.getPath());
+									String info = getDatasetInfo(
+											((N5DatasetMetadata) dataSelection.metadata.get(0))
+													.getAttributes());
+									marsBdvSource.setProperty("info", info);
+
+									//Update the fields
 									pathField.setText(selectionDialog.getN5RootPath());
 									n5Dataset.setText(dataSelection.metadata.get(0).getPath());
+									datasetInfo.setText(info);
 								}
 							});
 						};
@@ -278,6 +290,7 @@ public class BdvSourceOptionsPane extends VBox {
 				if (file != null) {
 					marsBdvSource.setPath(file.getAbsolutePath());
 					pathField.setText(file.getAbsolutePath());
+					datasetInfo.setText("");
 				}
 			}
 		});
@@ -319,10 +332,12 @@ public class BdvSourceOptionsPane extends VBox {
 			pathDetectionPause.setOnFinished(event -> {
 				if (marsBdvSource == null) return;
 				else marsBdvSource.setPath(pathField.getText());
+				datasetInfo.setText("");
 
 				boolean pathExists, datasetExists;
+				N5Reader reader = null;
 				try {
-					N5Reader reader = new MarsN5ViewerReaderFun().apply(pathField.getText());
+					reader = new MarsN5ViewerReaderFun().apply(pathField.getText());
 					pathExists = reader.exists("/");
 					datasetExists = reader.exists(n5Dataset.getText());
 				} catch(Exception e) {
@@ -333,6 +348,17 @@ public class BdvSourceOptionsPane extends VBox {
 				if (pathExists) {
 					pathValidation.setGraphic(check);
 					if (datasetExists) datasetValidation.setGraphic(check2);
+
+					if (reader != null) {
+						try {
+							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+							if (attributes != null) {
+								String info = getDatasetInfo(attributes);
+								marsBdvSource.setProperty("info", info);
+								datasetInfo.setText(info);
+							}
+						} catch (IOException e) {}
+					}
 				} else {
 					pathValidation.setGraphic(times);
 					datasetValidation.setGraphic(times2);
@@ -347,14 +373,29 @@ public class BdvSourceOptionsPane extends VBox {
 				if (marsBdvSource == null) return;
 
 				marsBdvSource.setN5Dataset(n5Dataset.getText());
+				datasetInfo.setText("");
 
 				boolean exists;
+				N5Reader reader = null;
 				try {
-					exists = new MarsN5ViewerReaderFun().apply(pathField.getText()).exists(n5Dataset.getText());
+					reader = new MarsN5ViewerReaderFun().apply(pathField.getText());
+					exists = reader.exists(n5Dataset.getText());
 				} catch (Exception e) {
 					exists = false;
 				}
-				if (exists) datasetValidation.setGraphic(check2);
+				if (exists) {
+					datasetValidation.setGraphic(check2);
+					if (reader != null) {
+						try {
+							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+							if (attributes != null) {
+								String info = getDatasetInfo(attributes);
+								marsBdvSource.setProperty("info", info);
+								datasetInfo.setText(info);
+							}
+						} catch (IOException e) {}
+					}
+				}
 				else datasetValidation.setGraphic(times2);
 			});
 			datasetDetectionPause.playFromStart();
@@ -436,6 +477,13 @@ public class BdvSourceOptionsPane extends VBox {
 		marsBdvSource.getAffineTransform3D().set(number, m, n);
 	}
 
+	public static String getDatasetInfo(DatasetAttributes attributes) {
+		final String dimString = String.join(" x ", Arrays.stream(attributes
+				.getDimensions()).mapToObj(d -> Long.toString(d)).collect(Collectors
+				.toList()));
+		return "Dimensions " + dimString + ", " + attributes.getDataType();
+	}
+
 	public void setMarsBdvSource(MarsBdvSource marsBdvSource) {
 		if (marsBdvSource == null) {
 			this.marsBdvSource = null;
@@ -491,7 +539,8 @@ public class BdvSourceOptionsPane extends VBox {
 
 				// Dataset information
 				if (marsBdvSource.getProperties().containsKey("info")) datasetInfo
-					.setText("Dimensions " + marsBdvSource.getProperties().get("info"));
+					.setText(marsBdvSource.getProperties().get("info"));
+				else datasetInfo.setText("");
 			}
 			else {
 				getChildren().remove(n5OptionsHBox);
