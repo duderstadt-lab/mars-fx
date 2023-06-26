@@ -245,67 +245,8 @@ public class BdvViewTable implements MetadataEventHandler {
 						break;
 				}
 
-				if (bdvSource.isN5()) {
-					SwingUtilities.invokeLater(new Runnable() {
-
-						@Override
-						public void run() {
-							DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-								new MarsN5ViewerReaderFun(), new N5BasePathFun(), System
-									.getProperty("user.home"), new N5MetadataParser[] {},
-								new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
-									new N5CosemMetadataParser(),
-									new N5SingleScaleMetadataParser(),
-									new CanonicalMetadataParser(),
-									new N5GenericSingleScaleMetadataParser() });
-
-							selectionDialog.setVirtualOption(false);
-							selectionDialog.setCropOption(false);
-
-							selectionDialog.setTreeRenderer(new N5DatasetTreeCellRenderer(
-								true));
-
-							// Prevents NullPointerException
-							selectionDialog.setContainerPathUpdateCallback(x -> {});
-
-							final Consumer<DataSelection> callback = (
-								DataSelection dataSelection) -> {
-								Platform.runLater(new Runnable() {
-
-									@Override
-									public void run() {
-										bdvSource.setPath(selectionDialog.getN5RootPath());
-										bdvSource.setN5Dataset(dataSelection.metadata.get(0)
-											.getPath());
-										bdvSource.setProperty("info", getDatasetInfo(
-											((N5DatasetMetadata) dataSelection.metadata.get(0))
-												.getAttributes()));
-										marsImageMetadata.putBdvSource(bdvSource);
-										loadBdvSources();
-									}
-								});
-							};
-
-							selectionDialog.run(callback);
-						}
-					});
-				}
-				else {
-					FileChooser fileChooser = new FileChooser();
-					fileChooser.setTitle("Select xml");
-					fileChooser.setInitialDirectory(new File(System.getProperty(
-						"user.home")));
-					fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file",
-						"*.xml"));
-					File path = fileChooser.showOpenDialog(getNode().getScene()
-						.getWindow());
-
-					if (path != null) {
-						bdvSource.setPath(path.getAbsolutePath());
-						marsImageMetadata.putBdvSource(bdvSource);
-						loadBdvSources();
-					}
-				}
+				marsImageMetadata.putBdvSource(bdvSource);
+				loadBdvSources();
 			}
 		});
 

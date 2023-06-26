@@ -275,9 +275,11 @@ public class BdvSourceOptionsPane extends VBox {
 						"") : new File(pathField.getText().trim());
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setTitle("Select xml");
-				File startingDirectory = new File(path.getParent());
-				if (startingDirectory.exists()) fileChooser.setInitialDirectory(
-					startingDirectory);
+				if (path.getParent() != null) {
+					File startingDirectory = new File(path.getParent());
+					if (startingDirectory.exists()) fileChooser.setInitialDirectory(
+							startingDirectory);
+				}
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file",
 					"*.xml"));
 				File file = fileChooser.showOpenDialog(getScene().getWindow());
