@@ -218,15 +218,6 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(pathValidation);
 
-		/*
-		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
-			File file = new File(pathField.getText());
-			if (file.exists()) pathValidation.setGraphic(check);
-			else pathValidation.setGraphic(times);
-
-			if (marsBdvSource != null) marsBdvSource.setPath(pathField.getText());
-		});
-*/
 		pathButton = new Button("Browse");
 		pathButton.setPrefWidth(70);
 		pathButton.setMaxWidth(70);
