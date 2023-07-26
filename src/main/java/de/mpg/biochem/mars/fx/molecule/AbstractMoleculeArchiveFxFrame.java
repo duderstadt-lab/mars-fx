@@ -59,8 +59,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingUtilities;
 
+import de.mpg.biochem.mars.fx.dialogs.*;
 import de.mpg.biochem.mars.n5.*;
+import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.controlsfx.control.MaskerPane;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -73,11 +76,6 @@ import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
-import de.mpg.biochem.mars.fx.dialogs.PropertySelectionDialog;
-import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
-import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
-import de.mpg.biochem.mars.fx.dialogs.SegmentTableSelectionDialog;
-import de.mpg.biochem.mars.fx.dialogs.ShowVideoDialog;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -193,7 +191,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	protected SettingsTab settingsTab;
 
 	protected boolean windowStateLoaded = false;
-	// protected boolean discoveredBdvFrameSettings = false;
 
 	protected static JsonFactory jfactory;
 
@@ -318,7 +315,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		catch (IOException e) {
 			e.printStackTrace();
 			logService.warn("A problem was encountered when loading the rover file " +
-				archive.getFile().getAbsolutePath() + ".rover" +
+				archive.getSource().getPath() + ".rover" +
 				" containing the mars-fx display settings. \n" +
 				"Please check the file to make sure the syntax is correct." +
 				"Aborting and opening with the default settings.");
@@ -371,7 +368,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		tabsContainer.getSelectionModel().selectedItemProperty().addListener(
 			new ChangeListener<Tab>()
 			{
-
 				@Override
 				public void changed(ObservableValue<? extends Tab> observable,
 					Tab oldValue, Tab newValue)
@@ -447,6 +443,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileSaveJsonVirtualStoreAction = new Action(
 			"Save a Json Virtual Store Copy...", null, null,
 			e -> saveJsonVirtualStoreCopy());
+		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", "Shortcut+S", FLOPPY_ALT,
+				e -> saveToCloudStorage());
 		// Comment this out for now since it doesn't clear the settings before
 		// loading the new ones and
 		// I have to check on BDV...
@@ -456,7 +454,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		fileMenu = ActionUtils.createMenu("File", fileSaveAction,
 			fileSaveCopyAction, fileSaveJsonCopyAction, fileSaveVirtualStoreAction,
-			fileSaveJsonVirtualStoreAction,
+			fileSaveJsonVirtualStoreAction, fileSaveActionCloudStorageAction,
 			// null,
 			// importRoverSettingsAction,
 			null, fileCloseAction);
@@ -565,11 +563,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		}
 
 		boolean discoveredBdvFrameSettings = false;
-		if (archive.getFile() != null) {
+		if (archive.getSource() != null && archive.getSource().getPath() != null) {
 			try {
 				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonNode = mapper.readTree(FileUtils.readFileToByteArray(
-					new File(archive.getFile().getAbsolutePath() + ".rover")));
+				JsonNode jsonNode = mapper.readTree(archive.getSource().getRoverInputStream());
 				if (jsonNode.get("bdvFrames") != null) discoveredBdvFrameSettings =
 					true;
 			}
@@ -899,27 +896,31 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public void save() {
-		if (archive.getFile() != null) {
-			if (archive.getFile().getName().equals(archive.getName())) {
+		if (!archive.getSource().isReachable()) {
+			RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+					.getWindow(), "MoleculeArchive source is unreachable.");
+			alert.show();
+			return;
+		}
+		if (archive.getSource() != null) {
+			//if (archive.getSource().getName().equals(archive.getName())) {
 				runTask(() -> {
 					fireEvent(new MoleculeArchiveSavingEvent(archive));
 					try {
 						archive.save();
-						saveState(archive.getFile().getAbsolutePath());
+						saveState(archive.getSource().getRoverOutputStream());
 					}
 					catch (IOException e) {
 						e.printStackTrace();
 					}
 					fireEvent(new MoleculeArchiveSavedEvent(archive));
 				}, "Saving...");
-			}
-			else {
+			//} else {
 				// the archive name has changed... so let's check with the user about
 				// the new name...
-				saveAs(archive.getFile());
-			}
-		}
-		else {
+				//saveAs(new File(archive.getName()));
+			//}
+		} else {
 			saveAs(new File(archive.getName()));
 		}
 		settingsTab.save();
@@ -930,8 +931,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
 			.length() - 6);
 
-		if (archive.getFile() != null) {
-			saveAsCopy(new File(archive.getFile().getParentFile(), fileName));
+		if (archive.getSource() != null) {
+			saveAsCopy(new File(new File(archive.getSource().getPath()).getParentFile(), fileName));
 		}
 		else {
 			saveAsCopy(new File(System.getProperty("user.home"), fileName));
@@ -943,8 +944,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
 			.length() - 6);
 
-		if (archive.getFile() != null) {
-			saveAsJsonCopy(new File(archive.getFile().getParentFile(), fileName));
+		if (archive.getSource() != null) {
+			saveAsCopy(new File(new File(archive.getSource().getPath()).getParentFile(), fileName));
 		}
 		else {
 			saveAsJsonCopy(new File(System.getProperty("user.home"), fileName));
@@ -972,10 +973,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					archive.saveAs(newFileWithExtension);
 					saveState(newFileWithExtension.getAbsolutePath());
 
+					/*
 					if (moleculeArchiveService.contains(archive.getName()))
 						moleculeArchiveService.removeArchive(archive);
 
-					archive.setFile(newFileWithExtension);
+					archive.getSource().setPath(newFileWithExtension.getAbsolutePath());
 					archive.setName(newFileWithExtension.getName());
 					Platform.runLater(new Runnable() {
 
@@ -986,6 +988,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					});
 
 					moleculeArchiveService.addArchive(archive);
+					*/
 				}
 				catch (IOException e) {
 					e.printStackTrace();
@@ -1136,6 +1139,28 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				fireEvent(new MoleculeArchiveSavedEvent(archive));
 			}, "Saving Virtual Store Copy...");
 		}
+	}
+
+	private void saveToCloudStorage() {
+		List<String> recentSaveURLs = prefService.getList(CloudSaveDialog.class, "recentSaveURLs");
+		CloudSaveDialog cloudSaveDialog = new CloudSaveDialog(this.tabsContainer.getScene().getWindow(),
+				"Select Save URL", recentSaveURLs);
+		cloudSaveDialog.showAndWait().ifPresent(result -> {
+			String url = result.getURL();
+			recentSaveURLs.add(url);
+			prefService.put(CloudSaveDialog.class, "recentSaveURLs", recentSaveURLs);
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					archive.saveAs(url);
+					saveState(archive.getSource().getRoverOutputStream());
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
+		});
 	}
 
 	private void importRoverSettings() {
@@ -1492,6 +1517,20 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		});
 	}
 
+	protected void saveState(OutputStream outputStream) throws IOException {
+		if (marsBdvFrames == null && archive.getSource().exists(archive.getSource().getPath() + ".rover"))
+			roverFileBackground = IOUtils.toByteArray(archive.getSource().getRoverInputStream());
+
+		logln("Saving archive window settings to rover file...");
+
+		JsonGenerator jGenerator = jfactory.createGenerator(outputStream);
+		jGenerator.useDefaultPrettyPrinter();
+		toJSON(jGenerator);
+		jGenerator.close();
+		outputStream.flush();
+		outputStream.close();
+	}
+
 	protected void saveState(String path) throws IOException {
 		if (marsBdvFrames == null && new File(path + ".rover").exists())
 			roverFileBackground = FileUtils.readFileToByteArray(new File(path +
@@ -1510,13 +1549,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	protected void loadState() throws IOException {
-		if (archive.getFile() == null) return;
+		if (archive.getSource() == null) return;
+		if (!archive.getSource().exists(archive.getSource().getPath() + ".rover")) return;
 
-		File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
-		if (!stateFile.exists()) return;
-
-		InputStream inputStream = new BufferedInputStream(new FileInputStream(
-			stateFile));
+		InputStream inputStream = new BufferedInputStream(archive.getSource().getRoverInputStream());
 		JsonParser jParser = jfactory.createParser(inputStream);
 		fromJSON(jParser);
 		jParser.close();
@@ -1524,10 +1560,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	protected void loadBdvSettings() {
-		if (archive.getFile() == null) return;
-
-		File stateFile = new File(archive.getFile().getAbsolutePath() + ".rover");
-		if (!stateFile.exists()) return;
+		if (archive.getSource() == null) return;
+		try {
+			if (!archive.getSource().exists(archive.getSource().getPath() + ".rover")) return;
+		} catch (IOException e) {}
 
 		// Build default parser
 		DefaultJsonConverter defaultParser = new DefaultJsonConverter();
@@ -1587,8 +1623,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			@Override
 			public void run() {
 				try {
-					InputStream inputStream = new BufferedInputStream(new FileInputStream(
-						stateFile));
+					InputStream inputStream = new BufferedInputStream(archive.getSource().getRoverInputStream());
 					JsonParser jParser = jfactory.createParser(inputStream);
 					defaultParser.fromJSON(jParser);
 					jParser.close();
