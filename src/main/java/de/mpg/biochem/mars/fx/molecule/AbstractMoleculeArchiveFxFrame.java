@@ -60,6 +60,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.fx.dialogs.*;
+import de.mpg.biochem.mars.io.MoleculeArchiveAmazonS3Source;
+import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
 import de.mpg.biochem.mars.n5.*;
 import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
@@ -210,7 +212,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		super();
 		context.inject(this);
 
-		this.title = archive.getName();
+		this.title = (archive.getSource() != null && archive.getSource() instanceof MoleculeArchiveAmazonS3Source) ? archive.getName() + " (s3)" : archive.getName();
 		this.archive = archive;
 
 		archive.setWindow(this);
@@ -1147,13 +1149,15 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				"Select Save URL", recentSaveURLs);
 		cloudSaveDialog.showAndWait().ifPresent(result -> {
 			String url = result.getURL();
-			recentSaveURLs.add(url);
+			if (recentSaveURLs.contains(url))
+				recentSaveURLs.remove(recentSaveURLs.indexOf(url));
+			recentSaveURLs.add(0, url);
 			prefService.put(CloudSaveDialog.class, "recentSaveURLs", recentSaveURLs);
 			runTask(() -> {
 				fireEvent(new MoleculeArchiveSavingEvent(archive));
 				try {
-					archive.saveAs(url);
-					saveState(archive.getSource().getRoverOutputStream());
+					String updatedURL = archive.saveAs(url);
+					saveState(new MoleculeArchiveIOFactory().openSource(updatedURL).getRoverOutputStream());
 				}
 				catch (IOException e) {
 					e.printStackTrace();
