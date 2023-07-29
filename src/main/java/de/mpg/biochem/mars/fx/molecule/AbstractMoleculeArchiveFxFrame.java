@@ -445,7 +445,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileSaveJsonVirtualStoreAction = new Action(
 			"Save a Json Virtual Store Copy...", null, null,
 			e -> saveJsonVirtualStoreCopy());
-		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", "Shortcut+S", FLOPPY_ALT,
+		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", null, FLOPPY_ALT,
 				e -> saveToCloudStorage());
 		// Comment this out for now since it doesn't clear the settings before
 		// loading the new ones and
