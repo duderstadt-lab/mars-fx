@@ -63,6 +63,7 @@ import javax.swing.SwingUtilities;
 import de.mpg.biochem.mars.fx.dialogs.*;
 import de.mpg.biochem.mars.io.MoleculeArchiveAmazonS3Source;
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
+import de.mpg.biochem.mars.io.MoleculeArchiveSource;
 import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.n5.*;
 import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveSaveDialog;
@@ -1155,7 +1156,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 							runTask(() -> {
 								fireEvent(new MoleculeArchiveSavingEvent(archive));
 								try {
-									String updatedURL = archive.saveAs(dataSelection.url);
+									String updatedURL = (dataSelection.url.endsWith("." + MoleculeArchiveSource.MOLECULE_ARCHIVE_STORE_ENDING)) ?
+										archive.saveAsVirtualStore(dataSelection.url) : archive.saveAs(dataSelection.url);
 									saveState(new MoleculeArchiveIOFactory().openSource(updatedURL).getRoverOutputStream());
 								}
 								catch (IOException e) {
