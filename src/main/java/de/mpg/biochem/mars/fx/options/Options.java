@@ -145,7 +145,13 @@ public class Options {
 		lineSeparator.setPreferences(options);
 		encoding.setPreferences(options);
 		markdownFileExtensions.setPreferences(options);
-		markdownExtensions.setPreferences(options);
+		//markdownExtensions.setPreferences(options);
+
+		//Make sure full set of markdown extensions are active.
+		markdownExtensions.set(new String[]{"abbreviation", "anchorlink", "aside", "autolink",
+				"definition", "gfm-strikethrough", "gfm-tables", "gfm-tasklist", "gitlab",
+				"toc", "yaml-front-matter"});
+
 		markdownRenderer.setPreferences(options);
 		showLineNo.setPreferences(options);
 		showWhitespace.setPreferences(options);
