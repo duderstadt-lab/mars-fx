@@ -434,7 +434,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 	protected void buildMenuBar() {
 		// Build file menu
-		Action fileSaveAction = new Action("Save", "Shortcut+S", FLOPPY_ALT,
+		Action fileSaveAction = new Action("Save", "Shortcut+S", null,
 			e -> save());
 		Action fileSaveCopyAction = new Action("Save a Copy...", null, null,
 			e -> saveCopy());
@@ -445,7 +445,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileSaveJsonVirtualStoreAction = new Action(
 			"Save a Json Virtual Store Copy...", null, null,
 			e -> saveJsonVirtualStoreCopy());
-		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", null, FLOPPY_ALT,
+		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", null, null,
 				e -> saveToCloudStorage());
 		// Comment this out for now since it doesn't clear the settings before
 		// loading the new ones and
