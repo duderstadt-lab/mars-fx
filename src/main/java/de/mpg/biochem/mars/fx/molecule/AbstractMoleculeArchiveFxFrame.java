@@ -56,13 +56,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.fx.dialogs.*;
 import de.mpg.biochem.mars.io.MoleculeArchiveAmazonS3Source;
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
+import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.n5.*;
+import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveSaveDialog;
+import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveSelection;
+import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveTreeCellRenderer;
 import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -99,14 +104,6 @@ import de.mpg.biochem.mars.fx.util.HotKeyEntry;
 import de.mpg.biochem.mars.fx.util.IJStage;
 import de.mpg.biochem.mars.fx.util.MarsAnimation;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
-import de.mpg.biochem.mars.molecule.ArchiveUtils;
-import de.mpg.biochem.mars.molecule.Molecule;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveWindow;
 import de.mpg.biochem.mars.object.MartianObject;
 import de.mpg.biochem.mars.util.DefaultJsonConverter;
 import de.mpg.biochem.mars.util.MarsUtil;
@@ -212,7 +209,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		super();
 		context.inject(this);
 
-		this.title = (archive.getSource() != null && archive.getSource() instanceof MoleculeArchiveAmazonS3Source) ? archive.getName() + " (s3)" : archive.getName();
+		this.title = (archive.getSource() != null && archive.getSource() instanceof MoleculeArchiveAmazonS3Source) ? archive.getName() + " (minio)" : archive.getName();
 		this.archive = archive;
 
 		archive.setWindow(this);
@@ -1144,27 +1141,37 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	private void saveToCloudStorage() {
-		List<String> recentSaveURLs = prefService.getList(CloudSaveDialog.class, "recentSaveURLs");
-		CloudSaveDialog cloudSaveDialog = new CloudSaveDialog(this.tabsContainer.getScene().getWindow(),
-				"Select Save URL", recentSaveURLs);
-		cloudSaveDialog.showAndWait().ifPresent(result -> {
-			String url = result.getURL();
-			if (recentSaveURLs.contains(url))
-				recentSaveURLs.remove(recentSaveURLs.indexOf(url));
-			recentSaveURLs.add(0, url);
-			prefService.put(CloudSaveDialog.class, "recentSaveURLs", recentSaveURLs);
-			runTask(() -> {
-				fireEvent(new MoleculeArchiveSavingEvent(archive));
-				try {
-					String updatedURL = archive.saveAs(url);
-					saveState(new MoleculeArchiveIOFactory().openSource(updatedURL).getRoverOutputStream());
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (archive != null) {
+					MoleculeArchiveSaveDialog cloudSaveDialog = new MoleculeArchiveSaveDialog(context);
+					cloudSaveDialog.setTreeRenderer(new MoleculeArchiveTreeCellRenderer(true));
+					// Prevents NullPointerException
+					cloudSaveDialog.setContainerPathUpdateCallback(x -> {});
+
+					final Consumer<MoleculeArchiveSelection> callback = (MoleculeArchiveSelection dataSelection) -> {
+						Platform.runLater(() -> {
+							runTask(() -> {
+								fireEvent(new MoleculeArchiveSavingEvent(archive));
+								try {
+									String updatedURL = archive.saveAs(dataSelection.url);
+									saveState(new MoleculeArchiveIOFactory().openSource(updatedURL).getRoverOutputStream());
+								}
+								catch (IOException e) {
+									e.printStackTrace();
+								}
+								fireEvent(new MoleculeArchiveSavedEvent(archive));
+							}, "Saving...");
+						});
+					};
+
+					cloudSaveDialog.run(callback);
 				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
-				fireEvent(new MoleculeArchiveSavedEvent(archive));
-			}, "Saving...");
+			}
 		});
+
+
 	}
 
 	private void importRoverSettings() {
