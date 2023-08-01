@@ -105,7 +105,7 @@
 		<mars-core.version>1.0.0-beta-53</mars-core.version>
 		<mars-minio.version>0.1</mars-minio.version>
 
-		<chartfx.version>11.2.5</chartfx.version>
+		<chartfx.version>11.2.7</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
 		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
 		<chartfx-math.version>${chartfx.version}</chartfx-math.version>
@@ -137,6 +137,7 @@
 		<controlsfx.version>11.1.0</controlsfx.version>
 		<flowless.version>0.6.3</flowless.version>
 		<fontawesomefx-commons.version>11.0</fontawesomefx-commons.version>
+		<fontawesomefx-controls.version>11.0</fontawesomefx-controls.version>
 		<fontawesomefx-fontawesome.version>4.7.0-11</fontawesomefx-fontawesome.version>
 		<fontawesomefx-materialicons.version>2.2.0-5</fontawesomefx-materialicons.version>
 		<fontawesomefx-octicons.version>4.3.0-5</fontawesomefx-octicons.version>
@@ -357,21 +358,105 @@
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-commons</artifactId>
 			<version>${fontawesomefx-commons.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
-			<artifactId>fontawesomefx-fontawesome</artifactId>
-			<version>${fontawesomefx-fontawesome.version}</version>
+			<artifactId>fontawesomefx-controls</artifactId>
+			<version>${fontawesomefx-controls.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>de.jensd</groupId>
+					<artifactId>fontawesomefx-commons</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-materialicons</artifactId>
 			<version>${fontawesomefx-materialicons.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>de.jensd</groupId>
+					<artifactId>fontawesomefx-commons</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-octicons</artifactId>
 			<version>${fontawesomefx-octicons.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>de.jensd</groupId>
+					<artifactId>fontawesomefx-commons</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
