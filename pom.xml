@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>33.2.0</version>
+		<version>35.1.1</version>
 		<relativePath />
 	</parent>
 
 	<groupId>de.mpg.biochem</groupId>
 	<artifactId>mars-fx</artifactId>
-	<version>0.6.1-SNAPSHOT</version>
+	<version>0.7-SNAPSHOT</version>
 
 	<name>mars-fx</name>
 	<description>JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.</description>
@@ -91,6 +91,9 @@
 	</ciManagement>
 
 	<properties>
+		<scijava.jvm.version>11</scijava.jvm.version>
+		<scijava.jvm.build.version>11</scijava.jvm.build.version>
+
 		<package-name>de.mpg.biochem.mars.fx</package-name>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
 		<license.licenseName>bsd_2</license.licenseName>
@@ -102,7 +105,7 @@
 		<mars-core.version>1.0.0-beta-53</mars-core.version>
 		<mars-minio.version>0.1</mars-minio.version>
 
-		<chartfx.version>8.1.5</chartfx.version>
+		<chartfx.version>11.2.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
 		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
 		<chartfx-math.version>${chartfx.version}</chartfx-math.version>
@@ -131,17 +134,20 @@
 
 		<autolink.version>0.10.0</autolink.version>
 		<annotations.version>15.0</annotations.version>
-		<controlsfx.version>8.40.17</controlsfx.version>
-		<flowless.version>0.6.1</flowless.version>
-		<fontawesomefx-commons.version>8.15</fontawesomefx-commons.version>
-		<fontawesomefx-fontawesome.version>4.7.0-5</fontawesomefx-fontawesome.version>
+		<controlsfx.version>11.1.0</controlsfx.version>
+		<flowless.version>0.6.3</flowless.version>
+		<fontawesomefx-commons.version>11.0</fontawesomefx-commons.version>
+		<fontawesomefx-fontawesome.version>4.7.0-11</fontawesomefx-fontawesome.version>
 		<fontawesomefx-materialicons.version>2.2.0-5</fontawesomefx-materialicons.version>
 		<fontawesomefx-octicons.version>4.3.0-5</fontawesomefx-octicons.version>
-		<jfoenix.version>8.0.10</jfoenix.version>
+		<jfoenix.version>9.0.10</jfoenix.version>
 		<reactfx.version>2.0-M5</reactfx.version>
-		<richtextfx.version>0.9.2</richtextfx.version>
+		<richtextfx.version>0.10.6</richtextfx.version>
 		<undofx.version>2.1.0</undofx.version>
 		<wellbehavedfx.version>0.3.3</wellbehavedfx.version>
+
+		<!-- JavaFx Version-->
+		<javafx.version>13</javafx.version>
 	</properties>
 
 	<dependencies>
@@ -155,6 +161,42 @@
 			<groupId>de.mpg.biochem</groupId>
 			<artifactId>mars-minio</artifactId>
 			<version>${mars-minio.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-base</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-controls</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-graphics</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-media</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-fxml</artifactId>
+			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-web</artifactId>
+			<version>${javafx.version}</version>
 		</dependency>
 
 		<!-- ImageJ dependencies -->
