@@ -99,7 +99,7 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 	private CustomFlowPane root;
 	private JFXChipView<T> control;
 	private MarsFakeFocusTextArea editor;
-	private ChipsAutoComplete<T> autoCompletePopup;
+	private JFXAutoCompletePopup<T> autoCompletePopup;
 
 	private boolean moveToNewLine = false;
 	private boolean editorOnNewLine = true;
@@ -149,7 +149,7 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 		getChildren().add(scrollPane);
 
 		// init auto complete
-		autoCompletePopup = (ChipsAutoComplete<T>) getSkinnable().getAutoCompletePopup();
+		autoCompletePopup = getSkinnable().getAutoCompletePopup();
 		autoCompletePopup.setSelectionHandler(event -> {
 			T selectedItem = event.getObject();
 			if (getSkinnable().getSelectionHandler() != null) {
@@ -158,9 +158,11 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 			getSkinnable().getChips().add(selectedItem);
 			editor.clear();
 		});
+		// COMMENTED OUT THESE TWO LINES DUE TO CASTING ISSUES
+		// DON'T SEE ANY EFFECT SO FAR
 		// add position listener to auto complete
-		autoCompletePopup.setShift(root.getVgap() * 2);
-		root.vgapProperty().addListener((observable -> autoCompletePopup.setShift(root.getVgap() * 2)));
+		// autoCompletePopup.setShift(root.getVgap() * 2);
+		// root.vgapProperty().addListener((observable -> autoCompletePopup.setShift(root.getVgap() * 2)));
 
 		// create initial chips
 		for (T item : control.getChips()) {
@@ -430,9 +432,9 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 
 	}
 
-	public static class ChipsAutoComplete<T> extends JFXAutoCompletePopup<T> {
+	public static class MarsChipsAutoComplete<T> extends JFXAutoCompletePopup<T> {
 
-		public ChipsAutoComplete() {
+		public MarsChipsAutoComplete() {
 			getStyleClass().add("jfx-chips-popup");
 		}
 
