@@ -215,6 +215,7 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 					break;
 
 				case BACK_SPACE:
+					/*
 					ObservableList<T> chips = getSkinnable().getChips();
 					int size = chips.size();
 					if ((size > 0) && editor.getText().isEmpty()) {
@@ -223,6 +224,7 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 							autoCompletePopup.hide();
 						}
 					}
+					*/
 					break;
 
 				case SPACE:
