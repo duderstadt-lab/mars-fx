@@ -51,6 +51,7 @@ import com.jfoenix.controls.JFXAutoCompletePopup;
 import com.jfoenix.controls.JFXChip;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXDefaultChip;
+import com.jfoenix.skins.JFXAutoCompletePopupSkin;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.FocusTraversalInputMap;
 import com.sun.javafx.scene.control.inputmap.InputMap;
@@ -91,13 +92,13 @@ import java.util.List;
  *         lines to make it work here... Make Skinnable request focus only on
  *         mouse click to prevent focus stealing...
  */
-public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
+public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 
 	private static final PseudoClass PSEUDO_CLASS_ERROR = PseudoClass.getPseudoClass("error");
 
 	private CustomFlowPane root;
 	private JFXChipView<T> control;
-	private FakeFocusTextArea editor;
+	private MarsFakeFocusTextArea editor;
 	private ChipsAutoComplete<T> autoCompletePopup;
 
 	private boolean moveToNewLine = false;
@@ -125,12 +126,12 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 	};
 
 	private final ScrollPane scrollPane;
-	private ChipViewBehaviorBase<T> behavior;
+	private MarsChipViewBehaviorBase<T> behavior;
 
-	public JFXChipViewSkin(JFXChipView<T> control) {
+	public MarsJFXChipViewSkin(JFXChipView<T> control) {
 		super(control);
 		this.control = control;
-		this.behavior = new JFXChipViewSkin.ChipViewBehaviorBase<>(control);
+		this.behavior = new MarsJFXChipViewSkin.MarsChipViewBehaviorBase<>(control);
 		root = new CustomFlowPane();
 		root.getStyleClass().add("chips-pane");
 		setupEditor();
@@ -175,7 +176,7 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 	}
 
 	private void setupEditor() {
-		editor = new FakeFocusTextArea();
+		editor = new MarsFakeFocusTextArea();
 		editor.setManaged(false);
 		editor.getStyleClass().add("editor");
 		editor.setWrapText(true);
@@ -260,12 +261,27 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 		editor.promptTextProperty().bind(control.promptTextProperty());
 		root.getChildren().add(editor);
 
-		// add control listeners
-		control.focusedProperty().addListener((obj, oldVal, newVal) -> {
-			if (editor != null) {
-				editor.setFakeFocus(newVal);
+		control.setOnMouseClicked(event -> {
+			if (editor != null && getSkinnable() != null) {
+				editor.setFakeFocus(true);
+				getSkinnable().requestFocus();
 			}
 		});
+
+		editor.setOnMouseClicked(event -> {
+			if (editor != null && getSkinnable() != null) {
+				editor.setFakeFocus(true);
+				getSkinnable().requestFocus();
+			}
+		});
+
+		// add control listeners
+		control.focusedProperty().addListener((obj, oldVal, newVal) -> {
+			if (editor != null && newVal == false) {
+				editor.setFakeFocus(false);
+			}
+		});
+
 		control.addEventFilter(KeyEvent.ANY, ke -> {
 			if (editor != null) {
 				if (ke.getTarget().equals(editor)) {
@@ -456,12 +472,13 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 		}
 	}
 
-	final class FakeFocusTextArea extends TextArea {
+	final class MarsFakeFocusTextArea extends TextArea {
+
 		@Override
 		public void requestFocus() {
-			if (getSkinnable() != null) {
-				getSkinnable().requestFocus();
-			}
+			// if (getSkinnable() != null) {
+			// getSkinnable().requestFocus();
+			// }
 		}
 
 		public void setFakeFocus(boolean b) {
@@ -469,7 +486,9 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 		}
 
 		@Override
-		public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
+		public Object queryAccessibleAttribute(AccessibleAttribute attribute,
+											   Object... parameters)
+		{
 			switch (attribute) {
 				case FOCUS_ITEM:
 					// keep focus on parent control
@@ -487,8 +506,8 @@ public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 		}
 	}
 
-	final static class ChipViewBehaviorBase<T> extends BehaviorBase<JFXChipView<T>> {
-		public ChipViewBehaviorBase(JFXChipView<T> control) {
+	final static class MarsChipViewBehaviorBase<T> extends BehaviorBase<JFXChipView<T>> {
+		public MarsChipViewBehaviorBase(JFXChipView<T> control) {
 			super(control);
 		}
 
