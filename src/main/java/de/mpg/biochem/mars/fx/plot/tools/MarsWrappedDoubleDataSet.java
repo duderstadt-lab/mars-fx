@@ -129,7 +129,7 @@ public class MarsWrappedDoubleDataSet extends
 	}
 
 	@Override
-	public int getDataCount(final int dimIndex) {
+	public int getDataCount() {
 		if (downsampling && rangeTooLarge()) {
 			AxisRange range = axis.getRange();
 			int fullRangePointCount = (int) (maxPointCount * (xValues.getValue(xValues
@@ -146,6 +146,12 @@ public class MarsWrappedDoubleDataSet extends
 	@Override
 	public final double[] getValues(final int dimIndex) {
 		return dimIndex == DataSet.DIM_X ? xValues.getArray() : yValues.getArray();
+	}
+
+	@Override
+	public MarsWrappedDoubleDataSet set(DataSet other, boolean copy) {
+		//No implementation for now.
+		return this;
 	}
 
 	public void stopDownsampling() {

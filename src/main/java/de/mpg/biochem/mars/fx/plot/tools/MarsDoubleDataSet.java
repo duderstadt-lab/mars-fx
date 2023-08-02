@@ -354,7 +354,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	}
 
 	@Override
-	public int getDataCount(final int dimIndex) {
+	public int getDataCount() {
 		if (downsampling && rangeTooLarge()) {
 			AxisRange range = axis.getRange();
 			int fullRangePointCount = (int) (maxPointCount * (xValues.getDouble(
@@ -371,6 +371,19 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	@Override
 	public final double[] getValues(final int dimIndex) {
 		return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
+	}
+
+	@Override
+	public MarsDoubleDataSet set(DataSet other, boolean copy) {
+		lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+			// copy data
+			this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), copy);
+
+			copyMetaData(other);
+			copyDataLabelsAndStyles(other, copy);
+			copyAxisDescription(other);
+		}));
+		return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
 	}
 
 	public void stopDownsampling() {
