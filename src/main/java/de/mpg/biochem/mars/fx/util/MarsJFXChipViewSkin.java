@@ -47,19 +47,16 @@
 
 package de.mpg.biochem.mars.fx.util;
 
-import java.util.List;
-
 import com.jfoenix.controls.JFXAutoCompletePopup;
 import com.jfoenix.controls.JFXChip;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXDefaultChip;
-import com.jfoenix.skins.JFXAutoCompletePopupSkin;
 import com.sun.javafx.scene.control.behavior.BehaviorBase;
-import com.sun.javafx.scene.control.behavior.KeyBinding;
-import com.sun.javafx.scene.control.skin.BehaviorSkinBase;
+import com.sun.javafx.scene.control.behavior.FocusTraversalInputMap;
+import com.sun.javafx.scene.control.inputmap.InputMap;
 import com.sun.javafx.scene.traversal.Direction;
-
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.HPos;
@@ -68,6 +65,7 @@ import javafx.geometry.VPos;
 import javafx.scene.AccessibleAttribute;
 import javafx.scene.Node;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.SkinBase;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
@@ -79,29 +77,28 @@ import javafx.scene.text.Text;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
 
+import java.util.List;
+
 /**
- * JFXChipArea is the material design implementation of chip Input. An easy way
- * to manage chips in a text area component with an x to omit the chip.
+ * JFXChipArea is the material design implementation of chip Input.
+ * An easy way to manage chips in a text area component with an x to
+ * omit the chip.
  *
- * @author Shadi Shaheen
- * @author Gerard Moubarak
+ * @author Shadi Shaheen & Gerard Moubarak
  * @version 1.0.0
  * @since 2018-02-01
  * @author Karl Duderstadt Remove backspace delete behavior. Comment out two
  *         lines to make it work here... Make Skinnable request focus only on
  *         mouse click to prevent focus stealing...
  */
-public class MarsJFXChipViewSkin<T> extends
-	BehaviorSkinBase<JFXChipView<T>, MarsJFXChipViewSkin.MarsChipViewBehaviorBase<T>>
-{
+public class JFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 
-	private static final PseudoClass PSEUDO_CLASS_ERROR = PseudoClass
-		.getPseudoClass("error");
+	private static final PseudoClass PSEUDO_CLASS_ERROR = PseudoClass.getPseudoClass("error");
 
 	private CustomFlowPane root;
 	private JFXChipView<T> control;
-	private MarsFakeFocusTextArea editor;
-	private JFXAutoCompletePopup<T> autoCompletePopup;
+	private FakeFocusTextArea editor;
+	private ChipsAutoComplete<T> autoCompletePopup;
 
 	private boolean moveToNewLine = false;
 	private boolean editorOnNewLine = true;
@@ -128,17 +125,17 @@ public class MarsJFXChipViewSkin<T> extends
 	};
 
 	private final ScrollPane scrollPane;
+	private ChipViewBehaviorBase<T> behavior;
 
-	public MarsJFXChipViewSkin(JFXChipView<T> control) {
-		super(control, new MarsChipViewBehaviorBase<T>(control, null));
+	public JFXChipViewSkin(JFXChipView<T> control) {
+		super(control);
 		this.control = control;
-
+		this.behavior = new JFXChipViewSkin.ChipViewBehaviorBase<>(control);
 		root = new CustomFlowPane();
 		root.getStyleClass().add("chips-pane");
 		setupEditor();
 
 		scrollPane = new ScrollPane(root) {
-
 			@Override
 			public void requestFocus() {
 				if (getSkinnable() != null) {
@@ -151,9 +148,7 @@ public class MarsJFXChipViewSkin<T> extends
 		getChildren().add(scrollPane);
 
 		// init auto complete
-		// autoCompletePopup = (MarsChipsAutoComplete<T>)
-		// getSkinnable().getAutoCompletePopup();
-		autoCompletePopup = getSkinnable().getAutoCompletePopup();
+		autoCompletePopup = (ChipsAutoComplete<T>) getSkinnable().getAutoCompletePopup();
 		autoCompletePopup.setSelectionHandler(event -> {
 			T selectedItem = event.getObject();
 			if (getSkinnable().getSelectionHandler() != null) {
@@ -162,31 +157,25 @@ public class MarsJFXChipViewSkin<T> extends
 			getSkinnable().getChips().add(selectedItem);
 			editor.clear();
 		});
-		// COMMENTED OUT THESE TWO LINES DUE TO CASTING ISSUES
-		// DON'T SEE ANY EFFECT SO FAR
 		// add position listener to auto complete
-		// autoCompletePopup.setShift(root.getVgap() * 2);
-		// root.vgapProperty().addListener((observable ->
-		// autoCompletePopup.setShift(root.getVgap() * 2)));
+		autoCompletePopup.setShift(root.getVgap() * 2);
+		root.vgapProperty().addListener((observable -> autoCompletePopup.setShift(root.getVgap() * 2)));
 
 		// create initial chips
 		for (T item : control.getChips()) {
 			createChip(item);
 		}
-		control.getChips().addListener(new WeakListChangeListener<>(
-			chipsChangeListeners));
+		control.getChips().addListener(new WeakListChangeListener<>(chipsChangeListeners));
 
 	}
 
 	@Override
-	protected void layoutChildren(double contentX, double contentY,
-		double contentWidth, double contentHeight)
-	{
+	protected void layoutChildren(double contentX, double contentY, double contentWidth, double contentHeight) {
 		scrollPane.resizeRelocate(contentX, contentY, contentWidth, contentHeight);
 	}
 
 	private void setupEditor() {
-		editor = new MarsFakeFocusTextArea();
+		editor = new FakeFocusTextArea();
 		editor.setManaged(false);
 		editor.getStyleClass().add("editor");
 		editor.setWrapText(true);
@@ -207,8 +196,7 @@ public class MarsJFXChipViewSkin<T> extends
 							}
 							editor.clear();
 							autoCompletePopup.hide();
-						}
-						catch (Exception ex) {
+						} catch (Exception ex) {
 							getSkinnable().pseudoClassStateChanged(PSEUDO_CLASS_ERROR, true);
 						}
 					}
@@ -218,28 +206,23 @@ public class MarsJFXChipViewSkin<T> extends
 				case TAB:
 					if (editor.getText().trim().isEmpty()) {
 						if (event.isShiftDown()) {
-							getBehavior().traverse(getSkinnable(), Direction.PREVIOUS);
-						}
-						else {
-							getBehavior().traverse(editor, Direction.NEXT);
+							behavior.traverse(getSkinnable(), Direction.PREVIOUS);
+						} else {
+							behavior.traverse(editor, Direction.NEXT);
 						}
 					}
 					event.consume();
 					break;
 
 				case BACK_SPACE:
-					// At the moment do nothing
-					// System.out.println("backspace - do nothing");
-					/*
-					  ObservableList<T> chips = getSkinnable().getChips();
-					  int size = chips.size();
-					  if ((size > 0) && editor.getText().isEmpty()) {
-					      chips.remove(size - 1);
-					      if (autoCompletePopup.isShowing()) {
-					          autoCompletePopup.hide();
-					      }
-					  }
-					  */
+					ObservableList<T> chips = getSkinnable().getChips();
+					int size = chips.size();
+					if ((size > 0) && editor.getText().isEmpty()) {
+						chips.remove(size - 1);
+						if (autoCompletePopup.isShowing()) {
+							autoCompletePopup.hide();
+						}
+					}
 					break;
 
 				case SPACE:
@@ -255,27 +238,19 @@ public class MarsJFXChipViewSkin<T> extends
 		editor.textProperty().addListener(observable -> {
 			// update editor position
 			// 13 is the default scroll bar width
-			requiredWidth = editor.snappedLeftInset() + computeTextContentWidth(
-				editor) + editor.snappedRightInset() + 13;
-			if (availableWidth < requiredWidth && !editorOnNewLine &&
-				!moveToNewLine)
-			{
+			requiredWidth = editor.snappedLeftInset() + computeTextContentWidth(editor) + editor.snappedRightInset() + 13;
+			if (availableWidth < requiredWidth && !editorOnNewLine && !moveToNewLine) {
 				moveToNewLine = true;
 				root.requestLayout();
-			}
-			else if (availableWidth > requiredWidth && editorOnNewLine &&
-				moveToNewLine)
-			{
+			} else if (availableWidth > requiredWidth && editorOnNewLine && moveToNewLine) {
 				moveToNewLine = false;
 				root.requestLayout();
 			}
 			// show popup
-			autoCompletePopup.filter(item -> getSkinnable().getPredicate().test(item,
-				editor.getText()));
+			autoCompletePopup.filter(item -> getSkinnable().getPredicate().test(item, editor.getText()));
 			if (autoCompletePopup.getFilteredSuggestions().isEmpty()) {
 				autoCompletePopup.hide();
-			}
-			else {
+			} else {
 				autoCompletePopup.show(editor);
 			}
 		});
@@ -283,27 +258,12 @@ public class MarsJFXChipViewSkin<T> extends
 		editor.promptTextProperty().bind(control.promptTextProperty());
 		root.getChildren().add(editor);
 
-		control.setOnMouseClicked(event -> {
-			if (editor != null && getSkinnable() != null) {
-				editor.setFakeFocus(true);
-				getSkinnable().requestFocus();
-			}
-		});
-
-		editor.setOnMouseClicked(event -> {
-			if (editor != null && getSkinnable() != null) {
-				editor.setFakeFocus(true);
-				getSkinnable().requestFocus();
-			}
-		});
-
 		// add control listeners
 		control.focusedProperty().addListener((obj, oldVal, newVal) -> {
-			if (editor != null && newVal == false) {
-				editor.setFakeFocus(false);
+			if (editor != null) {
+				editor.setFakeFocus(newVal);
 			}
 		});
-
 		control.addEventFilter(KeyEvent.ANY, ke -> {
 			if (editor != null) {
 				if (ke.getTarget().equals(editor)) {
@@ -331,15 +291,12 @@ public class MarsJFXChipViewSkin<T> extends
 		try {
 			if (getSkinnable().getChipFactory() != null) {
 				chip = getSkinnable().getChipFactory().apply(getSkinnable(), item);
-			}
-			else {
+			} else {
 				chip = new JFXDefaultChip<T>(getSkinnable(), item);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			throw new RuntimeException("can't create chip for item '" + item +
-				"' make sure to override the string converter and return null if text input is not valid.",
-				e);
+					"' make sure to override the string converter and return null if text input is not valid.", e);
 		}
 		int size = root.getChildren().size();
 		root.getChildren().add(size - 1, chip);
@@ -352,8 +309,8 @@ public class MarsJFXChipViewSkin<T> extends
 		return text.getLayoutBounds().getWidth();
 	}
 
-	private class CustomFlowPane extends FlowPane {
 
+	private class CustomFlowPane extends FlowPane {
 		double initOffset = 8;
 
 		{
@@ -366,8 +323,11 @@ public class MarsJFXChipViewSkin<T> extends
 			// scrolling values range from 0 to 1
 			scrollPane.setVvalue(y / height);
 			// just for usability
-			node.requestFocus();
+			if (getSkinnable().isFocused()) {
+				node.requestFocus();
+			}
 		}
+
 
 		@Override
 		protected void layoutChildren() {
@@ -404,8 +364,7 @@ public class MarsJFXChipViewSkin<T> extends
 			final double insideWidth = width - left - right;
 			final double insideHeight = height - top - bottom;
 			final double newLineEditorX = right + initOffset;
-			final double editorVInsets = editor.snappedTopInset() + editor
-				.snappedBottomInset();
+			final double editorVInsets = editor.snappedTopInset() + editor.snappedBottomInset();
 
 			final List<Node> managedChildren = getManagedChildren();
 			final int mangedChildrenSize = managedChildren.size();
@@ -422,23 +381,30 @@ public class MarsJFXChipViewSkin<T> extends
 				}
 
 				if (availableWidth < minWidth || moveToNewLine) {
-					layoutInArea(editor, newLineEditorX, contentHeight + root.getVgap(),
-						insideWidth - initOffset, editor.prefHeight(-1), 0,
-						getColumnHAlignmentInternal(), VPos.TOP);
+					layoutInArea(editor,
+							newLineEditorX,
+							contentHeight + root.getVgap(),
+							insideWidth - initOffset,
+							editor.prefHeight(-1),
+							0, getColumnHAlignmentInternal(), VPos.TOP);
 					editorOnNewLine = true;
 					ensureVisible(editor);
-				}
-				else {
-					layoutInArea(editor, lastChild.getBoundsInParent().getMaxX() + root
-						.getHgap(), lastChild.getLayoutY(), availableWidth - root.getHgap(),
-						lastChild.getHeight() + editorVInsets, 0,
-						getColumnHAlignmentInternal(), getRowVAlignmentInternal());
+				} else {
+					layoutInArea(editor,
+							lastChild.getBoundsInParent().getMaxX() + root.getHgap(),
+							lastChild.getLayoutY(),
+							availableWidth - root.getHgap(),
+							lastChild.getHeight() + editorVInsets,
+							0, getColumnHAlignmentInternal(), getRowVAlignmentInternal());
 					editorOnNewLine = false;
 				}
-			}
-			else {
-				layoutInArea(editor, newLineEditorX, top, insideWidth - initOffset,
-					editor.prefHeight(-1), 0, getColumnHAlignmentInternal(), VPos.TOP);
+			} else {
+				layoutInArea(editor,
+						newLineEditorX,
+						top,
+						insideWidth - initOffset,
+						editor.prefHeight(-1)
+						, 0, getColumnHAlignmentInternal(), VPos.TOP);
 				editorOnNewLine = true;
 				ensureVisible(editor);
 			}
@@ -446,10 +412,10 @@ public class MarsJFXChipViewSkin<T> extends
 
 	}
 
-	public static class MarsChipsAutoComplete<T> extends JFXAutoCompletePopup<T> {
+	public static class ChipsAutoComplete<T> extends JFXAutoCompletePopup<T> {
 
-		public MarsChipsAutoComplete() {
-			super();
+		public ChipsAutoComplete() {
+			getStyleClass().add("jfx-chips-popup");
 		}
 
 		private double shift = 0;
@@ -467,34 +433,33 @@ public class MarsJFXChipViewSkin<T> extends
 			node = text;
 			if (!isShowing()) {
 				if (node.getScene() == null || node.getScene().getWindow() == null) {
-					throw new IllegalStateException(
-						"Can not show popup. The node must be attached to a scene/window.");
+					throw new IllegalStateException("Can not show popup. The node must be attached to a scene/window.");
 				}
 				Window parent = node.getScene().getWindow();
-				this.show(parent, parent.getX() + node.localToScene(0, 0).getX() + node
-					.getScene().getX(), parent.getY() + node.localToScene(0, 0).getY() +
-						node.getScene().getY() + node.getLayoutBounds().getHeight() +
-						shift);
+				this.show(parent, parent.getX() +
+								node.localToScene(0, 0).getX() +
+								node.getScene().getX(),
+						parent.getY() + node.localToScene(0, 0).getY() +
+								node.getScene().getY() + node.getLayoutBounds().getHeight() + shift);
 				((JFXAutoCompletePopupSkin<T>) getSkin()).animate();
-			}
-			else {
+			} else {
 				// if already showing update location if needed
 				Window parent = node.getScene().getWindow();
-				this.show(parent, parent.getX() + node.localToScene(0, 0).getX() + node
-					.getScene().getX(), parent.getY() + node.localToScene(0, 0).getY() +
-						node.getScene().getY() + node.getLayoutBounds().getHeight() +
-						shift);
+				this.show(parent, parent.getX() +
+								node.localToScene(0, 0).getX() +
+								node.getScene().getX(),
+						parent.getY() + node.localToScene(0, 0).getY() +
+								node.getScene().getY() + node.getLayoutBounds().getHeight() + shift);
 			}
 		}
 	}
 
-	final class MarsFakeFocusTextArea extends TextArea {
-
+	final class FakeFocusTextArea extends TextArea {
 		@Override
 		public void requestFocus() {
-			// if (getSkinnable() != null) {
-			// getSkinnable().requestFocus();
-			// }
+			if (getSkinnable() != null) {
+				getSkinnable().requestFocus();
+			}
 		}
 
 		public void setFakeFocus(boolean b) {
@@ -502,9 +467,7 @@ public class MarsJFXChipViewSkin<T> extends
 		}
 
 		@Override
-		public Object queryAccessibleAttribute(AccessibleAttribute attribute,
-			Object... parameters)
-		{
+		public Object queryAccessibleAttribute(AccessibleAttribute attribute, Object... parameters) {
 			switch (attribute) {
 				case FOCUS_ITEM:
 					// keep focus on parent control
@@ -515,19 +478,25 @@ public class MarsJFXChipViewSkin<T> extends
 		}
 	}
 
-	final static class MarsChipViewBehaviorBase<T> extends
-		BehaviorBase<JFXChipView<T>>
-	{
+	public void dispose() {
+		super.dispose();
+		if (this.behavior != null) {
+			this.behavior.dispose();
+		}
+	}
 
-		public MarsChipViewBehaviorBase(JFXChipView<T> control,
-			List<KeyBinding> keyBindings)
-		{
-			super(control, keyBindings);
+	final static class ChipViewBehaviorBase<T> extends BehaviorBase<JFXChipView<T>> {
+		public ChipViewBehaviorBase(JFXChipView<T> control) {
+			super(control);
 		}
 
 		@Override
+		public InputMap<JFXChipView<T>> getInputMap() {
+			return new InputMap<>(getNode());
+		}
+
 		public void traverse(Node node, Direction dir) {
-			super.traverse(node, dir);
+			FocusTraversalInputMap.traverse(node, dir);
 		}
 	}
 }
