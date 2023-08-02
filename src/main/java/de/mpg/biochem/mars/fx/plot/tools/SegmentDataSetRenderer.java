@@ -30,10 +30,7 @@
 package de.mpg.biochem.mars.fx.plot.tools;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +107,7 @@ public class SegmentDataSetRenderer extends
 	}
 
 	@Override
-	public void render(final GraphicsContext gc, final Chart chart,
+	public List<DataSet> render(final GraphicsContext gc, final Chart chart,
 		final int dataSetOffset, final ObservableList<DataSet> datasets)
 	{
 		if (!(chart instanceof XYChart)) {
@@ -125,7 +122,7 @@ public class SegmentDataSetRenderer extends
 
 		// If there are no data sets
 		if (localDataSetList.isEmpty()) {
-			return;
+			return Collections.emptyList();
 		}
 
 		final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
@@ -171,11 +168,11 @@ public class SegmentDataSetRenderer extends
 			if (isAssumeSortedData()) {
 				indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
 				indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1, dataSet
-					.getDataCount(DataSet.DIM_X));
+					.getDataCount());
 			}
 			else {
 				indexMin = 0;
-				indexMax = dataSet.getDataCount(DataSet.DIM_X);
+				indexMax = dataSet.getDataCount();
 			}
 
 			if (indexMax - indexMin <= 0) {
@@ -283,6 +280,8 @@ public class SegmentDataSetRenderer extends
 		} // end of 'dataSetIndex' loop
 
 		ProcessingProfiler.getTimeDiff(start);
+
+		return localDataSetList;
 	}
 
 	/**

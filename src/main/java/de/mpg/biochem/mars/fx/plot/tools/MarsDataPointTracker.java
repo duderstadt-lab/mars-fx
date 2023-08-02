@@ -198,7 +198,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin
 		double prevX = Double.MIN_VALUE;
 		double nextX = Double.MAX_VALUE;
 
-		final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+		final int nDataCount = dataSet.getDataCount();
 		for (int i = 0, size = nDataCount; i < size; i++) {
 			final double currentX = dataSet.get(DataSet.DIM_X, i);
 
@@ -241,7 +241,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin
 		double prevX = Double.NEGATIVE_INFINITY;
 		double nextX = Double.POSITIVE_INFINITY;
 
-		final int nDataCount = dataSet.getDataCount(DataSet.DIM_X);
+		final int nDataCount = dataSet.getDataCount();
 		for (int i = 0, size = nDataCount; i < size; i++) {
 			final double currentX = dataSet.get(DataSet.DIM_X, i);
 

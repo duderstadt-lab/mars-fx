@@ -311,7 +311,7 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
 		final List<String> newCategoryList = new ArrayList<>();
 		final boolean result = dataSet.lock().readLockGuard(() -> {
 			boolean zeroDataLabels = true;
-			for (int i = 0; i < dataSet.getDataCount(DataSet.DIM_X); i++) {
+			for (int i = 0; i < dataSet.getDataCount(); i++) {
 				final String dataLabel = dataSet.getDataLabel(i);
 				String sanitizedLabel;
 				if (dataLabel == null) {
