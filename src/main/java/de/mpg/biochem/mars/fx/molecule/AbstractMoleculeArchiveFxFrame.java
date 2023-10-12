@@ -896,13 +896,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public void save() {
-		if (!archive.getSource().isReachable()) {
-			RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
-					.getWindow(), "MoleculeArchive source is unreachable.");
-			alert.show();
-			return;
-		}
 		if (archive.getSource() != null) {
+			if (!archive.getSource().isReachable()) {
+				RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+						.getWindow(), "MoleculeArchive source is unreachable.");
+				alert.show();
+				return;
+			}
 			//if (archive.getSource().getName().equals(archive.getName())) {
 				runTask(() -> {
 					fireEvent(new MoleculeArchiveSavingEvent(archive));
