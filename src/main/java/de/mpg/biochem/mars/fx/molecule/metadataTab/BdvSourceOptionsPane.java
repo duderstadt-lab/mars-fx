@@ -41,15 +41,17 @@ import de.mpg.biochem.mars.n5.*;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import org.controlsfx.control.ToggleSwitch;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.metadata.*;
-import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
-import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
+import org.janelia.saalfeldlab.n5.ui.DataSelection;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
+import org.janelia.saalfeldlab.n5.universe.metadata.*;
+import org.janelia.saalfeldlab.n5.universe.metadata.canonical.CanonicalMetadataParser;
+import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.v04.OmeNgffMetadataParser;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
@@ -229,13 +231,14 @@ public class BdvSourceOptionsPane extends VBox {
 					@Override
 					public void run() {
 						DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-							new MarsN5ViewerReaderFun(), new N5BasePathFun(),
-								pathField.getText(), new N5MetadataParser[] {},
-							new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
-								new N5CosemMetadataParser(),
-								new N5SingleScaleMetadataParser(),
-								new CanonicalMetadataParser(),
-								new N5GenericSingleScaleMetadataParser() });
+								new MarsN5ViewerReaderFun(), new N5BasePathFun(),
+								pathField.getText(),
+								new N5MetadataParser[]{ new OmeNgffMetadataParser() }, // need the ngff parser because it's where the metadata are
+								new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
+										new N5CosemMetadataParser(),
+										new N5SingleScaleMetadataParser(),
+										new CanonicalMetadataParser(),
+										new N5GenericSingleScaleMetadataParser() });
 
 						selectionDialog.setVirtualOption(false);
 						selectionDialog.setCropOption(false);
@@ -350,14 +353,12 @@ public class BdvSourceOptionsPane extends VBox {
 					if (datasetExists) datasetValidation.setGraphic(check2);
 
 					if (reader != null) {
-						try {
-							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-							if (attributes != null) {
-								String info = getDatasetInfo(attributes);
-								marsBdvSource.setProperty("info", info);
-								datasetInfo.setText(info);
-							}
-						} catch (IOException e) {}
+						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+						if (attributes != null) {
+							String info = getDatasetInfo(attributes);
+							marsBdvSource.setProperty("info", info);
+							datasetInfo.setText(info);
+						}
 					}
 				} else {
 					pathValidation.setGraphic(times);
@@ -386,14 +387,12 @@ public class BdvSourceOptionsPane extends VBox {
 				if (exists) {
 					datasetValidation.setGraphic(check2);
 					if (reader != null) {
-						try {
-							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-							if (attributes != null) {
-								String info = getDatasetInfo(attributes);
-								marsBdvSource.setProperty("info", info);
-								datasetInfo.setText(info);
-							}
-						} catch (IOException e) {}
+						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+						if (attributes != null) {
+							String info = getDatasetInfo(attributes);
+							marsBdvSource.setProperty("info", info);
+							datasetInfo.setText(info);
+						}
 					}
 				}
 				else datasetValidation.setGraphic(times2);
