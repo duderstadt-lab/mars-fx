@@ -255,18 +255,42 @@ public class BdvSourceOptionsPane extends VBox {
 
 								@Override
 								public void run() {
+									String baseDialogPath = selectionDialog.getN5RootPath();
+									String datasetPath = dataSelection.metadata.get(0).getPath();
+
+									//This mess is so that the n5rootPath ends with the n5 directory
+									//and the dataset is the path after that
+									//the dialog datasetPath that is returned can include the n5 directory otherwise.
+									StringBuilder n5RootPath = new StringBuilder(baseDialogPath);
+									StringBuilder n5DatasetPath = new StringBuilder(datasetPath);
+									if (!baseDialogPath.endsWith(".n5")) {
+										String[] parts = datasetPath.split("/");
+
+										for (int i = 0; i < parts.length; i++) {
+											if (!n5RootPath.toString().endsWith("/")) n5RootPath.append("/");
+											n5RootPath.append(parts[i]);
+											if (parts[i].endsWith(".n5")) {
+												n5DatasetPath = new StringBuilder();
+												n5DatasetPath.append(parts[i + 1]);
+												for (int j = i + 2; j < parts.length; j++) {
+													n5DatasetPath.append("/").append(parts[j]);
+												}
+												break;
+											}
+										}
+									}
+
 									//Update the source
-									marsBdvSource.setPath(selectionDialog.getN5RootPath());
-									marsBdvSource.setN5Dataset(dataSelection.metadata.get(0)
-											.getPath());
+									marsBdvSource.setPath(n5RootPath.toString());
+									marsBdvSource.setN5Dataset(n5DatasetPath.toString());
 									String info = getDatasetInfo(
 											((N5DatasetMetadata) dataSelection.metadata.get(0))
 													.getAttributes());
 									marsBdvSource.setProperty("info", info);
 
 									//Update the fields
-									pathField.setText(selectionDialog.getN5RootPath());
-									n5Dataset.setText(dataSelection.metadata.get(0).getPath());
+									pathField.setText(n5RootPath.toString());
+									n5Dataset.setText(n5DatasetPath.toString());
 									datasetInfo.setText(info);
 								}
 							});
