@@ -38,12 +38,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import javax.swing.JButton;
-import javax.swing.JToggleButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
 import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
@@ -85,6 +80,8 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 
 	private JTextField dnaThickness;
 
+	private JCheckBox showAllDNAs;
+
 	private JPanel panel;
 
 	private LineOverlay dnaMoleculeOverlay;
@@ -123,8 +120,11 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		});
 		Dimension dimScaleField = new Dimension(100, 20);
 		dnaThickness.setMinimumSize(dimScaleField);
-
 		panel.add(dnaThickness);
+
+		panel.add(new JLabel(""));
+		showAllDNAs = new JCheckBox("Show all", false);
+		panel.add(showAllDNAs);
 		
 		JButton dnaFinderButton = new JButton("Find DNA");
 		dnaFinderButton.addActionListener(new ActionListener() {
@@ -252,6 +252,11 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			if (dnaThickness != null) jGenerator.writeStringField("thickness",
 				dnaThickness.getText());
 		}, jParser -> dnaThickness.setText(jParser.getText()));
+
+		setJsonField("showAll", jGenerator -> {
+			if (showAllDNAs != null) jGenerator.writeBooleanField("showAll",
+					showAllDNAs.isSelected());
+		}, jParser -> showAllDNAs.setSelected(jParser.getBooleanValue()));
 	}
 
 	@Override
@@ -259,7 +264,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 		this.molecule = molecule;
 		if (molecule != null && dnaMoleculeOverlay != null) {
 			List<DNASegment> segments = new ArrayList<DNASegment>();
-			segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
+			if (showAllDNAs.isSelected() && archive != null) {
+				archive.molecules().filter(m -> m.getMetadataUID().equals(molecule.getMetadataUID())).forEach(m ->
+						segments.add(new DNASegment(m.getParameter("Dna_Top_X1"),
+								m.getParameter("Dna_Top_Y1"),
+								m.getParameter("Dna_Bottom_X2"),
+								m.getParameter("Dna_Bottom_Y2"))));
+			} else segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
 					molecule.getParameter("Dna_Top_Y1"),
 					molecule.getParameter("Dna_Bottom_X2"),
 					molecule.getParameter("Dna_Bottom_Y2")));
@@ -336,7 +347,13 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 			dnaMoleculeOverlay.setThickness(Integer.valueOf(dnaThickness.getText()));
 			if (molecule != null) {
 				List<DNASegment> segments = new ArrayList<DNASegment>();
-				segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
+				if (showAllDNAs.isSelected() && archive != null) {
+					archive.molecules().filter(m -> m.getMetadataUID().equals(molecule.getMetadataUID())).forEach(m ->
+						segments.add(new DNASegment(m.getParameter("Dna_Top_X1"),
+								m.getParameter("Dna_Top_Y1"),
+								m.getParameter("Dna_Bottom_X2"),
+								m.getParameter("Dna_Bottom_Y2"))));
+				} else segments.add(new DNASegment(molecule.getParameter("Dna_Top_X1"),
 						molecule.getParameter("Dna_Top_Y1"),
 						molecule.getParameter("Dna_Bottom_X2"),
 						molecule.getParameter("Dna_Bottom_Y2")));
