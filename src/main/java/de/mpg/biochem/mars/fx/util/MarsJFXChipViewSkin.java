@@ -56,6 +56,7 @@ import com.sun.javafx.scene.control.behavior.BehaviorBase;
 import com.sun.javafx.scene.control.behavior.FocusTraversalInputMap;
 import com.sun.javafx.scene.control.inputmap.InputMap;
 import com.sun.javafx.scene.traversal.Direction;
+import com.sun.javafx.scene.traversal.TraversalMethod;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
@@ -209,9 +210,9 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 				case TAB:
 					if (editor.getText().trim().isEmpty()) {
 						if (event.isShiftDown()) {
-							behavior.traverse(getSkinnable(), Direction.PREVIOUS);
+							behavior.traverse(getSkinnable(), Direction.PREVIOUS, TraversalMethod.KEY);
 						} else {
-							behavior.traverse(editor, Direction.NEXT);
+							behavior.traverse(editor, Direction.NEXT, TraversalMethod.KEY);
 						}
 					}
 					event.consume();
@@ -518,8 +519,9 @@ public class MarsJFXChipViewSkin<T> extends SkinBase<JFXChipView<T>> {
 			return new InputMap<>(getNode());
 		}
 
-		public void traverse(Node node, Direction dir) {
-			FocusTraversalInputMap.traverse(node, dir);
+		public void traverse(Node node, Direction dir, TraversalMethod method) {
+			FocusTraversalInputMap.traverse(node, dir, method);
 		}
 	}
 }
+

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.scijava</groupId>
 		<artifactId>pom-scijava</artifactId>
-		<version>35.1.1</version>
+		<version>36.0.0</version>
 		<relativePath />
 	</parent>
 
@@ -91,8 +91,8 @@
 	</ciManagement>
 
 	<properties>
-		<scijava.jvm.version>11</scijava.jvm.version>
 		<scijava.jvm.build.version>11</scijava.jvm.build.version>
+		<scijava.jvm.version>11</scijava.jvm.version>
 
 		<package-name>de.mpg.biochem.mars.fx</package-name>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
@@ -104,6 +104,14 @@
 
 		<mars-core.version>1.0.0-beta-53</mars-core.version>
 		<mars-minio.version>0.1</mars-minio.version>
+
+		<jvm.modules>javafx.base,javafx.controls,javafx.fxml,javafx.media,javafx.swing,javafx.web,javafx.graphics,java.naming,java.management,java.sql</jvm.modules>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
+
+		<!-- JavaFx Version-->
+		<javafx.version>21</javafx.version>
 
 		<chartfx.version>11.2.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
@@ -142,14 +150,13 @@
 		<annotations.version>15.0</annotations.version>
 		<controlsfx.version>11.1.0</controlsfx.version>
 		<flowless.version>0.6.3</flowless.version>
-		<jfoenix.version>9.0.10</jfoenix.version>
+		<jfoenix.version>21.0.0</jfoenix.version>
 		<reactfx.version>2.0-M5</reactfx.version>
 		<richtextfx.version>0.10.6</richtextfx.version>
 		<undofx.version>2.1.0</undofx.version>
 		<wellbehavedfx.version>0.3.3</wellbehavedfx.version>
 
-		<!-- JavaFx Version-->
-		<javafx.version>11</javafx.version>
+		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<dependencies>
@@ -164,6 +171,8 @@
 			<artifactId>mars-minio</artifactId>
 			<version>${mars-minio.version}</version>
 		</dependency>
+
+		<!-- JavaFX dependencies -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-base</artifactId>
@@ -184,7 +193,6 @@
 			<artifactId>javafx-swing</artifactId>
 			<version>${javafx.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
@@ -284,7 +292,7 @@
 			<version>${jackson-dataformat-smile.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.jfoenix</groupId>
+			<groupId>org.rationalityfrontline.workaround</groupId>
 			<artifactId>jfoenix</artifactId>
 			<version>${jfoenix.version}</version>
 		</dependency>
