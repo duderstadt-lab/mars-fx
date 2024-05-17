@@ -134,9 +134,7 @@
 		<n5-ij.version>4.1.1</n5-ij.version>
 		<n5-imglib2.version>7.0.0</n5-imglib2.version>
 		<n5-universe.version>1.4.1</n5-universe.version>
-		<n5-viewer_fiji.version>6.1.0</n5-viewer_fiji.version>
 		<n5-zarr.version>1.3.1</n5-zarr.version>
-		<n5-zstandard.version>1.0.2</n5-zstandard.version>
 
 		<autolink.version>0.10.0</autolink.version>
 		<annotations.version>15.0</annotations.version>
@@ -219,6 +217,51 @@
 		</dependency>
 
 		<!-- N5 dependencies -->
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5</artifactId>
+			<version>${n5.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-ij</artifactId>
+			<version>${n5-ij.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-imglib2</artifactId>
+			<version>${n5-imglib2.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-aws-s3</artifactId>
+			<version>${n5-aws-s3.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-universe</artifactId>
+			<version>${n5-universe.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-hdf5</artifactId>
+			<version>${n5-hdf5.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-blosc</artifactId>
+			<version>${n5-blosc.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-google-cloud</artifactId>
+			<version>${n5-google-cloud.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.janelia.saalfeldlab</groupId>
+			<artifactId>n5-zarr</artifactId>
+			<version>${n5-zarr.version}</version>
+		</dependency>
 
 		<!-- Third party dependencies -->
 		<dependency>

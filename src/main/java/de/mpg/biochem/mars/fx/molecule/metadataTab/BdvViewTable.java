@@ -40,18 +40,6 @@ import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.n5.*;
 import org.controlsfx.control.textfield.CustomTextField;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
-import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5DatasetMetadata;
-import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
-import org.janelia.saalfeldlab.n5.ui.DataSelection;
-import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
-import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
