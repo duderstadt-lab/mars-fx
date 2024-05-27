@@ -91,8 +91,8 @@
 	</ciManagement>
 
 	<properties>
-		<scijava.jvm.build.version>11</scijava.jvm.build.version>
-		<scijava.jvm.version>11</scijava.jvm.version>
+		<scijava.jvm.build.version>21</scijava.jvm.build.version>
+		<scijava.jvm.version>21</scijava.jvm.version>
 
 		<package-name>de.mpg.biochem.mars.fx</package-name>
 		<license.copyrightOwners>Karl Duderstadt</license.copyrightOwners>
