@@ -29,10 +29,7 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.scijava.table.DoubleColumn;
 
@@ -213,7 +210,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				xRangeIndicator.setLabelVerticalPosition(0.2);
 
 				Color color = Color.web(roi.getColor());
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".x-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }\n",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255), roi.getOpacity());
@@ -222,7 +219,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 					255), (int) Math.round(color.getGreen() * 255), (int) Math.round(color
 						.getBlue() * 255), roi.getOpacity());
 
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
 					index, Math.round(solidColor.getRed() * 255), Math.round(solidColor
 						.getGreen() * 255), Math.round(solidColor.getBlue() * 255));
@@ -236,7 +233,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				yRangeIndicator.setLabelHorizontalPosition(0.2);
 
 				Color color = Color.web(roi.getColor());
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".y-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255), roi.getOpacity());
@@ -245,7 +242,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 					255), (int) Math.round(color.getGreen() * 255), (int) Math.round(color
 						.getBlue() * 255), roi.getOpacity());
 
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
 					index, Math.round(solidColor.getRed() * 255), Math.round(solidColor
 						.getGreen() * 255), Math.round(solidColor.getBlue() * 255));
@@ -266,13 +263,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				xValueIndicator.setLabelPosition(0.2);
 
 				Color color = Color.web(poi.getColor());
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
 							.getStroke());
 
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: white; }\n",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255));
@@ -286,13 +283,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				yValueIndicator.setLabelPosition(0.2);
 
 				Color color = Color.web(poi.getColor());
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
 							.getStroke());
 
-				newStyleSheet += String.format(
+				newStyleSheet += String.format(Locale.US,
 					".x-value-indicator-label%d { -fx-stroke: rgba(%d, %d, %d); -fx-background-color: white; }\n",
 					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 						255), Math.round(color.getBlue() * 255));
