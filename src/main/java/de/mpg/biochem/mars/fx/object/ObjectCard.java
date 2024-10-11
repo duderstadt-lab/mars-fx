@@ -29,22 +29,24 @@
 
 package de.mpg.biochem.mars.fx.object;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
+import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsObjectTrackerBdvCommand;
 import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
+import org.scijava.Context;
+import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -84,6 +86,12 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 	@Parameter
 	protected MarsBdvFrame marsBdvFrame;
 
+	@Parameter
+	protected Context context;
+
+	@Parameter
+	protected ModuleService moduleService;
+
 	@Override
 	public void initialize() {
 		panel = new JPanel();
@@ -101,6 +109,39 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 		outlineThickness.setMinimumSize(dimScaleField);
 
 		panel.add(outlineThickness);
+
+		JButton objectFinderButton = new JButton("Find Objects");
+		objectFinderButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					MarsObjectTrackerBdvCommand objectFinderCommand = new MarsObjectTrackerBdvCommand();
+					objectFinderCommand.setContext(context);
+
+					for (Window window : Window.getWindows())
+						if (window instanceof JDialog && ((JDialog) window).getTitle()
+								.equals(objectFinderCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+							((JDialog) window).toFront();
+							((JDialog) window).repaint();
+							return;
+						}
+
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					objectFinderCommand.setMarsBdvFrame(marsBdvFrame);
+					objectFinderCommand.setArchive(archive);
+					try {
+						moduleService.run(objectFinderCommand, true).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						exc.printStackTrace();
+					}
+				});
+				backgroundThread.shutdown();
+			}
+		});
+		panel.add(objectFinderButton);
 	}
 
 	public boolean showObject() {
