@@ -36,27 +36,20 @@ import bdv.util.BdvOverlay;
 import bdv.util.BdvOverlaySource;
 import bdv.viewer.Source;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
-import de.mpg.biochem.mars.image.DNASegment;
 import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.image.Peak;
 import de.mpg.biochem.mars.image.PeakTracker;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.metadata.MarsOMEMetadata;
 import de.mpg.biochem.mars.molecule.*;
-import de.mpg.biochem.mars.object.MartianObject;
-import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.LogBuilder;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
-import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
@@ -68,10 +61,8 @@ import org.scijava.log.LogService;
 import org.scijava.module.MutableModuleItem;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
-import org.scijava.table.DoubleColumn;
 import org.scijava.ui.UIService;
 import org.scijava.widget.Button;
-import org.scijava.widget.NumberWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -79,36 +70,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-import de.mpg.biochem.mars.image.MarsImageUtils;
-import de.mpg.biochem.mars.image.Peak;
 import de.mpg.biochem.mars.image.PeakShape;
-import de.mpg.biochem.mars.image.PeakTracker;
-import de.mpg.biochem.mars.metadata.MarsOMEMetadata;
-import de.mpg.biochem.mars.metadata.MarsOMEUtils;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
-import de.mpg.biochem.mars.object.ObjectArchive;
-import de.mpg.biochem.mars.table.MarsTableService;
-import de.mpg.biochem.mars.util.LogBuilder;
-import de.mpg.biochem.mars.util.MarsMath;
-import de.mpg.biochem.mars.util.MarsUtil;
-import ij.ImagePlus;
-import ij.gui.Overlay;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
-import ij.plugin.frame.RoiManager;
 import ij.process.FloatPolygon;
-import io.scif.Metadata;
-import io.scif.img.SCIFIOImgPlus;
-import io.scif.ome.OMEMetadata;
-import io.scif.ome.services.OMEXMLService;
-import io.scif.services.FormatService;
-import io.scif.services.TranslatorService;
-import loci.common.services.ServiceException;
-import net.imagej.Dataset;
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.display.ImageDisplay;
-import net.imagej.ops.OpService;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
@@ -123,41 +88,9 @@ import net.imglib2.roi.geom.real.Polygon2D;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
-import net.imglib2.img.display.imagej.ImageJFunctions;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
-import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.util.Intervals;
 import net.imglib2.view.IntervalView;
-import net.imglib2.view.Views;
-import ome.units.quantity.Length;
-import ome.xml.meta.OMEXMLMetadata;
-import ome.xml.model.enums.EnumerationException;
-import ome.xml.model.enums.UnitsLength;
-import ome.xml.model.enums.handlers.UnitsLengthEnumHandler;
-import ome.xml.model.primitives.PositiveInteger;
-import org.decimal4j.util.DoubleRounder;
-import org.scijava.Initializable;
-import org.scijava.ItemIO;
-import org.scijava.ItemVisibility;
-import org.scijava.app.StatusService;
-import org.scijava.command.Command;
-import org.scijava.command.DynamicCommand;
-import org.scijava.command.Previewable;
-import org.scijava.convert.ConvertService;
-import org.scijava.event.EventService;
-import org.scijava.log.LogService;
-import org.scijava.menu.MenuConstants;
-import org.scijava.module.MutableModuleItem;
-import org.scijava.plugin.Menu;
-import org.scijava.plugin.Parameter;
-import org.scijava.plugin.Plugin;
-import org.scijava.ui.DialogPrompt.MessageType;
-import org.scijava.ui.DialogPrompt.OptionType;
-import org.scijava.ui.UIService;
-import org.scijava.widget.ChoiceWidget;
-import org.scijava.widget.NumberWidget;
 
 @Plugin(type = Command.class, label = "Bdv Object Tracker")
 public class MarsObjectTrackerBdvCommand extends InteractiveCommand implements Command,
@@ -274,8 +207,8 @@ Initializable, Previewable
 	@Parameter(label = "Exclude", style = "group:Output", required = false)
 	private String excludeTimePointList = "";
 
-	@Parameter(label = "Verbose", style = "group:Output")
-	private boolean verbose = false;
+	//@Parameter(label = "Verbose", style = "group:Output")
+	//private boolean verbose = false;
 
 	@Parameter(label = "Threads", required = false, min = "1", max = "120",
 			style = "group:Output")
@@ -437,7 +370,7 @@ Initializable, Previewable
 		builder.addParameter("Use area filter", String.valueOf(useAreaFilter));
 		builder.addParameter("Minimum area", String.valueOf(minArea));
 		builder.addParameter("Minimum distance", String.valueOf(minimumDistance));
-		builder.addParameter("Verbose output", String.valueOf(verbose));
+		//builder.addParameter("Verbose output", String.valueOf(verbose));
 		builder.addParameter("Max difference X", String.valueOf(maxDifferenceX));
 		builder.addParameter("Max difference Y", String.valueOf(maxDifferenceY));
 		builder.addParameter("Max difference T", String.valueOf(maxDifferenceT));
@@ -848,13 +781,13 @@ Initializable, Previewable
 		return this.minArea;
 	}
 
-	public void setVerboseOutput(boolean verbose) {
-		this.verbose = verbose;
-	}
+	//public void setVerboseOutput(boolean verbose) {
+	//	this.verbose = verbose;
+	//}
 
-	public boolean getVerboseOutput() {
-		return verbose;
-	}
+	//public boolean getVerboseOutput() {
+	//	return verbose;
+	//}
 
 }
 
