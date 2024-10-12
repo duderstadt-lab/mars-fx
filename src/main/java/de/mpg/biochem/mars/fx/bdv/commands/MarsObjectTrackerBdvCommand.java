@@ -481,6 +481,23 @@ Initializable, Previewable
 			final double circularity = peak.getShape().circularity();
 			peak.setProperty(Peak.CIRCULARITY, circularity);
 
+			double xmin = Double.POSITIVE_INFINITY;
+			double xmax = Double.NEGATIVE_INFINITY;
+			for (double x: peak.getShape().x) {
+				if (x < xmin) xmin = x;
+				if (x > xmax) xmax = x;
+			}
+
+			double ymin = Double.POSITIVE_INFINITY;
+			double ymax = Double.NEGATIVE_INFINITY;
+			for (double y: peak.getShape().y) {
+				if (y < ymin) ymin = y;
+				if (y > ymax) ymax = y;
+			}
+
+			peak.setProperty("xLength", xmax - xmin);
+			peak.setProperty("yLength", ymax - ymin);
+
 			if (useAreaFilter) {
 				if (area > minArea) objects.add(peak);
 			} else objects.add(peak);
