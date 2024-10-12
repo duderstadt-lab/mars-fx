@@ -279,7 +279,7 @@ Initializable, Previewable
 
 	@Parameter(label = "Threads", required = false, min = "1", max = "120",
 			style = "group:Output")
-	private int nThreads = 1;
+	private int nThreads = Runtime.getRuntime().availableProcessors();
 	
 	/**
 	 * Global Settings
@@ -472,13 +472,11 @@ Initializable, Previewable
 
 		RandomAccessibleInterval<T> imgView;
 		if (useMedianFilter) {
-			RandomAccessibleInterval<T> tempImg = (RandomAccessibleInterval<T>) opService.run("copy.rai", imgInterval);
-			tempImg = Views.translate(tempImg, -imgInterval.min(0), -imgInterval.min(1));
-			imgView = (RandomAccessibleInterval<T>) opService.run("create.img", tempImg);
+			RandomAccessibleInterval<T> originImgView = Views.translate(imgInterval, -imgInterval.min(0), -imgInterval.min(1));
+			imgView = (RandomAccessibleInterval<T>) opService.run("create.img", originImgView);
 			//There seems to be a bug where intervals that are not at 0, 0 are shifted by the median radius.
-			//HACK : to overcome this issue we make a copy of the rai shifted to the origin
-			//then shift back afterward.
-			opService.filter().median((IterableInterval<T>) imgView, tempImg,
+			//HACK : to overcome this issue we use an origin shifted image view then translate the filtered image afterward.
+			opService.filter().median((IterableInterval<T>) imgView, originImgView,
 					new HyperSphereShape(medianFilterRadius));
 			imgView = Views.translate(imgView, imgInterval.min(0), imgInterval.min(1));
 		}
