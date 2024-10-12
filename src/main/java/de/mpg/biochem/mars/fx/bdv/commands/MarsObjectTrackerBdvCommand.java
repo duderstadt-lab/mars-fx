@@ -47,10 +47,7 @@ import de.mpg.biochem.mars.object.MartianObject;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.LogBuilder;
 import net.imagej.ops.OpService;
-import net.imglib2.Interval;
-import net.imglib2.KDTree;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.RealLocalizable;
+import net.imglib2.*;
 import net.imglib2.neighborsearch.RadiusNeighborSearchOnKDTree;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.realtransform.AffineTransform3D;
@@ -59,6 +56,7 @@ import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Intervals;
+import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
@@ -112,7 +110,6 @@ import net.imagej.axis.Axes;
 import net.imagej.display.ImageDisplay;
 import net.imagej.ops.OpService;
 import net.imglib2.Interval;
-import net.imglib2.IterableInterval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
 import net.imglib2.algorithm.labeling.ConnectedComponents.StructuringElement;
@@ -126,6 +123,7 @@ import net.imglib2.roi.geom.real.Polygon2D;
 import net.imglib2.roi.labeling.ImgLabeling;
 import net.imglib2.roi.labeling.LabelRegion;
 import net.imglib2.roi.labeling.LabelRegions;
+import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
@@ -278,6 +276,10 @@ Initializable, Previewable
 
 	@Parameter(label = "Verbose", style = "group:Output")
 	private boolean verbose = false;
+
+	@Parameter(label = "Threads", required = false, min = "1", max = "120",
+			style = "group:Output")
+	private int nThreads = 1;
 	
 	/**
 	 * Global Settings
@@ -325,11 +327,13 @@ Initializable, Previewable
 	}
 	
 	protected void addObjectsToArchive() {
+		archive.getWindow().lock();
 		//save the current settings to the PrefService 
 		//so they are reloaded the next time the command is opened.
 		saveInputs();
 		if (archive != null) {
 			List<int[]> excludeTimePoints = new ArrayList<int[]>();
+			int totalExcludeTimePoints = 0;
 			if (excludeTimePointList.length() > 0) {
 				try {
 					final String[] excludeArray = excludeTimePointList.split(",");
@@ -338,7 +342,7 @@ Initializable, Previewable
 						int start = Integer.valueOf(endPoints[0].trim());
 						int end = (endPoints.length > 1) ? Integer.valueOf(endPoints[1]
 							.trim()) : start;
-		
+						totalExcludeTimePoints += end - start;
 						excludeTimePoints.add(new int[] { start, end });
 					}
 				}
@@ -374,14 +378,15 @@ Initializable, Previewable
 						List<Peak> objectsInT = findObjectsInT(theT);
 						if (!objectsInT.isEmpty()) {
 							processTimePoints.add(theT);
-							tasks.add(() -> objectLabels.put(theT, objectsInT));
+							objectLabels.put(theT, objectsInT);
 						}
 					});
 				}
 			}
 
+			archive.getWindow().updateLockMessage("Segmenting objects");
 			try {
-				ExecutorService threadPool = Executors.newFixedThreadPool(1);
+				ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
 				tasks.forEach(task -> threadPool.submit(task));
 				threadPool.shutdown();
 				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -397,13 +402,15 @@ Initializable, Previewable
 
 			archive.getWindow().lock();
 
+			archive.getWindow().updateLockMessage("Tracking objects");
 			//We are assuming the channel in N5 is the same as the channel from the original metadata hmmm....
 			tracker.track(objectLabels, archive, archive.getMetadata(marsBdvFrame.getMetadataUID()).getBdvSource(source).getChannel(), processTimePoints, 1);
 
-			if (archive.getNumberOfMolecules() == numMolecules) {
-				logService.info("MarsObjectTrackerBdvCommand: No new objects tracked for current settings.");
-				return;
-			}
+			//if (archive.getNumberOfMolecules() == numMolecules) {
+			//	logService.info("MarsObjectTrackerBdvCommand: No new objects tracked for current settings.");
+			//	archive.getWindow().unlock();
+			//	return;
+			//}
 			
 			LogBuilder builder = new LogBuilder();
 			String log = LogBuilder.buildTitleBlock(getInfo().getLabel());
@@ -448,14 +455,6 @@ Initializable, Previewable
 		//Remove the Z dimension
 		RandomAccessibleInterval<T> rawImg = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
 
-		RandomAccessibleInterval<T> img;
-		if (useMedianFilter) {
-			img = (RandomAccessibleInterval<T>) opService.run("create.img", rawImg);
-			opService.filter().median((IterableInterval<T>) img, rawImg,
-					new HyperSphereShape(medianFilterRadius));
-		}
-		else img = rawImg;
-
 		List<Peak> objectLabelLists = new ArrayList<>();
 
 		double[] scaleFactors = new double[]{interpolationFactor,
@@ -469,7 +468,21 @@ Initializable, Previewable
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 
 		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
-		RandomAccessibleInterval<T> imgView = Views.interval(img, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1)));
+		RandomAccessibleInterval<T> imgInterval = Views.interval(rawImg, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1)));
+
+		RandomAccessibleInterval<T> imgView;
+		if (useMedianFilter) {
+			RandomAccessibleInterval<T> tempImg = (RandomAccessibleInterval<T>) opService.run("copy.rai", imgInterval);
+			tempImg = Views.translate(tempImg, -imgInterval.min(0), -imgInterval.min(1));
+			imgView = (RandomAccessibleInterval<T>) opService.run("create.img", tempImg);
+			//There seems to be a bug where intervals that are not at 0, 0 are shifted by the median radius.
+			//HACK : to overcome this issue we make a copy of the rai shifted to the origin
+			//then shift back afterward.
+			opService.filter().median((IterableInterval<T>) imgView, tempImg,
+					new HyperSphereShape(medianFilterRadius));
+			imgView = Views.translate(imgView, imgInterval.min(0), imgInterval.min(1));
+		}
+		else imgView = imgInterval;
 
 		Interval newInterval = Intervals.createMinMax(Math.round(interval.min(0) *
 						interpolationFactor), Math.round(interval.min(1) * interpolationFactor),
