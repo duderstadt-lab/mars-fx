@@ -42,6 +42,7 @@ import de.mpg.biochem.mars.image.PeakTracker;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.*;
 import de.mpg.biochem.mars.util.LogBuilder;
+import de.mpg.biochem.mars.util.MarsUtil;
 import net.imagej.ops.OpService;
 import net.imglib2.*;
 import net.imglib2.realtransform.AffineTransform2D;
@@ -53,6 +54,7 @@ import net.imglib2.util.Intervals;
 import net.imglib2.view.Views;
 import org.scijava.Initializable;
 import org.scijava.ItemVisibility;
+import org.scijava.app.StatusService;
 import org.scijava.command.Command;
 import org.scijava.command.InteractiveCommand;
 import org.scijava.command.Previewable;
@@ -69,6 +71,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.mpg.biochem.mars.image.PeakShape;
 import ij.gui.PolygonRoi;
@@ -111,6 +114,9 @@ Initializable, Previewable
 	
 	@Parameter
 	private UIService uiService;
+
+	@Parameter
+	private StatusService statusService;
 	
 	/**
 	 * IMAGE
@@ -238,6 +244,7 @@ Initializable, Previewable
 
 	//This maps from t to list of labels or shapes for the that time point.
 	private ConcurrentMap<Integer, List<Peak>> objectLabels;
+	private AtomicInteger progressInteger = new AtomicInteger(0);
 	
 	@Override
 	public void initialize() {
@@ -266,7 +273,6 @@ Initializable, Previewable
 		saveInputs();
 		if (archive != null) {
 			List<int[]> excludeTimePoints = new ArrayList<int[]>();
-			int totalExcludeTimePoints = 0;
 			if (excludeTimePointList.length() > 0) {
 				try {
 					final String[] excludeArray = excludeTimePointList.split(",");
@@ -275,7 +281,6 @@ Initializable, Previewable
 						int start = Integer.valueOf(endPoints[0].trim());
 						int end = (endPoints.length > 1) ? Integer.valueOf(endPoints[1]
 							.trim()) : start;
-						totalExcludeTimePoints += end - start;
 						excludeTimePoints.add(new int[] { start, end });
 					}
 				}
@@ -310,7 +315,6 @@ Initializable, Previewable
 					tasks.add(() -> {
 						List<Peak> objectsInT = findObjectsInT(theT);
 						if (!objectsInT.isEmpty()) {
-							processTimePoints.add(theT);
 							objectLabels.put(theT, objectsInT);
 						}
 					});
@@ -318,15 +322,9 @@ Initializable, Previewable
 			}
 
 			archive.getWindow().updateLockMessage("Segmenting objects");
-			try {
-				ExecutorService threadPool = Executors.newFixedThreadPool(nThreads);
-				tasks.forEach(task -> threadPool.submit(task));
-				threadPool.shutdown();
-				threadPool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
-			}
-			catch (InterruptedException exc) {
-				exc.printStackTrace();
-			}
+			MarsUtil.threadPoolBuilder(statusService, logService, () -> {
+				archive.getWindow().setProgress((double) progressInteger.get() / processTimePoints.size());
+			}, tasks, nThreads);
 
 			PeakTracker tracker = new PeakTracker(maxDifferenceX, maxDifferenceY, maxDifferenceT,
 				minimumDistance, minTrajectoryLength, true, logService, 1);
@@ -507,6 +505,8 @@ Initializable, Previewable
 
 		// Set the T for the Peaks
 		objects.forEach(p -> p.setT(t));
+
+		progressInteger.incrementAndGet();
 
 		return objects;
 	}
