@@ -145,16 +145,18 @@ Initializable, Previewable
 	 * INPUT SETTINGS
 	 */
 	
-	@Parameter(visibility = ItemVisibility.MESSAGE, style = "image",
-		persist = false)
-	private String inputFigure = "ImageInput.png";
-	
 	@Parameter(label = "Source", choices = { "a", "b", "c" },
 		style = "group:Input", persist = false)
 	private String source = "";
 
 	@Parameter(label = "Background integration radius")
 	private long radius = 10;
+
+	@Parameter(label = "Threads", required = false, min = "1", max = "120")
+	private int nThreads = Runtime.getRuntime().availableProcessors();
+
+	@Parameter(visibility = ItemVisibility.MESSAGE, persist = false)
+	private String imgIntegrationMessage = "Image Integration Boundaries (in pixels)";
 
 	@Parameter(label = " X0")
 	private int X0 = 0;
@@ -167,9 +169,6 @@ Initializable, Previewable
 
 	@Parameter(label = " height")
 	private int height = 1024;
-
-	@Parameter(label = "Threads", required = false, min = "1", max = "120")
-	private int nThreads = Runtime.getRuntime().availableProcessors();
 
 	private ConcurrentMap<Integer, Double> tToShapeSum, tToPixelMedianBackground, tToShapeIntensity;
 
