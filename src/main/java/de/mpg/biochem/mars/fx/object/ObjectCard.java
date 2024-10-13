@@ -40,6 +40,7 @@ import java.util.concurrent.Executors;
 import javax.swing.*;
 
 import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsObjectIntegrationBdvCommand;
 import de.mpg.biochem.mars.fx.bdv.commands.MarsObjectTrackerBdvCommand;
 import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
@@ -142,6 +143,40 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 			}
 		});
 		panel.add(objectFinderButton);
+
+		JButton objectIntegrationButton = new JButton("Integrate Objects");
+		objectIntegrationButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					MarsObjectIntegrationBdvCommand objectIntegrationCommand = new MarsObjectIntegrationBdvCommand();
+					objectIntegrationCommand.setContext(context);
+
+					for (Window window : Window.getWindows())
+						if (window instanceof JDialog && ((JDialog) window).getTitle()
+								.equals(objectIntegrationCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+							((JDialog) window).toFront();
+							((JDialog) window).repaint();
+							return;
+						}
+
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					objectIntegrationCommand.setMarsBdvFrame(marsBdvFrame);
+					objectIntegrationCommand.setArchive(archive);
+					objectIntegrationCommand.setObject((MartianObject) molecule);
+					try {
+						moduleService.run(objectIntegrationCommand, true).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						exc.printStackTrace();
+					}
+				});
+				backgroundThread.shutdown();
+			}
+		});
+		panel.add(objectIntegrationButton);
 	}
 
 	public boolean showObject() {
