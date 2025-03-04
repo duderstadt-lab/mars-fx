@@ -70,7 +70,7 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 {
 
 	private JTextField outlineThickness;
-	private JCheckBox showObject;
+	private JCheckBox showObject, showAllObjects;
 
 	private JPanel panel;
 
@@ -100,8 +100,8 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 
 		showObject = new JCheckBox("show", false);
 		panel.add(showObject);
-		panel.add(new JPanel());
-
+		showAllObjects = new JCheckBox("show all", false);
+		panel.add(showAllObjects);
 		panel.add(new JLabel("thickness"));
 
 		outlineThickness = new JTextField(6);
@@ -183,6 +183,10 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 		return showObject.isSelected();
 	}
 
+	public boolean showALlObjects() {
+		return showAllObjects.isSelected();
+	}
+
 	@Override
 	public void setMolecule(Molecule molecule) {
 		this.molecule = molecule;
@@ -228,50 +232,87 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 
 		@Override
 		protected void draw(Graphics2D g) {
-			if (showObject.isSelected() && ((MartianObject) molecule).hasShape(info
-				.getTimePointIndex()))
-			{
-				AffineTransform2D transform = new AffineTransform2D();
-				getCurrentTransform2D(transform);
+			AffineTransform2D transform = new AffineTransform2D();
+			getCurrentTransform2D(transform);
 
-				g.setColor(getColor());
-				g.setStroke(new BasicStroke(Integer.valueOf(outlineThickness
-					.getText())));
+			g.setColor(getColor());
+			g.setStroke(new BasicStroke(Integer.valueOf(outlineThickness
+				.getText())));
+			if (showAllObjects.isSelected() && archive != null) {
+				archive.molecules().filter(m -> m.getMetadataUID().equals(molecule.getMetadataUID())).forEach(m -> {
+					PeakShape shape = ((MartianObject) m).getShape(info
+							.getTimePointIndex());
+					if (shape != null) {
+						boolean sourceInitialized = false;
+						int xSource = 0;
+						int ySource = 0;
+						int x1 = 0;
+						int y1 = 0;
+						for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
+							double x = shape.x[pIndex];
+							double y = shape.y[pIndex];
 
+							if (Double.isNaN(x) || Double.isNaN(y)) continue;
+
+							final double[] globalCoords = new double[]{x, y};
+							final double[] viewerCoords = new double[2];
+							transform.apply(globalCoords, viewerCoords);
+
+							int xTarget = (int) Math.round(viewerCoords[0]);
+							int yTarget = (int) Math.round(viewerCoords[1]);
+
+							if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
+							else {
+								x1 = xTarget;
+								y1 = yTarget;
+							}
+
+							xSource = xTarget;
+							ySource = yTarget;
+							sourceInitialized = true;
+						}
+
+						if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
+								y1);
+					}
+				});
+			} else if (showObject.isSelected()) {
 				PeakShape shape = ((MartianObject) molecule).getShape(info
-					.getTimePointIndex());
+						.getTimePointIndex());
 
-				boolean sourceInitialized = false;
-				int xSource = 0;
-				int ySource = 0;
-				int x1 = 0;
-				int y1 = 0;
-				for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
-					double x = shape.x[pIndex];
-					double y = shape.y[pIndex];
+				if (shape != null) {
+					boolean sourceInitialized = false;
+					int xSource = 0;
+					int ySource = 0;
+					int x1 = 0;
+					int y1 = 0;
+					for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
+						double x = shape.x[pIndex];
+						double y = shape.y[pIndex];
 
-					if (Double.isNaN(x) || Double.isNaN(y)) continue;
+						if (Double.isNaN(x) || Double.isNaN(y)) continue;
 
-					final double[] globalCoords = new double[] { x, y };
-					final double[] viewerCoords = new double[2];
-					transform.apply(globalCoords, viewerCoords);
+						final double[] globalCoords = new double[]{x, y};
+						final double[] viewerCoords = new double[2];
+						transform.apply(globalCoords, viewerCoords);
 
-					int xTarget = (int) Math.round(viewerCoords[0]);
-					int yTarget = (int) Math.round(viewerCoords[1]);
+						int xTarget = (int) Math.round(viewerCoords[0]);
+						int yTarget = (int) Math.round(viewerCoords[1]);
 
-					if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
-					else {
-						x1 = xTarget;
-						y1 = yTarget;
+						if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
+						else {
+							x1 = xTarget;
+							y1 = yTarget;
+						}
+
+						xSource = xTarget;
+						ySource = yTarget;
+						sourceInitialized = true;
 					}
 
-					xSource = xTarget;
-					ySource = yTarget;
-					sourceInitialized = true;
+					if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
+							y1);
 				}
-
-				if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
-					y1);
 			}
 		}
 
@@ -299,6 +340,11 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 			if (showObject != null) jGenerator.writeBooleanField("show", showObject
 				.isSelected());
 		}, jParser -> showObject.setSelected(jParser.getBooleanValue()));
+
+		setJsonField("showAll", jGenerator -> {
+			if (showAllObjects != null) jGenerator.writeBooleanField("showAll", showAllObjects
+					.isSelected());
+		}, jParser -> showAllObjects.setSelected(jParser.getBooleanValue()));
 
 		setJsonField("thickness", jGenerator -> {
 			if (outlineThickness != null) jGenerator.writeStringField("thickness",
