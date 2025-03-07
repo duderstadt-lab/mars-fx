@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2023 Karl Duderstadt
+ * Copyright (C) 2018 - 2025 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -29,22 +29,25 @@
 
 package de.mpg.biochem.mars.fx.object;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 
+import de.mpg.biochem.mars.fx.bdv.commands.MarsDNAFinderBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsObjectIntegrationBdvCommand;
+import de.mpg.biochem.mars.fx.bdv.commands.MarsObjectTrackerBdvCommand;
 import net.imagej.ops.Initializable;
 import net.imglib2.realtransform.AffineTransform2D;
 import net.imglib2.type.numeric.ARGBType;
 
+import org.scijava.Context;
+import org.scijava.module.ModuleService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -67,7 +70,7 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 {
 
 	private JTextField outlineThickness;
-	private JCheckBox showObject;
+	private JCheckBox showObject, showAllObjects;
 
 	private JPanel panel;
 
@@ -84,6 +87,12 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 	@Parameter
 	protected MarsBdvFrame marsBdvFrame;
 
+	@Parameter
+	protected Context context;
+
+	@Parameter
+	protected ModuleService moduleService;
+
 	@Override
 	public void initialize() {
 		panel = new JPanel();
@@ -91,8 +100,8 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 
 		showObject = new JCheckBox("show", false);
 		panel.add(showObject);
-		panel.add(new JPanel());
-
+		showAllObjects = new JCheckBox("show all", false);
+		panel.add(showAllObjects);
 		panel.add(new JLabel("thickness"));
 
 		outlineThickness = new JTextField(6);
@@ -101,10 +110,81 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 		outlineThickness.setMinimumSize(dimScaleField);
 
 		panel.add(outlineThickness);
+
+		JButton objectFinderButton = new JButton("Find Objects");
+		objectFinderButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					MarsObjectTrackerBdvCommand objectFinderCommand = new MarsObjectTrackerBdvCommand();
+					objectFinderCommand.setContext(context);
+
+					for (Window window : Window.getWindows())
+						if (window instanceof JDialog && ((JDialog) window).getTitle()
+								.equals(objectFinderCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+							((JDialog) window).toFront();
+							((JDialog) window).repaint();
+							return;
+						}
+
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					objectFinderCommand.setMarsBdvFrame(marsBdvFrame);
+					objectFinderCommand.setArchive(archive);
+					try {
+						moduleService.run(objectFinderCommand, true).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						exc.printStackTrace();
+					}
+				});
+				backgroundThread.shutdown();
+			}
+		});
+		panel.add(objectFinderButton);
+
+		JButton objectIntegrationButton = new JButton("Integrate Objects");
+		objectIntegrationButton.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				ExecutorService backgroundThread = Executors.newSingleThreadExecutor();
+				backgroundThread.submit(() -> {
+					MarsObjectIntegrationBdvCommand objectIntegrationCommand = new MarsObjectIntegrationBdvCommand();
+					objectIntegrationCommand.setContext(context);
+
+					for (Window window : Window.getWindows())
+						if (window instanceof JDialog && ((JDialog) window).getTitle()
+								.equals(objectIntegrationCommand.getInfo().getLabel()) && ((JDialog) window).isVisible()) {
+							((JDialog) window).toFront();
+							((JDialog) window).repaint();
+							return;
+						}
+
+					//We set these directly to avoid pre and post processors from running
+					//we don't need that in this context
+					objectIntegrationCommand.setMarsBdvFrame(marsBdvFrame);
+					objectIntegrationCommand.setArchive(archive);
+					objectIntegrationCommand.setObject((MartianObject) molecule);
+					try {
+						moduleService.run(objectIntegrationCommand, true).get();
+					}
+					catch (InterruptedException | ExecutionException exc) {
+						exc.printStackTrace();
+					}
+				});
+				backgroundThread.shutdown();
+			}
+		});
+		panel.add(objectIntegrationButton);
 	}
 
 	public boolean showObject() {
 		return showObject.isSelected();
+	}
+
+	public boolean showALlObjects() {
+		return showAllObjects.isSelected();
 	}
 
 	@Override
@@ -152,50 +232,87 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 
 		@Override
 		protected void draw(Graphics2D g) {
-			if (showObject.isSelected() && ((MartianObject) molecule).hasShape(info
-				.getTimePointIndex()))
-			{
-				AffineTransform2D transform = new AffineTransform2D();
-				getCurrentTransform2D(transform);
+			AffineTransform2D transform = new AffineTransform2D();
+			getCurrentTransform2D(transform);
 
-				g.setColor(getColor());
-				g.setStroke(new BasicStroke(Integer.valueOf(outlineThickness
-					.getText())));
+			g.setColor(getColor());
+			g.setStroke(new BasicStroke(Integer.valueOf(outlineThickness
+				.getText())));
+			if (showAllObjects.isSelected() && archive != null) {
+				archive.molecules().filter(m -> m.getMetadataUID().equals(molecule.getMetadataUID())).forEach(m -> {
+					PeakShape shape = ((MartianObject) m).getShape(info
+							.getTimePointIndex());
+					if (shape != null) {
+						boolean sourceInitialized = false;
+						int xSource = 0;
+						int ySource = 0;
+						int x1 = 0;
+						int y1 = 0;
+						for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
+							double x = shape.x[pIndex];
+							double y = shape.y[pIndex];
 
+							if (Double.isNaN(x) || Double.isNaN(y)) continue;
+
+							final double[] globalCoords = new double[]{x, y};
+							final double[] viewerCoords = new double[2];
+							transform.apply(globalCoords, viewerCoords);
+
+							int xTarget = (int) Math.round(viewerCoords[0]);
+							int yTarget = (int) Math.round(viewerCoords[1]);
+
+							if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
+							else {
+								x1 = xTarget;
+								y1 = yTarget;
+							}
+
+							xSource = xTarget;
+							ySource = yTarget;
+							sourceInitialized = true;
+						}
+
+						if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
+								y1);
+					}
+				});
+			} else if (showObject.isSelected()) {
 				PeakShape shape = ((MartianObject) molecule).getShape(info
-					.getTimePointIndex());
+						.getTimePointIndex());
 
-				boolean sourceInitialized = false;
-				int xSource = 0;
-				int ySource = 0;
-				int x1 = 0;
-				int y1 = 0;
-				for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
-					double x = shape.x[pIndex];
-					double y = shape.y[pIndex];
+				if (shape != null) {
+					boolean sourceInitialized = false;
+					int xSource = 0;
+					int ySource = 0;
+					int x1 = 0;
+					int y1 = 0;
+					for (int pIndex = 0; pIndex < shape.x.length; pIndex++) {
+						double x = shape.x[pIndex];
+						double y = shape.y[pIndex];
 
-					if (Double.isNaN(x) || Double.isNaN(y)) continue;
+						if (Double.isNaN(x) || Double.isNaN(y)) continue;
 
-					final double[] globalCoords = new double[] { x, y };
-					final double[] viewerCoords = new double[2];
-					transform.apply(globalCoords, viewerCoords);
+						final double[] globalCoords = new double[]{x, y};
+						final double[] viewerCoords = new double[2];
+						transform.apply(globalCoords, viewerCoords);
 
-					int xTarget = (int) Math.round(viewerCoords[0]);
-					int yTarget = (int) Math.round(viewerCoords[1]);
+						int xTarget = (int) Math.round(viewerCoords[0]);
+						int yTarget = (int) Math.round(viewerCoords[1]);
 
-					if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
-					else {
-						x1 = xTarget;
-						y1 = yTarget;
+						if (sourceInitialized) g.drawLine(xSource, ySource, xTarget, yTarget);
+						else {
+							x1 = xTarget;
+							y1 = yTarget;
+						}
+
+						xSource = xTarget;
+						ySource = yTarget;
+						sourceInitialized = true;
 					}
 
-					xSource = xTarget;
-					ySource = yTarget;
-					sourceInitialized = true;
+					if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
+							y1);
 				}
-
-				if (x1 != xSource || y1 != ySource) g.drawLine(xSource, ySource, x1,
-					y1);
 			}
 		}
 
@@ -223,6 +340,11 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 			if (showObject != null) jGenerator.writeBooleanField("show", showObject
 				.isSelected());
 		}, jParser -> showObject.setSelected(jParser.getBooleanValue()));
+
+		setJsonField("showAll", jGenerator -> {
+			if (showAllObjects != null) jGenerator.writeBooleanField("showAll", showAllObjects
+					.isSelected());
+		}, jParser -> showAllObjects.setSelected(jParser.getBooleanValue()));
 
 		setJsonField("thickness", jGenerator -> {
 			if (outlineThickness != null) jGenerator.writeStringField("thickness",

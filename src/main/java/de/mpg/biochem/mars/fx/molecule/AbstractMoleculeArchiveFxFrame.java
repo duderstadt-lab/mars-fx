@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2023 Karl Duderstadt
+ * Copyright (C) 2018 - 2025 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -896,13 +896,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public void save() {
-		if (!archive.getSource().isReachable()) {
-			RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
-					.getWindow(), "MoleculeArchive source is unreachable.");
-			alert.show();
-			return;
-		}
 		if (archive.getSource() != null) {
+			if (!archive.getSource().isReachable()) {
+				RoverErrorDialog alert = new RoverErrorDialog(getNode().getScene()
+						.getWindow(), "MoleculeArchive source is unreachable.");
+				alert.show();
+				return;
+			}
 			//if (archive.getSource().getName().equals(archive.getName())) {
 				runTask(() -> {
 					fireEvent(new MoleculeArchiveSavingEvent(archive));
@@ -931,7 +931,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
 			.length() - 6);
 
-		if (archive.getSource() != null) {
+		if (archive.getSource() != null && new File(archive.getSource().getPath()).getParentFile().exists()) {
 			saveAsCopy(new File(new File(archive.getSource().getPath()).getParentFile(), fileName));
 		}
 		else {

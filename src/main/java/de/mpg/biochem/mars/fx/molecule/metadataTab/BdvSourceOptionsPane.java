@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2023 Karl Duderstadt
+ * Copyright (C) 2018 - 2025 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -41,15 +41,17 @@ import de.mpg.biochem.mars.n5.*;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import org.controlsfx.control.ToggleSwitch;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.N5Reader;
 import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.metadata.*;
-import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
-import org.janelia.saalfeldlab.n5.ui.DataSelection;
 import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
+import org.janelia.saalfeldlab.n5.ui.DataSelection;
+import org.janelia.saalfeldlab.n5.DatasetAttributes;
+
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
+import org.janelia.saalfeldlab.n5.universe.metadata.*;
+import org.janelia.saalfeldlab.n5.universe.metadata.canonical.CanonicalMetadataParser;
+import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.v04.OmeNgffMetadataParser;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
@@ -229,13 +231,14 @@ public class BdvSourceOptionsPane extends VBox {
 					@Override
 					public void run() {
 						DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-							new MarsN5ViewerReaderFun(), new N5BasePathFun(),
-								pathField.getText(), new N5MetadataParser[] {},
-							new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
-								new N5CosemMetadataParser(),
-								new N5SingleScaleMetadataParser(),
-								new CanonicalMetadataParser(),
-								new N5GenericSingleScaleMetadataParser() });
+								new MarsN5ViewerReaderFun(), new N5BasePathFun(),
+								pathField.getText(),
+								new N5MetadataParser[]{ new OmeNgffMetadataParser() }, // need the ngff parser because it's where the metadata are
+								new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
+										new N5CosemMetadataParser(),
+										new N5SingleScaleMetadataParser(),
+										new CanonicalMetadataParser(),
+										new N5GenericSingleScaleMetadataParser() });
 
 						selectionDialog.setVirtualOption(false);
 						selectionDialog.setCropOption(false);
@@ -252,18 +255,42 @@ public class BdvSourceOptionsPane extends VBox {
 
 								@Override
 								public void run() {
+									String baseDialogPath = selectionDialog.getN5RootPath();
+									String datasetPath = dataSelection.metadata.get(0).getPath();
+
+									//This mess is so that the n5rootPath ends with the n5 directory
+									//and the dataset is the path after that
+									//the dialog datasetPath that is returned can include the n5 directory otherwise.
+									StringBuilder n5RootPath = new StringBuilder(baseDialogPath);
+									StringBuilder n5DatasetPath = new StringBuilder(datasetPath);
+									if (!baseDialogPath.endsWith(".n5")) {
+										String[] parts = datasetPath.split("/");
+
+										for (int i = 0; i < parts.length; i++) {
+											if (!n5RootPath.toString().endsWith("/")) n5RootPath.append("/");
+											n5RootPath.append(parts[i]);
+											if (parts[i].endsWith(".n5")) {
+												n5DatasetPath = new StringBuilder();
+												n5DatasetPath.append(parts[i + 1]);
+												for (int j = i + 2; j < parts.length; j++) {
+													n5DatasetPath.append("/").append(parts[j]);
+												}
+												break;
+											}
+										}
+									}
+
 									//Update the source
-									marsBdvSource.setPath(selectionDialog.getN5RootPath());
-									marsBdvSource.setN5Dataset(dataSelection.metadata.get(0)
-											.getPath());
+									marsBdvSource.setPath(n5RootPath.toString());
+									marsBdvSource.setN5Dataset(n5DatasetPath.toString());
 									String info = getDatasetInfo(
 											((N5DatasetMetadata) dataSelection.metadata.get(0))
 													.getAttributes());
 									marsBdvSource.setProperty("info", info);
 
 									//Update the fields
-									pathField.setText(selectionDialog.getN5RootPath());
-									n5Dataset.setText(dataSelection.metadata.get(0).getPath());
+									pathField.setText(n5RootPath.toString());
+									n5Dataset.setText(n5DatasetPath.toString());
 									datasetInfo.setText(info);
 								}
 							});
@@ -350,14 +377,12 @@ public class BdvSourceOptionsPane extends VBox {
 					if (datasetExists) datasetValidation.setGraphic(check2);
 
 					if (reader != null) {
-						try {
-							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-							if (attributes != null) {
-								String info = getDatasetInfo(attributes);
-								marsBdvSource.setProperty("info", info);
-								datasetInfo.setText(info);
-							}
-						} catch (IOException e) {}
+						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+						if (attributes != null) {
+							String info = getDatasetInfo(attributes);
+							marsBdvSource.setProperty("info", info);
+							datasetInfo.setText(info);
+						}
 					}
 				} else {
 					pathValidation.setGraphic(times);
@@ -386,14 +411,12 @@ public class BdvSourceOptionsPane extends VBox {
 				if (exists) {
 					datasetValidation.setGraphic(check2);
 					if (reader != null) {
-						try {
-							DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-							if (attributes != null) {
-								String info = getDatasetInfo(attributes);
-								marsBdvSource.setProperty("info", info);
-								datasetInfo.setText(info);
-							}
-						} catch (IOException e) {}
+						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
+						if (attributes != null) {
+							String info = getDatasetInfo(attributes);
+							marsBdvSource.setProperty("info", info);
+							datasetInfo.setText(info);
+						}
 					}
 				}
 				else datasetValidation.setGraphic(times2);

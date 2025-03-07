@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2023 Karl Duderstadt
+ * Copyright (C) 2018 - 2025 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -40,18 +40,6 @@ import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.n5.*;
 import org.controlsfx.control.textfield.CustomTextField;
-import org.janelia.saalfeldlab.n5.DatasetAttributes;
-import org.janelia.saalfeldlab.n5.ij.N5Importer.N5BasePathFun;
-import org.janelia.saalfeldlab.n5.metadata.N5CosemMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5DatasetMetadata;
-import org.janelia.saalfeldlab.n5.metadata.N5GenericSingleScaleMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5MetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.N5SingleScaleMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.canonical.CanonicalMetadataParser;
-import org.janelia.saalfeldlab.n5.metadata.imagej.ImagePlusLegacyMetadataParser;
-import org.janelia.saalfeldlab.n5.ui.DataSelection;
-import org.janelia.saalfeldlab.n5.ui.DatasetSelectorDialog;
-import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;

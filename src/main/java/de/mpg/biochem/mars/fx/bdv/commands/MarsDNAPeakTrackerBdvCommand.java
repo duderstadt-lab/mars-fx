@@ -2,7 +2,7 @@
  * #%L
  * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
  * %%
- * Copyright (C) 2018 - 2023 Karl Duderstadt
+ * Copyright (C) 2018 - 2025 Karl Duderstadt
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -227,7 +227,7 @@ Initializable, Previewable
 	@Parameter(label = "DNA length in bps", style = "group:Search Parameters")
 	private int DNALength = 21236;
 	
-	@Parameter(label = "Search radius around DNA",
+	@Parameter(label = "Search distance from DNA",
 			style = "group:Search Parameters")
 	private double radius;
 	
@@ -491,49 +491,17 @@ Initializable, Previewable
 		archivePositionSearcher.search(dnaSegment, radius + dnaSegment.getLength() / 2,
 			false);
 
-		// build DNA fit
-		double x1 = dnaSegment.getX1();
-		double y1 = dnaSegment.getY1();
-
-		double x2 = dnaSegment.getX2();
-		double y2 = dnaSegment.getY2();
-
 		for (int j = 0; j < archivePositionSearcher.numNeighbors(); j++) {
 			MoleculePosition moleculePosition = archivePositionSearcher.getSampler(j)
 				.get();
 
-			double distance;
+			double distance = pointToLineDistance(moleculePosition.getX(),
+					moleculePosition.getY(),
+					dnaSegment.getX1(),
+					dnaSegment.getY1(),
+					dnaSegment.getX2(),
+					dnaSegment.getY2());
 
-			// Before we add the the molecules we need to constrain positions to just
-			// within radius of DNA....
-			if (moleculePosition.getY() < y1) {
-				// the molecules is above the DNA
-				distance = Math.sqrt((moleculePosition.getX() - x1) * (moleculePosition
-					.getX() - x1) + (moleculePosition.getY() - y1) * (moleculePosition
-						.getY() - y1));
-			}
-			else if (moleculePosition.getY() > y2) {
-				distance = Math.sqrt((moleculePosition.getX() - x2) * (moleculePosition
-					.getX() - x2) + (moleculePosition.getY() - y2) * (moleculePosition
-						.getY() - y2));
-			}
-			else {
-				// find the x center position of the DNA for the molecule y position.
-
-				// If there is no intercept just take top x1.
-				double DNAx;
-				if (x1 == x2) DNAx = x1;
-				else {
-					SimpleRegression linearFit = new SimpleRegression(true);
-					linearFit.addData(x1, y1);
-					linearFit.addData(x2, y2);
-					DNAx = (moleculePosition.getY() - linearFit.getIntercept()) / linearFit.getSlope();
-				}
-
-				distance = Math.abs(moleculePosition.getX() - DNAx);
-			}
-
-			// other conditions
 			if (distance < radius) {
 				moleculesLocated.add(tracksArchive.get(moleculePosition.getUID()));
 			}
@@ -596,6 +564,38 @@ Initializable, Previewable
 		
 		return Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
 																	 (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
+	}
+
+	public static double pointToLineDistance(double x, double y, double x1, double y1, double x2, double y2) {
+		double A = x - x1;
+		double B = y - y1;
+		double C = x2 - x1;
+		double D = y2 - y1;
+
+		double dot = A * C + B * D;
+		double len_sq = C * C + D * D;
+		double param = -1;
+		if (len_sq != 0) //in case of 0 length line
+			param = dot / len_sq;
+
+		double xx, yy;
+
+		if (param < 0) {
+			xx = x1;
+			yy = y1;
+		}
+		else if (param > 1) {
+			xx = x2;
+			yy = y2;
+		}
+		else {
+			xx = x1 + param * C;
+			yy = y1 + param * D;
+		}
+
+		double dx = x - xx;
+		double dy = y - yy;
+		return Math.sqrt(dx * dx + dy * dy);
 	}
 	
 	@Override
