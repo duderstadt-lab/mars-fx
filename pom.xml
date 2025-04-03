@@ -111,6 +111,7 @@
 
 		<!-- JavaFx Version-->
 		<javafx.version>21.0.6</javafx.version>
+		<javafx.classifier>mac-aarch64</javafx.classifier>
 
 		<chartfx.version>11.2.5</chartfx.version>
 		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
@@ -147,8 +148,6 @@
 		<richtextfx.version>0.10.6</richtextfx.version>
 		<undofx.version>2.1.0</undofx.version>
 		<wellbehavedfx.version>0.3.3</wellbehavedfx.version>
-
-		<enforcer.skip>true</enforcer.skip>
 	</properties>
 
 	<dependencies>
@@ -165,47 +164,100 @@
 		</dependency>
 
 		<!-- JavaFX dependencies -->
+		<!-- Base -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-base</artifactId>
 			<version>${javafx.version}</version>
-			<scope>provided</scope>
+			<classifier>${javafx.classifier}</classifier>
 		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-controls</artifactId>
-			<version>${javafx.version}</version>
-			<scope>provided</scope>
-		</dependency>
+
+		<!-- Graphics (depends on base) -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-graphics</artifactId>
 			<version>${javafx.version}</version>
-			<scope>provided</scope>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
+		<!-- Controls (depends on graphics) -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-swing</artifactId>
+			<artifactId>javafx-controls</artifactId>
 			<version>${javafx.version}</version>
-			<scope>provided</scope>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-		<dependency>
-			<groupId>org.openjfx</groupId>
-			<artifactId>javafx-media</artifactId>
-			<version>${javafx.version}</version>
-			<scope>provided</scope>
-		</dependency>
+
+		<!-- FXML (depends on controls) -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-fxml</artifactId>
 			<version>${javafx.version}</version>
-			<scope>provided</scope>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
+
+		<!-- Media (depends on graphics) -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-media</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Web (depends on media and controls) -->
 		<dependency>
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-web</artifactId>
 			<version>${javafx.version}</version>
-			<scope>provided</scope>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-media</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<!-- Swing (depends on graphics) -->
+		<dependency>
+			<groupId>org.openjfx</groupId>
+			<artifactId>javafx-swing</artifactId>
+			<version>${javafx.version}</version>
+			<classifier>${javafx.classifier}</classifier>
+			<exclusions>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- ImageJ dependencies -->
@@ -373,6 +425,25 @@
 			<groupId>de.gsi.chart</groupId>
 			<artifactId>chartfx-chart</artifactId>
 			<version>${chartfx-chart.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.gsi.dataset</groupId>
@@ -388,26 +459,121 @@
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-commons</artifactId>
 			<version>${fontawesomefx-commons.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-controls</artifactId>
 			<version>${fontawesomefx-controls.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-fontawesome</artifactId>
 			<version>${fontawesomefx-fontawesome.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-materialicons</artifactId>
 			<version>${fontawesomefx-materialicons.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>de.jensd</groupId>
 			<artifactId>fontawesomefx-octicons</artifactId>
 			<version>${fontawesomefx-octicons.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -417,6 +583,25 @@
 			<groupId>org.controlsfx</groupId>
 			<artifactId>controlsfx</artifactId>
 			<version>${controlsfx.version}</version>
+			<exclusions>
+				<!-- Exclude all older JavaFX versions -->
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-base</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-controls</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-graphics</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.openjfx</groupId>
+					<artifactId>javafx-fxml</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.fxmisc.flowless</groupId>
