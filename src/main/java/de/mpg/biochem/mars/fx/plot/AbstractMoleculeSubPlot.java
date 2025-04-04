@@ -33,11 +33,11 @@ import java.util.*;
 
 import org.scijava.table.DoubleColumn;
 
-import de.gsi.chart.plugins.AbstractValueIndicator;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.XRangeIndicator;
-import de.gsi.chart.plugins.YRangeIndicator;
-import de.gsi.chart.plugins.YValueIndicator;
+import io.fair_acc.chartfx.plugins.AbstractValueIndicator;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.XRangeIndicator;
+import io.fair_acc.chartfx.plugins.YRangeIndicator;
+import io.fair_acc.chartfx.plugins.YValueIndicator;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;

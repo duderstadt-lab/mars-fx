@@ -32,13 +32,13 @@ package de.mpg.biochem.mars.fx.plot.tools;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.MouseEventsHelper;
-import de.gsi.dataset.DataSet;
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.MouseEventsHelper;
+import io.fair_acc.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
@@ -136,7 +136,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements
 	private final EventHandler<MouseEvent> regionSelectionStartHandler =
 		event -> {
 			if (getRegionSelectionMouseFilter() == null ||
-				getRegionSelectionMouseFilter().test(event) && getChart().getDatasets()
+				getRegionSelectionMouseFilter().test(event) && ((XYChart) getChart()).getDatasets()
 					.size() > 0)
 		{
 				regionSelectionStarted(event);
@@ -312,7 +312,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements
 		}
 	}
 
-	private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+	protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
 		final Canvas canvas = getChart().getCanvas();
 		// listen to only events within the canvas
 		final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent
@@ -485,7 +485,7 @@ public class MarsRegionSelectionPlugin extends ChartPlugin implements
 
 		final Point2D mouseLocation = getLocationInPlotArea(event);
 
-		Chart chart = getChart();
+		XYChart chart = (XYChart) getChart();
 
 		if (chart.getDatasets().size() == 0) return null;
 

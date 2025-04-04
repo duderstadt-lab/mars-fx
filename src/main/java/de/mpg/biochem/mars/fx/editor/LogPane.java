@@ -81,6 +81,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.IndexRange;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import org.fxmisc.flowless.Virtualized;
 
 public class LogPane {
 
@@ -106,6 +108,10 @@ public class LogPane {
 		textArea.textProperty().addListener((observable, oldText, newText) -> {
 			textChanged(newText);
 		});
+
+		System.out.println("Is Region: " + (textArea instanceof Region));
+		System.out.println("Is Virtualized: " + (textArea instanceof Virtualized));
+		System.out.println("Class hierarchy: " + textArea.getClass().getSuperclass());
 
 		// create scroll pane
 		VirtualizedScrollPane<MarkdownTextArea> scrollPane =

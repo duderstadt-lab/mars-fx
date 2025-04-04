@@ -34,12 +34,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.axes.AxisTransform;
-import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.axes.spi.transforms.DefaultAxisTransform;
-import de.gsi.dataset.DataSet;
+import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.axes.AxisTransform;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
+import io.fair_acc.dataset.DataSet;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;

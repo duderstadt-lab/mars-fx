@@ -29,8 +29,8 @@
 
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.plugins.XValueIndicator;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.plugins.XValueIndicator;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.UpdateMetadataPositionEvent;

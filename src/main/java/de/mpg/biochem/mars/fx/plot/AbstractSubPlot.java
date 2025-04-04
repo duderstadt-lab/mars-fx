@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 
 import com.jfoenix.controls.JFXBadge;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.AbstractValueIndicator;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.plugins.AbstractValueIndicator;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;

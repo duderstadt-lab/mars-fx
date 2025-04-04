@@ -31,10 +31,10 @@ package de.mpg.biochem.mars.fx.plot.tools;
 
 import org.scijava.table.DoubleColumn;
 
-import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.spi.AbstractDataSet;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.spi.AbstractDataSet;
 import javafx.scene.paint.Color;
 
 /**

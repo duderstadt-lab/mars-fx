@@ -33,8 +33,8 @@ import java.util.Set;
 
 import com.jfoenix.controls.JFXBadge;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.ChartPlugin;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;

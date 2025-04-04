@@ -52,10 +52,10 @@ import javax.imageio.ImageIO;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.Panner;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.Zoomer;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
@@ -224,8 +224,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 
 		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(
 			panSelected, () -> {
-				Panner panner = new Panner();
-				panner.setMouseFilter(PAN_MOUSE_FILTER);
+				Zoomer panner = new Zoomer();
+				panner.setPanMouseFilter(PAN_MOUSE_FILTER);
 				return panner;
 			}, Cursor.MOVE), null, panSelected);
 		addTool(panCursor);

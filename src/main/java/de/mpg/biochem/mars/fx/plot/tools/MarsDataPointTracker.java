@@ -36,10 +36,10 @@ import java.util.List;
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.AbstractDataFormattingPlugin;
-import de.gsi.dataset.DataSet;
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.plugins.AbstractDataFormattingPlugin;
+import io.fair_acc.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import javafx.event.EventHandler;

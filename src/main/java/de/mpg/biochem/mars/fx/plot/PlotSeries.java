@@ -35,7 +35,7 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-import de.gsi.chart.XYChart;
+import io.fair_acc.chartfx.XYChart;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
