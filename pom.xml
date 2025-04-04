@@ -113,11 +113,12 @@
 		<javafx.version>21.0.6</javafx.version>
 		<javafx.classifier>mac-aarch64</javafx.classifier>
 
-		<chartfx.version>11.3.1</chartfx.version>
+		<chartfx.version>11.2.5</chartfx.version>
+		<chartfx-chart.version>${chartfx.version}</chartfx-chart.version>
 		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
 		<chartfx-math.version>${chartfx.version}</chartfx-math.version>
 
-		<flexmark.version>0.64.8</flexmark.version>
+		<flexmark.version>0.62.2</flexmark.version>
 		<flexmark-ext-anchorlink.version>${flexmark.version}</flexmark-ext-anchorlink.version>
 		<flexmark-ext-autolink.version>${flexmark.version}</flexmark-ext-autolink.version>
 		<flexmark-ext-definition.version>${flexmark.version}</flexmark-ext-definition.version>
@@ -138,13 +139,14 @@
 		<fontawesomefx-materialicons.version>2.2.0-11</fontawesomefx-materialicons.version>
 		<fontawesomefx-octicons.version>4.3.0-11</fontawesomefx-octicons.version>
 
-		<annotations.version>26.0.2</annotations.version>
-		<controlsfx.version>11.2.2</controlsfx.version>
-		<flowless.version>0.7.4</flowless.version>
+		<autolink.version>0.10.0</autolink.version>
+		<annotations.version>15.0</annotations.version>
+		<controlsfx.version>11.1.0</controlsfx.version>
+		<flowless.version>0.6.3</flowless.version>
 		<jfoenix.version>21.0.0</jfoenix.version>
 		<reactfx.version>2.0-M5</reactfx.version>
-		<richtextfx.version>0.11.5</richtextfx.version>
-		<undofx.version>2.1.1</undofx.version>
+		<richtextfx.version>0.10.6</richtextfx.version>
+		<undofx.version>2.1.0</undofx.version>
 		<wellbehavedfx.version>0.3.3</wellbehavedfx.version>
 	</properties>
 
@@ -420,9 +422,9 @@
 			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.fair-acc</groupId>
-			<artifactId>chartfx</artifactId>
-			<version>${chartfx.version}</version>
+			<groupId>de.gsi.chart</groupId>
+			<artifactId>chartfx-chart</artifactId>
+			<version>${chartfx-chart.version}</version>
 			<exclusions>
 				<!-- Exclude all older JavaFX versions -->
 				<exclusion>
@@ -444,13 +446,13 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>io.fair-acc</groupId>
-			<artifactId>dataset</artifactId>
+			<groupId>de.gsi.dataset</groupId>
+			<artifactId>chartfx-dataset</artifactId>
 			<version>${chartfx-dataset.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.fair-acc</groupId>
-			<artifactId>math</artifactId>
+			<groupId>de.gsi.math</groupId>
+			<artifactId>chartfx-math</artifactId>
 			<version>${chartfx-math.version}</version>
 		</dependency>
 		<dependency>
