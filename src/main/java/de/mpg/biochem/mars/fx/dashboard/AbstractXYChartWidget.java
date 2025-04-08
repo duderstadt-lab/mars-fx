@@ -105,7 +105,7 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			renderer.pointReductionProperty().set(false);
 
 			xyChart.getRenderers().add(renderer);
-			xyChart.setLegend(null);
+			xyChart.setLegendVisible(false);
 			//xyChart.horizontalGridLinesVisibleProperty().set(false);
 			//xyChart.verticalGridLinesVisibleProperty().set(false);
 

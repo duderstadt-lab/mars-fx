@@ -116,7 +116,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		// be lost :(...
 		renderer.pointReductionProperty().set(false);
 		barChart.getRenderers().add(renderer);
-		barChart.setLegend(null);
+		barChart.setLegendVisible(false);
 		//barChart.horizontalGridLinesVisibleProperty().set(false);
 		//barChart.verticalGridLinesVisibleProperty().set(false);
 
