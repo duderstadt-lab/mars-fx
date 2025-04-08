@@ -102,6 +102,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
 
+import io.fair_acc.chartfx.legend.spi.DefaultLegend;
+
 public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 	implements PlotPane
 {
@@ -414,9 +416,11 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
 
-		subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
-		subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
+		//subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
+		//subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
 		// subplot.getChart().animatedProperty().bind(animateZoom);
+		//subplot.getChart().setLegend(new DefaultLegend());
+		//subplot.getChart().setLegendVisible(false);
 
 		if (subplot.getChart().getRenderers().get(
 			0) instanceof SegmentDataSetRenderer) ((SegmentDataSetRenderer) subplot

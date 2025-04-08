@@ -88,7 +88,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);
 		// For the moment lets hide the legend
-		chartPane.setLegend(null);
+		//chartPane.setLegend(null);
+		chartPane.setLegendVisible(false);
 
 		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
 
@@ -105,10 +106,9 @@ public abstract class AbstractSubPlot implements SubPlot {
 
 		// unbind PlotArea hiddenSidesPane from Chart HiddenSidesPane
 		// and then set default distance. This will allow zoom slider to come up.
-		chartPane.getPlotArea().triggerDistanceProperty().unbindBidirectional(
-			chartPane.triggerDistanceProperty());
+		//chartPane.getPlotArea().triggerDistanceProperty().unbindBidirectional(chartPane.triggerDistanceProperty());
 		chartPane.getPlotArea().setTriggerDistance(50);
-		chartPane.setTriggerDistance(-1);
+		//chartPane.setTriggerDistance(-1);
 
 		chartPane.getGridRenderer().getHorizontalMajorGrid().setStroke(chartPane
 			.getGridRenderer().getHorizontalMajorGrid().getStroke());

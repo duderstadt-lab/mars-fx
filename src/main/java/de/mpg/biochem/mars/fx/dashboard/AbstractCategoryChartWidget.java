@@ -73,7 +73,7 @@ public abstract class AbstractCategoryChartWidget extends
 
 			yAxis = new MarsNumericAxis();
 			yAxis.setName("Frequency");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setForceZeroInRange(true);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
@@ -94,10 +94,10 @@ public abstract class AbstractCategoryChartWidget extends
 			renderer.pointReductionProperty().set(false);
 			barChart.getRenderers().add(renderer);
 			barChart.setLegend(null);
-			barChart.horizontalGridLinesVisibleProperty().set(false);
-			barChart.verticalGridLinesVisibleProperty().set(false);
+			//barChart.horizontalGridLinesVisibleProperty().set(false);
+			//barChart.verticalGridLinesVisibleProperty().set(false);
 
-			barChart.setTriggerDistance(0);
+			//barChart.setTriggerDistance(0);
 
 			barChart.setPrefSize(100, 100);
 			barChart.setPadding(new Insets(10, 20, 10, 10));

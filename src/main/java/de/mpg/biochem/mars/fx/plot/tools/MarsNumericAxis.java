@@ -46,6 +46,7 @@ public class MarsNumericAxis extends DefaultNumericAxis {
 		return computePrefWidth(getHeight());
 	}
 
+	/*
 	@Override
 	protected void updateAxisLabelAndUnit() {
 		final String axisPrimaryLabel = getName();
@@ -57,4 +58,5 @@ public class MarsNumericAxis extends DefaultNumericAxis {
 		getAxisLabel().setText(axisPrimaryLabel);
 		getAxisLabel().applyCss();
 	}
+	 */
 }

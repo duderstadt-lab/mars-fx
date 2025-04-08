@@ -213,28 +213,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
 	public void init() {
-		// We temporarily redirect err output to suppress javafx related package warning.
-		PrintStream originalErr = System.err;
-
-		try {
-			// Create a no-op PrintStream to discard output
-			PrintStream noOpStream = new PrintStream(new OutputStream() {
-				@Override
-				public void write(int b) { /* Do nothing */ }
-			});
-
-			// Replace System.err temporarily
-			System.setErr(noOpStream);
-
-			// Create the JFXPanel (this will trigger the warning)
-			Platform.startup(() -> {});
-
-		} finally {
-			// Restore the original System.err
-			System.setErr(originalErr);
-		}
-
-		//new JFXPanel(); // initializes JavaFX environment
+		new JFXPanel(); // initializes JavaFX environment
 
 		// The call to runLater() avoid a mix between JavaFX thread and Swing
 		// thread.

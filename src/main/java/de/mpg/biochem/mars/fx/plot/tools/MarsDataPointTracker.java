@@ -116,7 +116,7 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin
 
 		final Point2D mouseLocation = getLocationInPlotArea(event);
 
-		Chart chart = getChart();
+		XYChart chart = (XYChart) getChart();
 
 		if (chart.getDatasets().size() == 0) return null;
 

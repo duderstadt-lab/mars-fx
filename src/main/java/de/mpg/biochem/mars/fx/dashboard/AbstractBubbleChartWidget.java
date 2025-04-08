@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
 import io.fair_acc.chartfx.XYChart;
@@ -74,12 +75,12 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 		}
 		else {
 			xAxis = new MarsNumericAxis("");
-			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setMinorTickCount(0);
 			xAxis.setAutoRanging(true);
 			xAxis.setAutoRangeRounding(false);
 
 			yAxis = new MarsNumericAxis("");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
 
@@ -92,19 +93,19 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			renderer.setMarkerSize(5);
+			renderer.setStyle(DataSetStyleBuilder.instance().setMarkerSize(5).build());
 			renderer.setPolyLineStyle(LineStyle.NONE);
-			renderer.setErrorType(ErrorStyle.NONE);
+			renderer.setErrorStyle(ErrorStyle.NONE);
 			renderer.setDrawMarker(true);
 			renderer.setAssumeSortedData(false);
 			renderer.pointReductionProperty().set(false);
 
 			bubbleChart.getRenderers().add(renderer);
 			bubbleChart.setLegend(null);
-			bubbleChart.horizontalGridLinesVisibleProperty().set(false);
-			bubbleChart.verticalGridLinesVisibleProperty().set(false);
+			//bubbleChart.horizontalGridLinesVisibleProperty().set(false);
+			//bubbleChart.verticalGridLinesVisibleProperty().set(false);
 
-			bubbleChart.setTriggerDistance(0);
+			//bubbleChart.setTriggerDistance(0);
 
 			bubbleChart.setPrefSize(100, 100);
 			bubbleChart.setPadding(new Insets(10, 20, 10, 10));

@@ -84,7 +84,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
 		yAxis = new MarsNumericAxis();
 		yAxis.setName("Molecules");
-		yAxis.setMinorTickVisible(false);
+		yAxis.setMinorTickCount(0);
 		yAxis.setForceZeroInRange(true);
 		yAxis.setAutoRanging(true);
 		yAxis.setAutoRangeRounding(false);
@@ -117,14 +117,14 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		renderer.pointReductionProperty().set(false);
 		barChart.getRenderers().add(renderer);
 		barChart.setLegend(null);
-		barChart.horizontalGridLinesVisibleProperty().set(false);
-		barChart.verticalGridLinesVisibleProperty().set(false);
+		//barChart.horizontalGridLinesVisibleProperty().set(false);
+		//barChart.verticalGridLinesVisibleProperty().set(false);
 
 		// barChart.getPlugins().add(new EditAxis());
 		// final Zoomer zoomer = new Zoomer();
 		// barChart.getPlugins().add(zoomer);
 
-		barChart.setTriggerDistance(0);
+		//barChart.setTriggerDistance(0);
 
 		// root.getChildren().add(barChart);
 		StackPane stack = new StackPane();

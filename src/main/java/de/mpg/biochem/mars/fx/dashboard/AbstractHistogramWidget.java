@@ -73,11 +73,11 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		else {
 			xAxis = new MarsNumericAxis("");
 			// xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setMinorTickCount(0);
 			xAxis.setAutoRangeRounding(false);
 			// xAxis.setAutoRanging(true);
 			yAxis = new MarsNumericAxis("");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setForceZeroInRange(true);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
@@ -88,17 +88,17 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 			outlineHistogramRenderer = new ErrorDataSetRenderer();
 			outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
-			outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
+			outlineHistogramRenderer.setErrorStyle(ErrorStyle.NONE);
 			outlineHistogramRenderer.pointReductionProperty().set(false);
 
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			histChart.getRenderers().add(outlineHistogramRenderer);
 			histChart.setLegend(null);
-			histChart.horizontalGridLinesVisibleProperty().set(false);
-			histChart.verticalGridLinesVisibleProperty().set(false);
+			//histChart.horizontalGridLinesVisibleProperty().set(false);
+			//histChart.verticalGridLinesVisibleProperty().set(false);
 
-			histChart.setTriggerDistance(0);
+			//histChart.setTriggerDistance(0);
 
 			histChart.setPrefSize(100, 100);
 			histChart.setPadding(new Insets(10, 20, 10, 10));

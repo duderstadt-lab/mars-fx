@@ -133,7 +133,7 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
 	// SUPER HACKY drop-in to fix error in chart-fx library related to single bars
 	// and
 	// LOGGER firing..
-	@Override
+
 	protected List<Double> calculateMajorTickValues(final double axisLength,
 		final AxisRange axisRange)
 	{
@@ -216,10 +216,10 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
 		return computeRange(paddedMin, paddedMax, length, labelSize);
 	}
 
-	@Override
-	protected List<Double> calculateMinorTickValues() {
-		return Collections.emptyList();
-	}
+	//@Override
+	//protected List<Double> calculateMinorTickValues() {
+	//	return Collections.emptyList();
+	//}
 
 	@Override
 	protected double computeTickUnit(final double rawTickUnit) {
@@ -339,7 +339,6 @@ public class MarsCategoryAxis extends DefaultNumericAxis {
 	}
 
 	// Added just to remove [] units.
-	@Override
 	protected void updateAxisLabelAndUnit() {
 		final String axisPrimaryLabel = getName();
 		final boolean isAutoScaling = isAutoUnitScaling();

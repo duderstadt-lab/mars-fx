@@ -36,6 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
 import io.fair_acc.chartfx.XYChart;
@@ -76,12 +77,12 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		}
 		else {
 			xAxis = new MarsNumericAxis("");
-			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setMinorTickCount(0);
 			xAxis.setAutoRanging(true);
 			xAxis.setAutoRangeRounding(false);
 
 			yAxis = new MarsNumericAxis("");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
 
@@ -96,19 +97,19 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			renderer.setMarkerSize(5);
+			renderer.setStyle(DataSetStyleBuilder.instance().setMarkerSize(5).build());
 			renderer.setPolyLineStyle(LineStyle.NORMAL);
-			renderer.setErrorType(ErrorStyle.NONE);
+			renderer.setErrorStyle(ErrorStyle.NONE);
 			renderer.setDrawMarker(false);
 			renderer.setAssumeSortedData(false);
 			renderer.pointReductionProperty().set(false);
 
 			xyChart.getRenderers().add(renderer);
 			xyChart.setLegend(null);
-			xyChart.horizontalGridLinesVisibleProperty().set(false);
-			xyChart.verticalGridLinesVisibleProperty().set(false);
+			//xyChart.horizontalGridLinesVisibleProperty().set(false);
+			//xyChart.verticalGridLinesVisibleProperty().set(false);
 
-			xyChart.setTriggerDistance(0);
+			//xyChart.setTriggerDistance(0);
 
 			xyChart.setPrefSize(100, 100);
 			xyChart.setPadding(new Insets(10, 20, 10, 10));
@@ -231,8 +232,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 				xyChart.setTitle(title);
 
-				if (drawErrorBars) renderer.setErrorType(ErrorStyle.ERRORBARS);
-				else renderer.setErrorType(ErrorStyle.NONE);
+				if (drawErrorBars) renderer.setErrorStyle(ErrorStyle.ERRORBARS);
+				else renderer.setErrorStyle(ErrorStyle.NONE);
 
 				xyChart.getDatasets().clear();
 				xyChart.getDatasets().addAll(datasets);
