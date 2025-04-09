@@ -418,8 +418,8 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
 
-		//subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
-		//subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
+		subplot.getChart().getGridRenderer().getHorizontalMajorGrid().visibleProperty().bind(gridlines);
+		subplot.getChart().getGridRenderer().getVerticalMajorGrid().visibleProperty().bind(gridlines);
 		// subplot.getChart().animatedProperty().bind(animateZoom);
 		//subplot.getChart().setLegend(new DefaultLegend());
 		//subplot.getChart().setLegendVisible(false);
