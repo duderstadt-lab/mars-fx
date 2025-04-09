@@ -109,10 +109,6 @@ public class LogPane {
 			textChanged(newText);
 		});
 
-		System.out.println("Is Region: " + (textArea instanceof Region));
-		System.out.println("Is Virtualized: " + (textArea instanceof Virtualized));
-		System.out.println("Class hierarchy: " + textArea.getClass().getSuperclass());
-
 		// create scroll pane
 		VirtualizedScrollPane<MarkdownTextArea> scrollPane =
 			new VirtualizedScrollPane<>(textArea);
