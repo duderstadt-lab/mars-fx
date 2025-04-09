@@ -172,6 +172,20 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 			return;
 		}
 
+		if (dataSet.getStyle().equals("Segments")) {
+			if (indexMin > 0 && indexMin % 2 != 0) {
+				indexMin--;
+			}
+
+			if (indexMax + 2 < dataSet.getDataCount()) {
+				if (indexMax + 1 % 2 != 0) indexMax += 1;
+				else if (indexMax + 2 % 2 != 0) indexMax += 2;
+			}
+			else {
+				indexMax = dataSet.getDataCount();
+			}
+		}
+
 		if (ProcessingProfiler.getDebugState()) {
 			timestamp = ProcessingProfiler.getTimeDiff(timestamp,
 					"get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
