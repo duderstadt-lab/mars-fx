@@ -62,7 +62,7 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
 
 		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn +
-			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries
+			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getType(), plotSeries
 				.getLineStyle());
 
 		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
@@ -97,7 +97,6 @@ public class MarsTableSubPlot extends AbstractSubPlot {
 		else dataset.add((DoubleColumn) getDataTable().get(xColumn),
 			(DoubleColumn) getDataTable().get(yColumn));
 
-		dataset.setStyle(plotSeries.getType());
 		if (plotPane.getPlotOptionsPane().downsample()) dataset.downsample(xAxis,
 			plotPane.getPlotOptionsPane().getMinDownsamplePoints());
 		getChart().getDatasets().add(dataset);

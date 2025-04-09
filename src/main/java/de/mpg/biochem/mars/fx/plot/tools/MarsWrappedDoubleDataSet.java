@@ -52,6 +52,7 @@ public class MarsWrappedDoubleDataSet extends
 	private Color color;
 	private double width;
 	private String lineStyle;
+	private String marsPlotType;
 	private DoubleColumn xValues, yValues;
 
 	private MarsNumericAxis axis;
@@ -71,20 +72,22 @@ public class MarsWrappedDoubleDataSet extends
 	}
 
 	public MarsWrappedDoubleDataSet(String name, Color color, double width,
-		String lineStyle)
+		String marsPlotType, String lineStyle)
 	{
 		this(name);
 		this.color = color;
 		this.width = width;
+		this.marsPlotType = marsPlotType;
 		this.lineStyle = lineStyle;
 	}
 
 	public MarsWrappedDoubleDataSet(final String name, final int initalSize,
-		Color color, double width, String lineStyle)
+		Color color, double width, String marsPlotType, String lineStyle)
 	{
 		this(name);
 		this.color = color;
 		this.width = width;
+		this.marsPlotType = marsPlotType;
 		this.lineStyle = lineStyle;
 	}
 
@@ -110,6 +113,14 @@ public class MarsWrappedDoubleDataSet extends
 
 	public String getLineStyle() {
 		return lineStyle;
+	}
+
+	public String getMarsPlotType() {
+		return marsPlotType;
+	}
+
+	public void setMarsPlotType(String marsPlotType) {
+		this.marsPlotType = marsPlotType;
 	}
 
 	public void add(DoubleColumn xValues, DoubleColumn yValues) {

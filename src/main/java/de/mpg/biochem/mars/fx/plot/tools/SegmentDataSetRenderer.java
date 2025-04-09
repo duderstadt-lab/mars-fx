@@ -34,7 +34,6 @@ import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.renderer.spi.AbstractErrorDataSetRendererParameter;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.shape.FillRule;
 import javafx.scene.paint.Color;
 
 import org.slf4j.Logger;
@@ -43,12 +42,10 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSetError.ErrorType;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
@@ -140,17 +137,19 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 		Color color = Color.BLACK;
 		double width = 1;
 		String lineStyle = "";
+		String marsPlotType = "";
 
 		if (dataSet instanceof MarsWrappedDoubleDataSet) {
 			color = ((MarsWrappedDoubleDataSet) dataSet).getColor();
 			width = ((MarsWrappedDoubleDataSet) dataSet).getWidth();
+			marsPlotType = ((MarsWrappedDoubleDataSet) dataSet).getMarsPlotType();
 			lineStyle = ((MarsWrappedDoubleDataSet) dataSet).getLineStyle();
 		} else if (dataSet instanceof MarsDoubleDataSet) {
 			color = ((MarsDoubleDataSet) dataSet).getColor();
 			width = ((MarsDoubleDataSet) dataSet).getWidth();
+			marsPlotType = ((MarsDoubleDataSet) dataSet).getMarsPlotType();
 			lineStyle = ((MarsDoubleDataSet) dataSet).getLineStyle();
 		}
-
 		style.setLineColor(color);
 		style.setLineWidth(width);
 		style.setMarkerSize(0);
@@ -172,7 +171,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 			return;
 		}
 
-		if (dataSet.getStyle().equals("Segments")) {
+		if (marsPlotType.equals("Segments")) {
 			if (indexMin > 0 && indexMin % 2 != 0) {
 				indexMin--;
 			}
@@ -216,8 +215,8 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 				getMinRequiredReductionSize());
 
 		// draw individual plot components
-		if (dataSet.getStyle() != null && dataSet.getStyle().equals("Segments")) drawSegments(gc, style, points);
-		else if (dataSet.getStyle().equals("Scatter")) {
+		if (marsPlotType.equals("Segments")) drawSegments(gc, style, points);
+		else if (marsPlotType.equals("Scatter")) {
 			gc.setFill(color);
 			style.setMarkerSize(width);
 			drawScatter(gc, style, points);

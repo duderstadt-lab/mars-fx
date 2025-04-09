@@ -116,7 +116,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 
 				MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet(
 					"Segments - " + yColumn + " vs " + xColumn + " - " + segmentTableName
-						.get(2), plotSeries.getSegmentsColor(), segmentWidth, "");
+						.get(2), plotSeries.getSegmentsColor(), segmentWidth, "Segments", "");
 
 				MarsTable segmentsTable = molecule.getSegmentsTable(segmentTableName);
 
@@ -134,7 +134,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 					}
 				}
 
-				segmentsDataSet.setStyle("Segments");
 				getChart().getDatasets().add(segmentsDataSet);
 			}
 		}
@@ -142,7 +141,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		double lineWidth = Double.valueOf(plotSeries.getWidth());
 
 		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn +
-			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries
+			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getType(), plotSeries
 				.getLineStyle());
 
 		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
@@ -176,7 +175,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		else dataset.add((DoubleColumn) getDataTable().get(xColumn),
 			(DoubleColumn) getDataTable().get(yColumn));
 
-		dataset.setStyle(plotSeries.getType());
 		if (plotPane.getPlotOptionsPane().downsample()) dataset.downsample(xAxis,
 			plotPane.getPlotOptionsPane().getMinDownsamplePoints());
 		getChart().getDatasets().add(dataset);
