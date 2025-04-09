@@ -49,6 +49,7 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
+import de.mpg.biochem.mars.fx.plot.tools.MarsPanner;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -226,8 +227,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 
 		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(
 			panSelected, () -> {
-				Zoomer panner = new Zoomer();
-				panner.setPanMouseFilter(PAN_MOUSE_FILTER);
+				MarsPanner panner = new MarsPanner();
+				//panner.setPanMouseFilter(PAN_MOUSE_FILTER);
+					panner.setMouseFilter(PAN_MOUSE_FILTER);
 				return panner;
 			}, Cursor.MOVE), null, panSelected);
 		addTool(panCursor);
