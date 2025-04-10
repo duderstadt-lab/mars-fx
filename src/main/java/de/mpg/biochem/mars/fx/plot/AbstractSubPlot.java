@@ -104,16 +104,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 
 		chartPane.getRenderers().setAll(renderer);
 
-		// unbind PlotArea hiddenSidesPane from Chart HiddenSidesPane
-		// and then set default distance. This will allow zoom slider to come up.
-		//chartPane.getPlotArea().triggerDistanceProperty().unbindBidirectional(chartPane.triggerDistanceProperty());
-		chartPane.getPlotArea().setTriggerDistance(50);
-		//chartPane.setTriggerDistance(-1);
-
-		chartPane.getGridRenderer().getHorizontalMajorGrid().setStroke(chartPane
-			.getGridRenderer().getHorizontalMajorGrid().getStroke());
-		chartPane.getGridRenderer().getVerticalMajorGrid().setStroke(chartPane
-			.getGridRenderer().getVerticalMajorGrid().getStroke());
+		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+		chartPane.getPlotArea().setTriggerDistance(0);
 
 		chartPane.getYAxis().minProperty().addListener((ob, o, n) -> {
 			if (!datasetOptionsPane.fixYBounds().get()) datasetOptionsPane.setYMin(n
