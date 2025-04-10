@@ -48,6 +48,8 @@ import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
+import java.util.Arrays;
+
 /**
  * Renders data points with error bars and/or error surfaces It can be used e.g. to render horizontal and/or vertical
  * errors additional functionality:
@@ -153,7 +155,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 		style.setLineColor(color);
 		style.setLineWidth(width);
 		style.setMarkerSize(0);
-		style.setStyle(lineStyle);
+		if (!lineStyle.equals(" ") && !lineStyle.isEmpty()) style.setLineDashArray(convertLineDashStringToArray(lineStyle));
 
 		var timestamp = ProcessingProfiler.getTimeStamp();
 		int indexMin;
@@ -228,6 +230,21 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 		}
 	}
 
+	public static Number[] convertLineDashStringToArray(String dashString) {
+		// Split the string by whitespace
+		String[] parts = dashString.trim().split("\\s+");
+
+		// Create a Number array of the same size
+		Number[] dashArray = new Number[parts.length];
+
+		// Convert each part to a Number and store in the array
+		for (int i = 0; i < parts.length; i++) {
+			dashArray[i] = Double.parseDouble(parts[i]);
+		}
+
+		return dashArray;
+	}
+
 	/**
 	 * @return the instance of this ErrorDataSetRenderer.
 	 */
@@ -239,45 +256,23 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 	protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
 		gc.save();
 		style.applyLineStrokeStyle(gc);
+		if (style.getLineDashArray() != null) {
+			Number[] dashes = style.getLineDashArray();
+			double[] array = new double[dashes.length];
+			for (int i=0; i<dashes.length; i++) array[i] = dashes[i].doubleValue();
+			gc.setLineDashes(array);
+		}
 
-		if (points.allowForNaNs) {
-			gc.beginPath();
-			gc.moveTo(points.xValues[0], points.yValues[0]);
-			boolean lastIsFinite = true;
-			double xLastValid = 0.0;
-			double yLastValid = 0.0;
-			for (int i = 0; i < points.actualDataCount; i++) {
-				final double x0 = points.xValues[i];
-				final double y0 = points.yValues[i];
-				if (Double.isFinite(x0) && Double.isFinite(y0)) {
-					if (!lastIsFinite) {
-						gc.moveTo(x0, y0);
-						lastIsFinite = true;
-						continue;
-					}
-					gc.lineTo(x0, y0);
-					xLastValid = x0;
-					yLastValid = y0;
-					lastIsFinite = true;
-				} else {
-					lastIsFinite = false;
-				}
-			}
-			gc.moveTo(xLastValid, yLastValid);
-			gc.closePath();
-			gc.stroke();
+		if (gc.getLineDashes() != null) {
+			gc.strokePolyline(points.xValues, points.yValues, points.actualDataCount);
 		} else {
-			if (gc.getLineDashes() != null) {
-				gc.strokePolyline(points.xValues, points.yValues, points.actualDataCount);
-			} else {
-				for (int i = 0; i < points.actualDataCount - 1; i++) {
-					final double x1 = points.xValues[i];
-					final double x2 = points.xValues[i + 1];
-					final double y1 = points.yValues[i];
-					final double y2 = points.yValues[i + 1];
+			for (int i = 0; i < points.actualDataCount - 1; i++) {
+				final double x1 = points.xValues[i];
+				final double x2 = points.xValues[i + 1];
+				final double y1 = points.yValues[i];
+				final double y2 = points.yValues[i + 1];
 
-					gc.strokeLine(x1, y1, x2, y2);
-				}
+				gc.strokeLine(x1, y1, x2, y2);
 			}
 		}
 
@@ -298,53 +293,6 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 		}
 
 		gc.restore();
-		/*
-		gc.save();
-		style.applyLineStrokeStyle(gc);
-
-		if (points.allowForNaNs) {
-			gc.beginPath();
-			gc.moveTo(points.xValues[0], points.yValues[0]);
-			boolean lastIsFinite = true;
-			double xLastValid = 0.0;
-			double yLastValid = 0.0;
-			for (int i = 0; i < points.actualDataCount; i++) {
-				final double x0 = points.xValues[i];
-				final double y0 = points.yValues[i];
-				if (Double.isFinite(x0) && Double.isFinite(y0)) {
-					if (!lastIsFinite) {
-						gc.moveTo(x0, y0);
-						lastIsFinite = true;
-						continue;
-					}
-					gc.lineTo(x0, y0);
-					xLastValid = x0;
-					yLastValid = y0;
-					lastIsFinite = true;
-				} else {
-					lastIsFinite = false;
-				}
-			}
-			gc.moveTo(xLastValid, yLastValid);
-			gc.closePath();
-			gc.stroke();
-		} else {
-			if (gc.getLineDashes() != null) {
-				gc.strokePolyline(points.xValues, points.yValues, points.actualDataCount);
-			} else {
-				for (int i = 0; i < points.actualDataCount - 1; i++) {
-					final double x1 = points.xValues[i];
-					final double x2 = points.xValues[i + 1];
-					final double y1 = points.yValues[i];
-					final double y2 = points.yValues[i + 1];
-
-					gc.strokeLine(x1, y1, x2, y2);
-				}
-			}
-		}
-
-		gc.restore();
-		*/
 	}
 
 	protected static void drawScatter(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points)
