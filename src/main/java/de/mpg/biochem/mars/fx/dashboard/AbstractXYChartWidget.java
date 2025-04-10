@@ -97,19 +97,19 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			renderer.setStyle(DataSetStyleBuilder.instance().setMarkerSize(5).build());
-			renderer.setPolyLineStyle(LineStyle.NORMAL);
-			renderer.setErrorStyle(ErrorStyle.NONE);
+			//renderer.setPolyLineStyle(LineStyle.NORMAL);
+			//renderer.setErrorStyle(ErrorStyle.NONE);
 			renderer.setDrawMarker(false);
 			renderer.setAssumeSortedData(false);
 			renderer.pointReductionProperty().set(false);
 
 			xyChart.getRenderers().add(renderer);
 			xyChart.setLegendVisible(false);
-			//xyChart.horizontalGridLinesVisibleProperty().set(false);
-			//xyChart.verticalGridLinesVisibleProperty().set(false);
+			xyChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			xyChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			//xyChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			xyChart.getPlotArea().setTriggerDistance(0);
 
 			xyChart.setPrefSize(100, 100);
 			xyChart.setPadding(new Insets(10, 20, 10, 10));
@@ -307,19 +307,13 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			return null;
 		}
 
-		String styleString = "";
+		DataSetStyleBuilder builder = DataSetStyleBuilder.instance();
+		if (outputs.containsKey(seriesName + "_strokeColor")) builder.setLineColor((String) outputs.get(seriesName + "_strokeColor"));
+		if (outputs.containsKey(seriesName + "_fillColor")) builder.setFill((String) outputs.get(seriesName + "_fillColor"));
+		if (outputs.containsKey(seriesName + "_strokeWidth")) builder.setStrokeWidth((Integer) outputs.get(seriesName + "_strokeWidth"));
 
-		if (outputs.containsKey(seriesName + "_strokeColor")) styleString +=
-			"strokeColor=" + (String) outputs.get(seriesName + "_strokeColor") + "; ";
-
-		if (outputs.containsKey(seriesName + "_fillColor")) styleString +=
-			"fillColor=" + (String) outputs.get(seriesName + "_fillColor") + "; ";
-
-		if (outputs.containsKey(seriesName + "_strokeWidth")) styleString +=
-			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_strokeWidth"))
-				.intValue();
-
-		dataset.setStyle(styleString);
+		String style = builder.build();
+		dataset.setStyle(style);
 
 		return dataset;
 	}
