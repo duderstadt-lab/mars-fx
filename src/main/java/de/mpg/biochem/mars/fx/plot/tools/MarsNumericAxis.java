@@ -35,28 +35,16 @@ public class MarsNumericAxis extends DefaultNumericAxis {
 
 	public MarsNumericAxis() {
 		super();
+		setUnit(null);
 	}
 
 	public MarsNumericAxis(String name) {
 		super();
 		setName(name);
+		setUnit(null);
 	}
 
 	public double calculateWidth() {
 		return computePrefWidth(getHeight());
 	}
-
-	/*
-	@Override
-	protected void updateAxisLabelAndUnit() {
-		final String axisPrimaryLabel = getName();
-		final boolean isAutoScaling = isAutoUnitScaling();
-		if (isAutoScaling) {
-			updateScaleAndUnitPrefix();
-		}
-
-		getAxisLabel().setText(axisPrimaryLabel);
-		getAxisLabel().applyCss();
-	}
-	 */
 }
