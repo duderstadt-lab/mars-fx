@@ -43,7 +43,6 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.application.Platform;
 import javafx.geometry.Insets;

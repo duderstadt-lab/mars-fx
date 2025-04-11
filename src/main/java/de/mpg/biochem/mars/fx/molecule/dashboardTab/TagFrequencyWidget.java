@@ -49,7 +49,6 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
