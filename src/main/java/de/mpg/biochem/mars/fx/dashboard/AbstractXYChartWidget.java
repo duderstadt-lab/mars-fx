@@ -97,8 +97,6 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			//renderer.setPolyLineStyle(LineStyle.NORMAL);
-			//renderer.setErrorStyle(ErrorStyle.NONE);
 			renderer.setDrawMarker(false);
 			renderer.setAssumeSortedData(false);
 			renderer.pointReductionProperty().set(false);

@@ -29,6 +29,7 @@
 
 package de.mpg.biochem.mars.fx.dashboard;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,7 +94,6 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			renderer.setStyle(DataSetStyleBuilder.instance().setMarkerSize(5).build());
 			renderer.setPolyLineStyle(LineStyle.NONE);
 			renderer.setErrorStyle(ErrorStyle.NONE);
 			renderer.setDrawMarker(true);
@@ -102,10 +102,11 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			bubbleChart.getRenderers().add(renderer);
 			bubbleChart.setLegendVisible(false);
-			//bubbleChart.horizontalGridLinesVisibleProperty().set(false);
-			//bubbleChart.verticalGridLinesVisibleProperty().set(false);
+			bubbleChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			bubbleChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			//bubbleChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			bubbleChart.getPlotArea().setTriggerDistance(0);
 
 			bubbleChart.setPrefSize(100, 100);
 			bubbleChart.setPadding(new Insets(10, 20, 10, 10));
@@ -236,14 +237,14 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 	}
 
 	protected DefaultErrorDataSet buildDataSet(Map<String, Object> outputs,
-		String seriesName)
+											   String seriesName)
 	{
 		DefaultErrorDataSet dataset = new DefaultErrorDataSet(seriesName);
 
 		int dataPointCount = 0;
 
 		if (outputs.containsKey(seriesName + "_xvalues") && outputs.containsKey(
-			seriesName + "_yvalues"))
+				seriesName + "_yvalues"))
 		{
 			Double[] xvalues = (Double[]) outputs.get(seriesName + "_xvalues");
 			Double[] yvalues = (Double[]) outputs.get(seriesName + "_yvalues");
@@ -257,7 +258,7 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (xvalues.length != yvalues.length) {
 				writeToLog(seriesName + "_xvalues and " + seriesName +
-					"_yvalues do not have the same dimensions.");
+						"_yvalues do not have the same dimensions.");
 				return null;
 			}
 
@@ -278,8 +279,8 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (dataPointCount != label.length) {
 				writeToLog("The length of " + seriesName +
-					"_label does not match that of " + seriesName + "_xvalues and " +
-					seriesName + "_yvalues.");
+						"_label does not match that of " + seriesName + "_xvalues and " +
+						seriesName + "_yvalues.");
 				return null;
 			}
 
@@ -296,20 +297,20 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (dataPointCount != color.length) {
 				writeToLog("The length of " + seriesName +
-					"_color does not match that of " + seriesName + "_xvalues and " +
-					seriesName + "_yvalues. Will assume single color input.");
+						"_color does not match that of " + seriesName + "_xvalues and " +
+						seriesName + "_yvalues. Will assume single color input.");
 				for (int index = 0; index < dataPointCount; index++)
-					styleString[index] += "markerColor=" + color[0] + "; ";
+					styleString[index] += "-fx-marker-color:" + color[0] + ";\n";
 			}
 			else {
 				for (int index = 0; index < dataPointCount; index++)
-					styleString[index] += "markerColor=" + color[index] + "; ";
+					styleString[index] += "-fx-marker-color:" + color[index] + ";\n";
 			}
 		}
 		else if (outputs.containsKey(seriesName + "_markerColor")) {
 			for (int index = 0; index < dataPointCount; index++)
-				styleString[index] += "markerColor=" + (String) outputs.get(seriesName +
-					"_markerColor") + "; ";
+				styleString[index] += "-fx-marker-color:" + (String) outputs.get(seriesName +
+						"_markerColor") + "; ";
 		}
 
 		if (outputs.containsKey(seriesName + "_size")) {
@@ -317,24 +318,24 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 
 			if (dataPointCount != size.length) {
 				writeToLog("The length of " + seriesName +
-					"_size does not match that of " + seriesName + "_xvalues and " +
-					seriesName + "_yvalues. Will assume single color input.");
+						"_size does not match that of " + seriesName + "_xvalues and " +
+						seriesName + "_yvalues. Will assume single color input.");
 				for (int index = 0; index < dataPointCount; index++)
-					styleString[index] += "markerSize=" + size[0] + "; ";
+					styleString[index] += "-fx-marker-size:" + size[0] + ";\n";
 			}
 			else {
 				for (int index = 0; index < dataPointCount; index++)
-					styleString[index] += "markerSize=" + size[index] + "; ";
+					styleString[index] += "-fx-marker-size:" + size[index] + ";\n";
 			}
 		}
 		else if (outputs.containsKey(seriesName + "_markerSize")) {
 			for (int index = 0; index < dataPointCount; index++)
-				styleString[index] += "markerSize=" + (String) outputs.get(seriesName +
-					"_markerSize") + "; ";
+				styleString[index] += "-fx-marker-size:" + (String) outputs.get(seriesName +
+						"_markerSize") + ";\n";
 		}
 
 		for (int index = 0; index < dataPointCount; index++)
-			dataset.addDataStyle(index, styleString[index] + "markerType=circle;");
+			dataset.addDataStyle(index, styleString[index] + "-fx-marker-type:circle;\n");
 
 		return dataset;
 	}
