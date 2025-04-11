@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.fair_acc.chartfx.axes.spi.CategoryAxis;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
@@ -72,7 +74,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	protected XYChart barChart;
-	protected MarsCategoryAxis xAxis;
+	protected CategoryAxis xAxis;
 	protected MarsNumericAxis yAxis;
 
 	@Override
@@ -80,8 +82,11 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		super.initialize();
 
 		// final StackPane root = new StackPane();
-		xAxis = new MarsCategoryAxis("Tag");
+		xAxis = new CategoryAxis("Tag");
+		xAxis.setUnit(null);
+		xAxis.setAutoRangePadding(0.2);
 		xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
+
 		yAxis = new MarsNumericAxis();
 		yAxis.setName("Molecules");
 		yAxis.setMinorTickCount(0);
@@ -117,14 +122,11 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		renderer.pointReductionProperty().set(false);
 		barChart.getRenderers().add(renderer);
 		barChart.setLegendVisible(false);
-		//barChart.horizontalGridLinesVisibleProperty().set(false);
-		//barChart.verticalGridLinesVisibleProperty().set(false);
+		barChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+		barChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-		// barChart.getPlugins().add(new EditAxis());
-		// final Zoomer zoomer = new Zoomer();
-		// barChart.getPlugins().add(zoomer);
-
-		//barChart.setTriggerDistance(0);
+		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+		barChart.getPlotArea().setTriggerDistance(0);
 
 		// root.getChildren().add(barChart);
 		StackPane stack = new StackPane();
@@ -156,7 +158,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 		});
 
 		final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
-		dataSet.setStyle("strokeColor:#add8e6;fillColor:#add8e6;strokeWidth=0;");
+		dataSet.setStyle(DataSetStyleBuilder.instance().setDatasetColor("#add8e6").build());
 
 		int index = 0;
 		for (String tag : tagFrequency.keySet()) {
