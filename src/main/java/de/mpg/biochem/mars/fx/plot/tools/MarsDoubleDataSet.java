@@ -29,10 +29,6 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	private static final String Y_COORDINATES = "Y coordinates";
 	protected DoubleArrayList xValues; // way faster than java default lists
 	protected DoubleArrayList yValues; // way faster than java default lists
-
-	private Color color;
-	private double width;
-	private String lineStyle;
 	private String marsPlotType;
 
 	private MarsNumericAxis axis;
@@ -98,69 +94,24 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 		yValues = new DoubleArrayList(initalSize);
 	}
 
-	public MarsDoubleDataSet(String name, Color color, double width, String marsPlotType,
-							 String lineStyle)
+	public MarsDoubleDataSet(String name, String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
 		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
 	}
 
-	public MarsDoubleDataSet(final String name, final int initalSize, Color color,
-							 double width, String marsPlotType, String lineStyle)
+	public MarsDoubleDataSet(final String name, final int initalSize, String marsPlotType)
 	{
 		this(name, initalSize);
-		this.color = color;
-		this.width = width;
 		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
-	}
-
-	public MarsDoubleDataSet(final DataSet2D another, Color color, double width,
-							 String marsPlotType, String lineStyle)
-	{
-		this(another);
-		this.color = color;
-		this.width = width;
-		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
 	}
 
 	public MarsDoubleDataSet(final String name, final double[] xValues,
 							 final double[] yValues, final int initalSize, final boolean deepCopy,
-							 Color color, double width, String marsPlotType, String lineStyle)
+							 String marsPlotType)
 	{
 		this(name, xValues, yValues, initalSize, deepCopy);
-		this.color = color;
-		this.width = width;
 		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
-	public double getWidth() {
-		return width;
-	}
-
-	public void setLineStyle(String lineStyle) {
-		this.lineStyle = lineStyle;
-	}
-
-	public String getLineStyle() {
-		return lineStyle;
 	}
 
 	public String getMarsPlotType() {

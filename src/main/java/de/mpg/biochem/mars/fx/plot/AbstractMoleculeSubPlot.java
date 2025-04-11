@@ -31,6 +31,7 @@ package de.mpg.biochem.mars.fx.plot;
 
 import java.util.*;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import org.scijava.table.DoubleColumn;
 
 import io.fair_acc.chartfx.plugins.AbstractValueIndicator;
@@ -112,11 +113,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		// Add segments
 		if (plotSeries.drawSegments() && hasSegmentsTables) {
 			for (List<String> segmentTableName : segmentTableNames) {
-				double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
-
 				MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet(
 					"Segments - " + yColumn + " vs " + xColumn + " - " + segmentTableName
-						.get(2), plotSeries.getSegmentsColor(), segmentWidth, "Segments", "");
+						.get(2), "Segments");
+
+				segmentsDataSet.setStyle(plotSeries.getSegmentsStyleString());
 
 				MarsTable segmentsTable = molecule.getSegmentsTable(segmentTableName);
 
@@ -138,11 +139,10 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 			}
 		}
 
-		double lineWidth = Double.valueOf(plotSeries.getWidth());
-
 		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn +
-			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries.getType(), plotSeries
-				.getLineStyle());
+			" vs " + xColumn, plotSeries.getType());
+;
+		dataset.setStyle(plotSeries.getStyleString());
 
 		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
 		DoubleColumn yCol = (DoubleColumn) getDataTable().get(yColumn);

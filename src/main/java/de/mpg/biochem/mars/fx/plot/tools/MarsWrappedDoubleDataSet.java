@@ -48,10 +48,6 @@ public class MarsWrappedDoubleDataSet extends
 {
 
 	private static final long serialVersionUID = -493232313124620828L;
-
-	private Color color;
-	private double width;
-	private String lineStyle;
 	private String marsPlotType;
 	private DoubleColumn xValues, yValues;
 
@@ -71,48 +67,17 @@ public class MarsWrappedDoubleDataSet extends
 		super(name, 2);
 	}
 
-	public MarsWrappedDoubleDataSet(String name, Color color, double width,
-		String marsPlotType, String lineStyle)
+	public MarsWrappedDoubleDataSet(String name, String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
 		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
 	}
 
 	public MarsWrappedDoubleDataSet(final String name, final int initalSize,
-		Color color, double width, String marsPlotType, String lineStyle)
+		String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
 		this.marsPlotType = marsPlotType;
-		this.lineStyle = lineStyle;
-	}
-
-	public void setColor(Color color) {
-		this.color = color;
-	}
-
-	public Color getColor() {
-		return color;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
-	public double getWidth() {
-		return width;
-	}
-
-	public void setLineStyle(String lineStyle) {
-		this.lineStyle = lineStyle;
-	}
-
-	public String getLineStyle() {
-		return lineStyle;
 	}
 
 	public String getMarsPlotType() {

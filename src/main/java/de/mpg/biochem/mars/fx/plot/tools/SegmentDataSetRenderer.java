@@ -51,15 +51,12 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 import java.util.Arrays;
 
 /**
- * Renders data points with error bars and/or error surfaces It can be used e.g. to render horizontal and/or vertical
- * errors additional functionality:
- * <ul>
- * <li>bar-type plot
- * <li>polar-axis plotting
- * <li>scatter and/or bubble-chart-type plots
- * </ul>
+ * Renders line charts with or without dashes, scatter charts, and segment charts. Segment charts display individual
+ * line segments from KCP fitting.
  *
- * @author R.J. Steinhagen
+ * @author Karl Duderstadt
+ *
+ *
  */
 @SuppressWarnings({ "PMD.LongVariable", "PMD.ShortVariable" }) // short variables like x, y are perfectly fine, as well
 // as descriptive long ones
@@ -136,26 +133,13 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 		// detecting redundant or too frequent render updates)
 		// System.err.println(String.format("render for range [%f,%f] and dataset = '%s'", xMin, xMax, dataSet.getName()));
 
-		Color color = Color.BLACK;
-		double width = 1;
-		String lineStyle = "";
 		String marsPlotType = "";
 
-		if (dataSet instanceof MarsWrappedDoubleDataSet) {
-			color = ((MarsWrappedDoubleDataSet) dataSet).getColor();
-			width = ((MarsWrappedDoubleDataSet) dataSet).getWidth();
-			marsPlotType = ((MarsWrappedDoubleDataSet) dataSet).getMarsPlotType();
-			lineStyle = ((MarsWrappedDoubleDataSet) dataSet).getLineStyle();
-		} else if (dataSet instanceof MarsDoubleDataSet) {
-			color = ((MarsDoubleDataSet) dataSet).getColor();
-			width = ((MarsDoubleDataSet) dataSet).getWidth();
-			marsPlotType = ((MarsDoubleDataSet) dataSet).getMarsPlotType();
-			lineStyle = ((MarsDoubleDataSet) dataSet).getLineStyle();
-		}
-		style.setLineColor(color);
-		style.setLineWidth(width);
+		if (dataSet instanceof MarsWrappedDoubleDataSet) marsPlotType = ((MarsWrappedDoubleDataSet) dataSet).getMarsPlotType();
+		else if (dataSet instanceof MarsDoubleDataSet) marsPlotType = ((MarsDoubleDataSet) dataSet).getMarsPlotType();
+
 		style.setMarkerSize(0);
-		if (!lineStyle.equals(" ") && !lineStyle.isEmpty()) style.setLineDashArray(convertLineDashStringToArray(lineStyle));
+		//if (!lineStyle.equals(" ") && !lineStyle.isEmpty()) style.setLineDashArray(convertLineDashStringToArray(lineStyle));
 
 		var timestamp = ProcessingProfiler.getTimeStamp();
 		int indexMin;
@@ -218,31 +202,12 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 
 		// draw individual plot components
 		if (marsPlotType.equals("Segments")) drawSegments(gc, style, points);
-		else if (marsPlotType.equals("Scatter")) {
-			gc.setFill(color);
-			style.setMarkerSize(width);
-			drawScatter(gc, style, points);
-		}
+		else if (marsPlotType.equals("Scatter")) drawScatter(gc, style, points);
 		else drawPolyLineLine(gc, style, points);
 
 		if (ProcessingProfiler.getDebugState()) {
 			timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
 		}
-	}
-
-	public static Number[] convertLineDashStringToArray(String dashString) {
-		// Split the string by whitespace
-		String[] parts = dashString.trim().split("\\s+");
-
-		// Create a Number array of the same size
-		Number[] dashArray = new Number[parts.length];
-
-		// Convert each part to a Number and store in the array
-		for (int i = 0; i < parts.length; i++) {
-			dashArray[i] = Double.parseDouble(parts[i]);
-		}
-
-		return dashArray;
 	}
 
 	/**
@@ -256,6 +221,7 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 	protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
 		gc.save();
 		style.applyLineStrokeStyle(gc);
+
 		if (style.getLineDashArray() != null) {
 			Number[] dashes = style.getLineDashArray();
 			double[] array = new double[dashes.length];
@@ -298,12 +264,14 @@ public class SegmentDataSetRenderer extends AbstractErrorDataSetRendererParamete
 	protected static void drawScatter(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points)
 	{
 		gc.save();
+		style.applyLineStrokeStyle(gc);
 
+		gc.setFill(style.getMarkerColor());
 		final Marker pointMarker = DefaultMarker.CIRCLE;
 		for (int i = 0; i < points.actualDataCount; i++) {
 			final double x = points.xValues[i];
 			final double y = points.yValues[i];
-			pointMarker.draw(gc, x, y, style.getMarkerSize());
+			pointMarker.draw(gc, x, y, style.getMarkerLineWidth());
 		}
 
 		gc.restore();

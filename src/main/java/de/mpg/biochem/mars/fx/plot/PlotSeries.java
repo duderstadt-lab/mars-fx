@@ -37,6 +37,7 @@ import com.jfoenix.controls.JFXTextField;
 
 import io.fair_acc.chartfx.XYChart;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ListCell;
@@ -151,6 +152,36 @@ public class PlotSeries extends AbstractJsonConvertibleRecord {
 		lineStyle.getSelectionModel().select(" ");
 		colorField.setValue(Color.BLACK);
 		segmentColorField.setValue(Color.RED);
+	}
+
+	public String getSegmentsStyleString() {
+		return DataSetStyleBuilder.instance().setDatasetColor("#" + getSegmentsColor().toString().substring(2)).setLineWidth(Double.parseDouble(getSegmentsWidth())).build();
+	}
+
+	public String getStyleString() {
+		DataSetStyleBuilder builder = DataSetStyleBuilder.instance();
+		if (getType().equals("Scatter")) {
+			return builder.setMarkerColor("#" + getColor().toString().substring(2)).setMarkerLineWidth(Double.parseDouble(getWidth())).build();
+		} else if (!getLineStyle().equals(" ") && !getLineStyle().isEmpty()) {
+			builder.setLineDashes(convertLineDashStringToArray(getLineStyle())); //stroke dash pattern
+		}
+
+		return builder.setDatasetColor("#" + getColor().toString().substring(2)).setLineWidth(Double.parseDouble(getWidth())).build();
+	}
+
+	public static double[] convertLineDashStringToArray(String dashString) {
+		// Split the string by whitespace
+		String[] parts = dashString.trim().split("\\s+");
+
+		// Create a Number array of the same size
+		double[] dashArray = new double[parts.length];
+
+		// Convert each part to a Number and store in the array
+		for (int i = 0; i < parts.length; i++) {
+			dashArray[i] = Double.parseDouble(parts[i]);
+		}
+
+		return dashArray;
 	}
 
 	public ComboBox<String> getTypeField() {
