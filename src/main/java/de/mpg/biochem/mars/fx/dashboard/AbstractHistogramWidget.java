@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
 import io.fair_acc.chartfx.XYChart;
@@ -89,16 +90,18 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 			outlineHistogramRenderer = new ErrorDataSetRenderer();
 			outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
 			outlineHistogramRenderer.setErrorStyle(ErrorStyle.NONE);
+			outlineHistogramRenderer.setDrawMarker(false);
 			outlineHistogramRenderer.pointReductionProperty().set(false);
 
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			histChart.getRenderers().add(outlineHistogramRenderer);
 			histChart.setLegendVisible(false);
-			//histChart.horizontalGridLinesVisibleProperty().set(false);
-			//histChart.verticalGridLinesVisibleProperty().set(false);
+			histChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			histChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			//histChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			histChart.getPlotArea().setTriggerDistance(0);
 
 			histChart.setPrefSize(100, 100);
 			histChart.setPadding(new Insets(10, 20, 10, 10));
@@ -259,15 +262,12 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		for (int index = 0; index < yvalues.length; index++)
 			dataset.add(xvalues[index], yvalues[index]);
 
-		String styleString = "";
-		if (outputs.containsKey(seriesName + "_" + "strokeColor")) styleString +=
-			"strokeColor=" + (String) outputs.get(seriesName + "_" + "strokeColor") +
-				"; ";
-		if (outputs.containsKey(seriesName + "_" + "strokeWidth")) styleString +=
-			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_" + "strokeWidth"))
-				.intValue();
+		DataSetStyleBuilder builder = DataSetStyleBuilder.instance();
+		if (outputs.containsKey(seriesName + "_strokeColor")) builder.setLineColor((String) outputs.get(seriesName + "_strokeColor"));
+		if (outputs.containsKey(seriesName + "_strokeWidth")) builder.setStrokeWidth((Integer) outputs.get(seriesName + "_strokeWidth"));
 
-		dataset.setStyle(styleString);
+		String style = builder.build();
+		dataset.setStyle(style);
 
 		return dataset;
 	}
