@@ -42,14 +42,14 @@ import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.MouseEventsHelper;
-import de.gsi.chart.plugins.Panner;
-import de.gsi.chart.ui.geometry.Side;
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.MouseEventsHelper;
+import io.fair_acc.chartfx.plugins.Zoomer;
+import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -122,7 +122,7 @@ public class MarsZoomer extends ChartPlugin {
 	 */
 	public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER =
 		MouseEventsHelper::isOnlyMiddleButtonDown;
-	private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
+	private Predicate<MouseEvent> mouseFilter = Zoomer.DEFAULT_MOUSE_FILTER;
 	private double panShiftX;
 	private double panShiftY;
 	private Point2D previousMouseLocation;
@@ -631,7 +631,7 @@ public class MarsZoomer extends ChartPlugin {
 		return animatedProperty().get();
 	}
 
-	private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+	protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
 		final Canvas canvas = getChart().getCanvas();
 		// listen to only events within the canvas
 		final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent
@@ -640,7 +640,7 @@ public class MarsZoomer extends ChartPlugin {
 		return screenBounds.contains(mouseLoc);
 	}
 
-	private boolean isMouseEventWithinCanvas(final ScrollEvent mouseEvent) {
+	protected boolean isMouseEventWithinCanvas(final ScrollEvent mouseEvent) {
 		// Added to work around issues with using screen coordinates...
 		if (getChart() == null || getChart().getCanvas() == null) return false;
 		final Canvas canvas = getChart().getCanvas();

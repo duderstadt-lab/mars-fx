@@ -36,13 +36,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.renderer.ErrorStyle;
+import io.fair_acc.chartfx.renderer.LineStyle;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.application.Platform;
@@ -76,12 +77,12 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 		}
 		else {
 			xAxis = new MarsNumericAxis("");
-			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setMinorTickCount(0);
 			xAxis.setAutoRanging(true);
 			xAxis.setAutoRangeRounding(false);
 
 			yAxis = new MarsNumericAxis("");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
 
@@ -96,19 +97,17 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			renderer = new ErrorDataSetRenderer();
-			renderer.setMarkerSize(5);
-			renderer.setPolyLineStyle(LineStyle.NORMAL);
-			renderer.setErrorType(ErrorStyle.NONE);
 			renderer.setDrawMarker(false);
 			renderer.setAssumeSortedData(false);
 			renderer.pointReductionProperty().set(false);
 
 			xyChart.getRenderers().add(renderer);
-			xyChart.setLegend(null);
-			xyChart.horizontalGridLinesVisibleProperty().set(false);
-			xyChart.verticalGridLinesVisibleProperty().set(false);
+			xyChart.setLegendVisible(false);
+			xyChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			xyChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			xyChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			xyChart.getPlotArea().setTriggerDistance(0);
 
 			xyChart.setPrefSize(100, 100);
 			xyChart.setPadding(new Insets(10, 20, 10, 10));
@@ -231,8 +230,8 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 
 				xyChart.setTitle(title);
 
-				if (drawErrorBars) renderer.setErrorType(ErrorStyle.ERRORBARS);
-				else renderer.setErrorType(ErrorStyle.NONE);
+				if (drawErrorBars) renderer.setErrorStyle(ErrorStyle.ERRORBARS);
+				else renderer.setErrorStyle(ErrorStyle.NONE);
 
 				xyChart.getDatasets().clear();
 				xyChart.getDatasets().addAll(datasets);
@@ -306,19 +305,13 @@ public abstract class AbstractXYChartWidget extends AbstractScriptableWidget
 			return null;
 		}
 
-		String styleString = "";
+		DataSetStyleBuilder builder = DataSetStyleBuilder.instance();
+		if (outputs.containsKey(seriesName + "_strokeColor")) builder.setLineColor((String) outputs.get(seriesName + "_strokeColor"));
+		if (outputs.containsKey(seriesName + "_fillColor")) builder.setFill((String) outputs.get(seriesName + "_fillColor"));
+		if (outputs.containsKey(seriesName + "_strokeWidth")) builder.setStrokeWidth((Integer) outputs.get(seriesName + "_strokeWidth"));
 
-		if (outputs.containsKey(seriesName + "_strokeColor")) styleString +=
-			"strokeColor=" + (String) outputs.get(seriesName + "_strokeColor") + "; ";
-
-		if (outputs.containsKey(seriesName + "_fillColor")) styleString +=
-			"fillColor=" + (String) outputs.get(seriesName + "_fillColor") + "; ";
-
-		if (outputs.containsKey(seriesName + "_strokeWidth")) styleString +=
-			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_strokeWidth"))
-				.intValue();
-
-		dataset.setStyle(styleString);
+		String style = builder.build();
+		dataset.setStyle(style);
 
 		return dataset;
 	}

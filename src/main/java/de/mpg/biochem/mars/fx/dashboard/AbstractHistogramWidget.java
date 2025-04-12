@@ -35,13 +35,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.renderer.ErrorStyle;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.renderer.ErrorStyle;
+import io.fair_acc.chartfx.renderer.LineStyle;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -73,11 +74,11 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		else {
 			xAxis = new MarsNumericAxis("");
 			// xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-			xAxis.minorTickVisibleProperty().set(false);
+			xAxis.setMinorTickCount(0);
 			xAxis.setAutoRangeRounding(false);
 			// xAxis.setAutoRanging(true);
 			yAxis = new MarsNumericAxis("");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setForceZeroInRange(true);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
@@ -88,17 +89,19 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 
 			outlineHistogramRenderer = new ErrorDataSetRenderer();
 			outlineHistogramRenderer.setPolyLineStyle(LineStyle.HISTOGRAM);
-			outlineHistogramRenderer.setErrorType(ErrorStyle.NONE);
+			outlineHistogramRenderer.setErrorStyle(ErrorStyle.NONE);
+			outlineHistogramRenderer.setDrawMarker(false);
 			outlineHistogramRenderer.pointReductionProperty().set(false);
 
 			datasets = new ArrayList<DefaultErrorDataSet>();
 
 			histChart.getRenderers().add(outlineHistogramRenderer);
-			histChart.setLegend(null);
-			histChart.horizontalGridLinesVisibleProperty().set(false);
-			histChart.verticalGridLinesVisibleProperty().set(false);
+			histChart.setLegendVisible(false);
+			histChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			histChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			histChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			histChart.getPlotArea().setTriggerDistance(0);
 
 			histChart.setPrefSize(100, 100);
 			histChart.setPadding(new Insets(10, 20, 10, 10));
@@ -259,15 +262,12 @@ public abstract class AbstractHistogramWidget extends AbstractScriptableWidget
 		for (int index = 0; index < yvalues.length; index++)
 			dataset.add(xvalues[index], yvalues[index]);
 
-		String styleString = "";
-		if (outputs.containsKey(seriesName + "_" + "strokeColor")) styleString +=
-			"strokeColor=" + (String) outputs.get(seriesName + "_" + "strokeColor") +
-				"; ";
-		if (outputs.containsKey(seriesName + "_" + "strokeWidth")) styleString +=
-			"strokeWidth=" + ((Integer) outputs.get(seriesName + "_" + "strokeWidth"))
-				.intValue();
+		DataSetStyleBuilder builder = DataSetStyleBuilder.instance();
+		if (outputs.containsKey(seriesName + "_strokeColor")) builder.setLineColor((String) outputs.get(seriesName + "_strokeColor"));
+		if (outputs.containsKey(seriesName + "_strokeWidth")) builder.setStrokeWidth((Integer) outputs.get(seriesName + "_strokeWidth"));
 
-		dataset.setStyle(styleString);
+		String style = builder.build();
+		dataset.setStyle(style);
 
 		return dataset;
 	}

@@ -31,13 +31,14 @@ package de.mpg.biochem.mars.fx.plot;
 
 import java.util.*;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import org.scijava.table.DoubleColumn;
 
-import de.gsi.chart.plugins.AbstractValueIndicator;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.XRangeIndicator;
-import de.gsi.chart.plugins.YRangeIndicator;
-import de.gsi.chart.plugins.YValueIndicator;
+import io.fair_acc.chartfx.plugins.AbstractValueIndicator;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.XRangeIndicator;
+import io.fair_acc.chartfx.plugins.YRangeIndicator;
+import io.fair_acc.chartfx.plugins.YValueIndicator;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
@@ -112,11 +113,11 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		// Add segments
 		if (plotSeries.drawSegments() && hasSegmentsTables) {
 			for (List<String> segmentTableName : segmentTableNames) {
-				double segmentWidth = Double.valueOf(plotSeries.getSegmentsWidth());
-
 				MarsDoubleDataSet segmentsDataSet = new MarsDoubleDataSet(
 					"Segments - " + yColumn + " vs " + xColumn + " - " + segmentTableName
-						.get(2), plotSeries.getSegmentsColor(), segmentWidth, "");
+						.get(2), "Segments");
+
+				segmentsDataSet.setStyle(plotSeries.getSegmentsStyleString());
 
 				MarsTable segmentsTable = molecule.getSegmentsTable(segmentTableName);
 
@@ -134,16 +135,14 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 					}
 				}
 
-				segmentsDataSet.setStyle("Segments");
 				getChart().getDatasets().add(segmentsDataSet);
 			}
 		}
 
-		double lineWidth = Double.valueOf(plotSeries.getWidth());
-
 		MarsWrappedDoubleDataSet dataset = new MarsWrappedDoubleDataSet(yColumn +
-			" vs " + xColumn, plotSeries.getColor(), lineWidth, plotSeries
-				.getLineStyle());
+			" vs " + xColumn, plotSeries.getType());
+;
+		dataset.setStyle(plotSeries.getStyleString());
 
 		DoubleColumn xCol = (DoubleColumn) getDataTable().get(xColumn);
 		DoubleColumn yCol = (DoubleColumn) getDataTable().get(yColumn);
@@ -176,7 +175,6 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		else dataset.add((DoubleColumn) getDataTable().get(xColumn),
 			(DoubleColumn) getDataTable().get(yColumn));
 
-		dataset.setStyle(plotSeries.getType());
 		if (plotPane.getPlotOptionsPane().downsample()) dataset.downsample(xAxis,
 			plotPane.getPlotOptionsPane().getMinDownsamplePoints());
 		getChart().getDatasets().add(dataset);

@@ -1,45 +1,15 @@
-/*-
- * #%L
- * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
- * %%
- * Copyright (C) 2018 - 2025 Karl Duderstadt
- * %%
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- * #L%
- */
-
 package de.mpg.biochem.mars.fx.plot.tools;
 
-import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.event.AddedDataEvent;
-import de.gsi.dataset.event.RemovedDataEvent;
-import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.spi.AbstractDataSet;
-import de.gsi.dataset.spi.DoubleErrorDataSet;
-import de.gsi.dataset.utils.AssertUtils;
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.EditableDataSet;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.spi.AbstractDataSet;
+import io.fair_acc.dataset.spi.DoubleErrorDataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.scene.paint.Color;
 
 /**
@@ -52,16 +22,14 @@ import javafx.scene.paint.Color;
  */
 @SuppressWarnings("PMD.TooManyMethods") // part of the flexible class nature
 public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
-	implements DataSet2D
+		implements EditableDataSet, DataSet2D
 {
-
 	private static final long serialVersionUID = -493232313124620828L;
+	private static final String X_COORDINATES = "X coordinates";
+	private static final String Y_COORDINATES = "Y coordinates";
 	protected DoubleArrayList xValues; // way faster than java default lists
 	protected DoubleArrayList yValues; // way faster than java default lists
-
-	private Color color;
-	private double width;
-	private String lineStyle;
+	private String marsPlotType;
 
 	private MarsNumericAxis axis;
 	private int maxPointCount;
@@ -106,7 +74,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 *           or if arrays with coordinates have different lengths
 	 */
 	public MarsDoubleDataSet(final String name, final double[] xValues,
-		final double[] yValues, final int initalSize, final boolean deepCopy)
+							 final double[] yValues, final int initalSize, final boolean deepCopy)
 	{
 		super(name, 2);
 		set(xValues, yValues, initalSize, deepCopy); // NOPMD
@@ -126,65 +94,32 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 		yValues = new DoubleArrayList(initalSize);
 	}
 
-	public MarsDoubleDataSet(String name, Color color, double width,
-		String lineStyle)
+	public MarsDoubleDataSet(String name, String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
+		this.marsPlotType = marsPlotType;
 	}
 
-	public MarsDoubleDataSet(final String name, final int initalSize, Color color,
-		double width, String lineStyle)
+	public MarsDoubleDataSet(final String name, final int initalSize, String marsPlotType)
 	{
 		this(name, initalSize);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
-	}
-
-	public MarsDoubleDataSet(final DataSet2D another, Color color, double width,
-		String lineStyle)
-	{
-		this(another);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
+		this.marsPlotType = marsPlotType;
 	}
 
 	public MarsDoubleDataSet(final String name, final double[] xValues,
-		final double[] yValues, final int initalSize, final boolean deepCopy,
-		Color color, double width, String lineStyle)
+							 final double[] yValues, final int initalSize, final boolean deepCopy,
+							 String marsPlotType)
 	{
 		this(name, xValues, yValues, initalSize, deepCopy);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
+		this.marsPlotType = marsPlotType;
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
+	public String getMarsPlotType() {
+		return marsPlotType;
 	}
 
-	public Color getColor() {
-		return color;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
-	public double getWidth() {
-		return width;
-	}
-
-	public void setLineStyle(String lineStyle) {
-		this.lineStyle = lineStyle;
-	}
-
-	public String getLineStyle() {
-		return lineStyle;
+	public void setMarsPlotType(String marsPlotType) {
+		this.marsPlotType = marsPlotType;
 	}
 
 	/**
@@ -207,7 +142,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself (fluent design)
 	 */
 	public MarsDoubleDataSet add(final double x, final double y,
-		final String label)
+								 final String label)
 	{
 		lock().writeLockGuard(() -> {
 			xValues.add(x);
@@ -220,7 +155,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			getAxisDescription(DIM_X).add(x);
 			getAxisDescription(DIM_Y).add(y);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this, "add"));
+		fireInvalidated(ChartBits.DataSetDataAdded);
+		return getThis();
 	}
 
 	/**
@@ -231,10 +167,10 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself
 	 */
 	public MarsDoubleDataSet add(final double[] xValuesNew,
-		final double[] yValuesNew)
+								 final double[] yValuesNew)
 	{
-		AssertUtils.notNull("X coordinates", xValuesNew);
-		AssertUtils.notNull("Y coordinates", yValuesNew);
+		AssertUtils.notNull(X_COORDINATES, xValuesNew);
+		AssertUtils.notNull(Y_COORDINATES, yValuesNew);
 		AssertUtils.equalDoubleArrays(xValuesNew, yValuesNew);
 
 		lock().writeLockGuard(() -> {
@@ -247,7 +183,20 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			getAxisDescription(DIM_X).add(xValuesNew);
 			getAxisDescription(DIM_Y).add(yValuesNew);
 		});
-		return fireInvalidated(new AddedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetDataAdded);
+		return getThis();
+	}
+
+	/**
+	 * add point to the data set
+	 *
+	 * @param index data point index at which the new data point should be added
+	 * @param newValue new data point coordinate
+	 * @return itself (fluent design)
+	 */
+	@Override
+	public MarsDoubleDataSet add(final int index, final double... newValue) {
+		return add(index, newValue[0], newValue[1], null);
 	}
 
 	/**
@@ -259,7 +208,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself (fluent design)
 	 */
 	public MarsDoubleDataSet add(final int index, final double x,
-		final double y)
+								 final double y)
 	{
 		return add(index, x, y, null);
 	}
@@ -274,7 +223,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself (fluent design)
 	 */
 	public MarsDoubleDataSet add(final int index, final double x, final double y,
-		final String label)
+								 final String label)
 	{
 		lock().writeLockGuard(() -> {
 			final int indexAt = Math.max(0, Math.min(index, getDataCount() + 1));
@@ -286,7 +235,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			getAxisDescription(DIM_X).add(x);
 			getAxisDescription(DIM_Y).add(y);
 		});
-		return fireInvalidated(new AddedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetDataAdded);
+		return getThis();
 	}
 
 	/**
@@ -298,10 +248,10 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself (fluent design)
 	 */
 	public MarsDoubleDataSet add(final int index, final double[] x,
-		final double[] y)
+								 final double[] y)
 	{
-		AssertUtils.notNull("X coordinates", x);
-		AssertUtils.notNull("Y coordinates", y);
+		AssertUtils.notNull(X_COORDINATES, x);
+		AssertUtils.notNull(Y_COORDINATES, y);
 		final int min = Math.min(x.length, y.length);
 		AssertUtils.equalDoubleArrays(x, y, min);
 
@@ -314,7 +264,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			getDataLabelMap().shiftKeys(indexAt, xValues.size());
 			getDataStyleMap().shiftKeys(indexAt, xValues.size());
 		});
-		return fireInvalidated(new AddedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetDataAdded);
+		return getThis();
 	}
 
 	/**
@@ -332,7 +283,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 
 			getAxisDescriptions().forEach(AxisDescription::clear);
 		});
-		return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+		fireInvalidated(ChartBits.DataSetDataRemoved);
+		return getThis();
 	}
 
 	/**
@@ -347,10 +299,10 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 		if (downsampling && rangeTooLarge()) {
 			int newIndex = (int) (index * binSize);
 			return dimIndex == DataSet.DIM_X ? xValues.elements()[newIndex] : yValues
-				.elements()[newIndex];
+					.elements()[newIndex];
 		}
 		else return dimIndex == DataSet.DIM_X ? xValues.elements()[index] : yValues
-			.elements()[index];
+				.elements()[index];
 	}
 
 	@Override
@@ -358,10 +310,10 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 		if (downsampling && rangeTooLarge()) {
 			AxisRange range = axis.getRange();
 			int fullRangePointCount = (int) (maxPointCount * (xValues.getDouble(
-				xValues.size() - 1) - xValues.getDouble(0)) / (range.getMax() - range
+					xValues.size() - 1) - xValues.getDouble(0)) / (range.getMax() - range
 					.getMin()));
 			fullRangePointCount = (fullRangePointCount < maxPointCount)
-				? maxPointCount : fullRangePointCount;
+					? maxPointCount : fullRangePointCount;
 			binSize = ((double) xValues.size()) / fullRangePointCount;
 			return fullRangePointCount;
 		}
@@ -373,51 +325,15 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 		return dimIndex == DataSet.DIM_X ? xValues.elements() : yValues.elements();
 	}
 
-	@Override
-	public MarsDoubleDataSet set(DataSet other, boolean copy) {
-		lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
-			// copy data
-			this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), copy);
-
-			copyMetaData(other);
-			copyDataLabelsAndStyles(other, copy);
-			copyAxisDescription(other);
-		}));
-		return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
-	}
-
-	public void stopDownsampling() {
-		this.downsampling = false;
-	}
-
-	public void downsample(final MarsNumericAxis axis, final int maxPointCount) {
-		this.downsampling = true;
-		this.axis = axis;
-		this.maxPointCount = maxPointCount;
-		this.pointsPerX = xValues.size() / (xValues.getDouble(xValues.size() - 1) -
-			xValues.getDouble(0));
-	}
-
-	private boolean rangeTooLarge() {
-		if (xValues.size() == 0 || Double.isInfinite(pointsPerX) || Double.isNaN(
-			pointsPerX)) return false;
-		AxisRange range = axis.getRange();
-		int pointCount = (int) (pointsPerX * (range.getMax() - range.getMin()));
-		if (pointCount > maxPointCount) return true;
-		else return false;
-	}
-
 	/**
-	 * @param amount storage capacity increase
+	 * remove point from data set
+	 *
+	 * @param index data point which should be removed
 	 * @return itself (fluent design)
 	 */
-	public MarsDoubleDataSet increaseCapacity(final int amount) {
-		lock().writeLockGuard(() -> {
-			final int size = getDataCount();
-			resize(getCapacity() + amount);
-			resize(size);
-		});
-		return getThis();
+	@Override
+	public EditableDataSet remove(final int index) {
+		return remove(index, index + 1);
 	}
 
 	/**
@@ -443,7 +359,57 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			// invalidate ranges
 			getAxisDescriptions().forEach(AxisDescription::clear);
 		});
-		return fireInvalidated(new RemovedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetDataRemoved);
+		return getThis();
+	}
+
+	@Override
+	public MarsDoubleDataSet set(DataSet other, boolean copy) {
+		lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+			// copy data
+			this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other.getDataCount(), copy);
+
+			copyMetaData(other);
+			copyDataLabelsAndStyles(other, copy);
+			copyAxisDescription(other);
+		}));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
+	}
+
+	public void stopDownsampling() {
+		this.downsampling = false;
+	}
+
+	public void downsample(final MarsNumericAxis axis, final int maxPointCount) {
+		this.downsampling = true;
+		this.axis = axis;
+		this.maxPointCount = maxPointCount;
+		this.pointsPerX = xValues.size() / (xValues.getDouble(xValues.size() - 1) -
+				xValues.getDouble(0));
+	}
+
+	private boolean rangeTooLarge() {
+		if (xValues.size() == 0 || Double.isInfinite(pointsPerX) || Double.isNaN(
+				pointsPerX)) return false;
+		AxisRange range = axis.getRange();
+		int pointCount = (int) (pointsPerX * (range.getMax() - range.getMin()));
+		if (pointCount > maxPointCount) return true;
+		else return false;
+	}
+
+	/**
+	 * @param amount storage capacity increase
+	 * @return itself (fluent design)
+	 */
+	public MarsDoubleDataSet increaseCapacity(final int amount) {
+		lock().writeLockGuard(() -> {
+			final int size = getDataCount();
+			resize(getCapacity() + amount);
+			resize(size);
+		});
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
 	}
 
 	/**
@@ -457,45 +423,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			xValues.size(size);
 			yValues.size(size);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
-	}
-
-	/**
-	 * clear old data and overwrite with data from 'other' data set (deep copy)
-	 *
-	 * @param other the source data set
-	 * @return itself (fluent design)
-	 */
-	public MarsDoubleDataSet set(final DataSet other) {
-		lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
-			// copy data
-			this.set(other.getValues(DIM_X), other.getValues(DIM_Y), other
-				.getDataCount(), true);
-
-			// deep copy data point labels and styles
-			getDataLabelMap().clear();
-			for (int index = 0; index < other.getDataCount(); index++) {
-				final String label = other.getDataLabel(index);
-				if (label != null && !label.isEmpty()) {
-					this.addDataLabel(index, label);
-				}
-			}
-			getDataStyleMap().clear();
-			for (int index = 0; index < other.getDataCount(); index++) {
-				final String style = other.getStyle(index);
-				if (style != null && !style.isEmpty()) {
-					this.addDataStyle(index, style);
-				}
-			}
-			this.setStyle(other.getStyle());
-
-			// synchronise axis description
-			for (int dimIndex = 0; dimIndex < getDimension(); dimIndex++) {
-				this.getAxisDescription(dimIndex).set(other.getAxisDescription(
-					dimIndex));
-			}
-		}));
-		return fireInvalidated(new UpdatedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
 	}
 
 	/**
@@ -525,9 +454,9 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself
 	 */
 	public MarsDoubleDataSet set(final double[] xValues, final double[] yValues,
-		final boolean copy)
+								 final boolean copy)
 	{
-		return set(xValues, yValues, -1, true);
+		return set(xValues, yValues, -1, copy);
 	}
 
 	/**
@@ -544,10 +473,10 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself
 	 */
 	public MarsDoubleDataSet set(final double[] xValues, final double[] yValues,
-		final int nSamples, final boolean copy)
+								 final int nSamples, final boolean copy)
 	{
-		AssertUtils.notNull("X coordinates", xValues);
-		AssertUtils.notNull("Y coordinates", yValues);
+		AssertUtils.notNull(X_COORDINATES, xValues);
+		AssertUtils.notNull(Y_COORDINATES, yValues);
 		final int dataMaxIndex = Math.min(xValues.length, yValues.length);
 		AssertUtils.equalDoubleArrays(xValues, yValues, dataMaxIndex);
 		if (nSamples >= 0) {
@@ -555,7 +484,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			AssertUtils.indexInBounds(nSamples, yValues.length + 1, "yValues bounds");
 		}
 		final int nSamplesToAdd = nSamples >= 0 ? Math.min(nSamples, xValues.length)
-			: xValues.length;
+				: xValues.length;
 
 		lock().writeLockGuard(() -> {
 			getDataLabelMap().clear();
@@ -580,7 +509,20 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			// invalidate ranges
 			getAxisDescriptions().forEach(AxisDescription::clear);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
+	}
+
+	/**
+	 * replaces point coordinate of existing data point
+	 *
+	 * @param index data point index at which the new data point should be added
+	 * @param newValue new data point coordinate
+	 * @return itself (fluent design)
+	 */
+	@Override
+	public MarsDoubleDataSet set(final int index, final double... newValue) {
+		return set(index, newValue[0], newValue[1]);
 	}
 
 	/**
@@ -593,7 +535,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 	 * @return itself (fluent design)
 	 */
 	public MarsDoubleDataSet set(final int index, final double x,
-		final double y)
+								 final double y)
 	{
 		lock().writeLockGuard(() -> {
 			final int dataCount = Math.max(index + 1, this.getDataCount());
@@ -607,11 +549,12 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			// invalidate ranges
 			getAxisDescriptions().forEach(AxisDescription::clear);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
 	}
 
 	public MarsDoubleDataSet set(final int index, final double[] x,
-		final double[] y)
+								 final double[] y)
 	{
 		lock().writeLockGuard(() -> {
 			resize(Math.max(index + x.length, xValues.size()));
@@ -623,7 +566,8 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			// invalidate ranges
 			getAxisDescriptions().forEach(AxisDescription::clear);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
 	}
 
 	/**
@@ -637,6 +581,7 @@ public class MarsDoubleDataSet extends AbstractDataSet<MarsDoubleDataSet>
 			xValues.trim(0);
 			yValues.trim(0);
 		});
-		return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+		fireInvalidated(ChartBits.DataSetData);
+		return getThis();
 	}
 }

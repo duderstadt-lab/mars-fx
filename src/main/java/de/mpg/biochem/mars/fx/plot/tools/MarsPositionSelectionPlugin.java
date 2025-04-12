@@ -32,14 +32,14 @@ package de.mpg.biochem.mars.fx.plot.tools;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import de.gsi.chart.Chart;
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.MouseEventsHelper;
-import de.gsi.chart.ui.HiddenSidesPane;
-import de.gsi.dataset.DataSet;
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.MouseEventsHelper;
+import io.fair_acc.chartfx.ui.HiddenSidesPane;
+import io.fair_acc.dataset.DataSet;
 import de.mpg.biochem.mars.fx.plot.DatasetOptionsPane;
 import de.mpg.biochem.mars.fx.plot.MarsPlotPlugin;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
@@ -218,7 +218,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements
 		this.positionSelectionMouseFilter = positionSelectionMouseFilter;
 	}
 
-	private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
+	protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
 		// Now sure why but sometimes this is fired...
 		// and these are null.. For the moment we add this work around
 		if (getChart() == null) return false;
@@ -325,7 +325,7 @@ public class MarsPositionSelectionPlugin extends ChartPlugin implements
 
 		final Point2D mouseLocation = getLocationInPlotArea(event);
 
-		Chart chart = getChart();
+		XYChart chart = (XYChart) getChart();
 
 		if (chart.getDatasets().size() == 0) return null;
 

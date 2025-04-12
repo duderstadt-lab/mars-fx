@@ -34,14 +34,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import net.imagej.ops.Initializable;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.AxisLabelOverlapPolicy;
-import de.gsi.chart.renderer.LineStyle;
-import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.mpg.biochem.mars.fx.plot.tools.MarsCategoryAxis;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.renderer.LineStyle;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.spi.DefaultErrorDataSet;
+import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -54,7 +55,7 @@ public abstract class AbstractCategoryChartWidget extends
 {
 
 	protected XYChart barChart;
-	protected MarsCategoryAxis xAxis;
+	protected CategoryAxis xAxis;
 	protected MarsNumericAxis yAxis;
 
 	protected ArrayList<String> requiredGlobalFields = new ArrayList<String>(
@@ -68,12 +69,14 @@ public abstract class AbstractCategoryChartWidget extends
 			setContent(getIcon(), new BorderPane());
 		}
 		else {
-			xAxis = new MarsCategoryAxis("Categories");
+			xAxis = new CategoryAxis("Category");
+			xAxis.setUnit(null);
+			xAxis.setAutoRangePadding(0.2);
 			xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
 
 			yAxis = new MarsNumericAxis();
 			yAxis.setName("Frequency");
-			yAxis.setMinorTickVisible(false);
+			yAxis.setMinorTickCount(0);
 			yAxis.setForceZeroInRange(true);
 			yAxis.setAutoRanging(true);
 			yAxis.setAutoRangeRounding(false);
@@ -82,6 +85,7 @@ public abstract class AbstractCategoryChartWidget extends
 			barChart = new XYChart(xAxis, yAxis);
 			barChart.setAnimated(false);
 			barChart.getRenderers().clear();
+
 			final ErrorDataSetRenderer renderer = new ErrorDataSetRenderer();
 			renderer.setPolyLineStyle(LineStyle.NONE);
 			renderer.setDrawBars(true);
@@ -93,11 +97,12 @@ public abstract class AbstractCategoryChartWidget extends
 			// lost :(...
 			renderer.pointReductionProperty().set(false);
 			barChart.getRenderers().add(renderer);
-			barChart.setLegend(null);
-			barChart.horizontalGridLinesVisibleProperty().set(false);
-			barChart.verticalGridLinesVisibleProperty().set(false);
+			barChart.setLegendVisible(false);
+			barChart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
+			barChart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
 
-			barChart.setTriggerDistance(0);
+			// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+			barChart.getPlotArea().setTriggerDistance(0);
 
 			barChart.setPrefSize(100, 100);
 			barChart.setPadding(new Insets(10, 20, 10, 10));
@@ -144,8 +149,7 @@ public abstract class AbstractCategoryChartWidget extends
 
 		final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("myData");
 
-		if (outputs.containsKey("color")) dataSet.setStyle("fillColor:" +
-			(String) outputs.get("color") + ";");
+		if (outputs.containsKey("color")) dataSet.setStyle(DataSetStyleBuilder.instance().setDatasetColor((String) outputs.get("color")).build());
 
 		List<String> categories = new ArrayList<String>();
 

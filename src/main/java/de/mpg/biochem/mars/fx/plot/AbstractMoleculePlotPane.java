@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 import org.scijava.Context;
 
-import de.gsi.chart.axes.AxisMode;
+import io.fair_acc.chartfx.axes.AxisMode;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;

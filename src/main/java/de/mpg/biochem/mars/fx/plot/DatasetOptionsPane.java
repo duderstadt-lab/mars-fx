@@ -41,7 +41,7 @@ import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
-import de.gsi.chart.XYChart;
+import io.fair_acc.chartfx.XYChart;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import javafx.beans.property.BooleanProperty;

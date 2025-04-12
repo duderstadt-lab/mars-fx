@@ -49,13 +49,14 @@ import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
 
+import de.mpg.biochem.mars.fx.plot.tools.MarsPanner;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.axes.AxisMode;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.plugins.Panner;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.Zoomer;
 import de.mpg.biochem.mars.fx.plot.tools.MarsDataPointTracker;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
 import de.mpg.biochem.mars.fx.plot.tools.SegmentDataSetRenderer;
@@ -101,6 +102,8 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
+
+import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 
 public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 	implements PlotPane
@@ -224,8 +227,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 
 		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(
 			panSelected, () -> {
-				Panner panner = new Panner();
-				panner.setMouseFilter(PAN_MOUSE_FILTER);
+				MarsPanner panner = new MarsPanner();
+				//panner.setPanMouseFilter(PAN_MOUSE_FILTER);
+					panner.setMouseFilter(PAN_MOUSE_FILTER);
 				return panner;
 			}, Cursor.MOVE), null, panSelected);
 		addTool(panCursor);
@@ -414,9 +418,11 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 		VBox.setVgrow(subplot.getNode(), Priority.ALWAYS);
 		chartsPane.getChildren().add(subplot.getNode());
 
-		subplot.getChart().horizontalGridLinesVisibleProperty().bind(gridlines);
-		subplot.getChart().verticalGridLinesVisibleProperty().bind(gridlines);
+		subplot.getChart().getGridRenderer().getHorizontalMajorGrid().visibleProperty().bind(gridlines);
+		subplot.getChart().getGridRenderer().getVerticalMajorGrid().visibleProperty().bind(gridlines);
 		// subplot.getChart().animatedProperty().bind(animateZoom);
+		//subplot.getChart().setLegend(new DefaultLegend());
+		//subplot.getChart().setLegendVisible(false);
 
 		if (subplot.getChart().getRenderers().get(
 			0) instanceof SegmentDataSetRenderer) ((SegmentDataSetRenderer) subplot

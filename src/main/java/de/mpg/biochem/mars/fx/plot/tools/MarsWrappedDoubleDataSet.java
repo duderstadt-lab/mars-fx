@@ -31,10 +31,10 @@ package de.mpg.biochem.mars.fx.plot.tools;
 
 import org.scijava.table.DoubleColumn;
 
-import de.gsi.chart.axes.spi.AxisRange;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSet2D;
-import de.gsi.dataset.spi.AbstractDataSet;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.spi.AbstractDataSet;
 import javafx.scene.paint.Color;
 
 /**
@@ -48,10 +48,7 @@ public class MarsWrappedDoubleDataSet extends
 {
 
 	private static final long serialVersionUID = -493232313124620828L;
-
-	private Color color;
-	private double width;
-	private String lineStyle;
+	private String marsPlotType;
 	private DoubleColumn xValues, yValues;
 
 	private MarsNumericAxis axis;
@@ -70,46 +67,25 @@ public class MarsWrappedDoubleDataSet extends
 		super(name, 2);
 	}
 
-	public MarsWrappedDoubleDataSet(String name, Color color, double width,
-		String lineStyle)
+	public MarsWrappedDoubleDataSet(String name, String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
+		this.marsPlotType = marsPlotType;
 	}
 
 	public MarsWrappedDoubleDataSet(final String name, final int initalSize,
-		Color color, double width, String lineStyle)
+		String marsPlotType)
 	{
 		this(name);
-		this.color = color;
-		this.width = width;
-		this.lineStyle = lineStyle;
+		this.marsPlotType = marsPlotType;
 	}
 
-	public void setColor(Color color) {
-		this.color = color;
+	public String getMarsPlotType() {
+		return marsPlotType;
 	}
 
-	public Color getColor() {
-		return color;
-	}
-
-	public void setWidth(double width) {
-		this.width = width;
-	}
-
-	public double getWidth() {
-		return width;
-	}
-
-	public void setLineStyle(String lineStyle) {
-		this.lineStyle = lineStyle;
-	}
-
-	public String getLineStyle() {
-		return lineStyle;
+	public void setMarsPlotType(String marsPlotType) {
+		this.marsPlotType = marsPlotType;
 	}
 
 	public void add(DoubleColumn xValues, DoubleColumn yValues) {

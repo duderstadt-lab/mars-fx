@@ -81,6 +81,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
 import javafx.scene.control.IndexRange;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
+import org.fxmisc.flowless.Virtualized;
 
 public class LogPane {
 

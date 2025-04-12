@@ -38,10 +38,10 @@ import java.util.stream.Collectors;
 
 import com.jfoenix.controls.JFXBadge;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.AbstractValueIndicator;
-import de.gsi.chart.plugins.ChartPlugin;
-import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.plugins.AbstractValueIndicator;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.fx.plot.tools.MarsZoomer;
@@ -88,7 +88,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 		chartPane.setMaxHeight(Double.MAX_VALUE);
 		chartPane.setMaxWidth(Double.MAX_VALUE);
 		// For the moment lets hide the legend
-		chartPane.setLegend(null);
+		//chartPane.setLegend(null);
+		chartPane.setLegendVisible(false);
 
 		SegmentDataSetRenderer renderer = new SegmentDataSetRenderer();
 
@@ -103,17 +104,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 
 		chartPane.getRenderers().setAll(renderer);
 
-		// unbind PlotArea hiddenSidesPane from Chart HiddenSidesPane
-		// and then set default distance. This will allow zoom slider to come up.
-		chartPane.getPlotArea().triggerDistanceProperty().unbindBidirectional(
-			chartPane.triggerDistanceProperty());
-		chartPane.getPlotArea().setTriggerDistance(50);
-		chartPane.setTriggerDistance(-1);
-
-		chartPane.getGridRenderer().getHorizontalMajorGrid().setStroke(chartPane
-			.getGridRenderer().getHorizontalMajorGrid().getStroke());
-		chartPane.getGridRenderer().getVerticalMajorGrid().setStroke(chartPane
-			.getGridRenderer().getVerticalMajorGrid().getStroke());
+		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+		chartPane.getPlotArea().setTriggerDistance(0);
 
 		chartPane.getYAxis().minProperty().addListener((ob, o, n) -> {
 			if (!datasetOptionsPane.fixYBounds().get()) datasetOptionsPane.setYMin(n
