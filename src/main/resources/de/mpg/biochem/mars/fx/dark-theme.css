@@ -234,6 +234,23 @@
     -fx-background-color: rgb(55, 58, 60) !important;
 }
 
+/* Data point tracker tooltip */
+.chart-datapoint-tooltip-label {
+    -fx-background-color: rgb(60, 63, 65) !important;
+    -fx-text-fill: rgb(220, 220, 220) !important;
+    -fx-border-color: rgb(100, 100, 100) !important;
+    -fx-border-width: 1px !important;
+    -fx-padding: 5px !important;
+    -fx-background-radius: 3px !important;
+    -fx-border-radius: 3px !important;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 5, 0, 0, 2) !important;
+}
+
+/* Red circle marker that shows the selected point */
+.chart-content Circle {
+    -fx-stroke: rgb(255, 100, 100) !important;
+}
+
 /* PopOver styles for dark theme */
 .popover {
     -fx-background-color: rgb(45, 48, 50) !important;
