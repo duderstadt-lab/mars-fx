@@ -258,8 +258,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		masker.setProgressNode(marsSpinning);
 
 		maskerStackPane = new StackPane();
-		maskerStackPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
+		maskerStackPane.getStylesheets().add("de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
 		masker.setStyle("-fx-accent: #f5f5f5; -fx-text-fill: #f5f5f5;");
 		maskerStackPane.getChildren().add(borderPane);
 		maskerStackPane.getChildren().add(lockLogArea);

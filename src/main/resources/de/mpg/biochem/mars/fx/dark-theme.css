@@ -1,82 +1,136 @@
+/* Base Dark Theme for Mars-FX */
 .root {
     -fx-base: rgb(45, 48, 50);
     -fx-background: rgb(45, 48, 50);
-    -fx-control-inner-background:  rgb(45, 48, 50);
+    -fx-control-inner-background: rgb(45, 48, 50);
     -fx-light-text-color: rgb(200, 200, 200);
-    -fx-accent: #e7eff7;
-    -fx-default-button: #7f878f;
+    -fx-accent: rgb(75, 110, 175);
+    -fx-default-button: rgb(75, 110, 175);
     -fx-focus-color: #efefef;
     -fx-faint-focus-color: #efefef22;
-    -fx-focused-text-base-color : ladder(
+    -fx-focused-text-base-color: ladder(
             -fx-selection-bar,
             -fx-light-text-color 45%,
             -fx-dark-text-color 46%,
             -fx-dark-text-color 59%,
             -fx-mid-text-color 60%
         );
-    -fx-focused-mark-color : -fx-focused-text-base-color;
+    -fx-focused-mark-color: -fx-focused-text-base-color;
+
+    /* Custom colors for the dark theme */
+    -mwfx-tab-background: rgb(55, 58, 60);
+    -mwfx-tab-active: rgb(75, 110, 175);
+
+    /* Overriding JFX colors */
+    -jfx-primary-color: rgb(75, 110, 175);
+    -jfx-light-primary-color: rgb(75, 110, 175);
+    -jfx-dark-primary-color: rgb(75, 110, 175);
+    -jfx-secondary-color: rgb(100, 100, 100);
+    -jfx-light-secondary-color: rgb(100, 100, 100);
+    -jfx-dark-secondary-color: rgb(100, 100, 100);
+
+    /* Icon colors */
+    -icon-paint: rgb(200, 200, 200);
+}
+
+/* Text Controls */
+.text-input {
+    -fx-text-fill: rgb(220, 220, 220);
 }
 
 .text-input:focused {
     -fx-highlight-text-fill: ladder(
         -fx-highlight-fill,
         -fx-light-text-color 45%,
-        -fx-dark-text-color  46%,
-        -fx-dark-text-color  59%,
-        -fx-mid-text-color   60%
+        -fx-dark-text-color 46%,
+        -fx-dark-text-color 59%,
+        -fx-mid-text-color 60%
     );
 }
 
 .label {
-    -fx-text-fill: lightgray;
+    -fx-text-fill: rgb(220, 220, 220);
 }
 
 .text-field {
-    -fx-prompt-text-fill: gray;
+    -fx-prompt-text-fill: rgb(150, 150, 150);
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-accent: rgb(75, 110, 175);
 }
 
-.titulo {
-    -fx-font-weight: bold;
-    -fx-font-size: 18px;
+.text-area {
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-background-color: rgb(60, 63, 65);
 }
 
+.text-area .content {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+/* Buttons */
 .button {
     -fx-focus-traversable: false;
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
 }
 
 .button:hover {
     -fx-text-fill: white;
-}
-
-.separator *.line {
-    -fx-background-color: #3C3C3C;
-    -fx-border-style: solid;
-    -fx-border-width: 1px;
-}
-
-.scroll-bar {
-    -fx-background-color: derive(-fx-base,45%)
+    -fx-background-color: rgb(75, 85, 95);
 }
 
 .button:default {
     -fx-base: -fx-accent;
+    -fx-background-color: -fx-accent;
 }
 
+/* Separators */
+.separator *.line {
+    -fx-background-color: rgb(75, 78, 80);
+    -fx-border-style: solid;
+    -fx-border-width: 1px;
+}
+
+/* Scroll bars */
+.scroll-bar {
+    -fx-background-color: rgb(50, 53, 55);
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: rgb(80, 83, 85);
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+/* Table and List Views */
 .table-view {
-    /*-fx-background-color: derive(-fx-base, 10%);*/
-    -fx-selection-bar-non-focused: derive(-fx-base, 50%);
+    -fx-background-color: rgb(50, 53, 55);
+    -fx-control-inner-background: rgb(50, 53, 55);
+    -fx-selection-bar: rgb(75, 110, 175);
+    -fx-selection-bar-non-focused: rgb(65, 68, 70);
+}
+
+.table-view .column-header {
+    -fx-background-color: rgb(60, 63, 65);
 }
 
 .table-view .column-header .label {
     -fx-alignment: CENTER_LEFT;
-    -fx-font-weight: none;
+    -fx-font-weight: normal;
+    -fx-text-fill: rgb(220, 220, 220);
 }
 
 .list-cell:even,
 .list-cell:odd,
 .table-row-cell:even,
 .table-row-cell:odd {
-    -fx-control-inner-background: derive(-fx-base, 15%);
+    -fx-control-inner-background: rgb(50, 53, 55);
+    -fx-background-color: rgb(50, 53, 55);
+    -fx-text-fill: rgb(220, 220, 220);
 }
 
 .list-cell:empty,
@@ -87,55 +141,608 @@
 .list-cell,
 .table-row-cell {
     -fx-border-color: transparent;
-    -fx-table-cell-border-color: transparent;
+    -fx-table-cell-border-color: rgb(70, 73, 75);
 }
 
-.chart-container {
-    /* Pane that contains the chart so we can set padding via css */
-    -fx-padding: 0 5 5 5px;
+.list-cell:selected,
+.table-row-cell:selected {
+    -fx-background-color: rgb(75, 110, 175);
+    -fx-text-fill: white;
 }
 
+/* Log text area */
+.log-text-area {
+    -fx-text-fill: white;
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+}
+
+.log-text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-pane .content {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+.log-text-area .list-view {
+    -fx-text-fill: white;
+    -fx-background-color: transparent;
+}
+
+/* Add these to your dark-theme.css file */
+.masker-stack-pane,
+.border-pane,
+.jfx-tab-pane {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+/* This will target the left sidebar specifically */
+.jfx-tab-pane .tab-header-area {
+    -fx-background-color: rgb(55, 58, 60) !important;
+}
+
+/* Fix for icons - ensure they're visible but with correct colors */
+.microscopeIcon,
+.moleculeIcon,
+.dnaIcon,
+.objectIcon,
+.bookIcon,
+.smallBookIcon,
+.categoriesIcon,
+.barchartIcon,
+.xychartIcon,
+.bubblechartIcon {
+    -icon-paint: rgb(200, 200, 200) !important;
+    -fx-background-color: -icon-paint !important;
+}
+
+/* Generic icon styling for all types of icons */
+.icon,
+.glyph-icon,
+.ikonli-font-icon,
+.fontawesome-icon,
+.material-icon,
+[class*="icon-"] {
+    -fx-fill: rgb(200, 200, 200) !important;
+    -fx-text-fill: rgb(200, 200, 200) !important;
+    -fx-effect: null !important;
+}
+
+/* Chart controls and icons in headers */
+.chart-control-icon,
+.chart-header-icon,
+.widget-header-icon,
+.tab-icon,
+.control-icon {
+    -fx-fill: rgb(200, 200, 200) !important;
+    -fx-background-color: rgb(200, 200, 200) !important;
+}
+
+/* Fix for blue background in widget headers */
+.widget-header,
+.chart-header,
+.panel-header {
+    -fx-background-color: rgb(55, 58, 60) !important;
+}
+
+/* PopOver styles for dark theme */
+.popover {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.popover > .border {
+    -fx-stroke: rgb(80, 83, 85) !important;
+    -fx-fill: rgb(45, 48, 50) !important;
+}
+
+.popover > .content {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.popover > .title {
+    -fx-background-color: rgb(55, 58, 60) !important;
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* Style the toggle switch in popover */
+.popover .toggle-switch .thumb {
+    -fx-background-color: white !important;
+}
+
+.popover .toggle-switch:selected .thumb-area {
+    -fx-background-color: rgb(75, 110, 175) !important;
+}
+
+.popover .toggle-switch .thumb-area {
+    -fx-background-color: rgb(100, 100, 100) !important;
+}
+
+/* Style text fields in the popover */
+.popover .text-field {
+    -fx-background-color: rgb(60, 63, 65) !important;
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* Style labels in the popover */
+.popover .label {
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* More specific icon selectors */
+.glyph-icon .fontawesome-icon,
+.button .glyph-icon,
+.label .glyph-icon,
+Text.glyph-icon {
+    -fx-fill: rgb(200, 200, 200) !important;
+}
+
+/* Target SVG icons if used */
+.svg-icon {
+    -fx-background-color: rgb(200, 200, 200) !important;
+}
+
+/* Target font awesome icons specifically */
+.fa,
+.fas,
+.far,
+.fal,
+.fab {
+    -fx-fill: rgb(200, 200, 200) !important;
+    -fx-text-fill: rgb(200, 200, 200) !important;
+}
+
+/* Target Text nodes directly */
+Text {
+    -fx-fill: rgb(220, 220, 220) !important;
+}
+
+/* Specifically target headings */
+Text.heading {
+    -fx-fill: rgb(220, 220, 220) !important;
+}
+
+/* Specifically target descriptions */
+Text.description {
+    -fx-fill: rgb(220, 220, 220) !important;
+}
+
+Text, .text {
+    -fx-fill: rgb(220, 220, 220) !important;
+}
+
+/* JFX Tab Pane */
+.jfx-tab-pane {
+    -fx-base: rgb(45, 48, 50);
+    -fx-color: -fx-base;
+    -fx-accent: rgb(75, 110, 175);
+    -fx-default-button: -fx-accent;
+    -jfx-primary-color: -fx-accent;
+    -jfx-light-primary-color: -fx-accent;
+    -jfx-dark-primary-color: -fx-accent;
+    -fx-focus-color: rgb(100, 100, 100);
+    -jfx-secondary-color: -fx-focus-color;
+    -jfx-light-secondary-color: -fx-focus-color;
+    -jfx-dark-secondary-color: -fx-focus-color;
+}
+
+/* Target the left sidebar specifically */
+.jfx-tab-pane .tab-header-area,
+.jfx-tab-pane .headers-region,
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: rgb(55, 58, 60) !important;
+}
+
+/* Target the tab elements */
+.jfx-tab-pane .tab {
+    -fx-background-color: rgb(55, 58, 60) !important;
+}
+
+/* Selected tab indicator */
+.jfx-tab-pane .tab:selected {
+    -fx-background-color: rgb(75, 110, 175) !important;
+}
+
+.jfx-tab-pane .headers-region {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.jfx-tab-pane .tab-selected-line {
+    -fx-stroke: rgb(75, 110, 175);
+}
+
+.jfx-tab-pane .tab-header-area .jfx-rippler {
+    -jfx-rippler-fill: rgb(100, 100, 100);
+}
+
+.tab-selected-line {
+    -fx-background-color: rgb(75, 110, 175);
+}
+
+/* Standard Tab Pane */
+.tab-pane {
+    -fx-base: rgb(45, 48, 50);
+    -fx-color: -fx-base;
+    -fx-accent: rgb(75, 110, 175);
+    -fx-default-button: -fx-accent;
+    -fx-focus-color: rgb(100, 100, 100);
+    -mwfx-tab-background: rgb(55, 58, 60);
+    -mwfx-tab-active: rgb(75, 110, 175);
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: -mwfx-tab-background;
+}
+
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
+    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:hover {
+    -fx-background-color: derive(-mwfx-tab-active, 35%), -mwfx-tab-background;
+    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: rgb(180, 180, 180);
+}
+
+.tab-pane .tab:selected .tab-label,
+.tab-pane .tab:hover .tab-label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+/* Icons */
+.icon-button {
+    -fx-stroke: rgb(180, 180, 180);
+    -fx-background-color: transparent;
+}
+
+.microscopeIcon,
+.moleculeIcon,
+.dnaIcon,
+.objectIcon,
+.bookIcon,
+.smallBookIcon,
+.categoriesIcon,
+.barchartIcon,
+.xychartIcon,
+.bubblechartIcon {
+    -icon-paint: rgb(200, 200, 200);
+    -fx-background-color: -icon-paint;
+}
+
+/* Chart Styling */
 .chart {
     -fx-background-color: rgb(45, 48, 50);
     -fx-font-size: 12;
-    /* WARNING: DO NOT SET PADDING!!! IT FORCES CONTINUOUS RE-RENDERING */
-    /*-fx-padding: 10px;*/
 }
 
 .chart .chart-title {
-    -fx-text-fill: #aaaaaa;
+    -fx-text-fill: rgb(170, 170, 170);
     -fx-font-size: 12;
     -fx-padding: 0 0 5 0px;
 }
 
 .chart .axis .axis-label {
-    -fx-fill: #cccccc;
+    -fx-fill: rgb(200, 200, 200);
 }
 
 .chart .axis .axis-tick-mark {
-    -fx-stroke: #888888;
+    -fx-stroke: rgb(140, 140, 140);
 }
 
 .chart .axis .axis-minor-tick-mark {
-    -fx-stroke: #666666;
+    -fx-stroke: rgb(100, 100, 100);
+}
+
+.chart .axis-tick-label {
+    -fx-fill: rgb(200, 200, 200);
+}
+
+.chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart .chart-legend-item {
+    -fx-text-fill: rgb(200, 200, 200);
+}
+
+.chart .chart-plot-background {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.chart .chart-vertical-grid-lines,
+.chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
 }
 
 .chart .grid-renderer .chart-major-grid-lines {
-    -fx-stroke: #666666;
+    -fx-stroke: rgb(100, 100, 100);
 }
 
 .chart .grid-renderer .chart-minor-grid-lines {
-    -fx-stroke: #555555;
+    -fx-stroke: rgb(85, 85, 85);
 }
 
 .chart .chart-zoom-rect {
-    -fx-fill: #007bff;
-    -fx-stroke: #007bff;
+    -fx-fill: rgb(0, 123, 255);
+    -fx-stroke: rgb(0, 123, 255);
 }
 
 .chart .value-indicator-line,
 .chart .value-indicator-marker,
 .chart .value-indicator-label {
-    -fx-fill: #cccccc;
-    -fx-stroke: #cccccc;
+    -fx-fill: rgb(200, 200, 200);
+    -fx-stroke: rgb(200, 200, 200);
+}
+
+.chart-container {
+    -fx-padding: 0 5 5 5px;
+}
+
+/* ChartFX specific styles */
+.chart-fx .axis-tick-label {
+    -fx-fill: rgb(200, 200, 200);
+}
+
+.chart-fx .chart-plot-background {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.chart-fx .chart-horizontal-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
+}
+
+.chart-fx .chart-vertical-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
+}
+
+/* Additional Controls */
+.combo-box {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.choice-box {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-mark-color: rgb(200, 200, 200);
+}
+
+.check-box {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.check-box .box {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.radio-button {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.radio-button .radio {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+/* Dialog Styling */
+.dialog-pane {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.dialog-pane .content {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Menu Styling */
+.menu-bar {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.menu {
+    -fx-background-color: transparent;
+}
+
+.menu:hover, .menu:showing {
+    -fx-background-color: rgb(75, 85, 95);
+}
+
+.menu-item {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.menu-item:hover {
+    -fx-background-color: rgb(75, 85, 95);
+}
+
+.menu .label, .menu-item .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Additional specific selectors for your application */
+
+/* Chart control panel (the area below the chart) */
+.chart-control-panel,
+.chart-settings-panel {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.chart-control-panel .label,
+.chart-settings-panel .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Title, X-Axis, Y-Axis input fields */
+.axis-config-field,
+.title-config-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Bounds controls */
+.bounds-control,
+.chart-bounds-panel {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.bounds-control .label,
+.chart-bounds-panel .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Number fields and spinners */
+.spinner,
+.number-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.spinner .text-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: rgb(70, 73, 75);
+}
+
+/* Track controls and table */
+.track-controls-panel,
+.track-table {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.track-controls-panel .label,
+.track-table .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* More specific selectors for handling chart number labels */
+.axis-tick-mark,
+.axis .tick-label {
+    -fx-fill: rgb(200, 200, 200);
+    -fx-text-fill: rgb(200, 200, 200);
+}
+
+/* Override for any white panels in the application */
+.panel,
+.pane,
+.split-pane,
+.split-pane-divider,
+.grid-pane,
+.anchor-pane,
+.stack-pane,
+.border-pane,
+.hbox,
+.vbox,
+.flow-pane {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+/* Fix for grid pane and its children */
+.grid-pane > * {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+/* Any specific chart number components */
+.chart-fx-axis .axis-tick-label,
+.chart-fx-axis .axis-label {
+    -fx-text-fill: rgb(200, 200, 200);
+    -fx-fill: rgb(200, 200, 200);
+}
+
+/* JFX specific controls */
+.jfx-text-field,
+.jfx-password-field,
+.jfx-text-area {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.jfx-check-box {
+    -fx-text-fill: rgb(220, 220, 200);
+}
+
+.jfx-radio-button {
+    -fx-text-fill: rgb(220, 220, 200);
+}
+
+.jfx-combo-box {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.jfx-combo-box .list-cell {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Inputs and form elements */
+.text-input,
+.combo-box-base,
+.choice-box,
+.color-picker,
+.date-picker {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Force white backgrounds to be dark */
+* {
+    -fx-base: rgb(45, 48, 50) !important;
+    -fx-control-inner-background: rgb(45, 48, 50) !important;
+    -fx-background: rgb(45, 48, 50) !important;
+}
+
+/* Specifically targeting elements that might still be white */
+.plot-pane,
+.plot-background,
+.chart-background {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.chart-axis-label,
+.chart-title,
+.axis-label,
+.tick-label {
+    -fx-text-fill: rgb(220, 220, 220) !important;
+    -fx-fill: rgb(220, 220, 220) !important;
 }
