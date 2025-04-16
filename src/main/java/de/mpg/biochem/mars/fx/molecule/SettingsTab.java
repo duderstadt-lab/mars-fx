@@ -95,6 +95,35 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 
 		rootPane = new VBox();
 
+		//General Options
+		Text generalHeading = new Text("General");
+		generalHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
+
+		rootPane.getChildren().add(generalHeading);
+		VBox.setMargin(generalHeading, new Insets(15, 15, 15, 15));
+
+		GridPane generalGridpane = new GridPane();
+
+		Label darkThemeLabel = new Label("Use Dark Theme");
+		generalGridpane.add(darkThemeLabel, 0, 5);
+		GridPane.setMargin(darkThemeLabel, new Insets(5, 5, 5, 5));
+
+		ToggleSwitch darkThemeSwitch = new ToggleSwitch();
+		generalGridpane.add(darkThemeSwitch, 1, 5);
+
+		darkThemeSwitch.setSelected(prefService.getBoolean(SettingsTab.class,
+				"useDarkTheme", false));
+		darkThemeSwitch.selectedProperty().addListener((t, o, n) -> {
+			prefService.remove(SettingsTab.class, "useDarkTheme");
+			prefService.put(SettingsTab.class, "useDarkTheme", n);
+			if (n) getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
+			else getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/dark-theme.css");
+		});
+		GridPane.setMargin(darkThemeSwitch, new Insets(5, 5, 5, 5));
+
+		rootPane.getChildren().add(generalGridpane);
+		VBox.setMargin(generalGridpane, new Insets(15, 15, 15, 15));
+
 		Text moleculesHeading = new Text("Tag shortcuts");
 		moleculesHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
 

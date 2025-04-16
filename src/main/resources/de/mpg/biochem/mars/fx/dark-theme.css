@@ -1,0 +1,141 @@
+.root {
+    -fx-base: rgb(45, 48, 50);
+    -fx-background: rgb(45, 48, 50);
+    -fx-control-inner-background:  rgb(45, 48, 50);
+    -fx-light-text-color: rgb(200, 200, 200);
+    -fx-accent: #e7eff7;
+    -fx-default-button: #7f878f;
+    -fx-focus-color: #efefef;
+    -fx-faint-focus-color: #efefef22;
+    -fx-focused-text-base-color : ladder(
+            -fx-selection-bar,
+            -fx-light-text-color 45%,
+            -fx-dark-text-color 46%,
+            -fx-dark-text-color 59%,
+            -fx-mid-text-color 60%
+        );
+    -fx-focused-mark-color : -fx-focused-text-base-color;
+}
+
+.text-input:focused {
+    -fx-highlight-text-fill: ladder(
+        -fx-highlight-fill,
+        -fx-light-text-color 45%,
+        -fx-dark-text-color  46%,
+        -fx-dark-text-color  59%,
+        -fx-mid-text-color   60%
+    );
+}
+
+.label {
+    -fx-text-fill: lightgray;
+}
+
+.text-field {
+    -fx-prompt-text-fill: gray;
+}
+
+.titulo {
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}
+
+.button {
+    -fx-focus-traversable: false;
+}
+
+.button:hover {
+    -fx-text-fill: white;
+}
+
+.separator *.line {
+    -fx-background-color: #3C3C3C;
+    -fx-border-style: solid;
+    -fx-border-width: 1px;
+}
+
+.scroll-bar {
+    -fx-background-color: derive(-fx-base,45%)
+}
+
+.button:default {
+    -fx-base: -fx-accent;
+}
+
+.table-view {
+    /*-fx-background-color: derive(-fx-base, 10%);*/
+    -fx-selection-bar-non-focused: derive(-fx-base, 50%);
+}
+
+.table-view .column-header .label {
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-weight: none;
+}
+
+.list-cell:even,
+.list-cell:odd,
+.table-row-cell:even,
+.table-row-cell:odd {
+    -fx-control-inner-background: derive(-fx-base, 15%);
+}
+
+.list-cell:empty,
+.table-row-cell:empty {
+    -fx-background-color: transparent;
+}
+
+.list-cell,
+.table-row-cell {
+    -fx-border-color: transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.chart-container {
+    /* Pane that contains the chart so we can set padding via css */
+    -fx-padding: 0 5 5 5px;
+}
+
+.chart {
+    -fx-background-color: rgb(45, 48, 50);
+    -fx-font-size: 12;
+    /* WARNING: DO NOT SET PADDING!!! IT FORCES CONTINUOUS RE-RENDERING */
+    /*-fx-padding: 10px;*/
+}
+
+.chart .chart-title {
+    -fx-text-fill: #aaaaaa;
+    -fx-font-size: 12;
+    -fx-padding: 0 0 5 0px;
+}
+
+.chart .axis .axis-label {
+    -fx-fill: #cccccc;
+}
+
+.chart .axis .axis-tick-mark {
+    -fx-stroke: #888888;
+}
+
+.chart .axis .axis-minor-tick-mark {
+    -fx-stroke: #666666;
+}
+
+.chart .grid-renderer .chart-major-grid-lines {
+    -fx-stroke: #666666;
+}
+
+.chart .grid-renderer .chart-minor-grid-lines {
+    -fx-stroke: #555555;
+}
+
+.chart .chart-zoom-rect {
+    -fx-fill: #007bff;
+    -fx-stroke: #007bff;
+}
+
+.chart .value-indicator-line,
+.chart .value-indicator-marker,
+.chart .value-indicator-label {
+    -fx-fill: #cccccc;
+    -fx-stroke: #cccccc;
+}
