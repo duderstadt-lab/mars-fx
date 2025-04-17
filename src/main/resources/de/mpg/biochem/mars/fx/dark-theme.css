@@ -251,6 +251,49 @@
     -fx-stroke: rgb(255, 100, 100) !important;
 }
 
+/* Target the chip's container */
+.jfx-chip-view {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane > .viewport,
+.jfx-chip-view .chips-pane > .text-area:focused,
+.jfx-chip-view .chips-pane > .text-area:focused .scroll-pane {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area .content,
+.jfx-chip-view .chips-pane > .text-area:focused .content {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+    -fx-padding: 0 0 0 0;
+}
+
+.jfx-chip-view > .scroll-pane,
+.jfx-chip-view > .scroll-pane > .viewport {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view > .scroll-pane > .scroll-bar:horizontal,
+.jfx-chip-view > .scroll-pane > .scroll-bar:vertical {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(150, 150, 150);
+    -fx-fill: rgb(0, 0, 0);
+}
+
+.jfx-chip > HBox {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.jfx-chip .text {
+    -fx-fill: rgb(0, 0, 0);
+}
+
 /* PopOver styles for dark theme */
 .popover {
     -fx-background-color: rgb(45, 48, 50) !important;
@@ -271,15 +314,15 @@
 }
 
 /* Style the toggle switch in popover */
-.popover .toggle-switch .thumb {
+.toggle-switch .thumb {
     -fx-background-color: white !important;
 }
 
-.popover .toggle-switch:selected .thumb-area {
+.toggle-switch:selected .thumb-area {
     -fx-background-color: rgb(75, 110, 175) !important;
 }
 
-.popover .toggle-switch .thumb-area {
+.toggle-switch .thumb-area {
     -fx-background-color: rgb(100, 100, 100) !important;
 }
 
