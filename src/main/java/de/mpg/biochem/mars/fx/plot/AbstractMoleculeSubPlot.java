@@ -206,6 +206,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		int bgG = plotPane.darkMode() ? 63 : 255;
 		int bgB = plotPane.darkMode() ? 65 : 255;
 
+		// Border styling - only applies in dark mode
+		String borderStyle = plotPane.darkMode() ? "-fx-border-color: rgb(100, 100, 100); " : "";
+
 		for (int index = 0; index < regionNames.size(); index++) {
 			String regionName = regionNames.get(index);
 			MarsRegion roi = record.getRegion(regionName);
@@ -231,8 +234,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				);
 
 				newStyleSheet += String.format(Locale.US,
-						".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
-						index, solidRgb[0], solidRgb[1], solidRgb[2]);
+						".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); %s}\n",
+						index, solidRgb[0], solidRgb[1], solidRgb[2], borderStyle);
 
 				getChart().getPlugins().add(xRangeIndicator);
 			}
@@ -258,8 +261,8 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 				);
 
 				newStyleSheet += String.format(Locale.US,
-						".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
-						index, solidRgb[0], solidRgb[1], solidRgb[2]);
+						".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); %s}\n",
+						index, solidRgb[0], solidRgb[1], solidRgb[2], borderStyle);
 
 				getChart().getPlugins().add(yRangeIndicator);
 			}
@@ -284,9 +287,9 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-						".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; }\n",
+						".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; %s}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-								255), Math.round(color.getBlue() * 255), backgroundColor);
+								255), Math.round(color.getBlue() * 255), backgroundColor, borderStyle);
 
 				getChart().getPlugins().add(xValueIndicator);
 			}
@@ -304,15 +307,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-						".y-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; }\n",
+						".y-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; %s}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-								255), Math.round(color.getBlue() * 255), backgroundColor);
+								255), Math.round(color.getBlue() * 255), backgroundColor, borderStyle);
 
 				getChart().getPlugins().add(yValueIndicator);
 			}
 		}
-
-		System.out.println(newStyleSheet);
 
 		getChart().getStylesheets().add(getPlotPane().getStyleSheetUpdater()
 				.getStyleSheetURL(newStyleSheet));
