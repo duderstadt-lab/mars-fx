@@ -188,7 +188,7 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		if (this.getDatasetOptionsPane().isMoleculeIndicators()) record = molecule;
 		else if (this.getDatasetOptionsPane().isMetadataIndicators()) {
 			record = ((AbstractMoleculePlotPane<Molecule, SubPlot>) plotPane)
-				.getArchive().getMetadata(molecule.getMetadataUID());
+					.getArchive().getMetadata(molecule.getMetadataUID());
 		}
 		else return;
 
@@ -198,106 +198,144 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 
 		String newStyleSheet = "";
 
+		// Background color for labels based on theme
+		String backgroundColor = (plotPane.darkMode()) ? "rgb(60, 63, 65)" : "white";
+
+		// Background RGB values for blending with the rgba2rgb function
+		int bgR = plotPane.darkMode() ? 60 : 255;
+		int bgG = plotPane.darkMode() ? 63 : 255;
+		int bgB = plotPane.darkMode() ? 65 : 255;
+
 		for (int index = 0; index < regionNames.size(); index++) {
 			String regionName = regionNames.get(index);
 			MarsRegion roi = record.getRegion(regionName);
 
 			if (xAxisList.contains(roi.getColumn())) {
 				XRangeIndicator xRangeIndicator = new XRangeIndicator(this.xAxis, roi
-					.getStart(), roi.getEnd(), roi.getName());
+						.getStart(), roi.getEnd(), roi.getName());
 				xRangeIndicator.setLabelVerticalPosition(0.2);
 
 				Color color = Color.web(roi.getColor());
 				newStyleSheet += String.format(Locale.US,
-					".x-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }\n",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255), roi.getOpacity());
+						".x-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), roi.getOpacity());
 
-				Color solidColor = Utils.rgba2rgb((int) Math.round(color.getRed() *
-					255), (int) Math.round(color.getGreen() * 255), (int) Math.round(color
-						.getBlue() * 255), roi.getOpacity());
+				// Use the new rgba2rgb function with appropriate background
+				int[] solidRgb = rgba2rgb(
+						(int) Math.round(color.getRed() * 255),
+						(int) Math.round(color.getGreen() * 255),
+						(int) Math.round(color.getBlue() * 255),
+						roi.getOpacity(),
+						bgR, bgG, bgB
+				);
 
 				newStyleSheet += String.format(Locale.US,
-					".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
-					index, Math.round(solidColor.getRed() * 255), Math.round(solidColor
-						.getGreen() * 255), Math.round(solidColor.getBlue() * 255));
+						".x-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
+						index, solidRgb[0], solidRgb[1], solidRgb[2]);
 
 				getChart().getPlugins().add(xRangeIndicator);
 			}
 
 			if (yAxisList.contains(roi.getColumn())) {
 				YRangeIndicator yRangeIndicator = new YRangeIndicator(this.yAxis, roi
-					.getStart(), roi.getEnd(), roi.getName());
+						.getStart(), roi.getEnd(), roi.getName());
 				yRangeIndicator.setLabelHorizontalPosition(0.2);
 
 				Color color = Color.web(roi.getColor());
 				newStyleSheet += String.format(Locale.US,
-					".y-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255), roi.getOpacity());
+						".y-range-indicator-rect%d { -fx-stroke: transparent; -fx-fill: rgba(%d, %d, %d, %f); }\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), roi.getOpacity());
 
-				Color solidColor = Utils.rgba2rgb((int) Math.round(color.getRed() *
-					255), (int) Math.round(color.getGreen() * 255), (int) Math.round(color
-						.getBlue() * 255), roi.getOpacity());
+				// Use the new rgba2rgb function with appropriate background
+				int[] solidRgb = rgba2rgb(
+						(int) Math.round(color.getRed() * 255),
+						(int) Math.round(color.getGreen() * 255),
+						(int) Math.round(color.getBlue() * 255),
+						roi.getOpacity(),
+						bgR, bgG, bgB
+				);
 
 				newStyleSheet += String.format(Locale.US,
-					".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
-					index, Math.round(solidColor.getRed() * 255), Math.round(solidColor
-						.getGreen() * 255), Math.round(solidColor.getBlue() * 255));
+						".y-range-indicator-label%d { -fx-background-color: rgb(%d, %d, %d); }\n",
+						index, solidRgb[0], solidRgb[1], solidRgb[2]);
 
 				getChart().getPlugins().add(yRangeIndicator);
 			}
 		}
 
 		ArrayList<String> positionNames = new ArrayList<>(record
-			.getPositionNames());
+				.getPositionNames());
 		for (int index = 0; index < positionNames.size(); index++) {
 			String positionName = positionNames.get(index);
 			MarsPosition poi = record.getPosition(positionName);
 
 			if (xAxisList.contains(poi.getColumn())) {
 				MarsXValueIndicator xValueIndicator = new MarsXValueIndicator(
-					this.xAxis, poi.getPosition(), poi.getName(), datasetOptionsPane);
+						this.xAxis, poi.getPosition(), poi.getName(), datasetOptionsPane);
 				xValueIndicator.setLabelPosition(0.2);
 
 				Color color = Color.web(poi.getColor());
 				newStyleSheet += String.format(Locale.US,
-					".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
-							.getStroke());
+						".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
+								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-					".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: white; }\n",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255));
+						".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; }\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), backgroundColor);
 
 				getChart().getPlugins().add(xValueIndicator);
 			}
 
 			if (yAxisList.contains(poi.getColumn())) {
 				YValueIndicator yValueIndicator = new YValueIndicator(this.yAxis, poi
-					.getPosition(), poi.getName());
+						.getPosition(), poi.getName());
 				yValueIndicator.setLabelPosition(0.2);
 
 				Color color = Color.web(poi.getColor());
 				newStyleSheet += String.format(Locale.US,
-					".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
-							.getStroke());
+						".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
+								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-					".x-value-indicator-label%d { -fx-stroke: rgba(%d, %d, %d); -fx-background-color: white; }\n",
-					index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
-						255), Math.round(color.getBlue() * 255));
+						".y-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; }\n",
+						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
+								255), Math.round(color.getBlue() * 255), backgroundColor);
 
 				getChart().getPlugins().add(yValueIndicator);
 			}
 		}
 
+		System.out.println(newStyleSheet);
+
 		getChart().getStylesheets().add(getPlotPane().getStyleSheetUpdater()
-			.getStyleSheetURL(newStyleSheet));
+				.getStyleSheetURL(newStyleSheet));
+	}
+
+	/**
+	 * Converts an RGBA color to RGB by blending with the specified background color
+	 *
+	 * @param r Red component of the rgba color (0-255)
+	 * @param g Green component of the rgba color (0-255)
+	 * @param b Blue component of the rgba color (0-255)
+	 * @param a Alpha component of the rgba color (0-1)
+	 * @param bgR Red component of the background (0-255)
+	 * @param bgG Green component of the background (0-255)
+	 * @param bgB Blue component of the background (0-255)
+	 * @return RGB color as int array [r, g, b]
+	 */
+	public static int[] rgba2rgb(int r, int g, int b, double a, int bgR, int bgG, int bgB) {
+		int[] rgb = new int[3];
+		rgb[0] = (int) Math.round(r * a + bgR * (1 - a));
+		rgb[1] = (int) Math.round(g * a + bgG * (1 - a));
+		rgb[2] = (int) Math.round(b * a + bgB * (1 - a));
+		return rgb;
 	}
 
 	@Override

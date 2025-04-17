@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.JsonToken;
 
 import java.util.ArrayList;
 
+import de.mpg.biochem.mars.fx.molecule.SettingsTab;
 import org.scijava.Context;
 
 import io.fair_acc.chartfx.axes.AxisMode;
@@ -59,6 +60,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;
+import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 
 public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends SubPlot>
 	extends AbstractPlotPane implements MoleculeSubPane
@@ -68,6 +71,9 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 
 	protected BooleanProperty regionSelected;
 	protected BooleanProperty positionSelected;
+
+	@Parameter
+	private PrefService prefService;
 
 	protected MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
@@ -317,6 +323,12 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 			chartsPane.getChildren().add(subPlot.getNode());
 		}
 		resetXYZoom();
+	}
+
+	@Override
+	public boolean darkMode() {
+		return prefService.getBoolean(SettingsTab.class,
+				"useDarkTheme", false);
 	}
 
 	@Override
