@@ -1,67 +1,13 @@
-/*---- main tab pane ----*/
+/*---- Widget tab pane styling - LIGHT THEME ----*/
 
-.tab-pane {
-	-mwfx-tab-background: derive(-fx-background,25%);
-	-mwfx-tab-active: white;
-}
-
-.tab-pane > .tab-header-area > .headers-region > .tab {
-	-fx-background-color: -mwfx-tab-background;
+/* Use a more specific selector to target only widget tab panes */
+.dashboard-widget .tab-pane {
+    -mwfx-tab-background: white;
+    -mwfx-tab-active: #007bff;
 }
 
-.tab-pane > .tab-header-area {
-	-fx-padding: 5 5 0 20;
-}
-
-.tab-pane > .tab-header-area > .tab-header-background {
-	-fx-background-color: -fx-outer-border, transparent, -mwfx-tab-background;
-	-fx-background-insets: 0 0 0 0, 0 0 0 0, 0;
-}
-
-.tab-pane > .tab-header-area > .headers-region > .tab.preview {
-	-fx-font-style: italic;
-}
-
-/* orange marker for selected/hover tab */
-.tab-pane > .tab-header-area > .headers-region > .tab:selected {
-	-fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
-	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
-}
-.tab-pane > .tab-header-area > .headers-region > .tab:hover {
-	-fx-background-color: derive(-mwfx-tab-active,35%), -mwfx-tab-background;
-	-fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
-}
-
-/* make tab texts brighter, except selected tab */
-.tab-pane .tab-label {
-	-fx-text-fill: derive(-fx-text-base-color,35%);
-}
-.tab-pane .tab:selected .tab-label,
-.tab-pane .tab:hover .tab-label {
-	-fx-text-fill: -fx-text-base-color;
-}
-
-.tab-pane .focus-indicator {
-	visibility: hidden;
-}
-
-
-/* hide tab-close-button by default; show it only for selected tab and on hover */
-.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
-	-fx-background-color: transparent;
-}
-.tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
-.tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
-	-fx-background-color: -fx-mark-color;
-	-fx-opacity: 0.4;
-}
-.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
-	-fx-background-color: red;
-	-fx-opacity: 1.0;
-}
-
-/* Remove tab borders and separators - light theme version */
-.tab-pane > .tab-header-area > .headers-region > .tab {
+/* Remove tab borders and separators - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab {
     -fx-background-color: white !important;
     -fx-border-color: transparent !important;
     -fx-border-width: 0 !important;
@@ -69,24 +15,24 @@
     -fx-border-insets: 0 !important;
 }
 
-/* Remove tab container borders - light theme version */
-.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container {
+/* Remove tab container borders - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container {
     -fx-border-color: transparent !important;
     -fx-border-width: 0 !important;
     -fx-background-insets: 0 !important;
     -fx-border-insets: 0 !important;
 }
 
-/* Remove any dividers between tabs - light theme version */
-.tab-pane > .tab-header-area > .tab-header-background {
+/* Remove any dividers between tabs - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .tab-header-background {
     -fx-background-color: white !important;
     -fx-background-insets: 0 !important;
     -fx-border-color: transparent !important;
     -fx-border-width: 0 !important;
 }
 
-/* Remove header area borders - light theme version */
-.tab-pane > .tab-header-area {
+/* Remove header area borders - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area {
     -fx-padding: 5 5 0 20;
     -fx-border-color: transparent !important;
     -fx-border-width: 0 !important;
@@ -94,26 +40,62 @@
     -fx-border-insets: 0 !important;
 }
 
-/* Target all types of icons in selected tabs - light theme version */
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic {
-    -fx-background-color: #007bff !important;  /* Use a blue that works well on light background */
+/* Override the selected tab background to be transparent - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: white !important;
+    -fx-background-insets: 0;
 }
 
-/* Target specific icon types that might be used - light theme version */
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Region,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Text,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .glyph-icon,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .icon,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .xychartIcon,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .fontawesome-icon,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .material-icon,
-.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .octicon {
+/* Target all types of icons in selected tabs - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic {
+    -fx-background-color: #007bff !important;
+}
+
+/* Target specific icon types that might be used - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Region,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Text,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .glyph-icon,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .icon,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .xychartIcon,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .fontawesome-icon,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .material-icon,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .octicon {
     -fx-background-color: #007bff !important;
     -fx-fill: #007bff !important;
     -fx-text-fill: #007bff !important;
 }
 
-/* For hover state - light theme version */
-.tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
-    -fx-background-color: rgba(0, 123, 255, 0.1) !important; /* Subtle hover effect */
+/* For hover state - only for widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
+    -fx-background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Remove focus/selection outlines for dashboard widget tabs */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:focused,
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-focus-color: transparent !important;
+    -fx-faint-focus-color: transparent !important;
+    -fx-effect: null !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-border-style: none !important;
+    -fx-box-shadow: none !important;
+}
+
+/* Ensure no focus indicator is visible */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab .focus-indicator {
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-border-style: none !important;
+    -fx-background-color: transparent !important;
+    -fx-opacity: 0 !important;
+    -fx-visibility: hidden !important;
+}
+
+/* Remove all outlines from the tab container */
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container {
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-effect: null !important;
+    -fx-background-insets: 0 !important;
 }

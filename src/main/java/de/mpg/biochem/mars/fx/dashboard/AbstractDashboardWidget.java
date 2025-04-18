@@ -96,11 +96,11 @@ public abstract class AbstractDashboardWidget extends
 	@Override
 	public void initialize() {
 		rootPane = new AnchorPane();
+		rootPane.getStyleClass().add("dashboard-widget");
 		tabs = new TabPane();
 		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabs.setStyle("");
 		tabs.getStylesheets().clear();
-		//tabs.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
 
 		AnchorPane.setTopAnchor(tabs, 0.0);
 		AnchorPane.setLeftAnchor(tabs, 0.0);
