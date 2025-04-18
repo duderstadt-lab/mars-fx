@@ -114,15 +114,28 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		darkThemeSwitch.setSelected(prefService.getBoolean(SettingsTab.class,
 				"useDarkTheme", false));
 		darkThemeSwitch.selectedProperty().addListener((t, o, n) -> {
+			// Save the preference
 			prefService.remove(SettingsTab.class, "useDarkTheme");
 			prefService.put(SettingsTab.class, "useDarkTheme", n);
+
+			// Get current stylesheets
+			ObservableList<String> stylesheets = getNode().getScene().getStylesheets();
+
+			// Define stylesheet paths
+			String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
+			String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
 			if (n) {
-				getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
-				getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/light-theme.css");
-			}
-			else {
-				getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/dark-theme.css");
-				getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
+				stylesheets.remove(lightThemeSheet);
+
+				if (!stylesheets.contains(darkThemeSheet)) {
+					stylesheets.add(darkThemeSheet);
+				}
+			} else {
+				stylesheets.remove(darkThemeSheet);
+
+				if (!stylesheets.contains(lightThemeSheet)) {
+					stylesheets.add(lightThemeSheet);
+				}
 			}
 		});
 		GridPane.setMargin(darkThemeSwitch, new Insets(5, 5, 5, 5));

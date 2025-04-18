@@ -336,9 +336,26 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					}
 				}
 			});
+		// Get current stylesheets
+		ObservableList<String> stylesheets = scene.getStylesheets();
+
+		// Define stylesheet paths
+		String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
+		String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
 		if (prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false)) scene.getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
-		else scene.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
+				"useDarkTheme", false)) {
+			stylesheets.remove(lightThemeSheet);
+
+			if (!stylesheets.contains(darkThemeSheet)) {
+				stylesheets.add(darkThemeSheet);
+			}
+		} else {
+			stylesheets.remove(darkThemeSheet);
+
+			if (!stylesheets.contains(lightThemeSheet)) {
+				stylesheets.add(lightThemeSheet);
+			}
+		}
 		return scene;
 	}
 
