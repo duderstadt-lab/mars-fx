@@ -557,13 +557,13 @@ Text, .text {
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
-    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+    -fx-background-color: rgb(75, 110, 175), rgb(55, 58, 60) !important;
+    -fx-background-insets: 0 0 0 0, 0 0 0.333333em 0 !important;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:hover {
-    -fx-background-color: derive(-mwfx-tab-active, 35%), -mwfx-tab-background;
-    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+.tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
+    -fx-background-color: derive(rgb(75, 110, 175), 35%), rgb(55, 58, 60) !important;
+    -fx-background-insets: 0 0 0 0, 0 0 0.333333em 0 !important;
 }
 
 .tab-pane .tab-label {

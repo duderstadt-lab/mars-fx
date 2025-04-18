@@ -111,6 +111,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		tabPane.getStylesheets().clear();
 		tabPane.getStylesheets().add(
 			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
+		//tabPane.getStyleClass().add("molecule-tables-pane");
 
 		tabPane.getSelectionModel().select(dataTableTab);
 
