@@ -118,6 +118,10 @@
     -fx-background-color: rgb(60, 63, 65);
 }
 
+.tool-bar {
+    -fx-background-color: rgb(55, 58, 60) !important;
+}
+
 .table-view .column-header .label {
     -fx-alignment: CENTER_LEFT;
     -fx-font-weight: normal;
@@ -567,8 +571,10 @@ Text, .text {
     -fx-fill: rgb(200, 200, 200);
 }
 
-.chart-fx .chart-plot-background {
-    -fx-background-color: rgb(55, 58, 60);
+.chart-plot-background,
+.chart-plot-area,
+.chart-canvas-area {
+    -fx-background-color: rgb(45, 48, 50) !important;
 }
 
 .chart-fx .chart-horizontal-grid-lines {
