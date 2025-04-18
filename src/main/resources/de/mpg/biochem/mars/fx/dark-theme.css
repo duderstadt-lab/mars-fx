@@ -548,6 +548,12 @@ Text, .text {
     -mwfx-tab-active: rgb(75, 110, 175);
 }
 
+.dashboard-scroll-pane {
+    -fx-border-color: rgb(55, 58, 60) !important;
+    -fx-focus-color: rgb(55, 58, 60) !important;
+    -fx-faint-focus-color: rgb(55, 58, 60) !important;
+}
+
 .tab-pane > .tab-header-area > .headers-region > .tab {
     -fx-background-color: -mwfx-tab-background;
 }
@@ -845,6 +851,10 @@ Text, .text {
 .vbox,
 .flow-pane {
     -fx-background-color: rgb(45, 48, 50);
+}
+
+.bdv-source-options {
+    -fx-border-color: transparent;
 }
 
 /* Fix for grid pane and its children */

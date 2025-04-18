@@ -198,6 +198,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 		});
 
 		scrollPane = new ScrollPane();
+		scrollPane.getStyleClass().add("dashboard-scroll-pane");
 		scrollPane.setContent(widgetPane);
 		scrollPane.setFitToWidth(true);
 		borderPane.setCenter(scrollPane);

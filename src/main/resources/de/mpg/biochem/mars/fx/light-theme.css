@@ -99,3 +99,7 @@
     -fx-effect: null !important;
     -fx-background-insets: 0 !important;
 }
+
+.bdv-source-options {
+    -fx-border-color: lightgray;
+}

@@ -90,7 +90,7 @@ public class BdvSourceOptionsPane extends VBox {
 		setSpacing(5);
 		setFillWidth(true);
 
-		setStyle("-fx-border-color: lightgray");
+		getStyleClass().add("bdv-source-options");
 
 		GridPane gridpane1 = new GridPane();
 
