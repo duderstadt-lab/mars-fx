@@ -116,8 +116,14 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		darkThemeSwitch.selectedProperty().addListener((t, o, n) -> {
 			prefService.remove(SettingsTab.class, "useDarkTheme");
 			prefService.put(SettingsTab.class, "useDarkTheme", n);
-			if (n) getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
-			else getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/dark-theme.css");
+			if (n) {
+				getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
+				getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/light-theme.css");
+			}
+			else {
+				getNode().getScene().getStylesheets().remove("de/mpg/biochem/mars/fx/dark-theme.css");
+				getNode().getScene().getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
+			}
 		});
 		GridPane.setMargin(darkThemeSwitch, new Insets(5, 5, 5, 5));
 

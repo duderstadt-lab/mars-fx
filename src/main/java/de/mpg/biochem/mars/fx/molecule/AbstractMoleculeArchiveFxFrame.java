@@ -336,6 +336,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					}
 				}
 			});
+		if (prefService.getBoolean(SettingsTab.class,
+				"useDarkTheme", false)) scene.getStylesheets().add("de/mpg/biochem/mars/fx/dark-theme.css");
+		else scene.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
 		return scene;
 	}
 

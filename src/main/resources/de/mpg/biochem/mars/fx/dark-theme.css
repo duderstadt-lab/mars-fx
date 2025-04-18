@@ -194,6 +194,123 @@
     -fx-background-color: rgb(55, 58, 60) !important;
 }
 
+/*---- main tab pane ----*/
+
+.tab-pane {
+    -mwfx-tab-background: rgb(45, 48, 50); /* Dark background color */
+    -mwfx-tab-active: white;
+}
+
+/* Make individual tabs match the dark background */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: rgb(45, 48, 50) !important; /* Force dark background for all tabs */
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 5 5 0 20;
+}
+
+/* This is the tab header background area */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: rgb(45, 48, 50) !important; /* Direct color specification */
+    -fx-background-insets: 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab.preview {
+    -fx-font-style: italic;
+}
+
+/* Override the selected tab background to be transparent */
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: rgb(45, 48, 50) !important; /* Same dark color */
+    -fx-background-insets: 0;
+}
+
+/* For hover state - use same dark color with slight transparency */
+.tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
+    -fx-background-color: rgba(75, 110, 175, 0.2) !important; /* Subtle hover effect */
+}
+
+/* Target all types of icons in selected tabs */
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic {
+    -fx-background-color: rgb(75, 110, 175) !important;
+}
+
+/* Target specific icon types that might be used */
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Region,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic Text,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .glyph-icon,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .icon,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .xychartIcon,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .fontawesome-icon,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .material-icon,
+.tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic .octicon {
+    -fx-background-color: rgb(75, 110, 175) !important;
+    -fx-fill: rgb(75, 110, 175) !important;
+    -fx-text-fill: rgb(75, 110, 175) !important;
+}
+
+/* make tab texts brighter, except selected tab */
+.tab-pane .tab-label {
+    -fx-text-fill: derive(-fx-text-base-color,35%);
+}
+.tab-pane .tab:selected .tab-label,
+.tab-pane .tab:hover .tab-label {
+    -fx-text-fill: -fx-text-base-color;
+}
+
+.tab-pane .focus-indicator {
+    visibility: hidden;
+}
+
+/* hide tab-close-button by default; show it only for selected tab and on hover */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+    -fx-background-color: transparent;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
+.tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
+    -fx-background-color: -fx-mark-color;
+    -fx-opacity: 0.4;
+}
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
+    -fx-background-color: red;
+    -fx-opacity: 1.0;
+}
+
+/* Remove tab borders and separators */
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: rgb(45, 48, 50) !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-insets: 0 !important;
+}
+
+/* Remove tab container borders */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container {
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-insets: 0 !important;
+}
+
+/* Remove any dividers between tabs */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: rgb(45, 48, 50) !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+}
+
+/* Remove header area borders */
+.tab-pane > .tab-header-area {
+    -fx-padding: 5 5 0 20;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-insets: 0 !important;
+}
+
 /* Fix for icons - ensure they're visible but with correct colors */
 .microscopeIcon,
 .moleculeIcon,

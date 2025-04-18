@@ -100,8 +100,7 @@ public abstract class AbstractDashboardWidget extends
 		tabs.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 		tabs.setStyle("");
 		tabs.getStylesheets().clear();
-		tabs.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/WidgetTabPane.css");
+		//tabs.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme.css");
 
 		AnchorPane.setTopAnchor(tabs, 0.0);
 		AnchorPane.setLeftAnchor(tabs, 0.0);
