@@ -554,6 +554,113 @@ Text, .text {
     -fx-faint-focus-color: rgb(55, 58, 60) !important;
 }
 
+/* Dark theme for CodeArea */
+.code-area {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #d4d4d4;
+}
+
+/* Syntax highlighting */
+.keyword {
+    -fx-fill: #c586c0 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Import statement */
+.import {
+    -fx-fill: #c586c0 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Java/Groovy keywords */
+.for, .if, .while, .do, .new, .return, .null, .true, .false, .class, .try, .catch {
+    -fx-fill: #569cd6 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Types */
+.int, .double, .float, .long, .boolean, .byte, .char, .short, .void {
+    -fx-fill: #569cd6 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Strings */
+.string {
+    -fx-fill: #ce9178 !important;
+}
+
+.semicolon {
+    -fx-fill: #d4d4d4;
+    -fx-font-weight: bold;
+}
+
+.paren {
+    -fx-fill: #ff8c7a;
+    -fx-font-weight: bold;
+}
+
+.bracket {
+    -fx-fill: #6abf69;
+    -fx-font-weight: bold;
+}
+
+.brace {
+    -fx-fill: #4ec9b0;
+    -fx-font-weight: bold;
+}
+
+/* Comments */
+.comment, .multi-comment {
+    -fx-fill: #6a9955 !important;
+}
+
+/* With both of these alternatives */
+.paragraph-box:has-caret {
+    -fx-background-color: #2d2d30 !important;
+}
+
+/* Alternative for environments that don't support :has-caret */
+.paragraph-box.has-caret {
+    -fx-background-color: #2d2d30 !important;
+}
+
+/* OUTPUT directive styling - FIXED */
+[class*="OUTPUT"] {
+    -fx-fill: #4ec9b0 !important;
+}
+
+/* Selection color */
+.code-area .selection {
+    -fx-fill: #264f78;
+}
+
+/* Line numbers if needed */
+.lineno {
+    -fx-background-color: #252526;
+    -fx-text-fill: #858585;
+}
+
+/* Scrollbars */
+.code-area .scroll-bar:vertical,
+.code-area .scroll-bar:horizontal {
+    -fx-background-color: #1e1e1e;
+}
+
+.code-area .scroll-bar:vertical .thumb,
+.code-area .scroll-bar:horizontal .thumb {
+    -fx-background-color: #424242;
+}
+
+.code-area .scroll-bar:vertical .thumb:hover,
+.code-area .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #686868;
+}
+
+/* Virtual flow */
+.code-area .virtual-flow {
+    -fx-background-color: #1e1e1e;
+}
+
 .tab-pane > .tab-header-area > .headers-region > .tab {
     -fx-background-color: -mwfx-tab-background;
 }
