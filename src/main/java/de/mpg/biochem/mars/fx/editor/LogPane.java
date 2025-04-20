@@ -96,7 +96,8 @@ public class LogPane {
 
 	public LogPane() {
 		textArea = new MarkdownTextArea();
-		textArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
+		textArea.getStyleClass().add("log-area");
+		//textArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
 		textArea.setEditable(false);
 		// textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
