@@ -606,6 +606,10 @@ Text, .text {
     -fx-stroke: #d4d4d4;
 }
 
+.markdown-editor .hit {
+    -rtfx-background-color: #4D4D00 !important;
+}
+
 /* Dark theme for CodeArea */
 .code-area {
     -fx-background-color: #1e1e1e;

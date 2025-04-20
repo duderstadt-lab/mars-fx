@@ -340,10 +340,10 @@
 }
 
 .markdown-editor .hit {
-	-rtfx-background-color: #FFF59D !important;
+	-rtfx-background-color: #FFF59D;
 }
 .markdown-editor .hit-active {
-	-rtfx-background-color: #F9A825 !important;
+	-rtfx-background-color: #F9A825;
 }
 
 .scroll-bar > .track {
