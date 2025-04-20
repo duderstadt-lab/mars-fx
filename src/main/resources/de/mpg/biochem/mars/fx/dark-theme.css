@@ -554,6 +554,58 @@ Text, .text {
     -fx-faint-focus-color: rgb(55, 58, 60) !important;
 }
 
+/* Dark theme for Log Area */
+.log-area {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #d4d4d4;
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/* Text style */
+.log-area .text {
+    -fx-fill: #d4d4d4 !important;
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/* Remove active line highlighting */
+.log-area .paragraph-box:has-caret,
+.log-area .paragraph-box.has-caret {
+    -fx-background-color: transparent;
+}
+
+/* Selection color */
+.log-area .selection {
+    -fx-fill: #264f78;
+}
+
+/* Scrollbars */
+.log-area .scroll-bar:vertical,
+.log-area .scroll-bar:horizontal {
+    -fx-background-color: #1a1a1a;
+}
+
+.log-area .scroll-bar:vertical .thumb,
+.log-area .scroll-bar:horizontal .thumb {
+    -fx-background-color: #424242;
+}
+
+.log-area .scroll-bar:vertical .thumb:hover,
+.log-area .scroll-bar:horizontal .thumb:hover {
+    -fx-background-color: #686868;
+}
+
+/* Virtual flow */
+.log-area .virtual-flow {
+    -fx-background-color: #1a1a1a;
+}
+
+/* Caret style */
+.log-area .caret {
+    -fx-stroke: #d4d4d4;
+}
+
 /* Dark theme for CodeArea */
 .code-area {
     -fx-background-color: #1e1e1e;
