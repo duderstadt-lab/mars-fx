@@ -112,28 +112,16 @@ public class MarkdownExtensions {
 	public static List<com.vladsch.flexmark.util.misc.Extension>
 		getFlexmarkExtensions()
 	{
-		return createdExtensions(flexmarkExtClasses, null);
-	}
-
-	public static List<com.vladsch.flexmark.util.misc.Extension>
-		getFlexmarkExtensions(RendererType rendererType)
-	{
-		return createdExtensions(flexmarkExtClasses, rendererType);
+		return createdExtensions(flexmarkExtClasses);
 	}
 
 	private static <E> ArrayList<E> createdExtensions(
-		HashMap<String, String> extClasses, RendererType rendererType)
+		HashMap<String, String> extClasses)
 	{
 		ArrayList<E> extensions = new ArrayList<>();
-		for (String markdownExtension : Options.getMarkdownExtensions()) {
-			if (rendererType != null && !isAvailable(rendererType, markdownExtension))
-				continue;
-
-			String extClassName = extClasses.get(markdownExtension);
-			if (extClassName == null) continue; // extension not supported by renderer
-
+		for (String markdownExtension : flexmarkExtClasses.keySet()) {
 			try {
-				Class<?> cls = Class.forName(extClassName);
+				Class<?> cls = Class.forName(flexmarkExtClasses.get(markdownExtension));
 				Method createMethod = cls.getMethod("create");
 				@SuppressWarnings("unchecked")
 				E extension = (E) createMethod.invoke(null);

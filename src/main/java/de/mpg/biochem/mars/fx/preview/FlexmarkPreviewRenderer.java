@@ -217,6 +217,8 @@ class FlexmarkPreviewRenderer implements MarkdownPreviewPane.Renderer {
 
 		if (astRoot == null) return "";
 
+		System.out.println(MarkdownExtensions.getFlexmarkExtensions());
+
 		HtmlRenderer.Builder builder = HtmlRenderer.builder().extensions(
 			MarkdownExtensions.getFlexmarkExtensions());
 		if (!source) builder.attributeProviderFactory(
