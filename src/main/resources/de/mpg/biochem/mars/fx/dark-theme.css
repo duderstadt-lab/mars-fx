@@ -92,34 +92,6 @@
     -fx-border-width: 1px;
 }
 
-/* Scroll bars */
-.scroll-bar {
-    -fx-background-color: #1e1e1e;
-}
-
-.scroll-bar .thumb {
-    -fx-background-color: #6e6e6e;
-    -fx-background-radius: 5px;
-}
-
-.scroll-bar .thumb:hover {
-    -fx-background-color: #8e8e8e;
-}
-
-.scroll-bar .thumb:pressed {
-    -fx-background-color: #a0a0a0;
-}
-
-.scroll-bar .increment-button,
-.scroll-bar .decrement-button {
-    -fx-background-color: #3e3e3e;
-}
-
-.scroll-bar .increment-arrow,
-.scroll-bar .decrement-arrow {
-    -fx-background-color: #aaaaaa;
-}
-
 /* Table and List Views */
 .table-view {
     -fx-background-color: rgb(50, 53, 55);
@@ -595,19 +567,40 @@ Text, .text {
 }
 
 /* Scrollbars */
-.log-area .scroll-bar:vertical,
-.log-area .scroll-bar:horizontal {
-    -fx-background-color: #1a1a1a;
+.scroll-bar {
+    -fx-background-color: #1e1e1e;
 }
 
-.log-area .scroll-bar:vertical .thumb,
-.log-area .scroll-bar:horizontal .thumb {
-    -fx-background-color: #424242;
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: #1a1a1a !important;
 }
 
-.log-area .scroll-bar:vertical .thumb:hover,
-.log-area .scroll-bar:horizontal .thumb:hover {
-    -fx-background-color: #686868;
+.scroll-bar .thumb {
+    -fx-background-color: #6e6e6e !important;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #8e8e8e !important;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #a0a0a0 !important;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: #3e3e3e !important;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #aaaaaa !important;
+}
+
+/* Scrollbar track color for search highlighting */
+.scroll-bar > .track {
+    -mwfx-hit: #8B6000 !important;
 }
 
 /* Virtual flow */
@@ -618,6 +611,41 @@ Text, .text {
 /* Caret style */
 .log-area .caret {
     -fx-stroke: #d4d4d4;
+}
+
+/* Make the cursor (caret) visible in dark theme */
+.code-area .caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+.text-area .caret,
+.text-field .caret,
+.styled-text-area .caret,
+.markdown-editor .caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* If you're using RichTextFX-based components */
+.styled-text-area .caret-path {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* Additional selectors to cover all possible cases */
+.text-input-caret,
+.rich-text-caret,
+.text-caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* Sometimes the caret might be implemented as a background color */
+.text-area .caret-blink-rate,
+.styled-text-area .caret-blink-rate {
+    -rtfx-blink-rate: 500ms;
+    -fx-background-color: #ffffff !important;
 }
 
 /* Markdown Editor Dark Theme */
@@ -835,11 +863,6 @@ Text, .text {
     -fx-fill: #d4d4d4 !important;
 }
 
-/* Scrollbar track color for search highlighting */
-.scroll-bar > .track {
-    -mwfx-hit: #8B6000;
-}
-
 /* Lists */
 .markdown-editor .list-marker {
     -fx-fill: #e06c75 !important;
@@ -1049,22 +1072,6 @@ Text, .text {
 .lineno {
     -fx-background-color: #252526;
     -fx-text-fill: #858585;
-}
-
-/* Scrollbars */
-.code-area .scroll-bar:vertical,
-.code-area .scroll-bar:horizontal {
-    -fx-background-color: #1e1e1e;
-}
-
-.code-area .scroll-bar:vertical .thumb,
-.code-area .scroll-bar:horizontal .thumb {
-    -fx-background-color: #424242;
-}
-
-.code-area .scroll-bar:vertical .thumb:hover,
-.code-area .scroll-bar:horizontal .thumb:hover {
-    -fx-background-color: #686868;
 }
 
 /* Virtual flow */
