@@ -94,16 +94,30 @@
 
 /* Scroll bars */
 .scroll-bar {
-    -fx-background-color: rgb(50, 53, 55);
+    -fx-background-color: #1e1e1e;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: rgb(80, 83, 85);
+    -fx-background-color: #6e6e6e;
+    -fx-background-radius: 5px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #8e8e8e;
+}
+
+.scroll-bar .thumb:pressed {
+    -fx-background-color: #a0a0a0;
 }
 
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-    -fx-background-color: rgb(60, 63, 65);
+    -fx-background-color: #3e3e3e;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #aaaaaa;
 }
 
 /* Table and List Views */
@@ -605,6 +619,347 @@ Text, .text {
 .log-area .caret {
     -fx-stroke: #d4d4d4;
 }
+
+/* Markdown Editor Dark Theme */
+
+/* Base styling */
+.markdown-editor {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #d4d4d4;
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/* Headers */
+.markdown-editor .h1,
+.markdown-editor h1,
+.markdown-editor .header1 {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 1.6em !important;
+}
+
+.markdown-editor .h2,
+.markdown-editor h2,
+.markdown-editor .header2 {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 1.4em !important;
+}
+
+.markdown-editor .h3,
+.markdown-editor h3,
+.markdown-editor .header3 {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+    -fx-font-size: 1.2em !important;
+}
+
+/* Text formatting */
+.markdown-editor .bold,
+.markdown-editor .strong {
+    -fx-font-weight: bold !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .italic,
+.markdown-editor .emphasis {
+    -fx-font-style: italic !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .monospace,
+.markdown-editor .code-inline {
+    -fx-font-family: "monospace" !important;
+    -fx-fill: #89DDFF !important;
+    -fx-background-color: #2d2d2d !important;
+    -fx-padding: 2px !important;
+    -rtfx-background-color: #2d2d2d !important;
+}
+
+/* Markdown Editor Dark Theme Overrides */
+
+/* Base inline background color */
+.markdown-editor {
+    -mwfx-inline-background-color: #2d2d2d;
+}
+
+/* Disabled state */
+.markdown-editor:disabled,
+.markdown-editor:disabled .paragraph-text {
+    -fx-background-color: #1a1a1a;
+}
+
+.markdown-editor:disabled .paragraph-text .text {
+    -fx-fill: #ff6b6b;
+}
+
+/* Highlight current line */
+.markdown-editor .paragraph-box:has-caret {
+    -fx-background-color: #2d2d30;
+}
+
+/* Gutter */
+.markdown-editor .paragraph-graphic .gutter {
+    -fx-border-color: #333;
+}
+
+.markdown-editor .paragraph-graphic .lineno {
+    -fx-text-fill: #777;
+}
+
+/* Headers */
+.markdown-editor .h1,
+.markdown-editor .h2,
+.markdown-editor .h3,
+.markdown-editor .h4,
+.markdown-editor .h5,
+.markdown-editor .h6 {
+    -fx-font-weight: bold;
+    -fx-fill: #e06c75;
+}
+
+/* Inline styles */
+.markdown-editor .strong {
+    -fx-font-weight: bold;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .em {
+    -fx-font-style: italic;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .del {
+    -fx-strikethrough: true;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .a {
+    -fx-fill: #61afef !important;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .img {
+    -fx-fill: #e5c07b !important;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .code {
+    -fx-fill: #98c379 !important;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .br {
+    -rtfx-background-color: #3e4451;
+}
+
+/* Code blocks */
+.markdown-editor .pre.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .pre.text {
+    -fx-fill: #98c379 !important;
+}
+
+/* Blockquotes */
+.markdown-editor .blockquote {
+    -fx-fill: #abb2bf;
+}
+
+.markdown-editor .aside {
+    -fx-fill: #e5c07b;
+}
+
+/* Lists */
+.markdown-editor .li {
+    -fx-fill: #d4d4d4;
+}
+
+.markdown-editor .liopen {
+    -fx-fill: #e5c07b;
+    -fx-font-weight: bold;
+}
+
+.markdown-editor .liopentask {
+    -fx-fill: #61afef;
+    -fx-font-weight: bold;
+}
+
+.markdown-editor .dt {
+    -fx-font-weight: bold;
+    -fx-font-style: italic;
+}
+
+.markdown-editor .dd {
+    -fx-fill: #d4d4d4;
+}
+
+/* Tables */
+.markdown-editor .table.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .th {
+    -fx-font-weight: bold;
+}
+
+/* HTML */
+.markdown-editor .html.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .html.text {
+    -rtfx-background-color: #2d2d2d;
+}
+
+/* References */
+.markdown-editor .reference {
+    -fx-fill: #61afef !important;
+}
+
+.markdown-editor .abbrdef,
+.markdown-editor .abbr {
+    -fx-fill: #56b6c2;
+}
+
+/* Search highlighting */
+.markdown-editor .hit {
+    -rtfx-background-color: #4D4D00 !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .hit-active {
+    -rtfx-background-color: #8B6000 !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+/* Scrollbar track color for search highlighting */
+.scroll-bar > .track {
+    -mwfx-hit: #8B6000;
+}
+
+/* Lists */
+.markdown-editor .list-marker {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+}
+
+.markdown-editor .list-item-number {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Code blocks */
+.markdown-editor .code-block,
+.markdown-editor .fenced-code,
+.markdown-editor .preformatted {
+    -fx-font-family: "monospace" !important;
+    -fx-background-color: #2d2d2d !important;
+    -rtfx-background-color: #2d2d2d !important;
+    -fx-padding: 5px !important;
+}
+
+/* Block quotes */
+.markdown-editor .blockquote {
+    -fx-fill: #b8b8b8 !important;
+    -fx-background-color: #2d2d2d !important;
+    -rtfx-background-color: #2d2d2d !important;
+    -fx-border-color: #4e4e4e !important;
+    -fx-border-width: 0 0 0 3px !important;
+    -fx-padding: 0 0 0 10px !important;
+}
+
+/* Links */
+.markdown-editor .link {
+    -fx-fill: #61afef !important;
+    -fx-underline: true !important;
+}
+
+/* Search highlighting */
+.markdown-editor .hit {
+    -rtfx-background-color: #4D4D00 !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .hit-active {
+    -rtfx-background-color: #8B6000 !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+/* Code syntax highlighting for dark theme */
+.markdown-editor .token.comment {
+    -fx-fill: #6A9955 !important;
+}
+
+.markdown-editor .token.punctuation {
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .token.property,
+.markdown-editor .token.tag,
+.markdown-editor .token.boolean,
+.markdown-editor .token.number,
+.markdown-editor .token.constant,
+.markdown-editor .token.symbol,
+.markdown-editor .token.deleted {
+    -fx-fill: #C792EA !important;
+}
+
+.markdown-editor .token.selector,
+.markdown-editor .token.attr-name,
+.markdown-editor .token.string,
+.markdown-editor .token.char,
+.markdown-editor .token.builtin,
+.markdown-editor .token.inserted {
+    -fx-fill: #89DDFF !important;
+}
+
+.markdown-editor .token.operator,
+.markdown-editor .token.entity,
+.markdown-editor .token.url {
+    -fx-fill: #E06C75 !important;
+}
+
+.markdown-editor .token.atrule,
+.markdown-editor .token.attr-value,
+.markdown-editor .token.keyword {
+    -fx-fill: #C586C0 !important;
+}
+
+.markdown-editor .token.function {
+    -fx-fill: #DCDCAA !important;
+}
+
+.markdown-editor .token.regex,
+.markdown-editor .token.important,
+.markdown-editor .token.variable {
+    -fx-fill: #F7B267 !important;
+}
+
+/* Fix for nested elements to maintain proper styling */
+.markdown-editor .preformatted .keyword,
+.markdown-editor .code-block .keyword {
+    -fx-fill: #C586C0 !important;
+}
+
+.markdown-editor .preformatted .string,
+.markdown-editor .code-block .string {
+    -fx-fill: #CE9178 !important;
+}
+
+.markdown-editor .preformatted .comment,
+.markdown-editor .code-block .comment {
+    -fx-fill: #6A9955 !important;
+}
+
+/* Ensure code blocks have proper dark background */
+.styled-text-area.padding .paragraph-box .paragraph-text {
+    -fx-background-color: transparent;
+}
+
+
 
 .markdown-editor .hit {
     -rtfx-background-color: #4D4D00 !important;

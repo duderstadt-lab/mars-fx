@@ -42,15 +42,24 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
+import de.mpg.biochem.mars.fx.molecule.SettingsTab;
 import de.mpg.biochem.mars.table.MarsTable;
 import de.mpg.biochem.mars.util.MarsUtil;
+import org.scijava.Context;
+import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 
 public class MarsTablePlotPane extends AbstractPlotPane {
 
 	private MarsTable table;
 
-	public MarsTablePlotPane(MarsTable table) {
+	@Parameter
+	private PrefService prefService;
+
+	public MarsTablePlotPane(MarsTable table, final Context context) {
 		super();
+		context.inject(this);
+
 		this.table = table;
 		addChart();
 	}
@@ -160,5 +169,11 @@ public class MarsTablePlotPane extends AbstractPlotPane {
 	public ArrayList<String> getColumnNames() {
 		return (ArrayList<String>) table.getColumnHeadingList().stream().sorted()
 			.collect(toList());
+	}
+
+	@Override
+	public boolean darkMode() {
+		return prefService.getBoolean(SettingsTab.class,
+				"useDarkTheme", false);
 	}
 }

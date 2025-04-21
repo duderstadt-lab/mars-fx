@@ -221,7 +221,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 
 		plotTab = new Tab();
 		plotTab.setText("Plot");
-		plotPane = new MarsTablePlotPane(table);
+		plotPane = new MarsTablePlotPane(table, context);
 		plotTab.setContent(plotPane.getNode());
 
 		dashboardTab = new Tab();
