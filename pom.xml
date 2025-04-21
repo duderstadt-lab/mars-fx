@@ -110,7 +110,7 @@
 		<maven.compiler.target>21</maven.compiler.target>
 
 		<!-- JavaFx Version-->
-		<javafx.version>21.0.6</javafx.version>
+		<javafx.version>23.0.2</javafx.version>
 		<javafx.classifier>mac-aarch64</javafx.classifier>
 
 		<chartfx.version>11.3.1</chartfx.version>
