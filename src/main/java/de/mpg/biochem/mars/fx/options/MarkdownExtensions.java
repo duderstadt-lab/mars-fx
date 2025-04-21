@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -79,11 +79,11 @@ public class MarkdownExtensions {
 
 	static {
 		ResourceBundle bundle = ResourceBundle.getBundle(
-			"de.mpg.biochem.mars.fx.MarkdownExtensions");
+				"de.mpg.biochem.mars.fx.MarkdownExtensions");
 		for (String key : bundle.keySet()) {
 			String value = bundle.getString(key);
 			if (key.startsWith("flexmark.ext.")) flexmarkExtClasses.put(key.substring(
-				"flexmark.ext.".length()), value);
+					"flexmark.ext.".length()), value);
 		}
 
 		HashSet<String> ids = new HashSet<>();
@@ -110,30 +110,18 @@ public class MarkdownExtensions {
 	}
 
 	public static List<com.vladsch.flexmark.util.misc.Extension>
-		getFlexmarkExtensions()
+	getFlexmarkExtensions()
 	{
-		return createdExtensions(flexmarkExtClasses, null);
-	}
-
-	public static List<com.vladsch.flexmark.util.misc.Extension>
-		getFlexmarkExtensions(RendererType rendererType)
-	{
-		return createdExtensions(flexmarkExtClasses, rendererType);
+		return createdExtensions(flexmarkExtClasses);
 	}
 
 	private static <E> ArrayList<E> createdExtensions(
-		HashMap<String, String> extClasses, RendererType rendererType)
+			HashMap<String, String> extClasses)
 	{
 		ArrayList<E> extensions = new ArrayList<>();
-		for (String markdownExtension : Options.getMarkdownExtensions()) {
-			if (rendererType != null && !isAvailable(rendererType, markdownExtension))
-				continue;
-
-			String extClassName = extClasses.get(markdownExtension);
-			if (extClassName == null) continue; // extension not supported by renderer
-
+		for (String markdownExtension : flexmarkExtClasses.keySet()) {
 			try {
-				Class<?> cls = Class.forName(extClassName);
+				Class<?> cls = Class.forName(flexmarkExtClasses.get(markdownExtension));
 				Method createMethod = cls.getMethod("create");
 				@SuppressWarnings("unchecked")
 				E extension = (E) createMethod.invoke(null);

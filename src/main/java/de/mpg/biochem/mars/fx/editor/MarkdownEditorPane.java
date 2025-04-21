@@ -446,7 +446,7 @@ public class MarkdownEditorPane {
 	Node parseMarkdown(String text) {
 		if (parser == null) {
 			parser = Parser.builder().extensions(MarkdownExtensions
-				.getFlexmarkExtensions(Options.getMarkdownRenderer())).build();
+				.getFlexmarkExtensions()).build();
 		}
 		return parser.parse(text);
 	}

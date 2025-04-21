@@ -257,7 +257,7 @@ public class DocumentEditor extends AnchorPane {
 	public void renderWidgets() {
 		if (widgetParser == null) {
 			widgetParser = Parser.builder().extensions(MarkdownExtensions
-				.getFlexmarkExtensions(Options.getMarkdownRenderer()))
+				.getFlexmarkExtensions())
 				.postProcessorFactory(new FencedCodeWidgetNodePostProcessorFactory(
 					this)).build();
 		}
