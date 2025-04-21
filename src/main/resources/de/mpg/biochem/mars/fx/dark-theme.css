@@ -568,12 +568,17 @@ Text, .text {
 
 /* Scrollbars */
 .scroll-bar {
-    -fx-background-color: #1e1e1e;
+    -fx-background-color: #252525;
 }
 
 .scroll-bar:vertical,
 .scroll-bar:horizontal {
-    -fx-background-color: #1a1a1a !important;
+    -fx-background-color: #252525 !important;
+}
+
+.scroll-bar > .track {
+    -fx-background-color: #2d2d2d !important;
+    -mwfx-hit: #8B6000 !important;
 }
 
 .scroll-bar .thumb {
@@ -590,7 +595,7 @@ Text, .text {
 
 .scroll-bar .increment-button,
 .scroll-bar .decrement-button {
-    -fx-background-color: #3e3e3e !important;
+    -fx-background-color: #353535 !important;
 }
 
 .scroll-bar .increment-arrow,
@@ -598,9 +603,10 @@ Text, .text {
     -fx-background-color: #aaaaaa !important;
 }
 
-/* Scrollbar track color for search highlighting */
-.scroll-bar > .track {
-    -mwfx-hit: #8B6000 !important;
+/* Ensure no parts of the scrollbar are pure black */
+.scroll-bar * {
+    -fx-shadow-highlight-color: transparent;
+    -fx-shadow-color: transparent;
 }
 
 /* Virtual flow */
