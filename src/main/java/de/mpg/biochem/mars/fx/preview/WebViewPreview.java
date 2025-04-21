@@ -169,10 +169,10 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		String scrollScript = (lastScrollX > 0 || lastScrollY > 0)
 			? ("  onload='window.scrollTo(" + lastScrollX + ", " + lastScrollY +
 				");'") : "";
-
+System.out.println("loading content...");
 		webView.getEngine().loadContent("<!DOCTYPE html>\n" + "<html>\n" +
 			"<head>\n" + "<link rel=\"stylesheet\" href=\"" + getClass().getResource(
-				"markdownpad-github.css") + "\">\n" +
+				(documentEditor.darkMode()) ? "markdownpad-github-dark.css" : "markdownpad-github.css") + "\">\n" +
 			"<link rel=\"stylesheet\" href=\"" + getClass().getResource(
 				"katex.min.css") + "\">\n" + "<style>\n" + Utils.defaultIfEmpty(Options
 					.getAdditionalCSS(), "") + "\n" + ".mwfx-editor-selection {\n" +

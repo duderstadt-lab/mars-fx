@@ -62,6 +62,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import de.mpg.biochem.mars.fx.molecule.SettingsTab;
 import org.fxmisc.undo.UndoManager;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
@@ -98,6 +99,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.AnchorPane;
+import org.scijava.prefs.PrefService;
 
 /**
  * Editor for MoleculeArchive comments Original author - Karl Tauber from
@@ -117,6 +119,9 @@ public class DocumentEditor extends AnchorPane {
 
 	@Parameter
 	protected Context context;
+
+	@Parameter
+	private PrefService prefService;
 
 	public static final String MARKDOWN_WIDGET_MEDIA_KEY_PREFIX =
 		"MARKDOWN_WIDGET_MEDIA_KEY:";
@@ -493,6 +498,11 @@ public class DocumentEditor extends AnchorPane {
 	
 	public void setArchive(MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive) {
 		this.archive = archive;
+	}
+
+	public boolean darkMode() {
+		return prefService.getBoolean(SettingsTab.class,
+				"useDarkTheme", false);
 	}
 
 	public void save() {
