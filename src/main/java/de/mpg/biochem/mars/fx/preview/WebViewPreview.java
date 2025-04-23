@@ -169,7 +169,6 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		String scrollScript = (lastScrollX > 0 || lastScrollY > 0)
 			? ("  onload='window.scrollTo(" + lastScrollX + ", " + lastScrollY +
 				");'") : "";
-System.out.println("loading content...");
 		webView.getEngine().loadContent("<!DOCTYPE html>\n" + "<html>\n" +
 			"<head>\n" + "<link rel=\"stylesheet\" href=\"" + getClass().getResource(
 				(documentEditor.darkMode()) ? "markdownpad-github-dark.css" : "markdownpad-github.css") + "\">\n" +
@@ -276,7 +275,7 @@ System.out.println("loading content...");
 		// js, html, xml, svg, ...)
 		StringBuilder buf = new StringBuilder();
 		buf.append("<link rel=\"stylesheet\" href=\"").append(getClass()
-			.getResource("prism/prism.css")).append("\">\n");
+			.getResource((documentEditor.darkMode()) ? "prism/prism-tomorrow.css" : "prism/prism.css")).append("\">\n");
 		buf.append("<script src=\"").append(getClass().getResource(
 			"prism/prism-core.min.js")).append("\"></script>\n");
 		for (String language : languages) {
