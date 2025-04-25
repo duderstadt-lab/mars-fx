@@ -374,9 +374,8 @@ public class DocumentEditor extends AnchorPane {
 
 	private void activated() {
 		if (tab.getTabPane() == null || !tab.isSelected()) return; // tab is already
-																																// closed or no
-																																// longer active
-
+																	// closed or no
+																	// longer active
 		if (tab.getContent() != null) {
 			markdownEditorPane.setVisible(true);
 			markdownEditorPane.requestFocus();
@@ -417,7 +416,7 @@ public class DocumentEditor extends AnchorPane {
 		canRedo.bind(undoManager.redoAvailableProperty());
 
 		splitPane = new SplitPane();
-		splitPane.setStyle("-fx-border-color: lightgray");
+		splitPane.getStyleClass().add("bdv-source-options");
 		tab.setContent(splitPane);
 
 		markdownEditorPane.setVisible(true);
