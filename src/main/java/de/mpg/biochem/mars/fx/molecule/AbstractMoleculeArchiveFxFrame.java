@@ -29,7 +29,6 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -62,7 +61,6 @@ import de.mpg.biochem.mars.n5.*;
 import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveSaveDialog;
 import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveSelection;
 import de.mpg.biochem.mars.swingUI.MoleculeArchiveSelector.MoleculeArchiveTreeCellRenderer;
-import javafx.stage.Window;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.controlsfx.control.MaskerPane;
@@ -236,6 +234,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 				buildScene();
+
+				stage.setOnCloseRequest(event -> {
+					ijStage.cleanup();
+				});
 			}
 		});
 	}
