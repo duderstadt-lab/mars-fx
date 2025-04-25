@@ -71,8 +71,14 @@ public class IJStage extends Frame {
 		// No need to worry about accelerator conflicts since this
 		// will only be active when your JavaFX stage has focus
 		java.awt.Menu editMenu = new java.awt.Menu("Edit");
-		java.awt.MenuItem saveItem = new java.awt.MenuItem("Unlock");
-		editMenu.add(saveItem);
+		java.awt.MenuItem unlockItem = new java.awt.MenuItem("Unlock");
+
+		// Add action listener to the save menu item
+		unlockItem.addActionListener(e -> {
+			System.out.println("Unlock needs to be implemented");
+		});
+
+		editMenu.add(unlockItem);
 		menuBar.add(editMenu);
 
 		// Set this menu bar on the Frame
