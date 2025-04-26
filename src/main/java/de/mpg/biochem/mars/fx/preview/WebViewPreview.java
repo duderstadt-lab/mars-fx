@@ -163,6 +163,13 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		}
 		lastEditorSelection = context.getEditorSelection();
 
+		String mwfxSelection = (documentEditor.darkMode()) ? ".mwfx-editor-selection {\n" +
+				"  border-right: 5px solid #f47806; /* Keep the orange border */\n" +
+				"  margin-right: -5px;\n" +
+				"  background-color: rgba(244, 120, 6, 0.2); /* Semi-transparent orange that works in dark theme */\n" +
+				"}\n" : ".mwfx-editor-selection {\n" +
+				"  border-right: 5px solid #f47806;\n" + "  margin-right: -5px;\n" +
+				"  background-color: rgb(253, 247, 241);\n" + "}\n";
 		Path path = context.getPath();
 		String base = (path != null) ? ("<base href=\"" + path.getParent().toUri()
 			.toString() + "\">\n") : "";
@@ -174,9 +181,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 				(documentEditor.darkMode()) ? "markdownpad-github-dark.css" : "markdownpad-github.css") + "\">\n" +
 			"<link rel=\"stylesheet\" href=\"" + getClass().getResource(
 				"katex.min.css") + "\">\n" + "<style>\n" + Utils.defaultIfEmpty(Options
-					.getAdditionalCSS(), "") + "\n" + ".mwfx-editor-selection {\n" +
-			"  border-right: 5px solid #f47806;\n" + "  margin-right: -5px;\n" +
-			"  background-color: rgb(253, 247, 241);\n" + "}\n" + "</style>\n" +
+					.getAdditionalCSS(), "") + "\n" + mwfxSelection + "</style>\n" +
 			"<script src=\"" + getClass().getResource("katex.min.js") +
 			"\"></script>\n" + "<script src=\"" + getClass().getResource(
 				"mermaid.min.js") + "\"></script>\n" + "<script src=\"" + getClass()

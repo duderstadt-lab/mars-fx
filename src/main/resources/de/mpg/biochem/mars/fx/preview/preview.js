@@ -61,20 +61,30 @@ var preview = {
 	},
 
 	findNodesAt: function(node, offset, result) {
-		if (node.dataset.pos != null) {
-			// get value of data-pos attribute
-			var pos = node.dataset.pos.split(':');
-			var start = pos[0];
-			var end = pos[1];
-			if (offset >= start && offset <= end)
-				result.push(node);
+        // Skip footnote backreferences completely
+        if (node.classList && node.classList.contains('footnote-backref')) {
+            return;
+        }
 
-			if (offset > end)
-				return;
-		}
+        if (node.dataset.pos != null) {
+            // get value of data-pos attribute
+            var pos = node.dataset.pos.split(':');
+            var start = parseInt(pos[0]);
+            var end = parseInt(pos[1]);
 
-		var children = node.children
-		for (var i=0; i < children.length; i++)
-			this.findNodesAt(children[i], offset, result);
-	},
+            // Skip elements that span the whole document (likely footnote containers)
+            if (start === 0 && end > (document.body.textContent.length / 2)) {
+                // This is likely a footnote container with incorrect span, skip it
+            } else if (offset >= start && offset <= end) {
+                result.push(node);
+            }
+
+            if (offset > end)
+                return;
+        }
+
+        var children = node.children
+        for (var i=0; i < children.length; i++)
+            this.findNodesAt(children[i], offset, result);
+    },
 };
