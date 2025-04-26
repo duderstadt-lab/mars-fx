@@ -83,6 +83,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 	public MetadataGeneralTabController() {
 		rootPane = new ScrollPane();
+		rootPane.getStyleClass().add("dashboard-scroll-pane");
 
 		vBox = new VBox();
 		vBox.setAlignment(Pos.CENTER);

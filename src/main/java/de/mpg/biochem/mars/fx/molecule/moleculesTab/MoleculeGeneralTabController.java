@@ -97,6 +97,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	public MoleculeGeneralTabController() {
 		rootPane = new ScrollPane();
+		rootPane.getStyleClass().add("dashboard-scroll-pane");
 
 		vBox = new VBox();
 		vBox.setAlignment(Pos.CENTER);
