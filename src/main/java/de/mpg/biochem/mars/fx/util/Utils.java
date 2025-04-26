@@ -62,15 +62,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
 
+import javafx.animation.FadeTransition;
 import javafx.css.PseudoClass;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TextField;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.util.Duration;
 
 /**
  * @author Karl Tauber
@@ -238,6 +246,95 @@ public class Utils {
 				lastCharacter = character;
 			}
 		});
+	}
+
+	/**
+	 * Creates a StackPane container with copy-to-clipboard functionality around a given label.
+	 * The copy indicator covers the entire label with a light outline and rounded corners.
+	 *
+	 * @param label The original label to wrap with copy functionality
+	 * @return A StackPane containing the original label and a copy indicator
+	 */
+	public static StackPane createCopyableLabel(Label label) {
+		// Save original styling and adjust label
+		String originalStyle = label.getStyle();
+		label.setStyle(originalStyle + "; -fx-cursor: hand;");
+
+		// Create a "Copy" indicator label that will appear on hover and cover the entire label
+		Label copyIndicator = new Label("Copy");
+		copyIndicator.setStyle("-fx-font-size: 12px; -fx-background-color: rgba(0, 0, 0, 0.9); " +
+				"-fx-text-fill: white; -fx-padding: 3px 7px; " +
+				"-fx-background-radius: 12px; " +
+				"-fx-border-color: rgba(255, 255, 255, 0.5); " +
+				"-fx-border-radius: 12px; " +
+				"-fx-border-width: 1px; " +
+				"-fx-alignment: center;");
+		copyIndicator.setOpacity(0.0);  // Initially invisible
+		copyIndicator.setMaxWidth(Double.MAX_VALUE);
+		copyIndicator.setMaxHeight(Double.MAX_VALUE);
+
+		// Create a stack pane to overlay the copy indicator on the label
+		StackPane labelContainer = new StackPane(label, copyIndicator);
+		labelContainer.setAlignment(Pos.CENTER);
+
+		// Make the container take the full width of the label
+		labelContainer.prefWidthProperty().bind(label.prefWidthProperty());
+		labelContainer.prefHeightProperty().bind(label.prefHeightProperty());
+
+		// Add some padding around the container to make it look nicer
+		labelContainer.setPadding(new Insets(5));
+
+		// Set up the fade transition for the copy indicator
+		FadeTransition fadeIn = new FadeTransition(Duration.millis(200), copyIndicator);
+		fadeIn.setFromValue(0.0);
+		fadeIn.setToValue(0.8);  // Partly transparent
+
+		FadeTransition fadeOut = new FadeTransition(Duration.millis(200), copyIndicator);
+		fadeOut.setFromValue(0.8);
+		fadeOut.setToValue(0.0);
+
+		// Show the copy indicator on hover
+		labelContainer.setOnMouseEntered(event -> fadeIn.playFromStart());
+		labelContainer.setOnMouseExited(event -> fadeOut.playFromStart());
+
+		// Copy to clipboard when clicked
+		labelContainer.setOnMouseClicked(event -> {
+			// Get the system clipboard
+			Clipboard clipboard = Clipboard.getSystemClipboard();
+			ClipboardContent content = new ClipboardContent();
+
+			// Set the label text as content
+			content.putString(label.getText());
+			clipboard.setContent(content);
+
+			// Visual feedback that copy occurred
+			String originalText = copyIndicator.getText();
+			copyIndicator.setText("Copied!");
+			copyIndicator.setOpacity(0.9);  // Make it more visible for feedback
+
+			// Reset after a short delay
+			new Thread(() -> {
+				try {
+					Thread.sleep(800);
+					javafx.application.Platform.runLater(() -> {
+						// First check if we're still hovering
+						if (labelContainer.isHover()) {
+							// Just reset the text but keep it visible
+							copyIndicator.setText(originalText);
+						} else {
+							// If we're not hovering, make sure it's invisible first, then reset text
+							fadeOut.stop(); // Stop any running animations
+							copyIndicator.setOpacity(0.0); // Ensure it's invisible
+							copyIndicator.setText(originalText); // Then reset text
+						}
+					});
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}).start();
+		});
+
+		return labelContainer;
 	}
 
 	// convert transpart color to solid color...

@@ -44,6 +44,7 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -65,23 +66,25 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
+import javafx.animation.FadeTransition;
+import javafx.util.Duration;
+import javafx.scene.layout.StackPane;
+
 public class MoleculeGeneralTabController implements MoleculeSubPane {
 
 	private ScrollPane rootPane;
 	private VBox vBox;
+
 	private BorderPane UIDIconContainer;
-	private JFXTextField UIDLabel;
-	private JFXButton UIDClippyButton;
+	private Label UIDLabel;
 	private BorderPane metaUIDIconContainer;
-	private JFXTextField metaUIDLabel;
-	private JFXButton metaUIDClippyButton;
+	private Label metaUIDLabel;
 	private Text iText, iInt, cText, cInt;
 	private TextFlow imageAndchannel;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
 	private TextArea notesTextArea;
-	// private JFXTextArea notesTextArea;
 
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 
@@ -107,28 +110,10 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
 		vBox.getChildren().add(UIDIconContainer);
 
-		UIDLabel = new JFXTextField();
-		UIDLabel.setPrefHeight(20.0);
-		UIDLabel.setPrefWidth(180.0);
+		UIDLabel = new Label();
 		UIDLabel.setText("UID");
-		UIDLabel.setEditable(false);
-
-		UIDClippyButton = new JFXButton();
-		UIDClippyButton.setPrefHeight(20.0);
-		UIDClippyButton.setPrefWidth(20.0);
-		UIDClippyButton.setOnAction(e -> {
-			ClipboardContent content = new ClipboardContent();
-			content.putString(UIDLabel.getText());
-			clipboard.setContent(content);
-		});
-		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-
-		HBox hbox1 = new HBox();
-		hbox1.getChildren().add(UIDLabel);
-		hbox1.getChildren().add(UIDClippyButton);
-		hbox1.setAlignment(Pos.CENTER);
-		vBox.getChildren().add(hbox1);
+		StackPane copyableUIDLabel = Utils.createCopyableLabel(UIDLabel);
+		vBox.getChildren().add(copyableUIDLabel);
 
 		metaUIDIconContainer = new BorderPane();
 		metaUIDIconContainer.setPrefHeight(60.0);
@@ -138,28 +123,10 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		metaUIDIconContainer.setCenter(microscopeIcon);
 		vBox.getChildren().add(metaUIDIconContainer);
 
-		metaUIDLabel = new JFXTextField();
-		metaUIDLabel.setPrefHeight(20.0);
-		metaUIDLabel.setPrefWidth(100.0);
+		metaUIDLabel = new Label();
 		metaUIDLabel.setText("metaUID");
-		metaUIDLabel.setEditable(false);
-
-		metaUIDClippyButton = new JFXButton();
-		metaUIDClippyButton.setPrefHeight(20.0);
-		metaUIDClippyButton.setPrefWidth(20.0);
-		metaUIDClippyButton.setOnAction(e -> {
-			ClipboardContent content = new ClipboardContent();
-			content.putString(metaUIDLabel.getText());
-			clipboard.setContent(content);
-		});
-		metaUIDClippyButton.setGraphic(OctIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-
-		HBox hbox2 = new HBox();
-		hbox2.getChildren().add(metaUIDLabel);
-		hbox2.getChildren().add(metaUIDClippyButton);
-		hbox2.setAlignment(Pos.CENTER);
-		vBox.getChildren().add(hbox2);
+		StackPane copyableMetaUIDLabel = Utils.createCopyableLabel(metaUIDLabel);
+		vBox.getChildren().add(copyableMetaUIDLabel);
 
 		imageAndchannel = new TextFlow();
 		iText = new Text("");

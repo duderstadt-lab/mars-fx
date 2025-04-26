@@ -39,6 +39,7 @@ import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
+import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -56,18 +57,14 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 
 public class MetadataGeneralTabController implements MetadataSubPane {
 
 	private ScrollPane rootPane;
 	private VBox vBox;
 	private BorderPane UIDIconContainer;
-	private JFXTextField UIDLabel;
-	private JFXButton UIDClippyButton;
+	private Label metaUIDLabel;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
@@ -100,28 +97,10 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		UIDIconContainer.setCenter(microscopeIcon);
 		vBox.getChildren().add(UIDIconContainer);
 
-		UIDLabel = new JFXTextField();
-		UIDLabel.setPrefHeight(20.0);
-		UIDLabel.setPrefWidth(100.0);
-		UIDLabel.setText("metaUID");
-		UIDLabel.setEditable(false);
-
-		UIDClippyButton = new JFXButton();
-		UIDClippyButton.setPrefHeight(20.0);
-		UIDClippyButton.setPrefWidth(20.0);
-		UIDClippyButton.setOnAction(e -> {
-			ClipboardContent content = new ClipboardContent();
-			content.putString(UIDLabel.getText());
-			clipboard.setContent(content);
-		});
-		UIDClippyButton.setGraphic(OctIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.octicons.OctIcon.CLIPPY, "1.3em"));
-
-		HBox hbox = new HBox();
-		hbox.getChildren().add(UIDLabel);
-		hbox.getChildren().add(UIDClippyButton);
-		hbox.setAlignment(Pos.CENTER);
-		vBox.getChildren().add(hbox);
+		metaUIDLabel = new Label();
+		metaUIDLabel.setText("metaUID");
+		StackPane copyableMetaUIDLabel = Utils.createCopyableLabel(metaUIDLabel);
+		vBox.getChildren().add(copyableMetaUIDLabel);
 
 		tags = new Label();
 		tags.setText("Tags");
@@ -213,7 +192,7 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		
 		if (marsImageMetadata == null) return;
 
-		UIDLabel.setText(marsMetadata.getUID());
+		metaUIDLabel.setText(marsMetadata.getUID());
 
 		chipView.getChips().removeListener(chipsListener);
 		chipView.getChips().clear();
