@@ -262,13 +262,7 @@ public class Utils {
 
 		// Create a "Copy" indicator label that will appear on hover and cover the entire label
 		Label copyIndicator = new Label("Copy");
-		copyIndicator.setStyle("-fx-font-size: 12px; -fx-background-color: rgba(0, 0, 0, 0.9); " +
-				"-fx-text-fill: white; -fx-padding: 3px 7px; " +
-				"-fx-background-radius: 12px; " +
-				"-fx-border-color: rgba(255, 255, 255, 0.5); " +
-				"-fx-border-radius: 12px; " +
-				"-fx-border-width: 1px; " +
-				"-fx-alignment: center;");
+		copyIndicator.getStyleClass().add("copy-label");
 		copyIndicator.setOpacity(0.0);  // Initially invisible
 		copyIndicator.setMaxWidth(Double.MAX_VALUE);
 		copyIndicator.setMaxHeight(Double.MAX_VALUE);
