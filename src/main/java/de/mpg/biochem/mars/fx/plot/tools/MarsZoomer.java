@@ -1440,6 +1440,7 @@ public class MarsZoomer extends ChartPlugin {
 		}
 
 		public void reset() {
+			System.out.println("slider reset");
 			resetSlider(true);
 		}
 

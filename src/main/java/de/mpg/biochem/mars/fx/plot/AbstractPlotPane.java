@@ -50,6 +50,7 @@ import java.util.function.Supplier;
 import javax.imageio.ImageIO;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsPanner;
+import javafx.event.ActionEvent;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -360,7 +361,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 		for (SubPlot subPlot : charts) {
 			if (subPlot.getPlotSeriesList().size() == 0) continue;
 
-			// Make sure the columns have been picked otherwise do nothing...
+			if (zoomXSelected.get() || zoomYSelected.get() || zoomXYSelected.get()) subPlot.removeTools();
+
+				// Make sure the columns have been picked otherwise do nothing...
 			for (int i = 0; i < subPlot.getPlotSeriesList().size(); i++) {
 				if (subPlot.getPlotSeriesList().get(i).getXColumn() == null || subPlot
 					.getPlotSeriesList().get(i).getYColumn() == null) return;
@@ -397,6 +400,9 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 			// Still the plot area doesn't update together with the axis...
 			// Platform.runLater(() -> subPlot.getChart().layoutChildren());
 		}
+
+		if (zoomXSelected.get() || zoomYSelected.get() || zoomXYSelected.get())
+			Platform.runLater(() -> tools.stream().filter(action -> action.selected.get()).forEach( action -> action.action.handle(new ActionEvent())));
 
 		// for (SubPlot subPlot : charts)
 		// Platform.runLater(() -> subPlot.getChart().layoutChildren());
