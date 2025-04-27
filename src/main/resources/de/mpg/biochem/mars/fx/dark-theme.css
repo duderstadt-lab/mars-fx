@@ -678,29 +678,23 @@ Text, .text {
     -fx-font-size: 10pt;
 }
 
-/* Headers */
+/*---- headers ----*/
+
+.markdown-editor .h1 { -fx-font-size: 2em; }
+.markdown-editor .h2 { -fx-font-size: 1.75em; }
+.markdown-editor .h3 { -fx-font-size: 1.5em; }
+.markdown-editor .h4 { -fx-font-size: 1.25em; }
+.markdown-editor .h5 { -fx-font-size: 1.1em; }
+.markdown-editor .h6 { -fx-font-size: 1em; }
+
 .markdown-editor .h1,
-.markdown-editor h1,
-.markdown-editor .header1 {
-    -fx-fill: #e06c75 !important;
-    -fx-font-weight: bold !important;
-    -fx-font-size: 1.6em !important;
-}
-
 .markdown-editor .h2,
-.markdown-editor h2,
-.markdown-editor .header2 {
-    -fx-fill: #e06c75 !important;
-    -fx-font-weight: bold !important;
-    -fx-font-size: 1.4em !important;
-}
-
 .markdown-editor .h3,
-.markdown-editor h3,
-.markdown-editor .header3 {
-    -fx-fill: #e06c75 !important;
-    -fx-font-weight: bold !important;
-    -fx-font-size: 1.2em !important;
+.markdown-editor .h4,
+.markdown-editor .h5,
+.markdown-editor .h6 {
+	-fx-font-weight: bold;
+	-fx-fill: #e06c75 !important;
 }
 
 /* Text formatting */
@@ -756,17 +750,6 @@ Text, .text {
     -fx-text-fill: #777;
 }
 
-/* Headers */
-.markdown-editor .h1,
-.markdown-editor .h2,
-.markdown-editor .h3,
-.markdown-editor .h4,
-.markdown-editor .h5,
-.markdown-editor .h6 {
-    -fx-font-weight: bold;
-    -fx-fill: #e06c75;
-}
-
 /* Inline styles */
 .markdown-editor .strong {
     -fx-font-weight: bold;
@@ -786,6 +769,16 @@ Text, .text {
 .markdown-editor .a {
     -fx-fill: #61afef !important;
     -rtfx-background-color: transparent;
+}
+
+/* For dark theme - link highlighting */
+.markdown-editor .a {
+  color: #58a6ff; /* Blue color for links in dark theme */
+  -rtfx-background-color: -mwfx-inline-background-color;
+  text-decoration: none; /* Remove underline */
+  padding: 0 2px; /* Small padding around links */
+  border-radius: 2px; /* Slight rounding of corners */
+  transition: background-color 0.2s; /* Smooth transition for hover effect */
 }
 
 .markdown-editor .img {
