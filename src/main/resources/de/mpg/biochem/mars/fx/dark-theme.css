@@ -342,19 +342,19 @@
 
 /* Data point tracker tooltip */
 .chart-datapoint-tooltip-label {
-    -fx-background-color: rgb(60, 63, 65) !important;
-    -fx-text-fill: rgb(220, 220, 220) !important;
-    -fx-border-color: rgb(100, 100, 100) !important;
-    -fx-border-width: 1px !important;
-    -fx-padding: 5px !important;
-    -fx-background-radius: 3px !important;
-    -fx-border-radius: 3px !important;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 5, 0, 0, 2) !important;
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-border-color: rgb(100, 100, 100);
+    -fx-border-width: 1px;
+    -fx-padding: 5px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 5, 0, 0, 2);
 }
 
 /* Red circle marker that shows the selected point */
 .chart-content Circle {
-    -fx-stroke: rgb(255, 100, 100) !important;
+    -fx-stroke: rgb(255, 100, 100);
 }
 
 /* Target the chip's container */
@@ -1471,6 +1471,6 @@ Text, .text {
 .chart-title,
 .axis-label,
 .tick-label {
-    -fx-text-fill: rgb(220, 220, 220) !important;
-    -fx-fill: rgb(220, 220, 220) !important;
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-fill: rgb(220, 220, 220);
 }

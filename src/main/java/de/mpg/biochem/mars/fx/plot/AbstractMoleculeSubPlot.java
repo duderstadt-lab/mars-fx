@@ -281,13 +281,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 
 				Color color = Color.web(poi.getColor());
 				newStyleSheet += String.format(Locale.US,
-						".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}\n",
+						".x-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f) !important; -fx-stroke-width: %f !important;}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 								255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
 								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-						".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; %s}\n",
+						".x-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d) !important; -fx-background-color: %s !important; %s}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 								255), Math.round(color.getBlue() * 255), backgroundColor, borderStyle);
 
@@ -301,13 +301,13 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 
 				Color color = Color.web(poi.getColor());
 				newStyleSheet += String.format(Locale.US,
-						".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f); -fx-stroke-width: %f;}\n",
+						".y-value-indicator-line%d { -fx-stroke: rgba(%d, %d, %d, %f) !important; -fx-stroke-width: %f !important;}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 								255), Math.round(color.getBlue() * 255), color.getOpacity(), poi
 								.getStroke());
 
 				newStyleSheet += String.format(Locale.US,
-						".y-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d); -fx-background-color: %s; %s}\n",
+						".y-value-indicator-label%d { -fx-text-fill: rgba(%d, %d, %d) !important; -fx-background-color: %s !important; %s}\n",
 						index, Math.round(color.getRed() * 255), Math.round(color.getGreen() *
 								255), Math.round(color.getBlue() * 255), backgroundColor, borderStyle);
 
