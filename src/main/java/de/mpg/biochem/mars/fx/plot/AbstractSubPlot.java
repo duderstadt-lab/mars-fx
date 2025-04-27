@@ -106,9 +106,8 @@ public abstract class AbstractSubPlot implements SubPlot {
 
 		chartPane.getRenderers().setAll(renderer);
 
-		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
+		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero. We will manually add slider when needed.
 		chartPane.getPlotArea().setTriggerDistance(0);
-		chartPane.getPlotArea().setPinnedSide(Side.BOTTOM);
 
 		chartPane.getYAxis().minProperty().addListener((ob, o, n) -> {
 			if (!datasetOptionsPane.fixYBounds().get()) datasetOptionsPane.setYMin(n

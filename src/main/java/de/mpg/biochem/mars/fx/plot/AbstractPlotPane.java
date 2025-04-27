@@ -51,6 +51,7 @@ import javax.imageio.ImageIO;
 
 import de.mpg.biochem.mars.fx.plot.tools.MarsPanner;
 import javafx.event.ActionEvent;
+import javafx.geometry.Side;
 import org.controlsfx.control.PopOver;
 import org.controlsfx.control.ToggleSwitch;
 
@@ -349,6 +350,13 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 	{
 		for (SubPlot subPlot : charts) {
 			if (selected.get()) {
+				if (supplier.get() instanceof MarsZoomer) {
+					AxisMode mode = ((MarsZoomer) supplier.get()).getAxisMode();
+					if (mode.equals(AxisMode.XY) || mode.equals(AxisMode.X))
+						subPlot.getChart().getPlotArea().setPinnedSide(Side.BOTTOM);
+					else
+						subPlot.getChart().getPlotArea().setPinnedSide(null);
+				}
 				subPlot.setTool(supplier.get(), cursor);
 			}
 			else {
