@@ -53,8 +53,10 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.Side;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.util.Duration;
 
 public abstract class AbstractSubPlot implements SubPlot {
 
@@ -106,6 +108,7 @@ public abstract class AbstractSubPlot implements SubPlot {
 
 		// Prevent chartfx tools panel from opening by setting HiddenSidesPane to zero.
 		chartPane.getPlotArea().setTriggerDistance(0);
+		chartPane.getPlotArea().setPinnedSide(Side.BOTTOM);
 
 		chartPane.getYAxis().minProperty().addListener((ob, o, n) -> {
 			if (!datasetOptionsPane.fixYBounds().get()) datasetOptionsPane.setYMin(n

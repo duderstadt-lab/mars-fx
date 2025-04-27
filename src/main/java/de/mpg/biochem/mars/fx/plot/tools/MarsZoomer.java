@@ -331,6 +331,8 @@ public class MarsZoomer extends ChartPlugin {
 		this.setAddButtonsToToolBar(false);
 		//
 
+		setSliderVisible(true);
+
 		setAxisMode(zoomMode);
 		setAnimated(animated);
 		setZoomCursor(Cursor.CROSSHAIR);
@@ -354,12 +356,11 @@ public class MarsZoomer extends ChartPlugin {
 				}
 				/* always create the slider, even if not visible at first */
 				final ZoomRangeSlider slider = new ZoomRangeSlider(n);
-				if (isSliderVisible()) {
+				//if (isSliderVisible()) {
 					n.getPlotArea().setBottom(slider);
 					xRangeSlider.prefWidthProperty().bind(n.getCanvasForeground()
 						.widthProperty());
-				}
-
+				//}
 			}
 		});
 	}
