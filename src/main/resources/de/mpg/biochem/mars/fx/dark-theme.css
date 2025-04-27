@@ -548,6 +548,12 @@ Text, .text {
     -mwfx-tab-active: rgb(75, 110, 175);
 }
 
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-font-family: sans-serif !important;
+    -fx-font-size: 16px !important;
+    -fx-padding: 0em 0.5em 0em 0.5em !important; /* Horizontal padding increased */
+}
+
 .dashboard-scroll-pane {
     -fx-border-color: rgb(55, 58, 60) !important;
     -fx-focus-color: rgb(55, 58, 60) !important;
