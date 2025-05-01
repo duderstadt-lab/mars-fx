@@ -163,6 +163,15 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		}
 		lastEditorSelection = context.getEditorSelection();
 
+		// Add code highlighting for widgets when they are not rendered
+		String customPrismConfig = "<script>\n" +
+				"  // Map custom language tags to existing Prism languages\n" +
+				"  Prism.languages['groovy-html-widget'] = Prism.languages.groovy;\n" +
+				"  Prism.languages['groovy-image-widget'] = Prism.languages.groovy;\n" +
+				"  Prism.languages['python-html-widget'] = Prism.languages.python;\n" +
+				"  Prism.languages['python-image-widget'] = Prism.languages.python;\n" +
+				"</script>\n";
+
 		String mwfxSelection = (documentEditor.darkMode()) ? ".mwfx-editor-selection {\n" +
 				"  border-right: 5px solid #f47806; /* Keep the orange border */\n" +
 				"  margin-right: -5px;\n" +
@@ -186,7 +195,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 			"\"></script>\n" + "<script src=\"" + getClass().getResource(
 				"mermaid.min.js") + "\"></script>\n" + "<script src=\"" + getClass()
 					.getResource("preview.js") + "\"></script>\n" +
-			prismSyntaxHighlighting(context.getMarkdownAST()) + base + "</head>\n" +
+			prismSyntaxHighlighting(context.getMarkdownAST()) + customPrismConfig + base + "</head>\n" +
 			"<body" + scrollScript + ">\n" + renderer.getHtml(false, documentEditor) +
 			"<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n" +
 			"<script>" + anchorFixer() + "</script>\n" + "<script> (function () {" +
