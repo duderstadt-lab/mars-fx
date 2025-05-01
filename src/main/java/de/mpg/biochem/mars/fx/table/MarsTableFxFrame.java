@@ -43,9 +43,12 @@ import java.io.OutputStream;
 
 import javax.swing.SwingUtilities;
 
+import de.mpg.biochem.mars.fx.molecule.SettingsTab;
+import javafx.collections.ObservableList;
 import org.scijava.Context;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
+import org.scijava.prefs.PrefService;
 import org.scijava.ui.UIService;
 
 import com.fasterxml.jackson.core.JsonFactory;
@@ -98,6 +101,9 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 
 	@Parameter
 	private Context context;
+
+	@Parameter
+	private PrefService prefService;
 
 	protected String title;
 	protected Stage stage;
@@ -168,6 +174,28 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 				borderPane.setCenter(buildTabs());
 
 				scene = new Scene(borderPane);
+
+				// Get current stylesheets
+				ObservableList<String> stylesheets = scene.getStylesheets();
+
+				// Define stylesheet paths
+				String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
+				String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
+				if (prefService.getBoolean(SettingsTab.class,
+						"useDarkTheme", false)) {
+					stylesheets.remove(lightThemeSheet);
+
+					if (!stylesheets.contains(darkThemeSheet)) {
+						stylesheets.add(darkThemeSheet);
+					}
+				} else {
+					stylesheets.remove(darkThemeSheet);
+
+					if (!stylesheets.contains(lightThemeSheet)) {
+						stylesheets.add(lightThemeSheet);
+					}
+				}
+
 				stage.setScene(scene);
 
 				if (jfactory == null) jfactory = new JsonFactory();
