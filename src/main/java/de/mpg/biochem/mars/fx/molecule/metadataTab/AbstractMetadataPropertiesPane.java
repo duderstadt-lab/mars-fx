@@ -94,8 +94,6 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 		stackPane.setMinWidth(220);
 		stackPane.prefWidth(220.0);
 		stackPane.prefHeight(220.0);
-		stackPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/metadataTab/MetadataOverview.css");
 
 		tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(350.0);

@@ -105,15 +105,9 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(moleculeDashboardTab);
-		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-
-		tabPane.setStyle("");
-		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeTablesPane.css");
-		//tabPane.getStyleClass().add("molecule-tables-pane");
-
 		tabPane.getSelectionModel().select(dataTableTab);
+
+		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
 		segmentTableNames = new HashSet<List<String>>();
 		refreshedTabs = new HashSet<String>();

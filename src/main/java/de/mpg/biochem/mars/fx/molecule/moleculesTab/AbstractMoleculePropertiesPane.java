@@ -98,8 +98,6 @@ public abstract class AbstractMoleculePropertiesPane<M extends Molecule>
 		rootPane.setMinWidth(220);
 		rootPane.prefWidth(220.0);
 		rootPane.prefHeight(220.0);
-		rootPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeOverview.css");
 
 		tabsContainer = new JFXTabPane();
 		tabsContainer.prefHeight(350.0);

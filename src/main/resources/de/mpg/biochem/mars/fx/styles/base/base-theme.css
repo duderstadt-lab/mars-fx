@@ -1,1 +1,79 @@
 /* base-theme.css - Shared properties that apply to both themes */
+
+.root {
+    /* Font settings */
+    -fx-font-family: "Montserrat", sans-serif;
+
+    /* Common layout properties */
+    -fx-focus-traversable: false;
+}
+
+/* Tab pane base styling */
+.tab-pane {
+    -fx-tab-min-height: 35px;
+    -fx-tab-max-height: 35px;
+}
+
+.tab-pane > .tab-header-area {
+    -fx-padding: 0;
+}
+
+.tab-pane .focus-indicator {
+    visibility: hidden;
+}
+
+/* Split pane styling */
+.split-pane > .split-pane-divider {
+    -fx-padding: 0 1 0 0;
+}
+
+/* Make split pane grabber larger without changing visual size */
+.split-pane:horizontal .split-pane-divider .horizontal-grabber,
+.split-pane:vertical .split-pane-divider .vertical-grabber {
+    -fx-padding: 0.25em;
+}
+
+/* Basic component styling that's theme-independent */
+.button {
+    -fx-focus-traversable: false;
+}
+
+/* Icon base styles */
+.microscopeIcon, .moleculeIcon, .dnaIcon, .objectIcon,
+.bookIcon, .smallBookIcon, .categoriesIcon,
+.barchartIcon, .xychartIcon, .bubblechartIcon {
+    -fx-background-color: -icon-paint;
+}
+
+/* Progress bar */
+.progress-bar > .bar {
+    -fx-padding: 0.50em;
+    -fx-background-radius: 0, 0, 0;
+}
+
+/* Shared animation properties */
+.animation-transition {
+    -fx-transition-duration: 0.2s;
+}
+
+/* Remove scroll pane borders by default */
+.scroll-pane {
+    -fx-padding: 0;
+}
+
+/* Styled text area base properties */
+.styled-text-area {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/* Log text area base styling */
+.log-text-area {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/* Base dashboard widget styling */
+.dashboard-widget .tab-pane > .tab-header-area {
+    -fx-padding: 5 5 0 20;
+}

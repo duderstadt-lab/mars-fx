@@ -1,1 +1,183 @@
 /* light-theme.css - Light theme implementation */
+
+/* Base light theme properties */
+.root {
+    /* JavaFX standard properties */
+    -fx-base: -mars-light-bg-primary;
+    -fx-background: -mars-light-bg-primary;
+    -fx-control-inner-background: -mars-light-bg-primary;
+    -fx-light-text-color: -mars-light-text-primary;
+    -fx-accent: -mars-light-accent-primary;
+    -fx-default-button: -mars-light-accent-primary;
+    -fx-focus-color: -mars-light-focus-color;
+    -fx-faint-focus-color: derive(-mars-light-focus-color, 25%);
+
+    /* JFX specific properties */
+    -jfx-primary-color: -mars-light-accent-primary;
+    -jfx-light-primary-color: -mars-light-accent-primary;
+    -jfx-dark-primary-color: -mars-light-accent-primary;
+    -jfx-secondary-color: -mars-light-focus-color;
+    -jfx-light-secondary-color: -mars-light-focus-color;
+    -jfx-dark-secondary-color: -mars-light-focus-color;
+
+    /* Custom tab pane properties */
+    -mwfx-tab-background: -mars-light-bg-secondary;
+    -mwfx-tab-active: -mars-light-accent-secondary;
+
+    /* Icon color */
+    -icon-paint: -mars-light-text-primary;
+
+    /* Selection color for tables and lists */
+    -fx-selection-bar: -mars-light-selection-color;
+    -fx-selection-bar-non-focused: derive(-mars-light-selection-color, 25%);
+
+    /* Highlight for styled text areas */
+    -fx-highlight-fill: -mars-light-highlight-fill;
+
+    /* Markdown editor inline background */
+    -mwfx-inline-background-color: #f6f6f6;
+
+    /* Search highlighting */
+    -mwfx-hit: -mars-light-search-hit-active;
+}
+
+/* Text styling */
+.text-field {
+    -fx-prompt-text-fill: -mars-light-text-disabled;
+    -fx-background-color: -mars-light-bg-field;
+    -fx-text-fill: -mars-light-text-field;
+    -fx-accent: -mars-light-accent-primary;
+}
+
+.text-area {
+    -fx-text-fill: -mars-light-text-field;
+    -fx-background-color: -mars-light-bg-field;
+}
+
+.text-area .content {
+    -fx-background-color: -mars-light-bg-field;
+}
+
+.label {
+    -fx-text-fill: -mars-light-text-primary;
+}
+
+/* Copy label styling for light theme */
+.copy-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(240, 240, 240, 0.97);
+    -fx-text-fill: #444444;
+    -fx-padding: 3px 7px;
+    -fx-background-radius: 12px;
+    -fx-border-color: rgba(180, 180, 180, 0.7);
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 3, 0, 0, 1);
+    -fx-alignment: center;
+}
+
+/* Tab styling */
+.tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: -fx-outer-border, transparent, -mwfx-tab-background;
+    -fx-background-insets: 0, 0, 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: -mwfx-tab-background;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
+    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:hover {
+    -fx-background-color: derive(-mwfx-tab-active, 35%), -mwfx-tab-background;
+    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: derive(-fx-text-base-color, 35%);
+}
+
+.tab-pane .tab:selected .tab-label,
+.tab-pane .tab:hover .tab-label {
+    -fx-text-fill: -fx-text-base-color;
+}
+
+/* JFX Tab Pane styling */
+.jfx-tab-pane .headers-region {
+    -fx-background-color: -fx-accent;
+}
+
+.jfx-tab-pane .tab-header-background {
+    -fx-background-color: -fx-accent;
+}
+
+.jfx-tab-pane .tab-selected-line {
+    -fx-stroke: -fx-accent;
+}
+
+.tab-selected-line {
+    -fx-background-color: -fx-focus-color;
+}
+
+/* Dashboard widget tab styling - LIGHT THEME */
+.dashboard-widget .tab-pane {
+    -mwfx-tab-background: white;
+    -mwfx-tab-active: #007bff;
+}
+
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab {
+    -fx-background-color: white !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-insets: 0 !important;
+}
+
+.dashboard-widget .tab-pane > .tab-header-area > .tab-header-background {
+    -fx-background-color: white !important;
+    -fx-background-insets: 0 !important;
+    -fx-border-color: transparent !important;
+    -fx-border-width: 0 !important;
+}
+
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected {
+    -fx-background-color: white !important;
+    -fx-background-insets: 0;
+}
+
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:selected .graphic {
+    -fx-background-color: #007bff !important;
+}
+
+.dashboard-widget .tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
+    -fx-background-color: rgba(0, 123, 255, 0.1) !important;
+}
+
+/* Border and separator styling */
+.bdv-source-options {
+    -fx-border-color: lightgray;
+}
+
+/* Scroll bar styling */
+.scroll-bar > .track {
+    -mwfx-hit: #FBC02D;
+}
+
+/* Markdown editor styling for light theme */
+.markdown-editor .paragraph-box:has-caret {
+    -fx-background-color: #f2f9fc;
+}
+
+.markdown-editor .hit {
+    -rtfx-background-color: -mars-light-search-hit;
+}
+
+.markdown-editor .hit-active {
+    -rtfx-background-color: -mars-light-search-hit-active;
+}

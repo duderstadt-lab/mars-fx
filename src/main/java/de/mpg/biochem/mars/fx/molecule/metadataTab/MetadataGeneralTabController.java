@@ -87,14 +87,14 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 
 		vBox = new VBox();
 		vBox.setAlignment(Pos.CENTER);
-		vBox.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/moleculesTab/MoleculeGeneralTab.css");
 
 		UIDIconContainer = new BorderPane();
 		UIDIconContainer.setPrefHeight(60.0);
 		UIDIconContainer.setPrefWidth(70.0);
 		Region microscopeIcon = new Region();
 		microscopeIcon.getStyleClass().add("microscopeIcon");
+		microscopeIcon.getStyleClass().add("icon-lg"); //Should work to increase the size but is not working currently
+		microscopeIcon.setStyle("-fx-min-height: 30px; -fx-min-width: 30px; -fx-max-height: 30px; -fx-max-width: 30px;"); //Remove once issue is resolved
 		UIDIconContainer.setCenter(microscopeIcon);
 		vBox.getChildren().add(UIDIconContainer);
 
