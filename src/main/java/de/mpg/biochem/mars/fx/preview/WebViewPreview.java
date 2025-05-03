@@ -76,6 +76,7 @@ import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
 import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.concurrent.Worker.State;
 import javafx.print.PrinterJob;
@@ -172,7 +173,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 				"  Prism.languages['python-image-widget'] = Prism.languages.python;\n" +
 				"</script>\n";
 
-		String mwfxSelection = (documentEditor.darkMode()) ? ".mwfx-editor-selection {\n" +
+		String mwfxSelection = (MarsThemeManager.isDarkTheme()) ? ".mwfx-editor-selection {\n" +
 				"  border-right: 5px solid #f47806; /* Keep the orange border */\n" +
 				"  margin-right: -5px;\n" +
 				"  background-color: rgba(244, 120, 6, 0.2); /* Semi-transparent orange that works in dark theme */\n" +
@@ -187,7 +188,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 				");'") : "";
 		webView.getEngine().loadContent("<!DOCTYPE html>\n" + "<html>\n" +
 			"<head>\n" + "<link rel=\"stylesheet\" href=\"" + getClass().getResource(
-				(documentEditor.darkMode()) ? "markdownpad-github-dark.css" : "markdownpad-github.css") + "\">\n" +
+				(MarsThemeManager.isDarkTheme()) ? "markdownpad-github-dark.css" : "markdownpad-github.css") + "\">\n" +
 			"<link rel=\"stylesheet\" href=\"" + getClass().getResource(
 				"katex.min.css") + "\">\n" + "<style>\n" + Utils.defaultIfEmpty(Options
 					.getAdditionalCSS(), "") + "\n" + mwfxSelection + "</style>\n" +
@@ -289,7 +290,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		// js, html, xml, svg, ...)
 		StringBuilder buf = new StringBuilder();
 		buf.append("<link rel=\"stylesheet\" href=\"").append(getClass()
-			.getResource((documentEditor.darkMode()) ? "prism/prism-tomorrow.css" : "prism/prism.css")).append("\">\n");
+			.getResource((MarsThemeManager.isDarkTheme()) ? "prism/prism-tomorrow.css" : "prism/prism.css")).append("\">\n");
 		buf.append("<script src=\"").append(getClass().getResource(
 			"prism/prism-core.min.js")).append("\"></script>\n");
 		for (String language : languages) {

@@ -52,8 +52,6 @@ public interface PlotPane extends JsonConvertibleRecord {
 
 	public PlotOptionsPane getPlotOptionsPane();
 
-	public boolean darkMode();
-
 	public void showSubPlotOptions(DatasetOptionsPane datasetOptionsPane);
 
 	public void hideSubPlotOptions();

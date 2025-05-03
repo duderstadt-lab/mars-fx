@@ -1,0 +1,90 @@
+/* variables.css - Central location for all theme variables */
+
+/* Light theme colors */
+* {
+    /* Base colors */
+    -mars-light-bg-primary: white;
+    -mars-light-bg-secondary: rgb(246, 246, 246);
+    -mars-light-bg-tertiary: derive(white, 25%);
+    -mars-light-bg-field: white;
+
+    /* Text colors */
+    -mars-light-text-primary: black;
+    -mars-light-text-secondary: #444444;
+    -mars-light-text-disabled: #888888;
+    -mars-light-text-field: black;
+
+    /* Accent colors */
+    -mars-light-accent-primary: #007bff;
+    -mars-light-accent-secondary: #f47806;
+    -mars-light-accent-tertiary: #0675f4;
+
+    /* Border colors */
+    -mars-light-border-primary: lightgray;
+    -mars-light-border-secondary: #dddddd;
+
+    /* Component specific colors */
+    -mars-light-selection-color: #c3c3c3;
+    -mars-light-focus-color: rgb(222, 222, 222);
+    -mars-light-highlight-fill: derive(#1E90FF, 50%);
+    -mars-light-search-hit: #FFF59D;
+    -mars-light-search-hit-active: #F9A825;
+}
+
+/* Dark theme colors */
+* {
+    /* Base colors */
+    -mars-dark-bg-primary: rgb(45, 48, 50);
+    -mars-dark-bg-secondary: rgb(55, 58, 60);
+    -mars-dark-bg-tertiary: rgb(60, 63, 65);
+    -mars-dark-bg-field: rgb(60, 63, 65);
+
+    /* Text colors */
+    -mars-dark-text-primary: rgb(220, 220, 220);
+    -mars-dark-text-secondary: rgb(180, 180, 180);
+    -mars-dark-text-disabled: rgb(150, 150, 150);
+    -mars-dark-text-field: rgb(220, 220, 220);
+
+    /* Accent colors */
+    -mars-dark-accent-primary: rgb(75, 110, 175);
+    -mars-dark-accent-secondary: rgb(75, 110, 175);
+    -mars-dark-accent-tertiary: rgb(75, 110, 175);
+
+    /* Border colors */
+    -mars-dark-border-primary: rgb(80, 83, 85);
+    -mars-dark-border-secondary: rgb(75, 78, 80);
+
+    /* Component specific colors */
+    -mars-dark-selection-color: rgb(75, 110, 175);
+    -mars-dark-focus-color: #efefef;
+    -mars-dark-highlight-fill: #264f78;
+    -mars-dark-search-hit: #4D4D00;
+    -mars-dark-search-hit-active: #8B6000;
+}
+
+/* Shared dimensions and spacing */
+* {
+    /* Padding and spacing */
+    -mars-padding-xs: 3px;
+    -mars-padding-sm: 5px;
+    -mars-padding-md: 10px;
+    -mars-padding-lg: 15px;
+
+    /* Border radii */
+    -mars-border-radius-sm: 2px;
+    -mars-border-radius-md: 3px;
+    -mars-border-radius-lg: 12px;
+
+    /* Icon sizes */
+    -mars-icon-size-xs: 14px;
+    -mars-icon-size-sm: 16px;
+    -mars-icon-size-md: 20px;
+    -mars-icon-size-lg: 30px;
+
+    /* Font sizes */
+    -mars-font-size-sm: 0.9em;
+    -mars-font-size-md: 1em;
+    -mars-font-size-lg: 1.2em;
+    -mars-font-size-xl: 1.5em;
+    -mars-font-size-xxl: 2em;
+}

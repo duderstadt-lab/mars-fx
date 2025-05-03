@@ -31,6 +31,7 @@ package de.mpg.biochem.mars.fx.plot;
 
 import java.util.*;
 
+import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import org.scijava.table.DoubleColumn;
 
@@ -199,15 +200,15 @@ public abstract class AbstractMoleculeSubPlot<M extends Molecule> extends
 		String newStyleSheet = "";
 
 		// Background color for labels based on theme
-		String backgroundColor = (plotPane.darkMode()) ? "rgb(60, 63, 65)" : "white";
+		String backgroundColor = (MarsThemeManager.isDarkTheme()) ? "rgb(60, 63, 65)" : "white";
 
 		// Background RGB values for blending with the rgba2rgb function
-		int bgR = plotPane.darkMode() ? 60 : 255;
-		int bgG = plotPane.darkMode() ? 63 : 255;
-		int bgB = plotPane.darkMode() ? 65 : 255;
+		int bgR = MarsThemeManager.isDarkTheme() ? 60 : 255;
+		int bgG = MarsThemeManager.isDarkTheme() ? 63 : 255;
+		int bgB = MarsThemeManager.isDarkTheme() ? 65 : 255;
 
 		// Border styling - only applies in dark mode
-		String borderStyle = plotPane.darkMode() ? "-fx-border-color: rgb(100, 100, 100); " : "";
+		String borderStyle = MarsThemeManager.isDarkTheme() ? "-fx-border-color: rgb(100, 100, 100); " : "";
 
 		for (int index = 0; index < regionNames.size(); index++) {
 			String regionName = regionNames.get(index);

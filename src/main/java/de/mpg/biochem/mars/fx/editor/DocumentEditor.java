@@ -499,11 +499,6 @@ public class DocumentEditor extends AnchorPane {
 		this.archive = archive;
 	}
 
-	public boolean darkMode() {
-		return prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false);
-	}
-
 	public void save() {
 		if (archive != null && markdownEditorPane != null) {
 			document.setContent(markdownEditorPane.getMarkdown());

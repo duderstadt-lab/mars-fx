@@ -176,6 +176,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 				scene = new Scene(borderPane);
 
 				// Get current stylesheets
+				/*
 				ObservableList<String> stylesheets = scene.getStylesheets();
 
 				// Define stylesheet paths
@@ -195,7 +196,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 						stylesheets.add(lightThemeSheet);
 					}
 				}
-
+*/
 				stage.setScene(scene);
 
 				if (jfactory == null) jfactory = new JsonFactory();

@@ -83,9 +83,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 	protected ObservableList<HotKeyEntry> hotKeyRowList = FXCollections
 		.observableArrayList();
 
-	@Parameter
-	private PrefService prefService;
-
 	private VBox rootPane;
 
 	public SettingsTab(final Context context) {
@@ -96,6 +93,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		rootPane = new VBox();
 
 		//General Options
+		/*
 		Text generalHeading = new Text("General");
 		generalHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
 
@@ -142,6 +140,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 
 		rootPane.getChildren().add(generalGridpane);
 		VBox.setMargin(generalGridpane, new Insets(15, 15, 15, 15));
+*/
 
 		Text moleculesHeading = new Text("Tag shortcuts");
 		moleculesHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));

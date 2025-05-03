@@ -54,6 +54,7 @@ import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.fx.dialogs.*;
+import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.io.MoleculeArchiveAmazonS3Source;
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
 import de.mpg.biochem.mars.io.MoleculeArchiveSource;
@@ -91,11 +92,6 @@ import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
-import de.mpg.biochem.mars.fx.util.Action;
-import de.mpg.biochem.mars.fx.util.ActionUtils;
-import de.mpg.biochem.mars.fx.util.HotKeyEntry;
-import de.mpg.biochem.mars.fx.util.IJStage;
-import de.mpg.biochem.mars.fx.util.MarsAnimation;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.object.MartianObject;
 import de.mpg.biochem.mars.util.DefaultJsonConverter;
@@ -244,6 +240,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	protected Scene buildScene() {
+		MarsThemeManager.initialize();
+
 		borderPane = new BorderPane();
 
 		lockLogArea = new ListView<String>();
@@ -337,6 +335,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					}
 				}
 			});
+		/*
 		// Get current stylesheets
 		ObservableList<String> stylesheets = scene.getStylesheets();
 
@@ -357,6 +356,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				stylesheets.add(lightThemeSheet);
 			}
 		}
+*/
+		MarsThemeManager.applyTheme(scene);
 		return scene;
 	}
 
@@ -460,6 +461,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			e -> saveJsonVirtualStoreCopy());
 		Action fileSaveActionCloudStorageAction = new Action("Save a Cloud Storage Copy...", null, null,
 				e -> saveToCloudStorage());
+
+		Action lightThemeAction = new Action("Light theme", null, null,
+				e -> MarsThemeManager.setDarkTheme(false));
+		Action darkThemeAction = new Action("Dark theme", null, null,
+				e -> MarsThemeManager.setDarkTheme(true));
+
 		// Comment this out for now since it doesn't clear the settings before
 		// loading the new ones and
 		// I have to check on BDV...
@@ -472,7 +479,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			fileSaveJsonVirtualStoreAction, fileSaveActionCloudStorageAction,
 			// null,
 			// importRoverSettingsAction,
-			null, fileCloseAction);
+			null, lightThemeAction, darkThemeAction, null, fileCloseAction);
 
 		// Build tools menu
 		Action showVideoAction = new Action("Show Video", null, null,
