@@ -17,7 +17,6 @@ public class MarsThemeManager {
 
     // Preference key for saving theme selection
     private static final String DARK_MODE_PREF_KEY = "mars.darkMode";
-
     // Current theme state
     private static boolean isDarkTheme = true;
 

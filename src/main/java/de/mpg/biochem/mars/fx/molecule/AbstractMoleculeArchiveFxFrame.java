@@ -299,7 +299,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		borderPane.setCenter(tabsContainer);
 		Scene scene = new Scene(maskerStackPane);
-
+		MarsThemeManager.applyTheme(scene);
 		stage.setScene(scene);
 
 		try {
@@ -335,29 +335,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					}
 				}
 			});
-		/*
-		// Get current stylesheets
-		ObservableList<String> stylesheets = scene.getStylesheets();
-
-		// Define stylesheet paths
-		String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
-		String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
-		if (prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false)) {
-			stylesheets.remove(lightThemeSheet);
-
-			if (!stylesheets.contains(darkThemeSheet)) {
-				stylesheets.add(darkThemeSheet);
-			}
-		} else {
-			stylesheets.remove(darkThemeSheet);
-
-			if (!stylesheets.contains(lightThemeSheet)) {
-				stylesheets.add(lightThemeSheet);
-			}
-		}
-*/
-		MarsThemeManager.applyTheme(scene);
 		return scene;
 	}
 

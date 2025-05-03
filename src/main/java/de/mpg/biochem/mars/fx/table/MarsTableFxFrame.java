@@ -44,6 +44,7 @@ import java.io.OutputStream;
 import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.fx.molecule.SettingsTab;
+import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import javafx.collections.ObservableList;
 import org.scijava.Context;
 import org.scijava.log.LogService;
@@ -165,6 +166,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 				ijStage = new IJStage(stage);
 
 				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
+				MarsThemeManager.initialize();
 
 				borderPane = new BorderPane();
 				borderPane.getStylesheets().add(
@@ -174,29 +176,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 				borderPane.setCenter(buildTabs());
 
 				scene = new Scene(borderPane);
-
-				// Get current stylesheets
-				/*
-				ObservableList<String> stylesheets = scene.getStylesheets();
-
-				// Define stylesheet paths
-				String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
-				String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
-				if (prefService.getBoolean(SettingsTab.class,
-						"useDarkTheme", false)) {
-					stylesheets.remove(lightThemeSheet);
-
-					if (!stylesheets.contains(darkThemeSheet)) {
-						stylesheets.add(darkThemeSheet);
-					}
-				} else {
-					stylesheets.remove(darkThemeSheet);
-
-					if (!stylesheets.contains(lightThemeSheet)) {
-						stylesheets.add(lightThemeSheet);
-					}
-				}
-*/
+				MarsThemeManager.applyTheme(scene);
 				stage.setScene(scene);
 
 				if (jfactory == null) jfactory = new JsonFactory();
@@ -230,10 +210,15 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 		Action fileSaveAsJSONAction = new Action("Export to JSON", "Shortcut+C",
 			null, e -> saveAsJSON());
 
-		Action fileCloseAction = new Action("close", null, null, e -> close());
+		Action lightThemeAction = new Action("Light theme", null, null,
+				e -> MarsThemeManager.setDarkTheme(false));
+		Action darkThemeAction = new Action("Dark theme", null, null,
+				e -> MarsThemeManager.setDarkTheme(true));
+
+		Action fileCloseAction = new Action("Close", null, null, e -> close());
 
 		Menu fileMenu = ActionUtils.createMenu("File", fileSaveAsYAMTAction,
-			fileSaveAsCSVAction, fileSaveAsJSONAction, null, fileCloseAction);
+			fileSaveAsCSVAction, fileSaveAsJSONAction, null, lightThemeAction, darkThemeAction, null, fileCloseAction);
 
 		menuBar = new MenuBar(fileMenu);
 
@@ -260,16 +245,6 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 		marsTableDashboardPane = new MarsTableDashboard(context, table);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
 
-		// commentTab = new Tab();
-		// commentTab.setText("");
-
-		// Region bookIcon = new Region();
-		// bookIcon.getStyleClass().add("smallBookIcon");
-
-		// commentTab.setGraphic(bookIcon);
-		// commentPane = new CommentPane();
-		// commentTab.setContent(commentPane.getNode());
-
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(dashboardTab);
@@ -280,27 +255,8 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 		tabPane.getStylesheets().clear();
 		tabPane.getStylesheets().add(
 			"de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
-		tabPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/table/TableWindowPane.css");
 
 		tabPane.getSelectionModel().select(dataTableTab);
-		/*
-		tabPane.getSelectionModel().selectedItemProperty().addListener(
-		  		new ChangeListener<Tab>() {
-		  			@Override
-		  			public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-		  					
-		  				if (oldValue == commentTab) {
-		  					commentPane.setEditMode(false);
-		  					menuBar.getMenus().removeAll(commentPane.getMenus());
-		  				}
-		  				
-		    			if (newValue == commentTab) {
-		    				menuBar.getMenus().addAll(commentPane.getMenus());
-						} 
-		  			}
-		  		});
-		*/
 
 		return tabPane;
 	}
@@ -434,12 +390,6 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 			jGenerator.writeFieldName("marsTableDashboard");
 			marsTableDashboardPane.toJSON(jGenerator);
 		}, jParser -> marsTableDashboardPane.fromJSON(jParser));
-
-//			setJsonField("comments", 
-//					jGenerator -> {
-//						jGenerator.writeStringField("comments", commentPane.getComments());
-//					},
-//					jParser -> commentPane.setComments(jParser.getText()));
 	}
 
 	protected void saveState(String path) throws IOException {
