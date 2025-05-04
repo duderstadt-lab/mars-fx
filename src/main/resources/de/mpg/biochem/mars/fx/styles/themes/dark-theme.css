@@ -423,13 +423,6 @@ Text, .text {
     -fx-stroke: rgb(70, 73, 75);
 }
 
-/* Scrollbars */
-.dashboard-scroll-pane {
-    -fx-border-color: rgb(55, 58, 60) !important;
-    -fx-focus-color: rgb(55, 58, 60) !important;
-    -fx-faint-focus-color: rgb(55, 58, 60) !important;
-}
-
 .scroll-bar {
     -fx-background-color: #252525;
 }
@@ -500,10 +493,32 @@ Text, .text {
     -fx-effect: null !important;
 }
 
+/* Fix dark borders around panes in SplitPane for dark theme */
+.split-pane {
+    -fx-background-color: rgb(45, 48, 50); /* Match your dark theme primary background */
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
 /* Split pane divider styling */
 .split-pane > .split-pane-divider {
     -fx-background-color: #444444 !important;
     -fx-padding: 0 1px 0 1px !important;
+}
+
+/* Prevent TreeView border color from changing when selected */
+.tree-view {
+    -fx-background-color: rgb(45, 48, 50); /* Match your dark theme background */
+    -fx-border-color: rgb(60, 63, 65); /* Your preferred border color */
+    -fx-border-width: 1px;
+}
+
+/* Override the focus styling */
+.tree-view:focused {
+    -fx-background-color: rgb(45, 48, 50); /* Keep the same background */
+    -fx-border-color: rgb(60, 63, 65); /* Keep the same border color */
+    -fx-focus-color: transparent; /* Remove focus highlight */
+    -fx-faint-focus-color: transparent; /* Remove faint focus highlight */
 }
 
 /* Target the chip's container */
@@ -1071,25 +1086,45 @@ Text, .text {
     -fx-text-fill: rgb(220, 220, 220);
 }
 
-/* Menu Styling */
+/* Make menu bar visually distinct in dark theme */
 .menu-bar {
-    -fx-background-color: rgb(55, 58, 60);
+    -fx-background-color: rgb(55, 58, 60); /* Slightly lighter than the main background */
+    -fx-border-color: rgb(65, 68, 70); /* Subtle border at the bottom */
+    -fx-border-width: 0 0 1px 0; /* Only bottom border */
+    -fx-padding: 2px 5px 2px 5px; /* Add a bit more padding */
 }
 
+/* Style menu items to match */
 .menu {
+    -fx-padding: 4px 8px 4px 8px; /* More padding for menu items */
     -fx-background-color: transparent;
 }
 
+/* Style for the dropdown context menu */
+.context-menu {
+    -fx-background-color: rgb(55, 58, 60); /* Match this with your menu items */
+    -fx-background-radius: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0; /* Remove padding to eliminate those dark areas */
+}
+
+/* Make the hover state more visible */
 .menu:hover, .menu:showing {
-    -fx-background-color: rgb(75, 85, 95);
+    -fx-background-color: rgb(75, 110, 175); /* Use your accent color */
 }
 
 .menu-item {
     -fx-background-color: rgb(55, 58, 60);
+    -fx-padding: 5px 10px 5px 10px; /* Add padding to menu items instead */
 }
 
 .menu-item:hover {
-    -fx-background-color: rgb(75, 85, 95);
+    -fx-background-color: rgb(75, 110, 175); /* Your accent color */
+}
+
+/* Fix for the separator lines in menus */
+.menu-item .separator {
+    -fx-background-color: rgb(65, 68, 70); /* Slightly darker line color */
 }
 
 .menu .label, .menu-item .label {

@@ -416,7 +416,6 @@ public class DocumentEditor extends AnchorPane {
 		canRedo.bind(undoManager.redoAvailableProperty());
 
 		splitPane = new SplitPane();
-		splitPane.getStyleClass().add("bdv-source-options");
 		tab.setContent(splitPane);
 
 		markdownEditorPane.setVisible(true);
