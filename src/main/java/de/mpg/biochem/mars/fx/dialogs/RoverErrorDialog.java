@@ -49,7 +49,7 @@ public class RoverErrorDialog extends Alert {
 		super(AlertType.ERROR);
 		initModality(Modality.WINDOW_MODAL);
 		initOwner(owner);
-		Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverError.png");
+		Image image1 = new Image("de/mpg/biochem/mars/fx/images/RoverError.png");
 		ImageView imageView = new ImageView(image1);
 		imageView.setFitWidth(80);
 		imageView.setFitHeight(80);

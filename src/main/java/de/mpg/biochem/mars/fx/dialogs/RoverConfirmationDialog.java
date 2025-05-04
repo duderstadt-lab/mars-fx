@@ -48,7 +48,7 @@ public class RoverConfirmationDialog extends Alert {
 		super(AlertType.CONFIRMATION);
 		initModality(Modality.WINDOW_MODAL);
 		initOwner(owner);
-		Image image1 = new Image("de/mpg/biochem/mars/fx/dialogs/RoverSmile.png");
+		Image image1 = new Image("de/mpg/biochem/mars/fx/images/RoverSmile.png");
 		ImageView imageView = new ImageView(image1);
 		imageView.setFitWidth(80);
 		imageView.setFitHeight(80);

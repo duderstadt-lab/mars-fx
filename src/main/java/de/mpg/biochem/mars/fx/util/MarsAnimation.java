@@ -69,7 +69,7 @@ public class MarsAnimation extends BorderPane {
 	private VBox vbox;
 
 	public MarsAnimation() {
-		Image image = new Image("de/mpg/biochem/mars/fx/molecule/mars.jpg");
+		Image image = new Image("de/mpg/biochem/mars/fx/images/mars.jpg");
 
 		ImageView imageView1 = new ImageView(image);
 		ImageView imageView2 = new ImageView(image);

@@ -50,19 +50,19 @@ public class NavigationPanel extends JPanel {
 		this.setBackground(Color.white);
 
 		moleculeLocation = new NavigationButton(new ImageIcon(this.getClass()
-			.getResource("Molecule.png")), "Go to");
+			.getResource("BdvMolecule.png")), "Go to");
 
 		fullView = new NavigationButton(new ImageIcon(this.getClass().getResource(
-			"FullView.png")), "Full view");
+			"BdvFullView.png")), "Full view");
 
 		autoContrast = new NavigationButton(new ImageIcon(this.getClass()
-			.getResource("AutoContrast.png")), "Contrast");
+			.getResource("BdvAutoContrast.png")), "Contrast");
 
 		exportImagePlus = new NavigationButton(new ImageIcon(this.getClass()
-			.getResource("ExportImage.png")), "Export");
+			.getResource("BdvExportImage.png")), "Export");
 
 		help = new NavigationButton(new ImageIcon(this.getClass().getResource(
-			"Help.png")), "Help");
+			"BdvHelp.png")), "Help");
 
 		moleculeLocation.addActionListener(e -> {
 			marsBdvFrame.updateView();

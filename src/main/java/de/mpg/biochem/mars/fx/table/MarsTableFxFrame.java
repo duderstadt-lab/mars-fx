@@ -169,8 +169,6 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 				MarsThemeManager.initialize();
 
 				borderPane = new BorderPane();
-				borderPane.getStylesheets().add(
-					"de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
 
 				borderPane.setTop(buildMenuBar());
 				borderPane.setCenter(buildTabs());
@@ -249,12 +247,6 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(dashboardTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
-
-		tabPane.setStyle("");
-		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/molecule/MoleculeArchiveFxFrame.css");
-
 		tabPane.getSelectionModel().select(dataTableTab);
 
 		return tabPane;

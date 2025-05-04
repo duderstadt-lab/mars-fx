@@ -1,1 +1,144 @@
 /* tables.css - Styles for table views, list views, and grids */
+
+/* Base table view styling */
+.table-view {
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Selection colors defined in theme */
+}
+
+/* Table header styling */
+.table-view .column-header {
+    -fx-background-insets: 0;
+    -fx-padding: 5px 10px; /* Replaced -mars-padding-sm -mars-padding-md */
+    /* Background color defined in theme */
+}
+
+.table-view .column-header .label {
+    -fx-alignment: CENTER_LEFT;
+    -fx-font-weight: normal;
+    /* Text color defined in theme */
+}
+
+/* Table cells and rows */
+.table-row-cell {
+    -fx-table-cell-border-color: derive(-fx-base, 10%);
+    /* Background colors defined in theme */
+}
+
+.list-cell:even,
+.list-cell:odd,
+.table-row-cell:even,
+.table-row-cell:odd {
+    /* Background colors defined in theme */
+}
+
+.list-cell:empty,
+.table-row-cell:empty {
+    -fx-background-color: transparent;
+}
+
+/* Selected row styling */
+.list-cell:selected,
+.table-row-cell:selected {
+    /* Background and text colors defined in theme */
+}
+
+/* Table borders */
+.list-cell,
+.table-row-cell {
+    -fx-border-color: transparent;
+    /* Border color defined in theme */
+}
+
+/* Table sort arrows */
+.table-view .arrow {
+    -fx-background-color: -fx-mark-color;
+    -fx-padding: 0.25em 0.3125em 0.25em 0.3125em;
+    -fx-shape: "M 0 0 h 7 l -3.5 4 z";
+}
+
+/* Alternating row colors (if needed) */
+.table-row-cell:filled:even {
+    /* Even row color defined by theme */
+}
+
+.table-row-cell:filled:odd {
+    /* Odd row color defined by theme */
+}
+
+/* Table row highlighting on hover */
+.table-row-cell:filled:hover {
+    -fx-background-color: -fx-selection-bar-non-focused;
+    -fx-background-insets: 0;
+}
+
+/* Column resize styling */
+.table-view .column-resize-line {
+    -fx-background-color: -fx-accent;
+    -fx-background-insets: 0;
+}
+
+/* Table padding */
+.table-view .column-header-background {
+    -fx-padding: 0;
+}
+
+.table-view > .column-header-background > .nested-column-header > .column-header {
+    -fx-padding: 3px 5px 3px 5px;
+}
+
+/* List View styling */
+.list-view {
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Background color defined in theme */
+}
+
+.list-view .list-cell {
+    -fx-padding: 5px 10px; /* Replaced -mars-padding-sm -mars-padding-md */
+    /* Background and text colors defined in theme */
+}
+
+/* List cell hover styling */
+.list-view .list-cell:filled:hover {
+    -fx-background-color: -fx-selection-bar-non-focused;
+    -fx-background-insets: 0;
+}
+
+/* Border below "open folder" item in projects combo box */
+.projects-combo-box .list-cell {
+    -fx-border-width: 0 0 1 0;
+}
+
+.projects-combo-box .list-cell.open-project {
+    -fx-border-color: -fx-outer-border;
+}
+
+/* JFX specific table customizations */
+.jfx-table-view {
+    /* Any specific JFX table customizations */
+}
+
+/* Scrollbars in tables */
+.table-view .scroll-bar:vertical,
+.table-view .scroll-bar:horizontal,
+.list-view .scroll-bar:vertical,
+.list-view .scroll-bar:horizontal {
+    -fx-background-color: derive(-fx-base, 5%);
+}
+
+/* Selected cell styling */
+.table-view:focused .table-row-cell:filled:focused:selected {
+    -fx-background-color: -fx-selection-bar;
+    -fx-background-insets: 0, 1, 2;
+}
+
+/* Table cell content alignment */
+.table-view .table-cell {
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* Table header sorting indicators */
+.table-view .column-header.sorted-ascending > .label,
+.table-view .column-header.sorted-descending > .label {
+    -fx-text-fill: -fx-text-base-color;
+}
