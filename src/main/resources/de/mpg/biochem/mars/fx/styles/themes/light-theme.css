@@ -21,7 +21,7 @@
     -jfx-dark-secondary-color: -mars-light-focus-color;
 
     /* Custom tab pane properties */
-    -mwfx-tab-background: -mars-light-bg-secondary;
+    -mwfx-tab-background: -mars-light-bg-primary;
     -mwfx-tab-active: -mars-light-accent-secondary;
 
     /* Icon color */
@@ -106,6 +106,13 @@
 .tab-pane .tab:selected .tab-label,
 .tab-pane .tab:hover .tab-label {
     -fx-text-fill: -fx-text-base-color;
+}
+
+/* Fix dark borders around panes in SplitPane for dark theme */
+.split-pane {
+    -fx-background-color: -fx-box-border, -fx-control-inner-background;
+        -fx-background-insets: 0, 1;
+        -fx-padding: 1;
 }
 
 /* JFX Tab Pane styling */
