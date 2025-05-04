@@ -88,7 +88,6 @@ class HtmlSourcePreview implements MarkdownPreviewPane.Preview {
 	private void createNodes() {
 		textArea = new PreviewStyledTextArea();
 		textArea.setWrapText(true);
-		textArea.getStylesheets().add("org/markdownwriterfx/prism.css");
 
 		scrollPane = new VirtualizedScrollPane<>(textArea);
 	}

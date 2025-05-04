@@ -565,11 +565,7 @@ class FindReplacePane {
 	}
 
 	private void initComponents() {
-		// JFormDesigner - Component initialization - DO NOT MODIFY
-		// //GEN-BEGIN:initComponents
 		pane = new VBox();
-		// pane.setStyle("-fx-background-color: #efefef");
-		// pane.getStylesheets().add("org/markdownwriterfx/MarkdownWriter.css");
 		findField = new CustomTextField();
 		previousButton = new Button();
 		nextButton = new Button();

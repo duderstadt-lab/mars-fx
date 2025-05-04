@@ -1,1 +1,142 @@
 /* dialogs.css - Styles for dialogs, popups, and modal windows */
+
+/* Dialog pane */
+.dialog-pane {
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Background color defined in theme */
+}
+
+.dialog-pane .header-panel {
+    -fx-padding: 10px; /* Replaced -mars-padding-md */
+    /* Background color defined in theme */
+}
+
+.dialog-pane .content {
+    -fx-padding: 10px; /* Replaced -mars-padding-md */
+    /* Text color defined in theme */
+}
+
+/* PopOver styles */
+.popover {
+    /* Background color defined in theme */
+}
+
+.popover > .border {
+    /* Stroke and fill color defined in theme */
+}
+
+.popover > .content {
+    /* Background color defined in theme */
+}
+
+.popover > .title {
+    -fx-padding: 5px 10px; /* Replaced -mars-padding-sm -mars-padding-md */
+    /* Background and text color defined in theme */
+}
+
+/* Style text fields in the popover */
+.popover .text-field {
+    /* Background and text color defined in theme */
+}
+
+/* Style labels in the popover */
+.popover .label {
+    /* Text color defined in theme */
+}
+
+/* Find/Replace dialog */
+.find-replace {
+    -fx-padding: 0.25em;
+    -fx-border-width: 1 0 1 0;
+    /* Background and border color defined in theme */
+}
+
+.find-replace .text-field:error {
+    -fx-control-inner-background: #ffebee;
+}
+
+.find-replace .info {
+    -fx-text-fill: #c62828;
+}
+
+.find-replace .custom-text-field .left-pane {
+    -fx-padding: 0 0.25em 0 0.5em;
+}
+
+.find-replace .custom-text-field .right-pane {
+    -fx-padding: 0 0.5em 0 0.25em;
+}
+
+.find-replace .custom-text-field .glyph-icon {
+    -fx-fill: #aaa;
+}
+
+.find-replace .custom-text-field .label {
+    -fx-text-fill: #888;
+    -fx-font-size: 0.9em;
+}
+
+.find-replace .flat-button {
+    -fx-background-color: transparent;
+}
+
+.find-replace .flat-button:hover {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-color: -fx-hover-base;
+}
+
+.find-replace .flat-button:armed {
+    -fx-color: -fx-pressed-base;
+}
+
+.find-replace .flat-button:selected {
+    -fx-background-color: -fx-outer-border;
+}
+
+/* Alert dialog specific styles */
+.alert.confirmation.dialog-pane,
+.alert.error.dialog-pane,
+.alert.information.dialog-pane,
+.alert.warning.dialog-pane {
+    /* Colors set by theme */
+}
+
+/* Dialog buttons */
+.dialog-pane .button-bar .button {
+    -fx-min-width: 80px;
+    -fx-padding: 5px 10px; /* Replaced -mars-padding-sm -mars-padding-md */
+}
+
+/* Progress indicators in dialogs */
+.dialog-pane .progress-indicator {
+    -fx-max-height: 50px;
+    -fx-max-width: 50px;
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-padding: 5px 10px; /* Replaced -mars-padding-sm -mars-padding-md */
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Colors set by theme */
+}
+
+/* Alert icons */
+.alert.confirmation .graphic,
+.alert.error .graphic,
+.alert.information .graphic,
+.alert.warning .graphic {
+    -fx-padding: 10px; /* Replaced -mars-padding-md */
+}
+
+/* JFX Dialog styles */
+.jfx-dialog-layout {
+    -fx-padding: 10px; /* Replaced -mars-padding-md */
+    /* Background color set by theme */
+}
+
+.jfx-dialog-layout .jfx-layout-heading {
+    -fx-padding: 10px; /* Replaced -mars-padding-md */
+    -fx-font-size: 1.2em; /* Replaced -mars-font-size-lg */
+    -fx-font-weight: bold;
+    /* Colors set by theme */
+}

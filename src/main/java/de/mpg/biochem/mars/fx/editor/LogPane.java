@@ -97,13 +97,10 @@ public class LogPane {
 	public LogPane() {
 		textArea = new MarkdownTextArea();
 		textArea.getStyleClass().add("log-area");
-		//textArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
 		textArea.setEditable(false);
 		// textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
 		textArea.getStyleClass().add("markdown-editor");
-		//textArea.getStylesheets().add("de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
-		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/prism.css");
 
 		textArea.textProperty().addListener((observable, oldText, newText) -> {
 			textChanged(newText);

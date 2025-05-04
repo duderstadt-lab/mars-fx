@@ -1,1 +1,93 @@
 /* buttons.css - Styles for all button components */
+
+/* Base button styling */
+.button {
+    -fx-focus-traversable: false;
+    -fx-background-radius: 3px; /* replace me with -mars-border-radius-md; when all other css are removed? */
+}
+
+/* Standard button hover states */
+.button:hover {
+    -fx-cursor: hand;
+}
+
+/* Default button styling (for primary actions) */
+.button:default {
+    -fx-base: -fx-accent;
+    -fx-background-color: -fx-accent;
+}
+
+/* Icon buttons - transparent background with only icon visible */
+.icon-button {
+    -fx-background-color: transparent;
+    -fx-stroke: -icon-paint;
+    -fx-pref-height: 20;
+    -fx-pref-width: 20;
+    -fx-min-height: 20;
+    -fx-min-width: 20;
+    -fx-max-height: 20;
+    -fx-max-width: 20;
+}
+
+/* Flat buttons (used in toolbars and lightweight interfaces) */
+.flat-button {
+    -fx-background-color: transparent;
+}
+
+.flat-button:hover {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-color: -fx-hover-base;
+}
+
+.flat-button:armed {
+    -fx-color: -fx-pressed-base;
+}
+
+.flat-button:selected {
+    -fx-background-color: -fx-outer-border;
+}
+
+/* Close project button in projects combo box */
+.projects-combo-box .close-project-button {
+    -fx-background-color: transparent;
+    -fx-shape: "M 0,0 H1 L 4,3 7,0 H8 V1 L 5,4 8,7 V8 H7 L 4,5 1,8 H0 V7 L 3,4 0,1 Z";
+    -fx-scale-shape: false;
+    -fx-effect: dropshadow(two-pass-box , rgba(255, 255, 255, 0.4), 1, 0.0 , 0, 1);
+}
+
+.projects-combo-box .list-cell:hover .close-project-button {
+    -fx-background-color: -fx-mark-color;
+}
+
+.projects-combo-box .list-cell:hover .close-project-button:hover {
+    -fx-background-color: red;
+}
+
+/* Tab close buttons */
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
+    -fx-background-color: transparent;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-close-button,
+.tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-close-button {
+    -fx-background-color: -fx-mark-color;
+    -fx-opacity: 0.4;
+}
+
+.tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button:hover {
+    -fx-background-color: red;
+    -fx-opacity: 1.0;
+}
+
+/* Toggle switch button */
+.toggle-switch .thumb {
+    -fx-background-color: white;
+}
+
+.toggle-switch:selected .thumb-area {
+    -fx-background-color: -fx-accent;
+}
+
+.toggle-switch .thumb-area {
+    -fx-background-color: rgb(100, 100, 100);
+}

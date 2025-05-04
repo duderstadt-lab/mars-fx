@@ -144,9 +144,8 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		tabPane = new TabPane();
 		tabPane.setFocusTraversable(false);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.ALL_TABS);
-		tabPane.setStyle("");
-		tabPane.getStylesheets().clear();
-		tabPane.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
+		//tabPane.setStyle("");
+		//tabPane.getStylesheets().clear();
 
 		borderPane = new BorderPane();
 		borderPane.getStyleClass().add("main");
@@ -209,8 +208,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		nonEditToolBar.getItems().add(nonEditspacer);
 
 		nonEditToolBar.getItems().add(createPrintDocumentButton);
-		nonEditToolBar.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/MarkdownWriter.css");
 
 		// Edit actions
 		Action editUndoAction = new Action(Messages.get(
@@ -455,9 +452,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		editToolBar.getItems().add(saveDocumentTemplateButton);
 
 		editToolBar.getItems().add(0, new Separator());
-
-		editToolBar.getStylesheets().add(
-			"de/mpg/biochem/mars/fx/MarkdownWriter.css");
 
 		// horizontal spacer
 		Region spacer = new Region();

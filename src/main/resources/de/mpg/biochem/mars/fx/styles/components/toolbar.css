@@ -1,0 +1,94 @@
+/* toolbar.css - Styles for all toolbars throughout the application */
+
+/* Base toolbar styling */
+.tool-bar {
+    -fx-spacing: 0;
+    -fx-background-color: derive(-fx-background, 25%);
+}
+
+/* Toolbar buttons */
+.tool-bar .button,
+.tool-bar .toggle-button,
+.tool-bar .choice-box {
+    -fx-background-color: transparent;
+}
+
+.tool-bar .button:hover,
+.tool-bar .toggle-button:hover,
+.tool-bar .choice-box:hover {
+    -fx-background-color: -fx-shadow-highlight-color, -fx-outer-border, -fx-inner-border, -fx-body-color;
+    -fx-color: -fx-hover-base;
+}
+
+.tool-bar .button:armed,
+.tool-bar .toggle-button:armed {
+    -fx-color: -fx-pressed-base;
+}
+
+.tool-bar .toggle-button:selected {
+    -fx-background-color: -fx-pressed-base, -fx-outer-border, -fx-inner-border, -fx-body-color;
+}
+
+/* Theme-specific overrides */
+/* These will be automatically overridden by the appropriate theme CSS */
+.dark-theme .tool-bar {
+    -fx-background-color: -mars-dark-bg-secondary !important;
+}
+
+.light-theme .tool-bar {
+    -fx-background-color: derive(-mars-light-bg-primary, 25%);
+}
+
+/* Projects combo box in toolbar */
+.main .projects-combo-box {
+    -fx-background-color: transparent;
+}
+
+.main .projects-combo-box:hover {
+    -fx-background-color: -fx-shadow-highlight-color;
+}
+
+.main .projects-combo-box > .cell {
+    /* give projects combo box same height as tabs */
+    -fx-padding: 0.625em 0 0.625em 0.75em;
+}
+
+/* Use light hover background color in popup list */
+.main .projects-combo-box .combo-box-popup > .list-view .list-cell:filled:hover {
+    -fx-background-color: -fx-selection-bar-non-focused;
+    -fx-text-fill: -fx-text-base-color;
+}
+
+/* Border below "open folder" item */
+.main .projects-combo-box .list-cell {
+    /* necessary on all cells for correct resizing of ListView when adding items */
+    -fx-border-width: 0 0 1 0;
+}
+
+.main .projects-combo-box .list-cell.open-project {
+    -fx-border-color: -fx-outer-border;
+}
+
+/* Markdown editor toolbar specific styles */
+.markdown-toolbar {
+    -fx-padding: 4px 8px;
+}
+
+.markdown-toolbar .separator {
+    -fx-padding: 0 4px;
+}
+
+.markdown-toolbar .button {
+    -fx-padding: 4px 8px;
+    -fx-background-radius: 3px;
+}
+
+/* Toolbar icon styling */
+.toolbar-icon {
+    -fx-fill: -fx-text-base-color;
+    -fx-opacity: 0.8;
+}
+
+.toolbar-icon:hover {
+    -fx-opacity: 1.0;
+}

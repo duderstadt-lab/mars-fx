@@ -248,7 +248,6 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
 		tabPane.getTabs().add(dashboardTab);
-		// tabPane.getTabs().add(commentTab);
 		tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
 
 		tabPane.setStyle("");

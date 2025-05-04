@@ -1,1 +1,87 @@
 /* scrollbars.css - Unified styling for all scrollbars */
+
+/* Base scrollbar styling */
+.scroll-bar {
+    -fx-background-insets: 0;
+    /* Background color defined in theme */
+}
+
+/* Horizontal scroll bar adjustments */
+.scroll-bar:horizontal > .increment-button,
+.scroll-bar:horizontal > .decrement-button {
+    -fx-padding: 0.25em 0.416667em; /* 3 5 */
+    -fx-background-insets: 0;
+}
+
+/* Vertical scroll bar adjustments */
+.scroll-bar:vertical > .increment-button,
+.scroll-bar:vertical > .decrement-button {
+    -fx-padding: 0.416667em 0.25em; /* 5 3 */
+    -fx-background-insets: 0;
+}
+
+/* Increment/decrement button hover states */
+.scroll-bar > .increment-button:hover,
+.scroll-bar > .decrement-button:hover {
+    /* Hover color defined in theme */
+}
+
+/* Increment/decrement button pressed states */
+.scroll-bar > .increment-button:pressed,
+.scroll-bar > .decrement-button:pressed {
+    /* Pressed color defined in theme */
+}
+
+/* Scrollbar thumb styling */
+.scroll-bar > .thumb {
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    /* Thumb color defined in theme */
+}
+
+.scroll-bar > .thumb:hover {
+    /* Hover thumb color defined in theme */
+}
+
+.scroll-bar > .thumb:pressed {
+    /* Pressed thumb color defined in theme */
+}
+
+/* Scroll bar track */
+.scroll-bar > .track {
+    /* Track color defined in theme */
+}
+
+/* Arrow buttons */
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    /* Arrow color defined in theme */
+}
+
+/* Ensure no parts of the scrollbar are pure black */
+.scroll-bar * {
+    -fx-shadow-highlight-color: transparent;
+    -fx-shadow-color: transparent;
+}
+
+/* Invisible scrollbars for specific components */
+.log-text-area .scroll-bar:vertical:disabled {
+    -fx-opacity: 0;
+}
+
+/* Dashboard scroll pane */
+.dashboard-scroll-pane {
+    /* Border and focus colors defined in theme */
+}
+
+/* Remove scrollbars in specific components that don't need them */
+.scroll-pane.no-scrollbars .scroll-bar:vertical,
+.scroll-pane.no-scrollbars .scroll-bar:horizontal {
+    -fx-opacity: 0;
+    -fx-padding: -1;
+}
+
+/* Special scrollbar for search results with hits */
+.scroll-bar > .track {
+    /* Hit marker color defined in theme via -mwfx-hit property */
+}

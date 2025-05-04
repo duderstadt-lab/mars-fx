@@ -139,7 +139,6 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 		});
 
 		toolbar = new ToolBar();
-		toolbar.getStylesheets().add("de/mpg/biochem/mars/fx/MarkdownWriter.css");
 
 		// horizontal spacer
 		Region spacer = new Region();

@@ -143,9 +143,6 @@ public class MarkdownEditorPane {
 		textArea.setWrapText(true);
 		textArea.setUseInitialStyleForInsertion(true);
 		textArea.getStyleClass().add("markdown-editor");
-		//textArea.getStyleClass().add("code-area");
-		//textArea.getStylesheets().add("de/mpg/biochem/mars/fx/editor/MarkdownEditor.css");
-		textArea.getStylesheets().add("de/mpg/biochem/mars/fx/prism.css");
 
 		textArea.textProperty().addListener((observable, oldText, newText) -> {
 			textChanged(newText);

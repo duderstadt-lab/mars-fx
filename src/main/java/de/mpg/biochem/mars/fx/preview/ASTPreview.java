@@ -94,7 +94,6 @@ class ASTPreview implements MarkdownPreviewPane.Preview {
 	private void createNodes() {
 		textArea = new PreviewStyledTextArea();
 		textArea.getStyleClass().add("ast-preview");
-		textArea.getStylesheets().add("org/markdownwriterfx/prism.css");
 
 		scrollPane = new VirtualizedScrollPane<>(textArea);
 	}
