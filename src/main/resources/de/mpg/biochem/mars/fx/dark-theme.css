@@ -560,32 +560,6 @@ Text, .text {
     -fx-faint-focus-color: rgb(55, 58, 60) !important;
 }
 
-/* Dark theme for Log Area */
-.log-area {
-    -fx-background-color: #1a1a1a;
-    -fx-text-fill: #d4d4d4;
-    -fx-font-family: "monospace";
-    -fx-font-size: 10pt;
-}
-
-/* Text style */
-.log-area .text {
-    -fx-fill: #d4d4d4 !important;
-    -fx-font-family: "monospace";
-    -fx-font-size: 10pt;
-}
-
-/* Remove active line highlighting */
-.log-area .paragraph-box:has-caret,
-.log-area .paragraph-box.has-caret {
-    -fx-background-color: transparent;
-}
-
-/* Selection color */
-.log-area .selection {
-    -fx-fill: #264f78;
-}
-
 /* Scrollbars */
 .scroll-bar {
     -fx-background-color: #252525;
