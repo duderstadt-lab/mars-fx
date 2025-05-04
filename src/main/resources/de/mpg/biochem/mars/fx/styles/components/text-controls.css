@@ -1,1 +1,146 @@
 /* text-controls.css - Styles for text fields, labels, and related components */
+
+/* Base label styling */
+.label {
+    /* Colors set by theme */
+    -fx-text-fill: -fx-text-base-color;
+}
+
+/* Custom label for copy operations */
+.copy-label {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 3px 7px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-alignment: center;
+    /* Colors set by theme */
+}
+
+/* Base text field styling */
+.text-field {
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Colors set by theme */
+}
+
+.text-field:focused {
+    /* Focus styling handled by theme */
+}
+
+.text-field:error {
+    -fx-control-inner-background: #ffebee;
+}
+
+/* Custom text field with icon support */
+.custom-text-field .left-pane {
+    -fx-padding: 0 0.25em 0 0.5em;
+}
+
+.custom-text-field .right-pane {
+    -fx-padding: 0 0.5em 0 0.25em;
+}
+
+.custom-text-field .glyph-icon {
+    -fx-fill: #aaa;
+}
+
+.custom-text-field .label {
+    -fx-text-fill: #888;
+    -fx-font-size: 0.9em;
+}
+
+/* Text areas */
+.text-area {
+    -fx-background-radius: 3px; /* Replaced -mars-border-radius-md */
+    /* Colors set by theme */
+}
+
+.text-area .content {
+    /* Colors set by theme */
+}
+
+/* Remove text area round edges in preview pane */
+.preview-pane .text-input {
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+}
+
+/* Log text area styling */
+.log-text-area {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+    /* Colors set by theme */
+}
+
+.log-text-area .scroll-pane {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-pane .viewport {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .scroll-pane .content {
+    -fx-background-color: transparent;
+}
+
+.log-text-area .list-cell {
+    -fx-background-color: transparent;
+    /* Text color set by theme */
+}
+
+.log-text-area .list-view {
+    -fx-background-color: transparent;
+    /* Text color set by theme */
+}
+
+/* Log Area for dark theme */
+.log-area {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+    /* Colors set by theme */
+}
+
+/* Text style for logs */
+.log-area .text {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+    /* Colors set by theme */
+}
+
+/* JFX text components */
+.jfx-text-field,
+.jfx-password-field,
+.jfx-text-area {
+    /* Colors set by theme */
+}
+
+/* Fix for caret visibility - crucial for text editing experience */
+.text-area .caret,
+.text-field .caret,
+.styled-text-area .caret,
+.markdown-editor .caret {
+    -fx-stroke-width: 1.5px !important;
+    /* Color set by theme */
+}
+
+/* Styled text area - used for code and markdown */
+.styled-text-area {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+    /* Highlight color set by theme */
+}
+
+/* Add padding to styled text area */
+.styled-text-area.padding .paragraph-box .paragraph-text {
+    -fx-padding: 0 1em 0 1em;
+}
+
+.styled-text-area.padding .paragraph-box:last-paragraph .paragraph-text {
+    -fx-padding: 0 1em 1em 1em;
+}
+
+.styled-text-area.padding .paragraph-box:first-paragraph .paragraph-text {
+    -fx-padding: 1em 1em 0 1em;
+}

@@ -92,56 +92,6 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 
 		rootPane = new VBox();
 
-		//General Options
-		/*
-		Text generalHeading = new Text("General");
-		generalHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
-
-		rootPane.getChildren().add(generalHeading);
-		VBox.setMargin(generalHeading, new Insets(15, 15, 15, 15));
-
-		GridPane generalGridpane = new GridPane();
-
-		Label darkThemeLabel = new Label("Use Dark Theme");
-		generalGridpane.add(darkThemeLabel, 0, 5);
-		GridPane.setMargin(darkThemeLabel, new Insets(5, 5, 5, 5));
-
-		ToggleSwitch darkThemeSwitch = new ToggleSwitch();
-		generalGridpane.add(darkThemeSwitch, 1, 5);
-
-		darkThemeSwitch.setSelected(prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false));
-		darkThemeSwitch.selectedProperty().addListener((t, o, n) -> {
-			// Save the preference
-			prefService.remove(SettingsTab.class, "useDarkTheme");
-			prefService.put(SettingsTab.class, "useDarkTheme", n);
-
-			// Get current stylesheets
-			ObservableList<String> stylesheets = getNode().getScene().getStylesheets();
-
-			// Define stylesheet paths
-			String darkThemeSheet = "de/mpg/biochem/mars/fx/dark-theme.css";
-			String lightThemeSheet = "de/mpg/biochem/mars/fx/light-theme.css";
-			if (n) {
-				stylesheets.remove(lightThemeSheet);
-
-				if (!stylesheets.contains(darkThemeSheet)) {
-					stylesheets.add(darkThemeSheet);
-				}
-			} else {
-				stylesheets.remove(darkThemeSheet);
-
-				if (!stylesheets.contains(lightThemeSheet)) {
-					stylesheets.add(lightThemeSheet);
-				}
-			}
-		});
-		GridPane.setMargin(darkThemeSwitch, new Insets(5, 5, 5, 5));
-
-		rootPane.getChildren().add(generalGridpane);
-		VBox.setMargin(generalGridpane, new Insets(15, 15, 15, 15));
-*/
-
 		Text moleculesHeading = new Text("Tag shortcuts");
 		moleculesHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
 

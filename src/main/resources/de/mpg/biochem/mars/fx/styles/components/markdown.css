@@ -1,4 +1,248 @@
 /* markdown.css - Styles for markdown editing and previewing */
 
+/* Base Markdown Editor */
+.markdown-editor {
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+    /* Background and inline background colors defined in theme */
+}
+
+/* Disabled state */
+.markdown-editor:disabled,
+.markdown-editor:disabled .paragraph-text {
+    /* Colors defined in theme */
+}
+
+.markdown-editor:disabled .paragraph-text .text {
+    /* Error text color defined in theme */
+}
+
+/* Highlight current line */
+.markdown-editor .paragraph-box:has-caret {
+    /* Background defined in theme */
+}
+
+/* Alternative for environments that don't support :has-caret */
+.markdown-editor .paragraph-box.has-caret {
+    /* Background defined in theme */
+}
+
+/* Drag caret */
+.markdown-editor .drag-caret {
+    -rtfx-blink-rate: indefinite;
+    -fx-stroke-width: 2.0;
+}
+
+/* Headers */
+.markdown-editor .h1 { -fx-font-size: 2em; }
+.markdown-editor .h2 { -fx-font-size: 1.75em; }
+.markdown-editor .h3 { -fx-font-size: 1.5em; }
+.markdown-editor .h4 { -fx-font-size: 1.25em; }
+.markdown-editor .h5 { -fx-font-size: 1.1em; }
+.markdown-editor .h6 { -fx-font-size: 1em; }
+
+.markdown-editor .h1,
+.markdown-editor .h2,
+.markdown-editor .h3,
+.markdown-editor .h4,
+.markdown-editor .h5,
+.markdown-editor .h6 {
+    -fx-font-weight: bold;
+    /* Header color defined in theme */
+}
+
+/* Inlines */
+.markdown-editor .strong {
+    -fx-font-weight: bold;
+    -rtfx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .em {
+    -fx-font-style: italic;
+    -rtfx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .del {
+    -fx-strikethrough: true;
+    -rtfx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .a {
+    -rtfx-background-color: -mwfx-inline-background-color;
+    /* Link color defined in theme */
+}
+
+.markdown-editor .img {
+    -rtfx-background-color: -mwfx-inline-background-color;
+    /* Image link color defined in theme */
+}
+
+.markdown-editor .code {
+    -fx-font-family: "monospace" !important;
+    -rtfx-background-color: -mwfx-inline-background-color;
+    /* Code color defined in theme */
+}
+
+.markdown-editor .br {
+    -rtfx-background-color: #c8eafb;
+}
+
+/* Blocks */
+.markdown-editor .pre.paragraph-text {
+    -fx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .pre.text {
+    /* Code block color defined in theme */
+}
+
+.markdown-editor .blockquote {
+    /* Blockquote color defined in theme */
+}
+
+.markdown-editor .aside {
+    /* Aside color defined in theme */
+}
+
+/* Lists */
+.markdown-editor .li {
+    /* List item color defined in theme */
+}
+
+.markdown-editor .liopen {
+    -fx-font-weight: bold;
+    /* List marker color defined in theme */
+}
+
+.markdown-editor .liopentask {
+    -fx-font-weight: bold;
+    /* Task list marker color defined in theme */
+}
+
+.markdown-editor .dt {
+    -fx-font-weight: bold;
+    -fx-font-style: italic;
+}
+
+.markdown-editor .dd {
+    /* Definition description color defined in theme */
+}
+
+/* Table */
+.markdown-editor .table.paragraph-text {
+    -fx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .th {
+    -fx-font-weight: bold;
+}
+
+/* HTML */
+.markdown-editor .html.paragraph-text {
+    -fx-background-color: -mwfx-inline-background-color;
+}
+
+.markdown-editor .html.text {
+    -rtfx-background-color: -mwfx-inline-background-color;
+}
+
+/* References */
+.markdown-editor .reference {
+    /* Reference color defined in theme */
+}
+
+.markdown-editor .abbrdef,
+.markdown-editor .abbr {
+    /* Abbreviation color defined in theme */
+}
+
+/* Search highlighting */
+.markdown-editor .hit {
+    /* Hit background defined in theme */
+}
+
+.markdown-editor .hit-active {
+    /* Active hit background defined in theme */
+}
+
+/* Gutter for line numbers */
+.markdown-editor .paragraph-graphic .gutter {
+    -fx-border-width: 0 1 0 0;
+    /* Border color defined in theme */
+}
+
+.markdown-editor .paragraph-graphic .lineno {
+    -fx-padding: 0 0.25em 0 0.25em;
+    /* Line number color defined in theme */
+}
+
+/* Padding - OPTIONAL - may cause layout issues */
+/*
+.markdown-editor .paragraph-box .paragraph-text {
+    -fx-padding: 0 1em 0 1em;
+}
+.markdown-editor .paragraph-box:last-paragraph .paragraph-text {
+    -fx-padding: 0 1em 1em 1em;
+}
+.markdown-editor .paragraph-box:first-paragraph .paragraph-text {
+    -fx-padding: 1em 1em 0 1em;
+}
+*/
+
+/* Code syntax highlighting in dark theme */
+.markdown-editor .token.comment {
+    /* Comment color defined in theme */
+}
+
+.markdown-editor .token.punctuation {
+    /* Punctuation color defined in theme */
+}
+
+.markdown-editor .token.property,
+.markdown-editor .token.tag,
+.markdown-editor .token.boolean,
+.markdown-editor .token.number,
+.markdown-editor .token.constant,
+.markdown-editor .token.symbol,
+.markdown-editor .token.deleted {
+    /* Property token color defined in theme */
+}
+
+.markdown-editor .token.selector,
+.markdown-editor .token.attr-name,
+.markdown-editor .token.string,
+.markdown-editor .token.char,
+.markdown-editor .token.builtin,
+.markdown-editor .token.inserted {
+    /* String token color defined in theme */
+}
+
+.markdown-editor .token.operator,
+.markdown-editor .token.entity,
+.markdown-editor .token.url {
+    /* Operator token color defined in theme */
+}
+
+.markdown-editor .token.atrule,
+.markdown-editor .token.attr-value,
+.markdown-editor .token.keyword {
+    /* Keyword token color defined in theme */
+}
+
+.markdown-editor .token.function {
+    /* Function token color defined in theme */
+}
+
+.markdown-editor .token.regex,
+.markdown-editor .token.important,
+.markdown-editor .token.variable {
+    /* Variable token color defined in theme */
+}
+
+/* Preview */
+.ast-preview .selection {
+    -rtfx-background-color: #FFF59D;
+}
+
 
 

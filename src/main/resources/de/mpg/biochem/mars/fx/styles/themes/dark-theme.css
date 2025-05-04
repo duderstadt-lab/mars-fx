@@ -49,6 +49,25 @@
     -mwfx-hit: -mars-dark-search-hit-active;
 }
 
+/* Target Text nodes directly */
+Text {
+    -fx-fill: rgb(220, 220, 220);
+}
+
+/* Specifically target headings */
+Text.heading {
+    -fx-fill: rgb(220, 220, 220);
+}
+
+/* Specifically target descriptions */
+Text.description {
+    -fx-fill: rgb(220, 220, 220);
+}
+
+Text, .text {
+    -fx-fill: rgb(220, 220, 220);
+}
+
 /* Text Controls */
 .text-input {
     -fx-text-fill: -mars-dark-text-primary;
@@ -134,13 +153,13 @@
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
-    -fx-background-color: -mwfx-tab-active, -mwfx-tab-background;
-    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+    -fx-background-color: rgb(75, 110, 175), rgb(55, 58, 60) !important;
+    -fx-background-insets: 0 0 0 0, 0 0 0.333333em 0 !important;
 }
 
-.tab-pane > .tab-header-area > .headers-region > .tab:hover {
-    -fx-background-color: derive(-mwfx-tab-active, 35%), -mwfx-tab-background;
-    -fx-background-insets: 0 1 0 0, 0 1 0.333333em 0;
+.tab-pane > .tab-header-area > .headers-region > .tab:hover:not(:selected) {
+    -fx-background-color: derive(rgb(75, 110, 175), 35%), rgb(55, 58, 60) !important;
+    -fx-background-insets: 0 0 0 0, 0 0 0.333333em 0 !important;
 }
 
 .tab-pane .tab-label {
@@ -234,6 +253,10 @@
     -fx-stroke: -mars-dark-accent-primary;
 }
 
+.jfx-tab-pane .tab-header-area .jfx-rippler {
+    -jfx-rippler-fill: rgb(100, 100, 100);
+}
+
 .tab-selected-line {
     -fx-background-color: -mars-dark-accent-primary;
 }
@@ -312,7 +335,101 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 5, 0, 0, 2);
 }
 
+/* Chart Styling */
+.chart {
+    -fx-background-color: rgb(45, 48, 50);
+    -fx-font-size: 12;
+}
+
+.chart .chart-title {
+    -fx-text-fill: rgb(170, 170, 170);
+    -fx-font-size: 12;
+    -fx-padding: 0 0 5 0px;
+}
+
+.chart .axis .axis-label {
+    -fx-fill: rgb(200, 200, 200);
+}
+
+.chart .axis .axis-tick-mark {
+    -fx-stroke: rgb(140, 140, 140);
+}
+
+.chart .axis .axis-minor-tick-mark {
+    -fx-stroke: rgb(100, 100, 100);
+}
+
+.chart .axis-tick-label {
+    -fx-fill: rgb(200, 200, 200);
+}
+
+.chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart .chart-legend-item {
+    -fx-text-fill: rgb(200, 200, 200);
+}
+
+.chart .chart-plot-background {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.chart .chart-vertical-grid-lines,
+.chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
+}
+
+.chart .grid-renderer .chart-major-grid-lines {
+    -fx-stroke: rgb(100, 100, 100);
+}
+
+.chart .grid-renderer .chart-minor-grid-lines {
+    -fx-stroke: rgb(85, 85, 85);
+}
+
+.chart .chart-zoom-rect {
+    -fx-fill: rgb(0, 123, 255);
+    -fx-stroke: rgb(0, 123, 255);
+}
+
+.chart .value-indicator-line,
+.chart .value-indicator-marker,
+.chart .value-indicator-label {
+    -fx-fill: rgb(200, 200, 200);
+    -fx-stroke: rgb(200, 200, 200);
+}
+
+.chart-container {
+    -fx-padding: 0 5 5 5px;
+}
+
+/* ChartFX specific styles */
+.chart-fx .axis-tick-label {
+    -fx-fill: rgb(200, 200, 200);
+}
+
+.chart-plot-background,
+.chart-plot-area,
+.chart-canvas-area {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.chart-fx .chart-horizontal-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
+}
+
+.chart-fx .chart-vertical-grid-lines {
+    -fx-stroke: rgb(70, 73, 75);
+}
+
 /* Scrollbars */
+.dashboard-scroll-pane {
+    -fx-border-color: rgb(55, 58, 60) !important;
+    -fx-focus-color: rgb(55, 58, 60) !important;
+    -fx-faint-focus-color: rgb(55, 58, 60) !important;
+}
+
 .scroll-bar {
     -fx-background-color: #252525;
 }
@@ -337,6 +454,23 @@
 
 .scroll-bar .thumb:pressed {
     -fx-background-color: #a0a0a0 !important;
+}
+
+/* Scrollbars */
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: #353535 !important;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: #aaaaaa !important;
+}
+
+/* Ensure no parts of the scrollbar are pure black */
+.scroll-bar * {
+    -fx-shadow-highlight-color: transparent;
+    -fx-shadow-color: transparent;
 }
 
 /* Fix for icons */
@@ -372,13 +506,526 @@
     -fx-padding: 0 1px 0 1px !important;
 }
 
-/* Markdown Editor styling for dark theme */
+/* Target the chip's container */
+.jfx-chip-view {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane > .viewport,
+.jfx-chip-view .chips-pane > .text-area:focused,
+.jfx-chip-view .chips-pane > .text-area:focused .scroll-pane {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area .content,
+.jfx-chip-view .chips-pane > .text-area:focused .content {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+    -fx-padding: 0 0 0 0;
+}
+
+.jfx-chip-view > .scroll-pane,
+.jfx-chip-view > .scroll-pane > .viewport {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view > .scroll-pane > .scroll-bar:horizontal,
+.jfx-chip-view > .scroll-pane > .scroll-bar:vertical {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgb(150, 150, 150);
+    -fx-fill: rgb(0, 0, 0);
+}
+
+.jfx-chip > HBox {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.jfx-chip .text {
+    -fx-fill: rgb(0, 0, 0);
+}
+
+/* Markdown Editor Dark Theme */
+
+/* Base styling */
+.markdown-editor {
+    -fx-background-color: #1a1a1a;
+    -fx-text-fill: #d4d4d4;
+    -fx-font-family: "monospace";
+    -fx-font-size: 10pt;
+}
+
+/*---- headers ----*/
+
+.markdown-editor .h1,
+.markdown-editor .h2,
+.markdown-editor .h3,
+.markdown-editor .h4,
+.markdown-editor .h5,
+.markdown-editor .h6 {
+	-fx-font-weight: bold;
+	-fx-fill: #e06c75 !important;
+}
+
+/* Text formatting */
+.markdown-editor .bold,
+.markdown-editor .strong {
+    -fx-font-weight: bold !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .italic,
+.markdown-editor .emphasis {
+    -fx-font-style: italic !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .monospace,
+.markdown-editor .code-inline {
+    -fx-font-family: "monospace" !important;
+    -fx-fill: #89DDFF !important;
+    -fx-background-color: #2d2d2d !important;
+    -fx-padding: 2px !important;
+    -rtfx-background-color: #2d2d2d !important;
+}
+
+/* Markdown Editor Dark Theme Overrides */
+
+/* Base inline background color */
+.markdown-editor {
+    -mwfx-inline-background-color: #2d2d2d;
+}
+
+/* Disabled state */
+.markdown-editor:disabled,
+.markdown-editor:disabled .paragraph-text {
+    -fx-background-color: #1a1a1a;
+}
+
+.markdown-editor:disabled .paragraph-text .text {
+    -fx-fill: #ff6b6b;
+}
+
+/* Highlight current line */
+.markdown-editor .paragraph-box:has-caret {
+    -fx-background-color: #2d2d30;
+}
+
+/* Gutter */
+.markdown-editor .paragraph-graphic .gutter {
+    -fx-border-color: #333;
+}
+
+.markdown-editor .paragraph-graphic .lineno {
+    -fx-text-fill: #777;
+}
+
+/* Inline styles */
+.markdown-editor .strong {
+    -fx-font-weight: bold;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .em {
+    -fx-font-style: italic;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .del {
+    -fx-strikethrough: true;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .a {
+    -fx-fill: #61afef !important;
+    -rtfx-background-color: transparent;
+}
+
+/* For dark theme - link highlighting */
+.markdown-editor .a {
+  color: #58a6ff; /* Blue color for links in dark theme */
+  -rtfx-background-color: -mwfx-inline-background-color;
+  text-decoration: none; /* Remove underline */
+  padding: 0 2px; /* Small padding around links */
+  border-radius: 2px; /* Slight rounding of corners */
+  transition: background-color 0.2s; /* Smooth transition for hover effect */
+}
+
+/* Make the cursor (caret) visible in dark theme */
+.code-area .caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+.text-area .caret,
+.text-field .caret,
+.styled-text-area .caret,
+.markdown-editor .caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* If you're using RichTextFX-based components */
+.styled-text-area .caret-path {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* Additional selectors to cover all possible cases */
+.text-input-caret,
+.rich-text-caret,
+.text-caret {
+    -fx-stroke: #ffffff !important;
+    -fx-stroke-width: 1.5px !important;
+}
+
+/* Sometimes the caret might be implemented as a background color */
+.text-area .caret-blink-rate,
+.styled-text-area .caret-blink-rate {
+    -rtfx-blink-rate: 500ms;
+    -fx-background-color: #ffffff !important;
+}
+
+.markdown-editor .img {
+    -fx-fill: #e5c07b !important;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .code {
+    -fx-fill: #98c379 !important;
+    -rtfx-background-color: transparent;
+}
+
+.markdown-editor .br {
+    -rtfx-background-color: #3e4451;
+}
+
+/* Code blocks */
+.markdown-editor .pre.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .pre.text {
+    -fx-fill: #98c379 !important;
+}
+
+/* Blockquotes */
+.markdown-editor .blockquote {
+    -fx-fill: #abb2bf;
+}
+
+.markdown-editor .aside {
+    -fx-fill: #e5c07b;
+}
+
+/* Lists */
+.markdown-editor .li {
+    -fx-fill: #d4d4d4;
+}
+
+.markdown-editor .liopen {
+    -fx-fill: #e5c07b;
+    -fx-font-weight: bold;
+}
+
+.markdown-editor .liopentask {
+    -fx-fill: #61afef;
+    -fx-font-weight: bold;
+}
+
+.markdown-editor .dt {
+    -fx-font-weight: bold;
+    -fx-font-style: italic;
+}
+
+.markdown-editor .dd {
+    -fx-fill: #d4d4d4;
+}
+
+/* Tables */
+.markdown-editor .table.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .th {
+    -fx-font-weight: bold;
+}
+
+/* HTML */
+.markdown-editor .html.paragraph-text {
+    -fx-background-color: #2d2d2d;
+}
+
+.markdown-editor .html.text {
+    -rtfx-background-color: #2d2d2d;
+}
+
+/* References */
+.markdown-editor .reference {
+    -fx-fill: #61afef !important;
+}
+
+.markdown-editor .abbrdef,
+.markdown-editor .abbr {
+    -fx-fill: #56b6c2;
+}
+
+/* Lists */
+.markdown-editor .list-marker {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+}
+
+.markdown-editor .list-item-number {
+    -fx-fill: #e06c75 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Code blocks */
+.markdown-editor .code-block,
+.markdown-editor .fenced-code,
+.markdown-editor .preformatted {
+    -fx-font-family: "monospace" !important;
+    -fx-background-color: #2d2d2d !important;
+    -rtfx-background-color: #2d2d2d !important;
+    -fx-padding: 5px !important;
+}
+
+/* Block quotes */
+.markdown-editor .blockquote {
+    -fx-fill: #b8b8b8 !important;
+    -fx-background-color: #2d2d2d !important;
+    -rtfx-background-color: #2d2d2d !important;
+    -fx-border-color: #4e4e4e !important;
+    -fx-border-width: 0 0 0 3px !important;
+    -fx-padding: 0 0 0 10px !important;
+}
+
+/* Links */
+.markdown-editor .link {
+    -fx-fill: #61afef !important;
+    -fx-underline: true !important;
+}
+
+/* Search highlighting */
 .markdown-editor .hit {
-    -rtfx-background-color: -mars-dark-search-hit !important;
+    -rtfx-background-color: #4D4D00 !important;
+    -fx-fill: #d4d4d4 !important;
 }
 
 .markdown-editor .hit-active {
-    -rtfx-background-color: -mars-dark-search-hit-active !important;
+    -rtfx-background-color: #8B6000 !important;
+    -fx-fill: #d4d4d4 !important;
+}
+
+/* Code syntax highlighting for dark theme */
+.markdown-editor .token.comment {
+    -fx-fill: #6A9955 !important;
+}
+
+.markdown-editor .token.punctuation {
+    -fx-fill: #d4d4d4 !important;
+}
+
+.markdown-editor .token.property,
+.markdown-editor .token.tag,
+.markdown-editor .token.boolean,
+.markdown-editor .token.number,
+.markdown-editor .token.constant,
+.markdown-editor .token.symbol,
+.markdown-editor .token.deleted {
+    -fx-fill: #C792EA !important;
+}
+
+.markdown-editor .token.selector,
+.markdown-editor .token.attr-name,
+.markdown-editor .token.string,
+.markdown-editor .token.char,
+.markdown-editor .token.builtin,
+.markdown-editor .token.inserted {
+    -fx-fill: #89DDFF !important;
+}
+
+.markdown-editor .token.operator,
+.markdown-editor .token.entity,
+.markdown-editor .token.url {
+    -fx-fill: #E06C75 !important;
+}
+
+.markdown-editor .token.atrule,
+.markdown-editor .token.attr-value,
+.markdown-editor .token.keyword {
+    -fx-fill: #C586C0 !important;
+}
+
+.markdown-editor .token.function {
+    -fx-fill: #DCDCAA !important;
+}
+
+.markdown-editor .token.regex,
+.markdown-editor .token.important,
+.markdown-editor .token.variable {
+    -fx-fill: #F7B267 !important;
+}
+
+/* Fix for nested elements to maintain proper styling */
+.markdown-editor .preformatted .keyword,
+.markdown-editor .code-block .keyword {
+    -fx-fill: #C586C0 !important;
+}
+
+.markdown-editor .preformatted .string,
+.markdown-editor .code-block .string {
+    -fx-fill: #CE9178 !important;
+}
+
+.markdown-editor .preformatted .comment,
+.markdown-editor .code-block .comment {
+    -fx-fill: #6A9955 !important;
+}
+
+/* Dark theme for CodeArea */
+.code-area {
+    -fx-background-color: #1e1e1e;
+    -fx-text-fill: #d4d4d4;
+}
+
+/* Syntax highlighting */
+.keyword {
+    -fx-fill: #c586c0 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Import statement */
+.import {
+    -fx-fill: #c586c0 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Java/Groovy keywords */
+.for, .if, .while, .do, .new, .return, .null, .true, .false, .class, .try, .catch {
+    -fx-fill: #569cd6 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Types */
+.int, .double, .float, .long, .boolean, .byte, .char, .short, .void {
+    -fx-fill: #569cd6 !important;
+    -fx-font-weight: bold !important;
+}
+
+/* Strings */
+.string {
+    -fx-fill: #ce9178 !important;
+}
+
+.semicolon {
+    -fx-fill: #d4d4d4;
+    -fx-font-weight: bold;
+}
+
+.paren {
+    -fx-fill: #ff8c7a;
+    -fx-font-weight: bold;
+}
+
+.bracket {
+    -fx-fill: #6abf69;
+    -fx-font-weight: bold;
+}
+
+.brace {
+    -fx-fill: #4ec9b0;
+    -fx-font-weight: bold;
+}
+
+/* Comments */
+.comment, .multi-comment {
+    -fx-fill: #6a9955 !important;
+}
+
+/* With both of these alternatives */
+.paragraph-box:has-caret {
+    -fx-background-color: #2d2d30 !important;
+}
+
+/* Alternative for environments that don't support :has-caret */
+.paragraph-box.has-caret {
+    -fx-background-color: #2d2d30 !important;
+}
+
+/* OUTPUT directive styling - FIXED */
+[class*="OUTPUT"] {
+    -fx-fill: #4ec9b0 !important;
+}
+
+/* Selection color */
+.code-area .selection {
+    -fx-fill: #264f78;
+}
+
+/* Line numbers if needed */
+.lineno {
+    -fx-background-color: #252526;
+    -fx-text-fill: #858585;
+}
+
+/* Additional Controls */
+.combo-box {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+/* Virtual flow */
+.code-area .virtual-flow {
+    -fx-background-color: #1e1e1e;
+}
+
+/* PopOver styles for dark theme */
+.popover {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.popover > .border {
+    -fx-stroke: rgb(80, 83, 85) !important;
+    -fx-fill: rgb(45, 48, 50) !important;
+}
+
+.popover > .content {
+    -fx-background-color: rgb(45, 48, 50) !important;
+}
+
+.popover > .title {
+    -fx-background-color: rgb(55, 58, 60) !important;
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* Style text fields in the popover */
+.popover .text-field {
+    -fx-background-color: rgb(60, 63, 65) !important;
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* Style labels in the popover */
+.popover .label {
+    -fx-text-fill: rgb(220, 220, 220) !important;
+}
+
+/* Ensure code blocks have proper dark background */
+.styled-text-area.padding .paragraph-box .paragraph-text {
+    -fx-background-color: transparent;
 }
 
 .markdown-editor .paragraph-box:has-caret {
@@ -388,4 +1035,135 @@
 /* Border styling */
 .bdv-source-options {
     -fx-border-color: transparent;
+}
+
+.choice-box {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-mark-color: rgb(200, 200, 200);
+}
+
+.check-box {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.check-box .box {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+.radio-button {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.radio-button .radio {
+    -fx-background-color: rgb(60, 63, 65);
+}
+
+/* Dialog Styling */
+.dialog-pane {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.dialog-pane .content {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Menu Styling */
+.menu-bar {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.menu {
+    -fx-background-color: transparent;
+}
+
+.menu:hover, .menu:showing {
+    -fx-background-color: rgb(75, 85, 95);
+}
+
+.menu-item {
+    -fx-background-color: rgb(55, 58, 60);
+}
+
+.menu-item:hover {
+    -fx-background-color: rgb(75, 85, 95);
+}
+
+.menu .label, .menu-item .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Tooltip */
+.tooltip {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Additional specific selectors for your application */
+
+/* Chart control panel (the area below the chart) */
+.chart-control-panel,
+.chart-settings-panel {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.chart-control-panel .label,
+.chart-settings-panel .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Title, X-Axis, Y-Axis input fields */
+.axis-config-field,
+.title-config-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Bounds controls */
+.bounds-control,
+.chart-bounds-panel {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.bounds-control .label,
+.chart-bounds-panel .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* Number fields and spinners */
+.spinner,
+.number-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.spinner .text-field {
+    -fx-background-color: rgb(60, 63, 65);
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    -fx-background-color: rgb(70, 73, 75);
+}
+
+/* Track controls and table */
+.track-controls-panel,
+.track-table {
+    -fx-background-color: rgb(45, 48, 50);
+}
+
+.track-controls-panel .label,
+.track-table .label {
+    -fx-text-fill: rgb(220, 220, 220);
+}
+
+/* More specific selectors for handling chart number labels */
+.axis-tick-mark,
+.axis .tick-label {
+    -fx-fill: rgb(200, 200, 200);
+    -fx-text-fill: rgb(200, 200, 200);
 }

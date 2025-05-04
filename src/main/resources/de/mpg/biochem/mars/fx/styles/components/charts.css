@@ -1,1 +1,245 @@
 /* charts.css - Styles for charts and data visualization components */
+
+/* Base chart styling */
+.chart {
+    -fx-padding: 0 5 5 5px;
+    -fx-font-size: 12;
+    /* Background defined in theme */
+}
+
+.chart-container {
+    -fx-padding: 0 5 5 5px;
+}
+
+/* Chart title and labels */
+.chart .chart-title {
+    -fx-font-size: 12;
+    -fx-padding: 0 0 5 0px;
+    /* Colors defined in theme */
+}
+
+.chart .axis .axis-label {
+    /* Colors defined in theme */
+}
+
+/* Tick marks and grid lines */
+.chart .axis .axis-tick-mark {
+    -fx-stroke-width: 1;
+    /* Colors defined in theme */
+}
+
+.chart .axis .axis-minor-tick-mark {
+    -fx-stroke-width: 0.5;
+    /* Colors defined in theme */
+}
+
+.chart .axis-tick-label {
+    /* Colors defined in theme */
+}
+
+/* Chart legend */
+.chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.chart .chart-legend-item {
+    /* Colors defined in theme */
+}
+
+/* Chart background and plots */
+.chart .chart-plot-background {
+    /* Colors defined in theme */
+}
+
+.chart-plot-background,
+.chart-plot-area,
+.chart-canvas-area {
+    /* Colors defined in theme via !important */
+}
+
+/* Chart grid lines */
+.chart .chart-vertical-grid-lines,
+.chart .chart-horizontal-grid-lines {
+    -fx-stroke-width: 1;
+    -fx-stroke-dash-array: 2 2;
+    /* Colors defined in theme */
+}
+
+.chart .grid-renderer .chart-major-grid-lines {
+    -fx-stroke-width: 1;
+    /* Colors defined in theme */
+}
+
+.chart .grid-renderer .chart-minor-grid-lines {
+    -fx-stroke-width: 0.5;
+    /* Colors defined in theme */
+}
+
+/* Chart zoom rectangle */
+.chart .chart-zoom-rect {
+    -fx-fill: rgba(0, 123, 255, 0.25);
+    -fx-stroke: rgb(0, 123, 255);
+    -fx-stroke-width: 1;
+}
+
+/* Value indicators */
+.chart .value-indicator-line,
+.chart .value-indicator-marker,
+.chart .value-indicator-label {
+    /* Colors defined in theme */
+}
+
+/* Data point marker */
+.chart-content Circle {
+    -fx-stroke-width: 1.5;
+    /* Color defined in theme */
+}
+
+/* Data point tooltip */
+.chart-datapoint-tooltip-label {
+    -fx-padding: 5px;
+    -fx-background-radius: 3px;
+    -fx-border-radius: 3px;
+    -fx-border-width: 1px;
+    /* Colors defined in theme */
+}
+
+/* ChartFX specific styles */
+.chart-fx .axis-tick-label {
+    /* Colors defined in theme */
+}
+
+.chart-fx .chart-horizontal-grid-lines {
+    -fx-stroke-width: 0.5;
+    -fx-stroke-dash-array: 2 2;
+    /* Colors defined in theme */
+}
+
+.chart-fx .chart-vertical-grid-lines {
+    -fx-stroke-width: 0.5;
+    -fx-stroke-dash-array: 2 2;
+    /* Colors defined in theme */
+}
+
+/* Chart bounds controls */
+.bounds-control,
+.chart-bounds-panel {
+    /* Colors defined in theme */
+}
+
+.bounds-control .label,
+.chart-bounds-panel .label {
+    /* Colors defined in theme */
+}
+
+/* Chart number fields and spinners */
+.spinner,
+.number-field {
+    /* Colors defined in theme */
+}
+
+.spinner .text-field {
+    /* Colors defined in theme */
+}
+
+.spinner .increment-arrow-button,
+.spinner .decrement-arrow-button {
+    /* Colors defined in theme */
+}
+
+/* Track controls */
+.track-controls-panel,
+.track-table {
+    /* Colors defined in theme */
+}
+
+.track-controls-panel .label,
+.track-table .label {
+    /* Colors defined in theme */
+}
+
+/* Chart header styling */
+.widget-header,
+.chart-header,
+.panel-header {
+    -fx-padding: 5px;
+    /* Background defined in theme */
+}
+
+/* Color-specific chart styles */
+.chart-series-line.series0 {
+    -fx-stroke: #f3622d;
+}
+
+.chart-series-line.series1 {
+    -fx-stroke: #fba71b;
+}
+
+.chart-series-line.series2 {
+    -fx-stroke: #57b757;
+}
+
+.chart-series-line.series3 {
+    -fx-stroke: #41a9c9;
+}
+
+.chart-series-line.series4 {
+    -fx-stroke: #4258c9;
+}
+
+.chart-series-line.series5 {
+    -fx-stroke: #9a42c8;
+}
+
+.chart-series-line.series6 {
+    -fx-stroke: #c84164;
+}
+
+.chart-series-line.series7 {
+    -fx-stroke: #888888;
+}
+
+/* Line chart specific styles */
+.chart-line-symbol {
+    -fx-background-radius: 5px;
+    -fx-padding: 3px;
+}
+
+.chart-line-symbol.series0 {
+    -fx-background-color: #f3622d, white;
+}
+
+.chart-line-symbol.series1 {
+    -fx-background-color: #fba71b, white;
+}
+
+.chart-line-symbol.series2 {
+    -fx-background-color: #57b757, white;
+}
+
+.chart-line-symbol.series3 {
+    -fx-background-color: #41a9c9, white;
+}
+
+.chart-line-symbol.series4 {
+    -fx-background-color: #4258c9, white;
+}
+
+.chart-line-symbol.series5 {
+    -fx-background-color: #9a42c8, white;
+}
+
+.chart-line-symbol.series6 {
+    -fx-background-color: #c84164, white;
+}
+
+.chart-line-symbol.series7 {
+    -fx-background-color: #888888, white;
+}
+
+/* Chart with selected points highlight */
+.chart-content .selected-point {
+    -fx-background-color: red;
+    -fx-background-radius: 7px;
+    -fx-padding: 2px;
+}
