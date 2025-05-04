@@ -47,6 +47,10 @@
     -fx-background-color: -fx-outer-border;
 }
 
+.jfx-chip-view .jfx-chip .close-button {
+    -fx-background-radius: 50%;
+}
+
 /* Close project button in projects combo box */
 .projects-combo-box .close-project-button {
     -fx-background-color: transparent;
