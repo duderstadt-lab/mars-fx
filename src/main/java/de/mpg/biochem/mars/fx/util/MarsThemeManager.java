@@ -48,9 +48,6 @@ public class MarsThemeManager {
     public static void applyTheme(Scene scene, boolean darkMode) {
         String css = darkMode ? DARK_THEME : LIGHT_THEME;
         scene.getStylesheets().clear();
-
-        if (!darkMode) scene.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme-remove.css");
-
         scene.getStylesheets().add(MarsThemeManager.class.getResource(css).toExternalForm());
     }
 
@@ -72,9 +69,6 @@ public class MarsThemeManager {
     public static void applyTheme(Parent root, boolean darkMode) {
         String css = darkMode ? DARK_THEME : LIGHT_THEME;
         root.getStylesheets().clear();
-
-        if (!darkMode) root.getStylesheets().add("de/mpg/biochem/mars/fx/light-theme-remove.css");
-
         root.getStylesheets().add(MarsThemeManager.class.getResource(css).toExternalForm());
     }
 
