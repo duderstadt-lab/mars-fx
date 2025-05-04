@@ -187,6 +187,13 @@
 .scroll-bar > .track {
     -mwfx-hit: #FBC02D;
 }
+
+.scroll-pane {
+    -fx-background-color: -fx-box-border, -fx-control-inner-background;
+    -fx-background-insets: 0, 1;
+    -fx-padding: 1;
+}
+
 .markdown-editor {
 	-mwfx-inline-background-color: #f6f6f6;
 }

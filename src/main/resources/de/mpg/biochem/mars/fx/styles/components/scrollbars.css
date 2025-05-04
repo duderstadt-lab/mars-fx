@@ -69,11 +69,6 @@
     -fx-opacity: 0;
 }
 
-/* Dashboard scroll pane */
-.dashboard-scroll-pane {
-    /* Border and focus colors defined in theme */
-}
-
 /* Remove scrollbars in specific components that don't need them */
 .scroll-pane.no-scrollbars .scroll-bar:vertical,
 .scroll-pane.no-scrollbars .scroll-bar:horizontal {
