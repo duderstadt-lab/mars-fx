@@ -201,6 +201,39 @@
     -fx-padding: 1;
 }
 
+/* Target the chip's container */
+.jfx-chip-view {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane,
+.jfx-chip-view .chips-pane > .text-area .scroll-pane > .viewport,
+.jfx-chip-view .chips-pane > .text-area:focused,
+.jfx-chip-view .chips-pane > .text-area:focused .scroll-pane {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+}
+
+.jfx-chip-view .chips-pane > .text-area .content,
+.jfx-chip-view .chips-pane > .text-area:focused .content {
+    -fx-background-color: TRANSPARENT, TRANSPARENT, TRANSPARENT, TRANSPARENT;
+    -fx-padding: 0 0 0 0;
+}
+
+.jfx-chip-view > .scroll-pane,
+.jfx-chip-view > .scroll-pane > .viewport {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip-view > .scroll-pane > .scroll-bar:horizontal,
+.jfx-chip-view > .scroll-pane > .scroll-bar:vertical {
+    -fx-background-color: TRANSPARENT;
+}
+
+.jfx-chip {
+    -fx-background-color: transparent;
+}
+
 .markdown-editor {
 	-mwfx-inline-background-color: #f6f6f6;
 }
