@@ -161,6 +161,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 
 		logArea = new InlineCssTextArea("");
 		logArea.getStyleClass().add("log-area");
+		logArea.getStyleClass().add("markdown-editor");
 		logArea.setEditable(false);
 		//logArea.setStyle("-fx-font-family: \"monospace\"; -fx-font-size: 10pt;");
 
