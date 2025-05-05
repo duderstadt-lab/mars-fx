@@ -42,15 +42,13 @@ import javafx.stage.Stage;
 public class IJStage extends Frame {
 
 	private Stage stage;
-	private MenuBar menuBar;
 
 	public IJStage(Stage stage) throws HeadlessException {
 		super(stage.getTitle());
 		this.stage = stage;
+	}
 
-		// Create a menu bar specific to this window
-		setupMenuBar();
-
+	public void buildShadowFrame() {
 		// Forward focus events between the JavaFX stage and this Frame
 		setupFocusSync();
 
@@ -61,28 +59,6 @@ public class IJStage extends Frame {
 		setLocation(-100, -100); // Off-screen
 		setUndecorated(true);
 		setVisible(true);
-	}
-
-	private void setupMenuBar() {
-		// Create a custom menu bar for this window
-		menuBar = new MenuBar();
-
-		// Add menus that make sense for your JavaFX application
-		// No need to worry about accelerator conflicts since this
-		// will only be active when your JavaFX stage has focus
-		java.awt.Menu editMenu = new java.awt.Menu("Edit");
-		java.awt.MenuItem unlockItem = new java.awt.MenuItem("Unlock");
-
-		// Add action listener to the save menu item
-		unlockItem.addActionListener(e -> {
-			System.out.println("Unlock needs to be implemented");
-		});
-
-		editMenu.add(unlockItem);
-		menuBar.add(editMenu);
-
-		// Set this menu bar on the Frame
-		setMenuBar(menuBar);
 	}
 
 	private void setupFocusSync() {

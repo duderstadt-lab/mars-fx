@@ -228,6 +228,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				}));
 
 				ijStage = new IJStage(stage);
+				java.awt.MenuBar menuBar = new java.awt.MenuBar();
+				java.awt.Menu editMenu = new java.awt.Menu("Edit");
+				java.awt.MenuItem unlockItem = new java.awt.MenuItem("Unlock");
+
+				unlockItem.addActionListener(e -> unlock());
+
+				editMenu.add(unlockItem);
+				menuBar.add(editMenu);
+				ijStage.setMenuBar(menuBar);
+				ijStage.buildShadowFrame();
 
 				SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 				buildScene();
