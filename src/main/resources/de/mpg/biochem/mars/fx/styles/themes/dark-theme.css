@@ -108,6 +108,14 @@ Text, .text {
     -fx-accent: -mars-dark-accent-primary;
 }
 
+.rounded-corners-textfield {
+    -fx-background-radius: 2em !important;
+    -fx-background-color: rgb(60, 63, 65); /* Your dark theme field color */
+    /* -fx-border-color: rgb(80, 83, 85);  Slightly lighter for border */
+    -fx-border-radius: 2em;
+    -fx-border-width: 1px;
+}
+
 .text-area {
     -fx-text-fill: -mars-dark-text-primary;
     -fx-background-color: -mars-dark-bg-field;

@@ -293,7 +293,8 @@ public abstract class AbstractPositionOfInterestTable {
 				addPositionField.setRight(addButton);
 			}
 		});
-		addPositionField.setStyle("-fx-background-radius: 2em; ");
+		//addPositionField.setStyle("-fx-background-radius: 2em; ");
+		addPositionField.getStyleClass().add("rounded-corners-textfield");
 
 		rootPane = new BorderPane();
 		Insets insets = new Insets(5);

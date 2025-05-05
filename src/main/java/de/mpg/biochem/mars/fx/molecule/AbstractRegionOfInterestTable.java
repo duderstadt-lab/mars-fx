@@ -309,7 +309,8 @@ public abstract class AbstractRegionOfInterestTable {
 				addRegionNameField.setRight(addButton);
 			}
 		});
-		addRegionNameField.setStyle("-fx-background-radius: 2em; ");
+		//addRegionNameField.setStyle("-fx-background-radius: 2em; ");
+		addRegionNameField.getStyleClass().add("rounded-corners-textfield");
 
 		rootPane = new BorderPane();
 		Insets insets = new Insets(5);

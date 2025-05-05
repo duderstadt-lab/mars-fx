@@ -287,8 +287,7 @@ public class MarsOMEView {
 				return name.contains(newValue);
 			});
 		});
-
-		filterField.setStyle("-fx-background-radius: 2em; ");
+		filterField.getStyleClass().add("rounded-corners-textfield");
 
 		borderPane.setTop(filterField);
 		BorderPane.setMargin(filterField, new Insets(5));

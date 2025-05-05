@@ -329,7 +329,8 @@ public abstract class AbstractParametersTable {
 				addParameterField.setRight(addButton);
 			}
 		});
-		addParameterField.setStyle("-fx-background-radius: 2em; ");
+		//addParameterField.setStyle("-fx-background-radius: 2em; ");
+		addParameterField.getStyleClass().add("rounded-corners-textfield");
 
 		typeButton = new Button();
 		typeButton.setText("123");

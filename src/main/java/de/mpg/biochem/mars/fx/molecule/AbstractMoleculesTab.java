@@ -451,7 +451,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 		moleculeIndexTable.setItems(filteredData);
 
-		filterField.setStyle("-fx-background-radius: 2em; ");
+		//filterField.setStyle("-fx-background-radius: 2em; ");
+		filterField.getStyleClass().add("rounded-corners-textfield");
 
 		Insets insets = new Insets(5);
 

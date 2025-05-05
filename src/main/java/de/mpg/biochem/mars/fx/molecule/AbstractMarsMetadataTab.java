@@ -260,7 +260,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 
 		metaIndexTable.setItems(filteredData);
 
-		filterField.setStyle("-fx-background-radius: 2em; ");
+		//filterField.setStyle("-fx-background-radius: 2em; ");
+		filterField.getStyleClass().add("rounded-corners-textfield");
 
 		BorderPane borderPane = new BorderPane();
 		Insets insets = new Insets(5);
