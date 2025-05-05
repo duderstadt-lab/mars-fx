@@ -136,6 +136,7 @@ public class DocumentTemplateSelectionDialog extends
 		});
 
 		vBox.getChildren().add(setTemplateButton);
+		vBox.getStyleClass().add("bdv-source-options");
 
 		dialogPane.setContent(vBox);
 
