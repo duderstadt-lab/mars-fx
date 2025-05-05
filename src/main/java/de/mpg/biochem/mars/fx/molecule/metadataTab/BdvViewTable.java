@@ -247,7 +247,7 @@ public class BdvViewTable implements MetadataEventHandler {
 				addBdvSourceNameField.setRight(addButton);
 			}
 		});
-		addBdvSourceNameField.setStyle("-fx-background-radius: 2em; ");
+		addBdvSourceNameField.getStyleClass().add("rounded-corners-textfield");
 
 		typeButton = new Button();
 		typeButton.setText("N5");

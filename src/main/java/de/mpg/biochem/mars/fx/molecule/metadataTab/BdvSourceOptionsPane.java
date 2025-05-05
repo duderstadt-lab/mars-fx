@@ -210,11 +210,11 @@ public class BdvSourceOptionsPane extends VBox {
 
 		Text times = FontAwesomeIconFactory.get().createIcon(
 			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
-		times.setStyle(times.getStyle() + "-fx-fill: red;");
+		times.setStyle(times.getStyle() + "-fx-fill: red !important;");
 
 		Text check = FontAwesomeIconFactory.get().createIcon(
 			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
-		check.setStyle(check.getStyle() + "-fx-fill: green;");
+		check.setStyle(check.getStyle() + "-fx-fill: green !important;");
 
 		Label pathValidation = new Label("");
 		pathValidation.setGraphic(times);
@@ -343,11 +343,11 @@ public class BdvSourceOptionsPane extends VBox {
 
 		Text times2 = FontAwesomeIconFactory.get().createIcon(
 			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
-		times2.setStyle(times.getStyle() + "-fx-fill: red;");
+		times2.setStyle(times.getStyle() + "-fx-fill: red !important;");
 
 		Text check2 = FontAwesomeIconFactory.get().createIcon(
 			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
-		check2.setStyle(check.getStyle() + "-fx-fill: green;");
+		check2.setStyle(check.getStyle() + "-fx-fill: green !important;");
 
 		Label datasetValidation = new Label("");
 		datasetValidation.setGraphic(times2);

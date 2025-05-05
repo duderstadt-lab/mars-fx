@@ -213,9 +213,74 @@
     -fx-background-color: rgba(0, 123, 255, 0.1) !important;
 }
 
-/* Border and separator styling */
+/* BdvSourceOptionsPane styling for light theme */
 .bdv-source-options {
-    -fx-border-color: lightgray;
+    -fx-background-color: white;
+    -fx-border-color: #e0e0e0;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+/* Text field styling */
+.bdv-source-options .text-field {
+    -fx-background-color: white;
+    -fx-border-color: #cccccc;
+    -fx-border-width: 1px;
+    -fx-border-radius: 3px;
+    -fx-padding: 5px;
+    -fx-text-fill: #333333;
+}
+
+.bdv-source-options .text-field:focused {
+    -fx-border-color: #007bff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 123, 255, 0.25), 4, 0, 0, 0);
+}
+
+/* Validation icons */
+.bdv-source-options .label .fontawesome-icon.fa-times {
+    -fx-fill: #dc3545 !important; /* Red color for X icon */
+}
+
+.bdv-source-options .label .fontawesome-icon.fa-check {
+    -fx-fill: #28a745 !important; /* Green color for check icon */
+}
+
+/* Button styling */
+.bdv-source-options .button {
+    -fx-background-color: #f8f9fa;
+    -fx-border-color: #dee2e6;
+    -fx-text-fill: #212529;
+    -fx-border-radius: 3px;
+    -fx-background-radius: 3px;
+    -fx-padding: 5px 10px;
+}
+
+.bdv-source-options .button:hover {
+    -fx-background-color: #e9ecef;
+    -fx-border-color: #ced4da;
+}
+
+/* Toggle switch styling for light theme */
+.bdv-source-options .toggle-switch .thumb {
+    -fx-background-color: white;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 3, 0, 0, 1);
+}
+
+.bdv-source-options .toggle-switch .thumb-area {
+    -fx-background-color: #d0d0d0;
+    -fx-border-color: #b0b0b0;
+    -fx-border-radius: 1em;
+    -fx-background-radius: 1em;
+}
+
+.bdv-source-options .toggle-switch:selected .thumb-area {
+    -fx-background-color: #007bff;
+    -fx-border-color: #0069d9;
+}
+
+/* Labels styling */
+.bdv-source-options .label {
+    -fx-text-fill: #333333;
 }
 
 /* Scroll bar styling */
