@@ -116,6 +116,25 @@
     /* Colors set by theme */
 }
 
+/* JFXChipView Popup fixes for text visibility and width */
+.jfx-chips-popup {
+    /* Control width based on content */
+    -fx-pref-width: 0; /* Force preferred width to fit content */
+    -fx-max-width: 400px; /* Maximum width if content is very long */
+    -fx-min-width: 150px; /* Minimum width */
+}
+
+/* Fix cell layout to show text properly */
+.jfx-chips-popup .list-view {
+    -fx-fixed-cell-size: 30px; /* Set fixed height for cells */
+}
+
+.jfx-chips-popup .list-cell {
+    -fx-padding: 0 10px; /* Give text proper horizontal padding */
+    -fx-alignment: center-left; /* Align text to the left */
+    -fx-text-overrun: ellipsis; /* Show ellipsis for very long text */
+}
+
 /* Fix for caret visibility - crucial for text editing experience */
 .text-area .caret,
 .text-field .caret,
