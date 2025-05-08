@@ -47,7 +47,6 @@ public class NavigationPanel extends JPanel {
 		final MarsBdvFrame<?> marsBdvFrame)
 	{
 		super(new MigLayout("ins 0, fillx, filly", "[][][]", "top"));
-		this.setBackground(Color.white);
 
 		moleculeLocation = new NavigationButton(new ImageIcon(this.getClass()
 			.getResource("BdvMolecule.png")), "Go to");
