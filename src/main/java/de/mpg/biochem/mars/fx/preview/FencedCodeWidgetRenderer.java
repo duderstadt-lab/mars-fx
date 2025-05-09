@@ -96,6 +96,13 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
 					.tag("img", true);
 				return;
 			}
+			else if (node.getInfo().equals("python-images-widget") || node.getInfo()
+					.equals("groovy-images-widget"))
+			{
+				String[] imageData = convertCommaStringToArray(documentEditor.getDocument().getMedia(key));
+                for (String imageDatum : imageData) html.attr("src", imageDatum).withAttr().tag("img", true);
+				return;
+			}
 			else if (node.getInfo().equals("python-html-widget") || node.getInfo()
 				.equals("groovy-html-widget"))
 			{
@@ -105,5 +112,16 @@ public class FencedCodeWidgetRenderer implements NodeRenderer {
 			}
 		}
 		context.delegateRender();
+	}
+
+	public static String[] convertCommaStringToArray(String commaString) {
+		if (commaString == null || commaString.isEmpty()) {
+			return new String[0];
+		}
+
+		// Split the string at commas followed by optional whitespace
+		String[] array = commaString.split("\\s+");
+
+		return array;
 	}
 }

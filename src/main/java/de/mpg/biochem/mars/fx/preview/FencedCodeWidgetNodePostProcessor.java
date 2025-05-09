@@ -65,6 +65,8 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 					"html");
 			else if (fencedCodeBlockNode.getInfo().equals("groovy-image-widget"))
 				processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "imgsrc");
+			else if (fencedCodeBlockNode.getInfo().equals("groovy-images-widget"))
+				processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "imgsrcs");
 			else if (fencedCodeBlockNode.getInfo().equals("groovy-html-widget"))
 				processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "html");
 		}
@@ -73,6 +75,10 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 	private void processFencedCodeBlockWidget(FencedCodeBlock fencedCodeBlockNode,
 		String language, String outputVariableName)
 	{
+
+		//I just need to add the case that detects the output variable name imgsrcs and
+		//then uses the array string to build one string where the image data is separated by commas.
+
 		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
 
 		Map<String, Object> inputs = new HashMap<String, Object>();
@@ -96,7 +102,27 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 			documentEditor.getDocument().putMedia(key, (String) outputs.get(
 				FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
 		}
-		else documentEditor.getDocument().putMedia(key, (String) outputs.get(
-			outputVariableName));
+		else if (outputVariableName.equals("imgsrcs")) {
+			documentEditor.getDocument().putMedia(key, convertArrayToCommaString((String[]) outputs.get(outputVariableName)));
+		} else documentEditor.getDocument().putMedia(key, (String) outputs.get(outputVariableName));
+	}
+
+	public static String convertArrayToCommaString(String[] array) {
+		if (array == null || array.length == 0) {
+			return "";
+		}
+
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0; i < array.length; i++) {
+			sb.append(array[i]);
+
+			// Add comma if not the last element
+			if (i < array.length - 1) {
+				sb.append(" ");
+			}
+		}
+
+		return sb.toString();
 	}
 }
