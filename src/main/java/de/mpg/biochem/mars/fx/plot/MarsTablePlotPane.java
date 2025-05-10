@@ -170,10 +170,4 @@ public class MarsTablePlotPane extends AbstractPlotPane {
 		return (ArrayList<String>) table.getColumnHeadingList().stream().sorted()
 			.collect(toList());
 	}
-
-	@Override
-	public boolean darkMode() {
-		return prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false);
-	}
 }

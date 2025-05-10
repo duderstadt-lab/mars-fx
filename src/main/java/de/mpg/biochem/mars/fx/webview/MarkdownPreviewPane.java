@@ -53,7 +53,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import java.nio.file.Path;
 import java.util.List;

@@ -27,16 +27,16 @@
  * #L%
  */
 /*
- * Copyright (c) 2017 Karl Tauber <karl at jformdesigner dot com>
+ * Copyright (c) 2015 Karl Tauber <karl at jformdesigner dot com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
- *  o Redistributions of source code must retain the above copyright
+ *  * Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
  *
- *  o Redistributions in binary form must reproduce the above copyright
+ *  * Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
  *
@@ -53,66 +53,96 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
-import java.util.Iterator;
-import java.util.ServiceLoader;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 
-import de.mpg.biochem.mars.fx.Messages;
-import de.mpg.biochem.mars.fx.addons.PreviewViewAddon;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import org.fxmisc.flowless.VirtualizedScrollPane;
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.PreviewContext;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.Renderer;
+import de.mpg.biochem.mars.fx.syntaxhighlighter.SyntaxHighlighter;
+import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.scene.control.IndexRange;
-import javafx.scene.control.Label;
+import javafx.scene.control.ScrollBar;
 
 /**
- * External preview (provided by addon).
+ * HTML source preview.
  *
  * @author Karl Tauber
  */
-class ExternalPreview implements MarkdownPreviewPane.Preview {
+class HtmlSourcePreview implements MarkdownPreviewPane.Preview {
 
-	private static final boolean hasExternalPreview = ServiceLoader.load(
-		PreviewViewAddon.class).iterator().hasNext();
+	private PreviewStyledTextArea textArea;
+	private VirtualizedScrollPane<StyleClassedTextArea> scrollPane;
+	private ScrollBar vScrollBar;
 
-	private PreviewViewAddon previewView;
+	HtmlSourcePreview() {}
 
-	ExternalPreview() {
-		// Not using a static field for service loader here because each instance of
-		// this class
-		// requires a new instance of PreviewViewAddon.
-		// This allows PreviewViewAddon implementations to store information in
-		// fields.
-		ServiceLoader<PreviewViewAddon> addons = ServiceLoader.load(
-			PreviewViewAddon.class);
-		Iterator<PreviewViewAddon> it = addons.iterator();
-		if (it.hasNext()) previewView = it.next();
-	}
+	private void createNodes() {
+		textArea = new PreviewStyledTextArea();
+		textArea.setWrapText(true);
 
-	static boolean hasExternalPreview() {
-		return hasExternalPreview;
+		scrollPane = new VirtualizedScrollPane<>(textArea);
 	}
 
 	@Override
 	public javafx.scene.Node getNode() {
-		if (previewView != null) return previewView.getNode();
-		else return new Label(Messages.get("ExternalPreview.notAvailable"));
+		if (scrollPane == null) createNodes();
+		return scrollPane;
 	}
 
 	@Override
 	public void update(PreviewContext context, Renderer renderer) {
-		if (previewView != null) previewView.update(context.getMarkdownText(),
-			context.getPath());
+		String html = renderer.getHtml(true);
+		textArea.replaceText(html, computeHighlighting(html));
 	}
 
 	@Override
 	public void scrollY(PreviewContext context, double value) {
-		if (previewView != null) previewView.scrollY(value);
+		if (vScrollBar == null) vScrollBar = Utils.findVScrollBar(scrollPane);
+		if (vScrollBar == null) return;
+
+		double maxValue = vScrollBar.maxProperty().get();
+		vScrollBar.setValue(maxValue * value);
 	}
 
 	@Override
-	public void editorSelectionChanged(PreviewContext context, IndexRange range) {
-		if (previewView != null) previewView.editorSelectionChanged(range);
+	public void editorSelectionChanged(PreviewContext context,
+		IndexRange range)
+	{}
+
+	// ---- selection highlighting ---------------------------------------------
+
+	private static final HashMap<String, Collection<String>> spanStyleCache =
+		new HashMap<>();
+
+	private static StyleSpans<Collection<String>> computeHighlighting(
+		String text)
+	{
+		StyleSpansBuilder<Collection<String>> spansBuilder =
+			new StyleSpansBuilder<>();
+		SyntaxHighlighter.highlight(text, "html", (length, style) -> {
+			spansBuilder.add(toSpanStyle(style), length);
+		});
+		return spansBuilder.create();
+	}
+
+	private static Collection<String> toSpanStyle(String style) {
+		if (style == null) return Collections.emptyList();
+
+		Collection<String> spanStyle = spanStyleCache.get(style);
+		if (spanStyle == null) {
+			spanStyle = Arrays.asList(style, "token");
+			spanStyleCache.put(style, spanStyle);
+		}
+		return spanStyle;
 	}
 
 	@Override

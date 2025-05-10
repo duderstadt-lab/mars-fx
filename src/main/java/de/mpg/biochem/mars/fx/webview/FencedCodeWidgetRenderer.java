@@ -27,12 +27,12 @@
  * #L%
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.vladsch.flexmark.ast.Image;
+import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.html.HtmlWriter;
 import com.vladsch.flexmark.html.renderer.NodeRenderer;
 import com.vladsch.flexmark.html.renderer.NodeRendererContext;
@@ -42,11 +42,11 @@ import com.vladsch.flexmark.util.sequence.BasedSequence;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 
-public class MarsEmbbededImageRenderer implements NodeRenderer {
+public class FencedCodeWidgetRenderer implements NodeRenderer {
 
 	private DocumentEditor documentEditor;
 
-	public MarsEmbbededImageRenderer(DataHolder options,
+	public FencedCodeWidgetRenderer(DataHolder options,
 		DocumentEditor documentEditor)
 	{
 		this.documentEditor = documentEditor;
@@ -55,20 +55,52 @@ public class MarsEmbbededImageRenderer implements NodeRenderer {
 	@Override
 	public Set<NodeRenderingHandler<?>> getNodeRenderingHandlers() {
 		Set<NodeRenderingHandler<?>> set = new HashSet<>();
-		set.add(new NodeRenderingHandler<>(Image.class, this::render));
+		set.add(new NodeRenderingHandler<>(FencedCodeBlock.class, this::render));
 		return set;
 	}
 
-	private void render(Image node, NodeRendererContext context,
+	private void render(FencedCodeBlock node, NodeRendererContext context,
 		HtmlWriter html)
 	{
-		String mediaData = node.getUrl().toString();
-		if (documentEditor != null && documentEditor.getDocument().getMediaIDs()
-			.contains(mediaData))
-		{
-			documentEditor.addActiveMediaID(mediaData);
-			mediaData = documentEditor.getDocument().getMedia(mediaData);
-			node.setUrl(BasedSequence.of(mediaData));
+
+		// Should we check if node.getInfo() matches something first?
+
+		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX + node
+			.getInfo() + ":" + node.getContentChars().normalizeEOL();
+
+		if (documentEditor.getDocument().getMediaIDs().contains(key) || documentEditor.getDocument().getMediaArrayIDs().contains(key)) {
+			if (documentEditor.getDocument().getMediaIDs().contains(key) && documentEditor.getDocument().getMedia(key).startsWith(
+					FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX)) {
+				int startOffset = node.getStartOffset();
+				int endOffset = node.getEndOffset();
+				BasedSequence errorMessage = BasedSequence.of(documentEditor.getDocument().getMedia(key).substring(
+						FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX
+								.length()));
+				html.line();
+				html.attr("data-pos", startOffset + ":" + endOffset).withAttr().tag(
+						"pre").openPre();
+				html.attr("data-pos", startOffset + ":" + endOffset).srcPosWithEOL(
+						errorMessage).withAttr().tag("code");
+				html.text(errorMessage.normalizeEOL());
+				html.tag("/code");
+				html.tag("/pre").closePre();
+				return;
+			} else if (node.getInfo().equals("python-image-widget") || node.getInfo()
+					.equals("groovy-image-widget")) {
+				html.attr("src", documentEditor.getDocument().getMedia(key)).withAttr()
+						.tag("img", true);
+				return;
+			} else if (node.getInfo().equals("python-images-widget") || node.getInfo()
+					.equals("groovy-images-widget")) {
+				for (String imgsrc : documentEditor.getDocument().getMediaArray(key))
+					html.attr("src", imgsrc).withAttr().tag("img", true);
+				return;
+			} else if (node.getInfo().equals("python-html-widget") || node.getInfo()
+					.equals("groovy-html-widget")) {
+				html.line();
+				html.raw(documentEditor.getDocument().getMedia(key));
+				return;
+			}
 		}
 		context.delegateRender();
 	}

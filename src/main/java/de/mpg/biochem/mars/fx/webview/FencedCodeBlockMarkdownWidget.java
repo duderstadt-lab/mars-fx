@@ -27,7 +27,7 @@
  * #L%
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import java.io.IOException;
 import java.io.OutputStream;

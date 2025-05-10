@@ -53,101 +53,100 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
 
-import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.fxmisc.undo.UndoManagerFactory;
 
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
-import de.mpg.biochem.mars.fx.syntaxhighlighter.SyntaxHighlighter;
-import de.mpg.biochem.mars.fx.util.Utils;
+import de.mpg.biochem.mars.fx.options.Options;
+import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.WeakInvalidationListener;
 import javafx.scene.control.IndexRange;
-import javafx.scene.control.ScrollBar;
 
 /**
- * HTML source preview.
+ * A styled text area for preview. It uses the same font as the editor.
  *
  * @author Karl Tauber
  */
-class HtmlSourcePreview implements MarkdownPreviewPane.Preview {
+class PreviewStyledTextArea extends StyleClassedTextArea {
 
-	private PreviewStyledTextArea textArea;
-	private VirtualizedScrollPane<StyleClassedTextArea> scrollPane;
-	private ScrollBar vScrollBar;
+	private final InvalidationListener optionsListener;
 
-	HtmlSourcePreview() {}
+	PreviewStyledTextArea() {
+		setEditable(false);
+		setFocusTraversable(false);
+		getStyleClass().add("padding");
+		setUndoManager(UndoManagerFactory.zeroHistorySingleChangeUM(richChanges()));
 
-	private void createNodes() {
-		textArea = new PreviewStyledTextArea();
-		textArea.setWrapText(true);
+		updateFont();
 
-		scrollPane = new VirtualizedScrollPane<>(textArea);
+		optionsListener = e -> updateFont();
+		WeakInvalidationListener weakOptionsListener = new WeakInvalidationListener(
+			optionsListener);
+		Options.fontFamilyProperty().addListener(weakOptionsListener);
+		Options.fontSizeProperty().addListener(weakOptionsListener);
 	}
 
-	@Override
-	public javafx.scene.Node getNode() {
-		if (scrollPane == null) createNodes();
-		return scrollPane;
+	private void updateFont() {
+		setStyle("-fx-font-family: '" + Options.getFontFamily() +
+			"'; -fx-font-size: " + Options.getFontSize());
 	}
 
-	@Override
-	public void update(PreviewContext context, Renderer renderer) {
-		String html = renderer.getHtml(true);
-		textArea.replaceText(html, computeHighlighting(html));
-	}
-
-	@Override
-	public void scrollY(PreviewContext context, double value) {
-		if (vScrollBar == null) vScrollBar = Utils.findVScrollBar(scrollPane);
-		if (vScrollBar == null) return;
-
-		double maxValue = vScrollBar.maxProperty().get();
-		vScrollBar.setValue(maxValue * value);
-	}
-
-	@Override
-	public void editorSelectionChanged(PreviewContext context,
-		IndexRange range)
-	{}
-
-	// ---- selection highlighting ---------------------------------------------
-
-	private static final HashMap<String, Collection<String>> spanStyleCache =
-		new HashMap<>();
-
-	private static StyleSpans<Collection<String>> computeHighlighting(
-		String text)
+	void replaceText(String text,
+		StyleSpans<? extends Collection<String>> styleSpans)
 	{
-		StyleSpansBuilder<Collection<String>> spansBuilder =
-			new StyleSpansBuilder<>();
-		SyntaxHighlighter.highlight(text, "html", (length, style) -> {
-			spansBuilder.add(toSpanStyle(style), length);
+		// remember old selection range and scrollY
+		IndexRange oldSelection = getSelection();
+		double oldScrollY = getEstimatedScrollY();
+
+		// replace text and styles
+		doReplaceText(text);
+		if (styleSpans != null) setStyleSpans(0, styleSpans);
+
+		// restore old selection range and scrollY
+		int newLength = getLength();
+		selectRange(Math.min(oldSelection.getStart(), newLength), Math.min(
+			oldSelection.getEnd(), newLength));
+		Platform.runLater(() -> {
+			estimatedScrollYProperty().setValue(oldScrollY);
 		});
-		return spansBuilder.create();
 	}
 
-	private static Collection<String> toSpanStyle(String style) {
-		if (style == null) return Collections.emptyList();
+	/**
+	 * Replaces whole text in text area, but reduces the change by removing equal
+	 * leading and trailing characters.
+	 */
+	private void doReplaceText(String text) {
+		int start = 0;
+		int end = getLength();
+		String oldText = getText(start, end);
 
-		Collection<String> spanStyle = spanStyleCache.get(style);
-		if (spanStyle == null) {
-			spanStyle = Arrays.asList(style, "token");
-			spanStyleCache.put(style, spanStyle);
+		int textLength = text.length();
+		int textStart = 0;
+		int textEnd = textLength;
+
+		// trim leading equal characters
+		while (textStart < textLength && start < end) {
+			if (text.charAt(textStart) != oldText.charAt(textStart)) break;
+			textStart++;
+			start++;
 		}
-		return spanStyle;
-	}
 
-	@Override
-	public void createPrintJob() {
-		// TODO Auto-generated method stub
+		// trim trailing equal characters
+		int oldIndex = oldText.length() - 1;
+		while (textEnd > textStart && end > start) {
+			if (text.charAt(textEnd - 1) != oldText.charAt(oldIndex)) break;
+			textEnd--;
+			end--;
+			oldIndex--;
+		}
 
+		if (start == end && textStart == textEnd) return;
+
+		replaceText(start, end, text.substring(textStart, textEnd));
 	}
 }

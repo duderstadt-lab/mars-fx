@@ -62,7 +62,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import de.mpg.biochem.mars.fx.molecule.SettingsTab;
 import org.fxmisc.undo.UndoManager;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
@@ -72,8 +71,8 @@ import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.CommentsTab;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
 import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.FencedCodeWidgetNodePostProcessorFactory;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane;
+import de.mpg.biochem.mars.fx.webview.FencedCodeWidgetNodePostProcessorFactory;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;

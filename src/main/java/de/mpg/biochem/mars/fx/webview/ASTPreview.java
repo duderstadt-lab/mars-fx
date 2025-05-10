@@ -53,7 +53,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,8 +69,8 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.PreviewContext;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.Range;
 import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.scene.control.IndexRange;

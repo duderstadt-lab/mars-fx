@@ -53,7 +53,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -74,8 +74,8 @@ import com.vladsch.flexmark.util.data.MutableDataSet;
 
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
 import de.mpg.biochem.mars.fx.options.Options;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.PreviewContext;
-import de.mpg.biochem.mars.fx.preview.MarkdownPreviewPane.Renderer;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.PreviewContext;
+import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane.Renderer;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.concurrent.Worker.State;

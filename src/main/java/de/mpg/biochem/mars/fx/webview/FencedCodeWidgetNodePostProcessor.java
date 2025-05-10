@@ -27,7 +27,7 @@
  * #L%
  */
 
-package de.mpg.biochem.mars.fx.preview;
+package de.mpg.biochem.mars.fx.webview;
 
 import com.vladsch.flexmark.ast.FencedCodeBlock;
 import com.vladsch.flexmark.parser.block.NodePostProcessor;
@@ -103,26 +103,8 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 				FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
 		}
 		else if (outputVariableName.equals("imgsrcs")) {
-			documentEditor.getDocument().putMedia(key, convertArrayToCommaString((String[]) outputs.get(outputVariableName)));
+			String[] imgData = (String[]) outputs.get(outputVariableName);
+			documentEditor.getDocument().putMediaArray(key, imgData);
 		} else documentEditor.getDocument().putMedia(key, (String) outputs.get(outputVariableName));
-	}
-
-	public static String convertArrayToCommaString(String[] array) {
-		if (array == null || array.length == 0) {
-			return "";
-		}
-
-		StringBuilder sb = new StringBuilder();
-
-		for (int i = 0; i < array.length; i++) {
-			sb.append(array[i]);
-
-			// Add comma if not the last element
-			if (i < array.length - 1) {
-				sb.append(" ");
-			}
-		}
-
-		return sb.toString();
 	}
 }
