@@ -326,12 +326,6 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 	}
 
 	@Override
-	public boolean darkMode() {
-		return prefService.getBoolean(SettingsTab.class,
-				"useDarkTheme", false);
-	}
-
-	@Override
 	public void addChart() {
 		SubPlot subplot = createSubPlot();
 		if (molecule != null) subplot.fireEvent(new MoleculeSelectionChangedEvent(
