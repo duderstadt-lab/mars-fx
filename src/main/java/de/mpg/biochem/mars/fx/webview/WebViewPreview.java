@@ -169,8 +169,10 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 				"  // Map custom language tags to existing Prism languages\n" +
 				"  Prism.languages['groovy-html-widget'] = Prism.languages.groovy;\n" +
 				"  Prism.languages['groovy-image-widget'] = Prism.languages.groovy;\n" +
+				"  Prism.languages['groovy-images-widget'] = Prism.languages.groovy;\n" +
 				"  Prism.languages['python-html-widget'] = Prism.languages.python;\n" +
 				"  Prism.languages['python-image-widget'] = Prism.languages.python;\n" +
+				"  Prism.languages['python-images-widget'] = Prism.languages.python;\n" +
 				"</script>\n";
 
 		String mwfxSelection = (MarsThemeManager.isDarkTheme()) ? ".mwfx-editor-selection {\n" +
