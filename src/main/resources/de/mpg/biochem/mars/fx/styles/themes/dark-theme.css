@@ -719,7 +719,7 @@ Text, .text {
 }
 
 .markdown-editor .code {
-    -fx-fill: #98c379 !important;
+    -fx-fill: #7FD47F !important;
     -rtfx-background-color: transparent;
 }
 
@@ -733,7 +733,7 @@ Text, .text {
 }
 
 .markdown-editor .pre.text {
-    -fx-fill: #98c379 !important;
+    -fx-fill: #7FD47F !important;
 }
 
 /* Blockquotes */
