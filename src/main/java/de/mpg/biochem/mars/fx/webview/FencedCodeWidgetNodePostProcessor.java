@@ -34,6 +34,7 @@ import com.vladsch.flexmark.parser.block.NodePostProcessor;
 import com.vladsch.flexmark.util.ast.Node;
 import com.vladsch.flexmark.util.ast.NodeTracker;
 import com.vladsch.flexmark.util.data.DataHolder;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -80,6 +81,8 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 
 		String script = fencedCodeBlockNode.getContentChars().normalizeEOL();
 
+		int maxAllowedLength = StreamReadConstraints.defaults().getMaxStringLength();
+
 		Map<String, Object> inputs = new HashMap<String, Object>();
 
 		inputs.put("scijavaContext", documentEditor.getContext());
@@ -105,10 +108,19 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 			String error = FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX + "Expected output " + outputVariableName + " was missing.\n" +
 					"Make sure your script includes " + outputVarString + " providing the output.\n";
 			documentEditor.getDocument().putMedia(key, error);
-		}
-		else if (outputVariableName.equals("imgsrcs")) {
+		}  else if (outputVariableName.equals("imgsrcs")) {
 			String[] imgData = (String[]) outputs.get(outputVariableName);
+
+			for (String str : imgData)
+				if (str.length() > maxAllowedLength) {
+					String error = FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX + "Output exceeds current limit of " + maxAllowedLength + " characters. Try again with reduced output length.\n";
+					documentEditor.getDocument().putMedia(key, error);
+					return;
+				}
 			documentEditor.getDocument().putMediaArray(key, imgData);
+		} else if (((String) outputs.get(outputVariableName)).length() > maxAllowedLength) {
+			String error = FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX + "Output exceeds current limit of " + maxAllowedLength + " characters. Try again with reduced output length.\n";
+			documentEditor.getDocument().putMedia(key, error);
 		} else documentEditor.getDocument().putMedia(key, (String) outputs.get(outputVariableName));
 	}
 }
