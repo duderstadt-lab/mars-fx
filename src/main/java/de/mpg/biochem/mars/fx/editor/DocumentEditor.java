@@ -274,12 +274,7 @@ public class DocumentEditor extends AnchorPane {
 	}
 
 	public void clearWidgetMedia() {
-		Set<String> oldKeys = new HashSet<String>();
-		for (String key : document.getMediaIDs())
-			if (key.startsWith(MARKDOWN_WIDGET_MEDIA_KEY_PREFIX)) oldKeys.add(key);
-
-		for (String oldKey : oldKeys)
-			document.removeMedia(oldKey);
+		document.removeAllMedia();
 	}
 
 	public void addActiveMediaID(String activeMediaID) {
