@@ -73,8 +73,7 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 	}
 
 	private void processFencedCodeBlockWidget(FencedCodeBlock fencedCodeBlockNode,
-		String language, String outputVariableName)
-	{
+		String language, String outputVariableName) {
 
 		//I just need to add the case that detects the output variable name imgsrcs and
 		//then uses the array string to build one string where the image data is separated by commas.
@@ -87,20 +86,25 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 		inputs.put("archive", documentEditor.getArchive());
 
 		FencedCodeBlockMarkdownWidget fencedCodeBlockMarkdownWidget =
-			new FencedCodeBlockMarkdownWidget(documentEditor.getContext(),
-				documentEditor.getArchive(), language);
+				new FencedCodeBlockMarkdownWidget(documentEditor.getContext(),
+						documentEditor.getArchive(), language);
 
 		Map<String, Object> outputs = fencedCodeBlockMarkdownWidget.runScript(
-			inputs, script);
+				inputs, script);
 
 		String key = DocumentEditor.MARKDOWN_WIDGET_MEDIA_KEY_PREFIX +
-			fencedCodeBlockNode.getInfo() + ":" + script;
+				fencedCodeBlockNode.getInfo() + ":" + script;
 
 		if (outputs.containsKey(
-			FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX))
+				FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX))
 		{
 			documentEditor.getDocument().putMedia(key, (String) outputs.get(
-				FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
+					FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX));
+		} else if (!outputs.containsKey(outputVariableName)) {
+			String outputVarString = (outputVariableName.equals("imgsrcs")) ? "#@OUTPUT String[] imgsrcs " + outputVariableName : "#@OUTPUT String " + outputVariableName;
+			String error = FencedCodeBlockMarkdownWidget.MARKDOWN_WIDGET_ERROR_KEY_PREFIX + "Expected output " + outputVariableName + " was missing.\n" +
+					"Make sure your script includes " + outputVarString + " providing the output.\n";
+			documentEditor.getDocument().putMedia(key, error);
 		}
 		else if (outputVariableName.equals("imgsrcs")) {
 			String[] imgData = (String[]) outputs.get(outputVariableName);
