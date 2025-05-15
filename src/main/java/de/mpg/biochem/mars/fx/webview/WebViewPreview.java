@@ -175,6 +175,8 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 				"  Prism.languages['python-images-widget'] = Prism.languages.python;\n" +
 				"</script>\n";
 
+		String mermaidTheme = (MarsThemeManager.isDarkTheme()) ? "dark" : "default";
+
 		String mwfxSelection = (MarsThemeManager.isDarkTheme()) ? ".mwfx-editor-selection {\n" +
 				"  border-right: 5px solid #f47806; /* Keep the orange border */\n" +
 				"  margin-right: -5px;\n" +
@@ -201,6 +203,7 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 			prismSyntaxHighlighting(context.getMarkdownAST()) + customPrismConfig + base + "</head>\n" +
 			"<body" + scrollScript + ">\n" + renderer.getHtml(false, documentEditor) +
 			"<script>" + highlightNodesAt(lastEditorSelection) + "</script>\n" +
+				"<script>mermaid.initialize({ theme: '"+ mermaidTheme +"'}); </script>\n" +
 			"<script>" + anchorFixer() + "</script>\n" + "<script> (function () {" +
 			"document.addEventListener(\"DOMContentLoaded\", function () {\n" +
 			"var mathElems = document.getElementsByClassName(\"katex\");\n" +
