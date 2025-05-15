@@ -54,6 +54,7 @@ import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 
+import org.apache.commons.io.IOUtils;
 import org.scijava.Context;
 
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
@@ -292,7 +294,15 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 			"MainWindow.insertFencedCodeBlockAction"), "Shortcut+Shift+K",
 			FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```\n",
 				"\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")));
-
+		Action insertHtmlWidgetCodeBlockAction = new Action("Html Widget Code Block", null,
+				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-html-widget\n",
+				"\n```\n\n", loadCommentTemplate("HtmlWidgetTemplate.groovy")));
+		Action insertImageWidgetCodeBlockAction = new Action("Image Widget Code Block", null,
+				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-image-widget\n",
+				"\n```\n\n", loadCommentTemplate("ImageWidgetTemplate.groovy")));
+		Action insertImagesWidgetCodeBlockAction = new Action("Images Widget Code Block", null,
+				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-images-widget\n",
+				"\n```\n\n", loadCommentTemplate("ImagesWidgetTemplate.groovy")));
 		Action insertHeader1Action = new Action(Messages.get(
 			"MainWindow.insertHeader1Action"), "Shortcut+1", HEADER,
 			e -> getActiveSmartEdit().insertHeading(1, Messages.get(
@@ -331,8 +341,6 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		Menu viewMenu = ActionUtils.createMenu("View", viewPreviewAction, null,
 			viewShowLineNoAction, viewShowWhitespaceAction);
 
-		// ,viewShowImagesEmbeddedAction);
-
 		Menu insertMenu = ActionUtils.createMenu("Insert", insertBoldAction,
 			insertItalicAction, insertStrikethroughAction, insertCodeAction, null,
 			// insertLinkAction,
@@ -340,6 +348,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 			// null,
 			insertUnorderedListAction, insertOrderedListAction,
 			insertBlockquoteAction, insertFencedCodeBlockAction, null,
+				insertHtmlWidgetCodeBlockAction, insertImageWidgetCodeBlockAction, insertImagesWidgetCodeBlockAction, null,
 			insertHeader1Action, insertHeader2Action, insertHeader3Action,
 			insertHeader4Action, insertHeader5Action, insertHeader6Action, null,
 			insertHorizontalRuleAction);
@@ -504,6 +513,22 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 
 	private SmartEdit getActiveSmartEdit() {
 		return getActiveEditor().getSmartEdit();
+	}
+
+	private String loadCommentTemplate(String name) {
+		String template = "";
+		try {
+			// Use a leading slash to indicate the resource should be loaded from the root of the classpath
+			InputStream is = getClass().getResourceAsStream("/de/mpg/biochem/mars/fx/comments/" + name);
+			if (is == null) {
+				throw new IOException("Resource not found: " + name);
+			}
+			template = IOUtils.toString(is, "UTF-8");
+			is.close();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return template;
 	}
 
 	/**
