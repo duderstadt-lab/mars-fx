@@ -939,7 +939,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		if (fileName.endsWith(".store")) fileName = fileName.substring(0, fileName
 			.length() - 6);
 
-		if (archive.getSource() != null && new File(archive.getSource().getPath()).getParentFile().exists()) {
+		if (archive.getSource() != null && new File(archive.getSource().getPath()).getParentFile() != null && new File(archive.getSource().getPath()).getParentFile().exists()) {
 			saveAsCopy(new File(new File(archive.getSource().getPath()).getParentFile(), fileName));
 		}
 		else {
