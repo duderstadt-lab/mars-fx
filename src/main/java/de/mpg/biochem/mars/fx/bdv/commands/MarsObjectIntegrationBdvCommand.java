@@ -139,8 +139,6 @@ Initializable, Previewable
 	
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
-	private MartianObject object;
-
 	/**
 	 * INPUT SETTINGS
 	 */
@@ -151,6 +149,9 @@ Initializable, Previewable
 
 	@Parameter(label = "Background integration radius")
 	private long radius = 10;
+
+	@Parameter(label = "All Objects")
+	private boolean integrateAll = false;
 
 	@Parameter(label = "Threads", required = false, min = "1", max = "120")
 	private int nThreads = Runtime.getRuntime().availableProcessors();
@@ -170,11 +171,11 @@ Initializable, Previewable
 	@Parameter(label = " height")
 	private int height = 1024;
 
-	private ConcurrentMap<Integer, Double> tToShapeSum, tToPixelMedianBackground, tToShapeIntensity;
-
 	private AtomicInteger progressInteger = new AtomicInteger(0);
 
-	Interval imgInterval;
+	private Interval imgInterval;
+
+	private String objectUID;
 	
 	@Override
 	public void initialize() {
@@ -189,26 +190,22 @@ Initializable, Previewable
 		//save the current settings to the PrefService
 		//so they are reloaded the next time the command is opened.
 		saveInputs();
-		archive.getWindow().updateLockMessage("Integrating object");
+		archive.getWindow().updateLockMessage((integrateAll) ? "Integrating objects" : "Integrating object");
 		imgInterval = Intervals.createMinMax(X0, Y0, X0 + width - 1,
 				Y0 + height - 1);
-		tToShapeSum = new ConcurrentHashMap<>();
-		tToPixelMedianBackground = new ConcurrentHashMap<>();
-		tToShapeIntensity = new ConcurrentHashMap<>();
-		List<Runnable> tasks = new ArrayList<>();
-		for (int t : object.getShapeKeys()) tasks.add(() -> integrateObjectInT(t));
 
-		MarsUtil.threadPoolBuilder(statusService, logService, () -> {
-			archive.getWindow().setProgress((double) progressInteger.get() / object.getShapeKeys().size());
-		}, tasks, nThreads);
-
-		//Add sum, median pixel background, and intensity (sum - medianPixelBG * numPixels...) to table
-		object.getTable().rows().forEach(row -> {
-			int theT = (int)row.getValue("T");
-            row.setValue(source + "_Median_Background_Pixel", tToPixelMedianBackground.getOrDefault(theT, Double.NaN));
-			row.setValue(source + "_Sum_Pixels", tToShapeSum.getOrDefault(theT, Double.NaN));
-			row.setValue(source + "_Intensity", tToShapeIntensity.getOrDefault(theT, Double.NaN));
-		});
+		if (integrateAll) {
+			//Integrate all with one thread per object
+			List<Runnable> tasks = new ArrayList<>();
+			archive.molecules().forEach( object -> tasks.add(() -> integrateObject((MartianObject) object)));
+			MarsUtil.threadPoolBuilder(statusService, logService, () -> {
+				archive.getWindow().setProgress((double) progressInteger.get() / archive.getNumberOfMolecules());
+			}, tasks, nThreads);
+		} else {
+			//Integrate just one object
+			MartianObject object = (MartianObject) archive.get(objectUID);
+			integrateObject(object);
+		}
 
 		LogBuilder builder = new LogBuilder();
 		String log = LogBuilder.buildTitleBlock(getInfo().getLabel());
@@ -220,9 +217,31 @@ Initializable, Previewable
 		archive.getWindow().unlock();
 	}
 
+	private void integrateObject(MartianObject object) {
+		ConcurrentMap<Integer, Double> tToShapeSum = new ConcurrentHashMap<>();
+		ConcurrentMap<Integer, Double> tToPixelMedianBackground = new ConcurrentHashMap<>();
+		ConcurrentMap<Integer, Double> tToShapeIntensity = new ConcurrentHashMap<>();
+		if (integrateAll) {
+			for (int t : object.getShapeKeys()) integrateObjectInT(t, object, tToShapeSum, tToPixelMedianBackground, tToShapeIntensity);
+		} else {
+			List<Runnable> tasks = new ArrayList<>();
+			for (int t : object.getShapeKeys()) tasks.add(() -> integrateObjectInT(t, object, tToShapeSum, tToPixelMedianBackground, tToShapeIntensity));
+			MarsUtil.threadPoolBuilder(statusService, logService, () -> {
+				archive.getWindow().setProgress((double) progressInteger.get() / object.getShapeKeys().size());
+			}, tasks, nThreads);
+		}
+		//Add sum, median pixel background, and intensity (sum - medianPixelBG * numPixels...) to table
+		object.getTable().rows().forEach(row -> {
+			int theT = (int)row.getValue("T");
+			row.setValue(source + "_Median_Background_Pixel", tToPixelMedianBackground.getOrDefault(theT, Double.NaN));
+			row.setValue(source + "_Sum_Pixels", tToShapeSum.getOrDefault(theT, Double.NaN));
+			row.setValue(source + "_Intensity", tToShapeIntensity.getOrDefault(theT, Double.NaN));
+		});
+	}
+
 	@SuppressWarnings("unchecked")
 	private <T extends RealType<T> & NativeType<T>> void integrateObjectInT(
-			int t)
+			int t, MartianObject object, ConcurrentMap<Integer, Double> tToShapeSum, ConcurrentMap<Integer, Double> tToPixelMedianBackground, ConcurrentMap<Integer, Double> tToShapeIntensity)
 	{
 		Source<T> bdvSource = marsBdvFrame.getSource(source);
 
@@ -318,12 +337,12 @@ Initializable, Previewable
 		return archive;
 	}
 
-	public void setObject(MartianObject object) {
-		this.object = object;
+	public void setSelectedObjectUID(String objectUID) {
+		this.objectUID = objectUID;
 	}
 
-	public MartianObject getObject() {
-		return this.object;
+	public String getSelectedObjectUID() {
+		return this.objectUID;
 	}
 }
 

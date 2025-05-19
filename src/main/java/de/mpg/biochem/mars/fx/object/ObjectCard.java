@@ -165,7 +165,7 @@ public class ObjectCard extends AbstractJsonConvertibleRecord implements
 					//we don't need that in this context
 					objectIntegrationCommand.setMarsBdvFrame(marsBdvFrame);
 					objectIntegrationCommand.setArchive(archive);
-					objectIntegrationCommand.setObject((MartianObject) molecule);
+					objectIntegrationCommand.setSelectedObjectUID(molecule.getUID());
 					try {
 						moduleService.run(objectIntegrationCommand, true).get();
 					}
