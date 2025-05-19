@@ -111,7 +111,6 @@
 
 		<!-- JavaFx Version-->
 		<javafx.version>23.0.2</javafx.version>
-		<javafx.classifier>mac-aarch64</javafx.classifier>
 
 		<chartfx.version>11.3.1</chartfx.version>
 		<chartfx-dataset.version>${chartfx.version}</chartfx-dataset.version>
@@ -681,6 +680,56 @@
 			<url>https://maven.scijava.org/content/groups/public</url>
 		</repository>
 	</repositories>
+
+	<profiles>
+		<profile>
+			<id>mac-aarch64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>aarch64</arch>
+				</os>
+			</activation>
+			<properties>
+				<javafx.classifier>mac-aarch64</javafx.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>mac-x64</id>
+			<activation>
+				<os>
+					<family>mac</family>
+					<arch>x86_64</arch>
+				</os>
+			</activation>
+			<properties>
+				<javafx.classifier>mac</javafx.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>linux</id>
+			<activation>
+				<os>
+					<family>unix</family>
+					<name>linux</name>
+				</os>
+			</activation>
+			<properties>
+				<javafx.classifier>linux</javafx.classifier>
+			</properties>
+		</profile>
+		<profile>
+			<id>windows</id>
+			<activation>
+				<os>
+					<family>windows</family>
+				</os>
+			</activation>
+			<properties>
+				<javafx.classifier>win</javafx.classifier>
+			</properties>
+		</profile>
+	</profiles>
 
 	<build>
 		<plugins>
