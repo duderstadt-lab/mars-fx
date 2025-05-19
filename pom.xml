@@ -735,21 +735,6 @@
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<configuration>
-					<source>${maven.compiler.source}</source>
-					<detectJavaApiLink>false</detectJavaApiLink>
-					<additionalJOption>--add-exports=javafx.graphics/com.sun.javafx.scene.traversal=de.mpg.biochem.mars.fx</additionalJOption>
-					<additionalJOption>--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=de.mpg.biochem.mars.fx</additionalJOption>
-					<additionalJOption>--add-exports=javafx.controls/com.sun.javafx.scene.control.inputmap=de.mpg.biochem.mars.fx</additionalJOption>
-					<additionalJOption>--add-exports=org.controlsfx.controls/impl.org.controlsfx.skin=de.mpg.biochem.mars.fx</additionalJOption>
-					<additionalOptions>
-						<additionalOption>-Xdoclint:none</additionalOption>
-					</additionalOptions>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<encoding>UTF-8</encoding>
