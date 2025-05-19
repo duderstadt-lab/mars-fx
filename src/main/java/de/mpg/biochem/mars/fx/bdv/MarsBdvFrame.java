@@ -858,9 +858,17 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 	public List<String> getSourceNames() {
 		return bdvSourcesForExport.get(activeMetaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
 	}
+
+	public List<String> getSourceNames(String metaUID) {
+		return bdvSourcesForExport.get(metaUID).stream().map(source -> source.getName()).collect(Collectors.toList());
+	}
 	
 	public Source<T> getSource(String name) {
 		return bdvSourcesForExport.get(activeMetaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
+	}
+
+	public Source<T> getSource(String metaUID, String name) {
+		return bdvSourcesForExport.get(metaUID).stream().filter(source -> source.getName().equals(name)).findFirst().get();
 	}
 	
 	public long[] getSourceDimensions(String name) {

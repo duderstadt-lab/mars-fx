@@ -105,7 +105,9 @@ import org.scijava.widget.Button;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -173,6 +175,8 @@ Initializable, Previewable
 
 	private AtomicInteger progressInteger = new AtomicInteger(0);
 
+	private Set<String> sourceNotPresent = new HashSet<>();
+
 	private Interval imgInterval;
 
 	private String objectUID;
@@ -211,9 +215,18 @@ Initializable, Previewable
 		String log = LogBuilder.buildTitleBlock(getInfo().getLabel());
 		addInputParameterLog(builder);
 		log += builder.buildParameterList();
-		log += "\n" + LogBuilder.endBlock();
-		archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(log);
 
+		String successMessage = log + "\n" + LogBuilder.endBlock(true);
+		String failMessage = log + "Requested source " + source + " does not exist.\n" + LogBuilder.endBlock(false);
+
+		if (integrateAll)
+			archive.metadata().forEach(metadata -> {
+				if (sourceNotPresent.contains(metadata.getUID()))
+					metadata.logln(failMessage);
+				else
+					metadata.logln(successMessage);
+			});
+		else archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(successMessage);
 		archive.getWindow().unlock();
 	}
 
@@ -243,7 +256,11 @@ Initializable, Previewable
 	private <T extends RealType<T> & NativeType<T>> void integrateObjectInT(
 			int t, MartianObject object, ConcurrentMap<Integer, Double> tToShapeSum, ConcurrentMap<Integer, Double> tToPixelMedianBackground, ConcurrentMap<Integer, Double> tToShapeIntensity)
 	{
-		Source<T> bdvSource = marsBdvFrame.getSource(source);
+		if (!marsBdvFrame.getSourceNames(object.getMetadataUID()).contains(source)) {
+			sourceNotPresent.add(object.getMetadataUID());
+			return;
+		}
+		Source<T> bdvSource = marsBdvFrame.getSource(object.getMetadataUID(), source);
 
 		//Remove the Z dimension
 		RandomAccessibleInterval<T> img = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
