@@ -715,7 +715,7 @@
 				</os>
 			</activation>
 			<properties>
-				<javafx.classifier>linux-x64</javafx.classifier>
+				<javafx.classifier>linux</javafx.classifier>
 			</properties>
 		</profile>
 		<profile>

@@ -22,7 +22,9 @@ jobs:
       - name: Set up CI environment
         run: .github/setup.sh
       - name: Execute the build
-        run: .github/build.sh
+        run: |
+          mvn -B -Djavafx.classifier=linux clean package
+          .github/build.sh
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
