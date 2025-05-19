@@ -23,7 +23,8 @@ jobs:
         run: .github/setup.sh
       - name: Execute the build
         run: |
-          mvn -B -Djavafx.classifier=linux -Dmaven.javadoc.skip=true clean package
+          export MAVEN_OPTS="$MAVEN_OPTS --add-exports=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED,de.mpg.biochem.mars.fx --add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED,de.mpg.biochem.mars.fx --add-exports=javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED,de.mpg.biochem.mars.fx --add-exports=org.controlsfx.controls/impl.org.controlsfx.skin=ALL-UNNAMED,de.mpg.biochem.mars.fx"
+          mvn -B -Djavafx.classifier=linux -Djavadoc.opts="--add-exports javafx.graphics/com.sun.javafx.scene.traversal=de.mpg.biochem.mars.fx --add-exports javafx.controls/com.sun.javafx.scene.control.behavior=de.mpg.biochem.mars.fx --add-exports javafx.controls/com.sun.javafx.scene.control.inputmap=de.mpg.biochem.mars.fx --add-exports org.controlsfx.controls/impl.org.controlsfx.skin=de.mpg.biochem.mars.fx" clean package
           .github/build.sh
         env:
           GPG_KEY_NAME: ${{ secrets.GPG_KEY_NAME }}
@@ -32,3 +33,4 @@ jobs:
           MAVEN_PASS: ${{ secrets.MAVEN_PASS }}
           OSSRH_PASS: ${{ secrets.OSSRH_PASS }}
           SIGNING_ASC: ${{ secrets.SIGNING_ASC }}
+          MAVEN_OPTS: "--add-opens=java.base/java.lang=ALL-UNNAMED"
