@@ -738,19 +738,10 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
 					<encoding>UTF-8</encoding>
-					<compilerArgs>
-						<arg>-parameters</arg>
-					</compilerArgs>
-				</configuration>
-			</plugin>
-			<!-- Configure the compiler to handle internal JavaFX and ControlsFX packages -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
 					<source>${maven.compiler.source}</source>
 					<target>${maven.compiler.target}</target>
 					<compilerArgs>
+						<arg>-parameters</arg>
 						<arg>--add-exports=javafx.graphics/com.sun.javafx.scene.traversal=de.mpg.biochem.mars.fx</arg>
 						<arg>--add-exports=javafx.controls/com.sun.javafx.scene.control.behavior=de.mpg.biochem.mars.fx</arg>
 						<arg>--add-exports=javafx.controls/com.sun.javafx.scene.control.inputmap=de.mpg.biochem.mars.fx</arg>
