@@ -94,7 +94,7 @@ public class DocumentTemplateSelectionDialog extends
 
 		ListView<String> templateList = new ListView<String>();
 
-		if (templateDirectory != null && templateDirectory.exists() && templateDirectory.isDirectory()) {
+		if (templateDirectory != null && templateDirectory.exists() && templateDirectory.isDirectory() && templateDirectory.list() != null) {
 			ObservableList<String> templateFiles = FXCollections.observableArrayList(
 				templateDirectory.list());
 			templateFiles.add(0, "<none>");
