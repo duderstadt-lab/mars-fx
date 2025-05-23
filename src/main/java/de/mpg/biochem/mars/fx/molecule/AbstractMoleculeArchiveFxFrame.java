@@ -208,14 +208,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	 * JFXPanel creates a link between Swing and JavaFX.
 	 */
 	public void init() {
-		new JFXPanel(); // initializes JavaFX environment
-
 		// The call to runLater() avoid a mix between JavaFX thread and Swing
 		// thread.
 		// Allows multiple runLaters in the same session...
 		// Suggested here -
 		// https://stackoverflow.com/questions/29302837/javafx-platform-runlater-never-running
 		Platform.setImplicitExit(false);
+
+		new JFXPanel(); // initializes JavaFX environment
 
 		Platform.runLater(new Runnable() {
 
