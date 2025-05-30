@@ -71,7 +71,7 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 	public void initialize() {
 		super.initialize();
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			setContent(getIcon(), new BorderPane());
 		}
 		else {
@@ -126,7 +126,7 @@ public abstract class AbstractBubbleChartWidget extends AbstractScriptableWidget
 			return;
 		}
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;

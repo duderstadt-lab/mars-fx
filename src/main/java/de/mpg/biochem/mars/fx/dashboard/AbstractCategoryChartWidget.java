@@ -65,7 +65,7 @@ public abstract class AbstractCategoryChartWidget extends
 	public void initialize() {
 		super.initialize();
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			setContent(getIcon(), new BorderPane());
 		}
 		else {
@@ -119,7 +119,7 @@ public abstract class AbstractCategoryChartWidget extends
 
 		if (outputs == null) return;
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;

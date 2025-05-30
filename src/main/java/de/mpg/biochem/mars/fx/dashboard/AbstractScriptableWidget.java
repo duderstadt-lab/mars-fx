@@ -101,7 +101,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 	protected MarsScriptEditor codeArea;
 	protected InlineCssTextArea logArea;
 
-	// Used for Python (PyImageJ) widgets
+	// Used for Python (scyjava) widgets
 	protected String imgsrc;
 
 	@Override
@@ -125,9 +125,9 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 				lang = scriptService.getLanguages().stream().filter(l -> l
 					.getLanguageName().equals("Python (Jython)")).findFirst().get();
 		}
-		else if (languageName.equals("Python (PyImageJ)")) {
+		else if (languageName.equals("Python (scyjava)")) {
 			lang = scriptService.getLanguages().stream().filter(l -> l
-				.getLanguageName().equals("Python (PyImageJ)")).findFirst().get();
+				.getLanguageName().equals("Python (scyjava)")).findFirst().get();
 		}
 
 		// Script Pane
@@ -175,7 +175,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
 		getTabPane().getTabs().add(logTab);
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) loadImage();
+		if (lang.getLanguageName().equals("Python (scyjava)")) loadImage();
 	}
 
 	protected Map<String, Object> runScript() {
@@ -189,7 +189,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		}
 		else if (lang.getLanguageName().equals("Python") || 
 				     lang.getLanguageName().equals("Python (Jython)") ||
-				     lang.getLanguageName().equals("Python (PyImageJ)"))
+				     lang.getLanguageName().equals("Python (scyjava)"))
 		{
 			scriptName += ".py";
 		}
@@ -263,7 +263,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 		else if (lang.getLanguageName().equals("Python") || lang.getLanguageName().equals("Python (Jython)")) {
 			name += ".py";
 		}
-		else if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		else if (lang.getLanguageName().equals("Python (scyjava)")) {
 			name += "_pyimagej.py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class

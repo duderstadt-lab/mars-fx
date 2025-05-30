@@ -59,10 +59,10 @@ public class FencedCodeWidgetNodePostProcessor extends NodePostProcessor {
 			FencedCodeBlock fencedCodeBlockNode = (FencedCodeBlock) node;
 
 			if (fencedCodeBlockNode.getInfo().equals("python-image-widget"))
-				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (PyImageJ)",
+				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (scyjava)",
 					"imgsrc");
 			else if (fencedCodeBlockNode.getInfo().equals("python-html-widget"))
-				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (PyImageJ)",
+				processFencedCodeBlockWidget(fencedCodeBlockNode, "Python (scyjava)",
 					"html");
 			else if (fencedCodeBlockNode.getInfo().equals("groovy-image-widget"))
 				processFencedCodeBlockWidget(fencedCodeBlockNode, "Groovy", "imgsrc");

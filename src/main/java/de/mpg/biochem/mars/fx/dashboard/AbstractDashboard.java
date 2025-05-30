@@ -151,7 +151,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 		ArrayList<String> languages = new ArrayList<>();
 		languages.add("Groovy");
 		languages.add("Python (Jython)");
-		languages.add("Python (PyImageJ)");
+		languages.add("Python (scyjava)");
 		widgetScriptLanguage.getItems().addAll(languages);
 		widgetScriptLanguage.getSelectionModel().selectedItemProperty().addListener(
 			(ob, o, n) -> {

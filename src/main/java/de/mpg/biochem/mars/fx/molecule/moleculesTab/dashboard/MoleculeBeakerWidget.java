@@ -71,7 +71,7 @@ public class MoleculeBeakerWidget extends AbstractBeakerWidget implements
 		module.setInput("archive", archive);
 		module.setInput("molecule", molecule);
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			module.setInput("width", Float.valueOf((float) rootPane.getWidth() / 72));
 			module.setInput("height", Float.valueOf((float) (rootPane.getHeight() -
 				65) / 72));

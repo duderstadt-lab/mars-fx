@@ -71,7 +71,7 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 
 		if (outputs == null) return;
 
-		if (lang.getLanguageName().equals("Python (PyImageJ)")) {
+		if (lang.getLanguageName().equals("Python (scyjava)")) {
 			if (!outputs.containsKey("imgsrc")) {
 				writeToLog("required output imgsrc is missing.");
 				return;
