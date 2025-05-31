@@ -5,6 +5,8 @@
 import marspylib as mars
 import seaborn as sns
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 data = {'Categories': ['Triangles', 'Squares', 'Circles'], 'Frequency': [20, 50, 30]}  

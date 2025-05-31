@@ -6,6 +6,8 @@ import marspylib as mars
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 sns.set_theme(style="ticks")

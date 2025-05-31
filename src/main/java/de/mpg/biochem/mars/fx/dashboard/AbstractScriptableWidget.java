@@ -264,7 +264,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 			name += ".py";
 		}
 		else if (lang.getLanguageName().equals("Python (scyjava)")) {
-			name += "_pyimagej.py";
+			name += "_scyjava.py";
 		}
 		InputStream is = de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidget.class
 			.getResourceAsStream(name);

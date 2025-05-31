@@ -6,6 +6,8 @@ import marspylib as mars
 import seaborn as sns
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.ticker as ticker
 import matplotlib.pyplot as plt
 
