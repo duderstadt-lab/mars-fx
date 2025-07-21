@@ -102,7 +102,7 @@
 		<!-- NB: Deploy releases to the SciJava Maven repository. -->
 		<releaseProfiles>sign,deploy-to-scijava</releaseProfiles>
 
-		<mars-core.version>1.0.0</mars-core.version>
+		<mars-core.version>1.0.1</mars-core.version>
 		<mars-minio.version>0.6</mars-minio.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

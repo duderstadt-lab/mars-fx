@@ -335,7 +335,7 @@ Initializable, Previewable
 
 			archive.getWindow().updateLockMessage("Tracking objects");
 			//We are assuming the channel in N5 is the same as the channel from the original metadata hmmm....
-			tracker.track(objectLabels, archive, archive.getMetadata(marsBdvFrame.getMetadataUID()).getBdvSource(source).getChannel(), processTimePoints, 1);
+			tracker.track(objectLabels, archive, marsBdvFrame.getMetadataUID(), archive.getMetadata(marsBdvFrame.getMetadataUID()).getBdvSource(source).getChannel(), processTimePoints, 1);
 
 			//if (archive.getNumberOfMolecules() == numMolecules) {
 			//	logService.info("MarsObjectTrackerBdvCommand: No new objects tracked for current settings.");
