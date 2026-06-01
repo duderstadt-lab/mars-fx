@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -30,8 +30,10 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -39,6 +41,8 @@ import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.n5.*;
 import javafx.animation.PauseTransition;
+import javafx.animation.RotateTransition;
+import javafx.concurrent.Task;
 import javafx.util.Duration;
 import org.controlsfx.control.ToggleSwitch;
 import org.janelia.saalfeldlab.n5.N5Reader;
@@ -85,6 +89,34 @@ public class BdvSourceOptionsPane extends VBox {
 
 	private HBox n5OptionsHBox;
 
+	// Icons reused across validation updates.
+	private Text times, check, times2, check2;
+
+	// Spinning refresh icons shown while a background check is running.
+	private Text pathRefresh, datasetRefresh;
+	private RotateTransition pathRefreshSpin, datasetRefreshSpin;
+
+	// Validation labels (need to be reachable from the background task callbacks).
+	private Label pathValidation, datasetValidation;
+
+	// Single-thread daemon executor for all background validation work.
+	private final ExecutorService validationExecutor = Executors
+			.newSingleThreadExecutor(new ThreadFactory() {
+
+				@Override
+				public Thread newThread(Runnable r) {
+					Thread t = new Thread(r, "BdvSource-validation");
+					t.setDaemon(true);
+					return t;
+				}
+			});
+
+	// The currently running (or last-launched) validation task. We keep a single
+	// shared reference for both fields so that whichever field fired last wins,
+	// and we cancel any in-flight task before launching a new one. Combined with
+	// the 500 ms PauseTransition this guarantees at most one validation in flight.
+	private Task<ValidationResult> currentValidationTask;
+
 	public BdvSourceOptionsPane() {
 		setPadding(new Insets(15, 20, 15, 20));
 		setSpacing(5);
@@ -103,7 +135,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m00 = new TextField();
 		m00.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m00.getText(), 0, 0));
+										newValue) -> setAffineTransform3D(m00.getText(), 0, 0));
 		m00.setPrefWidth(80);
 		m00.setMaxWidth(80);
 		gridpane1.add(m00, 1, 0);
@@ -115,7 +147,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m01 = new TextField();
 		m01.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m01.getText(), 0, 1));
+										newValue) -> setAffineTransform3D(m01.getText(), 0, 1));
 		m01.setPrefWidth(80);
 		m01.setMaxWidth(80);
 		gridpane1.add(m01, 3, 0);
@@ -127,7 +159,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m02 = new TextField();
 		m02.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m02.getText(), 0, 3));
+										newValue) -> setAffineTransform3D(m02.getText(), 0, 3));
 		m02.setPrefWidth(80);
 		m02.setMaxWidth(80);
 		gridpane1.add(m02, 5, 0);
@@ -144,7 +176,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m10 = new TextField();
 		m10.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m10.getText(), 1, 0));
+										newValue) -> setAffineTransform3D(m10.getText(), 1, 0));
 		m10.setPrefWidth(80);
 		m10.setMaxWidth(80);
 		gridpane2.add(m10, 1, 0);
@@ -156,7 +188,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m11 = new TextField();
 		m11.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m11.getText(), 1, 1));
+										newValue) -> setAffineTransform3D(m11.getText(), 1, 1));
 		m11.setPrefWidth(80);
 		m11.setMaxWidth(80);
 		gridpane2.add(m11, 3, 0);
@@ -168,7 +200,7 @@ public class BdvSourceOptionsPane extends VBox {
 
 		m12 = new TextField();
 		m12.textProperty().addListener((observable, oldValue,
-			newValue) -> setAffineTransform3D(m12.getText(), 1, 3));
+										newValue) -> setAffineTransform3D(m12.getText(), 1, 3));
 		m12.setPrefWidth(80);
 		m12.setMaxWidth(80);
 		gridpane2.add(m12, 5, 0);
@@ -208,15 +240,23 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setHgrow(pathField, Priority.ALWAYS);
 		pathBox.getChildren().add(pathField);
 
-		Text times = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
+		times = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
 		times.setStyle(times.getStyle() + "-fx-fill: red !important;");
 
-		Text check = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
+		check = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
 		check.setStyle(check.getStyle() + "-fx-fill: green !important;");
 
-		Label pathValidation = new Label("");
+		// Spinning refresh icon for the Path field.
+		pathRefresh = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH, "1.5em");
+		pathRefreshSpin = new RotateTransition(Duration.millis(800), pathRefresh);
+		pathRefreshSpin.setByAngle(360);
+		pathRefreshSpin.setCycleCount(RotateTransition.INDEFINITE);
+		pathRefreshSpin.setInterpolator(javafx.animation.Interpolator.LINEAR);
+
+		pathValidation = new Label("");
 		pathValidation.setGraphic(times);
 		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(pathValidation);
@@ -244,13 +284,13 @@ public class BdvSourceOptionsPane extends VBox {
 						selectionDialog.setCropOption(false);
 
 						selectionDialog.setTreeRenderer(new N5DatasetTreeCellRenderer(
-							true));
+								true));
 
 						// Prevents NullPointerException
 						selectionDialog.setContainerPathUpdateCallback(x -> {});
 
 						final Consumer<DataSelection> callback = (
-							DataSelection dataSelection) -> {
+								DataSelection dataSelection) -> {
 							Platform.runLater(new Runnable() {
 
 								@Override
@@ -311,7 +351,7 @@ public class BdvSourceOptionsPane extends VBox {
 							startingDirectory);
 				}
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file",
-					"*.xml"));
+						"*.xml"));
 				File file = fileChooser.showOpenDialog(getScene().getWindow());
 
 				if (file != null) {
@@ -341,85 +381,52 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(n5Dataset);
 
-		Text times2 = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
+		times2 = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
 		times2.setStyle(times.getStyle() + "-fx-fill: red !important;");
 
-		Text check2 = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
+		check2 = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
 		check2.setStyle(check.getStyle() + "-fx-fill: green !important;");
 
-		Label datasetValidation = new Label("");
+		// Spinning refresh icon for the Dataset field.
+		datasetRefresh = FontAwesomeIconFactory.get().createIcon(
+				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH, "1.5em");
+		datasetRefreshSpin = new RotateTransition(Duration.millis(800),
+				datasetRefresh);
+		datasetRefreshSpin.setByAngle(360);
+		datasetRefreshSpin.setCycleCount(RotateTransition.INDEFINITE);
+		datasetRefreshSpin.setInterpolator(javafx.animation.Interpolator.LINEAR);
+
+		datasetValidation = new Label("");
 		datasetValidation.setGraphic(times2);
 		HBox.setMargin(datasetValidation, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(datasetValidation);
 
-		PauseTransition pathDetectionPause = new PauseTransition(Duration.millis(300));
+		// Increased to 500 ms before validation begins. The PauseTransition
+		// collapses rapid typing into a single trigger; cancelling the previous
+		// task (see launchValidation) prevents parallel checks if a task is still
+		// running when the next one fires.
+		PauseTransition pathDetectionPause = new PauseTransition(Duration.millis(
+				500));
 		pathField.textProperty().addListener((observable, oldValue, newValue) -> {
 			pathDetectionPause.setOnFinished(event -> {
 				if (marsBdvSource == null) return;
-				else marsBdvSource.setPath(pathField.getText());
+				marsBdvSource.setPath(pathField.getText());
 				datasetInfo.setText("");
-
-				boolean pathExists, datasetExists;
-				N5Reader reader = null;
-				try {
-					reader = new MarsN5ViewerReaderFun().apply(pathField.getText());
-					pathExists = reader.exists("/");
-					datasetExists = reader.exists(n5Dataset.getText());
-				} catch(Exception e) {
-					pathExists = false;
-					datasetExists = false;
-				}
-
-				if (pathExists) {
-					pathValidation.setGraphic(check);
-					if (datasetExists) datasetValidation.setGraphic(check2);
-
-					if (reader != null) {
-						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-						if (attributes != null) {
-							String info = getDatasetInfo(attributes);
-							marsBdvSource.setProperty("info", info);
-							datasetInfo.setText(info);
-						}
-					}
-				} else {
-					pathValidation.setGraphic(times);
-					datasetValidation.setGraphic(times2);
-				}
+				launchValidation(pathField.getText(), n5Dataset.getText());
 			});
 			pathDetectionPause.playFromStart();
 		});
 
-		PauseTransition datasetDetectionPause = new PauseTransition(Duration.millis(300));
+		PauseTransition datasetDetectionPause = new PauseTransition(Duration.millis(
+				500));
 		n5Dataset.textProperty().addListener((observable, oldValue, newValue) -> {
 			datasetDetectionPause.setOnFinished(event -> {
 				if (marsBdvSource == null) return;
-
 				marsBdvSource.setN5Dataset(n5Dataset.getText());
 				datasetInfo.setText("");
-
-				boolean exists;
-				N5Reader reader = null;
-				try {
-					reader = new MarsN5ViewerReaderFun().apply(pathField.getText());
-					exists = reader.exists(n5Dataset.getText());
-				} catch (Exception e) {
-					exists = false;
-				}
-				if (exists) {
-					datasetValidation.setGraphic(check2);
-					if (reader != null) {
-						DatasetAttributes attributes = reader.getDatasetAttributes(n5Dataset.getText());
-						if (attributes != null) {
-							String info = getDatasetInfo(attributes);
-							marsBdvSource.setProperty("info", info);
-							datasetInfo.setText(info);
-						}
-					}
-				}
-				else datasetValidation.setGraphic(times2);
+				launchValidation(pathField.getText(), n5Dataset.getText());
 			});
 			datasetDetectionPause.playFromStart();
 		});
@@ -468,7 +475,7 @@ public class BdvSourceOptionsPane extends VBox {
 		tField = new TextField();
 		tField.textProperty().addListener((observable, oldValue, newValue) -> {
 			if (marsBdvSource != null) marsBdvSource.setSingleTimePoint(Integer
-				.valueOf(tField.getText()));
+					.valueOf(tField.getText()));
 		});
 		tField.setPrefWidth(50);
 		tField.setMaxWidth(50);
@@ -484,6 +491,132 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(datasetInfo, new Insets(0, 5, 10, 5));
 
 		getChildren().add(infoGridpane);
+	}
+
+	/**
+	 * Immutable result carried back from the background validation task to the
+	 * JavaFX thread.
+	 */
+	private static final class ValidationResult {
+
+		final boolean pathExists;
+		final boolean datasetExists;
+		final String info; // null if no attributes were available
+
+		ValidationResult(boolean pathExists, boolean datasetExists, String info) {
+			this.pathExists = pathExists;
+			this.datasetExists = datasetExists;
+			this.info = info;
+		}
+	}
+
+	/**
+	 * Launches a background validation of the given path and dataset. Any
+	 * previously running task is cancelled first, so at most one validation is
+	 * ever in flight. All N5 I/O happens off the JavaFX Application Thread; UI
+	 * updates are applied in the task's succeeded handler (which runs on the FX
+	 * thread).
+	 */
+	private void launchValidation(final String path, final String dataset) {
+		// Cancel any in-flight (or queued) validation so we never run parallel
+		// checks even if the user types fast enough to start one before the
+		// previous finishes.
+		if (currentValidationTask != null && currentValidationTask.isRunning()) {
+			currentValidationTask.cancel();
+		}
+
+		// Show spinning refresh icons while the check runs.
+		startSpin();
+
+		final Task<ValidationResult> task = new Task<ValidationResult>() {
+
+			@Override
+			protected ValidationResult call() throws Exception {
+				boolean pathExists;
+				boolean datasetExists;
+				String info = null;
+				N5Reader reader = null;
+				try {
+					reader = new MarsN5ViewerReaderFun().apply(path);
+					if (isCancelled()) return null;
+					pathExists = reader.exists("/");
+					datasetExists = reader.exists(dataset);
+					if (pathExists && reader != null) {
+						DatasetAttributes attributes = reader.getDatasetAttributes(
+								dataset);
+						if (attributes != null) info = getDatasetInfo(attributes);
+					}
+				}
+				catch (Exception e) {
+					pathExists = false;
+					datasetExists = false;
+				}
+				return new ValidationResult(pathExists, datasetExists, info);
+			}
+		};
+
+		task.setOnSucceeded(e -> {
+			// Ignore stale results: only apply if this is still the current task.
+			if (task != currentValidationTask) return;
+			stopSpin();
+
+			ValidationResult result = task.getValue();
+			if (result == null) return;
+
+			if (result.pathExists) {
+				pathValidation.setGraphic(check);
+				if (result.datasetExists) datasetValidation.setGraphic(check2);
+				else datasetValidation.setGraphic(times2);
+
+				if (result.info != null) {
+					if (marsBdvSource != null) marsBdvSource.setProperty("info",
+							result.info);
+					datasetInfo.setText(result.info);
+				}
+			}
+			else {
+				pathValidation.setGraphic(times);
+				datasetValidation.setGraphic(times2);
+			}
+		});
+
+		task.setOnFailed(e -> {
+			if (task != currentValidationTask) return;
+			stopSpin();
+			pathValidation.setGraphic(times);
+			datasetValidation.setGraphic(times2);
+		});
+
+		task.setOnCancelled(e -> {
+			// A newer task has taken over; it will manage the spinner and icons.
+		});
+
+		currentValidationTask = task;
+		validationExecutor.submit(task);
+	}
+
+	/** Show and start spinning the refresh icons on both validation labels. */
+	private void startSpin() {
+		pathValidation.setGraphic(pathRefresh);
+		datasetValidation.setGraphic(datasetRefresh);
+		pathRefreshSpin.playFromStart();
+		datasetRefreshSpin.playFromStart();
+	}
+
+	/** Stop spinning the refresh icons. */
+	private void stopSpin() {
+		pathRefreshSpin.stop();
+		datasetRefreshSpin.stop();
+		pathRefresh.setRotate(0);
+		datasetRefresh.setRotate(0);
+	}
+
+	/**
+	 * Shuts down the background executor. Call this when the pane is being
+	 * disposed of (optional, since the executor uses daemon threads).
+	 */
+	public void shutdown() {
+		validationExecutor.shutdownNow();
 	}
 
 	private void setAffineTransform3D(String value, int m, int n) {
@@ -534,35 +667,35 @@ public class BdvSourceOptionsPane extends VBox {
 
 			this.marsBdvSource = marsBdvSource;
 			m00.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0,
-				0)));
+					0)));
 			m01.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0,
-				1)));
+					1)));
 			m02.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(0,
-				3)));
+					3)));
 			m10.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1,
-				0)));
+					0)));
 			m11.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1,
-				1)));
+					1)));
 			m12.setText(String.valueOf(marsBdvSource.getAffineTransform3D().get(1,
-				3)));
+					3)));
 			driftCorrect.set(marsBdvSource.getCorrectDrift());
 			pathField.setText(marsBdvSource.getPath());
 
 			if (marsBdvSource.isN5()) {
 				if (!getChildren().contains(n5OptionsHBox)) getChildren().add(
-					getChildren().size() - 1, n5OptionsHBox);
+						getChildren().size() - 1, n5OptionsHBox);
 				cField.setText(String.valueOf(marsBdvSource.getChannel()));
 				n5Dataset.setText(marsBdvSource.getN5Dataset());
 
 				if (marsBdvSource.getSingleTimePointMode()) singleTimePoint.setValue(
-					true);
+						true);
 				else singleTimePoint.setValue(false);
 
 				tField.setText(String.valueOf(marsBdvSource.getSingleTimePoint()));
 
 				// Dataset information
 				if (marsBdvSource.getProperties().containsKey("info")) datasetInfo
-					.setText(marsBdvSource.getProperties().get("info"));
+						.setText(marsBdvSource.getProperties().get("info"));
 				else datasetInfo.setText("");
 			}
 			else {
