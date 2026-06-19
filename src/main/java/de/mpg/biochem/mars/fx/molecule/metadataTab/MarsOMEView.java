@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javafx.application.Platform;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 import org.scijava.convert.ConvertService;
@@ -64,6 +65,9 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+
+import javafx.scene.control.skin.VirtualFlow;
+import javafx.scene.control.IndexedCell;
 
 /**
  * Inspired by FXML Controller class from Hadrien Mary.
@@ -97,6 +101,29 @@ public class MarsOMEView {
 		.observableArrayList();
 	private FilteredList<String> filteredPlaneFieldNameList = new FilteredList<>(
 		planeFieldNameList, p -> true);
+
+	// --- selection memory ---
+	private SelectionKey lastSelectionKey = null;
+
+	/** Identifies a plane across metadata records by image + C/Z/T. */
+	private static class SelectionKey {
+		final int imageID, c, z, t;
+		SelectionKey(int imageID, int c, int z, int t) {
+			this.imageID = imageID; this.c = c; this.z = z; this.t = t;
+		}
+		boolean matches(MarsOMEPlane p) {
+			return p.getImageID() == imageID
+					&& p.getC() == c && p.getZ() == z && p.getT() == t;
+		}
+	}
+
+	private SelectionKey keyForSelectedPlane() {
+		TreeItem<GenericModel> item =
+				(TreeItem<GenericModel>) testTree.getSelectionModel().getSelectedItem();
+		if (item == null || !(item.getValue() instanceof MarsOMEPlane)) return null;
+		MarsOMEPlane p = (MarsOMEPlane) item.getValue();
+		return new SelectionKey(p.getImageID(), p.getC(), p.getZ(), p.getT());
+	}
 
 	public MarsOMEView(final Context context) {
 		context.inject(this);
@@ -294,16 +321,63 @@ public class MarsOMEView {
 
 		borderPane.setCenter(planeSplitPane);
 		splitPane.getItems().add(borderPane);
+
+		testTree.getSelectionModel().selectedItemProperty().addListener(
+				(ObservableValue obs, Object oldValue, Object newValue) -> {
+					TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
+					if (selectedItem != null
+							&& selectedItem.getValue() instanceof MarsOMEPlane)
+						populateTiffDataInformations((MarsOMEPlane) selectedItem.getValue());
+				});
+	}
+
+	@SuppressWarnings("rawtypes")
+	private VirtualFlow findVirtualFlow() {
+		if (testTree.getSkin() == null) return null;
+		for (Node n : testTree.lookupAll(".virtual-flow")) {
+			if (n instanceof VirtualFlow) return (VirtualFlow) n;
+		}
+		return null;
+	}
+
+	/** Index of the first (partially) visible row, or -1. */
+	@SuppressWarnings("rawtypes")
+	private int firstVisibleRow() {
+		VirtualFlow flow = findVirtualFlow();
+		if (flow == null) return -1;
+		IndexedCell cell = flow.getFirstVisibleCell();
+		return (cell == null) ? -1 : cell.getIndex();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private int lastVisibleRow() {
+		VirtualFlow flow = findVirtualFlow();
+		if (flow == null) return -1;
+		IndexedCell cell = flow.getLastVisibleCell();
+		return (cell == null) ? -1 : cell.getIndex();
 	}
 
 	public void fill(MarsMetadata meta) {
+		// 1. Remember what was selected before we tear down the tree.
+		SelectionKey previousKey = keyForSelectedPlane();
+		if (previousKey != null) lastSelectionKey = previousKey;
+
+		final int previousFirstVisible = firstVisibleRow();
+		final int previousLastVisible  = lastVisibleRow();
+
+		// 2. Clear tables up front.
+		imageData.clear();
+		imageFieldNameList.clear();
+		planeData.clear();
+		planeFieldNameList.clear();
+
+		// 3. Rebuild the tree.
 		TreeItem<GenericModel> root = new TreeItem<>();
-		testTree.setRoot(root);
 		testTree.setShowRoot(false);
 
-		// Build and populate the tree
-		// for (int imageIndex = 0; imageIndex < meta.getImageCount(); imageIndex++)
-		// {
+		final java.util.concurrent.atomic.AtomicReference<TreeItem<GenericModel>> itemToSelect =
+				new java.util.concurrent.atomic.AtomicReference<>(null);
+
 		meta.images().forEach(image -> {
 			TreeItem<GenericModel> imageItem = new TreeItem<>(image);
 			root.getChildren().add(imageItem);
@@ -311,23 +385,31 @@ public class MarsOMEView {
 			image.planes().forEach(plane -> {
 				TreeItem<GenericModel> dataItem = new TreeItem<>(plane);
 				imageItem.getChildren().add(dataItem);
+				if (lastSelectionKey != null && lastSelectionKey.matches(plane)) {
+					itemToSelect.set(dataItem);
+					imageItem.setExpanded(true);   // restore expansion of the parent Image
+				}
 			});
 		});
 
-		// Handle selection in the tree
-		testTree.getSelectionModel().selectedItemProperty().addListener((
-			ObservableValue obs, Object oldValue, Object newValue) -> {
-			TreeItem<GenericModel> selectedItem = (TreeItem<GenericModel>) newValue;
+		testTree.setRoot(root);
 
-			if (selectedItem != null && selectedItem
-				.getValue() instanceof MarsOMEPlane) populateTiffDataInformations(
-					(MarsOMEPlane) selectedItem.getValue());
-		});
-
-		imageData.clear();
-		imageFieldNameList.clear();
-		planeData.clear();
-		planeFieldNameList.clear();
+		// 4. Restore selection if the same plane exists; otherwise leave default.
+		final TreeItem<GenericModel> sel = itemToSelect.get();
+		if (sel != null) {
+			testTree.getSelectionModel().select(sel);
+			final int selRow = testTree.getRow(sel);
+			Platform.runLater(() -> {
+				int firstVisible = previousFirstVisible;
+				int lastVisible  = previousLastVisible;
+				// If the selected row was already on-screen, keep the scroll where it was.
+				if (firstVisible >= 0 && selRow >= firstVisible && selRow <= lastVisible) {
+					testTree.scrollTo(firstVisible);
+				} else {
+					testTree.scrollTo(selRow);  // off-screen: bring it into view
+				}
+			});
+		}
 	}
 
 	private void populateTiffDataInformations(MarsOMEPlane plane) {
