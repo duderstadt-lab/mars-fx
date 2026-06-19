@@ -84,6 +84,7 @@ public class BdvViewTable implements MetadataEventHandler {
 	protected BdvSourceOptionsPane bdvSourceOptionsPane;
 
 	protected ChangeListener<MarsBdvSource> bdvIndexTableListener;
+	protected TableView<MarsBdvSource> bdvTable;
 
 	public BdvViewTable() {
 		rootPane = new SplitPane();
@@ -104,7 +105,7 @@ public class BdvViewTable implements MetadataEventHandler {
 	}
 
 	protected BorderPane buildBdvTableIndex() {
-		TableView<MarsBdvSource> bdvTable = new TableView<MarsBdvSource>();
+		bdvTable = new TableView<MarsBdvSource>();
 		addBdvSourceNameField = new CustomTextField();
 
 		TableColumn<MarsBdvSource, String> typeColumn = new TableColumn<>();
@@ -290,9 +291,33 @@ public class BdvViewTable implements MetadataEventHandler {
 	}
 
 	public void loadBdvSources() {
+		// Remember the selected source name before rebuilding the list.
+		MarsBdvSource selected = (bdvTable != null)
+				? bdvTable.getSelectionModel().getSelectedItem() : null;
+		String previousName = (selected != null) ? selected.getName() : null;
+
 		bdvRowList.setAll(marsImageMetadata.getBdvSourceNames().stream().map(
-			name -> marsImageMetadata.getBdvSource(name)).collect(Collectors
+				name -> marsImageMetadata.getBdvSource(name)).collect(Collectors
 				.toList()));
+
+		// Restore selection if a source with the same name exists; otherwise clear.
+		if (previousName != null && bdvTable != null) {
+			int matchRow = -1;
+			for (int i = 0; i < bdvRowList.size(); i++) {
+				if (previousName.equals(bdvRowList.get(i).getName())) {
+					matchRow = i;
+					break;
+				}
+			}
+			if (matchRow >= 0) {
+				bdvTable.getSelectionModel().select(matchRow);
+				final int row = matchRow;
+				Platform.runLater(() -> bdvTable.scrollTo(row));
+			} else {
+				bdvTable.getSelectionModel().clearSelection();
+				bdvSourceOptionsPane.setMarsBdvSource(null);
+			}
+		}
 	}
 
 	@Override
