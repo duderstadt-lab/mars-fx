@@ -30,6 +30,7 @@ package de.mpg.biochem.mars.fx.molecule.metadataTab.n5browser;
 
 import java.io.File;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -41,8 +42,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
-import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import javafx.stage.Window;
+import javafx.geometry.Pos;
 
 /**
  * Reduced JavaFX dialog for browsing N5 datasets in a local .n5 directory.
@@ -81,6 +82,7 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
         pathField.setOnAction(e -> loadPath(pathField.getText().trim()));
 
         HBox top = new HBox(8, pathLbl, pathField, browseButton);
+        top.setAlignment(Pos.CENTER_LEFT);
         top.setPadding(new Insets(10));
         HBox.setHgrow(pathField, Priority.ALWAYS);
 
@@ -114,6 +116,11 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
         // If we were given a path that looks like an .n5, load it immediately.
         if (initialPath != null && initialPath.endsWith(".n5")) loadPath(
                 initialPath);
+
+        Platform.runLater(() -> {
+            pathField.deselect();
+            pathField.end();   // caret to end, nothing selected
+        });
     }
 
     private void chooseDirectory() {
@@ -137,6 +144,7 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
         if (path == null || path.isEmpty()) return;
         statusLabel.setText("");
         final String name = new File(path).getName();
-        datasetPane.load(path, name, null);
+        //datasetPane.load(path, name, null);
+        datasetPane.load(path, path, null);   // path as both root and header text
     }
 }

@@ -613,8 +613,11 @@ public class BdvSourceOptionsPane extends VBox {
 	}
 
 	private void openLocalBrowser() {
-		final N5LocalBrowserDialog dialog = new N5LocalBrowserDialog(getScene().getWindow(), pathField
-				.getText());
+		final String current = pathField.getText();
+		// Only seed the local dialog with a genuinely local path.
+		final String localSeed = (current != null && !current.startsWith("http")
+				&& !current.startsWith("s3")) ? current : null;
+		final N5LocalBrowserDialog dialog = new N5LocalBrowserDialog(getScene().getWindow(), localSeed);
 		final Optional<N5LocalBrowserDialog.LocalResult> result = dialog
 				.showAndWait();
 		result.ifPresent(r -> {

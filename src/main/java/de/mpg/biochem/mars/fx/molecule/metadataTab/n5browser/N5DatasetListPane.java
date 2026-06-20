@@ -49,6 +49,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
@@ -95,10 +96,11 @@ public class N5DatasetListPane extends BorderPane {
         refreshSpin.setCycleCount(RotateTransition.INDEFINITE);
         refreshSpin.setInterpolator(Interpolator.LINEAR);
 
-        HBox header = new HBox(8);
+        VBox header = new VBox(2, headerLabel, statusLabel);
         header.setAlignment(Pos.CENTER_LEFT);
         header.setPadding(new Insets(0, 0, 5, 0));
-        header.getChildren().addAll(headerLabel, statusLabel);
+        headerLabel.setWrapText(true);
+        headerLabel.setMaxWidth(Double.MAX_VALUE);
         setTop(header);
 
         datasetList.setCellFactory(lv -> new ListCell<DatasetEntry>() {

@@ -104,6 +104,20 @@
     -fx-background-insets: 0;
 }
 
+/* Selected rows keep the selection color even when hovered (override the
+ * plain hover above). */
+.list-view .list-cell:filled:selected:hover,
+.list-view .list-cell:filled:selected {
+    -fx-background-color: -fx-selection-bar;
+    -fx-background-insets: 0;
+}
+
+.tree-view .tree-cell:filled:selected:hover,
+.tree-view .tree-cell:filled:selected {
+    -fx-background-color: -fx-selection-bar;
+    -fx-background-insets: 0;
+}
+
 /* Border below "open folder" item in projects combo box */
 .projects-combo-box .list-cell {
     -fx-border-width: 0 0 1 0;

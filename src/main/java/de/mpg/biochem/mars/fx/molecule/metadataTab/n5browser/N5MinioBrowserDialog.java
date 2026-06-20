@@ -229,7 +229,7 @@ public class N5MinioBrowserDialog extends
         // --- bottom: dataset list inside the selected .n5 ---
         SplitPane vertical = new SplitPane(middle, datasetPane);
         vertical.setOrientation(Orientation.VERTICAL);
-        vertical.setDividerPositions(0.55);
+        //vertical.setDividerPositions(0.72);
 
         BorderPane content = new BorderPane();
         content.setTop(top);
@@ -245,6 +245,8 @@ public class N5MinioBrowserDialog extends
         okButton.setDisable(true);
         datasetPane.selectedDatasetProperty().addListener((obs, old, sel) -> okButton
                 .setDisable(sel == null || currentN5Root == null));
+
+        datasetPane.setMinHeight(0);
 
         setResultConverter(bt -> {
             if (bt == okType && currentN5Root != null && datasetPane
@@ -264,6 +266,9 @@ public class N5MinioBrowserDialog extends
             if (browser != null) browser.close();
         });
 
+        setOnShown(e -> Platform.runLater(() ->
+                vertical.setDividerPositions(0.6)));
+
         // Decide the starting server: parse an existing path if present, else the
         // last-used server from preferences (empty on first ever use).
         final MarsS3Browser.ParsedPath parsed = MarsS3Browser.parsePath(
@@ -282,6 +287,11 @@ public class N5MinioBrowserDialog extends
         // Auto-connect on open only if we already have a server address.
         if (!serverField.getText().trim().isEmpty()) Platform.runLater(
                 this::connect);
+
+        Platform.runLater(() -> {
+            serverField.deselect();
+            serverField.end();
+        });
     }
 
     private String endpoint() {
@@ -501,7 +511,7 @@ public class N5MinioBrowserDialog extends
                     node.prefix);
             final String preselect = pendingDataset; // null in the manual case
             pendingDataset = null;
-            datasetPane.load(url, node.name, preselect);
+            datasetPane.load(url, url, preselect);   // url as both root and header text
         }
         else {
             currentN5Root = null;
