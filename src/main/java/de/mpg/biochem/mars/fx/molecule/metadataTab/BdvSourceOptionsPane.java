@@ -76,6 +76,10 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 
+import de.mpg.biochem.mars.fx.molecule.metadataTab.n5browser.N5MinioBrowserDialog;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.n5browser.N5LocalBrowserDialog;
+import java.util.Optional;
+
 public class BdvSourceOptionsPane extends VBox {
 
 	private TextField m00, m01, m02, m10, m11, m12, cField, tField, pathField, n5Dataset;
@@ -84,6 +88,11 @@ public class BdvSourceOptionsPane extends VBox {
 	private BooleanProperty driftCorrect = new SimpleBooleanProperty();
 	private BooleanProperty singleTimePoint = new SimpleBooleanProperty();
 	private Button pathButton;
+	// Browse mode: true = cloud (MinIO/S3), false = local.
+	private Button modeButton;
+	private boolean cloudMode = true;
+	// Last-used server endpoint for the cloud dialog.
+	private String lastServer;
 	// private Label pathValidation;
 	private MarsBdvSource marsBdvSource;
 
@@ -261,86 +270,34 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setMargin(pathValidation, new Insets(0, 5, 10, 5));
 		pathBox.getChildren().add(pathValidation);
 
+		modeButton = new Button("S3");
+		modeButton.setFocusTraversable(false);
+		modeButton.setCenterShape(true);
+		modeButton.setStyle("-fx-background-radius: 2em; " +
+				"-fx-border-radius: 2em; " +
+				"-fx-min-width: 60px; " + "-fx-min-height: 30px; " +
+				"-fx-max-width: 60px; " + "-fx-max-height: 30px;");
+		modeButton.setOnAction(e -> {
+			cloudMode = !cloudMode;
+			modeButton.setText(cloudMode ? "S3" : "Local");
+		});
+		HBox.setMargin(modeButton, new Insets(0, 5, 10, 5));
+		pathBox.getChildren().add(modeButton);
+
 		pathButton = new Button("Browse");
 		pathButton.setPrefWidth(70);
 		pathButton.setMaxWidth(70);
 		pathButton.setOnAction(e -> {
-			if (marsBdvSource.isN5()) {
-				SwingUtilities.invokeLater(new Runnable() {
+			if (marsBdvSource == null) return;
 
-					@Override
-					public void run() {
-						DatasetSelectorDialog selectionDialog = new DatasetSelectorDialog(
-								new MarsN5ViewerReaderFun(), new N5BasePathFun(),
-								pathField.getText(),
-								new N5MetadataParser[]{ new OmeNgffMetadataParser() }, // need the ngff parser because it's where the metadata are
-								new N5MetadataParser[] { new ImagePlusLegacyMetadataParser(),
-										new N5CosemMetadataParser(),
-										new N5SingleScaleMetadataParser(),
-										new CanonicalMetadataParser(),
-										new N5GenericSingleScaleMetadataParser() });
-
-						selectionDialog.setVirtualOption(false);
-						selectionDialog.setCropOption(false);
-
-						selectionDialog.setTreeRenderer(new N5DatasetTreeCellRenderer(
-								true));
-
-						// Prevents NullPointerException
-						selectionDialog.setContainerPathUpdateCallback(x -> {});
-
-						final Consumer<DataSelection> callback = (
-								DataSelection dataSelection) -> {
-							Platform.runLater(new Runnable() {
-
-								@Override
-								public void run() {
-									String baseDialogPath = selectionDialog.getN5RootPath();
-									String datasetPath = dataSelection.metadata.get(0).getPath();
-
-									//This mess is so that the n5rootPath ends with the n5 directory
-									//and the dataset is the path after that
-									//the dialog datasetPath that is returned can include the n5 directory otherwise.
-									StringBuilder n5RootPath = new StringBuilder(baseDialogPath);
-									StringBuilder n5DatasetPath = new StringBuilder(datasetPath);
-									if (!baseDialogPath.endsWith(".n5")) {
-										String[] parts = datasetPath.split("/");
-
-										for (int i = 0; i < parts.length; i++) {
-											if (!n5RootPath.toString().endsWith("/")) n5RootPath.append("/");
-											n5RootPath.append(parts[i]);
-											if (parts[i].endsWith(".n5")) {
-												n5DatasetPath = new StringBuilder();
-												n5DatasetPath.append(parts[i + 1]);
-												for (int j = i + 2; j < parts.length; j++) {
-													n5DatasetPath.append("/").append(parts[j]);
-												}
-												break;
-											}
-										}
-									}
-
-									//Update the source
-									marsBdvSource.setPath(n5RootPath.toString());
-									marsBdvSource.setN5Dataset(n5DatasetPath.toString());
-									String info = getDatasetInfo(
-											((N5DatasetMetadata) dataSelection.metadata.get(0))
-													.getAttributes());
-									marsBdvSource.setProperty("info", info);
-
-									//Update the fields
-									pathField.setText(n5RootPath.toString());
-									n5Dataset.setText(n5DatasetPath.toString());
-									datasetInfo.setText(info);
-								}
-							});
-						};
-
-						selectionDialog.run(callback);
-					}
-				});
+			if (marsBdvSource.isN5() && cloudMode) {
+				openCloudBrowser();
+			}
+			else if (marsBdvSource.isN5() && !cloudMode) {
+				openLocalBrowser();
 			}
 			else {
+				// Non-N5 (xml/hdf5) — keep the original local file chooser.
 				final File path = (pathField.getText().trim().equals("")) ? new File(
 						"") : new File(pathField.getText().trim());
 				FileChooser fileChooser = new FileChooser();
@@ -353,7 +310,6 @@ public class BdvSourceOptionsPane extends VBox {
 				fileChooser.getExtensionFilters().add(new ExtensionFilter("xml file",
 						"*.xml"));
 				File file = fileChooser.showOpenDialog(getScene().getWindow());
-
 				if (file != null) {
 					marsBdvSource.setPath(file.getAbsolutePath());
 					pathField.setText(file.getAbsolutePath());
@@ -638,6 +594,35 @@ public class BdvSourceOptionsPane extends VBox {
 				.getDimensions()).mapToObj(d -> Long.toString(d)).collect(Collectors
 				.toList()));
 		return "Dimensions " + dimString + ", " + attributes.getDataType();
+	}
+
+	private void openCloudBrowser() {
+		final N5MinioBrowserDialog dialog = new N5MinioBrowserDialog(
+				getScene().getWindow(), pathField.getText(), n5Dataset.getText());
+		final Optional<N5MinioBrowserDialog.BrowseResult> result = dialog
+				.showAndWait();
+		result.ifPresent(r -> {
+			lastServer = r.server;
+			final String fullPath = r.getFullPath();
+			marsBdvSource.setPath(fullPath);
+			marsBdvSource.setN5Dataset(r.dataset);
+			pathField.setText(fullPath);
+			n5Dataset.setText(r.dataset);
+			// Validation (triggered by the field listeners) will refresh the info.
+		});
+	}
+
+	private void openLocalBrowser() {
+		final N5LocalBrowserDialog dialog = new N5LocalBrowserDialog(getScene().getWindow(), pathField
+				.getText());
+		final Optional<N5LocalBrowserDialog.LocalResult> result = dialog
+				.showAndWait();
+		result.ifPresent(r -> {
+			marsBdvSource.setPath(r.n5Path);
+			marsBdvSource.setN5Dataset(r.dataset);
+			pathField.setText(r.n5Path);
+			n5Dataset.setText(r.dataset);
+		});
 	}
 
 	public void setMarsBdvSource(MarsBdvSource marsBdvSource) {

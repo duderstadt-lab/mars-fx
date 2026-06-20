@@ -519,6 +519,7 @@ Text, .text {
     -fx-background-color: rgb(45, 48, 50); /* Match your dark theme background */
     -fx-border-color: rgb(60, 63, 65); /* Your preferred border color */
     -fx-border-width: 1px;
+    -fx-selection-bar-non-focused: -mars-dark-selection-color;
 }
 
 /* Override the focus styling */
@@ -527,6 +528,20 @@ Text, .text {
     -fx-border-color: rgb(60, 63, 65); /* Keep the same border color */
     -fx-focus-color: transparent; /* Remove focus highlight */
     -fx-faint-focus-color: transparent; /* Remove faint focus highlight */
+}
+
+/* Dataset list keeps a black border whether focused or not (dark theme). */
+.bdv-source-options .list-view {
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+    -fx-background-insets: 0;
+}
+
+/* Remove only the focus ring (not the border) on the list and tree. */
+.bdv-source-options .list-view:focused,
+.bdv-source-options .tree-view:focused {
+    -fx-focus-color: transparent !important;
+    -fx-faint-focus-color: transparent !important;
 }
 
 /* Target the chip's container */
