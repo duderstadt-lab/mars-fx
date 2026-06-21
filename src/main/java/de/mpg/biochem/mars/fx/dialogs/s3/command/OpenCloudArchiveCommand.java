@@ -44,12 +44,12 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIOPlugin;
 import javafx.application.Platform;
 
-@Plugin(type = Command.class, label = "Open archive (S3)", menu = { @Menu(
+@Plugin(type = Command.class, label = "Open Archive (S3)", menu = { @Menu(
         label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
         mnemonic = MenuConstants.PLUGINS_MNEMONIC), @Menu(label = "Mars",
         weight = MenuConstants.PLUGINS_WEIGHT, mnemonic = 'm'), @Menu(
         label = "Molecule", weight = 2, mnemonic = 'm'), @Menu(
-        label = "Open archive (S3)", weight = 3, mnemonic = 's') })
+        label = "Open Archive (S3)", weight = 3, mnemonic = 's') })
 public class OpenCloudArchiveCommand extends DynamicCommand {
 
     @Parameter

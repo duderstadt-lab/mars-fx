@@ -37,6 +37,8 @@ import java.util.prefs.Preferences;
 
 import com.amazonaws.AmazonServiceException;
 
+import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
+import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.n5.MarsS3Browser;
 import javafx.application.Platform;
@@ -180,6 +182,21 @@ public class CloudArchiveSaveDialog extends Dialog<String> {
             if (sel != null) {
                 bucketField.setText(sel);
                 selectBucket(sel);
+            }
+        });
+        bucketList.setCellFactory(lv -> new javafx.scene.control.ListCell<String>() {
+            @Override
+            protected void updateItem(String bucket, boolean empty) {
+                super.updateItem(bucket, empty);
+                if (empty || bucket == null) {
+                    setText(null);
+                    setGraphic(null);
+                }
+                else {
+                    setText(bucket);
+                    setGraphic(FontAwesomeIconFactory.get().createIcon(
+                            FontAwesomeIcon.ARCHIVE, "1.0em"));
+                }
             }
         });
         folderTree.setShowRoot(false);
