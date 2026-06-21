@@ -78,9 +78,6 @@ public class BdvViewTable implements MetadataEventHandler {
 	protected ObservableList<MarsBdvSource> bdvRowList = FXCollections
 		.observableArrayList();
 
-	protected Button typeButton;
-	protected int buttonType = 0;
-
 	protected BdvSourceOptionsPane bdvSourceOptionsPane;
 
 	protected ChangeListener<MarsBdvSource> bdvIndexTableListener;
@@ -107,17 +104,6 @@ public class BdvViewTable implements MetadataEventHandler {
 	protected BorderPane buildBdvTableIndex() {
 		bdvTable = new TableView<MarsBdvSource>();
 		addBdvSourceNameField = new CustomTextField();
-
-		TableColumn<MarsBdvSource, String> typeColumn = new TableColumn<>();
-		typeColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-		typeColumn.setCellValueFactory(bdvSource -> new ReadOnlyObjectWrapper<>(
-			(bdvSource.getValue().isN5()) ? "N5" : "HD5"));
-		typeColumn.setSortable(false);
-		typeColumn.setEditable(false);
-		typeColumn.setPrefWidth(40);
-		typeColumn.setMinWidth(40);
-		typeColumn.setStyle("-fx-alignment: CENTER-LEFT;");
-		bdvTable.getColumns().add(typeColumn);
 
 		TableColumn<MarsBdvSource, MarsBdvSource> deleteColumn =
 			new TableColumn<>();
@@ -224,15 +210,7 @@ public class BdvViewTable implements MetadataEventHandler {
 			{
 				MarsBdvSource bdvSource = new MarsBdvSource(addBdvSourceNameField
 					.getText());
-
-				switch (this.buttonType) {
-					case 0:
-						bdvSource.setN5(true);
-						break;
-					case 1:
-						bdvSource.setN5(false);
-						break;
-				}
+				bdvSource.setN5(true);
 
 				marsImageMetadata.putBdvSource(bdvSource);
 				loadBdvSources();
@@ -250,38 +228,11 @@ public class BdvViewTable implements MetadataEventHandler {
 		});
 		addBdvSourceNameField.getStyleClass().add("rounded-corners-textfield");
 
-		typeButton = new Button();
-		typeButton.setText("N5");
-		typeButton.setCenterShape(true);
-		typeButton.setStyle("-fx-background-radius: 2em; " +
-			"-fx-min-width: 60px; " + "-fx-min-height: 30px; " +
-			"-fx-max-width: 60px; " + "-fx-max-height: 30px;");
-		typeButton.setOnAction(e -> {
-			buttonType++;
-			if (buttonType > 1) buttonType = 0;
-
-			switch (buttonType) {
-				case 0:
-					typeButton.setText("N5");
-					typeButton.setGraphic(null);
-					break;
-				case 1:
-					typeButton.setText("HD5");
-					typeButton.setGraphic(null);
-					break;
-			}
-		});
-
-		BorderPane bomttomPane = new BorderPane();
-		bomttomPane.setCenter(addBdvSourceNameField);
-		bomttomPane.setLeft(typeButton);
-
 		BorderPane bdvTableIndex = new BorderPane();
 		bdvTableIndex.setCenter(bdvTable);
-		bdvTableIndex.setBottom(bomttomPane);
+		bdvTableIndex.setBottom(addBdvSourceNameField);
 
 		BorderPane.setMargin(addBdvSourceNameField, new Insets(5));
-		BorderPane.setMargin(typeButton, new Insets(5));
 
 		return bdvTableIndex;
 	}
