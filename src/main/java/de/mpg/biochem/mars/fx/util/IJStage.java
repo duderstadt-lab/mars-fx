@@ -72,11 +72,7 @@ public class IJStage extends Frame {
 	}
 
 	private void setupWindowMenuIntegration() {
-		// ONE-DIRECTIONAL ONLY: when Fiji activates this shadow Frame (e.g. the
-		// user picks it from the Window menu), raise the JavaFX stage. We do NOT
-		// listen to stage focus and push it back to the Frame — that reverse
-		// direction is a feedback loop that fights the window manager and makes
-		// the stage focus oscillate, killing keyboard input and menus.
+		// Reverse direction (unchanged): Fiji activates the Frame -> raise the stage.
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowActivated(WindowEvent e) {
@@ -84,15 +80,33 @@ public class IJStage extends Frame {
 				Platform.runLater(() -> {
 					try {
 						if (stage != null) stage.toFront();
-						// Note: toFront() only, NOT requestFocus(). Raising the
-						// window lets the WM grant focus naturally; explicitly
-						// grabbing focus is what triggers the war.
 					} finally {
 						raising.set(false);
 					}
 				});
 			}
 		});
+
+		// Forward direction (OS-gated): on macOS/Windows, when the JavaFX stage
+		// gains focus, move the AWT focus owner onto this shadow Frame so keystrokes
+		// route here instead of leaking to ImageJ's toolbar. Skipped on Linux, where
+		// the forward focus-pull caused a focus-oscillation war with the WM.
+		final String os = System.getProperty("os.name", "").toLowerCase();
+		final boolean isLinux = os.contains("linux") || os.contains("nix");
+		if (!isLinux) {
+			stage.focusedProperty().addListener((obs, was, isNow) -> {
+				if (!isNow) return;
+				if (!raising.compareAndSet(false, true)) return;
+				java.awt.EventQueue.invokeLater(() -> {
+					try {
+						toFront();
+						requestFocus();
+					} finally {
+						raising.set(false);
+					}
+				});
+			});
+		}
 	}
 
 	@Override

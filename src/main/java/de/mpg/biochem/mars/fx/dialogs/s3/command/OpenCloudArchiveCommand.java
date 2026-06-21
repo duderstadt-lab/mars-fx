@@ -30,6 +30,7 @@ package de.mpg.biochem.mars.fx.dialogs.s3.command;
 
 import java.io.IOException;
 
+import de.mpg.biochem.mars.fx.dialogs.s3.CloudArchiveOpenWindow;
 import org.scijava.command.Command;
 import org.scijava.command.DynamicCommand;
 import org.scijava.menu.MenuConstants;
@@ -39,7 +40,6 @@ import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
-import de.mpg.biochem.mars.fx.dialogs.s3.CloudArchiveOpenDialog;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIOPlugin;
 import javafx.application.Platform;
@@ -60,20 +60,19 @@ public class OpenCloudArchiveCommand extends DynamicCommand {
 
     @Override
     public void run() {
+        // Keep the JVM/FX runtime alive across dialog open/close cycles.
+        Platform.setImplicitExit(false);
+
         // Ensure the JavaFX toolkit is initialized. Constructing a JFXPanel boots
         // the FX runtime synchronously if it hasn't started yet (e.g. when this
         // command is the first JavaFX thing in the session). Mirrors the archive
         // frame's init().
         new javafx.embed.swing.JFXPanel();
 
-        // Keep the JVM/FX runtime alive across dialog open/close cycles.
-        Platform.setImplicitExit(false);
-
-        Platform.runLater(() -> {
-            final CloudArchiveOpenDialog dialog = new CloudArchiveOpenDialog(null);
-            dialog.showAndWait().ifPresent(url ->
-                    new Thread(() -> openArchive(url), "OpenCloudArchive").start());
-        });
+        Platform.runLater(() -> CloudArchiveOpenWindow.show(url -> {
+            if (url != null)
+                new Thread(() -> openArchive(url), "OpenCloudArchive").start();
+        }));
     }
 
     private void openArchive(final String url) {

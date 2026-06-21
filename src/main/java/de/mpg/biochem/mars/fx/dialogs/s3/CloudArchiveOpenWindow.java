@@ -34,21 +34,24 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
 import java.util.prefs.Preferences;
+
+import javax.swing.SwingUtilities;
 
 import com.amazonaws.AmazonServiceException;
 
+import de.mpg.biochem.mars.fx.util.IJStage;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.n5.MarsS3Browser;
+import ij.WindowManager;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar.ButtonData;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
@@ -58,20 +61,21 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.Window;
+import javafx.stage.Stage;
 
 /**
- * JavaFX dialog for opening Mars archives (.yama) stored in S3/MinIO buckets.
- * Browses buckets and folders, treating .yama files and .yama.store
- * directories as selectable leaves, .n5 directories as non-enterable leaves,
- * and shows a recently-opened list plus a paste-URL field at the bottom.
- * Returns the full archive URL.
+ * Modeless Stage-based window for opening Mars archives (.yama) from S3/MinIO.
+ * Built as a Stage wrapped in an {@link IJStage} shadow frame (like the archive
+ * windows) so AWT focus moves onto its proxy when focused, preventing Cmd/Ctrl
+ * shortcuts from leaking to ImageJ. The chosen archive URL is delivered via a
+ * callback (the window is modeless, so there is no blocking showAndWait).
  *
  * @author Karl Duderstadt
  */
-public class CloudArchiveOpenDialog extends Dialog<String> {
+public class CloudArchiveOpenWindow {
 
     private static final String SERVER_PREF_KEY = "mars.s3.lastServer";
     private static final String RECENTS_PREF_KEY = "recentOpenURLs";
@@ -118,13 +122,14 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
     private final ListView<String> recentList = new ListView<>();
     private final Label statusLabel = new Label();
 
-    // Pre-navigation target (parsed from a pasted/recent URL), consumed stepwise.
+    private final Button openButton = new Button("Open");
+
     private String pendingBucket;
     private List<String> pendingSegments;
 
     private MarsS3Browser browser;
     private String currentBucket;
-    private String selectedUrl; // full .yama url of current selection
+    private String selectedUrl;
 
     private final java.util.Set<String> loadingPrefixes =
             new java.util.HashSet<>();
@@ -141,10 +146,41 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                 }
             });
 
-    public CloudArchiveOpenDialog(final Window owner) {
-        setTitle("Open Archive — S3");
-        initOwner(owner);
-        setResizable(true);
+    private Stage stage;
+    private IJStage ijStage;
+    private final Consumer<String> resultCallback;
+
+    private CloudArchiveOpenWindow(final Consumer<String> resultCallback) {
+        this.resultCallback = resultCallback;
+    }
+
+    /**
+     * Builds and shows the window. The callback is invoked once with the chosen
+     * archive URL (Open) or null (Cancel / closed). Must be called on the FX
+     * thread.
+     */
+    private static CloudArchiveOpenWindow openInstance;
+
+    public static void show(final Consumer<String> resultCallback) {
+        // Only one Open Archive window at a time — focus the existing one.
+        if (openInstance != null && openInstance.stage != null) {
+            openInstance.stage.toFront();
+            openInstance.stage.requestFocus();
+            return;
+        }
+        final CloudArchiveOpenWindow win = new CloudArchiveOpenWindow(
+                resultCallback);
+        openInstance = win;
+        win.build();
+    }
+
+    private void build() {
+        stage = new Stage();
+        stage.setTitle("Open Archive — S3");
+
+        ijStage = new IJStage(stage);
+        ijStage.buildShadowFrame();
+        SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 
         serverField.setPromptText("https://server:port/");
         bucketField.setPromptText("bucket name");
@@ -176,28 +212,25 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                 selectBucket(sel);
             }
         });
-
         folderTree.setShowRoot(false);
         folderTree.getSelectionModel().selectedItemProperty().addListener((obs,
                                                                            old, sel) -> onTreeSelected(sel));
         SplitPane middle = new SplitPane(bucketList, folderTree);
         middle.setDividerPositions(0.3);
 
-        // --- bottom: paste field + recently opened archives ---
+        // --- bottom: paste field + recents ---
         VBox recentBox = new VBox(2);
         recentBox.setPadding(new Insets(5, 0, 0, 0));
-
         pasteField.setPromptText(
                 "Or paste a full archive URL (…/file.yama) and press Enter");
         pasteField.setOnAction(e -> navigateToUrl(pasteField.getText().trim()));
-
         Label recentLabel = new Label("Recent");
         recentList.getItems().setAll(loadRecents());
         recentList.getSelectionModel().selectedItemProperty().addListener((obs,
                                                                            old, sel) -> {
             if (sel != null) {
                 selectedUrl = sel;
-                updateOk();
+                updateOpen();
                 folderTree.getSelectionModel().clearSelection();
             }
         });
@@ -217,40 +250,46 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
             }
         });
         VBox.setVgrow(recentList, Priority.ALWAYS);
-
         recentBox.getChildren().addAll(pasteField, recentLabel, recentList);
 
         SplitPane vertical = new SplitPane(middle, recentBox);
         vertical.setOrientation(Orientation.VERTICAL);
 
+        // --- button bar ---
+        Button cancelButton = new Button("Cancel");
+        openButton.setDisable(true);
+        cancelButton.setOnAction(e -> finish(null));
+        openButton.setOnAction(e -> finish(selectedUrl));
+        HBox buttonBar = new HBox(8, cancelButton, openButton);
+        buttonBar.setAlignment(Pos.CENTER_RIGHT);
+        buttonBar.setPadding(new Insets(8, 10, 10, 10));
+
         BorderPane content = new BorderPane();
         content.setTop(top);
         content.setCenter(vertical);
-        content.setPrefSize(800, 600);
+        content.setBottom(buttonBar);
         content.getStyleClass().add("bdv-source-options");
-        getDialogPane().setContent(content);
-        MarsThemeManager.applyTheme(getDialogPane());
 
-        ButtonType okType = new ButtonType("Open", ButtonData.OK_DONE);
-        getDialogPane().getButtonTypes().addAll(okType, ButtonType.CANCEL);
+        Scene scene = new Scene(content, 800, 640);
+        MarsThemeManager.applyTheme(scene);
+        stage.setScene(scene);
 
-        final Node okButton = getDialogPane().lookupButton(okType);
-        okButton.setDisable(true);
-
-        setResultConverter(bt -> {
-            if (bt == okType && selectedUrl != null) {
-                saveLastServer(endpoint());
-                addRecent(selectedUrl);
-                return selectedUrl;
+        stage.setOnCloseRequest(e -> {
+            if (!resultDelivered) {
+                resultDelivered = true;
+                if (resultCallback != null) resultCallback.accept(null);
             }
-            return null;
+            cleanupExecutor();
+            SwingUtilities.invokeLater(() -> {
+                WindowManager.removeWindow(ijStage);
+                ijStage.cleanup();
+            });
         });
 
-        setOnShown(e -> vertical.setDividerPositions(0.7));
-        setOnHidden(e -> {
-            executor.shutdownNow();
-            if (browser != null) browser.close();
-        });
+        stage.setOnHidden(e -> openInstance = null);
+
+        stage.setOnShown(e -> vertical.setDividerPositions(0.7));
+        stage.show();
 
         serverField.setText(loadLastServer());
         if (!serverField.getText().trim().isEmpty()) Platform.runLater(
@@ -259,6 +298,35 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
             serverField.deselect();
             serverField.end();
         });
+    }
+
+    private boolean resultDelivered = false;
+
+    private void finish(final String url) {
+        if (resultDelivered) return;
+        resultDelivered = true;
+
+        if (url != null) {
+            saveLastServer(endpoint());
+            addRecent(url);
+        }
+        if (resultCallback != null) resultCallback.accept(url);
+
+        cleanupExecutor();
+        stage.close();
+        SwingUtilities.invokeLater(() -> {
+            WindowManager.removeWindow(ijStage);
+            ijStage.cleanup();
+        });
+        openInstance = null;
+    }
+
+    private void cleanupExecutor() {
+        final MarsS3Browser b = browser;
+        new Thread(() -> {
+            executor.shutdownNow();
+            if (b != null) b.close();
+        }, "CloudArchiveOpen-cleanup").start();
     }
 
     private void navigateToUrl(final String url) {
@@ -271,21 +339,16 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
             statusLabel.setText("Could not parse that URL");
             return;
         }
-        // Make it immediately selectable even before the tree catches up.
         selectedUrl = url;
-        updateOk();
-
+        updateOpen();
         serverField.setText(parsed.server);
         pendingBucket = parsed.bucket;
         pendingSegments = new ArrayList<>(Arrays.asList(parsed.n5Root.split("/")));
-        // Reconnect to the (possibly new) server, then pre-navigate.
         connect();
     }
 
-    private void updateOk() {
-        final Node okButton = getDialogPane().lookupButton(getDialogPane()
-                .getButtonTypes().get(0));
-        if (okButton != null) okButton.setDisable(selectedUrl == null);
+    private void updateOpen() {
+        openButton.setDisable(selectedUrl == null);
     }
 
     private String endpoint() {
@@ -301,7 +364,7 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
         statusLabel.setText("Connecting…");
         bucketList.getItems().clear();
         folderTree.setRoot(null);
-        updateOk();
+        updateOpen();
 
         if (browser != null) browser.close();
         browser = new MarsS3Browser(server);
@@ -317,7 +380,6 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
         task.setOnSucceeded(e -> {
             bucketList.getItems().setAll(task.getValue());
             statusLabel.setText(task.getValue().isEmpty() ? "No buckets" : "");
-
             if (pendingBucket != null) {
                 bucketField.setText(pendingBucket);
                 if (bucketList.getItems().contains(pendingBucket)) {
@@ -335,7 +397,6 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                     ((AmazonServiceException) ex).getErrorCode())) statusLabel.setText(
                     "Bucket list unavailable — enter a bucket name");
             else statusLabel.setText("Could not reach server — check the address");
-
             if (pendingBucket != null) {
                 bucketField.setText(pendingBucket);
                 selectBucket(pendingBucket);
@@ -371,32 +432,21 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
 
             @Override
             protected FolderContents call() {
-                final List<String> folders = browser.listFolders(currentBucket,
-                        node.prefix);
-                final List<String> files = browser.listFiles(currentBucket,
-                        node.prefix);
-                return new FolderContents(folders, files);
+                return new FolderContents(browser.listFolders(currentBucket,
+                        node.prefix), browser.listFiles(currentBucket, node.prefix));
             }
         };
-
         task.setOnSucceeded(e -> {
             loadingPrefixes.remove(node.prefix);
             parent.getChildren().clear();
-
             final FolderContents contents = task.getValue();
-
             for (String folder : contents.folders) {
                 final String childPrefix = node.prefix.isEmpty() ? folder
                         : node.prefix + "/" + folder;
-                if (browser.isArchive(folder)) {
-                    parent.getChildren().add(new TreeItem<>(new S3Node(folder,
-                            childPrefix, Kind.ARCHIVE)));
-                }
-                else if (folder.endsWith(".n5")) {
-                    // .n5 shown as a dead-end leaf — visible for context, not enterable.
-                    parent.getChildren().add(new TreeItem<>(new S3Node(folder,
-                            childPrefix, Kind.N5)));
-                }
+                if (browser.isArchive(folder)) parent.getChildren().add(
+                        new TreeItem<>(new S3Node(folder, childPrefix, Kind.ARCHIVE)));
+                else if (folder.endsWith(".n5")) parent.getChildren().add(
+                        new TreeItem<>(new S3Node(folder, childPrefix, Kind.N5)));
                 else {
                     final TreeItem<S3Node> child = new TreeItem<>(new S3Node(folder,
                             childPrefix, Kind.FOLDER));
@@ -407,7 +457,6 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                     parent.getChildren().add(child);
                 }
             }
-
             for (String file : contents.files) {
                 if (browser.isArchive(file)) {
                     final String childPrefix = node.prefix.isEmpty() ? file
@@ -416,14 +465,10 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                             childPrefix, Kind.ARCHIVE)));
                 }
             }
-
             if (parent.getChildren().isEmpty()) statusLabel.setText("Empty: " +
                     node.prefix);
-
-            // Continue any pending pre-navigation from this freshly-loaded level.
             advancePendingNavigation(parent);
         });
-
         task.setOnFailed(e -> {
             loadingPrefixes.remove(node.prefix);
             parent.getChildren().clear();
@@ -432,53 +477,46 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
                     ? "error" : ex.getMessage()));
             pendingSegments = null;
         });
-
         executor.submit(task);
     }
 
     private void advancePendingNavigation(final TreeItem<S3Node> justLoaded) {
         if (pendingSegments == null || pendingSegments.isEmpty()) return;
         if (justLoaded.getValue() == null) return;
-
         final String parentPrefix = justLoaded.getValue().prefix;
         final int consumed = parentPrefix.isEmpty() ? 0 : parentPrefix.split("/")
                 .length;
         if (consumed >= pendingSegments.size()) return;
-
         final String nextName = pendingSegments.get(consumed);
-
         for (TreeItem<S3Node> child : justLoaded.getChildren()) {
             if (child.getValue() == null) continue;
             if (nextName.equals(child.getValue().name)) {
                 if (child.getValue().kind == Kind.ARCHIVE) {
                     final TreeItem<S3Node> archiveItem = child;
                     pendingSegments = null;
-
                     TreeItem<S3Node> p = archiveItem.getParent();
                     while (p != null) {
                         p.setExpanded(true);
                         p = p.getParent();
                     }
                     folderTree.getSelectionModel().select(archiveItem);
-
                     Platform.runLater(() -> Platform.runLater(() -> {
                         folderTree.getSelectionModel().select(archiveItem);
                         final int row = folderTree.getRow(archiveItem);
                         if (row >= 0) folderTree.getFocusModel().focus(row);
-                        final TreeItem<S3Node> parentFolder = archiveItem.getParent();
-                        final int scrollRow = (parentFolder != null) ? folderTree
-                                .getRow(parentFolder) : row;
+                        final TreeItem<S3Node> pf = archiveItem.getParent();
+                        final int scrollRow = (pf != null) ? folderTree.getRow(pf)
+                                : row;
                         if (scrollRow >= 0) folderTree.scrollTo(scrollRow);
                     }));
                 }
                 else {
                     folderTree.scrollTo(folderTree.getRow(child));
-                    child.setExpanded(true); // triggers its own load + continuation
+                    child.setExpanded(true);
                 }
                 return;
             }
         }
-        // Target segment not found at this level — abandon pre-navigation quietly.
         pendingSegments = null;
     }
 
@@ -489,26 +527,20 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
             selectedUrl = MarsS3Browser.buildPath(endpoint(), currentBucket,
                     node.prefix);
             recentList.getSelectionModel().clearSelection();
-            updateOk();
+            updateOpen();
         }
-        else {
-            if (recentList.getSelectionModel().getSelectedItem() == null) {
-                selectedUrl = null;
-                updateOk();
-            }
+        else if (recentList.getSelectionModel().getSelectedItem() == null) {
+            selectedUrl = null;
+            updateOpen();
         }
     }
 
-    // ---- recents ----
-
     private List<String> loadRecents() {
         final String stored = Preferences.userNodeForPackage(
-                CloudArchiveOpenDialog.class).get(RECENTS_PREF_KEY, "");
+                CloudArchiveOpenWindow.class).get(RECENTS_PREF_KEY, "");
         final List<String> recents = new ArrayList<>();
-        if (!stored.isEmpty()) {
-            for (String line : stored.split("\n"))
-                if (!line.trim().isEmpty()) recents.add(line);
-        }
+        if (!stored.isEmpty()) for (String line : stored.split("\n"))
+            if (!line.trim().isEmpty()) recents.add(line);
         return recents;
     }
 
@@ -518,20 +550,18 @@ public class CloudArchiveOpenDialog extends Dialog<String> {
         recents.add(0, url);
         while (recents.size() > MAX_RECENTS)
             recents.remove(recents.size() - 1);
-        Preferences.userNodeForPackage(CloudArchiveOpenDialog.class).put(
+        Preferences.userNodeForPackage(CloudArchiveOpenWindow.class).put(
                 RECENTS_PREF_KEY, String.join("\n", recents));
     }
 
-    // ---- server endpoint persistence ----
-
     private static String loadLastServer() {
-        return Preferences.userNodeForPackage(CloudArchiveOpenDialog.class).get(
+        return Preferences.userNodeForPackage(CloudArchiveOpenWindow.class).get(
                 SERVER_PREF_KEY, "");
     }
 
     private static void saveLastServer(final String server) {
         if (server == null || server.isEmpty()) return;
-        Preferences.userNodeForPackage(CloudArchiveOpenDialog.class).put(
+        Preferences.userNodeForPackage(CloudArchiveOpenWindow.class).put(
                 SERVER_PREF_KEY, server);
     }
 }
