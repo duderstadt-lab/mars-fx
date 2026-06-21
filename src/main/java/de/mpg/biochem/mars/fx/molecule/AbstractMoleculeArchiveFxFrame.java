@@ -54,6 +54,7 @@ import java.util.function.Consumer;
 import javax.swing.SwingUtilities;
 
 import de.mpg.biochem.mars.fx.dialogs.*;
+import de.mpg.biochem.mars.fx.dialogs.s3.CloudArchiveSaveDialog;
 import de.mpg.biochem.mars.fx.util.*;
 import de.mpg.biochem.mars.io.MoleculeArchiveAmazonS3Source;
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
@@ -1150,38 +1151,25 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	private void saveToCloudStorage() {
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if (archive != null) {
-					MoleculeArchiveSaveDialog cloudSaveDialog = new MoleculeArchiveSaveDialog(context);
-					cloudSaveDialog.setTreeRenderer(new MoleculeArchiveTreeCellRenderer(true));
-					// Prevents NullPointerException
-					cloudSaveDialog.setContainerPathUpdateCallback(x -> {});
-
-					final Consumer<MoleculeArchiveSelection> callback = (MoleculeArchiveSelection dataSelection) -> {
-						Platform.runLater(() -> {
-							runTask(() -> {
-								fireEvent(new MoleculeArchiveSavingEvent(archive));
-								try {
-									String updatedURL = (dataSelection.url.endsWith("." + MoleculeArchiveSource.MOLECULE_ARCHIVE_STORE_ENDING)) ?
-										archive.saveAsVirtualStore(dataSelection.url) : archive.saveAs(dataSelection.url);
-									saveState(new MoleculeArchiveIOFactory().openSource(updatedURL).getRoverOutputStream());
-								}
-								catch (IOException e) {
-									e.printStackTrace();
-								}
-								fireEvent(new MoleculeArchiveSavedEvent(archive));
-							}, "Saving...");
-						});
-					};
-
-					cloudSaveDialog.run(callback);
+		if (archive == null) return;
+		final CloudArchiveSaveDialog dialog = new CloudArchiveSaveDialog(
+				stage, archive.getName());
+		dialog.showAndWait().ifPresent(url -> {
+			runTask(() -> {
+				fireEvent(new MoleculeArchiveSavingEvent(archive));
+				try {
+					String updatedURL = url.endsWith("." +
+							MoleculeArchiveSource.MOLECULE_ARCHIVE_STORE_ENDING)
+							? archive.saveAsVirtualStore(url) : archive.saveAs(url);
+					saveState(new MoleculeArchiveIOFactory().openSource(updatedURL)
+							.getRoverOutputStream());
 				}
-			}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+				fireEvent(new MoleculeArchiveSavedEvent(archive));
+			}, "Saving...");
 		});
-
-
 	}
 
 	private void importRoverSettings() {
