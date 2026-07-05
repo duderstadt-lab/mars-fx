@@ -620,6 +620,17 @@ public class DatasetExplorerWindow {
                 return MarsS3Browser.buildPath(endpointField.getText().trim(),
                         currentBucket(), selected.getPath());
             });
+            // "All" mode: every archive currently shown by the filter.
+            scriptPane.setAllArchiveUrlsSupplier(() -> {
+                java.util.List<String> urls = new java.util.ArrayList<>();
+                String endpoint = endpointField.getText().trim();
+                String bucket = currentBucket();
+                for (DatasetEntry e : filtered) {
+                    if (e.isArchive())
+                        urls.add(MarsS3Browser.buildPath(endpoint, bucket, e.getPath()));
+                }
+                return urls;
+            });
             codeTab.setContent(scriptPane);
         } else {
             Label noCtx = new Label("Scripting unavailable (no SciJava context).");

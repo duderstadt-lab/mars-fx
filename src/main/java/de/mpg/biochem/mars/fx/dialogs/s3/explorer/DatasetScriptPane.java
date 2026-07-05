@@ -28,19 +28,13 @@
  */
 package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.Writer;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
 import de.mpg.biochem.mars.io.MoleculeArchiveSource;
-import de.mpg.biochem.mars.metadata.MarsMetadata;
-import de.mpg.biochem.mars.molecule.*;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.scijava.Context;
@@ -52,12 +46,15 @@ import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
 import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIOPlugin;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
@@ -91,6 +88,10 @@ public class DatasetScriptPane extends BorderPane {
     private static final String DEFAULT_SCRIPT =
             "#@ MoleculeArchive archive\n" +
                     "#@ Context scijavaContext\n" +
+                    "\n" +
+                    "// 'archive' is the selected Molecule Archive (opened headless).\n" +
+                    "// 'scijavaContext' is the SciJava context.\n" +
+                    "// Example: print some basic info.\n" +
                     "println \"Name: \" + archive.getName()\n" +
                     "println \"Molecules: \" + archive.getNumberOfMolecules()\n" +
                     "println \"Metadata: \" + archive.getNumberOfMetadatas()\n";
@@ -98,30 +99,39 @@ public class DatasetScriptPane extends BorderPane {
     private static final DateTimeFormatter TS =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final Context context;
-    private final ScriptService scriptService;
-    private final ModuleService moduleService;
+    private static final java.util.prefs.Preferences PREFS =
+            java.util.prefs.Preferences.userNodeForPackage(DatasetScriptPane.class);
+    private static final String PREF_SCRIPT_DIVIDER = "script.dividerPosition";
+
+    @Parameter
+    protected Context context;
+
+    @Parameter
+    protected ScriptService scriptService;
+
+    @Parameter
+    protected ModuleService moduleService;
+
+    @Parameter
+    protected MoleculeArchiveService moleculeArchiveService;
 
     private final MarsScriptEditor codeArea;
     private final InlineCssTextArea logArea;
     private final Button runButton;
     private final Button stopButton;
+    private final CheckBox allCheckBox;
 
     // Supplies the archive URL to open+run against (the currently selected card).
     private java.util.function.Supplier<String> archiveUrlSupplier = () -> null;
+    // Supplies ALL archive URLs currently shown by the search filter (for "All").
+    private java.util.function.Supplier<java.util.List<String>> allArchiveUrlsSupplier =
+            java.util.Collections::emptyList;
 
     private volatile Thread runThread;
     private volatile boolean stopRequested = false;
 
-    @Parameter
-    protected MoleculeArchiveService moleculeArchiveService;
-
-
     public DatasetScriptPane(Context context) {
         context.inject(this);
-        this.context = context;
-        this.scriptService = context.getService(ScriptService.class);
-        this.moduleService = context.getService(ModuleService.class);
 
         // --- Script editor (top) ---
         codeArea = new MarsScriptEditor();
@@ -138,10 +148,20 @@ public class DatasetScriptPane extends BorderPane {
         logBox.setCenter(new VirtualizedScrollPane<>(logArea));
 
         // --- Adjustable split between editor and log ---
+        // Start centered (or at the last-saved position) so the editor has real
+        // room. SplitPane can reset an early setDividerPositions during initial
+        // layout, so we also re-apply once after the scene lays out.
+        double savedDiv = PREFS.getDouble(PREF_SCRIPT_DIVIDER, 0.5);
         SplitPane split = new SplitPane(editorBox, logBox);
         split.setOrientation(Orientation.VERTICAL);
-        split.setDividerPositions(0.6);
+        split.setDividerPositions(savedDiv);
         setCenter(split);
+        Platform.runLater(() -> split.setDividerPositions(savedDiv));
+        // Persist whenever the user drags the divider.
+        if (!split.getDividers().isEmpty()) {
+            split.getDividers().get(0).positionProperty().addListener((o, a, b) ->
+                    PREFS.putDouble(PREF_SCRIPT_DIVIDER, b.doubleValue()));
+        }
 
         // --- Toolbar: Run / Stop / Save-on-exit ---
         runButton = new Button("Run");
@@ -149,12 +169,15 @@ public class DatasetScriptPane extends BorderPane {
         stopButton = new Button("Stop");
         stopButton.setDisable(true);
         stopButton.setOnAction(e -> requestStop());
+        allCheckBox = new CheckBox("All");
+        allCheckBox.setTooltip(new javafx.scene.control.Tooltip(
+                "Run on every dataset currently shown by the search filter"));
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Label lang = new Label("Groovy");
         lang.setStyle("-fx-opacity: 0.6;");
-        HBox toolbar = new HBox(6, runButton, stopButton, spacer, lang);
+        HBox toolbar = new HBox(6, runButton, stopButton, allCheckBox, spacer, lang);
         toolbar.setAlignment(Pos.CENTER_LEFT);
         toolbar.setPadding(new Insets(6, 8, 6, 8));
         setTop(toolbar);
@@ -165,16 +188,38 @@ public class DatasetScriptPane extends BorderPane {
         this.archiveUrlSupplier = supplier == null ? () -> null : supplier;
     }
 
+    /** Set the supplier that yields all filtered archive URLs (for the "All" mode). */
+    public void setAllArchiveUrlsSupplier(
+            java.util.function.Supplier<java.util.List<String>> supplier)
+    {
+        this.allArchiveUrlsSupplier = supplier == null
+                ? java.util.Collections::emptyList : supplier;
+    }
+
     // ---- execution -----------------------------------------------------
 
     private void runScriptAsync() {
         if (runThread != null) return; // a run is already in progress
 
-        final String url = archiveUrlSupplier.get();
-        if (url == null || url.isEmpty()) {
-            appendLog("\n" + LocalDateTime.now().format(TS)
-                    + " — No archive selected. Select a dataset card first.\n");
-            return;
+        // Build the list of archive URLs to run against: either every dataset the
+        // filter currently shows ("All"), or just the selected one.
+        final java.util.List<String> urls = new java.util.ArrayList<>();
+        if (allCheckBox.isSelected()) {
+            java.util.List<String> all = allArchiveUrlsSupplier.get();
+            if (all != null) urls.addAll(all);
+            if (urls.isEmpty()) {
+                appendLog("\n" + LocalDateTime.now().format(TS)
+                        + " — No archives in the current filter to run on.\n");
+                return;
+            }
+        } else {
+            String url = archiveUrlSupplier.get();
+            if (url == null || url.isEmpty()) {
+                appendLog("\n" + LocalDateTime.now().format(TS)
+                        + " — No archive selected. Select a dataset card first.\n");
+                return;
+            }
+            urls.add(url);
         }
 
         stopRequested = false;
@@ -182,35 +227,37 @@ public class DatasetScriptPane extends BorderPane {
         stopButton.setDisable(false);
 
         final String scriptText = codeArea.getText();
+        final boolean runAll = urls.size() > 1;
 
         runThread = new Thread(() -> {
-            MoleculeArchive<?, ?, ?, ?> archive = null;
             try {
-                appendLog("\n" + LocalDateTime.now().format(TS) + " — Running script…\n");
+                appendLog("\n" + LocalDateTime.now().format(TS) + " — Running script"
+                        + (runAll ? " on " + urls.size() + " archives…" : "…") + "\n");
 
-                // Open the archive HEADLESS — as a variable only, no window shown.
-                //MoleculeArchiveIOPlugin ioPlugin = new MoleculeArchiveIOPlugin();
-                //ioPlugin.setContext(context);
-                //archive = ioPlugin.open(url);
-                MoleculeArchiveSource virtualSource = new MoleculeArchiveIOFactory().openSource(url);
-                String archiveType = virtualSource.getArchiveType();
-                archive = moleculeArchiveService.createArchive(archiveType, virtualSource);
+                int i = 0;
+                for (String url : urls) {
+                    if (stopRequested) { appendLog("Stopped.\n"); break; }
+                    i++;
+                    if (runAll) appendLog("\n[" + i + "/" + urls.size() + "] " + url + "\n");
 
-                if (archive == null) {
-                    appendLog("Could not open archive: " + url + "\n");
-                    return;
+                    MoleculeArchive<?, ?, ?, ?> archive = openHeadless(url);
+                    if (archive == null) {
+                        appendLog("Could not open archive: " + url + "\n");
+                        continue;
+                    }
+                    try {
+                        runScript(scriptText, archive);
+                    } finally {
+                        // No window/service holds the archive, so dropping the
+                        // reference lets it be garbage-collected.
+                        archive = null;
+                    }
                 }
-                if (stopRequested) { appendLog("Stopped before run.\n"); return; }
-
-                runScript(scriptText, archive);
 
                 appendLog(LocalDateTime.now().format(TS) + " — Done.\n");
             } catch (Exception ex) {
                 appendLog("Error: " + ex.getMessage() + "\n");
             } finally {
-                // No window holds the archive, so dropping the reference lets it be
-                // garbage-collected. (MoleculeArchive has no close() on the interface.)
-                archive = null;
                 runThread = null;
                 Platform.runLater(() -> {
                     runButton.setDisable(false);
@@ -220,6 +267,19 @@ public class DatasetScriptPane extends BorderPane {
         }, "DatasetScriptRun");
         runThread.setDaemon(true);
         runThread.start();
+    }
+
+    /**
+     * Open an archive HEADLESS — as a variable only, with no window shown and
+     * without registering it in the ObjectService. This deliberately bypasses
+     * MoleculeArchiveIOPlugin.open(), which under SciJava-IO both registers the
+     * archive and calls uiService.show(). We only do the minimal load steps.
+     */
+    private MoleculeArchive<?, ?, ?, ?> openHeadless(String url) throws IOException {
+        MoleculeArchiveSource virtualSource =
+                new MoleculeArchiveIOFactory().openSource(url);
+        String archiveType = virtualSource.getArchiveType();
+        return moleculeArchiveService.createArchive(archiveType, virtualSource);
     }
 
     /**
