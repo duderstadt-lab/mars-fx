@@ -169,12 +169,15 @@ public class DatasetCard extends BorderPane {
     }
 
     private String baseStyle(boolean sel) {
-        // Selection changes ONLY the border to the accent color (thicker), keeping
-        // the normal card background so the content and tags stay fully readable.
-        String border = sel ? "-fx-accent" : "derive(-fx-text-inner-color, 60%)";
+        // Selection changes ONLY the border COLOR, not its width — the width stays
+        // constant at 2px so content never reflows/shifts when a card is selected.
+        // Unselected uses the theme's standard control-border gray (-fx-box-border),
+        // which is a muted gray in both light and dark themes rather than a bright
+        // white line; selected uses the accent color.
+        String border = sel ? "-fx-accent" : "-fx-box-border";
         return "-fx-background-color: -fx-control-inner-background;"
                 + "-fx-border-color: " + border + ";"
-                + "-fx-border-width: " + (sel ? "3" : "1") + ";"
+                + "-fx-border-width: 2;"
                 + "-fx-border-radius: 8; -fx-background-radius: 8;";
     }
 

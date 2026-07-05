@@ -84,11 +84,28 @@ public class DatasetNotesPane extends BorderPane {
     private Consumer<String> onMarkdownChanged;
     private boolean suppressChangeEvents = false;
 
+    // Supplies the folder where dropped images are stored (derived from the index
+    // folder by the window). May return null if no index folder is set.
+    private java.util.function.Supplier<java.io.File> imagesFolder;
+
+    /** Set the supplier that resolves the current images folder for dropped images. */
+    public void setImagesFolder(java.util.function.Supplier<java.io.File> supplier) {
+        this.imagesFolder = supplier;
+    }
+
     public DatasetNotesPane() {
         getStyleClass().add("dataset-notes-pane");
 
         // --- Editor (archive-free: no-arg constructor) ---
         editorPane = new MarkdownEditorPane();
+
+        // The built-in MarkdownEditorPane.onDragDropped routes dropped files to the
+        // archive media store via documentEditor.getDocument().putMedia(...), which
+        // NPEs here because we have no DocumentEditor. Intercept drag events with
+        // FILTERS (capturing phase, before the built-in bubbling handler), handle
+        // image drops ourselves (copy to the index images folder, insert a short
+        // file: URL), then consume the event so the built-in handler never runs.
+        installImageDropHandler(editorPane.getNode());
 
         // --- Preview (archive-free: no-arg constructor) ---
         previewPane = new MarkdownPreviewPane();
@@ -194,11 +211,8 @@ public class DatasetNotesPane extends BorderPane {
         Button quote = formatButton(FontAwesomeIcon.QUOTE_LEFT, "Block quote",
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n> ", ""));
 
-        Button link = formatButton(FontAwesomeIcon.LINK, "Insert link",
-                () -> editorPane.getSmartEdit().insertLink());
-
         HBox bar = new HBox(2, undo, redo, sep(), bold, italic, strike, code,
-                sep(), h1, h2, h3, sep(), bullet, numbered, quote, sep(), link);
+                sep(), h1, h2, h3, sep(), bullet, numbered, quote);
         bar.setAlignment(Pos.CENTER_LEFT);
         return bar;
     }
@@ -224,6 +238,102 @@ public class DatasetNotesPane extends BorderPane {
 
     public boolean isEditMode() {
         return editToggle.isSelected();
+    }
+
+    // ---- drag & drop image embedding -----------------------------------
+
+    private static final java.util.Set<String> IMAGE_EXTS =
+            java.util.Set.of("png", "jpg", "jpeg", "gif", "bmp", "webp");
+
+    /**
+     * Install drag-and-drop image handling on the editor node. Uses event FILTERS
+     * so we run before MarkdownEditorPane's built-in bubbling onDragDropped (which
+     * NPEs against our null DocumentEditor), and consume the events so it never
+     * fires. Dropped image files are embedded directly into the markdown as
+     * base64 data-URI images: {@code ![name](data:image/png;base64,....)}.
+     */
+    private void installImageDropHandler(javafx.scene.Node node) {
+        node.addEventFilter(javafx.scene.input.DragEvent.DRAG_OVER, e -> {
+            if (e.getDragboard().hasFiles() && hasImageFile(e.getDragboard().getFiles())) {
+                e.acceptTransferModes(javafx.scene.input.TransferMode.COPY);
+                e.consume();
+            }
+        });
+        node.addEventFilter(javafx.scene.input.DragEvent.DRAG_DROPPED, e -> {
+            javafx.scene.input.Dragboard db = e.getDragboard();
+            boolean done = false;
+            if (db.hasFiles()) {
+                for (java.io.File f : db.getFiles()) {
+                    if (isImageFile(f)) {
+                        embedImage(f);
+                        done = true;
+                    }
+                }
+            }
+            e.setDropCompleted(done);
+            e.consume(); // stop propagation to the built-in (archive-coupled) handler
+        });
+    }
+
+    private boolean hasImageFile(java.util.List<java.io.File> files) {
+        for (java.io.File f : files) if (isImageFile(f)) return true;
+        return false;
+    }
+
+    private boolean isImageFile(java.io.File f) {
+        if (f == null || !f.isFile()) return false;
+        String n = f.getName().toLowerCase();
+        int dot = n.lastIndexOf('.');
+        return dot >= 0 && IMAGE_EXTS.contains(n.substring(dot + 1));
+    }
+
+    /**
+     * Copy a dropped image into the index "images" folder and insert a markdown
+     * image referencing it by a short {@code file:} URL. This keeps the editor
+     * text short (a path, not a multi-megabyte base64 blob) so selection/deletion
+     * stay responsive, while the preview WebView still renders the image natively
+     * from the local file. If no index folder is set, falls back to base64 so the
+     * drop still works (with the known selection-performance caveat).
+     */
+    private void embedImage(java.io.File f) {
+        try {
+            String ext = f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase();
+            String alt = f.getName().replace("]", "").replace("[", "");
+
+            java.io.File imagesDir = imagesFolder == null ? null : imagesFolder.get();
+            if (imagesDir != null) {
+                imagesDir.mkdirs();
+                // Content-hash the bytes so identical images dedupe and names are stable.
+                byte[] bytes = java.nio.file.Files.readAllBytes(f.toPath());
+                String hash = shortHash(bytes);
+                java.io.File dest = new java.io.File(imagesDir, hash + "." + ext);
+                if (!dest.exists())
+                    java.nio.file.Files.write(dest.toPath(), bytes);
+                String url = dest.toURI().toString(); // file:/…/images/<hash>.<ext>
+                String md = "\n\n![" + alt + "](" + url + ")\n\n";
+                editorPane.getSmartEdit().surroundSelection(md, "");
+            } else {
+                // No index folder — fall back to inline base64 so the drop still works.
+                byte[] bytes = java.nio.file.Files.readAllBytes(f.toPath());
+                String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
+                String mime = ext.equals("jpg") ? "jpeg" : ext;
+                String md = "\n\n![" + alt + "](data:image/" + mime + ";base64," + b64 + ")\n\n";
+                editorPane.getSmartEdit().surroundSelection(md, "");
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private static String shortHash(byte[] bytes) {
+        try {
+            byte[] d = java.security.MessageDigest.getInstance("SHA-256").digest(bytes);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 8; i++) sb.append(String.format("%02x", d[i]));
+            return sb.toString();
+        } catch (Exception e) {
+            return Long.toHexString(java.util.Arrays.hashCode(bytes) & 0xffffffffL);
+        }
     }
 
     /**

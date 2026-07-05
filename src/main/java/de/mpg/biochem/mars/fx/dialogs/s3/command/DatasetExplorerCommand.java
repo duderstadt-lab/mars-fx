@@ -28,6 +28,8 @@
  */
 package de.mpg.biochem.mars.fx.dialogs.s3.command;
 
+import java.io.IOException;
+
 import org.scijava.command.Command;
 import org.scijava.command.DynamicCommand;
 import org.scijava.menu.MenuConstants;
@@ -38,23 +40,29 @@ import org.scijava.plugin.Plugin;
 import org.scijava.ui.UIService;
 
 import de.mpg.biochem.mars.fx.dialogs.s3.explorer.DatasetExplorerWindow;
+import de.mpg.biochem.mars.molecule.MoleculeArchive;
+import de.mpg.biochem.mars.molecule.MoleculeArchiveIOPlugin;
+
 import javafx.application.Platform;
 
 /**
  * Fiji command that opens the {@link DatasetExplorerWindow}.
  *
- * <p>Mirrors {@code OpenCloudArchiveCommand}: it keeps the FX runtime alive
- * ({@code setImplicitExit(false)}), ensures the toolkit is booted via a
- * {@code JFXPanel}, and then builds the window on the FX thread with
- * {@code Platform.runLater}. The window is modeless, so {@code run()} returns
- * immediately while the explorer stays open in the background.
+ * <p>Mirrors {@code OpenCloudArchiveCommand}: keeps the FX runtime alive
+ * ({@code setImplicitExit(false)}), boots the toolkit via a {@code JFXPanel},
+ * and builds the window on the FX thread. The window is modeless, so
+ * {@code run()} returns immediately while the explorer stays open.
+ *
+ * <p>Double-clicking an archive card invokes the open handler wired here, which
+ * loads the archive from its cloud URL on a background thread using the exact
+ * same path as {@code OpenCloudArchiveCommand.openArchive}.
  */
 @Plugin(type = Command.class, label = "Dataset Explorer", menu = {
-    @Menu(label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
-        mnemonic = MenuConstants.PLUGINS_MNEMONIC),
-    @Menu(label = "Mars", weight = MenuConstants.PLUGINS_WEIGHT, mnemonic = 'm'),
-    @Menu(label = "Molecule", weight = 2, mnemonic = 'm'),
-    @Menu(label = "Dataset Explorer", weight = 4, mnemonic = 'd') })
+        @Menu(label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
+                mnemonic = MenuConstants.PLUGINS_MNEMONIC),
+        @Menu(label = "Mars", weight = MenuConstants.PLUGINS_WEIGHT, mnemonic = 'm'),
+        @Menu(label = "Molecule", weight = 2, mnemonic = 'm'),
+        @Menu(label = "Dataset Explorer", weight = 4, mnemonic = 'd') })
 public class DatasetExplorerCommand extends DynamicCommand {
 
     @Parameter
@@ -68,11 +76,38 @@ public class DatasetExplorerCommand extends DynamicCommand {
         // Keep the JVM/FX runtime alive across window open/close cycles.
         Platform.setImplicitExit(false);
 
-        // Ensure the JavaFX toolkit is initialized (boots FX synchronously if
-        // this is the first JavaFX thing this session). Mirrors the archive
-        // frame's init and OpenCloudArchiveCommand.
+        // Ensure the JavaFX toolkit is initialized. Constructing a JFXPanel boots
+        // the FX runtime synchronously if it hasn't started yet. Mirrors
+        // OpenCloudArchiveCommand.
         new javafx.embed.swing.JFXPanel();
 
-        Platform.runLater(DatasetExplorerWindow::show);
+        // Open handler: invoked with the archive URL when a card is double-clicked.
+        // Loads on a background thread so the FX UI stays responsive.
+        Platform.runLater(() -> DatasetExplorerWindow.show(url -> {
+            if (url != null)
+                new Thread(() -> openArchive(url), "OpenDatasetArchive").start();
+        }, getContext()));
+    }
+
+    /**
+     * Load a MoleculeArchive from a cloud URL — identical to
+     * OpenCloudArchiveCommand.openArchive.
+     */
+    private void openArchive(final String url) {
+        if (url == null || url.isEmpty()) return;
+
+        final MoleculeArchiveIOPlugin ioPlugin = new MoleculeArchiveIOPlugin();
+        ioPlugin.setContext(getContext());
+
+        try {
+            final MoleculeArchive<?, ?, ?, ?> archive = ioPlugin.open(url);
+
+            final boolean newStyleIO = optionsService.getOptions(
+                    net.imagej.legacy.ImageJ2Options.class).isSciJavaIO();
+            if (!newStyleIO && archive != null) uiService.show(archive);
+        }
+        catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 }

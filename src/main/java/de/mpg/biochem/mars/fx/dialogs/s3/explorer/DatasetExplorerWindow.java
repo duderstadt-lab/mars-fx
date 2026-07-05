@@ -61,16 +61,22 @@ import javafx.scene.control.ToggleGroup;
 
 import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
 import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import de.mpg.biochem.mars.n5.MarsS3Browser;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
+import de.mpg.biochem.mars.fx.util.IJStage;
 import com.jfoenix.controls.JFXChipView;
+import com.jfoenix.controls.JFXTabPane;
+
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+
+import org.scijava.Context;
+
+import javax.swing.SwingUtilities;
+import ij.WindowManager;
 
 /**
  * Dataset Explorer — a large, modeless {@link Stage} window that lists Molecule
@@ -101,9 +107,13 @@ public class DatasetExplorerWindow {
     private static final String PREF_ENDPOINT = "explorer.endpoint";
     private static final String PREF_BUCKET = "explorer.bucket";
     private static final String PREF_INDEX_FOLDER = "explorer.indexFolder";
+    private static final String PREF_WIN_W = "explorer.windowWidth";
+    private static final String PREF_WIN_H = "explorer.windowHeight";
+    private static final String PREF_DIV_LEFT = "explorer.dividerLeft";
+    private static final String PREF_DIV_RIGHT = "explorer.dividerRight";
 
     private Stage stage;
-    private Object ijStage; // INTEGRATION: real type is de.mpg.biochem.mars.fx.util.IJStage
+    private IJStage ijStage;
 
     // Model
     private final ObservableList<DatasetEntry> allEntries = FXCollections.observableArrayList();
@@ -117,6 +127,8 @@ public class DatasetExplorerWindow {
 
     // Center controls
     private TextField searchField;
+    private Label searchCountLabel;
+    private javafx.animation.PauseTransition searchDebounce;
     private ToggleButton archiveToggle;
     private ToggleButton n5Toggle;
     private DatePicker fromDate;
@@ -131,13 +143,20 @@ public class DatasetExplorerWindow {
 
     // Notes (now in the right pane, below details)
     private DatasetNotesPane notesPane;
+    private DatasetScriptPane scriptPane;
+    private Context context; // SciJava context for scripting (passed via show)
     private DatasetEntry notesBoundEntry; // dataset whose notes are currently loaded
 
     // Split panes + collapse state
     private SplitPane split;
     private Region leftPane;
     private Region rightPane;
-    private double[] lastDividers = {0.22, 0.78};
+    private Button toggleLeftBtn;
+    private Button toggleRightBtn;
+    // Remembered divider positions (persisted across sessions). Defaults match the
+    // initial layout; overwritten from prefs on open and whenever the user drags.
+    private double savedLeftDivider = 0.16;
+    private double savedRightDivider = 0.80;
 
     private boolean darkMode = false;
 
@@ -147,14 +166,19 @@ public class DatasetExplorerWindow {
 
     /** Show the explorer (creating it if needed, focusing it if already open). */
     public static void show() {
-        show(null);
+        show(null, null);
+    }
+
+    public static void show(java.util.function.Consumer<String> onOpenArchive) {
+        show(onOpenArchive, null);
     }
 
     /**
-     * Show the explorer, wiring an open-archive handler that is invoked with the
-     * archive URL when a card is double-clicked.
+     * Show the explorer, wiring an open-archive handler (invoked with the archive
+     * URL on double-click) and the SciJava {@link Context} used by the scripting
+     * tab. Both may be null (scripting is disabled without a context).
      */
-    public static void show(java.util.function.Consumer<String> onOpenArchive) {
+    public static void show(java.util.function.Consumer<String> onOpenArchive, Context context) {
         if (openInstance != null && openInstance.stage != null) {
             if (onOpenArchive != null) openInstance.setOnOpenArchive(onOpenArchive);
             openInstance.stage.toFront();
@@ -163,6 +187,7 @@ public class DatasetExplorerWindow {
         }
         openInstance = new DatasetExplorerWindow();
         if (onOpenArchive != null) openInstance.setOnOpenArchive(onOpenArchive);
+        openInstance.context = context;
         openInstance.build();
     }
 
@@ -172,8 +197,19 @@ public class DatasetExplorerWindow {
 
         stage = new Stage();
         stage.setTitle("Dataset Explorer");
-        stage.setWidth(1200);
-        stage.setHeight(760);
+        // Restore last session's window size (fall back to defaults).
+        stage.setWidth(PREFS.getDouble(PREF_WIN_W, 1200));
+        stage.setHeight(PREFS.getDouble(PREF_WIN_H, 760));
+
+        // Shadow AWT frame so Fiji's Window menu can enumerate this window, and so
+        // the OS-gated forward focus-pull inside IJStage moves AWT focus off
+        // ImageJ's toolbar when this window is focused — stopping Cmd/Ctrl
+        // keystrokes from leaking into Fiji's menus. Built once, right after the
+        // Stage, then registered with WindowManager on the EDT. Matches
+        // CloudArchiveOpenWindow exactly.
+        ijStage = new IJStage(stage);
+        ijStage.buildShadowFrame();
+        SwingUtilities.invokeLater(() -> WindowManager.addWindow(ijStage));
 
         BorderPane root = new BorderPane();
         split = new SplitPane();
@@ -182,8 +218,12 @@ public class DatasetExplorerWindow {
         Region center = buildCenterPane();
         rightPane = buildRightPane();
 
+        // Restore last session's divider positions.
+        savedLeftDivider = PREFS.getDouble(PREF_DIV_LEFT, 0.16);
+        savedRightDivider = PREFS.getDouble(PREF_DIV_RIGHT, 0.80);
+
         split.getItems().addAll(leftPane, center, rightPane);
-        split.setDividerPositions(0.22, 0.78);
+        split.setDividerPositions(savedLeftDivider, savedRightDivider);
 
         root.setCenter(split);
         root.setBottom(buildStatusBar());
@@ -193,20 +233,20 @@ public class DatasetExplorerWindow {
 
         stage.setScene(scene);
 
-        // INTEGRATION: wrap in IJStage for AWT focus anchoring, exactly like
-        // CloudArchiveOpenWindow:
-        //   IJStage ij = new IJStage(stage);
-        //   ij.buildShadowFrame();
-        //   this.ijStage = ij;
-
-        stage.setOnHidden(e -> {
+        // Teardown goes in setOnCloseRequest (not setOnHidden), on the EDT, exactly
+        // as CloudArchiveOpenWindow does — this avoids the close-lockup.
+        stage.setOnCloseRequest(e -> {
             persistPrefs();
-            // INTEGRATION: SwingUtilities.invokeLater(() -> {
-            //     WindowManager.removeWindow((IJStage) ijStage);
-            //     ((IJStage) ijStage).cleanup();
-            // });
-            openInstance = null;
+            if (currentIndexer != null) currentIndexer.cancel();
+            if (scriptPane != null) scriptPane.cleanup();
+            SwingUtilities.invokeLater(() -> {
+                WindowManager.removeWindow(ijStage);
+                ijStage.cleanup();
+            });
         });
+
+        // setOnHidden only clears the single-instance guard.
+        stage.setOnHidden(e -> openInstance = null);
 
         // Load any cached index for the last endpoint/bucket immediately.
         loadPrefsIntoFields();
@@ -314,7 +354,8 @@ public class DatasetExplorerWindow {
 
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
-        scroll.setMinWidth(220);
+        scroll.setMinWidth(180);
+        scroll.setPrefWidth(200);
         return scroll;
     }
 
@@ -393,43 +434,84 @@ public class DatasetExplorerWindow {
     }
 
     private Region buildDatasetsContent() {
-        // --- Top bar: collapse buttons, search, type switch, date range ---
-        Button toggleLeft = new Button("⯇");
-        toggleLeft.setTooltip(new javafx.scene.control.Tooltip("Show/hide connection pane"));
-        toggleLeft.setOnAction(e -> toggleLeftPane());
+        // --- Row 1: collapse buttons, search, type toggles, date-filter toggle ---
+        toggleLeftBtn = iconButton(FontAwesomeIcon.CHEVRON_LEFT, "Show/hide connection pane");
+        toggleLeftBtn.setOnAction(e -> toggleLeftPane());
 
-        Button toggleRight = new Button("⯈");
-        toggleRight.setTooltip(new javafx.scene.control.Tooltip("Show/hide details pane"));
-        toggleRight.setOnAction(e -> toggleRightPane());
+        toggleRightBtn = iconButton(FontAwesomeIcon.CHEVRON_RIGHT, "Show/hide details pane");
+        toggleRightBtn.setOnAction(e -> toggleRightPane());
 
         searchField = new TextField();
-        searchField.setPromptText("Search name, tags…");
+        searchField.setPromptText("Search name, tags…  (comma = AND, ! = exclude)");
         // Explicit border so the field is visible in light mode (the default
         // .text-field border can be too faint against the top bar background).
         searchField.setStyle("-fx-border-color: derive(-fx-text-inner-color, 55%);"
-                + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;");
-        HBox.setHgrow(searchField, Priority.ALWAYS);
-        searchField.textProperty().addListener((o, a, b) -> applyFilter());
+                + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;"
+                + " -fx-padding: 4 56 4 8;"); // right padding leaves room for the count
+        // Result count floats at the right edge of the field.
+        searchCountLabel = new Label("");
+        searchCountLabel.setStyle("-fx-opacity: 0.6; -fx-font-size: 11px;");
+        StackPane.setAlignment(searchCountLabel, Pos.CENTER_RIGHT);
+        StackPane.setMargin(searchCountLabel, new Insets(0, 8, 0, 0));
+        searchCountLabel.setMouseTransparent(true);
+        StackPane searchStack = new StackPane(searchField, searchCountLabel);
+        HBox.setHgrow(searchStack, Priority.ALWAYS);
+
+        // Debounce: typing schedules a filter ~150 ms later, coalescing rapid
+        // keystrokes so we don't re-filter (and rebuild cards) on every character.
+        searchDebounce = new javafx.animation.PauseTransition(javafx.util.Duration.millis(150));
+        searchDebounce.setOnFinished(ev -> applyFilter());
+        searchField.textProperty().addListener((o, a, b) -> searchDebounce.playFromStart());
 
         archiveToggle = new ToggleButton("YAMA");
         archiveToggle.setSelected(true);
         n5Toggle = new ToggleButton("N5");
         n5Toggle.setSelected(true);
-        archiveToggle.selectedProperty().addListener((o, a, b) -> applyFilter());
-        n5Toggle.selectedProperty().addListener((o, a, b) -> applyFilter());
+        // Make the pressed state unmistakable: selected = filled accent with white
+        // text; unselected = muted/outlined. Applied now and on every toggle.
+        styleFilterToggle(archiveToggle);
+        styleFilterToggle(n5Toggle);
+        archiveToggle.selectedProperty().addListener((o, a, b) -> { styleFilterToggle(archiveToggle); applyFilter(); });
+        n5Toggle.selectedProperty().addListener((o, a, b) -> { styleFilterToggle(n5Toggle); applyFilter(); });
 
+        // Date-filter toggle: reveals/hides the second row with the from/to pickers.
+        ToggleButton dateFilterToggle = new ToggleButton();
+        dateFilterToggle.setGraphic(FontAwesomeIconFactory.get().createIcon(
+                FontAwesomeIcon.CALENDAR, "1.0em"));
+        dateFilterToggle.setTooltip(new javafx.scene.control.Tooltip("Filter by modified date"));
+        styleFilterToggle(dateFilterToggle);
+        dateFilterToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(dateFilterToggle));
+
+        HBox row1 = new HBox(6, toggleLeftBtn, searchStack, archiveToggle, n5Toggle,
+                dateFilterToggle, toggleRightBtn);
+        row1.setAlignment(Pos.CENTER_LEFT);
+
+        // --- Row 2 (hidden by default): modified-date range ---
         fromDate = new DatePicker();
         fromDate.setPromptText("from");
-        fromDate.setPrefWidth(130);
+        fromDate.setPrefWidth(140);
         toDate = new DatePicker();
         toDate.setPromptText("to");
-        toDate.setPrefWidth(130);
+        toDate.setPrefWidth(140);
         fromDate.valueProperty().addListener((o, a, b) -> applyFilter());
         toDate.valueProperty().addListener((o, a, b) -> applyFilter());
+        Button clearDates = new Button("Clear");
+        clearDates.setOnAction(e -> { fromDate.setValue(null); toDate.setValue(null); });
 
-        HBox topBar = new HBox(6, toggleLeft, searchField, archiveToggle, n5Toggle,
-                new Label("Modified:"), fromDate, toDate, toggleRight);
-        topBar.setAlignment(Pos.CENTER_LEFT);
+        HBox row2 = new HBox(6, new Label("Modified:"), fromDate, new Label("–"), toDate, clearDates);
+        row2.setAlignment(Pos.CENTER_LEFT);
+        row2.setPadding(new Insets(6, 0, 0, 0));
+        row2.setVisible(false);
+        row2.setManaged(false);
+        // Reveal row 2 only when the date-filter toggle is on. When hidden, also
+        // clear any active date filter so hidden filters can't silently apply.
+        dateFilterToggle.selectedProperty().addListener((o, was, on) -> {
+            row2.setVisible(on);
+            row2.setManaged(on);
+            if (!on) { fromDate.setValue(null); toDate.setValue(null); }
+        });
+
+        VBox topBar = new VBox(0, row1, row2);
         topBar.setPadding(new Insets(8));
 
         // --- Card list ---
@@ -447,6 +529,14 @@ public class DatasetExplorerWindow {
         return pane;
     }
 
+    /** A small icon-only button using a FontAwesome glyph. */
+    private static Button iconButton(FontAwesomeIcon glyph, String tooltip) {
+        Button b = new Button();
+        b.setGraphic(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
+        b.setTooltip(new javafx.scene.control.Tooltip(tooltip));
+        return b;
+    }
+
     private Label notesHeader;
 
     private Region buildNotesSection() {
@@ -454,6 +544,12 @@ public class DatasetExplorerWindow {
         notesHeader.setStyle("-fx-font-weight: bold; -fx-padding: 8 0 4 0;");
 
         notesPane = new DatasetNotesPane();
+        // Dropped images are stored under <indexFolder>/images/. Supplied lazily so
+        // it always reflects the current index folder field value.
+        notesPane.setImagesFolder(() -> {
+            String folder = indexFolderField == null ? "" : indexFolderField.getText().trim();
+            return folder.isEmpty() ? null : new java.io.File(folder, "images");
+        });
         // Autosave: whenever the notes text changes, write it back to the bound
         // dataset and persist. Guarded by notesBoundEntry so edits are attributed
         // to the right dataset (and never fire while we're loading a new one).
@@ -486,12 +582,64 @@ public class DatasetExplorerWindow {
         // remains. No scroll pane around details, so nothing there gets clipped.
         Region notesSection = buildNotesSection();
 
-        VBox right = new VBox(8, title, detailsContent, new Separator(), notesSection);
-        right.setPadding(new Insets(8));
-        right.setMinWidth(260);
+        VBox infoContent = new VBox(8, title, detailsContent, new Separator(), notesSection);
+        infoContent.setPadding(new Insets(8));
         VBox.setVgrow(notesSection, Priority.ALWAYS);
 
+        // --- Tabbed right pane: info tab (details+notes) + code tab (scripting) ---
+        // Styled like AbstractMoleculePropertiesPane: JFXTabPane, top side, fixed
+        // 50x30 icon tabs, non-closable, glyph graphics.
+        double tabWidth = 50.0;
+        JFXTabPane tabs = new JFXTabPane();
+        tabs.setSide(javafx.geometry.Side.TOP);
+        tabs.setTabClosingPolicy(javafx.scene.control.TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabs.setTabMinWidth(tabWidth);
+        tabs.setTabMaxWidth(tabWidth);
+        tabs.setTabMinHeight(30.0);
+        tabs.setTabMaxHeight(30.0);
+        tabs.disableAnimationProperty();
+
+        Tab infoTab = new Tab();
+        infoTab.setClosable(false);
+        infoTab.setGraphic(tabGraphic(FontAwesomeIcon.INFO_CIRCLE, tabWidth));
+        infoTab.setContent(infoContent);
+
+        Tab codeTab = new Tab();
+        codeTab.setClosable(false);
+        // Code icon: octicon CODE, matching the scriptable-widget tab glyph.
+        BorderPane codeGraphic = new BorderPane();
+        codeGraphic.setMaxWidth(tabWidth);
+        codeGraphic.setCenter(de.jensd.fx.glyphs.octicons.utils.OctIconFactory.get()
+                .createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CODE, "1.1em"));
+        codeTab.setGraphic(codeGraphic);
+        if (context != null) {
+            scriptPane = new DatasetScriptPane(context);
+            // Run against the currently selected dataset's archive URL.
+            scriptPane.setArchiveUrlSupplier(() -> {
+                if (selected == null || !selected.isArchive()) return null;
+                return MarsS3Browser.buildPath(endpointField.getText().trim(),
+                        currentBucket(), selected.getPath());
+            });
+            codeTab.setContent(scriptPane);
+        } else {
+            Label noCtx = new Label("Scripting unavailable (no SciJava context).");
+            noCtx.setPadding(new Insets(16));
+            codeTab.setContent(noCtx);
+        }
+
+        tabs.getTabs().addAll(infoTab, codeTab);
+
+        BorderPane right = new BorderPane(tabs);
+        right.setMinWidth(260);
         return right;
+    }
+
+    /** A BorderPane-centered FontAwesome glyph for a fixed-width icon tab. */
+    private static BorderPane tabGraphic(FontAwesomeIcon glyph, double tabWidth) {
+        BorderPane p = new BorderPane();
+        p.setMaxWidth(tabWidth);
+        p.setCenter(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
+        return p;
     }
 
     private void showNoSelection() {
@@ -569,21 +717,52 @@ public class DatasetExplorerWindow {
 
     private void toggleLeftPane() {
         if (split.getItems().contains(leftPane)) {
-            lastDividers = split.getDividerPositions();
+            // Remember the left divider position before collapsing.
+            savedLeftDivider = split.getDividerPositions()[0];
             split.getItems().remove(leftPane);
+            setButtonIcon(toggleLeftBtn, FontAwesomeIcon.CHEVRON_RIGHT); // closed → point to content
         } else {
             split.getItems().add(0, leftPane);
-            Platform.runLater(() -> split.setDividerPositions(lastDividers));
+            Platform.runLater(() -> restoreDividers());
+            setButtonIcon(toggleLeftBtn, FontAwesomeIcon.CHEVRON_LEFT); // open → point to pane
         }
     }
 
     private void toggleRightPane() {
         if (split.getItems().contains(rightPane)) {
+            // Remember the right divider position before collapsing. The right
+            // divider is the LAST one in the split.
+            double[] d = split.getDividerPositions();
+            if (d.length > 0) savedRightDivider = d[d.length - 1];
             split.getItems().remove(rightPane);
+            setButtonIcon(toggleRightBtn, FontAwesomeIcon.CHEVRON_LEFT); // closed → point to content
         } else {
             split.getItems().add(rightPane);
-            Platform.runLater(() -> split.setDividerPositions(0.78));
+            Platform.runLater(() -> restoreDividers());
+            setButtonIcon(toggleRightBtn, FontAwesomeIcon.CHEVRON_RIGHT); // open → point to pane
         }
+    }
+
+    /**
+     * Restore both divider positions based on which panes are currently present.
+     * With all three panes visible, dividers are [savedLeftDivider, savedRightDivider].
+     * With one side collapsed there's a single divider to place.
+     */
+    private void restoreDividers() {
+        boolean hasLeft = split.getItems().contains(leftPane);
+        boolean hasRight = split.getItems().contains(rightPane);
+        if (hasLeft && hasRight) {
+            split.setDividerPositions(savedLeftDivider, savedRightDivider);
+        } else if (hasLeft) {
+            split.setDividerPositions(savedLeftDivider);
+        } else if (hasRight) {
+            // Only center + right: the single divider sits where the right pane starts.
+            split.setDividerPositions(savedRightDivider);
+        }
+    }
+
+    private static void setButtonIcon(Button b, FontAwesomeIcon glyph) {
+        b.setGraphic(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
     }
 
     // -----------------------------------------------------------------
@@ -598,9 +777,14 @@ public class DatasetExplorerWindow {
             setStatus("Enter a server address and bucket first.");
             return;
         }
+        if (indexing) {
+            setStatus("Already indexing — please wait…");
+            return;
+        }
         persistPrefs();
         store = folder.isEmpty() ? null : new DatasetIndexStore(folder);
 
+        indexing = true;
         busy.setVisible(true);
         setStatus("Indexing " + bucket + " …");
         allEntries.clear();
@@ -624,17 +808,25 @@ public class DatasetExplorerWindow {
             public boolean isN5(String name) { return browser.isN5(name); }
             @Override
             public boolean isArchive(String name) { return browser.isArchive(name); }
-            // meta(): MarsS3Browser exposes no per-object size/last-modified today,
-            // so we leave the default (null) — cards simply omit dates. If you add a
-            // metadata getter to MarsS3Browser later, override meta() here.
+            @Override
+            public DatasetIndexer.ObjectMeta meta(String b, String key) throws Exception {
+                // Fetch size + last-modified for each dataset. Runs on the indexer's
+                // BACKGROUND thread (not the FX thread), so it doesn't block the UI.
+                MarsS3Browser.MarsObjectMeta m = browser.getObjectMeta(b, key);
+                return m == null ? null
+                        : new DatasetIndexer.ObjectMeta(m.sizeBytes, m.lastModifiedMillis);
+            }
         };
 
         DatasetIndexer indexer = new DatasetIndexer(access);
         currentIndexer = indexer;
+        // Stream only a progress COUNT to the UI during the walk (cheap); defer all
+        // card building to onFinished so we rebuild the card list exactly once,
+        // instead of once per dataset (which was the real UI-lock cause).
         indexer.indexAsync(bucket, new DatasetIndexer.Listener() {
             @Override
-            public void onDatasetFound(DatasetEntry e) {
-                Platform.runLater(() -> addEntry(e));
+            public void onProgress(int discovered, String currentPrefix) {
+                Platform.runLater(() -> setStatus("Indexing… " + discovered + " found"));
             }
             @Override
             public void onFinished(List<DatasetEntry> all) {
@@ -646,6 +838,7 @@ public class DatasetExplorerWindow {
             @Override
             public void onError(Exception ex) {
                 Platform.runLater(() -> {
+                    indexing = false;
                     busy.setVisible(false);
                     setStatus("Error indexing: " + ex.getMessage());
                     browser.close();
@@ -654,23 +847,25 @@ public class DatasetExplorerWindow {
         });
     }
 
+    private volatile boolean indexing = false;
     private DatasetIndexer currentIndexer;
 
-    private void addEntry(DatasetEntry e) {
-        // Merge cached user data (tags/comments) as each entry streams in.
+    private void finishIndexing(String endpoint, String bucket, List<DatasetEntry> all) {
+        indexing = false;
+        busy.setVisible(false);
+
+        // Merge cached user data (tags/comments) for the whole batch at once.
         if (store != null) {
             try {
-                store.mergeUserData(endpointField.getText().trim(), currentBucket(),
-                        java.util.List.of(e));
+                store.mergeUserData(endpoint, bucket, all);
             } catch (Exception ignore) {}
         }
-        allEntries.add(e);
-        setStatus(allEntries.size() + " datasets found…");
-    }
 
-    private void finishIndexing(String endpoint, String bucket, List<DatasetEntry> all) {
-        busy.setVisible(false);
+        // Single bulk update — the FilteredList listener fires once, so rebuildCards
+        // runs a single time for the whole result set.
+        allEntries.setAll(all);
         setStatus(all.size() + " datasets indexed.");
+
         if (store != null) {
             try {
                 store.writeIndex(endpoint, bucket, all);
@@ -701,21 +896,38 @@ public class DatasetExplorerWindow {
     // -----------------------------------------------------------------
 
     private void applyFilter() {
-        String q = searchField == null ? "" : searchField.getText().trim().toLowerCase();
+        String raw = searchField == null ? "" : searchField.getText().trim();
         boolean showArchive = archiveToggle == null || archiveToggle.isSelected();
         boolean showN5 = n5Toggle == null || n5Toggle.isSelected();
         LocalDate from = fromDate == null ? null : fromDate.getValue();
         LocalDate to = toDate == null ? null : toDate.getValue();
 
+        // Parse the query into include/exclude terms. Comma separates terms; a
+        // leading '!' marks an exclusion. Case-insensitive. Semantics:
+        //   - every include term must be found (AND over includes)
+        //   - every exclusion term must NOT be found (AND over exclusions)
+        List<String> includes = new ArrayList<>();
+        List<String> excludes = new ArrayList<>();
+        for (String part : raw.split(",")) {
+            String t = part.trim().toLowerCase();
+            if (t.isEmpty()) continue;
+            if (t.startsWith("!")) {
+                String ex = t.substring(1).trim();
+                if (!ex.isEmpty()) excludes.add(ex);
+            } else {
+                includes.add(t);
+            }
+        }
+
         filtered.setPredicate(e -> {
             if (e.isArchive() && !showArchive) return false;
             if (e.isN5() && !showN5) return false;
 
-            if (!q.isEmpty()) {
-                boolean inName = e.getName() != null && e.getName().toLowerCase().contains(q);
-                boolean inPath = e.getPath() != null && e.getPath().toLowerCase().contains(q);
-                boolean inTags = e.getTags().stream().anyMatch(t -> t.toLowerCase().contains(q));
-                if (!inName && !inPath && !inTags) return false;
+            if (!includes.isEmpty() || !excludes.isEmpty()) {
+                String hay = haystack(e);
+                for (String ex : excludes) if (hay.contains(ex)) return false;
+                // AND: every include term must be found.
+                for (String in : includes) if (!hay.contains(in)) return false;
             }
 
             if ((from != null || to != null) && e.getModifiedEpochMillis() != null) {
@@ -726,19 +938,51 @@ public class DatasetExplorerWindow {
             }
             return true;
         });
+
+        // Update the result count shown in the search field.
+        if (searchCountLabel != null) {
+            int shown = filtered.size();
+            int total = allEntries.size();
+            searchCountLabel.setText(shown == total ? String.valueOf(total)
+                    : shown + " / " + total);
+        }
+    }
+
+    /** Lowercased searchable text for one entry: name + path + tags. */
+    private static String haystack(DatasetEntry e) {
+        StringBuilder sb = new StringBuilder();
+        if (e.getName() != null) sb.append(e.getName().toLowerCase()).append(' ');
+        if (e.getPath() != null) sb.append(e.getPath().toLowerCase()).append(' ');
+        for (String t : e.getTags()) sb.append(t.toLowerCase()).append(' ');
+        return sb.toString();
     }
 
     // -----------------------------------------------------------------
     // Card rendering
     // -----------------------------------------------------------------
 
+    // Cache of generated identicons, keyed by "seed|dark" so re-filtering reuses
+    // them instead of regenerating (identicon generation is the expensive part of
+    // rebuildCards). Cleared when the theme changes.
+    private final java.util.Map<String, javafx.scene.image.Image> iconCache =
+            new java.util.HashMap<>();
+
+    private javafx.scene.image.Image iconFor(DatasetEntry e, double size) {
+        String key = e.iconSeed() + "|" + darkMode;
+        javafx.scene.image.Image img = iconCache.get(key);
+        if (img == null) {
+            img = DatasetIdenticon.generate(e.iconSeed(), size,
+                    darkMode ? DatasetIdenticon.DARK : DatasetIdenticon.LIGHT);
+            iconCache.put(key, img);
+        }
+        return img;
+    }
+
     private void rebuildCards() {
         cardsBox.getChildren().clear();
         double iconSize = 72;
         for (DatasetEntry e : filtered) {
-            javafx.scene.image.Image icon = DatasetIdenticon.generate(e.iconSeed(), iconSize,
-                    darkMode ? DatasetIdenticon.DARK : DatasetIdenticon.LIGHT);
-            DatasetCard card = new DatasetCard(e, icon, iconSize, darkMode);
+            DatasetCard card = new DatasetCard(e, iconFor(e, iconSize), iconSize, darkMode);
             card.setSelected(e == selected);
             card.setOnMouseClicked(ev -> {
                 if (ev.getClickCount() == 2) openDataset(e);
@@ -749,7 +993,8 @@ public class DatasetExplorerWindow {
     }
 
     private void regenerateAllIcons() {
-        // Re-render every visible card's icon for the new theme.
+        // Theme changed — drop cached icons so they regenerate in the new variant.
+        iconCache.clear();
         rebuildCards();
     }
 
@@ -828,6 +1073,20 @@ public class DatasetExplorerWindow {
         PREFS.put(PREF_ENDPOINT, endpointField.getText().trim());
         PREFS.put(PREF_BUCKET, currentBucket());
         PREFS.put(PREF_INDEX_FOLDER, indexFolderField.getText().trim());
+        // Window size + divider positions, so the layout reopens the same next run.
+        if (stage != null) {
+            PREFS.putDouble(PREF_WIN_W, stage.getWidth());
+            PREFS.putDouble(PREF_WIN_H, stage.getHeight());
+        }
+        // Capture the live divider positions if all three panes are present (the
+        // user may have dragged since the last collapse/expand).
+        if (split != null && split.getItems().contains(leftPane)
+                && split.getItems().contains(rightPane)) {
+            double[] pos = split.getDividerPositions();
+            if (pos.length >= 2) { savedLeftDivider = pos[0]; savedRightDivider = pos[1]; }
+        }
+        PREFS.putDouble(PREF_DIV_LEFT, savedLeftDivider);
+        PREFS.putDouble(PREF_DIV_RIGHT, savedRightDivider);
         // Theme state is owned by MarsThemeManager (its own pref), not stored here.
     }
 
@@ -859,6 +1118,26 @@ public class DatasetExplorerWindow {
 
     private void setStatus(String msg) {
         if (statusLabel != null) statusLabel.setText(msg);
+    }
+
+    /**
+     * Style a filter toggle so its pressed state is unmistakable: selected shows a
+     * filled accent background with white text; unselected is a muted outlined
+     * button. Resolves against the active theme's -fx-accent, so it works in both
+     * light and dark.
+     */
+    private static void styleFilterToggle(javafx.scene.control.ToggleButton t) {
+        if (t.isSelected()) {
+            t.setStyle("-fx-background-color: -fx-accent; -fx-text-fill: white;"
+                    + " -fx-font-weight: bold; -fx-background-radius: 4;"
+                    + " -fx-border-color: -fx-accent; -fx-border-width: 1; -fx-border-radius: 4;");
+        } else {
+            t.setStyle("-fx-background-color: transparent;"
+                    + " -fx-text-fill: -fx-text-inner-color; -fx-opacity: 0.75;"
+                    + " -fx-background-radius: 4;"
+                    + " -fx-border-color: derive(-fx-text-inner-color, 45%);"
+                    + " -fx-border-width: 1; -fx-border-radius: 4;");
+        }
     }
 
     private static VBox labeled(String label, javafx.scene.control.Control field) {
