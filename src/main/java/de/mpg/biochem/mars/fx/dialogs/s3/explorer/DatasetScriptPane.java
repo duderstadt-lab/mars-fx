@@ -34,12 +34,10 @@ import java.time.format.DateTimeFormatter;
 
 import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
 import de.mpg.biochem.mars.io.MoleculeArchiveSource;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveService;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.scijava.Context;
 import org.scijava.module.ModuleService;
-import org.scijava.plugin.Parameter;
 import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
@@ -103,17 +101,16 @@ public class DatasetScriptPane extends BorderPane {
             java.util.prefs.Preferences.userNodeForPackage(DatasetScriptPane.class);
     private static final String PREF_SCRIPT_DIVIDER = "script.dividerPosition";
 
-    @Parameter
-    protected Context context;
-
-    @Parameter
-    protected ScriptService scriptService;
-
-    @Parameter
-    protected ModuleService moduleService;
-
-    @Parameter
-    protected MoleculeArchiveService moleculeArchiveService;
+    // Injected by context.inject(this) in the constructor. @Parameter fields can't
+    // be final (injection assigns them after the object is constructed).
+    @org.scijava.plugin.Parameter
+    private Context context;
+    @org.scijava.plugin.Parameter
+    private ScriptService scriptService;
+    @org.scijava.plugin.Parameter
+    private ModuleService moduleService;
+    @org.scijava.plugin.Parameter
+    private de.mpg.biochem.mars.molecule.MoleculeArchiveService moleculeArchiveService;
 
     private final MarsScriptEditor codeArea;
     private final InlineCssTextArea logArea;
@@ -131,6 +128,8 @@ public class DatasetScriptPane extends BorderPane {
     private volatile boolean stopRequested = false;
 
     public DatasetScriptPane(Context context) {
+        // Populate all @Parameter service fields (context, scriptService,
+        // moduleService, moleculeArchiveService) in one call.
         context.inject(this);
 
         // --- Script editor (top) ---
@@ -316,10 +315,12 @@ public class DatasetScriptPane extends BorderPane {
         }
 
         // Inject the two script inputs, matching the #@ header.
+        // Inject the two script inputs, matching the #@ header. Because we call
+        // moduleService.run(module, false) below (processing/harvesting OFF), no
+        // pre-processor will prompt for these, so setInput alone is sufficient —
+        // no resolveInput() needed.
         module.setInput("scijavaContext", context);
         module.setInput("archive", archive);
-        module.resolveInput("scijavaContext");
-        module.resolveInput("archive");
 
         try {
             moduleService.run(module, false).get();
