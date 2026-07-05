@@ -37,18 +37,21 @@ import java.io.Writer;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import de.mpg.biochem.mars.io.MoleculeArchiveIOFactory;
+import de.mpg.biochem.mars.io.MoleculeArchiveSource;
+import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.molecule.*;
 import org.fxmisc.flowless.VirtualizedScrollPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.scijava.Context;
 import org.scijava.module.ModuleService;
+import org.scijava.plugin.Parameter;
 import org.scijava.script.ScriptInfo;
 import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
 import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
-import de.mpg.biochem.mars.molecule.MoleculeArchive;
-import de.mpg.biochem.mars.molecule.MoleculeArchiveIOPlugin;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -80,18 +83,14 @@ import javafx.scene.layout.Region;
  *
  * <p>Only Groovy is supported. The script has this header prepended so the two
  * inputs are available:
- * <pre>#@ Context scijavaContext
- * #@ MoleculeArchive archive</pre>
+ * <pre>#@ MoleculeArchive archive
+ * #@ Context scijavaContext</pre>
  */
 public class DatasetScriptPane extends BorderPane {
 
-    private static final String SCRIPT_HEADER =
-            "#@ Context scijavaContext\n#@ MoleculeArchive archive\n";
-
     private static final String DEFAULT_SCRIPT =
-            "// 'archive' is the selected Molecule Archive (opened headless).\n" +
-                    "// 'scijavaContext' is the SciJava context.\n" +
-                    "// Example: print some basic info.\n" +
+            "#@ MoleculeArchive archive\n" +
+                    "#@ Context scijavaContext\n" +
                     "println \"Name: \" + archive.getName()\n" +
                     "println \"Molecules: \" + archive.getNumberOfMolecules()\n" +
                     "println \"Metadata: \" + archive.getNumberOfMetadatas()\n";
@@ -114,7 +113,12 @@ public class DatasetScriptPane extends BorderPane {
     private volatile Thread runThread;
     private volatile boolean stopRequested = false;
 
+    @Parameter
+    protected MoleculeArchiveService moleculeArchiveService;
+
+
     public DatasetScriptPane(Context context) {
+        context.inject(this);
         this.context = context;
         this.scriptService = context.getService(ScriptService.class);
         this.moduleService = context.getService(ModuleService.class);
@@ -177,7 +181,7 @@ public class DatasetScriptPane extends BorderPane {
         runButton.setDisable(true);
         stopButton.setDisable(false);
 
-        final String scriptText = SCRIPT_HEADER + codeArea.getText();
+        final String scriptText = codeArea.getText();
 
         runThread = new Thread(() -> {
             MoleculeArchive<?, ?, ?, ?> archive = null;
@@ -185,9 +189,13 @@ public class DatasetScriptPane extends BorderPane {
                 appendLog("\n" + LocalDateTime.now().format(TS) + " — Running script…\n");
 
                 // Open the archive HEADLESS — as a variable only, no window shown.
-                MoleculeArchiveIOPlugin ioPlugin = new MoleculeArchiveIOPlugin();
-                ioPlugin.setContext(context);
-                archive = ioPlugin.open(url);
+                //MoleculeArchiveIOPlugin ioPlugin = new MoleculeArchiveIOPlugin();
+                //ioPlugin.setContext(context);
+                //archive = ioPlugin.open(url);
+                MoleculeArchiveSource virtualSource = new MoleculeArchiveIOFactory().openSource(url);
+                String archiveType = virtualSource.getArchiveType();
+                archive = moleculeArchiveService.createArchive(archiveType, virtualSource);
+
                 if (archive == null) {
                     appendLog("Could not open archive: " + url + "\n");
                     return;
