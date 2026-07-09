@@ -57,12 +57,12 @@ import javafx.application.Platform;
  * loads the archive from its cloud URL on a background thread using the exact
  * same path as {@code OpenCloudArchiveCommand.openArchive}.
  */
-@Plugin(type = Command.class, label = "Dataset Explorer", menu = {
+@Plugin(type = Command.class, label = "Dataset Explorer (S3)", menu = {
         @Menu(label = MenuConstants.PLUGINS_LABEL, weight = MenuConstants.PLUGINS_WEIGHT,
                 mnemonic = MenuConstants.PLUGINS_MNEMONIC),
         @Menu(label = "Mars", weight = MenuConstants.PLUGINS_WEIGHT, mnemonic = 'm'),
         @Menu(label = "Molecule", weight = 2, mnemonic = 'm'),
-        @Menu(label = "Dataset Explorer", weight = 4, mnemonic = 'd') })
+        @Menu(label = "Dataset Explorer (S3)", weight = 4, mnemonic = 'd') })
 public class DatasetExplorerCommand extends DynamicCommand {
 
     @Parameter
