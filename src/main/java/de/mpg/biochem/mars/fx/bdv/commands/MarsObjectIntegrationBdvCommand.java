@@ -40,7 +40,9 @@ import de.mpg.biochem.mars.image.MarsImageUtils;
 import de.mpg.biochem.mars.image.Peak;
 import de.mpg.biochem.mars.image.PeakShape;
 import de.mpg.biochem.mars.image.PeakTracker;
+import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
+import de.mpg.biochem.mars.n5.MarsN5SourceLoader;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
@@ -104,9 +106,12 @@ import org.scijava.widget.Button;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -180,12 +185,45 @@ Initializable, Previewable
 	private Interval imgInterval;
 
 	private String objectUID;
-	
+
+	// Integration reads every pixel of a shape, so sources must be loaded
+	// non-volatile (not the viewer's volatile sources) or partially-loaded
+	// tiles would silently drop regions from the integration. Sources are
+	// loaded here directly, independent of which metadata record the BDV
+	// viewer happens to have displayed, so integrate-all covers every record.
+	private final MarsN5SourceLoader sourceLoader = new MarsN5SourceLoader();
+	private final Map<String, Map<String, Source>> recordSources = new HashMap<>();
+
 	@Override
 	public void initialize() {
 		final MutableModuleItem<String> channelItems = getInfo().getMutableInput(
 			"source", String.class);
 		channelItems.setChoices(marsBdvFrame.getSourceNames());
+	}
+
+	// Loads all N5 sources for a metadata record up front, single-threaded.
+	// integrateObjectInT only reads from recordSources afterward, so the
+	// concurrent per-object/per-timepoint tasks never race on the loader.
+	private void preloadSources(MarsMetadata meta) {
+		if (meta == null || recordSources.containsKey(meta.getUID())) return;
+		Map<String, Source> byName = new HashMap<>();
+		for (MarsBdvSource marsSource : meta.getBdvSources()) {
+			if (marsSource.isN5()) {
+				try {
+					byName.put(marsSource.getName(), sourceLoader.loadN5Source(
+						marsSource, meta));
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		recordSources.put(meta.getUID(), byName);
+	}
+
+	private Source getPreloadedSource(String metaUID, String sourceName) {
+		Map<String, Source> byName = recordSources.get(metaUID);
+		return (byName == null) ? null : byName.get(sourceName);
 	}
 	
 	@Override
@@ -199,6 +237,12 @@ Initializable, Previewable
 				Y0 + height - 1);
 
 		if (integrateAll) {
+			//Preload sources for every referenced metadata record sequentially,
+			//before any concurrent integration tasks start reading them.
+			Set<String> metaUIDs = new HashSet<>();
+			archive.molecules().forEach(object -> metaUIDs.add(object.getMetadataUID()));
+			metaUIDs.forEach(uid -> preloadSources(archive.getMetadata(uid)));
+
 			//Integrate all with one thread per object
 			List<Runnable> tasks = new ArrayList<>();
 			archive.molecules().forEach( object -> tasks.add(() -> integrateObject((MartianObject) object)));
@@ -208,6 +252,7 @@ Initializable, Previewable
 		} else {
 			//Integrate just one object
 			MartianObject object = (MartianObject) archive.get(objectUID);
+			preloadSources(archive.getMetadata(object.getMetadataUID()));
 			integrateObject(object);
 		}
 
@@ -228,6 +273,7 @@ Initializable, Previewable
 			});
 		else archive.getMetadata(marsBdvFrame.getMetadataUID()).logln(successMessage);
 		archive.getWindow().unlock();
+		sourceLoader.close();
 	}
 
 	private void integrateObject(MartianObject object) {
@@ -256,11 +302,11 @@ Initializable, Previewable
 	private <T extends RealType<T> & NativeType<T>> void integrateObjectInT(
 			int t, MartianObject object, ConcurrentMap<Integer, Double> tToShapeSum, ConcurrentMap<Integer, Double> tToPixelMedianBackground, ConcurrentMap<Integer, Double> tToShapeIntensity)
 	{
-		if (!marsBdvFrame.getSourceNames(object.getMetadataUID()).contains(source)) {
+		Source<T> bdvSource = (Source<T>) getPreloadedSource(object.getMetadataUID(), source);
+		if (bdvSource == null) {
 			sourceNotPresent.add(object.getMetadataUID());
 			return;
 		}
-		Source<T> bdvSource = marsBdvFrame.getSource(object.getMetadataUID(), source);
 
 		//Remove the Z dimension
 		RandomAccessibleInterval<T> img = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
