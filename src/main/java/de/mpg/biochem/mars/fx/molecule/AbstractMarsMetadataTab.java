@@ -37,9 +37,10 @@ import javax.swing.SwingUtilities;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
@@ -232,8 +233,7 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 		filterField = new CustomTextField();
 		nOfHitCountLabel = new Label();
 
-		filterField.setLeft(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.SEARCH));
+		filterField.setLeft(ActionUtils.icon(FontAwesome.SEARCH));
 		filterField.setRight(nOfHitCountLabel);
 		filterField.getStyleClass().add("find");
 		filterField.textProperty().addListener((observable, oldValue, newValue) -> {

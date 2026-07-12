@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.table;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FLOPPY_ALT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.FLOPPY_O;
 
 import java.awt.Rectangle;
 import java.io.BufferedInputStream;
@@ -57,7 +57,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import org.kordamp.ikonli.material.Material;
+
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
 import de.mpg.biochem.mars.fx.plot.MarsTablePlotPane;
 import de.mpg.biochem.mars.fx.table.dashboard.MarsTableDashboard;
@@ -212,7 +213,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 
 	protected MenuBar buildMenuBar() {
 		Action fileSaveAsYAMTAction = new Action("Save as YAMT", "Shortcut+S",
-			FLOPPY_ALT, e -> save());
+			FLOPPY_O, e -> save());
 		Action fileSaveAsCSVAction = new Action("Export to CSV", "Shortcut+C", null,
 			e -> saveAsCSV());
 		Action fileSaveAsJSONAction = new Action("Export to JSON", "Shortcut+C",
@@ -248,8 +249,7 @@ public class MarsTableFxFrame extends AbstractJsonConvertibleRecord implements
 
 		dashboardTab = new Tab();
 		dashboardTab.setText("");
-		dashboardTab.setGraphic(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.2em"));
+		dashboardTab.setGraphic(ActionUtils.icon(Material.DASHBOARD, "1.2em"));
 		marsTableDashboardPane = new MarsTableDashboard(context, table);
 		dashboardTab.setContent(marsTableDashboardPane.getNode());
 

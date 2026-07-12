@@ -57,8 +57,9 @@ package de.mpg.biochem.mars.fx.controls;
 
 import java.io.File;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.Utils;
 import javafx.scene.Node;
 import javafx.scene.control.TreeCell;
@@ -95,15 +96,15 @@ public class FileTreeCell extends TreeCell<File> {
 		Node graphic = null;
 		if (!empty && file != null) {
 			text = file.getName();
-			graphic = FontAwesomeIconFactory.get().createIcon(getTreeItem().isLeaf()
-				? fileIcon(text) : FontAwesomeIcon.FOLDER_ALT);
+			graphic = ActionUtils.icon(getTreeItem().isLeaf()
+				? fileIcon(text) : FontAwesome.FOLDER_OPEN_O);
 		}
 		setText(text);
 		setGraphic(graphic);
 	}
 
-	private FontAwesomeIcon fileIcon(String name) {
-		return Utils.isImage(name) ? FontAwesomeIcon.FILE_IMAGE_ALT
-			: FontAwesomeIcon.FILE_TEXT_ALT;
+	private FontAwesome fileIcon(String name) {
+		return Utils.isImage(name) ? FontAwesome.FILE_IMAGE_O
+			: FontAwesome.FILE_TEXT_O;
 	}
 }

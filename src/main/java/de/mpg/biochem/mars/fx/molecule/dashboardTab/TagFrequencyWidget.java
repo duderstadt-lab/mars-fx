@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TAG;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.TAG;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -47,8 +47,8 @@ import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.plot.tools.MarsNumericAxis;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -204,7 +204,7 @@ public class TagFrequencyWidget extends AbstractDashboardWidget implements
 
 	@Override
 	public Node getIcon() {
-		return (Node) FontAwesomeIconFactory.get().createIcon(TAG, "1.2em");
+		return (Node) ActionUtils.icon(TAG, "1.2em");
 	}
 
 	@Override

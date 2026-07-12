@@ -52,8 +52,9 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.scene.text.Text;
 
 /**
@@ -89,8 +90,7 @@ public class N5DatasetListPane extends BorderPane {
     public N5DatasetListPane() {
         setPadding(new Insets(5));
 
-        refresh = FontAwesomeIconFactory.get().createIcon(
-                FontAwesomeIcon.REFRESH, "1.2em");
+        refresh = ActionUtils.icon(FontAwesome.REFRESH, "1.2em");
         refreshSpin = new RotateTransition(Duration.millis(800), refresh);
         refreshSpin.setByAngle(360);
         refreshSpin.setCycleCount(RotateTransition.INDEFINITE);

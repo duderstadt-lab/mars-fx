@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.SQUARE_O;
 import static java.util.stream.Collectors.toList;
 
 import com.fasterxml.jackson.core.JsonToken;
@@ -131,7 +131,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 
 		regionSelected = new SimpleBooleanProperty();
 		Action regionSelectionCursor = new Action("region", "Shortcut+R",
-			SQUARE_ALT, e -> setTool(regionSelected, () -> {
+			SQUARE_O, e -> setTool(regionSelected, () -> {
 				MarsRegionSelectionPlugin tool = new MarsRegionSelectionPlugin(
 					AxisMode.X);
 				return tool;
@@ -140,7 +140,7 @@ public abstract class AbstractMoleculePlotPane<M extends Molecule, S extends Sub
 
 		positionSelected = new SimpleBooleanProperty();
 		Action positionSelectionCursor = new Action("position", "Shortcut+P",
-			de.jensd.fx.glyphs.octicons.OctIcon.MILESTONE, e -> setTool(
+			org.kordamp.ikonli.octicons.Octicons.MILESTONE_24, e -> setTool(
 				positionSelected, () -> {
 					MarsPositionSelectionPlugin tool = new MarsPositionSelectionPlugin();
 					return tool;

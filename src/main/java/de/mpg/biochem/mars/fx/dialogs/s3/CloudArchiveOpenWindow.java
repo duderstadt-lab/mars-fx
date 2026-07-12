@@ -41,8 +41,9 @@ import javax.swing.SwingUtilities;
 
 import com.amazonaws.AmazonServiceException;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.IJStage;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.n5.MarsS3Browser;
@@ -224,8 +225,7 @@ public class CloudArchiveOpenWindow {
                 }
                 else {
                     setText(bucket);
-                    setGraphic(FontAwesomeIconFactory.get().createIcon(
-                            FontAwesomeIcon.ARCHIVE, "1.0em"));
+                    setGraphic(ActionUtils.icon(FontAwesome.ARCHIVE, "1.0em"));
                 }
             }
         });

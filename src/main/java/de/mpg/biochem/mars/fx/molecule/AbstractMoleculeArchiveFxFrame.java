@@ -70,8 +70,9 @@ import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 import org.scijava.ui.UIService;
 
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import bdv.util.BdvHandle;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
@@ -81,6 +82,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
@@ -509,12 +511,10 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		showPropertiesButton = new Button("");
 		showPropertiesButton.setStyle(
 			"-fx-background-color: -fx-outer-border, -fx-inner-border, -fx-body-color;-fx-background-insets: 0, 1, 2;-fx-background-radius: 5, 4, 3;");
-		Text caretRight = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_RIGHT, "1.4em");
-		caretRight.setStyle(caretRight.getStyle() + "-fx-fill: gray;");
-		Text caretLeft = FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CARET_LEFT, "1.4em");
-		caretLeft.setStyle(caretLeft.getStyle() + "-fx-fill: gray;");
+		Text caretRight = ActionUtils.icon(FontAwesome.CARET_RIGHT, "1.4em");
+		caretRight.setStyle(caretRight.getStyle() + "-fx-icon-color: gray;");
+		Text caretLeft = ActionUtils.icon(FontAwesome.CARET_LEFT, "1.4em");
+		caretLeft.setStyle(caretLeft.getStyle() + "-fx-icon-color: gray;");
 		showPropertiesButton.setGraphic(caretRight);
 
 		showPropertiesButton.setOnAction(e -> {

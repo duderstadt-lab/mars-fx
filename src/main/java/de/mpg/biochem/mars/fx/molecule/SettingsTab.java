@@ -29,7 +29,9 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.COG;
+
+import org.kordamp.ikonli.fontawesome.FontAwesome;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,8 +43,8 @@ import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 import org.scijava.prefs.PrefService;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.HotKeyEntry;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -88,7 +90,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 	public SettingsTab(final Context context) {
 		super(context);
 
-		setIcon(FontAwesomeIconFactory.get().createIcon(COG, "1.083em"), "settings");
+		setIcon(ActionUtils.icon(COG, "1.083em"), "settings");
 
 		rootPane = new VBox();
 
@@ -180,8 +182,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 						return;
 					}
 
-					removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-						de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+					removeButton.setGraphic(ActionUtils.icon(FontAwesome.MINUS, "1.0em"));
 					removeButton.setCenterShape(true);
 					removeButton.setStyle("-fx-background-radius: 5em; " +
 						"-fx-min-width: 18px; " + "-fx-min-height: 18px; " +
@@ -238,8 +239,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		hotKeyTable.setEditable(true);
 
 		Button addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
 		addButton.setCursor(Cursor.DEFAULT);
 		addButton.setStyle("-fx-background-radius: 5em; " +

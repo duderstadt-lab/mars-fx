@@ -33,11 +33,12 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXTextField;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import org.kordamp.ikonli.material.Material;
+
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsJFXChipViewSkin;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -105,8 +106,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		UIDIconContainer = new BorderPane();
 		UIDIconContainer.setPrefHeight(55.0);
 		UIDIconContainer.setPrefWidth(60.0);
-		UIDIconContainer.setCenter(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.FINGERPRINT, "2.5em"));
+		UIDIconContainer.setCenter(ActionUtils.icon(Material.FINGERPRINT, "2.5em"));
 		vBox.getChildren().add(UIDIconContainer);
 
 		UIDLabel = new Label();

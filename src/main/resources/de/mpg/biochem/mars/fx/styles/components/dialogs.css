@@ -67,8 +67,10 @@
     -fx-padding: 0 0.5em 0 0.25em;
 }
 
-.find-replace .custom-text-field .glyph-icon {
+.find-replace .custom-text-field .glyph-icon,
+.find-replace .custom-text-field .ikonli-font-icon {
     -fx-fill: #aaa;
+    -fx-icon-color: #aaa;
 }
 
 .find-replace .custom-text-field .label {

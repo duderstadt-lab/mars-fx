@@ -37,9 +37,10 @@ import javax.swing.SwingUtilities;
 import org.controlsfx.control.textfield.CustomTextField;
 import org.scijava.Context;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
@@ -409,8 +410,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 			}
 		};
 		filterField.setSkin(filterFieldSkin);
-		filterField.setLeft(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.SEARCH));
+		filterField.setLeft(ActionUtils.icon(FontAwesome.SEARCH));
 		filterField.getStyleClass().add("find");
 		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
 			// If we don't clear the selection while we are searching the table will

@@ -40,8 +40,9 @@ import org.scijava.convert.ConvertService;
 import org.scijava.log.LogService;
 import org.scijava.plugin.Parameter;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.metadata.GenericModel;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.metadata.MarsOMEImage;
@@ -288,8 +289,7 @@ public class MarsOMEView {
 		BorderPane borderPane = new BorderPane();
 
 		filterField = new CustomTextField();
-		filterField.setLeft(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.SEARCH));
+		filterField.setLeft(ActionUtils.icon(FontAwesome.SEARCH));
 		filterField.getStyleClass().add("find");
 		filterField.textProperty().addListener((observable, oldValue, newValue) -> {
 			// If we don't clear the selection while we are searching the table will

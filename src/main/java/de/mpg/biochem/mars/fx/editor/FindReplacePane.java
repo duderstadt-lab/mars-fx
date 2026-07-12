@@ -80,9 +80,10 @@ import org.fxmisc.richtext.MultiChangeBuilder;
 import org.fxmisc.richtext.model.TwoDimensional.Bias;
 import org.fxmisc.wellbehaved.event.Nodes;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsFxGlobalPreferences;
 import de.mpg.biochem.mars.fx.util.PrefsBooleanProperty;
 import de.mpg.biochem.mars.fx.util.Range;
@@ -456,12 +457,9 @@ class FindReplacePane {
 		findInfoLabel.getStyleClass().add("info");
 		replaceInfoLabel.getStyleClass().add("info");
 
-		previousButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.CHEVRON_UP));
-		nextButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.CHEVRON_DOWN));
-		closeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.CLOSE));
+		previousButton.setGraphic(ActionUtils.icon(FontAwesome.CHEVRON_UP));
+		nextButton.setGraphic(ActionUtils.icon(FontAwesome.CHEVRON_DOWN));
+		closeButton.setGraphic(ActionUtils.icon(FontAwesome.TIMES));
 
 		previousButton.setTooltip(new Tooltip(Messages.get(
 			"FindReplacePane.previousButton.tooltip")));
@@ -474,8 +472,7 @@ class FindReplacePane {
 		closeButton.setTooltip(new Tooltip(Messages.get(
 			"FindReplacePane.closeButton.tooltip")));
 
-		findField.setLeft(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.SEARCH));
+		findField.setLeft(ActionUtils.icon(FontAwesome.SEARCH));
 		findField.setRight(nOfHitCountLabel);
 		findField.textProperty().addListener((ov, o, n) -> findAll(true));
 		Nodes.addInputMap(findField, sequence(
@@ -508,8 +505,7 @@ class FindReplacePane {
 
 		replacePane.setVisible(false);
 
-		replaceField.setLeft(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.RETWEET));
+		replaceField.setLeft(ActionUtils.icon(FontAwesome.RETWEET));
 		Nodes.addInputMap(replaceField, sequence(
 			// don't know why, but F3 (set in menubar) does not work if replaceField
 			// has focus

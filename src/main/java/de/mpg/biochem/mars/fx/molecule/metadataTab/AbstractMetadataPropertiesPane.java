@@ -29,20 +29,22 @@
 
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_ALT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.INFO_CIRCLE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.LIST_ALT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.SQUARE_O;
+import static org.kordamp.ikonli.octicons.Octicons.MILESTONE_16;
 
 import com.jfoenix.controls.JFXTabPane;
 
 import javafx.event.EventHandler;
 import org.scijava.Context;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
@@ -137,8 +139,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 		// Build general Tab
 		BorderPane tabPane = new BorderPane();
 		tabPane.setMaxWidth(tabWidth);
-		tabPane.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE,
-			"1.1em"));
+		tabPane.setCenter(ActionUtils.icon(INFO_CIRCLE, "1.1em"));
 
 		generalTab = new Tab();
 		generalTabContainer = new AnchorPane();
@@ -159,8 +160,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 
 		BorderPane propertiesTabPane = new BorderPane();
 		propertiesTabPane.setMaxWidth(tabWidth);
-		propertiesTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(
-			LIST_ALT, "1.1em"));
+		propertiesTabPane.setCenter(ActionUtils.icon(LIST_ALT, "1.1em"));
 
 		propertiesTab = new Tab();
 		propertiesTab.setText("");
@@ -185,8 +185,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 
 		BorderPane regionsTabPane = new BorderPane();
 		regionsTabPane.setMaxWidth(tabWidth);
-		regionsTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT, "1.1em"));
+		regionsTabPane.setCenter(ActionUtils.icon(SQUARE_O, "1.1em"));
 
 		regionsTab = new Tab();
 		regionsTab.setText("");
@@ -211,8 +210,7 @@ public abstract class AbstractMetadataPropertiesPane<I extends MarsMetadata>
 
 		BorderPane positionTabPane = new BorderPane();
 		positionTabPane.setMaxWidth(tabWidth);
-		positionTabPane.setCenter(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.octicons.OctIcon.MILESTONE, "1.1em"));
+		positionTabPane.setCenter(ActionUtils.icon(MILESTONE_16, "1.1em"));
 
 		positionsTab = new Tab();
 		positionsTab.setText("");

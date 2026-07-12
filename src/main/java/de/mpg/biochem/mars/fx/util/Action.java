@@ -55,7 +55,7 @@
 
 package de.mpg.biochem.mars.fx.util;
 
-import de.jensd.fx.glyphs.GlyphIcons;
+import org.kordamp.ikonli.Ikon;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.event.ActionEvent;
@@ -71,24 +71,24 @@ public class Action {
 
 	public final String text;
 	public final KeyCombination accelerator;
-	public final GlyphIcons icon;
+	public final Ikon icon;
 	public final EventHandler<ActionEvent> action;
 	public final ObservableBooleanValue disable;
 	public final BooleanProperty selected;
 
-	public Action(String text, String accelerator, GlyphIcons icon,
+	public Action(String text, String accelerator, Ikon icon,
 		EventHandler<ActionEvent> action)
 	{
 		this(text, accelerator, icon, action, null, null);
 	}
 
-	public Action(String text, String accelerator, GlyphIcons icon,
+	public Action(String text, String accelerator, Ikon icon,
 		EventHandler<ActionEvent> action, ObservableBooleanValue disable)
 	{
 		this(text, accelerator, icon, action, disable, null);
 	}
 
-	public Action(String text, String accelerator, GlyphIcons icon,
+	public Action(String text, String accelerator, Ikon icon,
 		EventHandler<ActionEvent> action, ObservableBooleanValue disable,
 		BooleanProperty selected)
 	{

@@ -60,8 +60,10 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+import org.kordamp.ikonli.octicons.Octicons;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
@@ -427,12 +429,12 @@ public class DatasetExplorerWindow {
 
         Tab cloudTab = new Tab();
         cloudTab.setClosable(false);
-        cloudTab.setGraphic(tabGraphic(FontAwesomeIcon.CLOUD, tabWidth));
+        cloudTab.setGraphic(tabGraphic(FontAwesome.CLOUD, tabWidth));
         cloudTab.setContent(cloudBox);
 
         Tab folderTab = new Tab();
         folderTab.setClosable(false);
-        folderTab.setGraphic(tabGraphic(FontAwesomeIcon.FOLDER, tabWidth));
+        folderTab.setGraphic(tabGraphic(FontAwesome.FOLDER, tabWidth));
         folderTab.setContent(folderBox);
 
         sourceTabs.getTabs().addAll(cloudTab, folderTab);
@@ -557,8 +559,7 @@ public class DatasetExplorerWindow {
                     setContextMenu(null);
                 } else {
                     setText(item);
-                    setGraphic(FontAwesomeIconFactory.get().createIcon(
-                            FontAwesomeIcon.FOLDER, "1.0em"));
+                    setGraphic(ActionUtils.icon(FontAwesome.FOLDER, "1.0em"));
                     javafx.scene.control.MenuItem remove =
                             new javafx.scene.control.MenuItem("Remove (and delete cache)");
                     remove.setOnAction(e -> removeProject(item));
@@ -605,8 +606,7 @@ public class DatasetExplorerWindow {
                 } else {
                     setText(item);
                     // Same icon factory the archive dialog uses, so it themes identically.
-                    setGraphic(FontAwesomeIconFactory.get().createIcon(
-                            FontAwesomeIcon.ARCHIVE, "1.0em"));
+                    setGraphic(ActionUtils.icon(FontAwesome.ARCHIVE, "1.0em"));
                 }
             }
         };
@@ -662,10 +662,10 @@ public class DatasetExplorerWindow {
 
     private Region buildDatasetsContent() {
         // --- Row 1: collapse buttons, search, type toggles, date-filter toggle ---
-        toggleLeftBtn = iconButton(FontAwesomeIcon.CHEVRON_LEFT, "Show/hide connection pane");
+        toggleLeftBtn = iconButton(FontAwesome.CHEVRON_LEFT, "Show/hide connection pane");
         toggleLeftBtn.setOnAction(e -> toggleLeftPane());
 
-        toggleRightBtn = iconButton(FontAwesomeIcon.CHEVRON_RIGHT, "Show/hide details pane");
+        toggleRightBtn = iconButton(FontAwesome.CHEVRON_RIGHT, "Show/hide details pane");
         toggleRightBtn.setOnAction(e -> toggleRightPane());
 
         searchField = new TextField();
@@ -718,8 +718,7 @@ public class DatasetExplorerWindow {
 
         // Sort toggle: reveals/hides the second row holding the sort dropdown.
         ToggleButton sortToggle = new ToggleButton();
-        sortToggle.setGraphic(FontAwesomeIconFactory.get().createIcon(
-                FontAwesomeIcon.SORT, "1.0em"));
+        sortToggle.setGraphic(ActionUtils.icon(FontAwesome.SORT, "1.0em"));
         sortToggle.setTooltip(new javafx.scene.control.Tooltip("Sort options"));
         styleFilterToggle(sortToggle);
         sortToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(sortToggle));
@@ -766,9 +765,9 @@ public class DatasetExplorerWindow {
     }
 
     /** A small icon-only button using a FontAwesome glyph. */
-    private static Button iconButton(FontAwesomeIcon glyph, String tooltip) {
+    private static Button iconButton(FontAwesome glyph, String tooltip) {
         Button b = new Button();
-        b.setGraphic(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
+        b.setGraphic(ActionUtils.icon(glyph, "1.1em"));
         b.setTooltip(new javafx.scene.control.Tooltip(tooltip));
         return b;
     }
@@ -837,7 +836,7 @@ public class DatasetExplorerWindow {
 
         Tab infoTab = new Tab();
         infoTab.setClosable(false);
-        infoTab.setGraphic(tabGraphic(FontAwesomeIcon.INFO_CIRCLE, tabWidth));
+        infoTab.setGraphic(tabGraphic(FontAwesome.INFO_CIRCLE, tabWidth));
         infoTab.setContent(infoContent);
 
         Tab codeTab = new Tab();
@@ -845,8 +844,7 @@ public class DatasetExplorerWindow {
         // Code icon: octicon CODE, matching the scriptable-widget tab glyph.
         BorderPane codeGraphic = new BorderPane();
         codeGraphic.setMaxWidth(tabWidth);
-        codeGraphic.setCenter(de.jensd.fx.glyphs.octicons.utils.OctIconFactory.get()
-                .createIcon(de.jensd.fx.glyphs.octicons.OctIcon.CODE, "1.1em"));
+        codeGraphic.setCenter(ActionUtils.icon(Octicons.CODE_16, "1.1em"));
         codeTab.setGraphic(codeGraphic);
         if (context != null) {
             scriptPane = new DatasetScriptPane(context);
@@ -884,10 +882,10 @@ public class DatasetExplorerWindow {
     }
 
     /** A BorderPane-centered FontAwesome glyph for a fixed-width icon tab. */
-    private static BorderPane tabGraphic(FontAwesomeIcon glyph, double tabWidth) {
+    private static BorderPane tabGraphic(FontAwesome glyph, double tabWidth) {
         BorderPane p = new BorderPane();
         p.setMaxWidth(tabWidth);
-        p.setCenter(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
+        p.setCenter(ActionUtils.icon(glyph, "1.1em"));
         return p;
     }
 
@@ -1009,11 +1007,11 @@ public class DatasetExplorerWindow {
             // Remember the left divider position before collapsing.
             savedLeftDivider = split.getDividerPositions()[0];
             split.getItems().remove(leftPane);
-            setButtonIcon(toggleLeftBtn, FontAwesomeIcon.CHEVRON_RIGHT); // closed → point to content
+            setButtonIcon(toggleLeftBtn, FontAwesome.CHEVRON_RIGHT); // closed → point to content
         } else {
             split.getItems().add(0, leftPane);
             Platform.runLater(() -> restoreDividers());
-            setButtonIcon(toggleLeftBtn, FontAwesomeIcon.CHEVRON_LEFT); // open → point to pane
+            setButtonIcon(toggleLeftBtn, FontAwesome.CHEVRON_LEFT); // open → point to pane
         }
     }
 
@@ -1024,11 +1022,11 @@ public class DatasetExplorerWindow {
             double[] d = split.getDividerPositions();
             if (d.length > 0) savedRightDivider = d[d.length - 1];
             split.getItems().remove(rightPane);
-            setButtonIcon(toggleRightBtn, FontAwesomeIcon.CHEVRON_LEFT); // closed → point to content
+            setButtonIcon(toggleRightBtn, FontAwesome.CHEVRON_LEFT); // closed → point to content
         } else {
             split.getItems().add(rightPane);
             Platform.runLater(() -> restoreDividers());
-            setButtonIcon(toggleRightBtn, FontAwesomeIcon.CHEVRON_RIGHT); // open → point to pane
+            setButtonIcon(toggleRightBtn, FontAwesome.CHEVRON_RIGHT); // open → point to pane
         }
     }
 
@@ -1050,8 +1048,8 @@ public class DatasetExplorerWindow {
         }
     }
 
-    private static void setButtonIcon(Button b, FontAwesomeIcon glyph) {
-        b.setGraphic(FontAwesomeIconFactory.get().createIcon(glyph, "1.1em"));
+    private static void setButtonIcon(Button b, FontAwesome glyph) {
+        b.setGraphic(ActionUtils.icon(glyph, "1.1em"));
     }
 
     // -----------------------------------------------------------------

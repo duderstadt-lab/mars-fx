@@ -30,8 +30,9 @@ package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
 import java.util.function.Consumer;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIconView;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+import org.kordamp.ikonli.javafx.FontIcon;
+
 import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane;
@@ -152,7 +153,7 @@ public class DatasetNotesPane extends BorderPane {
 
         // --- Toolbar ---
         editToggle = new ToggleButton();
-        editToggle.setGraphic(icon(FontAwesomeIcon.PENCIL));
+        editToggle.setGraphic(icon(FontAwesome.PENCIL));
         editToggle.setTooltip(new Tooltip("Edit notes"));
         editToggle.selectedProperty().addListener((o, was, on) -> setEditMode(on));
 
@@ -179,18 +180,18 @@ public class DatasetNotesPane extends BorderPane {
 
     private HBox buildFormatBar() {
         // Undo / redo (operate on the editor's undo manager).
-        Button undo = formatButton(FontAwesomeIcon.UNDO, "Undo",
+        Button undo = formatButton(FontAwesome.UNDO, "Undo",
                 () -> editorPane.undo());
-        Button redo = formatButton(FontAwesomeIcon.REPEAT, "Redo",
+        Button redo = formatButton(FontAwesome.REPEAT, "Redo",
                 () -> editorPane.redo());
 
-        Button bold = formatButton(FontAwesomeIcon.BOLD, "Bold",
+        Button bold = formatButton(FontAwesome.BOLD, "Bold",
                 () -> editorPane.getSmartEdit().insertBold("bold"));
-        Button italic = formatButton(FontAwesomeIcon.ITALIC, "Italic",
+        Button italic = formatButton(FontAwesome.ITALIC, "Italic",
                 () -> editorPane.getSmartEdit().insertItalic("italic"));
-        Button strike = formatButton(FontAwesomeIcon.STRIKETHROUGH, "Strikethrough",
+        Button strike = formatButton(FontAwesome.STRIKETHROUGH, "Strikethrough",
                 () -> editorPane.getSmartEdit().insertStrikethrough("strikethrough"));
-        Button code = formatButton(FontAwesomeIcon.CODE, "Inline code",
+        Button code = formatButton(FontAwesome.CODE, "Inline code",
                 () -> editorPane.getSmartEdit().insertInlineCode("code"));
 
         Button h1 = textButton("H1", "Heading 1",
@@ -204,11 +205,11 @@ public class DatasetNotesPane extends BorderPane {
         // SmartEdit.insertUnorderedList(), which reads Options.getBulletListMarker()
         // — that returns null outside an archive/Options context and inserts the
         // literal text "null". Explicit markers avoid that entirely.
-        Button bullet = formatButton(FontAwesomeIcon.LIST_UL, "Bulleted list",
+        Button bullet = formatButton(FontAwesome.LIST_UL, "Bulleted list",
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n- ", ""));
-        Button numbered = formatButton(FontAwesomeIcon.LIST_OL, "Numbered list",
+        Button numbered = formatButton(FontAwesome.LIST_OL, "Numbered list",
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n1. ", ""));
-        Button quote = formatButton(FontAwesomeIcon.QUOTE_LEFT, "Block quote",
+        Button quote = formatButton(FontAwesome.QUOTE_LEFT, "Block quote",
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n> ", ""));
 
         HBox bar = new HBox(2, undo, redo, sep(), bold, italic, strike, code,
@@ -386,7 +387,7 @@ public class DatasetNotesPane extends BorderPane {
 
     // ---- button helpers ------------------------------------------------
 
-    private Button formatButton(FontAwesomeIcon glyph, String tip, Runnable action) {
+    private Button formatButton(FontAwesome glyph, String tip, Runnable action) {
         Button b = new Button();
         b.setGraphic(icon(glyph));
         b.setTooltip(new Tooltip(tip));
@@ -416,11 +417,10 @@ public class DatasetNotesPane extends BorderPane {
         return r;
     }
 
-    // Single place that builds FontAwesome glyphs — change this one method when
-    // migrating to Ikonli.
-    private static FontAwesomeIconView icon(FontAwesomeIcon glyph) {
-        FontAwesomeIconView view = new FontAwesomeIconView(glyph);
-        view.setGlyphSize(14);
+    // Single place that builds FontAwesome glyphs.
+    private static FontIcon icon(FontAwesome glyph) {
+        FontIcon view = new FontIcon(glyph);
+        view.setIconSize(14);
         return view;
     }
 }

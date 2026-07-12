@@ -57,9 +57,10 @@ package de.mpg.biochem.mars.fx.controls;
 
 import java.io.File;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
@@ -73,8 +74,7 @@ import javafx.stage.DirectoryChooser;
 public class BrowseDirectoryButton extends BrowseFileButton {
 
 	public BrowseDirectoryButton() {
-		setGraphic(FontAwesomeIconFactory.get().createIcon(
-			FontAwesomeIcon.FOLDER_ALT, "1.2em"));
+		setGraphic(ActionUtils.icon(FontAwesome.FOLDER_OPEN_O, "1.2em"));
 		setTooltip(new Tooltip(Messages.get("BrowseDirectoryButton.tooltip")));
 	}
 

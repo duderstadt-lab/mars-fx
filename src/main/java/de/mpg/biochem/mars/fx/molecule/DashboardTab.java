@@ -38,8 +38,10 @@ import java.util.ArrayList;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import org.kordamp.ikonli.material.Material;
+
 import de.mpg.biochem.mars.fx.dashboard.MarsDashboardWidgetService;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.dashboardTab.MoleculeArchiveDashboard;
@@ -64,8 +66,7 @@ public class DashboardTab extends AbstractMoleculeArchiveTab {
 	public DashboardTab(final Context context) {
 		super(context);
 
-		setIcon(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.083em"), "dashboard");
+		setIcon(ActionUtils.icon(Material.DASHBOARD, "1.083em"), "dashboard");
 
 		dashboardPane = new MoleculeArchiveDashboard(context);
 

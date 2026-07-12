@@ -37,7 +37,8 @@ import java.util.Set;
 
 import org.scijava.Context;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import org.kordamp.ikonli.material.Material;
+
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
@@ -46,6 +47,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.plot.event.UpdatePlotAreaEvent;
 import de.mpg.biochem.mars.fx.table.MarsTableView;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
@@ -97,8 +99,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 
 		moleculeDashboardTab = new Tab();
 		moleculeDashboardTab.setText("");
-		moleculeDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		moleculeDashboardTab.setGraphic(ActionUtils.icon(Material.DASHBOARD, "1.0em"));
 		moleculeDashboardPane = new MoleculeDashboard<M>(context);
 		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
 

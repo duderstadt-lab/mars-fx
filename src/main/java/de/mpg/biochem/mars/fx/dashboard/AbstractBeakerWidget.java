@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.dashboard;
 
-import static de.jensd.fx.glyphs.octicons.OctIcon.BEAKER;
+import static org.kordamp.ikonli.octicons.Octicons.BEAKER_24;
 
 import java.util.Map;
 
@@ -37,7 +37,7 @@ import net.imagej.ops.Initializable;
 
 import org.scijava.plugin.SciJavaPlugin;
 
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
@@ -62,7 +62,7 @@ public abstract class AbstractBeakerWidget extends AbstractScriptableWidget
 
 	@Override
 	public Node getIcon() {
-		return (Node) OctIconFactory.get().createIcon(BEAKER, "1.2em");
+		return (Node) ActionUtils.icon(BEAKER_24, "1.2em");
 	}
 
 	@Override
