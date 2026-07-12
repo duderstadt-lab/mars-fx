@@ -275,6 +275,11 @@ public class MarkdownEditorPane {
 		return smartEdit;
 	}
 
+	/** Package-visible: used by {@link EmojiAutocomplete} to anchor its popup and track edits. */
+	MarkdownTextArea getTextArea() {
+		return textArea;
+	}
+
 	public void requestFocus() {
 		Platform.runLater(() -> {
 			if (textArea.getScene() != null) textArea.requestFocus();

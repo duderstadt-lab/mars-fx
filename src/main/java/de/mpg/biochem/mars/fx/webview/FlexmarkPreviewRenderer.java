@@ -222,6 +222,14 @@ class FlexmarkPreviewRenderer implements MarkdownPreviewPane.Renderer {
 		if (!source) builder.attributeProviderFactory(
 			new MyAttributeProvider.Factory());
 
+		// Overrides EmojiExtension's own renderer (registered above via the shared
+		// extensions list, for its shortcode parsing/validation) with one that emits
+		// bundled Twemoji SVGs instead of EmojiExtension's emoji-cheat-sheet/GitHub
+		// ".png" asset naming. Node renderers added after .extensions(...) take
+		// priority for the same node class -- see MarsEmbbededImageRenderer for the
+		// same pattern already used for Image nodes.
+		builder.nodeRendererFactory(new EmojiTwemojiRendererFactory());
+
 		if (documentEditor != null) {
 			documentEditor.removeAllActiveMediaIDs();
 			builder.nodeRendererFactory(new FencedCodeWidgetRendererFactory(

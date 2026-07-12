@@ -1003,6 +1003,20 @@ public class SmartEdit {
 		smartFormat.format(formatSelectionOnly, oldMarkdown);
 	}
 
+	// ---- plain text insertion -------------------------------------------------
+
+	/** Replaces the current selection (or inserts at the caret if empty) with {@code text}. */
+	public void insertText(String text) {
+		replaceSelection(textArea, text);
+	}
+
+	/** Replaces the text in {@code [start, end)} with {@code text} and moves the caret after it. */
+	public void replaceTextRange(int start, int end, String text) {
+		replaceText(textArea, start, end, text);
+		int caret = start + text.length();
+		selectRange(textArea, caret, caret);
+	}
+
 	// ---- text modification --------------------------------------------------
 
 	/**

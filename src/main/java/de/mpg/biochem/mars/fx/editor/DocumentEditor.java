@@ -380,6 +380,7 @@ public class DocumentEditor extends AnchorPane {
 		// load file and create UI when the tab becomes visible the first time
 
 		markdownEditorPane = new MarkdownEditorPane(this);
+		EmojiSupport.installAutocomplete(markdownEditorPane);
 		markdownPreviewPane = new MarkdownPreviewPane(this);
 
 		// markdownEditorPane.getUndoManager().mark();

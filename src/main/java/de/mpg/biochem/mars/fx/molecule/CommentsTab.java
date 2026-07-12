@@ -49,6 +49,7 @@ import static org.kordamp.ikonli.fontawesome.FontAwesome.REPEAT;
 import static org.kordamp.ikonli.fontawesome.FontAwesome.RETWEET;
 import static org.kordamp.ikonli.fontawesome.FontAwesome.SAVE;
 import static org.kordamp.ikonli.fontawesome.FontAwesome.SEARCH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.SMILE_O;
 import static org.kordamp.ikonli.fontawesome.FontAwesome.STRIKETHROUGH;
 import static org.kordamp.ikonli.fontawesome.FontAwesome.UNDO;
 
@@ -69,6 +70,7 @@ import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.dialogs.DocumentTemplateSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.editor.DocumentEditor;
+import de.mpg.biochem.mars.fx.editor.EmojiPicker;
 import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.editor.SmartEdit;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
@@ -458,6 +460,20 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		Node saveDocumentTemplateButton = ActionUtils.createToolBarButton(
 			saveDocumentTemplateAction);
 		editToolBar.getItems().add(saveDocumentTemplateButton);
+
+		Button emojiButton = new Button();
+		emojiButton.setGraphic(ActionUtils.icon(SMILE_O, "1.2em"));
+		emojiButton.setTooltip(new Tooltip("Insert emoji"));
+		emojiButton.setFocusTraversable(false);
+		// the toolbar is shared across all open document tabs, so the picker must
+		// resolve the active editor at click time (same pattern as renderWidgetsButton
+		// and the other Action-based buttons above), not bind to one fixed editor
+		EmojiPicker emojiPicker = new EmojiPicker(entry -> {
+			getActiveSmartEdit().insertText(entry.getInsertText());
+			getActiveEditor().requestFocus();
+		});
+		emojiButton.setOnAction(e -> emojiPicker.show(emojiButton));
+		editToolBar.getItems().add(emojiButton);
 
 		editToolBar.getItems().add(0, new Separator());
 
