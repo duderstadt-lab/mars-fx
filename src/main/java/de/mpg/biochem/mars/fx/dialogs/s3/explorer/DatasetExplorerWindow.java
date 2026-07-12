@@ -1237,7 +1237,7 @@ public class DatasetExplorerWindow {
     private void tryLoadCachedIndex() {
         String endpoint = sourceEndpoint();
         String bucket = sourceBucket();
-        String folder = indexFolderField.getText().trim();
+        String folder = indexFolderField == null ? "" : indexFolderField.getText().trim();
         if (endpoint.isEmpty() || bucket.isEmpty() || folder.isEmpty()) return;
         store = new DatasetIndexStore(folder);
         try {
