@@ -33,6 +33,7 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXTextField;
 
+import de.mpg.biochem.mars.fx.editor.MarkdownNotesPane;
 import de.mpg.biochem.mars.fx.event.DefaultMoleculeArchiveEventHandler;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
@@ -44,45 +45,39 @@ import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.*;
 
 public class MetadataGeneralTabController implements MetadataSubPane {
 
-	private ScrollPane rootPane;
+	private BorderPane rootPane;
 	private VBox vBox;
 	private BorderPane UIDIconContainer;
 	private Label metaUIDLabel;
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
-	private TextArea notesTextArea;
+	private MarkdownNotesPane notesPane;
 
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 
 	private ListChangeListener<String> chipsListener;
-	private ChangeListener<String> notesListener;
 
 	private MarsMetadata marsMetadata;
 
 	private MarsJFXChipViewSkin<String> skin;
 
 	public MetadataGeneralTabController() {
-		rootPane = new ScrollPane();
-		rootPane.getStyleClass().add("dashboard-scroll-pane");
+		rootPane = new BorderPane();
 
 		vBox = new VBox();
 		vBox.setAlignment(Pos.CENTER);
@@ -115,17 +110,21 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		notes = new Label();
 		notes.setText("Notes");
 		VBox.setMargin(notes, new Insets(5, 5, 5, 5));
-		vBox.getChildren().add(notes);
 
-		notesTextArea = new TextArea();
-		VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
-		notesTextArea.setMinHeight(150.0);
-		notesTextArea.setPromptText("none");
-		notesTextArea.setWrapText(true);
-		vBox.getChildren().add(notesTextArea);
+		// Notes pane fills whatever vertical space remains below the (fixed-height)
+		// UID/tags content above, same layout as the Dataset Explorer's notes
+		// section.
+		notesPane = new MarkdownNotesPane();
+		notesPane.setOnMarkdownChanged(md -> {
+			if (marsMetadata != null) marsMetadata.setNotes(md);
+		});
 
-		rootPane.setFitToWidth(true);
-		rootPane.setContent(vBox);
+		VBox notesSection = new VBox(4, notes, notesPane);
+		notesSection.setPadding(new Insets(8));
+		VBox.setVgrow(notesPane, Priority.ALWAYS);
+
+		rootPane.setTop(vBox);
+		rootPane.setCenter(notesSection);
 
 		getNode().addEventHandler(MetadataEvent.METADATA_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
@@ -159,20 +158,6 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 			}
 		};
 
-		if (notesListener == null) {
-			notesListener = new ChangeListener<String>() {
-
-				@Override
-				public void changed(final ObservableValue<? extends String> observable,
-					final String oldValue, final String newValue)
-				{
-					if (marsMetadata == null) return;
-
-					marsMetadata.setNotes(notesTextArea.getText());
-				}
-			};
-		}
-
 		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
 	}
@@ -203,9 +188,9 @@ public class MetadataGeneralTabController implements MetadataSubPane {
 		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
 
-		notesTextArea.textProperty().removeListener(notesListener);
-		notesTextArea.setText(marsMetadata.getNotes());
-		notesTextArea.textProperty().addListener(notesListener);
+		// setMarkdown() suppresses the change callback internally, so this doesn't
+		// bounce straight back into marsMetadata.setNotes(...).
+		notesPane.setMarkdown(marsMetadata.getNotes());
 	}
 
 	@Override

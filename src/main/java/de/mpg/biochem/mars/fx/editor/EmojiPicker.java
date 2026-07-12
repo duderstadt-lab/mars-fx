@@ -79,8 +79,12 @@ public class EmojiPicker {
 		categoryBox.setItems(categories);
 		categoryBox.getSelectionModel().select(ALL_CATEGORIES);
 
-		gridView.setCellWidth(34);
-		gridView.setCellHeight(34);
+		// Cell/font size chosen to land on a size the OS's bitmap-strike color-emoji
+		// font (e.g. Apple Color Emoji) actually has a native glyph for -- an
+		// in-between size like the previous 20px forces the OS to upscale its
+		// nearest strike, which is what reads as "blurry".
+		gridView.setCellWidth(44);
+		gridView.setCellHeight(44);
 		gridView.setHorizontalCellSpacing(2);
 		gridView.setVerticalCellSpacing(2);
 		gridView.setCellFactory(gv -> new EmojiCell(onChosen, this::hide));
@@ -147,7 +151,7 @@ public class EmojiPicker {
 		private final Label label = new Label();
 
 		EmojiCell(Consumer<EmojiEntry> onChosen, Runnable afterChoose) {
-			label.setStyle("-fx-font-size: 20px;");
+			label.setStyle("-fx-font-size: 26px;");
 			setGraphic(label);
 			setOnMouseClicked(e -> {
 				EmojiEntry entry = getItem();

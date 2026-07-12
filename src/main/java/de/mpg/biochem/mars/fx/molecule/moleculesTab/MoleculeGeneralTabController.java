@@ -35,6 +35,7 @@ import com.jfoenix.controls.JFXTextField;
 
 import org.kordamp.ikonli.material.Material;
 
+import de.mpg.biochem.mars.fx.editor.MarkdownNotesPane;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
@@ -46,8 +47,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
 import de.mpg.biochem.mars.fx.util.Utils;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -55,13 +54,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
@@ -73,7 +71,7 @@ import javafx.scene.layout.StackPane;
 
 public class MoleculeGeneralTabController implements MoleculeSubPane {
 
-	private ScrollPane rootPane;
+	private BorderPane rootPane;
 	private VBox vBox;
 
 	private BorderPane UIDIconContainer;
@@ -85,20 +83,18 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 	private Label tags;
 	private JFXChipView<String> chipView;
 	private Label notes;
-	private TextArea notesTextArea;
+	private MarkdownNotesPane notesPane;
 
 	final Clipboard clipboard = Clipboard.getSystemClipboard();
 
 	private ListChangeListener<String> chipsListener;
-	private ChangeListener<String> notesListener;
 
 	private MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive;
 	private Molecule molecule;
 	private MarsJFXChipViewSkin<String> skin;
 
 	public MoleculeGeneralTabController() {
-		rootPane = new ScrollPane();
-		rootPane.getStyleClass().add("dashboard-scroll-pane");
+		rootPane = new BorderPane();
 
 		vBox = new VBox();
 		vBox.setAlignment(Pos.CENTER);
@@ -158,17 +154,21 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		notes = new Label();
 		notes.setText("Notes");
 		VBox.setMargin(notes, new Insets(5, 5, 5, 5));
-		vBox.getChildren().add(notes);
 
-		notesTextArea = new TextArea();
-		VBox.setMargin(notesTextArea, new Insets(10, 10, 10, 10));
-		notesTextArea.setMinHeight(150.0);
-		notesTextArea.setPromptText("none");
-		notesTextArea.setWrapText(true);
-		vBox.getChildren().add(notesTextArea);
+		// Notes pane fills whatever vertical space remains below the (fixed-height)
+		// icon/UID/tags content above, same layout as the Dataset Explorer's notes
+		// section.
+		notesPane = new MarkdownNotesPane();
+		notesPane.setOnMarkdownChanged(md -> {
+			if (molecule != null) molecule.setNotes(md);
+		});
 
-		rootPane.setFitToWidth(true);
-		rootPane.setContent(vBox);
+		VBox notesSection = new VBox(4, notes, notesPane);
+		notesSection.setPadding(new Insets(8));
+		VBox.setVgrow(notesPane, Priority.ALWAYS);
+
+		rootPane.setTop(vBox);
+		rootPane.setCenter(notesSection);
 
 		getNode().addEventHandler(MoleculeEvent.MOLECULE_EVENT, this);
 		getNode().addEventHandler(MoleculeArchiveEvent.MOLECULE_ARCHIVE_EVENT,
@@ -204,20 +204,6 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			}
 		};
 
-		if (notesListener == null) {
-			notesListener = new ChangeListener<String>() {
-
-				@Override
-				public void changed(final ObservableValue<? extends String> observable,
-					final String oldValue, final String newValue)
-				{
-					if (molecule == null) return;
-
-					molecule.setNotes(notesTextArea.getText());
-				}
-			};
-		}
-
 		skin = new MarsJFXChipViewSkin<>(chipView);
 		chipView.setSkin(skin);
 	}
@@ -247,7 +233,7 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 			cText.setText("");
 			cInt.setText("");
 			chipView.getChips().clear();
-			notesTextArea.setText("");
+			notesPane.setMarkdown("");
 			UIDLabel.setText("");
 			metaUIDLabel.setText("");
 			return;
@@ -287,8 +273,8 @@ public class MoleculeGeneralTabController implements MoleculeSubPane {
 		chipView.getSuggestions().addAll(archive.properties().getTagSet());
 		chipView.getChips().addListener(chipsListener);
 
-		notesTextArea.textProperty().removeListener(notesListener);
-		notesTextArea.setText(molecule.getNotes());
-		notesTextArea.textProperty().addListener(notesListener);
+		// setMarkdown() suppresses the change callback internally, so this doesn't
+		// bounce straight back into molecule.setNotes(...).
+		notesPane.setMarkdown(molecule.getNotes());
 	}
 }
