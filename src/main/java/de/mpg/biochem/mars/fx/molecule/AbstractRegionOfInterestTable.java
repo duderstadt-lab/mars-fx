@@ -37,8 +37,10 @@ import java.util.stream.Collectors;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.MarsRecord;
@@ -101,8 +103,7 @@ public abstract class AbstractRegionOfInterestTable {
 						return;
 					}
 
-					removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-						de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+					removeButton.setGraphic(ActionUtils.icon(FontAwesome.MINUS, "1.0em"));
 					removeButton.setCenterShape(true);
 					removeButton.setStyle("-fx-background-radius: 5em; " +
 						"-fx-min-width: 18px; " + "-fx-min-height: 18px; " +
@@ -274,8 +275,7 @@ public abstract class AbstractRegionOfInterestTable {
 		regionTable.setEditable(true);
 
 		Button addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
 		addButton.setCursor(Cursor.DEFAULT);
 		addButton.setStyle("-fx-background-radius: 5em; " +

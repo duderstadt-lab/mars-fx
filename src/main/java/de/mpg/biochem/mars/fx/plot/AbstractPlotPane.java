@@ -29,17 +29,17 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_H;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ARROWS_V;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CIRCLE_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COG;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.EXPAND;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.HAND_PAPER_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.IMAGE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.ARROWS;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.ARROWS_H;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.ARROWS_V;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.CIRCLE_O;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.COG;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.EXPAND;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.HAND_PAPER_O;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.IMAGE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.MINUS;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.PLUS;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REFRESH;
 
 import java.io.File;
 import java.io.IOException;
@@ -207,7 +207,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 
 	protected void buildTools() {
 
-		Action trackCursor = new Action("Track", null, CIRCLE_ALT, e -> setTool(
+		Action trackCursor = new Action("Track", null, CIRCLE_O, e -> setTool(
 			trackSelected, () -> new MarsDataPointTracker(), Cursor.DEFAULT), null,
 			trackSelected);
 		addTool(trackCursor);
@@ -227,7 +227,7 @@ public abstract class AbstractPlotPane extends AbstractJsonConvertibleRecord
 				Cursor.V_RESIZE), null, zoomYSelected);
 		addTool(zoomYCursor);
 
-		Action panCursor = new Action("Pan", null, HAND_PAPER_ALT, e -> setTool(
+		Action panCursor = new Action("Pan", null, HAND_PAPER_O, e -> setTool(
 			panSelected, () -> {
 				MarsPanner panner = new MarsPanner();
 				//panner.setPanMouseFilter(PAN_MOUSE_FILTER);

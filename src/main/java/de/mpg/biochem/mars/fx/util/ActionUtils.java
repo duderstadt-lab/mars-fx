@@ -55,7 +55,8 @@
 
 package de.mpg.biochem.mars.fx.util;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.Ikon;
+import org.kordamp.ikonli.javafx.FontIcon;
 import javafx.beans.property.BooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -95,8 +96,7 @@ public class ActionUtils {
 		MenuItem menuItem = (action.selected != null) ? new CheckMenuItem(
 			action.text) : new MenuItem(action.text);
 		if (action.accelerator != null) menuItem.setAccelerator(action.accelerator);
-		if (action.icon != null) menuItem.setGraphic(FontAwesomeIconFactory.get()
-			.createIcon(action.icon));
+		if (action.icon != null) menuItem.setGraphic(icon(action.icon));
 		if (action.action != null) menuItem.setOnAction(action.action);
 		if (action.disable != null) menuItem.disableProperty().bind(action.disable);
 		if (action.selected != null) ((CheckMenuItem) menuItem).selectedProperty()
@@ -132,8 +132,7 @@ public class ActionUtils {
 	public static ButtonBase createToolBarButton(Action action, String size) {
 		ButtonBase button = (action.selected != null) ? new ToggleButton()
 			: new Button();
-		button.setGraphic(FontAwesomeIconFactory.get().createIcon(action.icon,
-			size));
+		button.setGraphic(icon(action.icon, size));
 		String tooltip = action.text;
 		if (tooltip.endsWith("...")) tooltip = tooltip.substring(0, tooltip
 			.length() - 3);
@@ -162,5 +161,20 @@ public class ActionUtils {
 		if (selected != null) ((ToggleButton) button).selectedProperty()
 			.bindBidirectional(selected);
 		return button;
+	}
+
+	public static FontIcon icon(Ikon icon) {
+		return new FontIcon(icon);
+	}
+
+	public static FontIcon icon(Ikon icon, String emSize) {
+		FontIcon fontIcon = new FontIcon(icon);
+		fontIcon.setIconSize(emToPx(emSize));
+		return fontIcon;
+	}
+
+	private static int emToPx(String em) {
+		double value = Double.parseDouble(em.replace("em", "").trim());
+		return (int) Math.round(value * 16);
 	}
 }

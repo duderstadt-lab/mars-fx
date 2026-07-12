@@ -34,13 +34,15 @@ import java.util.HashSet;
 import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
-import de.jensd.fx.glyphs.materialicons.utils.MaterialIconFactory;
+import org.kordamp.ikonli.material.Material;
+
 import de.mpg.biochem.mars.fx.editor.LogPane;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
 import de.mpg.biochem.mars.fx.event.MetadataSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.dashboard.MarsMetadataDashboard;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import javafx.event.Event;
@@ -113,8 +115,7 @@ public abstract class AbstractMetadataCenterPane<I extends MarsMetadata> extends
 
 		marsMetadataDashboardTab = new Tab();
 		marsMetadataDashboardTab.setText("");
-		marsMetadataDashboardTab.setGraphic(MaterialIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.materialicons.MaterialIcon.DASHBOARD, "1.0em"));
+		marsMetadataDashboardTab.setGraphic(ActionUtils.icon(Material.DASHBOARD, "1.0em"));
 		marsMetadataDashboardPane = new MarsMetadataDashboard<I>(context);
 		marsMetadataDashboardTab.setContent(marsMetadataDashboardPane.getNode());
 

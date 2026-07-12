@@ -167,6 +167,7 @@
 [class*="icon-"] {
     -fx-fill: -icon-paint !important;
     -fx-text-fill: -icon-paint !important;
+    -fx-icon-color: -icon-paint !important;
     -fx-effect: null !important;
 }
 

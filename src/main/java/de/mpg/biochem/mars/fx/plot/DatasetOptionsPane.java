@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REFRESH;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
@@ -42,8 +42,8 @@ import com.jfoenix.controls.JFXColorPicker;
 import com.jfoenix.controls.JFXTextField;
 
 import io.fair_acc.chartfx.XYChart;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -259,8 +259,7 @@ public class DatasetOptionsPane extends VBox {
 						return;
 					}
 
-					removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-						de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+					removeButton.setGraphic(ActionUtils.icon(FontAwesome.MINUS, "1.0em"));
 					removeButton.setCenterShape(true);
 					removeButton.setStyle("-fx-background-radius: 5em; " +
 						"-fx-min-width: 18px; " + "-fx-min-height: 18px; " +
@@ -376,8 +375,7 @@ public class DatasetOptionsPane extends VBox {
 		plotPropertiesTable.setItems(plotSeriesList);
 
 		addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
 		addButton.setStyle("-fx-background-radius: 5em; " +
 			"-fx-min-width: 20px; " + "-fx-min-height: 20px; " +
@@ -389,7 +387,7 @@ public class DatasetOptionsPane extends VBox {
 			}
 		});
 
-		Text syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
+		Text syncIcon = ActionUtils.icon(REFRESH, "1.0em");
 		updateButton = new Button();
 		updateButton.setGraphic(syncIcon);
 		updateButton.setCenterShape(true);

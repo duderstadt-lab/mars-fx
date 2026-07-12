@@ -29,13 +29,13 @@
 
 package de.mpg.biochem.mars.fx.molecule.dashboardTab;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.INFO_CIRCLE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.INFO_CIRCLE;
 
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
 import org.scijava.plugin.SciJavaPlugin;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.dashboard.AbstractDashboardWidget;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -77,8 +77,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements
 		vbox.setSpacing(5);
 
 		BorderPane iconContainer = new BorderPane();
-		iconContainer.setCenter(FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE,
-			"2em"));
+		iconContainer.setCenter(ActionUtils.icon(INFO_CIRCLE, "2em"));
 
 		vbox.getChildren().add(iconContainer);
 
@@ -134,7 +133,7 @@ public class ArchivePropertiesWidget extends AbstractDashboardWidget implements
 
 	@Override
 	public Node getIcon() {
-		return (Node) FontAwesomeIconFactory.get().createIcon(INFO_CIRCLE, "1.2em");
+		return (Node) ActionUtils.icon(INFO_CIRCLE, "1.2em");
 	}
 
 	@Override

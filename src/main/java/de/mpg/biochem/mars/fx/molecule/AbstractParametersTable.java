@@ -35,8 +35,10 @@ import java.util.LinkedHashMap;
 
 import org.controlsfx.control.textfield.CustomTextField;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.EditCell;
 import de.mpg.biochem.mars.molecule.MarsRecord;
 import javafx.application.Platform;
@@ -108,8 +110,7 @@ public abstract class AbstractParametersTable {
 							break;
 						case 2:
 							label.setText("");
-							label.setGraphic(FontAwesomeIconFactory.get().createIcon(
-								de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT,
+							label.setGraphic(ActionUtils.icon(FontAwesome.SQUARE_O,
 								"1.1em"));
 							break;
 					}
@@ -139,8 +140,7 @@ public abstract class AbstractParametersTable {
 						return;
 					}
 
-					removeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-						de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.MINUS, "1.0em"));
+					removeButton.setGraphic(ActionUtils.icon(FontAwesome.MINUS, "1.0em"));
 					removeButton.setCenterShape(true);
 					removeButton.setStyle("-fx-background-radius: 5em; " +
 						"-fx-min-width: 18px; " + "-fx-min-height: 18px; " +
@@ -288,8 +288,7 @@ public abstract class AbstractParametersTable {
 		parameterTable.setEditable(true);
 
 		Button addButton = new Button();
-		addButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-			de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS, "1.0em"));
+		addButton.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
 		addButton.setCenterShape(true);
 		addButton.setCursor(Cursor.DEFAULT);
 		addButton.setStyle("-fx-background-radius: 5em; " +
@@ -353,8 +352,7 @@ public abstract class AbstractParametersTable {
 					break;
 				case 2:
 					typeButton.setText("");
-					typeButton.setGraphic(FontAwesomeIconFactory.get().createIcon(
-						de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SQUARE_ALT,
+					typeButton.setGraphic(ActionUtils.icon(FontAwesome.SQUARE_O,
 						"1.1em"));
 					break;
 			}

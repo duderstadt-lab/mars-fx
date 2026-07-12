@@ -236,15 +236,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 123, 255, 0.25), 4, 0, 0, 0);
 }
 
-/* Validation icons */
-.bdv-source-options .label .fontawesome-icon.fa-times {
-    -fx-fill: #dc3545 !important; /* Red color for X icon */
-}
-
-.bdv-source-options .label .fontawesome-icon.fa-check {
-    -fx-fill: #28a745 !important; /* Green color for check icon */
-}
-
 /* Button styling */
 .bdv-source-options .button {
     -fx-background-color: #f8f9fa;

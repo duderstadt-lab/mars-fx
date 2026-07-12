@@ -29,28 +29,28 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOLD;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CODE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.COPY;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CUT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.EYE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.FILE_CODE_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.HEADER;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.ITALIC;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_OL;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LIST_UL;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PASTE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PENCIL;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PLUS;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.PRINT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUOTE_LEFT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REPEAT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.RETWEET;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SAVE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.SEARCH;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STRIKETHROUGH;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.UNDO;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.BOLD;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.CODE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.COPY;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.CUT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.EYE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.FILE_CODE_O;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.HEADER;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.ITALIC;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.LIST_OL;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.LIST_UL;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.PASTE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.PENCIL;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.PLUS;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.PRINT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.QUOTE_LEFT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REFRESH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REPEAT;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.RETWEET;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.SAVE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.SEARCH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.STRIKETHROUGH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.UNDO;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +65,6 @@ import java.util.prefs.Preferences;
 import org.apache.commons.io.IOUtils;
 import org.scijava.Context;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
 import de.mpg.biochem.mars.fx.Messages;
 import de.mpg.biochem.mars.fx.dialogs.DocumentTemplateSelectionDialog;
 import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
@@ -292,16 +291,16 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 			e -> getActiveSmartEdit().surroundSelection("\n\n> ", ""));
 		Action insertFencedCodeBlockAction = new Action(Messages.get(
 			"MainWindow.insertFencedCodeBlockAction"), "Shortcut+Shift+K",
-			FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```\n",
+			FILE_CODE_O, e -> getActiveSmartEdit().surroundSelection("\n\n```\n",
 				"\n```\n\n", Messages.get("MainWindow.insertFencedCodeBlockText")));
 		Action insertHtmlWidgetCodeBlockAction = new Action("Html Widget Code Block", null,
-				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-html-widget\n",
+				FILE_CODE_O, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-html-widget\n",
 				"\n```\n\n", loadCommentTemplate("HtmlWidgetTemplate.groovy")));
 		Action insertImageWidgetCodeBlockAction = new Action("Image Widget Code Block", null,
-				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-image-widget\n",
+				FILE_CODE_O, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-image-widget\n",
 				"\n```\n\n", loadCommentTemplate("ImageWidgetTemplate.groovy")));
 		Action insertImagesWidgetCodeBlockAction = new Action("Images Widget Code Block", null,
-				FILE_CODE_ALT, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-images-widget\n",
+				FILE_CODE_O, e -> getActiveSmartEdit().surroundSelection("\n\n```groovy-images-widget\n",
 				"\n```\n\n", loadCommentTemplate("ImagesWidgetTemplate.groovy")));
 		Action insertHeader1Action = new Action(Messages.get(
 			"MainWindow.insertHeader1Action"), "Shortcut+1", HEADER,
@@ -487,8 +486,7 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		editToolBar.getItems().add(0, editModeButton2);
 
 		ButtonBase renderWidgetsButton = new Button();
-		Text renderWidgetsIcon = FontAwesomeIconFactory.get().createIcon(REFRESH,
-			"1.2em");
+		Text renderWidgetsIcon = ActionUtils.icon(REFRESH, "1.2em");
 		renderWidgetsButton.setGraphic(renderWidgetsIcon);
 		renderWidgetsButton.setTooltip(new Tooltip("Render Widgets"));
 		renderWidgetsButton.setFocusTraversable(false);

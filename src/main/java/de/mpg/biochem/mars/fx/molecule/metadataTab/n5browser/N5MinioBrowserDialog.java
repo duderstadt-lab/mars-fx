@@ -59,8 +59,9 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Window;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 
 /**
  * JavaFX dialog for browsing N5 datasets stored in MinIO/S3 buckets. Lists
@@ -213,8 +214,7 @@ public class N5MinioBrowserDialog extends
                 }
                 else {
                     setText(bucket);
-                    setGraphic(FontAwesomeIconFactory.get().createIcon(
-                            FontAwesomeIcon.ARCHIVE, "1.0em"));
+                    setGraphic(ActionUtils.icon(FontAwesome.ARCHIVE, "1.0em"));
                 }
             }
         });

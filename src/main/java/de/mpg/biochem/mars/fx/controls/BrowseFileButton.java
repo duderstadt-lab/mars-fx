@@ -60,9 +60,10 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon;
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
 import de.mpg.biochem.mars.fx.Messages;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -84,8 +85,7 @@ public class BrowseFileButton extends Button {
 	private final List<ExtensionFilter> extensionFilters = new ArrayList<>();
 
 	public BrowseFileButton() {
-		setGraphic(FontAwesomeIconFactory.get().createIcon(FontAwesomeIcon.FILE_ALT,
-			"1.2em"));
+		setGraphic(ActionUtils.icon(FontAwesome.FILE_O, "1.2em"));
 		setTooltip(new Tooltip(Messages.get("BrowseFileButton.tooltip")));
 		setOnAction(this::browse);
 

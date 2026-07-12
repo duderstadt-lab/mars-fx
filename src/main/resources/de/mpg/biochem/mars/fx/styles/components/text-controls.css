@@ -41,8 +41,10 @@
     -fx-padding: 0 0.5em 0 0.25em;
 }
 
-.custom-text-field .glyph-icon {
+.custom-text-field .glyph-icon,
+.custom-text-field .ikonli-font-icon {
     -fx-fill: #aaa;
+    -fx-icon-color: #aaa;
 }
 
 .custom-text-field .label {

@@ -29,9 +29,9 @@
 
 package de.mpg.biochem.mars.fx.dashboard;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOMB;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.STOP;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.BOMB;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REFRESH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.STOP;
 
 import com.fasterxml.jackson.core.JsonToken;
 

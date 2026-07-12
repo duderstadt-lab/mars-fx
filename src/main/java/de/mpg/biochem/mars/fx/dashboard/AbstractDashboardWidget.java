@@ -29,18 +29,17 @@
 
 package de.mpg.biochem.mars.fx.dashboard;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CLOSE;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.QUESTION_CIRCLE_ALT;
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.TIMES;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.QUESTION_CIRCLE_O;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.REFRESH;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.scijava.plugin.Parameter;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import javafx.animation.Animation;
 import javafx.animation.Interpolator;
@@ -118,7 +117,7 @@ public abstract class AbstractDashboardWidget extends
 		// the
 		// widget...
 
-		Text closeIcon = OctIconFactory.get().createIcon(CLOSE, "1.0em");
+		Text closeIcon = ActionUtils.icon(TIMES, "1.0em");
 		closeButton = new Button();
 		closeButton.setPickOnBounds(true);
 		closeButton.setCenterShape(true);
@@ -133,7 +132,7 @@ public abstract class AbstractDashboardWidget extends
 		closeButton.setPrefWidth(20);
 		closeButton.setPrefHeight(20);
 
-		syncIcon = OctIconFactory.get().createIcon(REFRESH, "1.0em");
+		syncIcon = ActionUtils.icon(REFRESH, "1.0em");
 		loadButton = new Button();
 		loadButton.setGraphic(syncIcon);
 		loadButton.setCenterShape(true);
@@ -315,8 +314,7 @@ public abstract class AbstractDashboardWidget extends
 
 	@Override
 	public Node getIcon() {
-		return (Node) FontAwesomeIconFactory.get().createIcon(QUESTION_CIRCLE_ALT,
-			"1.0em");
+		return (Node) ActionUtils.icon(QUESTION_CIRCLE_O, "1.0em");
 	}
 
 	@Override

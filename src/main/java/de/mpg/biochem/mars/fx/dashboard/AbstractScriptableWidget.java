@@ -29,8 +29,8 @@
 
 package de.mpg.biochem.mars.fx.dashboard;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.BOOK;
-import static de.jensd.fx.glyphs.octicons.OctIcon.CODE;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.BOOK;
+import static org.kordamp.ikonli.octicons.Octicons.CODE_16;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,8 +63,8 @@ import org.scijava.script.ScriptLanguage;
 import org.scijava.script.ScriptModule;
 import org.scijava.script.ScriptService;
 
-import de.jensd.fx.glyphs.octicons.utils.OctIconFactory;
 import de.mpg.biochem.mars.fx.editor.MarsScriptEditor;
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
@@ -132,7 +132,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 
 		// Script Pane
 		Tab scriptTab = new Tab();
-		scriptTab.setGraphic(OctIconFactory.get().createIcon(CODE, "1.0em"));
+		scriptTab.setGraphic(ActionUtils.icon(CODE_16, "1.0em"));
 
 		codeArea = new MarsScriptEditor();
 
@@ -172,7 +172,7 @@ public abstract class AbstractScriptableWidget extends AbstractDashboardWidget
 
 		Tab logTab = new Tab();
 		logTab.setContent(borderPane);
-		logTab.setGraphic(OctIconFactory.get().createIcon(BOOK, "1.0em"));
+		logTab.setGraphic(ActionUtils.icon(BOOK, "1.0em"));
 		getTabPane().getTabs().add(logTab);
 
 		if (lang.getLanguageName().equals("Python (scyjava)")) loadImage();

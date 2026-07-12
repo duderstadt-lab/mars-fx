@@ -498,6 +498,7 @@ Text, .text {
 [class*="icon-"] {
     -fx-fill: -mars-dark-text-primary !important;
     -fx-text-fill: -mars-dark-text-primary !important;
+    -fx-icon-color: -mars-dark-text-primary !important;
     -fx-effect: null !important;
 }
 

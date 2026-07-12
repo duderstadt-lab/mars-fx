@@ -57,7 +57,9 @@ import org.janelia.saalfeldlab.n5.universe.metadata.*;
 import org.janelia.saalfeldlab.n5.universe.metadata.canonical.CanonicalMetadataParser;
 import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.v04.OmeNgffMetadataParser;
 
-import de.jensd.fx.glyphs.fontawesome.utils.FontAwesomeIconFactory;
+import org.kordamp.ikonli.fontawesome.FontAwesome;
+
+import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -249,17 +251,14 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setHgrow(pathField, Priority.ALWAYS);
 		pathBox.getChildren().add(pathField);
 
-		times = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
-		times.setStyle(times.getStyle() + "-fx-fill: red !important;");
+		times = ActionUtils.icon(FontAwesome.TIMES, "1.5em");
+		times.setStyle(times.getStyle() + "-fx-icon-color: red !important;");
 
-		check = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
-		check.setStyle(check.getStyle() + "-fx-fill: green !important;");
+		check = ActionUtils.icon(FontAwesome.CHECK, "1.5em");
+		check.setStyle(check.getStyle() + "-fx-icon-color: green !important;");
 
 		// Spinning refresh icon for the Path field.
-		pathRefresh = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH, "1.5em");
+		pathRefresh = ActionUtils.icon(FontAwesome.REFRESH, "1.5em");
 		pathRefreshSpin = new RotateTransition(Duration.millis(800), pathRefresh);
 		pathRefreshSpin.setByAngle(360);
 		pathRefreshSpin.setCycleCount(RotateTransition.INDEFINITE);
@@ -337,17 +336,14 @@ public class BdvSourceOptionsPane extends VBox {
 		HBox.setMargin(n5Dataset, new Insets(0, 5, 10, 5));
 		n5OptionsHBox.getChildren().add(n5Dataset);
 
-		times2 = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.TIMES, "1.5em");
-		times2.setStyle(times.getStyle() + "-fx-fill: red !important;");
+		times2 = ActionUtils.icon(FontAwesome.TIMES, "1.5em");
+		times2.setStyle(times.getStyle() + "-fx-icon-color: red !important;");
 
-		check2 = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.CHECK, "1.5em");
-		check2.setStyle(check.getStyle() + "-fx-fill: green !important;");
+		check2 = ActionUtils.icon(FontAwesome.CHECK, "1.5em");
+		check2.setStyle(check.getStyle() + "-fx-icon-color: green !important;");
 
 		// Spinning refresh icon for the Dataset field.
-		datasetRefresh = FontAwesomeIconFactory.get().createIcon(
-				de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.REFRESH, "1.5em");
+		datasetRefresh = ActionUtils.icon(FontAwesome.REFRESH, "1.5em");
 		datasetRefreshSpin = new RotateTransition(Duration.millis(800),
 				datasetRefresh);
 		datasetRefreshSpin.setByAngle(360);

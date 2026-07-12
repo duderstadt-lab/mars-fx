@@ -29,7 +29,7 @@
 
 package de.mpg.biochem.mars.fx.plot;
 
-import static de.jensd.fx.glyphs.fontawesome.FontAwesomeIcon.LINE_CHART;
+import static org.kordamp.ikonli.fontawesome.FontAwesome.LINE_CHART;
 
 import java.util.HashSet;
 import java.util.List;
