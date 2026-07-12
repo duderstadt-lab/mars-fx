@@ -37,9 +37,10 @@ import javafx.scene.control.Tooltip;
 
 /**
  * Wires emoji support (toolbar picker button + {@code :}-autocomplete) into a
- * {@link MarkdownEditorPane}. Single shared implementation used by both the
+ * {@link MarkdownEditorPane}. Single shared implementation used by the
  * Molecule Archive comments editor ({@code CommentsTab}/{@code DocumentEditor})
- * and the Dataset Explorer notes editor ({@code DatasetNotesPane}).
+ * and every {@link MarkdownNotesPane} (Dataset Explorer, Molecule/Metadata
+ * general tabs).
  */
 public final class EmojiSupport {
 

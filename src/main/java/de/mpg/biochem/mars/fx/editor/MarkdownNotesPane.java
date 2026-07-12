@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -26,39 +26,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
+package de.mpg.biochem.mars.fx.editor;
 
 import java.util.function.Consumer;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import de.mpg.biochem.mars.fx.editor.EmojiSupport;
-import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane;
 
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 
 /**
- * Standalone markdown notes pane for the Dataset Explorer.
+ * Standalone, archive-free markdown notes pane: toolbar (formatting + emoji) +
+ * editor/preview toggle, bound to a plain {@code String} field via
+ * {@link #getMarkdown()} / {@link #setMarkdown} rather than a
+ * {@code MoleculeArchive} document. Used anywhere a simple rich-text notes
+ * field is needed -- the Dataset Explorer, and the Molecule/Metadata general
+ * tabs' notes fields.
  *
  * <p>Reuses mars-fx's {@link MarkdownEditorPane} and {@link MarkdownPreviewPane}
  * but <b>without any archive coupling</b>: both are built with their no-arg
  * constructors, so nothing here touches a {@code MoleculeArchive}, the document
  * media store, or the SciJava context. The only editor feature this gives up is
- * drag-and-drop image embedding (which needs the archive media store); plain
- * text drops, links, and all formatting still work.
+ * drag-and-drop image embedding into the archive's media store; plain text
+ * drops, links, and all formatting still work, and dropped images are instead
+ * copied to disk (or embedded as base64 if no folder is configured).
  *
  * <p>A single pencil {@link ToggleButton} switches between:
  * <ul>
@@ -66,28 +71,27 @@ import javafx.scene.layout.StackPane;
  *       rendered markdown; the formatting buttons are hidden.</li>
  *   <li><b>edit mode</b> (pencil on): the {@link MarkdownEditorPane} is shown and
  *       the formatting toolbar (bold, italic, strikethrough, inline code,
- *       H1/H2/H3, list, link) appears.</li>
+ *       H1/H2/H3, list, quote, emoji) appears.</li>
  * </ul>
  *
  * <p>Content is plain markdown via {@link #getMarkdown()} / {@link #setMarkdown}.
- * The explorer stores that string in {@code DatasetEntry} and persists it in the
- * userdata JSON. A change callback lets the window autosave on edits.
+ * A change callback lets the caller autosave on edits.
  */
-public class DatasetNotesPane extends BorderPane {
+public class MarkdownNotesPane extends BorderPane {
 
     private final MarkdownEditorPane editorPane;
     private final MarkdownPreviewPane previewPane;
 
     private final ToggleButton editToggle;
-    private final HBox formatBar;      // formatting buttons; visible only in edit mode
-    private final HBox toolBar;        // whole top bar (pencil + format buttons)
+    private final java.util.List<Node> formatButtons; // visible only in edit mode
+    private final FlowPane toolBar;    // whole top bar (pencil + format buttons)
     private final StackPane centerStack;
 
     private Consumer<String> onMarkdownChanged;
     private boolean suppressChangeEvents = false;
 
-    // Supplies the folder where dropped images are stored (derived from the index
-    // folder by the window). May return null if no index folder is set.
+    // Supplies the folder where dropped images are stored. May return null, in
+    // which case dropped images fall back to inline base64 embedding.
     private java.util.function.Supplier<java.io.File> imagesFolder;
 
     /** Set the supplier that resolves the current images folder for dropped images. */
@@ -95,8 +99,8 @@ public class DatasetNotesPane extends BorderPane {
         this.imagesFolder = supplier;
     }
 
-    public DatasetNotesPane() {
-        getStyleClass().add("dataset-notes-pane");
+    public MarkdownNotesPane() {
+        getStyleClass().add("markdown-notes-pane");
 
         // --- Editor (archive-free: no-arg constructor) ---
         editorPane = new MarkdownEditorPane();
@@ -157,30 +161,57 @@ public class DatasetNotesPane extends BorderPane {
         editToggle = new ToggleButton();
         editToggle.setGraphic(icon(FontAwesome.PENCIL));
         editToggle.setTooltip(new Tooltip("Edit notes"));
+        // Otherwise the focus ring set by the mouse click lingers around the
+        // button until something else takes focus -- most visible when leaving
+        // edit mode, since (unlike the format buttons, which refocus the editor
+        // right after their own click) nothing claims focus on the way back to
+        // preview mode. Matches the emoji toolbar button, which does the same.
+        editToggle.setFocusTraversable(false);
         editToggle.selectedProperty().addListener((o, was, on) -> setEditMode(on));
 
-        formatBar = buildFormatBar();
-        formatBar.setVisible(false);
-        formatBar.setManaged(false);
-
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        toolBar = new HBox(6, editToggle, formatBar);
+        // FlowPane (not HBox) so a narrow pane wraps the buttons onto additional
+        // rows instead of overflowing -- an HBox never shrinks below the sum of
+        // its children's widths, which was forcing the whole notes pane (and the
+        // text area inside it) wider than the available column.
+        toolBar = new FlowPane();
+        toolBar.setHgap(6);
+        toolBar.setVgap(4);
         toolBar.setAlignment(Pos.CENTER_LEFT);
-        toolBar.getStyleClass().add("dataset-notes-toolbar");
+        toolBar.getStyleClass().add("markdown-notes-toolbar");
         toolBar.setStyle("-fx-padding: 4 8 4 8;");
+        toolBar.getChildren().add(editToggle);
+
+        formatButtons = buildFormatButtons();
+        toolBar.getChildren().addAll(formatButtons);
+        for (Node n : formatButtons) {
+            n.setVisible(false);
+            n.setManaged(false);
+        }
+
         setTop(toolBar);
 
         // --- Center: swap editor/preview node depending on mode ---
         centerStack = new StackPane(previewPane.getNode());
+        // Both themes' controls share the same background as this pane, so with no
+        // explicit border there's nothing to distinguish the notes area from the
+        // surrounding chrome in light mode (dark mode happens to get some contrast
+        // from the editor's own dark background, which is coincidental, not a real
+        // border). -fx-box-border is the same theme-aware token EmojiPicker uses.
+        centerStack.setStyle("-fx-border-color: -fx-box-border; -fx-border-width: 1;");
+        BorderPane.setMargin(centerStack, new Insets(8, 0, 0, 0));
         setCenter(centerStack);
+
+        // The RichTextFX content starts flush against the top of its node with no
+        // internal padding (unlike the preview WebView, which already has its own
+        // margin from the page CSS) -- pad only the editor's node, not the preview,
+        // so edit mode gets breathing room without changing how preview looks.
+        editorPane.getNode().setStyle("-fx-padding: 8 8 8 8;");
 
         // start in view mode
         setEditMode(false);
     }
 
-    private HBox buildFormatBar() {
+    private java.util.List<Node> buildFormatButtons() {
         // Undo / redo (operate on the editor's undo manager).
         Button undo = formatButton(FontAwesome.UNDO, "Undo",
                 () -> editorPane.undo());
@@ -215,12 +246,10 @@ public class DatasetNotesPane extends BorderPane {
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n> ", ""));
 
         Button emoji = EmojiSupport.createToolbarButton(editorPane);
-        emoji.getStyleClass().add("dataset-notes-format-button");
+        emoji.getStyleClass().add("markdown-notes-format-button");
 
-        HBox bar = new HBox(2, undo, redo, sep(), bold, italic, strike, code,
+        return java.util.List.of(undo, redo, sep(), bold, italic, strike, code,
                 sep(), h1, h2, h3, sep(), bullet, numbered, quote, sep(), emoji);
-        bar.setAlignment(Pos.CENTER_LEFT);
-        return bar;
     }
 
     // ---- edit/view switching -------------------------------------------
@@ -229,8 +258,10 @@ public class DatasetNotesPane extends BorderPane {
     public void setEditMode(boolean edit) {
         if (editToggle.isSelected() != edit) editToggle.setSelected(edit);
 
-        formatBar.setVisible(edit);
-        formatBar.setManaged(edit);
+        for (Node n : formatButtons) {
+            n.setVisible(edit);
+            n.setManaged(edit);
+        }
 
         if (edit) {
             centerStack.getChildren().setAll(editorPane.getNode());
@@ -294,12 +325,13 @@ public class DatasetNotesPane extends BorderPane {
     }
 
     /**
-     * Copy a dropped image into the index "images" folder and insert a markdown
-     * image referencing it by a short {@code file:} URL. This keeps the editor
-     * text short (a path, not a multi-megabyte base64 blob) so selection/deletion
-     * stay responsive, while the preview WebView still renders the image natively
-     * from the local file. If no index folder is set, falls back to base64 so the
-     * drop still works (with the known selection-performance caveat).
+     * Copy a dropped image into the configured images folder and insert a
+     * markdown image referencing it by a short {@code file:} URL. This keeps the
+     * editor text short (a path, not a multi-megabyte base64 blob) so
+     * selection/deletion stay responsive, while the preview WebView still
+     * renders the image natively from the local file. If no images folder is
+     * set, falls back to base64 so the drop still works (with the known
+     * selection-performance caveat).
      */
     private void embedImage(java.io.File f) {
         try {
@@ -319,7 +351,7 @@ public class DatasetNotesPane extends BorderPane {
                 String md = "\n\n![" + alt + "](" + url + ")\n\n";
                 editorPane.getSmartEdit().surroundSelection(md, "");
             } else {
-                // No index folder — fall back to inline base64 so the drop still works.
+                // No images folder — fall back to inline base64 so the drop still works.
                 byte[] bytes = java.nio.file.Files.readAllBytes(f.toPath());
                 String b64 = java.util.Base64.getEncoder().encodeToString(bytes);
                 String mime = ext.equals("jpg") ? "jpeg" : ext;
@@ -361,10 +393,9 @@ public class DatasetNotesPane extends BorderPane {
     }
 
     /**
-     * Replace the notes content. Does not fire the change callback (so loading a
-     * dataset's saved notes isn't mistaken for a user edit), and resets undo
-     * history so the newly-loaded content isn't undoable back to the previous
-     * dataset's text.
+     * Replace the notes content. Does not fire the change callback (so loading
+     * saved notes isn't mistaken for a user edit), and resets undo history so
+     * the newly-loaded content isn't undoable back to the previous text.
      */
     public void setMarkdown(String markdown) {
         suppressChangeEvents = true;
@@ -377,7 +408,7 @@ public class DatasetNotesPane extends BorderPane {
         }
     }
 
-    /** Called by the window when notes should be saved (e.g. on dataset switch). */
+    /** Called by the caller when notes should be saved (e.g. on selection switch). */
     public void setOnMarkdownChanged(Consumer<String> callback) {
         this.onMarkdownChanged = callback;
     }
@@ -396,7 +427,7 @@ public class DatasetNotesPane extends BorderPane {
         Button b = new Button();
         b.setGraphic(icon(glyph));
         b.setTooltip(new Tooltip(tip));
-        b.getStyleClass().add("dataset-notes-format-button");
+        b.getStyleClass().add("markdown-notes-format-button");
         b.setOnAction(e -> {
             action.run();
             editorPane.requestFocus();
@@ -407,7 +438,7 @@ public class DatasetNotesPane extends BorderPane {
     private Button textButton(String label, String tip, Runnable action) {
         Button b = new Button(label);
         b.setTooltip(new Tooltip(tip));
-        b.getStyleClass().add("dataset-notes-format-button");
+        b.getStyleClass().add("markdown-notes-format-button");
         b.setStyle("-fx-font-size: 11px; -fx-font-weight: bold;");
         b.setOnAction(e -> {
             action.run();

@@ -68,6 +68,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import de.mpg.biochem.mars.n5.MarsS3Browser;
+import de.mpg.biochem.mars.fx.editor.MarkdownNotesPane;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.fx.util.IJStage;
 import com.jfoenix.controls.JFXChipView;
@@ -195,7 +196,7 @@ public class DatasetExplorerWindow {
     private JFXChipView<String> tagChipView;
 
     // Notes (now in the right pane, below details)
-    private DatasetNotesPane notesPane;
+    private MarkdownNotesPane notesPane;
     private DatasetScriptPane scriptPane;
     private Context context; // SciJava context for scripting (passed via show)
     private DatasetEntry notesBoundEntry; // dataset whose notes are currently loaded
@@ -778,7 +779,7 @@ public class DatasetExplorerWindow {
         notesHeader = new Label("Notes");
         notesHeader.setStyle("-fx-font-weight: bold; -fx-padding: 8 0 4 0;");
 
-        notesPane = new DatasetNotesPane();
+        notesPane = new MarkdownNotesPane();
         // Dropped images are stored under <indexFolder>/images/. Supplied lazily so
         // it always reflects the current index folder field value.
         notesPane.setImagesFolder(() -> {
