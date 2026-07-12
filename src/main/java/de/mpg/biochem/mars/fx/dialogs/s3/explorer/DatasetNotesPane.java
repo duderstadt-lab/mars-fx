@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 import org.kordamp.ikonli.javafx.FontIcon;
 
+import de.mpg.biochem.mars.fx.editor.EmojiSupport;
 import de.mpg.biochem.mars.fx.editor.MarkdownEditorPane;
 import de.mpg.biochem.mars.fx.options.Options;
 import de.mpg.biochem.mars.fx.webview.MarkdownPreviewPane;
@@ -107,6 +108,7 @@ public class DatasetNotesPane extends BorderPane {
         // image drops ourselves (copy to the index images folder, insert a short
         // file: URL), then consume the event so the built-in handler never runs.
         installImageDropHandler(editorPane.getNode());
+        EmojiSupport.installAutocomplete(editorPane);
 
         // --- Preview (archive-free: no-arg constructor) ---
         previewPane = new MarkdownPreviewPane();
@@ -212,8 +214,11 @@ public class DatasetNotesPane extends BorderPane {
         Button quote = formatButton(FontAwesome.QUOTE_LEFT, "Block quote",
                 () -> editorPane.getSmartEdit().surroundSelection("\n\n> ", ""));
 
+        Button emoji = EmojiSupport.createToolbarButton(editorPane);
+        emoji.getStyleClass().add("dataset-notes-format-button");
+
         HBox bar = new HBox(2, undo, redo, sep(), bold, italic, strike, code,
-                sep(), h1, h2, h3, sep(), bullet, numbered, quote);
+                sep(), h1, h2, h3, sep(), bullet, numbered, quote, sep(), emoji);
         bar.setAlignment(Pos.CENTER_LEFT);
         return bar;
     }

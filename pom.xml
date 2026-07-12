@@ -125,6 +125,7 @@
 		<flexmark-ext-tables.version>${flexmark.version}</flexmark-ext-tables.version>
 		<flexmark-ext-toc.version>${flexmark.version}</flexmark-ext-toc.version>
 		<flexmark-ext-gitlab.version>${flexmark.version}</flexmark-ext-gitlab.version>
+		<flexmark-ext-emoji.version>${flexmark.version}</flexmark-ext-emoji.version>
 		<flexmark-util-ast.version>${flexmark.version}</flexmark-util-ast.version>
 		<flexmark-util-collection.version>${flexmark.version}</flexmark-util-collection.version>
 		<flexmark-util-html.version>${flexmark.version}</flexmark-util-html.version>
@@ -375,6 +376,11 @@
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark-ext-gfm-strikethrough</artifactId>
 			<version>${flexmark-ext-gfm-strikethrough.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladsch.flexmark</groupId>
+			<artifactId>flexmark-ext-emoji</artifactId>
+			<version>${flexmark-ext-emoji.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
