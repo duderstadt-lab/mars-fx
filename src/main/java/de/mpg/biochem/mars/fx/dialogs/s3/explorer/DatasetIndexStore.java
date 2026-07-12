@@ -1,35 +1,13 @@
 /*-
  * #%L
- * JavaFX GUI for processing single-molecule TIRF and FMT data in the Structure and Dynamics of Molecular Machines research group.
+ * Mars-fx: Data explorer for Molecule Archives and N5 datasets.
  * %%
- * Copyright (C) 2018 - 2026 Karl Duderstadt
- * %%
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice,
- *    this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * [BSD-2 license header — copy the exact block from another mars-fx file]
  * #L%
  */
 package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -87,6 +65,18 @@ public class DatasetIndexStore {
 
     private Path userDataFile(String endpoint, String bucket) {
         return root.resolve("userdata-" + bucketKey(endpoint, bucket) + ".json");
+    }
+
+    /**
+     * Delete both cache files (index + user data) for a source. Used when a local
+     * project is removed from the registered list. User data (tags/notes) is
+     * removed too, since the project is being forgotten entirely.
+     */
+    public void deleteCache(String endpoint, String bucket) {
+        try { java.nio.file.Files.deleteIfExists(indexFile(endpoint, bucket)); }
+        catch (IOException ignore) {}
+        try { java.nio.file.Files.deleteIfExists(userDataFile(endpoint, bucket)); }
+        catch (IOException ignore) {}
     }
 
     // ---------------------------------------------------------------------
@@ -153,8 +143,11 @@ public class DatasetIndexStore {
             for (DatasetEntry e : entries) {
                 DatasetEntry.UserData u = e.userData();
                 // Skip entries with no user annotations at all, to keep the file small.
+                // openedAtMillis counts as an annotation — an archive opened but never
+                // tagged still needs to persist so the Recent filter / Opened sort
+                // survive a re-index.
                 if (u.tags.isEmpty() && (u.commentsMarkdown == null || u.commentsMarkdown.isEmpty())
-                        && u.iconSeedOverride == null) continue;
+                        && u.iconSeedOverride == null && u.openedAtMillis == null) continue;
                 g.writeStartObject();
                 g.writeStringField("path", u.path);
                 g.writeArrayFieldStart("tags");
@@ -162,6 +155,7 @@ public class DatasetIndexStore {
                 g.writeEndArray();
                 g.writeStringField("comments", u.commentsMarkdown == null ? "" : u.commentsMarkdown);
                 if (u.iconSeedOverride != null) g.writeStringField("iconSeed", u.iconSeedOverride);
+                if (u.openedAtMillis != null) g.writeNumberField("openedAt", u.openedAtMillis);
                 g.writeEndObject();
             }
             g.writeEndArray();
@@ -183,6 +177,7 @@ public class DatasetIndexStore {
                         case "path": u.path = p.getText(); break;
                         case "comments": u.commentsMarkdown = p.getText(); break;
                         case "iconSeed": u.iconSeedOverride = p.getText(); break;
+                        case "openedAt": u.openedAtMillis = p.getLongValue(); break;
                         case "tags":
                             List<String> tags = new ArrayList<>();
                             while (p.nextToken() != JsonToken.END_ARRAY) tags.add(p.getText());

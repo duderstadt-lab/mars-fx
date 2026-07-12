@@ -123,6 +123,9 @@ public class DatasetScriptPane extends BorderPane {
     // Supplies ALL archive URLs currently shown by the search filter (for "All").
     private java.util.function.Supplier<java.util.List<String>> allArchiveUrlsSupplier =
             java.util.Collections::emptyList;
+    // Notified (with the archive URL) when a SINGLE archive is opened+run — never
+    // for "All" runs. Lets the window stamp opened-at for the Recent filter.
+    private java.util.function.Consumer<String> onSingleArchiveOpened = url -> {};
 
     private volatile Thread runThread;
     private volatile boolean stopRequested = false;
@@ -195,6 +198,14 @@ public class DatasetScriptPane extends BorderPane {
                 ? java.util.Collections::emptyList : supplier;
     }
 
+    /**
+     * Set the callback fired (with the archive URL) when a single archive is
+     * opened and run — not fired for "All" runs. Used to stamp opened-at.
+     */
+    public void setOnSingleArchiveOpened(java.util.function.Consumer<String> cb) {
+        this.onSingleArchiveOpened = cb == null ? url -> {} : cb;
+    }
+
     // ---- execution -----------------------------------------------------
 
     private void runScriptAsync() {
@@ -243,6 +254,12 @@ public class DatasetScriptPane extends BorderPane {
                     if (archive == null) {
                         appendLog("Could not open archive: " + url + "\n");
                         continue;
+                    }
+                    // Stamp opened-at only for a genuine single-archive run — a
+                    // batched "All" run shouldn't flood recents.
+                    if (!runAll) {
+                        final String openedUrl = url;
+                        Platform.runLater(() -> onSingleArchiveOpened.accept(openedUrl));
                     }
                     try {
                         runScript(scriptText, archive);

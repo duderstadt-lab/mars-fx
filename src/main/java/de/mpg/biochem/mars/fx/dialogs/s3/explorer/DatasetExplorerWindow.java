@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -28,10 +28,11 @@
  */
 package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
+import java.io.File;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -46,7 +47,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.DatePicker;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ProgressIndicator;
@@ -107,10 +108,59 @@ public class DatasetExplorerWindow {
     private static final String PREF_ENDPOINT = "explorer.endpoint";
     private static final String PREF_BUCKET = "explorer.bucket";
     private static final String PREF_INDEX_FOLDER = "explorer.indexFolder";
+    private static final String PREF_LOCAL_PATH = "explorer.localPath";
+    private static final String PREF_LOCAL_MODE = "explorer.localMode";
+    private static final String PREF_LOCAL_PROJECTS = "explorer.localProjects";
+    private static final String PREF_SORT = "explorer.sort";
+    private static final String PREF_RECENT = "explorer.recentOnly";
+
+    // Node-scoped stylesheet (data URI) that makes a ProgressIndicator's skin
+    // sub-nodes transparent, so no pale backing box shows behind the spinner in
+    // dark mode. Applied only to the status-bar busy indicator. Kept here rather
+    // than in the master sheets so the fix is self-contained to this window.
+    // Spaces are pre-encoded as %20 so no URLEncoder call is needed (and so this
+    // stays a compile-time constant with no Java-version-specific overloads).
+    private static final String SPINNER_TRANSPARENT_CSS =
+            "data:text/css,"
+                    + ".progress-indicator%20{%20-fx-background-color:%20transparent;%20}"
+                    + ".progress-indicator%20>%20.determinate-indicator%20>%20.indicator,"
+                    + ".progress-indicator%20>%20.spinner%20{%20-fx-background-color:%20transparent;%20-fx-border-color:%20transparent;%20}"
+                    + ".progress-indicator%20.percentage%20{%20visibility:%20hidden;%20}";
     private static final String PREF_WIN_W = "explorer.windowWidth";
     private static final String PREF_WIN_H = "explorer.windowHeight";
     private static final String PREF_DIV_LEFT = "explorer.dividerLeft";
     private static final String PREF_DIV_RIGHT = "explorer.dividerRight";
+
+    /**
+     * Card ordering options shown in the sort dropdown on the second search row.
+     * Each carries a human label and a comparator. Null timestamps sort last for
+     * the date-based options, so never-modified / never-opened items sink to the
+     * bottom rather than jumping to the top.
+     */
+    private enum SortOption {
+        MODIFIED_DESC("Modified (newest)",
+                Comparator.comparing(DatasetEntry::getModifiedEpochMillis,
+                        Comparator.nullsLast(Comparator.reverseOrder()))),
+        MODIFIED_ASC("Modified (oldest)",
+                Comparator.comparing(DatasetEntry::getModifiedEpochMillis,
+                        Comparator.nullsLast(Comparator.naturalOrder()))),
+        OPENED_DESC("Opened (newest)",
+                Comparator.comparing(DatasetEntry::getOpenedAtMillis,
+                        Comparator.nullsLast(Comparator.reverseOrder()))),
+        NAME_ASC("Name (A–Z)",
+                Comparator.comparing(DatasetEntry::getName,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))),
+        NAME_DESC("Name (Z–A)",
+                Comparator.comparing(DatasetEntry::getName,
+                        Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)).reversed());
+
+        final String label;
+        final Comparator<DatasetEntry> comparator;
+        SortOption(String label, Comparator<DatasetEntry> comparator) {
+            this.label = label; this.comparator = comparator;
+        }
+        @Override public String toString() { return label; }
+    }
 
     private Stage stage;
     private IJStage ijStage;
@@ -131,11 +181,12 @@ public class DatasetExplorerWindow {
     private javafx.animation.PauseTransition searchDebounce;
     private ToggleButton archiveToggle;
     private ToggleButton n5Toggle;
-    private DatePicker fromDate;
-    private DatePicker toDate;
+    private ToggleButton recentToggle;              // top row: filter to opened-only
+    private ComboBox<SortOption> sortChoice;        // second row: card ordering
     private VBox cardsBox;               // holds DatasetCard nodes
     private ProgressIndicator busy;
     private Label statusLabel;
+    private Button cancelIndexBtn;      // shown only while indexing
 
     // Right pane controls
     private VBox detailsContent;
@@ -238,6 +289,7 @@ public class DatasetExplorerWindow {
         stage.setOnCloseRequest(e -> {
             persistPrefs();
             if (currentIndexer != null) currentIndexer.cancel();
+            if (currentLocalIndexer != null) currentLocalIndexer.cancel();
             if (scriptPane != null) scriptPane.cleanup();
             SwingUtilities.invokeLater(() -> {
                 WindowManager.removeWindow(ijStage);
@@ -264,10 +316,19 @@ public class DatasetExplorerWindow {
     // -----------------------------------------------------------------
 
     private ListView<String> bucketListView;
+    private TextField localPathField;
+    private ListView<String> folderListView;
+    private boolean localMode = false; // false = cloud source, true = local folder
 
     private Region buildLeftPane() {
+        // ===== Cloud source tab content (server + buckets) =====
         endpointField = new TextField(PREFS.get(PREF_ENDPOINT, ""));
         endpointField.setPromptText("https://minio.example.tum.de");
+        // Explicit border so the field is visible in light mode (the default
+        // .text-field border can be too faint against the panel background) —
+        // same treatment as the search and local-path fields.
+        endpointField.setStyle("-fx-border-color: derive(-fx-text-inner-color, 55%);"
+                + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;");
 
         // Buckets are shown in a selectable list (like the Open Archive dialog),
         // each with an ARCHIVE icon. The list auto-populates when a server address
@@ -297,22 +358,100 @@ public class DatasetExplorerWindow {
             if (!focused && !endpointField.getText().trim().isEmpty()) loadBuckets();
         });
 
-        Button connectBtn = new Button("Index selected bucket");
-        connectBtn.setMaxWidth(Double.MAX_VALUE);
-        connectBtn.setOnAction(e -> startIndexing());
+        Button indexBucketBtn = new Button("Index selected bucket");
+        indexBucketBtn.setMaxWidth(Double.MAX_VALUE);
+        indexBucketBtn.setOnAction(e -> startIndexing());
 
-        VBox connBox = new VBox(6,
+        VBox cloudBox = new VBox(6,
                 labeled("Server address", endpointField),
                 new Label("Bucket"),
                 bucketListView,
-                connectBtn);
-        connBox.setPadding(new Insets(8));
-        VBox.setVgrow(connBox, Priority.ALWAYS);
-        TitledPane connPane = new TitledPane("Connection", connBox);
-        connPane.setCollapsible(false);
+                indexBucketBtn);
+        cloudBox.setPadding(new Insets(8));
+        VBox.setVgrow(bucketListView, Priority.ALWAYS);
 
-        // Appearance — light/dark radio buttons that switch the GLOBAL app theme
-        // immediately (re-theming every open Mars window), via MarsThemeManager.
+        // ===== Local folder tab content (registered indexed projects) =====
+        // The list holds project folders you've indexed (full paths, folder icon),
+        // the local analogue of S3 buckets. Point at a folder via the field / "…"
+        // browser, then "Index folder" walks it recursively AND registers it here.
+        // Clicking a project loads its cached index; right-click removes it (and
+        // deletes its cache).
+        localPathField = new TextField(PREFS.get(PREF_LOCAL_PATH, ""));
+        localPathField.setPromptText("/path/to/project/folder");
+        // Explicit border so the field is visible in light mode (the default
+        // .text-field border can be too faint against the panel background) —
+        // same treatment as the search field.
+        localPathField.setStyle("-fx-border-color: derive(-fx-text-inner-color, 55%);"
+                + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;");
+        Button browseLocal = new Button("…");
+        browseLocal.setOnAction(e -> chooseLocalPath());
+        HBox pathRow = new HBox(4, localPathField, browseLocal);
+        HBox.setHgrow(localPathField, Priority.ALWAYS);
+
+        folderListView = new ListView<>();
+        folderListView.setPrefHeight(320);
+        VBox.setVgrow(folderListView, Priority.ALWAYS);
+        folderListView.setCellFactory(lv -> projectListCell());
+        folderListView.getItems().setAll(loadRegisteredProjects());
+        // Clicking a registered project loads its path + cached index.
+        folderListView.getSelectionModel().selectedItemProperty().addListener((o, was, sel) -> {
+            if (sel != null) {
+                localPathField.setText(sel);
+                PREFS.put(PREF_LOCAL_PATH, sel);
+                tryLoadCachedIndex();
+            }
+        });
+
+        Button indexLocalBtn = new Button("Index folder");
+        indexLocalBtn.setMaxWidth(Double.MAX_VALUE);
+        indexLocalBtn.setOnAction(e -> startLocalIndexing());
+
+        VBox folderBox = new VBox(6,
+                labeled("Local path", pathRow),
+                new Label("Indexed projects"),
+                folderListView,
+                indexLocalBtn);
+        folderBox.setPadding(new Insets(8));
+        VBox.setVgrow(folderListView, Priority.ALWAYS);
+
+        // ===== Source tabs (cloud / folder), styled like the right-pane tabs =====
+        double tabWidth = 50.0;
+        JFXTabPane sourceTabs = new JFXTabPane();
+        sourceTabs.setSide(javafx.geometry.Side.TOP);
+        sourceTabs.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        sourceTabs.setTabMinWidth(tabWidth);
+        sourceTabs.setTabMaxWidth(tabWidth);
+        sourceTabs.setTabMinHeight(30.0);
+        sourceTabs.setTabMaxHeight(30.0);
+        sourceTabs.disableAnimationProperty();
+
+        Tab cloudTab = new Tab();
+        cloudTab.setClosable(false);
+        cloudTab.setGraphic(tabGraphic(FontAwesomeIcon.CLOUD, tabWidth));
+        cloudTab.setContent(cloudBox);
+
+        Tab folderTab = new Tab();
+        folderTab.setClosable(false);
+        folderTab.setGraphic(tabGraphic(FontAwesomeIcon.FOLDER, tabWidth));
+        folderTab.setContent(folderBox);
+
+        sourceTabs.getTabs().addAll(cloudTab, folderTab);
+        // Track which source mode is active so indexing/loading route correctly.
+        sourceTabs.getSelectionModel().selectedItemProperty().addListener((o, was, sel) -> {
+            localMode = (sel == folderTab);
+            tryLoadCachedIndex(); // show whichever source's cached datasets
+        });
+        // Restore last-used source tab.
+        if (PREFS.getBoolean(PREF_LOCAL_MODE, false)) {
+            sourceTabs.getSelectionModel().select(folderTab);
+            localMode = true;
+        }
+
+        TitledPane sourcePane = new TitledPane("Source", sourceTabs);
+        sourcePane.setCollapsible(false);
+        VBox.setVgrow(sourceTabs, Priority.ALWAYS);
+
+        // ===== Appearance (shared, below tabs) =====
         ToggleGroup themeGroup = new ToggleGroup();
         RadioButton lightRadio = new RadioButton("Light");
         RadioButton darkRadio = new RadioButton("Dark");
@@ -322,12 +461,8 @@ public class DatasetExplorerWindow {
         darkRadio.setSelected(darkMode);
         themeGroup.selectedToggleProperty().addListener((o, was, is) -> {
             darkMode = (is == darkRadio);
-            // setDarkTheme re-applies the master stylesheet to ALL open stages
-            // (including this one), so the whole app stays in sync.
             MarsThemeManager.setDarkTheme(darkMode);
-            regenerateAllIcons(); // our identicons switch light/dark variant
-            // The markdown preview reads the theme only when it re-renders, so
-            // nudge it to reload with the new markdownpad stylesheet.
+            regenerateAllIcons();
             if (notesPane != null) notesPane.refreshPreview();
         });
         HBox themeRow = new HBox(12, lightRadio, darkRadio);
@@ -336,9 +471,12 @@ public class DatasetExplorerWindow {
         TitledPane apprPane = new TitledPane("Appearance", apprBox);
         apprPane.setCollapsible(false);
 
-        // Index folder (bottom of left pane)
+        // ===== Index storage folder (shared, below tabs) =====
         indexFolderField = new TextField(PREFS.get(PREF_INDEX_FOLDER, ""));
         indexFolderField.setPromptText("local folder for index files");
+        // Explicit border for light-mode visibility — matches the other fields.
+        indexFolderField.setStyle("-fx-border-color: derive(-fx-text-inner-color, 55%);"
+                + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;");
         Button browseFolder = new Button("…");
         browseFolder.setOnAction(e -> chooseIndexFolder());
         HBox folderRow = new HBox(4, indexFolderField, browseFolder);
@@ -348,8 +486,8 @@ public class DatasetExplorerWindow {
         TitledPane idxPane = new TitledPane("Index", idxBox);
         idxPane.setCollapsible(false);
 
-        VBox content = new VBox(8, connPane, apprPane, new Region(), idxPane);
-        VBox.setVgrow(content.getChildren().get(2), Priority.ALWAYS); // spacer pushes index to bottom
+        VBox content = new VBox(8, sourcePane, apprPane, new Region(), idxPane);
+        VBox.setVgrow(sourcePane, Priority.ALWAYS);
         content.setPadding(new Insets(8));
 
         ScrollPane scroll = new ScrollPane(content);
@@ -357,6 +495,95 @@ public class DatasetExplorerWindow {
         scroll.setMinWidth(180);
         scroll.setPrefWidth(200);
         return scroll;
+    }
+
+    // ---- registered local projects -------------------------------------
+
+    /** Registered project paths are stored newline-joined in a single pref. */
+    private java.util.List<String> loadRegisteredProjects() {
+        String raw = PREFS.get(PREF_LOCAL_PROJECTS, "");
+        java.util.List<String> list = new java.util.ArrayList<>();
+        if (!raw.isEmpty())
+            for (String p : raw.split("\n")) { p = p.trim(); if (!p.isEmpty()) list.add(p); }
+        return list;
+    }
+
+    private void saveRegisteredProjects() {
+        if (folderListView == null) return;
+        PREFS.put(PREF_LOCAL_PROJECTS, String.join("\n", folderListView.getItems()));
+    }
+
+    /** Add a path to the registered-projects list (if not already present). */
+    private void registerProject(String path) {
+        if (folderListView == null || path == null || path.isEmpty()) return;
+        if (!folderListView.getItems().contains(path)) {
+            folderListView.getItems().add(path);
+            java.util.List<String> sorted = new java.util.ArrayList<>(folderListView.getItems());
+            sorted.sort(String.CASE_INSENSITIVE_ORDER);
+            folderListView.getItems().setAll(sorted);
+            saveRegisteredProjects();
+        }
+        folderListView.getSelectionModel().select(path);
+    }
+
+    /** Remove a project from the list and delete its cached index + user data. */
+    private void removeProject(String path) {
+        if (path == null) return;
+        folderListView.getItems().remove(path);
+        saveRegisteredProjects();
+        // Delete the cache for this local source ("local:" + path).
+        String folder = indexFolderField.getText().trim();
+        if (!folder.isEmpty()) {
+            try { new DatasetIndexStore(folder).deleteCache("local:", path); }
+            catch (Exception ignore) {}
+        }
+        // If the removed project was showing, clear the view.
+        if (path.equals(localPathField.getText().trim())) {
+            localPathField.clear();
+            allEntries.clear();
+            setStatus("Removed project: " + path);
+        }
+    }
+
+    /** A ListCell showing a FOLDER icon + full project path, with a right-click remove. */
+    private ListCell<String> projectListCell() {
+        return new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setContextMenu(null);
+                } else {
+                    setText(item);
+                    setGraphic(FontAwesomeIconFactory.get().createIcon(
+                            FontAwesomeIcon.FOLDER, "1.0em"));
+                    javafx.scene.control.MenuItem remove =
+                            new javafx.scene.control.MenuItem("Remove (and delete cache)");
+                    remove.setOnAction(e -> removeProject(item));
+                    setContextMenu(new javafx.scene.control.ContextMenu(remove));
+                }
+            }
+        };
+    }
+
+    private void chooseLocalPath() {
+        javafx.stage.DirectoryChooser chooser = new javafx.stage.DirectoryChooser();
+        chooser.setTitle("Choose project folder to index");
+        String p = localPathField.getText().trim();
+        if (!p.isEmpty()) {
+            File cur = new File(p);
+            if (cur.isDirectory()) chooser.setInitialDirectory(cur);
+        }
+        File dir = chooser.showDialog(stage);
+        if (dir != null) {
+            localPathField.setText(dir.getAbsolutePath());
+            PREFS.put(PREF_LOCAL_PATH, dir.getAbsolutePath());
+            // If this path is already a registered project, load its cache.
+            if (folderListView.getItems().contains(dir.getAbsolutePath()))
+                tryLoadCachedIndex();
+        }
     }
 
     /** The currently selected bucket, or empty string if none. */
@@ -474,41 +701,50 @@ public class DatasetExplorerWindow {
         archiveToggle.selectedProperty().addListener((o, a, b) -> { styleFilterToggle(archiveToggle); applyFilter(); });
         n5Toggle.selectedProperty().addListener((o, a, b) -> { styleFilterToggle(n5Toggle); applyFilter(); });
 
-        // Date-filter toggle: reveals/hides the second row with the from/to pickers.
-        ToggleButton dateFilterToggle = new ToggleButton();
-        dateFilterToggle.setGraphic(FontAwesomeIconFactory.get().createIcon(
-                FontAwesomeIcon.CALENDAR, "1.0em"));
-        dateFilterToggle.setTooltip(new javafx.scene.control.Tooltip("Filter by modified date"));
-        styleFilterToggle(dateFilterToggle);
-        dateFilterToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(dateFilterToggle));
+        // Recent toggle: when on, filters the cards to archives that have been
+        // opened (a non-null opened-at stamp), hiding never-opened items. It's a
+        // filter only — ordering is handled by the sort dropdown below. Sits next
+        // to YAMA/N5 and composes with them and the search box.
+        recentToggle = new ToggleButton("Recent");
+        recentToggle.setSelected(PREFS.getBoolean(PREF_RECENT, false));
+        recentToggle.setTooltip(new javafx.scene.control.Tooltip(
+                "Show only archives you've opened"));
+        styleFilterToggle(recentToggle);
+        recentToggle.selectedProperty().addListener((o, a, b) -> {
+            styleFilterToggle(recentToggle);
+            PREFS.putBoolean(PREF_RECENT, recentToggle.isSelected());
+            applyFilter();
+        });
+
+        // Sort toggle: reveals/hides the second row holding the sort dropdown.
+        ToggleButton sortToggle = new ToggleButton();
+        sortToggle.setGraphic(FontAwesomeIconFactory.get().createIcon(
+                FontAwesomeIcon.SORT, "1.0em"));
+        sortToggle.setTooltip(new javafx.scene.control.Tooltip("Sort options"));
+        styleFilterToggle(sortToggle);
+        sortToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(sortToggle));
 
         HBox row1 = new HBox(6, toggleLeftBtn, searchStack, archiveToggle, n5Toggle,
-                dateFilterToggle, toggleRightBtn);
+                recentToggle, sortToggle, toggleRightBtn);
         row1.setAlignment(Pos.CENTER_LEFT);
 
-        // --- Row 2 (hidden by default): modified-date range ---
-        fromDate = new DatePicker();
-        fromDate.setPromptText("from");
-        fromDate.setPrefWidth(140);
-        toDate = new DatePicker();
-        toDate.setPromptText("to");
-        toDate.setPrefWidth(140);
-        fromDate.valueProperty().addListener((o, a, b) -> applyFilter());
-        toDate.valueProperty().addListener((o, a, b) -> applyFilter());
-        Button clearDates = new Button("Clear");
-        clearDates.setOnAction(e -> { fromDate.setValue(null); toDate.setValue(null); });
+        // --- Row 2 (hidden by default): sort dropdown ---
+        sortChoice = new ComboBox<>();
+        sortChoice.getItems().setAll(SortOption.values());
+        sortChoice.setValue(loadSortPref());
+        sortChoice.valueProperty().addListener((o, was, now) -> {
+            if (now != null) PREFS.put(PREF_SORT, now.name());
+            rebuildCards(); // ordering happens at render time
+        });
 
-        HBox row2 = new HBox(6, new Label("Modified:"), fromDate, new Label("–"), toDate, clearDates);
+        HBox row2 = new HBox(6, new Label("Sort:"), sortChoice);
         row2.setAlignment(Pos.CENTER_LEFT);
         row2.setPadding(new Insets(6, 0, 0, 0));
         row2.setVisible(false);
         row2.setManaged(false);
-        // Reveal row 2 only when the date-filter toggle is on. When hidden, also
-        // clear any active date filter so hidden filters can't silently apply.
-        dateFilterToggle.selectedProperty().addListener((o, was, on) -> {
+        sortToggle.selectedProperty().addListener((o, was, on) -> {
             row2.setVisible(on);
             row2.setManaged(on);
-            if (!on) { fromDate.setValue(null); toDate.setValue(null); }
         });
 
         VBox topBar = new VBox(0, row1, row2);
@@ -617,19 +853,21 @@ public class DatasetExplorerWindow {
             // Run against the currently selected dataset's archive URL.
             scriptPane.setArchiveUrlSupplier(() -> {
                 if (selected == null || !selected.isArchive()) return null;
-                return MarsS3Browser.buildPath(endpointField.getText().trim(),
-                        currentBucket(), selected.getPath());
+                return datasetUrl(selected);
             });
             // "All" mode: every archive currently shown by the filter.
             scriptPane.setAllArchiveUrlsSupplier(() -> {
                 java.util.List<String> urls = new java.util.ArrayList<>();
-                String endpoint = endpointField.getText().trim();
-                String bucket = currentBucket();
                 for (DatasetEntry e : filtered) {
-                    if (e.isArchive())
-                        urls.add(MarsS3Browser.buildPath(endpoint, bucket, e.getPath()));
+                    if (e.isArchive()) urls.add(datasetUrl(e));
                 }
                 return urls;
+            });
+            // Single-archive script run stamps opened-at (fired on the FX thread by
+            // the pane; "All" runs never fire this).
+            scriptPane.setOnSingleArchiveOpened(url -> {
+                DatasetEntry e = entryForUrl(url);
+                if (e != null) stampOpened(e);
             });
             codeTab.setContent(scriptPane);
         } else {
@@ -715,11 +953,51 @@ public class DatasetExplorerWindow {
         busy = new ProgressIndicator();
         busy.setPrefSize(16, 16);
         busy.setVisible(false);
+        // The default ProgressIndicator skin paints a light backing box behind the
+        // spinning arc, which shows as a pale square against the dark theme. Inline
+        // styles can't reach the skin's inner sub-nodes (.percentage / .indicator),
+        // so a tiny node-scoped stylesheet (data URI, no master-sheet edit needed)
+        // forces those transparent. The -fx-progress-color keeps the arc on-accent.
+        busy.setStyle("-fx-progress-color: -fx-accent;");
+        busy.getStylesheets().add(SPINNER_TRANSPARENT_CSS);
         statusLabel = new Label("Ready");
-        HBox bar = new HBox(8, busy, statusLabel);
+        // Cancel button: visible only during an active index. Cancels whichever
+        // indexer (S3 or local) is running. Useful when a mis-named folder (e.g. an
+        // N5 missing its .n5 suffix) is being descended into and the walk would
+        // otherwise run for a very long time.
+        cancelIndexBtn = new Button("Cancel");
+        cancelIndexBtn.setVisible(false);
+        cancelIndexBtn.setManaged(false);
+        cancelIndexBtn.setOnAction(e -> cancelIndexing());
+        HBox bar = new HBox(8, busy, statusLabel, cancelIndexBtn);
         bar.setAlignment(Pos.CENTER_LEFT);
         bar.setPadding(new Insets(4, 8, 4, 8));
         return bar;
+    }
+
+    /** Toggle the busy spinner and cancel button together for the indexing state. */
+    private void setIndexingUi(boolean on) {
+        if (busy != null) busy.setVisible(on);
+        if (cancelIndexBtn != null) {
+            cancelIndexBtn.setVisible(on);
+            cancelIndexBtn.setManaged(on);
+        }
+    }
+
+    /**
+     * Cancel an in-progress index (S3 or local). The indexers stop their walk at
+     * the next check and won't fire onFinished, so we reset the UI state here
+     * rather than waiting on a callback. Any datasets already discovered are
+     * discarded — a partial index isn't written.
+     */
+    private void cancelIndexing() {
+        if (!indexing) return;
+        indexCancelled = true;
+        if (currentIndexer != null) currentIndexer.cancel();
+        if (currentLocalIndexer != null) currentLocalIndexer.cancel();
+        indexing = false;
+        setIndexingUi(false);
+        setStatus("Indexing cancelled.");
     }
 
     // -----------------------------------------------------------------
@@ -796,7 +1074,8 @@ public class DatasetExplorerWindow {
         store = folder.isEmpty() ? null : new DatasetIndexStore(folder);
 
         indexing = true;
-        busy.setVisible(true);
+        indexCancelled = false;
+        setIndexingUi(true);
         setStatus("Indexing " + bucket + " …");
         allEntries.clear();
 
@@ -850,7 +1129,7 @@ public class DatasetExplorerWindow {
             public void onError(Exception ex) {
                 Platform.runLater(() -> {
                     indexing = false;
-                    busy.setVisible(false);
+                    setIndexingUi(false);
                     setStatus("Error indexing: " + ex.getMessage());
                     browser.close();
                 });
@@ -859,11 +1138,70 @@ public class DatasetExplorerWindow {
     }
 
     private volatile boolean indexing = false;
+    private volatile boolean indexCancelled = false;
     private DatasetIndexer currentIndexer;
+    private DatasetLocalIndexer currentLocalIndexer;
+
+    /** Index a local directory tree (recurses under the path field's folder). */
+    private void startLocalIndexing() {
+        String path = localPathField.getText().trim();
+        String folder = indexFolderField.getText().trim();
+        if (path.isEmpty()) {
+            setStatus("Enter or choose a local path first.");
+            return;
+        }
+        File root = new File(path);
+        if (!root.isDirectory()) {
+            setStatus("Not a folder: " + path);
+            return;
+        }
+        if (indexing) { setStatus("Already indexing — please wait…"); return; }
+
+        PREFS.put(PREF_LOCAL_PATH, path);
+        store = folder.isEmpty() ? null : new DatasetIndexStore(folder);
+
+        indexing = true;
+        indexCancelled = false;
+        setIndexingUi(true);
+        setStatus("Indexing " + path + " …");
+        allEntries.clear();
+
+        final String endpoint = "local:";
+        final String bucket = path;
+
+        DatasetLocalIndexer indexer = new DatasetLocalIndexer();
+        currentLocalIndexer = indexer;
+        indexer.indexAsync(root, new DatasetLocalIndexer.Listener() {
+            @Override
+            public void onProgress(int discovered, String currentPath) {
+                Platform.runLater(() -> setStatus("Indexing… " + discovered + " found"));
+            }
+            @Override
+            public void onFinished(List<DatasetEntry> all) {
+                Platform.runLater(() -> {
+                    if (indexCancelled) { indexCancelled = false; return; }
+                    finishIndexing(endpoint, bucket, all);
+                    registerProject(bucket); // add this path to the projects list
+                });
+            }
+            @Override
+            public void onError(Exception ex) {
+                Platform.runLater(() -> {
+                    indexing = false;
+                    setIndexingUi(false);
+                    setStatus("Error indexing: " + ex.getMessage());
+                });
+            }
+        });
+    }
 
     private void finishIndexing(String endpoint, String bucket, List<DatasetEntry> all) {
+        // If the user cancelled after the indexer queued this callback but before
+        // it ran on the FX thread, discard the result — don't repopulate or write
+        // a cache for a run the user abandoned.
+        if (indexCancelled) { indexCancelled = false; return; }
         indexing = false;
-        busy.setVisible(false);
+        setIndexingUi(false);
 
         // Merge cached user data (tags/comments) for the whole batch at once.
         if (store != null) {
@@ -886,9 +1224,21 @@ public class DatasetExplorerWindow {
         }
     }
 
+    /** The store "endpoint" for the active source: real endpoint (cloud) or "local:". */
+    private String sourceEndpoint() {
+        return localMode ? "local:" : endpointField.getText().trim();
+    }
+
+    /** The store "bucket" for the active source: bucket name (cloud) or local path. */
+    private String sourceBucket() {
+        return localMode
+                ? (localPathField == null ? "" : localPathField.getText().trim())
+                : currentBucket();
+    }
+
     private void tryLoadCachedIndex() {
-        String endpoint = endpointField.getText().trim();
-        String bucket = currentBucket();
+        String endpoint = sourceEndpoint();
+        String bucket = sourceBucket();
         String folder = indexFolderField.getText().trim();
         if (endpoint.isEmpty() || bucket.isEmpty() || folder.isEmpty()) return;
         store = new DatasetIndexStore(folder);
@@ -906,12 +1256,18 @@ public class DatasetExplorerWindow {
     // Filtering
     // -----------------------------------------------------------------
 
+    /** The persisted sort option, defaulting to Modified-newest. */
+    private SortOption loadSortPref() {
+        String name = PREFS.get(PREF_SORT, SortOption.MODIFIED_DESC.name());
+        try { return SortOption.valueOf(name); }
+        catch (IllegalArgumentException ex) { return SortOption.MODIFIED_DESC; }
+    }
+
     private void applyFilter() {
         String raw = searchField == null ? "" : searchField.getText().trim();
         boolean showArchive = archiveToggle == null || archiveToggle.isSelected();
         boolean showN5 = n5Toggle == null || n5Toggle.isSelected();
-        LocalDate from = fromDate == null ? null : fromDate.getValue();
-        LocalDate to = toDate == null ? null : toDate.getValue();
+        boolean recentOnly = recentToggle != null && recentToggle.isSelected();
 
         // Parse the query into include/exclude terms. Comma separates terms; a
         // leading '!' marks an exclusion. Case-insensitive. Semantics:
@@ -941,12 +1297,8 @@ public class DatasetExplorerWindow {
                 for (String in : includes) if (!hay.contains(in)) return false;
             }
 
-            if ((from != null || to != null) && e.getModifiedEpochMillis() != null) {
-                LocalDate mod = Instant.ofEpochMilli(e.getModifiedEpochMillis())
-                        .atZone(ZoneId.systemDefault()).toLocalDate();
-                if (from != null && mod.isBefore(from)) return false;
-                if (to != null && mod.isAfter(to)) return false;
-            }
+            // Recent filter: hide anything never opened.
+            if (recentOnly && e.getOpenedAtMillis() == null) return false;
             return true;
         });
 
@@ -992,7 +1344,13 @@ public class DatasetExplorerWindow {
     private void rebuildCards() {
         cardsBox.getChildren().clear();
         double iconSize = 72;
-        for (DatasetEntry e : filtered) {
+        // FilteredList preserves source order, so sorting happens here at render
+        // time over a copy. Default is Modified-newest.
+        List<DatasetEntry> ordered = new ArrayList<>(filtered);
+        SortOption sort = sortChoice == null ? loadSortPref() : sortChoice.getValue();
+        if (sort == null) sort = SortOption.MODIFIED_DESC;
+        ordered.sort(sort.comparator);
+        for (DatasetEntry e : ordered) {
             DatasetCard card = new DatasetCard(e, iconFor(e, iconSize), iconSize, darkMode);
             card.setSelected(e == selected);
             card.setOnMouseClicked(ev -> {
@@ -1014,20 +1372,61 @@ public class DatasetExplorerWindow {
      * Mars URL and hand it to the open-archive callback; N5 datasets aren't opened
      * this way (no action for now).
      */
+    /**
+     * Build the openable URL/path for a dataset, for either source: an S3 URL via
+     * MarsS3Browser.buildPath (cloud), or an absolute local file path (local). For
+     * local, the entry path is relative to the indexed root, which — because a
+     * local index is keyed by its path — is the source "bucket".
+     */
+    private String datasetUrl(DatasetEntry e) {
+        if (localMode) {
+            String base = sourceBucket(); // the indexed local root path
+            File f = new File(base, e.getPath());
+            return f.getAbsolutePath();
+        }
+        return MarsS3Browser.buildPath(endpointField.getText().trim(),
+                currentBucket(), e.getPath());
+    }
+
     private void openDataset(DatasetEntry e) {
         if (e == null || !e.isArchive()) {
             setStatus(e != null && e.isN5()
                     ? "N5 datasets can't be opened from here yet." : "");
             return;
         }
-        String url = MarsS3Browser.buildPath(endpointField.getText().trim(),
-                currentBucket(), e.getPath());
+        String url = datasetUrl(e);
         if (onOpenArchive != null) {
+            stampOpened(e);
             onOpenArchive.accept(url);
             setStatus("Opening " + e.getName() + " …");
         } else {
             setStatus("No open handler set for: " + url);
         }
+    }
+
+    /**
+     * Record that a dataset was just opened for viewing: set its opened-at to now,
+     * persist user data, and refresh ordering if the Opened sort or Recent filter
+     * is active so the change is visible immediately.
+     */
+    private void stampOpened(DatasetEntry e) {
+        if (e == null) return;
+        e.setOpenedAtMillis(System.currentTimeMillis());
+        persistUserData();
+        boolean recentActive = recentToggle != null && recentToggle.isSelected();
+        boolean openedSort = sortChoice != null
+                && sortChoice.getValue() == SortOption.OPENED_DESC;
+        if (recentActive) applyFilter(); // may newly include this entry
+        else if (openedSort) rebuildCards();
+    }
+
+    /** Find a loaded entry by its resolved URL (for the script pane's open callback). */
+    private DatasetEntry entryForUrl(String url) {
+        if (url == null) return null;
+        for (DatasetEntry e : allEntries) {
+            if (e.isArchive() && url.equals(datasetUrl(e))) return e;
+        }
+        return null;
     }
 
     // Set by the command that launches the window, to actually open an archive URL
@@ -1075,8 +1474,8 @@ public class DatasetExplorerWindow {
     private void persistUserData() {
         if (store == null) return;
         try {
-            store.writeUserData(endpointField.getText().trim(),
-                    currentBucket(), new ArrayList<>(allEntries));
+            store.writeUserData(sourceEndpoint(),
+                    sourceBucket(), new ArrayList<>(allEntries));
         } catch (Exception ignore) {}
     }
 
@@ -1084,6 +1483,8 @@ public class DatasetExplorerWindow {
         PREFS.put(PREF_ENDPOINT, endpointField.getText().trim());
         PREFS.put(PREF_BUCKET, currentBucket());
         PREFS.put(PREF_INDEX_FOLDER, indexFolderField.getText().trim());
+        if (localPathField != null) PREFS.put(PREF_LOCAL_PATH, localPathField.getText().trim());
+        PREFS.putBoolean(PREF_LOCAL_MODE, localMode);
         // Window size + divider positions, so the layout reopens the same next run.
         if (stage != null) {
             PREFS.putDouble(PREF_WIN_W, stage.getWidth());
@@ -1151,7 +1552,7 @@ public class DatasetExplorerWindow {
         }
     }
 
-    private static VBox labeled(String label, javafx.scene.control.Control field) {
+    private static VBox labeled(String label, javafx.scene.layout.Region field) {
         Label l = new Label(label);
         l.setStyle("-fx-font-size: 11px; -fx-opacity: 0.8;");
         field.setMaxWidth(Double.MAX_VALUE);

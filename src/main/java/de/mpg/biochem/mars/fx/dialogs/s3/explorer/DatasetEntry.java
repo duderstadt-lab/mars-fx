@@ -64,6 +64,7 @@ public class DatasetEntry {
     private final ObservableList<String> tags = FXCollections.observableArrayList();
     private final StringProperty commentsMarkdown = new SimpleStringProperty(""); // serialized rich text
     private String iconSeedOverride; // null => use path as seed
+    private Long openedAtMillis;     // last time this dataset was opened for viewing; null => never
 
     public DatasetEntry() {}
 
@@ -128,6 +129,10 @@ public class DatasetEntry {
     public String getIconSeedOverride() { return iconSeedOverride; }
     public void setIconSeedOverride(String v) { this.iconSeedOverride = v; }
 
+    // --- opened-at (drives the Recent filter and Opened sort) ---
+    public Long getOpenedAtMillis() { return openedAtMillis; }
+    public void setOpenedAtMillis(Long v) { this.openedAtMillis = v; }
+
     /** Snapshot of the user-editable state, for merge-on-reindex. */
     public UserData userData() {
         UserData u = new UserData();
@@ -135,6 +140,7 @@ public class DatasetEntry {
         u.tags = new ArrayList<>(tags);
         u.commentsMarkdown = getCommentsMarkdown();
         u.iconSeedOverride = iconSeedOverride;
+        u.openedAtMillis = openedAtMillis;
         return u;
     }
 
@@ -143,6 +149,7 @@ public class DatasetEntry {
         setTags(u.tags);
         setCommentsMarkdown(u.commentsMarkdown);
         setIconSeedOverride(u.iconSeedOverride);
+        setOpenedAtMillis(u.openedAtMillis);
     }
 
     /** Plain serializable holder for the persisted user-side fields. */
@@ -151,5 +158,6 @@ public class DatasetEntry {
         public List<String> tags = new ArrayList<>();
         public String commentsMarkdown = "";
         public String iconSeedOverride;
+        public Long openedAtMillis;
     }
 }
