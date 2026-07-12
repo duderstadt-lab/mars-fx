@@ -90,9 +90,15 @@ class EmojiTwemojiRenderer implements NodeRenderer {
 		// (GitHub's convention), except when the emoji is the only content of its
 		// paragraph ("just an emoji" reactions/notes), which render noticeably
 		// bigger -- the same convention Slack/GitHub/Discord use.
+		//
+		// display:inline-block is required: markdownpad-github(-dark).css sets a
+		// blanket "img { display: block; }" (to keep dropped-in images from
+		// overflowing), which -- with no override -- forces even an inline emoji
+		// onto its own line. The inline style="" attribute on the element wins over
+		// that stylesheet rule by specificity.
 		String style = isSoloInParagraph(node)
-			? "height:2.2em;width:2.2em;vertical-align:-0.4em;"
-			: "height:1.2em;width:1.2em;vertical-align:-0.2em;";
+			? "display:inline-block;height:2.2em;width:2.2em;vertical-align:-0.4em;"
+			: "display:inline-block;height:1.2em;width:1.2em;vertical-align:-0.2em;";
 
 		html.attr("src", svgUrl.toExternalForm()).attr("alt", ":" + shortcode +
 			":").attr("class", "mars-emoji").attr("style", style).withAttr()

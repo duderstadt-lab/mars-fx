@@ -93,11 +93,20 @@ class EmojiAutocomplete {
 			if (!updatingProgrammatically) updateTrigger();
 		});
 
-		textArea.addEventFilter(KeyEvent.KEY_PRESSED, this::onKeyPressed);
+		// While a Popup is showing, JavaFX's PopupWindow.PopupEventRedirector
+		// intercepts EVERY key event delivered to the owner window and redirects it
+		// into the popup's OWN scene (to popup.getScene().getFocusOwner(), or the
+		// scene itself if nothing inside has focus) -- then consumes the original
+		// event so it never reaches the owner scene's normal dispatch at all. That
+		// happens regardless of autoHide/focus settings; it's how ComboBox-style
+		// popups capture arrow keys/Enter for their own navigation. So a filter on
+		// textArea (the owner scene) never sees Up/Down/Enter/Escape while this
+		// popup is showing -- it has to live in the popup's own scene instead.
+		popup.getScene().addEventFilter(KeyEvent.KEY_PRESSED, this::onKeyPressed);
 	}
 
 	private void onKeyPressed(KeyEvent e) {
-		if (!popup.isShowing()) return;
+		if (triggerColonOffset < 0) return;
 
 		switch (e.getCode()) {
 			case DOWN:
