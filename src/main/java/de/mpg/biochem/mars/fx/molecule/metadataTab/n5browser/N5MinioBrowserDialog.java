@@ -36,7 +36,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.prefs.Preferences;
 
-import com.amazonaws.AmazonServiceException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import de.mpg.biochem.mars.n5.MarsS3Browser;
 import javafx.application.Platform;
@@ -342,8 +342,8 @@ public class N5MinioBrowserDialog extends
 
         task.setOnFailed(e -> {
             Throwable ex = task.getException();
-            if (ex instanceof AmazonServiceException && "AccessDenied".equals(
-                    ((AmazonServiceException) ex).getErrorCode()))
+            if (ex instanceof S3Exception && "AccessDenied".equals(
+                    ((S3Exception) ex).awsErrorDetails().errorCode()))
             {
                 statusLabel.setText("Bucket list unavailable — enter a bucket name");
                 // Listing denied, but we can still pre-navigate a known bucket.

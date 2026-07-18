@@ -55,7 +55,7 @@ import org.janelia.saalfeldlab.n5.DatasetAttributes;
 import org.janelia.saalfeldlab.n5.ui.N5DatasetTreeCellRenderer;
 import org.janelia.saalfeldlab.n5.universe.metadata.*;
 import org.janelia.saalfeldlab.n5.universe.metadata.canonical.CanonicalMetadataParser;
-import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.v04.OmeNgffMetadataParser;
+import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.OmeNgffMetadataParser;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 

@@ -39,7 +39,7 @@ import java.util.prefs.Preferences;
 
 import javax.swing.SwingUtilities;
 
-import com.amazonaws.AmazonServiceException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 
@@ -410,8 +410,8 @@ public class CloudArchiveOpenWindow {
         });
         task.setOnFailed(e -> {
             Throwable ex = task.getException();
-            if (ex instanceof AmazonServiceException && "AccessDenied".equals(
-                    ((AmazonServiceException) ex).getErrorCode())) statusLabel.setText(
+            if (ex instanceof S3Exception && "AccessDenied".equals(
+                    ((S3Exception) ex).awsErrorDetails().errorCode())) statusLabel.setText(
                     "Bucket list unavailable — enter a bucket name");
             else statusLabel.setText("Could not reach server — check the address");
             if (pendingBucket != null) {
