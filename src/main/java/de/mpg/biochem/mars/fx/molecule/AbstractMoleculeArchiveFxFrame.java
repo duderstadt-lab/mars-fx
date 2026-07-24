@@ -366,6 +366,15 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		settingsTab = new SettingsTab(context);
 		tabSet.add(settingsTab);
 
+		// Push cache size preference changes straight into the live cache so
+		// they take effect without reopening the archive.
+		settingsTab.getCacheLookAheadSpinner().valueProperty().addListener(
+			(obs, oldValue, newValue) -> moleculesTab.setCacheLookAhead(
+				newValue));
+		settingsTab.getCacheLookBehindSpinner().valueProperty().addListener(
+			(obs, oldValue, newValue) -> moleculesTab.setCacheLookBehind(
+				newValue));
+
 		// fire save events for tabs as they are left and update events for new tabs
 		tabsContainer.getSelectionModel().selectedItemProperty().addListener(
 			new ChangeListener<Tab>()

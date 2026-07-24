@@ -50,4 +50,10 @@ public interface MoleculesTab<C extends MoleculeSubPane, O extends MoleculeSubPa
 	public void setSelectedMolecule(Molecule molecule);
 
 	public void setMarsBdvFrames(MarsBdvFrame[] marsBdvFrames);
+
+	/** Records ahead of the selection to prefetch. 0 disables prefetching. */
+	public void setCacheLookAhead(int lookAhead);
+
+	/** Records behind the selection to prefetch. 0 disables prefetching. */
+	public void setCacheLookBehind(int lookBehind);
 }
