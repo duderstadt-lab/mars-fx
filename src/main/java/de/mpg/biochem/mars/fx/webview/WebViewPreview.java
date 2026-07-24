@@ -112,6 +112,16 @@ class WebViewPreview implements MarkdownPreviewPane.Preview {
 		webView = new WebView();
 		webView.setFocusTraversable(false);
 
+		// Guard against being laid out at zero height (e.g. before a parent Tab/
+		// SplitPane/VBox has resolved real space): Prism rejects a 0-height render
+		// target with a RuntimeException from ES2RTTexture.create, which crashes the
+		// whole window's render pass, not just this node. A 1px floor keeps the
+		// texture request valid, and hiding the node while its height is still 0
+		// keeps it out of the render pass entirely until real space is allocated.
+		webView.setMinHeight(1);
+		webView.setMinWidth(1);
+		webView.visibleProperty().bind(webView.heightProperty().greaterThan(0));
+
 		// disable WebView default drag and drop handler to allow dropping markdown
 		// files
 		webView.setOnDragEntered(null);
