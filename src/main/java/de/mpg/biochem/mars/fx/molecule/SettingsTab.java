@@ -60,6 +60,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -86,6 +87,9 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		.observableArrayList();
 
 	private VBox rootPane;
+
+	private Spinner<Integer> cacheLookAheadSpinner;
+	private Spinner<Integer> cacheLookBehindSpinner;
 
 	public SettingsTab(final Context context) {
 		super(context);
@@ -148,6 +152,41 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 			prefService.put(SettingsTab.class, "activateSynchronizedBdvWindows", n);
 		});
 		GridPane.setMargin(synBdvSwitch, new Insets(5, 5, 5, 5));
+
+		//Performance heading
+		Text performanceHeading = new Text("Performance");
+		performanceHeading.setFont(Font.font("Helvetica", FontWeight.NORMAL, 20));
+		gridpane.add(performanceHeading, 0, 7);
+		GridPane.setColumnSpan(performanceHeading, 2);
+		GridPane.setMargin(performanceHeading, new Insets(15, 5, 5, 5));
+
+		//Molecule record cache look-ahead
+		Label lookAheadLabel = new Label("Records to cache ahead");
+		gridpane.add(lookAheadLabel, 0, 8);
+		GridPane.setMargin(lookAheadLabel, new Insets(5, 5, 5, 5));
+
+		cacheLookAheadSpinner = new Spinner<Integer>(0, 100, prefService.getInt(
+			SettingsTab.class, "recordCacheLookAhead", 10));
+		gridpane.add(cacheLookAheadSpinner, 1, 8);
+		cacheLookAheadSpinner.valueProperty().addListener((t, o, n) -> {
+			prefService.remove(SettingsTab.class, "recordCacheLookAhead");
+			prefService.put(SettingsTab.class, "recordCacheLookAhead", n);
+		});
+		GridPane.setMargin(cacheLookAheadSpinner, new Insets(5, 5, 5, 5));
+
+		//Molecule record cache look-behind
+		Label lookBehindLabel = new Label("Records to cache behind");
+		gridpane.add(lookBehindLabel, 0, 9);
+		GridPane.setMargin(lookBehindLabel, new Insets(5, 5, 5, 5));
+
+		cacheLookBehindSpinner = new Spinner<Integer>(0, 100, prefService.getInt(
+			SettingsTab.class, "recordCacheLookBehind", 3));
+		gridpane.add(cacheLookBehindSpinner, 1, 9);
+		cacheLookBehindSpinner.valueProperty().addListener((t, o, n) -> {
+			prefService.remove(SettingsTab.class, "recordCacheLookBehind");
+			prefService.put(SettingsTab.class, "recordCacheLookBehind", n);
+		});
+		GridPane.setMargin(cacheLookBehindSpinner, new Insets(5, 5, 5, 5));
 
 		rootPane.getChildren().add(gridpane);
 		VBox.setMargin(gridpane, new Insets(15, 15, 15, 15));
@@ -324,6 +363,14 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 
 	public ObservableList<HotKeyEntry> getHotKeyList() {
 		return hotKeyRowList;
+	}
+
+	public Spinner<Integer> getCacheLookAheadSpinner() {
+		return cacheLookAheadSpinner;
+	}
+
+	public Spinner<Integer> getCacheLookBehindSpinner() {
+		return cacheLookBehindSpinner;
 	}
 
 	@Override

@@ -104,6 +104,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 	protected FilteredList<MoleculeIndexRow> filteredData;
 
+	protected MoleculeRecordCache cache;
+
 	protected MarsBdvFrame[] marsBdvFrames;
 
 	protected ChangeListener<MoleculeIndexRow> moleculeIndexTableListener;
@@ -194,10 +196,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 						"REFRESH_MOLECULE_EVENT"))
 					{
 						// Reload molecule due to changes in the virtual store copy on the
-						// disk..
+						// disk.. Invalidate first, or the cache would just return the
+						// stale retained instance and the refresh would silently do
+						// nothing.
 						if (molecule == null) return;
-						molecule = (M) archive.get(molecule.getUID());
-		
+						cache.invalidate(molecule.getUID());
+						molecule = (M) cache.get(molecule.getUID());
+
 						moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(
 							molecule));
 						moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
@@ -359,12 +364,15 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				MoleculeIndexRow oldMoleculeIndexRow,
 				MoleculeIndexRow newMoleculeIndexRow)
 			{
-				// Need to save the current record when we change in the case the
-				// virtual storage.
-				saveCurrentRecord();
+				// Save the outgoing record (asynchronously, via the cache) only if
+				// it actually changed. Capture it before reassigning molecule below
+				// so the I/O thread never races the GUI thread's in-place edits.
+				M outgoing = molecule;
+				if (outgoing != null && outgoing.isModified()) cache.saveAsync(
+					outgoing);
 
 				if (newMoleculeIndexRow != null) {
-					molecule = (M) archive.get(newMoleculeIndexRow.getUID());
+					molecule = (M) cache.get(newMoleculeIndexRow.getUID());
 
 					// Here is an opportunity to update global indexes based
 					archive.properties().addMoleculeProperties(molecule);
@@ -390,6 +398,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 					Platform.runLater(() -> {
 						moleculeIndexTable.requestFocus();
 					});
+
+					cache.updateWindow(visibleMoleculeUIDs(), moleculeIndexTable
+						.getSelectionModel().getSelectedIndex());
 				}
 			}
 		};
@@ -522,13 +533,43 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 		moleculeCenterPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
 		moleculePropertiesPane.fireEvent(new InitializeMoleculeArchiveEvent(archive));
+
+		// Flushes any dirty records before the cache is torn down or replaced,
+		// so switching or closing an archive never silently drops an edit.
+		if (cache != null) cache.shutdown();
+
 		if (archive == null) {
+			cache = null;
 			molecule = null;
 			moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(null));
 			moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(null));
 			return;
 		}
+
+		cache = new MoleculeRecordCache(archive);
+		cache.setLookAhead(prefService.getInt(SettingsTab.class,
+			"recordCacheLookAhead", 10));
+		cache.setLookBehind(prefService.getInt(SettingsTab.class,
+			"recordCacheLookBehind", 3));
+
 		onMoleculeArchiveUnlockEvent();
+	}
+
+	@Override
+	public void setCacheLookAhead(int lookAhead) {
+		if (cache != null) cache.setLookAhead(lookAhead);
+	}
+
+	@Override
+	public void setCacheLookBehind(int lookBehind) {
+		if (cache != null) cache.setLookBehind(lookBehind);
+	}
+
+	private List<String> visibleMoleculeUIDs() {
+		List<String> uids = new ArrayList<>(filteredData.size());
+		for (MoleculeIndexRow row : filteredData)
+			uids.add(row.getUID());
+		return uids;
 	}
 
 	@Override
@@ -646,6 +687,9 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 	@Override
 	public void onMoleculeArchiveLockEvent() {
+		// Any queued async save must land before a script/command/save runs
+		// against the store, so block here until the cache is fully flushed.
+		if (cache != null) cache.flushAndWait();
 		saveCurrentRecord();
 	}
 
@@ -654,6 +698,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	public void onMoleculeArchiveUnlockEvent() {
 		moleculeIndexTable.getSelectionModel().selectedItemProperty()
 			.removeListener(moleculeIndexTableListener);
+
+		// Records on disk may have changed under a bulk operation that just ran
+		// under the archive lock (which already flushed anything dirty here via
+		// onMoleculeArchiveLockEvent), so discard retained instances rather than
+		// risk showing a stale one.
+		if (cache != null) cache.invalidateAll();
+
 		//Check if the current molecule was deleted, if so set molecule = null
 		if (molecule != null && !archive.contains(molecule.getUID())) {
 			molecule = null; 
@@ -694,13 +745,14 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 			if (filteredData.size() > 0) {
 				moleculeIndexTable.getSelectionModel().select(newIndex);
-				molecule = (M) archive.get(moleculeIndexTable.getSelectionModel()
+				molecule = (M) cache.get(moleculeIndexTable.getSelectionModel()
 					.getSelectedItem().getUID());
 				moleculeCenterPane.fireEvent(new MoleculeArchiveUnlockEvent(archive));
 				moleculeCenterPane.fireEvent(new MoleculeSelectionChangedEvent(
 					molecule));
 				moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
 					molecule));
+				cache.updateWindow(visibleMoleculeUIDs(), newIndex);
 			}
 		}
 
