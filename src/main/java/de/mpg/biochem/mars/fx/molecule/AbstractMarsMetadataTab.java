@@ -289,7 +289,8 @@ public abstract class AbstractMarsMetadataTab<I extends MarsMetadata, C extends 
 	}
 
 	public void saveCurrentRecord() {
-		if (marsMetadata != null) archive.putMetadata(marsMetadata);
+		if (marsMetadata != null && marsMetadata.isModified())
+			archive.putMetadata(marsMetadata);
 	}
 
 	public MarsMetadata getSelectedMetadata() {

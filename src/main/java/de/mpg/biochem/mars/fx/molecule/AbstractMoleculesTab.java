@@ -286,6 +286,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsRegion oldRoi = molecule.getRegion(newRoi.getName());
 		oldRoi.setStart(newRoi.getStart());
 		oldRoi.setEnd(newRoi.getEnd());
+		molecule.putRegion(oldRoi);
 		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
 			molecule));
 	}
@@ -303,6 +304,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		MarsPosition newPoi = ((UpdateMoleculePositionEvent) e).getPosition();
 		MarsPosition oldPoi = molecule.getPosition(newPoi.getName());
 		oldPoi.setPosition(newPoi.getPosition());
+		molecule.putPosition(oldPoi);
 		moleculePropertiesPane.fireEvent(new MoleculeSelectionChangedEvent(
 			molecule));
 	}
@@ -479,7 +481,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 
 	public void saveCurrentRecord() {
-		if (molecule != null) archive.put(molecule);
+		if (molecule != null && molecule.isModified()) archive.put(molecule);
 	}
 
 	@Override
