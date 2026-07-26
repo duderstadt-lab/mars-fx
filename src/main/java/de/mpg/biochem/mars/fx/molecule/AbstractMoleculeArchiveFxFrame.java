@@ -263,14 +263,18 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				buildScene();
 
 				stage.setOnCloseRequest(event -> {
+					// Always consume: whether the window actually closes is
+					// decided below, based on the confirmation outcome, not by
+					// the platform's default close behavior.
 					event.consume();
-					// Defer to the next pulse: showAndWait()'s nested event loop,
-					// if started directly inside this WINDOW_CLOSE_REQUEST callback,
-					// can deadlock in this embedded (JFXPanel-hosted) toolkit setup.
-					Platform.runLater(() -> confirmAndClose(() -> {
+					confirmAndClose(() -> {
+						// Let stage.close() -> setOnHidden -> close() (above) be
+						// the single call path that performs the real teardown,
+						// on the Swing EDT. Calling close() directly here as well
+						// caused it to run twice, concurrently, from two threads.
 						ijStage.cleanup();
-						close();
-					}));
+						stage.close();
+					});
 				});
 			}
 		});
@@ -532,7 +536,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action fileCloseAction = new Action("Close", null, null,
 			e -> confirmAndClose(() -> {
 				ijStage.cleanup();
-				close();
+				stage.close();
 			}));
 
 		fileMenu = ActionUtils.createMenu("File", fileSaveAction,
