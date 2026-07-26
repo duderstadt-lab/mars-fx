@@ -39,6 +39,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.scijava.plugin.Parameter;
 
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.event.DashboardChangedEvent;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.molecule.AbstractJsonConvertibleRecord;
 import javafx.animation.Animation;
@@ -205,9 +206,12 @@ public abstract class AbstractDashboardWidget extends
 	}
 
 	protected void mouseReleased(MouseEvent event) {
+		boolean resized = dragX || dragY;
 		dragX = dragY = false;
 		rootPane.setCursor(Cursor.DEFAULT);
 		tabs.setCursor(Cursor.DEFAULT);
+		if (resized && parent != null) parent.getNode().fireEvent(
+			new DashboardChangedEvent());
 	}
 
 	protected void mouseOver(MouseEvent event) {

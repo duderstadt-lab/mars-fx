@@ -6,13 +6,13 @@
  * %%
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright notice,
  *    this list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -27,50 +27,32 @@
  * #L%
  */
 
-package de.mpg.biochem.mars.fx.dialogs;
+package de.mpg.biochem.mars.fx.event;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.stage.Modality;
-import javafx.stage.Window;
+import de.mpg.biochem.mars.molecule.Molecule;
+import javafx.event.EventType;
 
-/**
- * Rover confirmation dialog.
- *
- * @author Karl Duderstadt
- */
-public class RoverConfirmationDialog extends Alert {
+public class MoleculeParametersChangedEvent extends MoleculeEvent {
 
-	public RoverConfirmationDialog(Window owner, String message) {
-		super(AlertType.CONFIRMATION);
-		initModality(Modality.WINDOW_MODAL);
-		initOwner(owner);
-		Image image1 = new Image("de/mpg/biochem/mars/fx/images/RoverSmile.png");
-		ImageView imageView = new ImageView(image1);
-		imageView.setFitWidth(80);
-		imageView.setFitHeight(80);
-		setGraphic(imageView);
-		setHeaderText(null);
-		setContentText(message);
+	/**
+	 *
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public static final EventType<MoleculeEvent> PARAMETERS_CHANGED = new EventType<>(
+		MOLECULE_EVENT, "PARAMETERS_CHANGED");
+
+	private final Molecule molecule;
+
+	public MoleculeParametersChangedEvent(Molecule molecule) {
+		super(PARAMETERS_CHANGED);
+		this.molecule = molecule;
 	}
 
-	public RoverConfirmationDialog(Window owner, String message,
-		String confirmationName, String cancelName)
-	{
-		this(owner, message);
-		((Button) getDialogPane().lookupButton(ButtonType.OK)).setText(
-			confirmationName);
-		((Button) getDialogPane().lookupButton(ButtonType.CANCEL)).setText(
-			cancelName);
+	public Molecule getMolecule() {
+		return molecule;
 	}
 
-	public RoverConfirmationDialog(Window owner, String message,
-		ButtonType... buttonTypes)
-	{
-		this(owner, message);
-		getDialogPane().getButtonTypes().setAll(buttonTypes);
-	}
+	@Override
+	public void invokeHandler(MoleculeEventHandler handler) {}
 }

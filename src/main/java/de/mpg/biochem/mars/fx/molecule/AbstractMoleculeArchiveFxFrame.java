@@ -76,7 +76,10 @@ import bdv.util.BdvHandle;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
+import de.mpg.biochem.mars.fx.event.DashboardChangedEvent;
+import de.mpg.biochem.mars.fx.event.DocumentChangedEvent;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MetadataParametersChangedEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
@@ -84,12 +87,14 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveSavingEvent;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeParametersChangedEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeTagsChangedEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMetadataPropertiesEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculeEvent;
 import de.mpg.biochem.mars.fx.event.RefreshMoleculePropertiesEvent;
 import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
+import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.MetadataSubPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
@@ -113,6 +118,8 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -191,6 +198,19 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 	protected final AtomicBoolean archiveLocked = new AtomicBoolean(false);
 
+	// Tracks whether the archive has edits that would be lost if the window
+	// were closed without saving. BDV viewer display settings are tracked
+	// separately (MarsBdvFrame.isModified()) since MarsBdvFrame lives outside
+	// the JavaFX scene graph and cannot bubble an event to this flag.
+	protected final BooleanProperty dirty = new SimpleBooleanProperty(false);
+
+	private static final ButtonType SAVE_BUTTON_TYPE = new ButtonType("Save",
+		ButtonBar.ButtonData.YES);
+	private static final ButtonType DISCARD_BUTTON_TYPE = new ButtonType(
+		"Discard", ButtonBar.ButtonData.NO);
+	private static final ButtonType CANCEL_BUTTON_TYPE = new ButtonType("Cancel",
+		ButtonBar.ButtonData.CANCEL_CLOSE);
+
 	public AbstractMoleculeArchiveFxFrame(
 		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
 		final Context context)
@@ -243,7 +263,16 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 				buildScene();
 
 				stage.setOnCloseRequest(event -> {
-					ijStage.cleanup();
+					// Always consume: whether the window actually closes is
+					// decided below, based on the confirmation outcome, not by
+					// the platform's default close behavior.
+					event.consume();
+					confirmAndClose(() -> {
+						SwingUtilities.invokeLater(() -> {
+							ijStage.cleanup();
+							Platform.runLater(() -> stage.close());
+						});
+					});
 				});
 			}
 		});
@@ -344,6 +373,41 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					}
 				}
 			});
+
+		// Track edits that should be treated as unsaved changes. Note:
+		// RefreshMoleculeEvent/RefreshMetadataEvent are intentionally excluded -
+		// they fire on plain tab-switch (see buildTabs()) with no actual edit.
+		EventHandler<Event> markDirty = e -> dirty.set(true);
+		getNode().addEventFilter(MoleculeTagsChangedEvent.TAGS_CHANGED, markDirty::handle);
+		getNode().addEventFilter(MetadataTagsChangedEvent.TAGS_CHANGED, markDirty::handle);
+		getNode().addEventFilter(
+			RefreshMoleculePropertiesEvent.REFRESH_MOLECULE_PROPERTIES_EVENT,
+			markDirty::handle);
+		getNode().addEventFilter(
+			RefreshMetadataPropertiesEvent.REFRESH_METADATA_PROPERTIES_EVENT,
+			markDirty::handle);
+		getNode().addEventFilter(MoleculeParametersChangedEvent.PARAMETERS_CHANGED,
+			markDirty::handle);
+		getNode().addEventFilter(MetadataParametersChangedEvent.PARAMETERS_CHANGED,
+			markDirty::handle);
+		getNode().addEventFilter(DocumentChangedEvent.DOCUMENT_CHANGED,
+			markDirty::handle);
+		getNode().addEventFilter(DashboardChangedEvent.DASHBOARD_CHANGED,
+			markDirty::handle);
+
+		// Regions/positions, excluding the view-only UPDATE_PLOT_AREA redraw echo
+		getNode().addEventFilter(PlotEvent.PLOT_EVENT, e -> {
+			if (!"UPDATE_PLOT_AREA".equals(e.getEventType().getName())) dirty.set(
+				true);
+		});
+
+		getNode().addEventFilter(MoleculeArchiveSavedEvent.MOLECULE_ARCHIVE_SAVED,
+			e -> Platform.runLater(() -> dirty.set(false)));
+
+		// Anything fired while building/restoring the scene above should not count
+		// as an unsaved change on a freshly opened archive.
+		dirty.set(false);
+
 		return scene;
 	}
 
@@ -467,7 +531,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		// I have to check on BDV...
 		// Action importRoverSettingsAction = new Action("Import Rover Settings...",
 		// null, null, e -> importRoverSettings());
-		Action fileCloseAction = new Action("Close", null, null, e -> close());
+		Action fileCloseAction = new Action("Close", null, null,
+			e -> confirmAndClose(() -> {
+				SwingUtilities.invokeLater(() -> {
+					ijStage.cleanup();
+					Platform.runLater(() -> stage.close());
+				});
+			}));
 
 		fileMenu = ActionUtils.createMenu("File", fileSaveAction,
 			fileSaveCopyAction, fileSaveJsonCopyAction, fileSaveVirtualStoreAction,
@@ -1368,7 +1438,62 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		archiveLocked.set(false);
 	}
 
+	private boolean isArchiveDirty() {
+		if (dirty.get()) return true;
+		if (marsBdvFrames != null) for (MarsBdvFrame bdvFrame : marsBdvFrames)
+			if (bdvFrame != null && bdvFrame.isModified()) return true;
+		return false;
+	}
+
+	// Gates window-close behind a Save/Discard/Cancel confirmation whenever
+	// there are unsaved changes. onProceed performs the actual close/teardown
+	// and is only run if the archive is clean, or the user picks Save (after
+	// the save completes) or Discard.
+	private void confirmAndClose(Runnable onProceed) {
+		if (!isArchiveDirty()) {
+			onProceed.run();
+			return;
+		}
+
+		RoverConfirmationDialog dialog = new RoverConfirmationDialog(getNode()
+			.getScene().getWindow(),
+			"This archive has unsaved changes. Would you like to save before closing?",
+			SAVE_BUTTON_TYPE, DISCARD_BUTTON_TYPE, CANCEL_BUTTON_TYPE);
+
+		dialog.showAndWait().ifPresent(result -> {
+			if (result == SAVE_BUTTON_TYPE) saveThenRun(onProceed);
+			else if (result == DISCARD_BUTTON_TYPE) {
+				onProceed.run();
+			}
+			// CANCEL_BUTTON_TYPE, or dialog dismissed -> leave the window open
+		});
+	}
+
+	// save() is asynchronous (runs on a background Thread via runTask()), so
+	// closing must wait for MoleculeArchiveSavedEvent before proceeding.
+	private void saveThenRun(Runnable onProceed) {
+		EventHandler<MoleculeArchiveEvent> handler =
+			new EventHandler<MoleculeArchiveEvent>()
+			{
+
+				@Override
+				public void handle(MoleculeArchiveEvent e) {
+					getNode().removeEventHandler(
+						MoleculeArchiveSavedEvent.MOLECULE_ARCHIVE_SAVED, this);
+					Platform.runLater(onProceed);
+				}
+			};
+		getNode().addEventHandler(MoleculeArchiveSavedEvent.MOLECULE_ARCHIVE_SAVED,
+			handler);
+		save();
+	}
+
 	public void close() {
+		// stage.close() below re-triggers stage.setOnHidden, which calls close()
+		// again - guard so that re-entrant call is a no-op instead of hitting a
+		// null archive.
+		if (archive == null) return;
+
 		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
@@ -1544,6 +1669,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		jGenerator.close();
 		outputStream.flush();
 		outputStream.close();
+
+		if (marsBdvFrames != null) for (MarsBdvFrame bdvFrame : marsBdvFrames)
+			if (bdvFrame != null) bdvFrame.setModified(false);
 	}
 
 	protected void saveState(String path) throws IOException {
@@ -1561,6 +1689,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		jGenerator.close();
 		stream.flush();
 		stream.close();
+
+		if (marsBdvFrames != null) for (MarsBdvFrame bdvFrame : marsBdvFrames)
+			if (bdvFrame != null) bdvFrame.setModified(false);
 	}
 
 	protected void loadState() throws IOException {
