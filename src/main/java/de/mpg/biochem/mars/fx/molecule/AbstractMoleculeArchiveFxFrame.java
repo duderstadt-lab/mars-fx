@@ -1485,15 +1485,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		// null archive.
 		if (archive == null) return;
 
-		// WindowManager.removeWindow(...) and MarsBdvFrame's JFrame.dispose()
-		// below are AWT/Swing calls and must run on the EDT, not the JavaFX
-		// Application Thread - redispatch if called from confirmAndClose(),
-		// which runs directly on the FX thread.
-		if (!SwingUtilities.isEventDispatchThread()) {
-			SwingUtilities.invokeLater(this::close);
-			return;
-		}
-
 		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
