@@ -30,6 +30,7 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import de.mpg.biochem.mars.fx.event.MetadataEvent;
+import de.mpg.biochem.mars.fx.event.MetadataParametersChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractParametersTable;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import javafx.event.Event;
@@ -58,5 +59,10 @@ public class MetadataPropertiesTable extends AbstractParametersTable implements
 	public void onMetadataSelectionChangedEvent(MarsMetadata marsImageMetadata) {
 		this.record = marsImageMetadata;
 		loadData();
+	}
+
+	@Override
+	protected void fireParametersChangedEvent() {
+		fireEvent(new MetadataParametersChangedEvent((MarsMetadata) record));
 	}
 }

@@ -485,6 +485,17 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		initBrightness(0.001, 0.999, bdv.getViewerPanel().state(), bdv
 			.getConverterSetups());
+
+		// Track live contrast/color changes made by the user in the viewer so
+		// they count as unsaved changes even before the settings are captured
+		// at serialize-time (see saveSourceDisplaySettings/toJSON).
+		for (SourceAndConverter<?> sourceAndConverter : bdv.getViewerPanel().state()
+			.getSources())
+		{
+			ConverterSetup setup = bdv.getConverterSetups().getConverterSetup(
+				sourceAndConverter);
+			if (setup != null) setup.setupChangeListeners().add(s -> markModified());
+		}
 	}
 
 	private void syncSourceLoaderState(MarsBdvSource marsSource,

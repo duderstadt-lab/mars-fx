@@ -30,6 +30,7 @@
 package de.mpg.biochem.mars.fx.molecule.moleculesTab;
 
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeParametersChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.AbstractParametersTable;
 import de.mpg.biochem.mars.molecule.Molecule;
 import javafx.event.Event;
@@ -58,5 +59,10 @@ public class MoleculePropertiesTable extends AbstractParametersTable implements
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.record = molecule;
 		loadData();
+	}
+
+	@Override
+	protected void fireParametersChangedEvent() {
+		fireEvent(new MoleculeParametersChangedEvent((Molecule) record));
 	}
 }

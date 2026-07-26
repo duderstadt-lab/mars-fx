@@ -67,6 +67,7 @@ import org.scijava.Context;
 import org.scijava.plugin.Parameter;
 
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.event.DocumentChangedEvent;
 import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.CommentsTab;
 import de.mpg.biochem.mars.fx.options.MarkdownExtensions;
@@ -159,6 +160,7 @@ public class DocumentEditor extends AnchorPane {
 					document.setName(newName);
 					archive.properties().putDocument(document);
 					label.setText(newName);
+					commentsTab.fireEvent(new DocumentChangedEvent(document));
 				}
 				tab.setGraphic(label);
 			});
@@ -175,6 +177,7 @@ public class DocumentEditor extends AnchorPane {
 						document.setName(newName);
 						archive.properties().putDocument(document);
 						label.setText(newName);
+						commentsTab.fireEvent(new DocumentChangedEvent(document));
 					}
 					tab.setGraphic(label);
 				}
@@ -201,6 +204,7 @@ public class DocumentEditor extends AnchorPane {
 		else {
 			this.document = new MarsDocument(name, "");
 			archive.properties().putDocument(document);
+			commentsTab.fireEvent(new DocumentChangedEvent(document));
 		}
 
 		// avoid that this is GCed
@@ -245,6 +249,7 @@ public class DocumentEditor extends AnchorPane {
 
 	public void close() {
 		archive.properties().removeDocument(document.getName());
+		commentsTab.fireEvent(new DocumentChangedEvent(document));
 	}
 
 	public Context getContext() {
@@ -407,6 +412,10 @@ public class DocumentEditor extends AnchorPane {
 		// bind the editor undo manager to the properties
 		UndoManager<?> undoManager = markdownEditorPane.getUndoManager();
 		modified.bind(Bindings.not(undoManager.atMarkedPositionProperty()));
+		modified.addListener((observable, oldValue, isNowModified) -> {
+			if (isNowModified) commentsTab.fireEvent(new DocumentChangedEvent(
+				document));
+		});
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 

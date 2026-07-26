@@ -150,6 +150,7 @@ public abstract class AbstractParametersTable {
 					removeButton.setOnAction(e -> {
 						record.removeParameter(pRow.getName());
 						loadData();
+						fireParametersChangedEvent();
 					});
 				}
 			});
@@ -247,6 +248,7 @@ public abstract class AbstractParametersTable {
 						checkbox.setSelected(record.getBooleanParameter(row.getName()));
 						checkbox.setOnAction(e -> {
 							record.setParameter(row.getName(), checkbox.isSelected());
+							fireParametersChangedEvent();
 						});
 						setStyle("-fx-alignment: CENTER-LEFT;");
 						setGraphic(checkbox);
@@ -317,6 +319,7 @@ public abstract class AbstractParametersTable {
 					break;
 			}
 			loadData();
+			fireParametersChangedEvent();
 		});
 
 		addParameterField.textProperty().addListener((observable, oldValue,
@@ -375,6 +378,8 @@ public abstract class AbstractParametersTable {
 		return rootPane;
 	}
 
+	protected abstract void fireParametersChangedEvent();
+
 	public void loadData() {
 		parameterRowList.clear();
 		
@@ -427,6 +432,8 @@ public abstract class AbstractParametersTable {
 					key, (Boolean) allParameters.get(key));
 				else record.setParameter(key, (String) allParameters.get(key));
 			}
+
+			fireParametersChangedEvent();
 		}
 
 		public int getType() {
@@ -464,6 +471,7 @@ public abstract class AbstractParametersTable {
 					record.setParameter(getName(), Boolean.valueOf(value));
 					break;
 			}
+			fireParametersChangedEvent();
 		}
 
 	}

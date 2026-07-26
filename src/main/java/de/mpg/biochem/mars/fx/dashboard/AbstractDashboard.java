@@ -50,6 +50,7 @@ import org.scijava.object.ObjectService;
 import org.scijava.plugin.Parameter;
 
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.event.DashboardChangedEvent;
 import de.mpg.biochem.mars.fx.util.Action;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsJFXMasonryPane;
@@ -125,6 +126,7 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 			if (result.get() == ButtonType.OK) {
 				widgets.clear();
 				widgetPane.getChildren().clear();
+				getNode().fireEvent(new DashboardChangedEvent());
 			}
 		});
 
@@ -258,11 +260,13 @@ public abstract class AbstractDashboard<W extends MarsDashboardWidget> extends
 		widgets.add(widget);
 		widgetPane.getChildren().add(widget.getNode());
 		scrollPane.layout();
+		getNode().fireEvent(new DashboardChangedEvent());
 	}
 
 	public void removeWidget(W widget) {
 		widgets.remove(widget);
 		widgetPane.getChildren().remove(widget.getNode());
+		getNode().fireEvent(new DashboardChangedEvent());
 	}
 
 	public ButtonBase createWidgetButton(String widgetName) {
