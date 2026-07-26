@@ -270,10 +270,9 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 					confirmAndClose(() -> {
 						// Let stage.close() -> setOnHidden -> close() (above) be
 						// the single call path that performs the real teardown,
-						// on the Swing EDT. Calling close() directly here as well
-						// caused it to run twice, concurrently, from two threads.
-						ijStage.cleanup();
+						// on the Swing EDT.
 						stage.close();
+						//ijStage.cleanup();
 					});
 				});
 			}
@@ -1462,7 +1461,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		dialog.showAndWait().ifPresent(result -> {
 			if (result == SAVE_BUTTON_TYPE) saveThenRun(onProceed);
-			else if (result == DISCARD_BUTTON_TYPE) onProceed.run();
+			else if (result == DISCARD_BUTTON_TYPE) {
+				// Defer to a fresh pulse: onProceed (ijStage.cleanup(), an AWT
+				// Frame teardown) must not run nested inside this callback,
+				// which is still logically inside showAndWait()'s own event
+				// loop until this handler returns - doing AWT Frame
+				// dispose()/setVisible() there deadlocks against Swing's EDT.
+				Platform.runLater(onProceed);
+			}
 			// CANCEL_BUTTON_TYPE, or dialog dismissed -> leave the window open
 		});
 	}
