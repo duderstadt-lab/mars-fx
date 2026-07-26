@@ -264,10 +264,13 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 				stage.setOnCloseRequest(event -> {
 					event.consume();
-					confirmAndClose(() -> {
+					// Defer to the next pulse: showAndWait()'s nested event loop,
+					// if started directly inside this WINDOW_CLOSE_REQUEST callback,
+					// can deadlock in this embedded (JFXPanel-hosted) toolkit setup.
+					Platform.runLater(() -> confirmAndClose(() -> {
 						ijStage.cleanup();
 						close();
-					});
+					}));
 				});
 			}
 		});
@@ -1480,6 +1483,11 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public void close() {
+		// stage.close() below re-triggers stage.setOnHidden, which calls close()
+		// again - guard so that re-entrant call is a no-op instead of hitting a
+		// null archive.
+		if (archive == null) return;
+
 		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
