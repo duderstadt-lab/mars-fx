@@ -388,8 +388,6 @@ public class DocumentEditor extends AnchorPane {
 		EmojiSupport.installAutocomplete(markdownEditorPane);
 		markdownPreviewPane = new MarkdownPreviewPane(this);
 
-		// markdownEditorPane.getUndoManager().mark();
-
 		// clear undo history after first load
 		markdownEditorPane.getUndoManager().forgetHistory();
 
@@ -412,10 +410,6 @@ public class DocumentEditor extends AnchorPane {
 		// bind the editor undo manager to the properties
 		UndoManager<?> undoManager = markdownEditorPane.getUndoManager();
 		modified.bind(Bindings.not(undoManager.atMarkedPositionProperty()));
-		modified.addListener((observable, oldValue, isNowModified) -> {
-			if (isNowModified) commentsTab.fireEvent(new DocumentChangedEvent(
-				document));
-		});
 		canUndo.bind(undoManager.undoAvailableProperty());
 		canRedo.bind(undoManager.redoAvailableProperty());
 
@@ -435,6 +429,17 @@ public class DocumentEditor extends AnchorPane {
 		markdownPreviewPane.editorSelectionProperty().set(new IndexRange(-1, -1));
 
 		markdownEditorPane.setMarkdown(document.getContent());
+
+		// Mark this freshly loaded state as the baseline - without this,
+		// loading the initial content moves the undo manager away from its
+		// default marked position, making "modified" spuriously true before
+		// any real edit. Attach the dirty-tracking listener only after the
+		// baseline is established so it doesn't observe that transient.
+		undoManager.mark();
+		modified.addListener((observable, oldValue, isNowModified) -> {
+			if (isNowModified) commentsTab.fireEvent(new DocumentChangedEvent(
+				document));
+		});
 	}
 
 	private boolean updateEditAndPreviewPending;
