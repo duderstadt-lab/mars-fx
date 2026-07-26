@@ -1480,11 +1480,6 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 	}
 
 	public void close() {
-		// stage.close() below re-triggers stage.setOnHidden, which calls close()
-		// again - guard so that re-entrant call is a no-op instead of hitting a
-		// null archive.
-		if (archive == null) return;
-
 		if (moleculeArchiveService.contains(archive.getName()))
 			moleculeArchiveService.removeArchive(archive);
 
