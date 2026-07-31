@@ -207,7 +207,10 @@ Initializable, Previewable
 	
 	@Parameter(label = "Outer radius", style = "group:Integrate")
 	private int integrationOuterRadius = 12;
-	
+
+	@Parameter(label = "All sources", style = "group:Integrate")
+	private boolean integrateAllSources = false;
+
 	/**
 	 * OUTPUT SETTINGS
 	 */
@@ -317,7 +320,7 @@ Initializable, Previewable
 					}
 
 				if (processedTimePoint) {
-					List<Peak> peaksInT = findPeaksInT(t, useDogFilter, integrate);
+					List<Peak> peaksInT = findPeaksInT(t, useDogFilter, integrate, integrateAllSources);
 					if (peaksInT.size() > 0) {
 						processTimePoints.add(t);
 						final int theT = t;
@@ -411,6 +414,8 @@ Initializable, Previewable
 			integrationInnerRadius));
 		builder.addParameter("Integration outer radius", String.valueOf(
 			integrationOuterRadius));
+		builder.addParameter("Integrate all sources", String.valueOf(
+			integrateAllSources));
 		builder.addParameter("Exclude time points", excludeTimePointList);
 		builder.addParameter("Replace all tracks", replaceAllTracks);
 	}
@@ -512,7 +517,7 @@ Initializable, Previewable
 	
 	@SuppressWarnings("unchecked")
 	private <T extends RealType<T> & NativeType<T>> List<Peak> findPeaksInT(
-		int t, boolean useDogFilter, boolean integrate)
+		int t, boolean useDogFilter, boolean integrate, boolean integrateAllSources)
 	{
 		Source<T> bdvSource = marsBdvFrame.getSource(source);
 
@@ -540,7 +545,15 @@ Initializable, Previewable
 
 		if (integrate) MarsImageUtils.integratePeaks(imgView, imgView, peaks,
 			integrationInnerRadius, integrationOuterRadius);
-		
+
+		if (integrate && integrateAllSources) {
+			List<String> otherSourceNames = (List<String>) marsBdvFrame.getSourceNames();
+			for (String otherSourceName : otherSourceNames) {
+				if (otherSourceName.equals(source)) continue;
+				integrateOtherSource(otherSourceName, t, peaks, bdvSourceTransform);
+			}
+		}
+
 		//Now we transform from the original image coordinates to the BDV view coordinates.
 		for (Peak peak : peaks) {
 			double[] source = new double[] { peak.getX(), peak.getY(), 0 };
@@ -552,7 +565,51 @@ Initializable, Previewable
 
 		return peaks;
 	}
-	
+
+	/**
+	 * Integrates the given peaks (already found and fit using the primary
+	 * tracking source) against another BDV source. The peak positions, which
+	 * are in the local pixel coordinates of the primary source at time t, are
+	 * transformed to global coordinates and then into the local pixel
+	 * coordinates of the other source before integration. The resulting
+	 * intensity is stored on each Peak as a property named
+	 * "&lt;otherSourceName&gt;_Intensity" so it is picked up as a separate column
+	 * when the track table is built.
+	 */
+	@SuppressWarnings("unchecked")
+	private <T extends RealType<T> & NativeType<T>> void integrateOtherSource(
+		String otherSourceName, int t, List<Peak> peaks,
+		AffineTransform3D primaryTransform)
+	{
+		Source<T> otherBdvSource = marsBdvFrame.getSource(otherSourceName);
+
+		RandomAccessibleInterval<T> otherImg = Views.hyperSlice(otherBdvSource
+			.getSource(t, 0), 2, 0);
+
+		final AffineTransform3D otherTransform = new AffineTransform3D();
+		otherBdvSource.getSourceTransform(t, 0, otherTransform);
+
+		List<Peak> otherSourcePeaks = new ArrayList<Peak>();
+		for (Peak peak : peaks) {
+			double[] local = new double[] { peak.getX(), peak.getY(), 0 };
+			double[] global = new double[3];
+			primaryTransform.apply(local, global);
+
+			double[] otherLocal = new double[3];
+			otherTransform.applyInverse(otherLocal, global);
+
+			otherSourcePeaks.add(new Peak(otherLocal[0], otherLocal[1]));
+		}
+
+		MarsImageUtils.integratePeaks(otherImg, otherImg, otherSourcePeaks,
+			integrationInnerRadius, integrationOuterRadius);
+
+		String intensityProperty = otherSourceName + "_Intensity";
+		for (int i = 0; i < peaks.size(); i++)
+			peaks.get(i).setProperty(intensityProperty, otherSourcePeaks.get(i)
+				.getIntensity());
+	}
+
 	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
 		double[] minInterval = new double[] {inter.min(0), inter.min(1), 0};
 		double[] transformedMinInterval = new double[3];
@@ -695,7 +752,7 @@ Initializable, Previewable
 			g.setPaint( intersectionFillColor );
 			g.fillRect((int) selection.min(0), (int) selection.min(1), (int)(selection.max(0) - selection.min(0)), (int)(selection.max(1) - selection.min(1)));
 			
-		  List<Peak> peaks = findPeaksInT(info.getTimePointIndex(), true, true);
+		  List<Peak> peaks = findPeaksInT(info.getTimePointIndex(), true, true, false);
 		  
 			if (peaks.size() > 0) {
 				g.setColor(getColor());
@@ -862,7 +919,15 @@ Initializable, Previewable
 	public int getIntegrationOuterRadius() {
 		return integrationOuterRadius;
 	}
-	
+
+	public void setIntegrateAllSources(boolean integrateAllSources) {
+		this.integrateAllSources = integrateAllSources;
+	}
+
+	public boolean getIntegrateAllSources() {
+		return integrateAllSources;
+	}
+
 	public void setExcludedTimePointsList(String excludeTimePointList) {
 		this.excludeTimePointList = excludeTimePointList;
 	}
