@@ -142,6 +142,16 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 	protected final HelpDialog helpDialog;
 
+	// SharedQueue fetcher threads pull N5/Zarr chunks (local or, for a MinIO/S3-
+	// backed archive, over the network) as the user scrubs through timepoints.
+	// cores/2 undersizes this badly for a network source: chunk fetches are
+	// latency-bound (waiting on a round trip), not CPU-bound, so the old default
+	// left most of the possible concurrency unused — the same reasoning that led
+	// to widening the Dataset Explorer's bucket-walk thread pool well past core
+	// count. Floored at 16 regardless of core count, uncapped above it.
+	private static final int SHARED_QUEUE_FETCHER_THREADS =
+		Math.max(16, Runtime.getRuntime().availableProcessors());
+
 	protected final SharedQueue sharedQueue;
 
 	protected Map<String, List<Source<T>>> bdvSources;
@@ -193,8 +203,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		frame = new JFrame(archive.getName() + " Bdv");
 		helpDialog = new HelpDialog(frame);
-		sharedQueue = new SharedQueue(Math.max(1, Runtime.getRuntime()
-			.availableProcessors() / 2));
+		sharedQueue = new SharedQueue(SHARED_QUEUE_FETCHER_THREADS);
 
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
@@ -254,8 +263,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 		frame = new JFrame(archive.getName() + " Bdv");
 		helpDialog = new HelpDialog(frame);
-		sharedQueue = new SharedQueue(Math.max(1, Runtime.getRuntime()
-			.availableProcessors() / 2));
+		sharedQueue = new SharedQueue(SHARED_QUEUE_FETCHER_THREADS);
 
 		System.setProperty("apple.laf.useScreenMenuBar", "true");
 
