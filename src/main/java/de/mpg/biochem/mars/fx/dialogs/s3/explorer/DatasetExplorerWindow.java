@@ -1135,6 +1135,15 @@ public class DatasetExplorerWindow {
             @Override
             public boolean isArchive(String name) { return browser.isArchive(name); }
             @Override
+            public DatasetIndexer.Children listChildren(String b, String prefix) throws Exception {
+                // Single round trip for both folders and files at this prefix,
+                // instead of the two separate (identical bucket/prefix/delimiter)
+                // requests listFolders()+listFiles() would issue — halves the S3
+                // calls the tree walk makes at every node.
+                MarsS3Browser.Children c = browser.listChildren(b, prefix);
+                return new DatasetIndexer.Children(c.folders, c.files);
+            }
+            @Override
             public DatasetIndexer.ObjectMeta meta(String b, String key) throws Exception {
                 // Fetch size + last-modified for each dataset. Runs on the indexer's
                 // BACKGROUND thread (not the FX thread), so it doesn't block the UI.

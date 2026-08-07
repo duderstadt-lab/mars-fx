@@ -74,6 +74,16 @@ public class DatasetIndexer {
         }
     }
 
+    /** Combined listFolders+listFiles result for one prefix — see {@link S3Access#listChildren}. */
+    public static final class Children {
+        public final List<String> folders;
+        public final List<String> files;
+        public Children(List<String> folders, List<String> files) {
+            this.folders = folders;
+            this.files = files;
+        }
+    }
+
     /**
      * The slice of {@code MarsS3Browser} this indexer relies on. These map
      * one-to-one onto existing MarsS3Browser methods, so the adapter in the
@@ -97,6 +107,18 @@ public class DatasetIndexer {
         default ObjectMeta meta(String bucket, String key) throws Exception {
             return null;
         }
+
+        /**
+         * Folders and files under {@code prefix} in one call. The walk needs both
+         * at every prefix; {@code listFolders}+{@code listFiles} are each their
+         * own identical (same bucket/prefix/delimiter) request, so calling both
+         * pays for two round trips where one suffices — {@code MarsS3Browser}
+         * exposes {@code listChildren} for exactly this. Default falls back to
+         * calling both separately, for adapters that haven't overridden it.
+         */
+        default Children listChildren(String bucket, String prefix) throws Exception {
+            return new Children(listFolders(bucket, prefix), listFiles(bucket, prefix));
+        }
     }
 
     /** Progress/callback hooks so the UI can show status and stream results in. */
@@ -108,11 +130,16 @@ public class DatasetIndexer {
         default void onError(Exception e) {}
     }
 
-    // Bucket-tree walks are latency-bound (each listFolders/listFiles call is a
-    // network round trip), not CPU-bound, so a pool wider than the CPU count is
+    // Bucket-tree walks are latency-bound (each listChildren call is a network
+    // round trip), not CPU-bound, so a pool wider than the CPU count is
     // appropriate — this bounds how many concurrent requests hit the S3/MinIO
-    // endpoint at once.
-    private static final int PARALLELISM = 12;
+    // endpoint at once. Tuned against a bucket with ~11k ordinary folders for
+    // 1348 datasets: walk time scaled cleanly with this value once
+    // MarsS3Browser's HTTP client connection pool was also raised past its ~50
+    // default (see buildClient in mars-minio) — that pool, not this one, was the
+    // hidden ceiling once this got past ~48. If a much larger/shared MinIO
+    // server starts showing degraded latency or errors under this load, lower it.
+    private static final int PARALLELISM = 150;
 
     private final S3Access s3;
     private volatile boolean cancelled = false;
@@ -184,23 +211,23 @@ public class DatasetIndexer {
     // Keys are assembled as prefix + name (+ "/" for folders) since MarsS3Browser
     // returns only the last path segment.
     //
-    // Concurrency: each level's listFiles/listFolders round trip runs on the
-    // pool, and ordinary-folder children recurse via thenCompose rather than a
-    // blocking join — so no pool thread ever blocks waiting on another pool
-    // thread (which would risk exhausting a bounded pool on deep trees). The
-    // only blocking join() is the single one in index(), on the caller's own
+    // Concurrency: each level's listChildren round trip runs on the pool, and
+    // ordinary-folder children recurse via thenCompose rather than a blocking
+    // join — so no pool thread ever blocks waiting on another pool thread
+    // (which would risk exhausting a bounded pool on deep trees). The only
+    // blocking join() is the single one in index(), on the caller's own
     // background thread, outside the pool.
     private CompletableFuture<Void> walkAsync(String bucket, String prefix, List<DatasetEntry> out,
                                                Listener listener, ExecutorService pool) {
         if (cancelled) return CompletableFuture.completedFuture(null);
         listener.onProgress(out.size(), prefix);
 
-        CompletableFuture<List<String>> filesF = CompletableFuture.supplyAsync(
-                () -> listOrThrow(() -> s3.listFiles(bucket, prefix)), pool);
-        CompletableFuture<List<String>> foldersF = CompletableFuture.supplyAsync(
-                () -> listOrThrow(() -> s3.listFolders(bucket, prefix)), pool);
+        CompletableFuture<Children> childrenF = CompletableFuture.supplyAsync(
+                () -> listOrThrow(() -> s3.listChildren(bucket, prefix)), pool);
 
-        return filesF.thenCombine(foldersF, (files, folders) -> {
+        return childrenF.thenApply(children -> {
+            List<String> files = children.files;
+            List<String> folders = children.folders;
             List<CompletableFuture<Void>> subtasks = new ArrayList<>();
 
             for (String fileName : files) {
