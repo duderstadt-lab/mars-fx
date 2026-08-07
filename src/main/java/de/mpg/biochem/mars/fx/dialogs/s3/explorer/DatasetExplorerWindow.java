@@ -82,6 +82,10 @@ import org.scijava.Context;
 import javax.swing.SwingUtilities;
 import ij.WindowManager;
 
+import javafx.embed.swing.SwingFXUtils;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * Dataset Explorer — a large, modeless {@link Stage} window that lists Molecule
  * Archives and N5 datasets discovered in an S3 bucket as searchable/filterable
@@ -294,6 +298,7 @@ public class DatasetExplorerWindow {
             if (currentIndexer != null) currentIndexer.cancel();
             if (currentLocalIndexer != null) currentLocalIndexer.cancel();
             if (scriptPane != null) scriptPane.cleanup();
+            iconExecutor.shutdownNow();
             SwingUtilities.invokeLater(() -> {
                 WindowManager.removeWindow(ijStage);
                 ijStage.cleanup();
@@ -361,15 +366,23 @@ public class DatasetExplorerWindow {
             if (!focused && !endpointField.getText().trim().isEmpty()) loadBuckets();
         });
 
-        Button indexBucketBtn = new Button("Index selected bucket");
+        Button indexBucketBtn = new Button("Update index");
         indexBucketBtn.setMaxWidth(Double.MAX_VALUE);
-        indexBucketBtn.setOnAction(e -> startIndexing());
+        indexBucketBtn.setTooltip(new javafx.scene.control.Tooltip(
+            "Add newly-found datasets and drop deleted ones (fast)"));
+        indexBucketBtn.setOnAction(e -> startIndexing(true));
+        HBox.setHgrow(indexBucketBtn, Priority.ALWAYS);
+        Button fullReindexBtn = new Button("Full reindex");
+        fullReindexBtn.setTooltip(new javafx.scene.control.Tooltip(
+            "Refetch metadata for every dataset (slow)"));
+        fullReindexBtn.setOnAction(e -> startIndexing(false));
+        HBox indexBtnRow = new HBox(4, indexBucketBtn, fullReindexBtn);
 
         VBox cloudBox = new VBox(6,
                 labeled("Server address", endpointField),
                 new Label("Bucket"),
                 bucketListView,
-                indexBucketBtn);
+                indexBtnRow);
         cloudBox.setPadding(new Insets(8));
         VBox.setVgrow(bucketListView, Priority.ALWAYS);
 
@@ -405,15 +418,23 @@ public class DatasetExplorerWindow {
             }
         });
 
-        Button indexLocalBtn = new Button("Index folder");
+        Button indexLocalBtn = new Button("Update index");
         indexLocalBtn.setMaxWidth(Double.MAX_VALUE);
-        indexLocalBtn.setOnAction(e -> startLocalIndexing());
+        indexLocalBtn.setTooltip(new javafx.scene.control.Tooltip(
+            "Add newly-found datasets and drop deleted ones (fast)"));
+        indexLocalBtn.setOnAction(e -> startLocalIndexing(true));
+        HBox.setHgrow(indexLocalBtn, Priority.ALWAYS);
+        Button fullReindexLocalBtn = new Button("Full reindex");
+        fullReindexLocalBtn.setTooltip(new javafx.scene.control.Tooltip(
+            "Recompute size/dates for every dataset (slow)"));
+        fullReindexLocalBtn.setOnAction(e -> startLocalIndexing(false));
+        HBox localBtnRow = new HBox(4, indexLocalBtn, fullReindexLocalBtn);
 
         VBox folderBox = new VBox(6,
                 labeled("Local path", pathRow),
                 new Label("Indexed projects"),
                 folderListView,
-                indexLocalBtn);
+                localBtnRow);
         folderBox.setPadding(new Insets(8));
         VBox.setVgrow(folderListView, Priority.ALWAYS);
 
@@ -1057,7 +1078,12 @@ public class DatasetExplorerWindow {
     // Indexing
     // -----------------------------------------------------------------
 
-    private void startIndexing() {
+    /**
+     * Index the selected bucket. Incremental fetches metadata only for datasets
+     * not already in the cache and drops any that vanished; full reindex
+     * refetches everything.
+     */
+    private void startIndexing(boolean incremental) {
         String endpoint = endpointField.getText().trim();
         String bucket = currentBucket();
         String folder = indexFolderField.getText().trim();
@@ -1072,10 +1098,21 @@ public class DatasetExplorerWindow {
         persistPrefs();
         store = folder.isEmpty() ? null : new DatasetIndexStore(folder);
 
+        // For an incremental reindex, load the existing cache so we can reuse cached
+        // entries (with their fetched size/dates) and only fetch NEW datasets.
+        final java.util.Map<String, DatasetEntry> cachedByPath = new java.util.HashMap<>();
+        if (incremental && store != null) {
+            try {
+                List<DatasetEntry> cached = store.readIndex(endpoint, bucket);
+                store.mergeUserData(endpoint, bucket, cached);
+                for (DatasetEntry e : cached) cachedByPath.put(e.getPath(), e);
+            } catch (Exception ignore) {}
+        }
+
         indexing = true;
         indexCancelled = false;
         setIndexingUi(true);
-        setStatus("Indexing " + bucket + " …");
+        setStatus((incremental ? "Updating index for " : "Full reindex of ") + bucket + " …");
         allEntries.clear();
 
         // Build a MarsS3Browser for this endpoint. Credentials are resolved by
@@ -1108,6 +1145,7 @@ public class DatasetExplorerWindow {
         };
 
         DatasetIndexer indexer = new DatasetIndexer(access);
+        indexer.setKnownPaths(cachedByPath.keySet()); // skip metadata for these
         currentIndexer = indexer;
         // Stream only a progress COUNT to the UI during the walk (cheap); defer all
         // card building to onFinished so we rebuild the card list exactly once,
@@ -1120,7 +1158,16 @@ public class DatasetExplorerWindow {
             @Override
             public void onFinished(List<DatasetEntry> all) {
                 Platform.runLater(() -> {
-                    finishIndexing(endpoint, bucket, all);
+                    // Substitute cached entries for rediscovered known paths (keeps
+                    // their size/dates without a refetch); new paths keep their fresh
+                    // metadata. Anything only in the cache (not rediscovered) is
+                    // dropped — that's the deletion handling.
+                    List<DatasetEntry> merged = new ArrayList<>(all.size());
+                    for (DatasetEntry e : all) {
+                        DatasetEntry cached = cachedByPath.get(e.getPath());
+                        merged.add(cached != null ? cached : e);
+                    }
+                    finishIndexing(endpoint, bucket, merged);
                     browser.close();
                 });
             }
@@ -1142,7 +1189,7 @@ public class DatasetExplorerWindow {
     private DatasetLocalIndexer currentLocalIndexer;
 
     /** Index a local directory tree (recurses under the path field's folder). */
-    private void startLocalIndexing() {
+    private void startLocalIndexing(boolean incremental) {
         String path = localPathField.getText().trim();
         String folder = indexFolderField.getText().trim();
         if (path.isEmpty()) {
@@ -1159,16 +1206,27 @@ public class DatasetExplorerWindow {
         PREFS.put(PREF_LOCAL_PATH, path);
         store = folder.isEmpty() ? null : new DatasetIndexStore(folder);
 
-        indexing = true;
-        indexCancelled = false;
-        setIndexingUi(true);
-        setStatus("Indexing " + path + " …");
-        allEntries.clear();
-
         final String endpoint = "local:";
         final String bucket = path;
 
+        // Incremental: load cache to reuse entries and skip size recomputation.
+        final java.util.Map<String, DatasetEntry> cachedByPath = new java.util.HashMap<>();
+        if (incremental && store != null) {
+            try {
+                List<DatasetEntry> cached = store.readIndex(endpoint, bucket);
+                store.mergeUserData(endpoint, bucket, cached);
+                for (DatasetEntry e : cached) cachedByPath.put(e.getPath(), e);
+            } catch (Exception ignore) {}
+        }
+
+        indexing = true;
+        indexCancelled = false;
+        setIndexingUi(true);
+        setStatus((incremental ? "Updating index for " : "Full reindex of ") + path + " …");
+        allEntries.clear();
+
         DatasetLocalIndexer indexer = new DatasetLocalIndexer();
+        indexer.setKnownPaths(cachedByPath.keySet());
         currentLocalIndexer = indexer;
         indexer.indexAsync(root, new DatasetLocalIndexer.Listener() {
             @Override
@@ -1179,7 +1237,12 @@ public class DatasetExplorerWindow {
             public void onFinished(List<DatasetEntry> all) {
                 Platform.runLater(() -> {
                     if (indexCancelled) { indexCancelled = false; return; }
-                    finishIndexing(endpoint, bucket, all);
+                    List<DatasetEntry> merged = new ArrayList<>(all.size());
+                    for (DatasetEntry e : all) {
+                        DatasetEntry cached = cachedByPath.get(e.getPath());
+                        merged.add(cached != null ? cached : e);
+                    }
+                    finishIndexing(endpoint, bucket, merged);
                     registerProject(bucket); // add this path to the projects list
                 });
             }
@@ -1329,15 +1392,37 @@ public class DatasetExplorerWindow {
     private final java.util.Map<String, javafx.scene.image.Image> iconCache =
             new java.util.HashMap<>();
 
-    private javafx.scene.image.Image iconFor(DatasetEntry e, double size) {
+    // Identicon rasterization (DatasetIdenticon.generateAwt) uses java.awt.Graphics2D
+    // rather than the JavaFX Canvas, specifically so it ISN'T confined to the FX
+    // Application Thread — that lets a large card grid's icons render in parallel
+    // across CPU cores instead of one at a time on the UI thread. Sized to the CPU
+    // count since this is genuinely CPU-bound work (unlike the S3 walk's pool,
+    // which is sized for latency-bound network calls).
+    private final ExecutorService iconExecutor = Executors.newFixedThreadPool(
+            Math.max(2, Runtime.getRuntime().availableProcessors()),
+            r -> { Thread t = new Thread(r, "DatasetIconRenderer"); t.setDaemon(true); return t; });
+
+    // Cache hit resolves synchronously via onReady; a miss renders the icon on
+    // the background iconExecutor and delivers it back on the FX thread once
+    // ready, caching it for next time.
+    private void iconForAsync(DatasetEntry e, double size,
+                               java.util.function.Consumer<javafx.scene.image.Image> onReady) {
         String key = e.iconSeed() + "|" + darkMode;
-        javafx.scene.image.Image img = iconCache.get(key);
-        if (img == null) {
-            img = DatasetIdenticon.generate(e.iconSeed(), size,
-                    darkMode ? DatasetIdenticon.DARK : DatasetIdenticon.LIGHT);
-            iconCache.put(key, img);
+        javafx.scene.image.Image cached = iconCache.get(key);
+        if (cached != null) {
+            onReady.accept(cached);
+            return;
         }
-        return img;
+        DatasetIdenticon.Theme theme = darkMode ? DatasetIdenticon.DARK : DatasetIdenticon.LIGHT;
+        String seed = e.iconSeed();
+        iconExecutor.submit(() -> {
+            java.awt.image.BufferedImage awtImg = DatasetIdenticon.generateAwt(seed, size, theme);
+            javafx.scene.image.Image img = SwingFXUtils.toFXImage(awtImg, null);
+            Platform.runLater(() -> {
+                iconCache.put(key, img);
+                onReady.accept(img);
+            });
+        });
     }
 
     private void rebuildCards() {
@@ -1350,13 +1435,18 @@ public class DatasetExplorerWindow {
         if (sort == null) sort = SortOption.MODIFIED_DESC;
         ordered.sort(sort.comparator);
         for (DatasetEntry e : ordered) {
-            DatasetCard card = new DatasetCard(e, iconFor(e, iconSize), iconSize, darkMode);
+            // Card is added immediately, icon-less; the identicon is rendered on a
+            // background thread pool and patched in via setIcon() once ready, so
+            // building a large card grid doesn't serialize icon rasterization on
+            // the FX thread at all (see iconForAsync / DatasetIdenticon.generateAwt).
+            DatasetCard card = new DatasetCard(e, null, iconSize, darkMode);
             card.setSelected(e == selected);
             card.setOnMouseClicked(ev -> {
                 if (ev.getClickCount() == 2) openDataset(e);
                 else selectEntry(e, card);
             });
             cardsBox.getChildren().add(card);
+            iconForAsync(e, iconSize, card::setIcon);
         }
     }
 

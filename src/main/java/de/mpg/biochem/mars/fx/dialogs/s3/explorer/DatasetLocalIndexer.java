@@ -50,7 +50,16 @@ public class DatasetLocalIndexer {
 
     private volatile boolean cancelled = false;
 
+    // Paths already in the cached index — the expensive recursive size computation
+    // is skipped for these (incremental reindex). Empty = full reindex.
+    private java.util.Set<String> knownPaths = java.util.Collections.emptySet();
+
     public void cancel() { this.cancelled = true; }
+
+    /** Restrict size/metadata work to datasets NOT in this set (incremental). */
+    public void setKnownPaths(java.util.Set<String> knownPaths) {
+        this.knownPaths = knownPaths == null ? java.util.Collections.emptySet() : knownPaths;
+    }
 
     public void indexAsync(File root, Listener listener) {
         Thread t = new Thread(() -> {
@@ -96,8 +105,13 @@ public class DatasetLocalIndexer {
                      List<DatasetEntry> out, Listener listener) {
         String rel = relativePath(root, f);
         DatasetEntry e = new DatasetEntry(f.getName(), rel, type);
-        e.setSizeBytes(sizeOf(f));
-        e.setModifiedEpochMillis(f.lastModified());
+        // Incremental: skip the recursive size walk for datasets already indexed
+        // (on network mounts sizeOf re-stats every chunk — the slow part). The
+        // caller substitutes the cached entry by path.
+        if (!knownPaths.contains(rel)) {
+            e.setSizeBytes(sizeOf(f));
+            e.setModifiedEpochMillis(f.lastModified());
+        }
         out.add(e);
     }
 

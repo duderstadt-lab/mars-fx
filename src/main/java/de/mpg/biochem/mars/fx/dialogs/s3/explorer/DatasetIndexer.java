@@ -29,7 +29,12 @@
 package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
@@ -103,8 +108,18 @@ public class DatasetIndexer {
         default void onError(Exception e) {}
     }
 
+    // Bucket-tree walks are latency-bound (each listFolders/listFiles call is a
+    // network round trip), not CPU-bound, so a pool wider than the CPU count is
+    // appropriate — this bounds how many concurrent requests hit the S3/MinIO
+    // endpoint at once.
+    private static final int PARALLELISM = 12;
+
     private final S3Access s3;
     private volatile boolean cancelled = false;
+
+    // Paths already in the cached index — metadata fetch is skipped for these
+    // (incremental reindex). Empty set = full reindex (fetch everything).
+    private java.util.Set<String> knownPaths = java.util.Collections.emptySet();
 
     public DatasetIndexer(S3Access s3) {
         this.s3 = s3;
@@ -113,20 +128,39 @@ public class DatasetIndexer {
     public void cancel() { this.cancelled = true; }
 
     /**
-     * Runs the walk on the CURRENT thread. Callers should invoke this from a
-     * background thread (see {@link #indexAsync}). Results are also delivered
-     * incrementally via the listener.
+     * Restrict metadata fetching to datasets NOT in this set. Discovered datasets
+     * whose path is already known are emitted "bare" (name/path/type only) so the
+     * caller can substitute its cached entry — avoiding a metadata round-trip per
+     * existing dataset. Pass an empty set (the default) for a full reindex.
+     */
+    public void setKnownPaths(java.util.Set<String> knownPaths) {
+        this.knownPaths = knownPaths == null ? java.util.Collections.emptySet() : knownPaths;
+    }
+
+    /**
+     * Runs the walk on the CURRENT thread, fanning sibling subtree walks out
+     * across a bounded worker pool ({@link #PARALLELISM}) so latency from one
+     * {@code listFolders}/{@code listFiles} round trip overlaps with others
+     * instead of paying for the whole tree serially. Callers should invoke this
+     * from a background thread (see {@link #indexAsync}). Results are also
+     * delivered incrementally via the listener.
      */
     public List<DatasetEntry> index(String bucket, Listener listener) {
-        List<DatasetEntry> results = new ArrayList<>();
+        List<DatasetEntry> out = Collections.synchronizedList(new ArrayList<>());
+        ExecutorService pool = Executors.newFixedThreadPool(PARALLELISM);
         try {
             listener.onStarted();
-            walk(bucket, "", results, listener);
-            if (!cancelled) listener.onFinished(results);
+            walkAsync(bucket, "", out, listener, pool).join();
+            if (!cancelled) listener.onFinished(new ArrayList<>(out));
+        } catch (CompletionException ce) {
+            Throwable cause = unwrap(ce);
+            listener.onError(cause instanceof Exception ? (Exception) cause : new Exception(cause));
         } catch (Exception e) {
             listener.onError(e);
+        } finally {
+            pool.shutdown();
         }
-        return results;
+        return new ArrayList<>(out);
     }
 
     /** Convenience: run {@link #index} on a daemon background thread. */
@@ -149,46 +183,106 @@ public class DatasetIndexer {
     //
     // Keys are assembled as prefix + name (+ "/" for folders) since MarsS3Browser
     // returns only the last path segment.
-    private void walk(String bucket, String prefix, List<DatasetEntry> out, Listener listener) throws Exception {
-        if (cancelled) return;
+    //
+    // Concurrency: each level's listFiles/listFolders round trip runs on the
+    // pool, and ordinary-folder children recurse via thenCompose rather than a
+    // blocking join — so no pool thread ever blocks waiting on another pool
+    // thread (which would risk exhausting a bounded pool on deep trees). The
+    // only blocking join() is the single one in index(), on the caller's own
+    // background thread, outside the pool.
+    private CompletableFuture<Void> walkAsync(String bucket, String prefix, List<DatasetEntry> out,
+                                               Listener listener, ExecutorService pool) {
+        if (cancelled) return CompletableFuture.completedFuture(null);
         listener.onProgress(out.size(), prefix);
 
-        // --- files at this level ---
-        for (String fileName : s3.listFiles(bucket, prefix)) {
-            if (cancelled) return;
-            String key = prefix + fileName;
-            if (s3.isN5(fileName)) {
-                addDataset(bucket, key, fileName, DatasetEntry.Type.N5, out, listener);
-            } else if (s3.isArchive(fileName)) {
-                addDataset(bucket, key, fileName, DatasetEntry.Type.ARCHIVE, out, listener);
-            }
-        }
+        CompletableFuture<List<String>> filesF = CompletableFuture.supplyAsync(
+                () -> listOrThrow(() -> s3.listFiles(bucket, prefix)), pool);
+        CompletableFuture<List<String>> foldersF = CompletableFuture.supplyAsync(
+                () -> listOrThrow(() -> s3.listFolders(bucket, prefix)), pool);
 
-        // --- folders at this level ---
-        for (String folderName : s3.listFolders(bucket, prefix)) {
-            if (cancelled) return;
-            String key = prefix + folderName; // dataset key (no trailing slash)
-            if (s3.isN5(folderName)) {
-                addDataset(bucket, key, folderName, DatasetEntry.Type.N5, out, listener);
-            } else if (s3.isArchive(folderName)) {
-                addDataset(bucket, key, folderName, DatasetEntry.Type.ARCHIVE, out, listener);
-            } else {
-                walk(bucket, key + "/", out, listener); // ordinary folder — recurse
+        return filesF.thenCombine(foldersF, (files, folders) -> {
+            List<CompletableFuture<Void>> subtasks = new ArrayList<>();
+
+            for (String fileName : files) {
+                if (cancelled) break;
+                String key = prefix + fileName;
+                subtasks.add(CompletableFuture.runAsync(
+                        () -> classifyAndAdd(bucket, key, fileName, out, listener), pool));
             }
+
+            for (String folderName : folders) {
+                if (cancelled) break;
+                String key = prefix + folderName; // dataset key (no trailing slash)
+                subtasks.add(CompletableFuture.supplyAsync(
+                        () -> classify(folderName), pool)
+                        .thenCompose(type -> {
+                            if (cancelled) return CompletableFuture.<Void>completedFuture(null);
+                            if (type != null) {
+                                return CompletableFuture.runAsync(
+                                        () -> addDataset(bucket, key, folderName, type, out, listener), pool);
+                            }
+                            return walkAsync(bucket, key + "/", out, listener, pool); // ordinary folder — recurse
+                        }));
+            }
+
+            return subtasks;
+        }).thenCompose(subtasks -> CompletableFuture.allOf(subtasks.toArray(new CompletableFuture[0])));
+    }
+
+    private interface ThrowingSupplier<T> { T get() throws Exception; }
+
+    private static <T> T listOrThrow(ThrowingSupplier<T> supplier) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            throw new CompletionException(e);
+        }
+    }
+
+    /** Classifies a file-level name and adds it as a dataset if it's an archive/N5 leaf. */
+    private void classifyAndAdd(String bucket, String key, String fileName,
+                                 List<DatasetEntry> out, Listener listener) {
+        DatasetEntry.Type type = classify(fileName);
+        if (type != null) addDataset(bucket, key, fileName, type, out, listener);
+    }
+
+    /** Classifies a folder-level name; null means "ordinary folder — recurse". */
+    private DatasetEntry.Type classify(String name) {
+        try {
+            if (s3.isN5(name)) return DatasetEntry.Type.N5;
+            if (s3.isArchive(name)) return DatasetEntry.Type.ARCHIVE;
+            return null;
+        } catch (Exception e) {
+            throw new CompletionException(e);
         }
     }
 
     private void addDataset(String bucket, String key, String name,
                              DatasetEntry.Type type, List<DatasetEntry> out,
-                             Listener listener) throws Exception {
+                             Listener listener) {
         DatasetEntry e = new DatasetEntry(name, key, type);
-        ObjectMeta meta = s3.meta(bucket, key);
-        if (meta != null) {
-            e.setSizeBytes(meta.size);
-            e.setModifiedEpochMillis(meta.lastModified);
+        try {
+            // Incremental: skip the (expensive) metadata round-trip for datasets
+            // we've already indexed. The caller substitutes the cached entry by
+            // path. Runs on the pool, same as the discovery calls, so new-dataset
+            // metadata fetches also overlap instead of serializing.
+            if (!knownPaths.contains(key)) {
+                ObjectMeta meta = s3.meta(bucket, key);
+                if (meta != null) {
+                    e.setSizeBytes(meta.size);
+                    e.setModifiedEpochMillis(meta.lastModified);
+                }
+            }
+        } catch (Exception ex) {
+            throw new CompletionException(ex);
         }
         out.add(e);
         listener.onDatasetFound(e);
+    }
+
+    private static Throwable unwrap(Throwable t) {
+        while (t instanceof CompletionException && t.getCause() != null) t = t.getCause();
+        return t;
     }
 
 }

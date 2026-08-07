@@ -35,6 +35,11 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.FillRule;
 import javafx.scene.SnapshotParameters;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.Path2D;
+import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -93,6 +98,111 @@ public final class DatasetIdenticon {
 
     /** Generate an identicon Image for the given seed, size, and theme. */
     public static Image generate(String seed, double size, Theme theme) {
+        Canvas canvas = draw(seed, size, theme);
+        SnapshotParameters params = new SnapshotParameters();
+        params.setFill(Color.TRANSPARENT);
+        return canvas.snapshot(params, null);
+    }
+
+    /**
+     * Generate an identicon as an AWT {@link BufferedImage} instead of a JavaFX
+     * {@link Image}. Unlike {@link #generate}, this does NOT touch any JavaFX
+     * scene-graph class ({@code Canvas}/{@code GraphicsContext}/{@code snapshot})
+     * — those are confined to the FX Application Thread by design, which makes
+     * generating many icons serialize on that one thread. This method renders
+     * with {@code java.awt.Graphics2D} onto a {@code BufferedImage}, which has no
+     * such thread affinity, so callers can run it on a background thread pool —
+     * e.g. {@code javafx.embed.swing.SwingFXUtils.toFXImage(...)} converts the
+     * result to a JavaFX {@code Image} on whichever thread calls it, cheaply.
+     * Produces the same picture as {@link #generate} — same hash/color/shape
+     * derivation, just rasterized through AWT instead of Canvas.
+     */
+    public static BufferedImage generateAwt(String seed, double size, Theme theme) {
+        String hash = sha1Hex(seed);
+        long hueVal = Long.parseLong(hash.substring(hash.length() - 7), 16);
+        double hueFraction = hueVal / (double) 0xfffffffL;
+        double hue = hueFraction * 360.0;
+        Color[] palette = buildPalette(hue, theme);
+
+        int px = (int) Math.round(size);
+        BufferedImage img = new BufferedImage(px, px, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        try {
+            double cellCount = 4.0;
+            double isize = Math.floor(size);
+            isize -= isize % cellCount;
+            double offset = (size - isize) / 2.0;
+            double cell = isize / cellCount;
+
+            int[] usedColors = new int[3];
+            int usedCount = 0;
+
+            usedCount = renderCategoryAwt(g2, hash, palette, offset, cell,
+                    8, OUTER_SHAPES, 2, 3,
+                    new int[]{1,0, 2,0, 2,3, 1,3, 0,1, 3,1, 3,2, 0,2},
+                    usedColors, usedCount);
+
+            usedCount = renderCategoryAwt(g2, hash, palette, offset, cell,
+                    9, OUTER_SHAPES, 4, 5,
+                    new int[]{0,0, 3,0, 3,3, 0,3},
+                    usedColors, usedCount);
+
+            renderCategoryAwt(g2, hash, palette, offset, cell,
+                    10, CENTER_SHAPES, 1, -1,
+                    new int[]{1,1, 2,1, 2,2, 1,2},
+                    usedColors, usedCount);
+        } finally {
+            g2.dispose();
+        }
+        return img;
+    }
+
+    /**
+     * AWT counterpart of {@link #renderCategory} — identical color/shape/rotation
+     * selection, filling into a {@link Graphics2D} via {@link AwtPathSink} instead
+     * of a JavaFX {@code GraphicsContext}.
+     */
+    private static int renderCategoryAwt(Graphics2D g2, String hash, Color[] palette,
+                                          double offset, double cell,
+                                          int colorIndex, List<TriConsumer> shapes,
+                                          int shapeIndex, int rotationIndex, int[] positions,
+                                          int[] usedColors, int usedCount) {
+        int colorCount = palette.length;
+
+        int colorThemeIndex = getOctet(hash, colorIndex) % colorCount;
+        if (isDuplicate(usedColors, usedCount, colorThemeIndex, new int[]{0, 4}) ||
+                isDuplicate(usedColors, usedCount, colorThemeIndex, new int[]{2, 3})) {
+            colorThemeIndex = 1;
+        }
+        usedColors[usedCount++] = colorThemeIndex;
+        Color fx = palette[colorThemeIndex];
+        g2.setColor(new java.awt.Color((float) fx.getRed(), (float) fx.getGreen(),
+                (float) fx.getBlue(), (float) fx.getOpacity()));
+
+        int startRotation = (rotationIndex < 0) ? 0 : getOctet(hash, rotationIndex);
+        int shapeIdx = getOctet(hash, shapeIndex) % shapes.size();
+        TriConsumer shape = shapes.get(shapeIdx);
+
+        int rotation = startRotation;
+        for (int i = 0; i + 1 < positions.length; i += 2) {
+            int cellX = positions[i];
+            int cellY = positions[i + 1];
+            Transform t = new Transform(
+                    offset + cellX * cell, offset + cellY * cell, cell, rotation % 4);
+            rotation++;
+
+            AwtPathSink sink = new AwtPathSink(t);
+            sink.positionIndex = i / 2;
+            shape.draw(sink, cell, i / 2);
+
+            g2.fill(sink.path);
+        }
+        return usedCount;
+    }
+
+    /** Draws the identicon shapes for {@code seed}/{@code theme} onto a fresh Canvas. */
+    private static Canvas draw(String seed, double size, Theme theme) {
         // Jdenticon hashes with SHA-1 and reads hex octets (nibbles). We match
         // that exactly: hex string, getOctet = hex digit at index (0..15).
         String hash = sha1Hex(seed);
@@ -139,9 +249,7 @@ public final class DatasetIdenticon {
                 new int[]{1,1, 2,1, 2,2, 1,2},
                 usedColors, usedCount);
 
-        SnapshotParameters params = new SnapshotParameters();
-        params.setFill(Color.TRANSPARENT);
-        return canvas.snapshot(params, null);
+        return canvas;
     }
 
     /**
@@ -284,7 +392,23 @@ public final class DatasetIdenticon {
 
     @FunctionalInterface
     private interface TriConsumer {
-        void draw(ShapeSink sink, double cell, int positionIndex);
+        void draw(ShapeTarget sink, double cell, int positionIndex);
+    }
+
+    /**
+     * The shape-library primitives ({@link #OUTER_SHAPES}/{@link #CENTER_SHAPES})
+     * are written against this interface rather than a concrete sink, so the same
+     * shape geometry/rotation math renders through either {@link ShapeSink} (SVG
+     * path string, for the JavaFX {@code GraphicsContext} path) or
+     * {@link AwtPathSink} ({@code java.awt.geom.Path2D}, for the background AWT
+     * path) without duplicating the shape definitions.
+     */
+    private interface ShapeTarget {
+        void addTriangle(double x, double y, double w, double h, int direction, boolean hole);
+        void addRhombus(double x, double y, double w, double h, boolean hole);
+        void addRectangle(double x, double y, double w, double h, boolean hole);
+        void addCircle(double x, double y, double diameter, boolean hole);
+        void addPolygon(double[] xs, double[] ys, boolean hole);
     }
 
     // ---- SVG path builder: transforms points, supports holes via winding ----
@@ -299,7 +423,7 @@ public final class DatasetIdenticon {
      * that removes one corner of the cell; addRhombus/addCircle/addRectangle are
      * inscribed in the given box; addPolygon takes explicit points.
      */
-    private static final class ShapeSink {
+    private static final class ShapeSink implements ShapeTarget {
         int positionIndex;
         private final Transform t;
         private final StringBuilder svg = new StringBuilder();
@@ -309,7 +433,8 @@ public final class DatasetIdenticon {
         // Triangle directions match Jdenticon's TriangleDirection:
         // 0=SW, 1=NW, 2=NE, 3=SE — the named corner is the RIGHT-ANGLE corner
         // that is *cut away* (the triangle omits that corner).
-        void addTriangle(double x, double y, double w, double h, int direction, boolean hole) {
+        @Override
+        public void addTriangle(double x, double y, double w, double h, int direction, boolean hole) {
             // Four corners of the box, then drop the one indicated by direction.
             // points listed clockwise starting top-left.
             double[][] corners = {
@@ -337,21 +462,24 @@ public final class DatasetIdenticon {
             polygon(xs, ys);
         }
 
-        void addRhombus(double x, double y, double w, double h, boolean hole) {
+        @Override
+        public void addRhombus(double x, double y, double w, double h, boolean hole) {
             double[] xs = {x + w / 2, x + w, x + w / 2, x};
             double[] ys = {y, y + h / 2, y + h, y + h / 2};
             if (hole) reverse(xs, ys);
             polygon(xs, ys);
         }
 
-        void addRectangle(double x, double y, double w, double h, boolean hole) {
+        @Override
+        public void addRectangle(double x, double y, double w, double h, boolean hole) {
             double[] xs = {x, x + w, x + w, x};
             double[] ys = {y, y, y + h, y + h};
             if (hole) reverse(xs, ys);
             polygon(xs, ys);
         }
 
-        void addCircle(double x, double y, double diameter, boolean hole) {
+        @Override
+        public void addCircle(double x, double y, double diameter, boolean hole) {
             // Transform the circle's bounding box; since our transforms are pure
             // quarter-turn rotations + translation, the circle stays a circle and
             // we can transform just its center. Radius is unaffected by rotation.
@@ -364,7 +492,8 @@ public final class DatasetIdenticon {
                     cx + r, cy, r, r, sweep, cx - r, cy, r, r, sweep, cx + r, cy));
         }
 
-        void addPolygon(double[] xs, double[] ys, boolean hole) {
+        @Override
+        public void addPolygon(double[] xs, double[] ys, boolean hole) {
             double[] xs2 = xs.clone(), ys2 = ys.clone();
             if (hole) reverse(xs2, ys2);
             polygon(xs2, ys2);
@@ -391,6 +520,76 @@ public final class DatasetIdenticon {
         }
 
         String build() { return svg.toString(); }
+    }
+
+    // ---- AWT path builder: same geometry as ShapeSink, for background rendering ----
+
+    /**
+     * AWT counterpart of {@link ShapeSink}, building a {@link Path2D} instead of
+     * an SVG string. Uses {@code WIND_EVEN_ODD}, so — unlike {@code ShapeSink},
+     * which must reverse a hole's winding order to cut correctly under
+     * {@code NON_ZERO} — a hole here just needs to overlap the outer shape; the
+     * even-odd rule cuts it regardless of winding direction. That means the
+     * {@code hole} flags below are accepted (to match {@link ShapeTarget}) but
+     * don't need any special-casing.
+     */
+    private static final class AwtPathSink implements ShapeTarget {
+        int positionIndex;
+        private final Transform t;
+        final Path2D.Double path = new Path2D.Double(Path2D.WIND_EVEN_ODD);
+
+        AwtPathSink(Transform t) { this.t = t; }
+
+        @Override
+        public void addTriangle(double x, double y, double w, double h, int direction, boolean hole) {
+            double[][] corners = {
+                    {x, y}, {x + w, y}, {x + w, y + h}, {x, y + h}
+            };
+            int remove;
+            switch (direction) {
+                case 1:  remove = 2; break;
+                case 2:  remove = 3; break;
+                case 3:  remove = 0; break;
+                default: remove = 1;
+            }
+            java.util.List<double[]> pts = new java.util.ArrayList<>();
+            for (int i = 0; i < 4; i++) if (i != remove) pts.add(corners[i]);
+            double[] xs = {pts.get(0)[0], pts.get(1)[0], pts.get(2)[0]};
+            double[] ys = {pts.get(0)[1], pts.get(1)[1], pts.get(2)[1]};
+            polygon(xs, ys);
+        }
+
+        @Override
+        public void addRhombus(double x, double y, double w, double h, boolean hole) {
+            polygon(new double[]{x + w / 2, x + w, x + w / 2, x},
+                    new double[]{y, y + h / 2, y + h, y + h / 2});
+        }
+
+        @Override
+        public void addRectangle(double x, double y, double w, double h, boolean hole) {
+            polygon(new double[]{x, x + w, x + w, x}, new double[]{y, y, y + h, y + h});
+        }
+
+        @Override
+        public void addCircle(double x, double y, double diameter, boolean hole) {
+            double r = diameter / 2;
+            double cx = t.transformX(x + r, y + r, 0, 0);
+            double cy = t.transformY(x + r, y + r, 0, 0);
+            path.append(new Ellipse2D.Double(cx - r, cy - r, diameter, diameter), false);
+        }
+
+        @Override
+        public void addPolygon(double[] xs, double[] ys, boolean hole) {
+            polygon(xs, ys);
+        }
+
+        private void polygon(double[] xs, double[] ys) {
+            path.moveTo(t.transformX(xs[0], ys[0], 0, 0), t.transformY(xs[0], ys[0], 0, 0));
+            for (int i = 1; i < xs.length; i++) {
+                path.lineTo(t.transformX(xs[i], ys[i], 0, 0), t.transformY(xs[i], ys[i], 0, 0));
+            }
+            path.closePath();
+        }
     }
 
     // ---- Shape library — geometry ported from Jdenticon's ShapeDefinitions ------
