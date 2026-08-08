@@ -31,6 +31,9 @@ package de.mpg.biochem.mars.fx.util;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.prefs.Preferences;
 
 /**
@@ -38,6 +41,20 @@ import java.util.prefs.Preferences;
  * between light and dark modes.
  */
 public class MarsThemeManager {
+
+    /**
+     * The scenes mars-fx has themed, so a theme switch reaches those and only
+     * those.
+     * <p>
+     * Fiji is one JVM shared with other JavaFX plugins, and a scene's stylesheet
+     * list belongs to whoever created the window. Switching theme used to walk
+     * Window.getWindows() and clear the stylesheets of every Stage in the
+     * process, which wiped the styling of any window mars-fx did not create and
+     * left mars-fx's own CSS on a scene built against a different base theme.
+     * Weak references so a closed window is not held alive by this set.
+     */
+    private static final Set<Scene> THEMED_SCENES =
+            Collections.newSetFromMap(new WeakHashMap<>());
 
     // CSS file paths - use actual paths relative to resources folder
     private static final String LIGHT_THEME = "/de/mpg/biochem/mars/fx/styles/master-light.css";
@@ -74,6 +91,8 @@ public class MarsThemeManager {
      * @param darkMode Whether to use dark mode
      */
     public static void applyTheme(Scene scene, boolean darkMode) {
+        // Theming a scene is what marks it as ours to re-theme later.
+        THEMED_SCENES.add(scene);
         String css = darkMode ? DARK_THEME : LIGHT_THEME;
         scene.getStylesheets().clear();
         scene.getStylesheets().add(MarsThemeManager.class.getResource(css).toExternalForm());
@@ -122,15 +141,10 @@ public class MarsThemeManager {
         Preferences prefs = Preferences.userNodeForPackage(MarsThemeManager.class);
         prefs.putBoolean(DARK_MODE_PREF_KEY, isDarkTheme);
 
-        // Apply to all stages
-        for (Stage stage : javafx.stage.Window.getWindows().stream()
-                .filter(window -> window instanceof Stage)
-                .map(window -> (Stage) window)
-                .toList()) {
-
-            if (stage.getScene() != null) {
-                applyTheme(stage.getScene(), isDarkTheme);
-            }
+        // Apply to the scenes mars-fx themed, and not to windows belonging to
+        // other plugins sharing this JVM.
+        for (Scene scene : new java.util.ArrayList<>(THEMED_SCENES)) {
+            applyTheme(scene, isDarkTheme);
         }
 
         return isDarkTheme;
