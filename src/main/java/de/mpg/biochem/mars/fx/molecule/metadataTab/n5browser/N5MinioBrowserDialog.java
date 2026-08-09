@@ -54,14 +54,17 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import javafx.event.ActionEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.Window;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 
 /**
  * JavaFX dialog for browsing N5 datasets stored in MinIO/S3 buckets. Lists
@@ -134,6 +137,12 @@ public class N5MinioBrowserDialog extends
     private final TreeView<S3Node> folderTree = new TreeView<>();
     private final N5DatasetListPane datasetPane = new N5DatasetListPane();
     private final Label statusLabel = new Label();
+
+    // Caller-supplied controls (e.g. the "Virtual" checkbox the open-as-ImagePlus
+    // commands add), shown in a bar between the dataset list and the buttons.
+    // Attached lazily, so a caller that adds nothing sees the dialog unchanged.
+    private final HBox optionsBar = new HBox(10);
+    private final BorderPane content = new BorderPane();
 
     private MarsS3Browser browser;
     private String currentBucket;
@@ -231,7 +240,9 @@ public class N5MinioBrowserDialog extends
         vertical.setOrientation(Orientation.VERTICAL);
         //vertical.setDividerPositions(0.72);
 
-        BorderPane content = new BorderPane();
+        optionsBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+        optionsBar.setPadding(new Insets(8, 10, 2, 10));
+
         content.setTop(top);
         content.setCenter(vertical);
         content.setPrefSize(800, 600);
@@ -241,10 +252,19 @@ public class N5MinioBrowserDialog extends
         ButtonType okType = new ButtonType("OK", ButtonData.OK_DONE);
         getDialogPane().getButtonTypes().addAll(okType, ButtonType.CANCEL);
 
+        // A Dialog builds its own Scene, which does not inherit the owner's
+        // stylesheets — theme the pane so this matches the window that opened it.
+        MarsThemeManager.applyTheme(getDialogPane());
+
         final Node okButton = getDialogPane().lookupButton(okType);
         okButton.setDisable(true);
         datasetPane.selectedDatasetProperty().addListener((obs, old, sel) -> okButton
                 .setDisable(sel == null || currentN5Root == null));
+        // Double-clicking a dataset row accepts it, rather than making the user
+        // select and then reach for OK.
+        datasetPane.setOnDatasetActivated(() -> {
+            if (!okButton.isDisabled()) okButton.fireEvent(new ActionEvent());
+        });
 
         datasetPane.setMinHeight(0);
 
@@ -292,6 +312,18 @@ public class N5MinioBrowserDialog extends
             serverField.deselect();
             serverField.end();
         });
+    }
+
+    /**
+     * Add a control to the options bar beneath the dataset list — for callers
+     * that need a setting alongside the selection, such as the open-as-ImagePlus
+     * commands' virtual-vs-in-memory choice. The bar only appears once something
+     * has been added, so the BDV source Browse dialog is unaffected.
+     */
+    public void addOption(final Node option) {
+        if (option == null) return;
+        if (optionsBar.getChildren().isEmpty()) content.setBottom(optionsBar);
+        optionsBar.getChildren().add(option);
     }
 
     private String endpoint() {

@@ -67,8 +67,10 @@ import de.mpg.biochem.mars.fx.util.ActionUtils;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
+import de.mpg.biochem.mars.n5.MarsN5ImagePlusOpener;
 import de.mpg.biochem.mars.n5.MarsS3Browser;
 import de.mpg.biochem.mars.fx.editor.MarkdownNotesPane;
+import de.mpg.biochem.mars.fx.molecule.metadataTab.n5browser.N5DatasetListPane;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.fx.util.IJStage;
 import com.jfoenix.controls.JFXChipView;
@@ -299,6 +301,7 @@ public class DatasetExplorerWindow {
             if (currentLocalIndexer != null) currentLocalIndexer.cancel();
             if (scriptPane != null) scriptPane.cleanup();
             iconExecutor.shutdownNow();
+            n5Executor.shutdownNow();
             SwingUtilities.invokeLater(() -> {
                 WindowManager.removeWindow(ijStage);
                 ijStage.cleanup();
@@ -1411,6 +1414,12 @@ public class DatasetExplorerWindow {
             Math.max(2, Runtime.getRuntime().availableProcessors()),
             r -> { Thread t = new Thread(r, "DatasetIconRenderer"); t.setDaemon(true); return t; });
 
+    // One-at-a-time N5 listings triggered by opening a container. Kept off the
+    // iconExecutor: that pool is sized for CPU-bound rasterization, and a
+    // blocking network listing parked on it would stall icon rendering.
+    private final ExecutorService n5Executor = Executors.newSingleThreadExecutor(
+            r -> { Thread t = new Thread(r, "DatasetExplorerN5"); t.setDaemon(true); return t; });
+
     // Cache hit resolves synchronously via onReady; a miss renders the icon on
     // the background iconExecutor and delivers it back on the FX thread once
     // ready, caching it for next time.
@@ -1466,11 +1475,6 @@ public class DatasetExplorerWindow {
     }
 
     /**
-     * Open a dataset (double-clicked card). For archives we build the canonical
-     * Mars URL and hand it to the open-archive callback; N5 datasets aren't opened
-     * this way (no action for now).
-     */
-    /**
      * Build the openable URL/path for a dataset, for either source: an S3 URL via
      * MarsS3Browser.buildPath (cloud), or an absolute local file path (local). For
      * local, the entry path is relative to the indexed root, which — because a
@@ -1486,10 +1490,21 @@ public class DatasetExplorerWindow {
                 currentBucket(), e.getPath());
     }
 
+    /**
+     * Open a dataset (double-clicked card). Archives go to the open-archive
+     * callback; N5 containers are opened as images via {@link #openN5}.
+     */
     private void openDataset(DatasetEntry e) {
-        if (e == null || !e.isArchive()) {
-            setStatus(e != null && e.isN5()
-                    ? "N5 datasets can't be opened from here yet." : "");
+        if (e == null) {
+            setStatus("");
+            return;
+        }
+        if (e.isN5()) {
+            openN5(e);
+            return;
+        }
+        if (!e.isArchive()) {
+            setStatus("");
             return;
         }
         String url = datasetUrl(e);
@@ -1500,6 +1515,133 @@ public class DatasetExplorerWindow {
         } else {
             setStatus("No open handler set for: " + url);
         }
+    }
+
+    /**
+     * Open an N5 container as an image. The container is listed first, then the
+     * datasets inside it are offered in a picker — always, even for a
+     * single-dataset .n5, since the picker also carries the virtual/in-memory
+     * choice. A lone dataset comes preselected, so it stays one extra click.
+     */
+    private void openN5(DatasetEntry e) {
+        if (context == null) {
+            setStatus("No SciJava context — cannot open images.");
+            return;
+        }
+        final String url = datasetUrl(e);
+        setStatus("Reading " + e.getName() + " …");
+
+        final javafx.concurrent.Task<List<de.mpg.biochem.mars.n5.DatasetEntry>> task =
+                new javafx.concurrent.Task<List<de.mpg.biochem.mars.n5.DatasetEntry>>() {
+
+            @Override
+            protected List<de.mpg.biochem.mars.n5.DatasetEntry> call() {
+                return MarsS3Browser.listDatasets(url);
+            }
+        };
+
+        task.setOnSucceeded(ev -> {
+            final List<de.mpg.biochem.mars.n5.DatasetEntry> datasets = task.getValue();
+            if (datasets.isEmpty()) {
+                setStatus("No datasets found in " + e.getName());
+                return;
+            }
+            setStatus("");
+            chooseN5Dataset(e, url, datasets);
+        });
+
+        task.setOnFailed(ev -> {
+            Throwable ex = task.getException();
+            setStatus("Could not read " + e.getName() + ": "
+                    + (ex == null ? "error" : ex.getMessage()));
+        });
+
+        n5Executor.submit(task);
+    }
+
+    /**
+     * Dataset picker for a .n5, laid out like the open-as-ImagePlus commands'
+     * dialogs: the shared dataset pane with a Virtual checkbox beneath it.
+     */
+    private void chooseN5Dataset(DatasetEntry e, String url,
+            List<de.mpg.biochem.mars.n5.DatasetEntry> datasets)
+    {
+        final N5DatasetListPane pane = new N5DatasetListPane();
+        // A lone dataset arrives already selected — the picker still appears (it
+        // carries the Virtual choice), but it takes one click to get through.
+        pane.setEntries(datasets, url, datasets.size() == 1 ? datasets.get(0)
+                .getName() : null);
+
+        final javafx.scene.control.CheckBox virtual =
+                new javafx.scene.control.CheckBox("Virtual");
+        virtual.setSelected(true);
+        virtual.setTooltip(new javafx.scene.control.Tooltip(
+                "Leave the image backed by lazily-fetched N5 chunks, so a large "
+                        + "volume shows immediately. Uncheck to copy it into memory "
+                        + "first — snappier to scrub, but nothing shows until the "
+                        + "download finishes."));
+
+        final HBox optionsBar = new HBox(10, virtual);
+        optionsBar.setAlignment(Pos.CENTER_LEFT);
+        optionsBar.setPadding(new Insets(8, 10, 2, 10));
+
+        final BorderPane content = new BorderPane();
+        content.setCenter(pane);
+        content.setBottom(optionsBar);
+        content.setPrefSize(640, 420);
+        content.getStyleClass().add("bdv-source-options");
+
+        final javafx.scene.control.Dialog<String> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Open N5 as ImagePlus — " + e.getName());
+        dialog.initOwner(stage);
+        dialog.setResizable(true);
+        dialog.getDialogPane().setContent(content);
+
+        final javafx.scene.control.ButtonType okType =
+                new javafx.scene.control.ButtonType("Open",
+                        javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(okType,
+                javafx.scene.control.ButtonType.CANCEL);
+        // Theme the pane, not the scene — the dialog has no scene until it shows.
+        MarsThemeManager.applyTheme(dialog.getDialogPane(), darkMode);
+
+        final javafx.scene.Node okButton = dialog.getDialogPane().lookupButton(okType);
+        okButton.setDisable(pane.getSelectedDataset() == null);
+        pane.selectedDatasetProperty().addListener((obs, old, sel) -> okButton
+                .setDisable(sel == null));
+        // Double-clicking a row in the picker opens it, matching how we got here.
+        pane.setOnDatasetActivated(() -> {
+            if (!okButton.isDisabled()) okButton.fireEvent(
+                    new javafx.event.ActionEvent());
+        });
+
+        dialog.setResultConverter(bt -> bt == okType ? pane.getSelectedDataset()
+                : null);
+        dialog.setOnHidden(ev -> pane.shutdown());
+
+        dialog.showAndWait().ifPresent(dataset -> openN5Dataset(e, url, dataset,
+                virtual.isSelected()));
+    }
+
+    /** Open one dataset inside an .n5 and show it, off the FX thread. */
+    private void openN5Dataset(DatasetEntry e, String url, String dataset,
+            boolean virtual)
+    {
+        stampOpened(e);
+        setStatus("Opening " + e.getName() + " / " + dataset + " …");
+
+        new Thread(() -> {
+            try {
+                final net.imagej.Dataset image = MarsN5ImagePlusOpener.open(url,
+                        dataset, virtual, context);
+                context.getService(org.scijava.ui.UIService.class).show(image);
+                Platform.runLater(() -> setStatus(""));
+            }
+            catch (final Exception ex) {
+                Platform.runLater(() -> setStatus("Could not open " + dataset
+                        + ": " + ex.getMessage()));
+            }
+        }, "OpenN5ImagePlus").start();
     }
 
     /**

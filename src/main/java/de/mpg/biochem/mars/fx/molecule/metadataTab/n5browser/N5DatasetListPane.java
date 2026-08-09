@@ -86,6 +86,7 @@ public class N5DatasetListPane extends BorderPane {
             });
 
     private Task<List<DatasetEntry>> currentTask;
+    private Runnable onDatasetActivated;
 
     public N5DatasetListPane() {
         setPadding(new Insets(5));
@@ -115,7 +116,20 @@ public class N5DatasetListPane extends BorderPane {
         datasetList.getSelectionModel().selectedItemProperty().addListener((obs,
                                                                             old, sel) -> selectedDataset.set(sel == null ? null : sel.getName()));
 
+        datasetList.setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2 && onDatasetActivated != null
+                    && getSelectedDataset() != null) onDatasetActivated.run();
+        });
+
         setCenter(datasetList);
+    }
+
+    /**
+     * Called when a dataset row is double-clicked. Lets a host dialog treat that
+     * as "OK" rather than making the user select and then click.
+     */
+    public void setOnDatasetActivated(final Runnable handler) {
+        this.onDatasetActivated = handler;
     }
 
     /** Selected dataset name (e.g. "Pos0"), or null. Bindable. */
@@ -133,6 +147,36 @@ public class N5DatasetListPane extends BorderPane {
         headerLabel.setText("");
         statusLabel.setText("");
         selectedDataset.set(null);
+    }
+
+    /**
+     * Display datasets the caller has already listed, skipping the round trip
+     * {@link #load} would make. Used where the container was listed to decide
+     * whether a choice is even needed (e.g. the Dataset Explorer opens a
+     * single-dataset .n5 directly and only shows this pane when there are
+     * several).
+     */
+    public void setEntries(final List<DatasetEntry> entries,
+                           final String displayName, final String preselect)
+    {
+        if (currentTask != null && currentTask.isRunning()) currentTask.cancel();
+        currentTask = null;
+        stopSpin();
+
+        headerLabel.setText(displayName == null ? "" : displayName);
+        statusLabel.setText("");
+        selectedDataset.set(null);
+        datasetList.getItems().setAll(entries == null ? List.of() : entries);
+
+        if (datasetList.getItems().isEmpty()) statusLabel.setText(
+                "No datasets found");
+        else if (preselect != null) {
+            for (DatasetEntry de : datasetList.getItems())
+                if (preselect.equals(de.getName())) {
+                    datasetList.getSelectionModel().select(de);
+                    break;
+                }
+        }
     }
 
     /**
