@@ -285,8 +285,9 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		final AffineTransform3D bdvSourceTransform = new AffineTransform3D();
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 		
-		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
-		RandomAccessibleInterval<T> imgView = Views.interval(img, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1))); 
+		Interval localInterval = BdvSourceIntervals.globalToSource(interval, bdvSourceTransform, img);
+		if (Intervals.isEmpty(localInterval)) return new ArrayList<DNASegment>();
+		RandomAccessibleInterval<T> imgView = Views.interval(img, localInterval);
 		
 		List<DNASegment> dnas = dnaFinder.findDNAs(imgView, imgView, t, 1);
 		
@@ -308,18 +309,6 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 		return dnas;
 	}
 	
-	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
-		double[] minInterval = new double[] {inter.min(0), inter.min(1), 0};
-		double[] transformedMinInterval = new double[3];
-		transform.applyInverse(transformedMinInterval, minInterval);
-		
-		double[] maxInterval = new double[] {inter.max(0), inter.max(1), 0};
-		double[] transformedMaxInterval = new double[3];
-		transform.applyInverse(transformedMaxInterval, maxInterval);
-		
-		return Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
-																	 (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
-	}
 
 	@Override
 	public void preview() {

@@ -393,13 +393,18 @@ Initializable, Previewable
 		NLinearInterpolatorFactory<T> interpolator =
 				new NLinearInterpolatorFactory<>();
 
-		//We need to transform the interval to the correct position in the img...
-		//Then we need to transform the results back...
+		//The selected region is in global BDV coordinates while rawImg is in the
+		//untransformed pixel coordinates of the source. Map the region into the
+		//local frame, segment there, and transform the resulting shapes back.
 		final AffineTransform3D bdvSourceTransform = new AffineTransform3D();
 		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
 
-		Interval transformedInterval = getTransformedInterval(interval, bdvSourceTransform);
-		RandomAccessibleInterval<T> imgInterval = Views.interval(rawImg, Intervals.createMinMax(transformedInterval.min(0), transformedInterval.min(1), transformedInterval.max(0), transformedInterval.max(1)));
+		Interval localInterval = BdvSourceIntervals.globalToSource(interval, bdvSourceTransform, rawImg);
+		if (Intervals.isEmpty(localInterval)) {
+			progressInteger.incrementAndGet();
+			return new ArrayList<>();
+		}
+		RandomAccessibleInterval<T> imgInterval = Views.interval(rawImg, localInterval);
 
 		RandomAccessibleInterval<T> imgView;
 		if (useMedianFilter) {
@@ -413,9 +418,11 @@ Initializable, Previewable
 		}
 		else imgView = imgInterval;
 
-		Interval newInterval = Intervals.createMinMax(Math.round(interval.min(0) *
-						interpolationFactor), Math.round(interval.min(1) * interpolationFactor),
-				Math.round(interval.max(0) * interpolationFactor), Math.round(interval
+		//The scaled image must be sampled over the local (source pixel) region,
+		//not the global selection, since imgView is in local coordinates.
+		Interval newInterval = Intervals.createMinMax(Math.round(localInterval.min(0) *
+						interpolationFactor), Math.round(localInterval.min(1) * interpolationFactor),
+				Math.round(localInterval.max(0) * interpolationFactor), Math.round(localInterval
 						.max(1) * interpolationFactor));
 
 		IntervalView<T> scaledImg = Views.interval(Views.raster(RealViews
@@ -462,11 +469,20 @@ Initializable, Previewable
 			r = new PolygonRoi(r.getInterpolatedPolygon(Math.min(2, r
 					.getNCoordinates() * 0.1), false), Roi.POLYGON);
 
+			//Vertices are in scaled local pixel coordinates. Undo the scaling and
+			//then transform into global BDV coordinates so the shapes line up with
+			//what is displayed and can be compared across (transformed) sources.
 			double[] xs = new double[r.getFloatPolygon().xpoints.length];
 			double[] ys = new double[r.getFloatPolygon().ypoints.length];
+			final double[] local = new double[3];
+			final double[] global = new double[3];
 			for (int i = 0; i < xs.length; i++) {
-				xs[i] = r.getFloatPolygon().xpoints[i] / interpolationFactor;
-				ys[i] = r.getFloatPolygon().ypoints[i] / interpolationFactor;
+				local[0] = r.getFloatPolygon().xpoints[i] / interpolationFactor;
+				local[1] = r.getFloatPolygon().ypoints[i] / interpolationFactor;
+				local[2] = 0;
+				bdvSourceTransform.apply(local, global);
+				xs[i] = global[0];
+				ys[i] = global[1];
 			}
 
 			Peak peak = PeakShape.createPeak(xs, ys);
@@ -525,18 +541,6 @@ Initializable, Previewable
 		return new PolygonRoi(poly2, Roi.POLYGON);
 	}
 	
-	private static Interval getTransformedInterval(Interval inter, AffineTransform3D transform) {
-		double[] minInterval = new double[] {inter.min(0), inter.min(1), 0};
-		double[] transformedMinInterval = new double[3];
-		transform.applyInverse(transformedMinInterval, minInterval);
-		
-		double[] maxInterval = new double[] {inter.max(0), inter.max(1), 0};
-		double[] transformedMaxInterval = new double[3];
-		transform.applyInverse(transformedMaxInterval, maxInterval);
-		
-		return Intervals.createMinMax( (long) transformedMinInterval[0], (long) transformedMinInterval[1], 0, 
-																	 (long) transformedMaxInterval[0], (long) transformedMaxInterval[1], 0);
-	}
 	
 	@Override
 	public void preview() {

@@ -311,8 +311,28 @@ Initializable, Previewable
 		//Remove the Z dimension
 		RandomAccessibleInterval<T> img = Views.hyperSlice(bdvSource.getSource(t, 0), 2, 0);
 
+		//Shapes are stored in global BDV coordinates while img holds the
+		//untransformed pixels of the source. Map the shape into the local pixel
+		//frame of this source before sampling.
+		final AffineTransform3D bdvSourceTransform = new AffineTransform3D();
+		bdvSource.getSourceTransform(t, 0, bdvSourceTransform);
+
+		PeakShape globalShape = object.getShape(t);
+		final double[] shapeX = new double[globalShape.x.length];
+		final double[] shapeY = new double[globalShape.y.length];
+		final double[] global = new double[3];
+		final double[] local = new double[3];
+		for (int i = 0; i < shapeX.length; i++) {
+			global[0] = globalShape.x[i];
+			global[1] = globalShape.y[i];
+			global[2] = 0;
+			bdvSourceTransform.applyInverse(local, global);
+			shapeX[i] = local[0];
+			shapeY[i] = local[1];
+		}
+		PeakShape shape = new PeakShape(shapeX, shapeY);
+
 		//Find shape boundaries that define integration interval
-		PeakShape shape = object.getShape(t);
 		double xmin = Double.POSITIVE_INFINITY;
 		double xmax = Double.NEGATIVE_INFINITY;
 		for (double x: shape.x) {
