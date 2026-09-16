@@ -29,8 +29,13 @@
 
 package de.mpg.biochem.mars.fx.molecule;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.SwingUtilities;
 
@@ -73,6 +78,8 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
+import javafx.collections.transformation.SortedList;
+import javafx.css.PseudoClass;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -80,7 +87,9 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
@@ -103,6 +112,23 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		.observableArrayList();
 
 	protected FilteredList<MoleculeIndexRow> filteredData;
+	/**
+	 * Display order of the table: filteredData sorted by whichever column the
+	 * user clicked, or archive order when no column is sorted. All positional
+	 * lookups against the table must go through this list.
+	 */
+	protected SortedList<MoleculeIndexRow> sortedData;
+
+	/**
+	 * UIDs of molecules that appeared in the archive during the most recent
+	 * lock/unlock cycle (e.g. added by a command). Their rows are highlighted
+	 * until the next command runs.
+	 */
+	protected final Set<String> newlyAddedUIDs = new HashSet<>();
+	private static final PseudoClass NEWLY_ADDED = PseudoClass.getPseudoClass(
+		"newly-added");
+	private static final DateTimeFormatter CREATED_FORMAT = DateTimeFormatter
+		.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
 	protected MoleculeRecordCache cache;
 
@@ -339,14 +365,12 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		TableColumn<MoleculeIndexRow, String> UIDColumn = new TableColumn<>("UID");
 		UIDColumn.setCellValueFactory(molIndexRow -> new ReadOnlyObjectWrapper<>(
 			molIndexRow.getValue().getUID()));
-		UIDColumn.setSortable(false);
 		moleculeIndexTable.getColumns().add(UIDColumn);
 
 		TableColumn<MoleculeIndexRow, String> TagsColumn = new TableColumn<>(
 			"Tags");
 		TagsColumn.setCellValueFactory(molIndexRow -> new ReadOnlyObjectWrapper<>(
 			molIndexRow.getValue().getTags()));
-		TagsColumn.setSortable(false);
 		moleculeIndexTable.getColumns().add(TagsColumn);
 
 		TableColumn<MoleculeIndexRow, String> metaUIDColumn = new TableColumn<>(
@@ -354,8 +378,36 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		metaUIDColumn.setCellValueFactory(
 			molIndexRow -> new ReadOnlyObjectWrapper<>(molIndexRow.getValue()
 				.getImageMetaDataUID()));
-		metaUIDColumn.setSortable(false);
 		moleculeIndexTable.getColumns().add(metaUIDColumn);
+
+		// The cell value is the Instant so sorting is chronological; records that
+		// predate the created field have null and sort first.
+		TableColumn<MoleculeIndexRow, Instant> createdColumn = new TableColumn<>(
+			"Created");
+		createdColumn.setCellValueFactory(
+			molIndexRow -> new ReadOnlyObjectWrapper<>(molIndexRow.getValue()
+				.getCreated()));
+		createdColumn.setCellFactory(column -> new TableCell<MoleculeIndexRow, Instant>() {
+			@Override
+			protected void updateItem(Instant item, boolean empty) {
+				super.updateItem(item, empty);
+				setText((empty || item == null) ? null : CREATED_FORMAT.format(item));
+			}
+		});
+		createdColumn.setPrefWidth(140);
+		moleculeIndexTable.getColumns().add(createdColumn);
+
+		moleculeIndexTable.setRowFactory(table -> {
+			TableRow<MoleculeIndexRow> row = new TableRow<MoleculeIndexRow>() {
+				@Override
+				protected void updateItem(MoleculeIndexRow item, boolean empty) {
+					super.updateItem(item, empty);
+					pseudoClassStateChanged(NEWLY_ADDED, !empty && item != null &&
+						newlyAddedUIDs.contains(item.getUID()));
+				}
+			};
+			return row;
+		});
 
 		moleculeIndexTableListener = new ChangeListener<MoleculeIndexRow>() {
 
@@ -462,7 +514,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 			}
 		});
 
-		moleculeIndexTable.setItems(filteredData);
+		sortedData = new SortedList<>(filteredData);
+		sortedData.comparatorProperty().bind(moleculeIndexTable
+			.comparatorProperty());
+		moleculeIndexTable.setItems(sortedData);
 
 		//filterField.setStyle("-fx-background-radius: 2em; ");
 		filterField.getStyleClass().add("rounded-corners-textfield");
@@ -502,8 +557,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	
 	@Override
 	public void setSelectedMolecule(String UID) {
-		for (int index = 0; index < filteredData.size(); index++) {
-			if (filteredData.get(index).getUID().equals(UID)) {
+		for (int index = 0; index < sortedData.size(); index++) {
+			if (sortedData.get(index).getUID().equals(UID)) {
 				moleculeIndexTable.getSelectionModel().select(index);
 				moleculeIndexTable.scrollTo(index);
 			}
@@ -566,8 +621,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 
 	private List<String> visibleMoleculeUIDs() {
-		List<String> uids = new ArrayList<>(filteredData.size());
-		for (MoleculeIndexRow row : filteredData)
+		List<String> uids = new ArrayList<>(sortedData.size());
+		for (MoleculeIndexRow row : sortedData)
 			uids.add(row.getUID());
 		return uids;
 	}
@@ -592,8 +647,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		setJsonField("moleculeSelectionUID", jGenerator -> jGenerator
 			.writeStringField("moleculeSelectionUID", (molecule != null) ? molecule.getUID() : ""), jParser -> {
 				String moleculeSelectionUID = jParser.getText();
-				for (int index = 0; index < filteredData.size(); index++) {
-					if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+				for (int index = 0; index < sortedData.size(); index++) {
+					if (sortedData.get(index).getUID().equals(moleculeSelectionUID)) {
 						moleculeIndexTable.getSelectionModel().select(index);
 						moleculeIndexTable.scrollTo(index);
 					}
@@ -622,8 +677,8 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 		setJsonField("MoleculeSelectionUID", null, jParser -> {
 			String moleculeSelectionUID = jParser.getText();
-			for (int index = 0; index < filteredData.size(); index++) {
-				if (filteredData.get(index).getUID().equals(moleculeSelectionUID)) {
+			for (int index = 0; index < sortedData.size(); index++) {
+				if (sortedData.get(index).getUID().equals(moleculeSelectionUID)) {
 					moleculeIndexTable.getSelectionModel().select(index);
 					moleculeIndexTable.scrollTo(index);
 				}
@@ -663,6 +718,11 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 			else if (getImageMetaDataUID().contains(str)) {
 				return true;
 			}
+			else if (getCreated() != null && CREATED_FORMAT.format(getCreated())
+				.contains(str))
+			{
+				return true;
+			}
 			else {
 				return false;
 			}
@@ -682,6 +742,10 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 
 		String getImageMetaDataUID() {
 			return archive.getMetadataUIDforMolecule(UID);
+		}
+
+		Instant getCreated() {
+			return archive.getMoleculeCreated(UID);
 		}
 	}
 
@@ -713,12 +777,23 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		}
 		String currentUID = "";
 		if (molecule != null) currentUID = molecule.getUID();
+
+		// Work out which molecules appeared since the archive was locked so their
+		// rows can be highlighted. An empty previous list means the archive was
+		// just opened, in which case nothing is "new".
+		Set<String> previousUIDs = new HashSet<>();
+		for (MoleculeIndexRow row : moleculeRowList)
+			previousUIDs.add(row.getUID());
+		newlyAddedUIDs.clear();
+
 		moleculeRowList.clear();
 		if (archive.getNumberOfMolecules() > 0) {
 			List<String> UIDs = archive.getMoleculeUIDs();
 			for (int index = 0; index < UIDs.size(); index++) {
 				MoleculeIndexRow row = new MoleculeIndexRow(index, UIDs.get(index));
 				moleculeRowList.add(row);
+				if (!previousUIDs.isEmpty() && !previousUIDs.contains(row.getUID()))
+					newlyAddedUIDs.add(row.getUID());
 			}
 
 			// Manually update filter in case a script changed the tags
@@ -737,14 +812,28 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				return true;
 			});
 
+			// Keep the previous selection if it still exists; otherwise jump to
+			// the first newly added record so it is easy to find.
 			int newIndex = 0;
-			for (int index = 0; index < filteredData.size(); index++) {
-				if (filteredData.get(index).getUID().equals(currentUID)) newIndex =
-					index;
+			boolean foundCurrent = false;
+			for (int index = 0; index < sortedData.size(); index++) {
+				if (sortedData.get(index).getUID().equals(currentUID)) {
+					newIndex = index;
+					foundCurrent = true;
+				}
+			}
+			if (!foundCurrent && !newlyAddedUIDs.isEmpty()) {
+				for (int index = 0; index < sortedData.size(); index++) {
+					if (newlyAddedUIDs.contains(sortedData.get(index).getUID())) {
+						newIndex = index;
+						break;
+					}
+				}
 			}
 
-			if (filteredData.size() > 0) {
+			if (sortedData.size() > 0) {
 				moleculeIndexTable.getSelectionModel().select(newIndex);
+				moleculeIndexTable.scrollTo(newIndex);
 				molecule = (M) cache.get(moleculeIndexTable.getSelectionModel()
 					.getSelectedItem().getUID());
 				moleculeCenterPane.fireEvent(new MoleculeArchiveUnlockEvent(archive));

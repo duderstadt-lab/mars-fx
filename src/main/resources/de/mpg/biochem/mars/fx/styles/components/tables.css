@@ -156,3 +156,11 @@
 .table-view .column-header.sorted-descending > .label {
     -fx-text-fill: -fx-text-base-color;
 }
+/* Rows for records added by the most recent command (see AbstractMoleculesTab) */
+.table-row-cell:filled:newly-added {
+    -fx-background-color: rgba(0, 123, 255, 0.18);
+}
+
+.table-row-cell:filled:newly-added:selected {
+    -fx-background-color: -fx-selection-bar;
+}
