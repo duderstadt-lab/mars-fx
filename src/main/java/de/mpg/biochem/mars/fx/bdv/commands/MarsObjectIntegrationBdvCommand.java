@@ -161,7 +161,7 @@ Initializable, Previewable
 	private boolean integrateAll = false;
 
 	@Parameter(label = "Threads", required = false, min = "1", max = "120")
-	private int nThreads = Runtime.getRuntime().availableProcessors();
+	private int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
 
 	@Parameter(visibility = ItemVisibility.MESSAGE, persist = false)
 	private String imgIntegrationMessage = "Image Integration Boundaries (in pixels)";

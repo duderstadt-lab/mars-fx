@@ -69,6 +69,7 @@ import org.scijava.widget.Button;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -80,11 +81,10 @@ import ij.process.FloatPolygon;
 import net.imglib2.Interval;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.RealLocalizable;
+import net.imglib2.algorithm.labeling.ConnectedComponents;
 import net.imglib2.algorithm.labeling.ConnectedComponents.StructuringElement;
-import net.imglib2.algorithm.neighborhood.HyperSphereShape;
+import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.interpolation.randomaccess.NLinearInterpolatorFactory;
-import net.imglib2.outofbounds.OutOfBoundsMirrorFactory;
-import net.imglib2.outofbounds.OutOfBoundsMirrorFactory.Boundary;
 import net.imglib2.realtransform.RealViews;
 import net.imglib2.realtransform.Scale;
 import net.imglib2.roi.geom.real.Polygon2D;
@@ -218,7 +218,7 @@ Initializable, Previewable
 
 	@Parameter(label = "Threads", required = false, min = "1", max = "120",
 			style = "group:Output")
-	private int nThreads = Runtime.getRuntime().availableProcessors();
+	private int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
 	
 	/**
 	 * Global Settings
@@ -406,17 +406,12 @@ Initializable, Previewable
 		}
 		RandomAccessibleInterval<T> imgInterval = Views.interval(rawImg, localInterval);
 
-		RandomAccessibleInterval<T> imgView;
-		if (useMedianFilter) {
-			RandomAccessibleInterval<T> originImgView = Views.translate(imgInterval, -imgInterval.min(0), -imgInterval.min(1));
-			imgView = (RandomAccessibleInterval<T>) opService.run("create.img", originImgView);
-			//There seems to be a bug where intervals that are not at 0, 0 are shifted by the median radius.
-			//HACK : to overcome this issue we use an origin shifted image view then translate the filtered image afterward.
-			opService.filter().median((IterableInterval<T>) imgView, originImgView,
-					new HyperSphereShape(medianFilterRadius));
-			imgView = Views.translate(imgView, imgInterval.min(0), imgInterval.min(1));
-		}
-		else imgView = imgInterval;
+		//The filters and thresholds below are deliberately single-threaded. The
+		//Ops versions fan every call out across all cores, which combined with
+		//the per-time-point thread pool starves the JavaFX threads.
+		RandomAccessibleInterval<T> imgView = (useMedianFilter)
+			? SegmentationFilters.median(imgInterval, medianFilterRadius)
+			: imgInterval;
 
 		//The scaled image must be sampled over the local (source pixel) region,
 		//not the global selection, since imgView is in local coordinates.
@@ -429,27 +424,33 @@ Initializable, Previewable
 				.affineReal(Views.interpolate(Views.extendMirrorSingle(imgView),
 						interpolator), new Scale(scaleFactors))), newInterval);
 
-		final RandomAccessibleInterval<BitType> binaryImg =
-				(RandomAccessibleInterval<BitType>) opService.run("create.img",
-						scaledImg, new BitType());
+		final RandomAccessibleInterval<BitType> binaryImg = (useLocalOstu)
+			? SegmentationFilters.localOtsu(scaledImg, otsuRadius)
+			: SegmentationFilters.otsu(scaledImg);
 
-		if (useLocalOstu) {
-			opService.run("threshold.otsu", binaryImg, scaledImg,
-					new HyperSphereShape(this.otsuRadius),
-					new OutOfBoundsMirrorFactory<T, RandomAccessibleInterval<T>>(
-							Boundary.SINGLE));
-		} else {
-			opService.run("threshold.otsu", binaryImg, scaledImg);
-		}
-
-		final RandomAccessibleInterval<UnsignedShortType> indexImg =
-				(RandomAccessibleInterval<UnsignedShortType>) opService.run(
-						"create.img", binaryImg, new UnsignedShortType());
+		final RandomAccessibleInterval<UnsignedShortType> indexImg = Views.translate(
+			ArrayImgs.unsignedShorts(Intervals.dimensionsAsLongArray(binaryImg)),
+			Intervals.minAsLongArray(binaryImg));
 		final ImgLabeling<Integer, UnsignedShortType> labeling =
 				new ImgLabeling<>(indexImg);
 
-		opService.run("labeling.cca", labeling, binaryImg,
-				StructuringElement.FOUR_CONNECTED);
+		//Connected components also parallelizes across all cores by default, so
+		//run it on a single thread here as well.
+		final ExecutorService ccaExecutor = Executors.newSingleThreadExecutor();
+		try {
+			final AtomicInteger nextLabel = new AtomicInteger(1);
+			ConnectedComponents.labelAllConnectedComponents(binaryImg, labeling,
+				new Iterator<Integer>() {
+					@Override
+					public boolean hasNext() { return true; }
+
+					@Override
+					public Integer next() { return nextLabel.getAndIncrement(); }
+				}, StructuringElement.FOUR_CONNECTED, ccaExecutor);
+		}
+		finally {
+			ccaExecutor.shutdown();
+		}
 
 		List<Peak> objects = new ArrayList<>();
 
