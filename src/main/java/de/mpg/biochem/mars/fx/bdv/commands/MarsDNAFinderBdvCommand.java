@@ -398,7 +398,6 @@ public class MarsDNAFinderBdvCommand extends InteractiveCommand implements Comma
 				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
 				
 				molecule.addTag("Bdv DNA Finder");
-				molecule.setNotes("DnaMolecule created on " + new java.util.Date() + " by the MarsDNAFinderBdvCommand");
 				//add to archive
 				archive.put(molecule);
 				//should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());

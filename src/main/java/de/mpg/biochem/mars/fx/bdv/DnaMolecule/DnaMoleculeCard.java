@@ -296,7 +296,6 @@ public class DnaMoleculeCard extends AbstractJsonConvertibleRecord implements
 				molecule.setParameter("Dna_Bottom_Y2", segment.getY2());
 
 				molecule.addTag("Bdv Draw DNA");
-				molecule.setNotes("DnaMolecule created on " + new java.util.Date() + " by the Bdv Draw DNA");
 				//add to archive
 				archive.put(molecule);
 				//should add something to the archive log ... logService.info("Added DnaMolecule record " + molecule.getUID());

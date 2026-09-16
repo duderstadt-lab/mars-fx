@@ -377,7 +377,6 @@ Initializable, Previewable
 	
 			dnaMolecule.setParameter("Number_" + source, moleculesOnDNA.size());
 			dnaMolecule.setTable(dnaMoleculeTable);
-			dnaMolecule.setNotes("Tracks added on " + new java.util.Date() + " by the MarsDNAPeakTrackerBdvCommand");
 			//The molecule is already in the archive but this updates indexes and could work in virtual mode.
 			archive.put(dnaMolecule);
 			
