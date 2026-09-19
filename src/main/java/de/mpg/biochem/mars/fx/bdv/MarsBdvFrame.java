@@ -254,6 +254,22 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		Molecule molecule, MarsMetadata metadataSelection, boolean useVolatile, final Context context)
 		throws IOException
 	{
+		this(jParser, archive, molecule, metadataSelection, useVolatile,
+			new ArrayList<MarsBdvCard>(), context);
+	}
+
+	/**
+	 * Restores a frame from saved settings while guaranteeing the archive type's
+	 * default card set. {@code defaultCards} fixes which custom cards appear and
+	 * in what order; a saved card of the same class replaces its default so its
+	 * settings survive, and saved cards of other classes are dropped. An empty
+	 * list keeps whatever was saved.
+	 */
+	public MarsBdvFrame(JsonParser jParser,
+		MoleculeArchive<Molecule, MarsMetadata, MoleculeArchiveProperties<Molecule, MarsMetadata>, MoleculeArchiveIndex<Molecule, MarsMetadata>> archive,
+		Molecule molecule, MarsMetadata metadataSelection, boolean useVolatile,
+		List<MarsBdvCard> defaultCards, final Context context) throws IOException
+	{
 		context.inject(this);
 		this.archive = archive;
 		this.molecule = molecule;
@@ -280,6 +296,8 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 			new NavigationPanel(bdv.getViewerPanel().state(), this), true);
 
 		if (jParser != null) fromJSON(jParser);
+
+		if (!defaultCards.isEmpty()) cards = reconcileCards(defaultCards, cards);
 
 		if (locationCard == null) {
 			locationCard = new LocationCard();
@@ -311,6 +329,16 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 		initializeView();
 
 		frame.setVisible(true);
+	}
+
+	private static List<MarsBdvCard> reconcileCards(
+		List<MarsBdvCard> defaultCards, List<MarsBdvCard> savedCards)
+	{
+		List<MarsBdvCard> merged = new ArrayList<MarsBdvCard>();
+		for (MarsBdvCard defaultCard : defaultCards)
+			merged.add(savedCards.stream().filter(saved -> saved.getClass().equals(
+				defaultCard.getClass())).findFirst().orElse(defaultCard));
+		return merged;
 	}
 
 	public void initializeView() {

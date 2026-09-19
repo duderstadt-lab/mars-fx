@@ -68,16 +68,21 @@ public class ObjectArchiveFxFrame extends
 		return new ObjectsTab(context);
 	}
 
-	@Override
-	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
+	private List<MarsBdvCard> createDefaultCards() {
 		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
 		ObjectCard card = new ObjectCard();
 		context.inject(card);
 		card.setArchive(archive);
 		card.initialize();
 		cards.add(card);
+		return cards;
+	}
+
+	@Override
+	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-			imageMetadataTab.getSelectedMetadata(), useVolatile, cards, context);
+			imageMetadataTab.getSelectedMetadata(), useVolatile,
+			createDefaultCards(), context);
 	}
 
 	@Override
@@ -86,7 +91,8 @@ public class ObjectArchiveFxFrame extends
 	{
 		try {
 			return new MarsBdvFrame(jParser, archive, moleculesTab
-				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(), useVolatile, context);
+				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(),
+				useVolatile, createDefaultCards(), context);
 		}
 		catch (IOException e) {
 			// have a nice error dialog show up to alert the user there is an issue.
