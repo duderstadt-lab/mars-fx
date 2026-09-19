@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.scijava.command.CommandService;
+import org.scijava.log.LogService;
 import org.scijava.plugin.AbstractPTService;
 import org.scijava.plugin.Parameter;
 import org.scijava.plugin.Plugin;
@@ -57,6 +58,9 @@ public class MarsBdvCardService extends AbstractPTService<MarsBdvCard>
 
 	@Parameter
 	private PrefService prefService;
+
+	@Parameter
+	private LogService log;
 
 	/** Map of each Card name to its corresponding plugin metadata. */
 	private HashMap<String, PluginInfo<MarsBdvCard>> cards = new HashMap<>();
@@ -111,6 +115,12 @@ public class MarsBdvCardService extends AbstractPTService<MarsBdvCard>
 			if (name == null || name.isEmpty()) {
 				name = info.getClassName();
 			}
+
+			// Card names are used as keys when restoring saved Bdv settings, so a
+			// collision silently swaps in the wrong card. Warn rather than hide it.
+			if (cards.containsKey(name)) log.warn("Duplicate MarsBdvCard name '" +
+				name + "': " + cards.get(name).getClassName() +
+				" will be replaced by " + info.getClassName());
 
 			// Add the plugin to the list of known cards.
 			cards.put(name, info);
