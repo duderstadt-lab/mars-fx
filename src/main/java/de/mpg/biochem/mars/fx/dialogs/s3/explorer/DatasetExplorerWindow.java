@@ -72,6 +72,7 @@ import de.mpg.biochem.mars.n5.MarsS3Browser;
 import de.mpg.biochem.mars.fx.editor.MarkdownNotesPane;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.n5browser.N5DatasetListPane;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
+import de.mpg.biochem.mars.fx.util.Utils;
 import de.mpg.biochem.mars.fx.util.IJStage;
 import com.jfoenix.controls.JFXChipView;
 import com.jfoenix.controls.JFXTabPane;
@@ -918,6 +919,26 @@ public class DatasetExplorerWindow {
         detailsContent.getChildren().setAll(new Label("No dataset selected."));
     }
 
+    private static final String SELECTABLE_STYLE =
+            "-fx-background-color: transparent; -fx-background-insets: 0;"
+            + " -fx-border-color: transparent; -fx-padding: 0;"
+            + " -fx-focus-color: transparent; -fx-faint-focus-color: transparent;";
+
+    /** Read-only text field styled like a plain label so its text can be selected and copied. */
+    private static TextField selectableField(String text) {
+        TextField tf = new TextField(text);
+        tf.setEditable(false);
+        tf.setStyle(SELECTABLE_STYLE);
+        return tf;
+    }
+
+    /** Left-aligns a copyable label and drops the helper's default padding. */
+    private static StackPane leftAligned(StackPane copyable) {
+        copyable.setAlignment(Pos.CENTER_LEFT);
+        copyable.setPadding(Insets.EMPTY);
+        return copyable;
+    }
+
     private void showDetailsFor(DatasetEntry e) {
         detailsContent.getChildren().clear();
 
@@ -957,7 +978,13 @@ public class DatasetExplorerWindow {
             applyFilter();
         });
 
-        detailsContent.getChildren().addAll(name, type, path, size, mod, created,
+        detailsContent.getChildren().addAll(
+                leftAligned(Utils.createCopyableLabel(name, e.getName())),
+                selectableField(type.getText()),
+                leftAligned(Utils.createCopyableLabel(path, e.getPath())),
+                selectableField(size.getText()),
+                selectableField(mod.getText()),
+                selectableField(created.getText()),
                 tagsHeader, tagChipView);
     }
 

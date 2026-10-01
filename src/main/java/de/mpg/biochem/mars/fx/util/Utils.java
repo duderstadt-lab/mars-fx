@@ -256,6 +256,18 @@ public class Utils {
 	 * @return A StackPane containing the original label and a copy indicator
 	 */
 	public static StackPane createCopyableLabel(Label label) {
+		return createCopyableLabel(label, null);
+	}
+
+	/**
+	 * Same as {@link #createCopyableLabel(Label)}, but copies {@code copyText}
+	 * instead of the label text (e.g. a value without its "Name: " prefix).
+	 *
+	 * @param label The original label to wrap with copy functionality
+	 * @param copyText Text placed on the clipboard; if null the label text is used
+	 * @return A StackPane containing the original label and a copy indicator
+	 */
+	public static StackPane createCopyableLabel(Label label, String copyText) {
 		// Save original styling and adjust label
 		String originalStyle = label.getStyle();
 		label.setStyle(originalStyle + "; -fx-cursor: hand;");
@@ -298,7 +310,7 @@ public class Utils {
 			ClipboardContent content = new ClipboardContent();
 
 			// Set the label text as content
-			content.putString(label.getText());
+			content.putString(copyText != null ? copyText : label.getText());
 			clipboard.setContent(content);
 
 			// Visual feedback that copy occurred
