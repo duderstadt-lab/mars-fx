@@ -451,7 +451,7 @@ public class CloudArchiveSaveDialog extends Dialog<String> {
                         : node.prefix + "/" + folder;
                 if (browser.isArchive(folder)) parent.getChildren().add(
                         new TreeItem<>(new S3Node(folder, childPrefix, Kind.ARCHIVE)));
-                else if (folder.endsWith(".n5")) parent.getChildren().add(
+                else if (de.mpg.biochem.mars.n5.MarsN5Factory.isContainerName(folder)) parent.getChildren().add(
                         new TreeItem<>(new S3Node(folder, childPrefix, Kind.N5)));
                 else {
                     final TreeItem<S3Node> child = new TreeItem<>(new S3Node(folder,

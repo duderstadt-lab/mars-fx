@@ -50,8 +50,8 @@ import javafx.geometry.Pos;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 
 /**
- * Reduced JavaFX dialog for browsing N5 datasets in a local .n5 directory.
- * Uses a DirectoryChooser to locate the .n5, then lists datasets inside it.
+ * Reduced JavaFX dialog for browsing N5 datasets in a local .n5 or .zarr directory.
+ * Uses a DirectoryChooser to locate the .n5/.zarr, then lists datasets inside it.
  *
  * @author Karl Duderstadt
  */
@@ -78,12 +78,12 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
     private final HBox optionsBar = new HBox(10);
 
     public N5LocalBrowserDialog(final Window owner, final String initialPath) {
-        setTitle("Open N5 — Local");
+        setTitle("Open N5/Zarr — Local");
         initOwner(owner);
         setResizable(true);
 
         if (initialPath != null) pathField.setText(initialPath);
-        pathField.setPromptText("/path/to/dataset.n5");
+        pathField.setPromptText("/path/to/dataset.n5 or .zarr");
 
         Label pathLbl = new Label("Path");
         Button browseButton = new Button("Browse");
@@ -136,8 +136,8 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
 
         setOnHidden(e -> datasetPane.shutdown());
 
-        // If we were given a path that looks like an .n5, load it immediately.
-        if (initialPath != null && initialPath.endsWith(".n5")) loadPath(
+        // If we were given a path that looks like an .n5 or .zarr, load it immediately.
+        if (initialPath != null && de.mpg.biochem.mars.n5.MarsN5Factory.isContainerName(initialPath)) loadPath(
                 initialPath);
 
         Platform.runLater(() -> {
@@ -166,8 +166,8 @@ public class N5LocalBrowserDialog extends Dialog<N5LocalBrowserDialog.LocalResul
         final File dir = chooser.showDialog(getDialogPane().getScene().getWindow());
         if (dir == null) return;
 
-        if (!dir.getName().endsWith(".n5")) {
-            statusLabel.setText("Selected folder is not an .n5 directory");
+        if (!de.mpg.biochem.mars.n5.MarsN5Factory.isContainerName(dir.getName())) {
+            statusLabel.setText("Selected folder is not an .n5 or .zarr directory");
             return;
         }
         pathField.setText(dir.getAbsolutePath());

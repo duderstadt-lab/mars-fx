@@ -175,7 +175,7 @@ public class N5MinioBrowserDialog extends
     public N5MinioBrowserDialog(final Window owner, final String initialPath,
                                 final String initialDataset)
     {
-        setTitle("Open N5 — MinIO");
+        setTitle("Open N5/Zarr — MinIO");
         initOwner(owner);
         setResizable(true);
 

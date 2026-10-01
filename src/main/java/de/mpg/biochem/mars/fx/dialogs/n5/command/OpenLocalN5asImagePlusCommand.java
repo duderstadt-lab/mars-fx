@@ -80,7 +80,7 @@ public class OpenLocalN5asImagePlusCommand extends DynamicCommand {
         Platform.runLater(() -> {
             final N5LocalBrowserDialog dialog = new N5LocalBrowserDialog(null,
                     null);
-            dialog.setTitle("Open N5 as ImagePlus (local)");
+            dialog.setTitle("Open N5/Zarr as ImagePlus (local)");
 
             final CheckBox virtual = new CheckBox("Virtual");
             virtual.setSelected(true);

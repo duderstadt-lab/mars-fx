@@ -40,7 +40,7 @@ import javafx.collections.ObservableList;
 
 /**
  * One indexed dataset in the explorer — either a Molecule Archive (.yama /
- * .yama.store) or an N5 container (.n5) discovered in an S3 bucket.
+ * .yama.store) or an N5/Zarr container (.n5/.zarr) discovered in an S3 bucket.
  *
  * <p>The "indexed" fields (name, path, type, timestamps) come from the S3
  * listing and are refreshed on every re-index. The "user" fields (tags,
@@ -96,6 +96,15 @@ public class DatasetEntry {
     public void setType(Type t) { this.type = t; }
     public boolean isArchive() { return type == Type.ARCHIVE; }
     public boolean isN5() { return type == Type.N5; }
+
+    /**
+     * Container format derived from the name suffix: "Zarr" for .zarr, otherwise
+     * "N5". Zarr containers are indexed as {@link Type#N5} (opened via the N5 API).
+     */
+    public String getContainerFormat() {
+        final String n = getName();
+        return n != null && n.toLowerCase().replaceAll("/+$", "").endsWith(".zarr") ? "Zarr" : "N5";
+    }
 
     // --- size ---
     public long getSizeBytes() { return sizeBytes; }

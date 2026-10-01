@@ -115,7 +115,7 @@ public class DatasetCard extends BorderPane {
         nameLabel.setStyle("-fx-font-size: 15px; -fx-font-weight: bold;");
         nameLabel.setWrapText(true);
 
-        Label typeBadge = new Label(entry.isArchive() ? "YAMA" : "N5");
+        Label typeBadge = new Label(entry.isArchive() ? "YAMA" : entry.getContainerFormat());
         typeBadge.getStyleClass().add("dataset-card-type");
         typeBadge.setStyle("-fx-font-size: 10px; -fx-padding: 1 6 1 6; "
                 + "-fx-background-radius: 8; -fx-background-color: -fx-accent; -fx-text-fill: white;");

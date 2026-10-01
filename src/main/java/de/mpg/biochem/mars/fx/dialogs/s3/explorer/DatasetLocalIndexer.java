@@ -35,7 +35,7 @@ import java.util.List;
 /**
  * Walks a local directory tree finding Molecule Archives and N5 datasets, the
  * local-filesystem counterpart of {@link DatasetIndexer}. Same classification
- * rules: a {@code .n5} directory or a {@code .yama} / {@code .yama.store} /
+ * rules: a {@code .n5} or {@code .zarr} directory or a {@code .yama} / {@code .yama.store} /
  * {@code .yama.json} entry is a dataset (and is NOT descended into); ordinary
  * folders are recursed. Runs its walk on a background thread via
  * {@link #indexAsync}.
@@ -116,7 +116,7 @@ public class DatasetLocalIndexer {
     }
 
     private static boolean isN5(String name) {
-        return name.toLowerCase().endsWith(".n5");
+        return de.mpg.biochem.mars.n5.MarsN5Factory.isContainerName(name);
     }
 
     private static boolean isArchive(String name) {

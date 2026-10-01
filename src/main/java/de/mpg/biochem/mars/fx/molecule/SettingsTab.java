@@ -124,7 +124,7 @@ public class SettingsTab extends AbstractMoleculeArchiveTab implements
 		GridPane gridpane = new GridPane();
 
 		//N5 volatile view option
-		Label volatileLabel = new Label("Use N5 volatile view");
+		Label volatileLabel = new Label("Use N5/Zarr volatile view");
 		gridpane.add(volatileLabel, 0, 5);
 		GridPane.setMargin(volatileLabel, new Insets(5, 5, 5, 5));
 

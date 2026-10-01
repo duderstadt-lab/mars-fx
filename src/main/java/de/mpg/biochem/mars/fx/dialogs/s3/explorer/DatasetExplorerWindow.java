@@ -718,7 +718,7 @@ public class DatasetExplorerWindow {
 
         archiveToggle = new ToggleButton("YAMA");
         archiveToggle.setSelected(true);
-        n5Toggle = new ToggleButton("N5");
+        n5Toggle = new ToggleButton("N5/Zarr");
         n5Toggle.setSelected(true);
         // Make the pressed state unmistakable: selected = filled accent with white
         // text; unselected = muted/outlined. Applied now and on every toggle.
@@ -946,7 +946,7 @@ public class DatasetExplorerWindow {
         name.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
         name.setWrapText(true);
 
-        Label type = new Label("Type: " + (e.isArchive() ? "Molecule Archive (YAMA)" : "N5 container"));
+        Label type = new Label("Type: " + (e.isArchive() ? "Molecule Archive (YAMA)" : e.getContainerFormat() + " container"));
         Label path = new Label("Path: " + e.getPath());
         path.setWrapText(true);
         Label size = new Label("Size: " + (e.getSizeBytes() >= 0 ? humanBytes(e.getSizeBytes()) : "—"));
@@ -1013,7 +1013,7 @@ public class DatasetExplorerWindow {
         statusLabel = new Label("Ready");
         // Cancel button: visible only during an active index. Cancels whichever
         // indexer (S3 or local) is running. Useful when a mis-named folder (e.g. an
-        // N5 missing its .n5 suffix) is being descended into and the walk would
+        // N5 or Zarr missing its .n5/.zarr suffix) is being descended into and the walk would
         // otherwise run for a very long time.
         cancelIndexBtn = new Button("Cancel");
         cancelIndexBtn.setVisible(false);
