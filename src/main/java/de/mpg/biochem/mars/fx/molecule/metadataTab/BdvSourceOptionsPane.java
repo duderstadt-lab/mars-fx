@@ -589,7 +589,12 @@ public class BdvSourceOptionsPane extends VBox {
 		final String dimString = String.join(" x ", Arrays.stream(attributes
 				.getDimensions()).mapToObj(d -> Long.toString(d)).collect(Collectors
 				.toList()));
-		return "Dimensions " + dimString + ", " + attributes.getDataType();
+		String info = "Dimensions " + dimString + ", " + attributes.getDataType();
+		if (attributes.isSharded()) {
+			info += ", chunks " + Arrays.toString(attributes.getChunkSize()) +
+				", shards " + Arrays.toString(attributes.getBlockSize());
+		}
+		return info;
 	}
 
 	private void openCloudBrowser() {
