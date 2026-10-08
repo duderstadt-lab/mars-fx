@@ -324,7 +324,12 @@ public class MarsDataPointTracker extends AbstractDataFormattingPlugin
 	}
 
 	private void updateToolTip(final MouseEvent event) {
-		final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
+		// The plugin can still receive mouse events after it has been detached
+		// from its chart (e.g. while the plot is rebuilt on save/theme change).
+		final Chart chart = getChart();
+		if (chart == null || chart.getPlotArea() == null) return;
+
+		final Bounds plotAreaBounds = chart.getPlotArea().getBoundsInLocal();
 		final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
 
 		if (dataPoint == null) {
