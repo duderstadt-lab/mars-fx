@@ -1226,3 +1226,124 @@ Text, .text {
     -fx-fill: rgb(200, 200, 200);
     -fx-text-fill: rgb(200, 200, 200);
 }
+/* ---------------------------------------------------------------------
+   New Archive wizard (Dataset Explorer) — dark theme
+   --------------------------------------------------------------------- */
+.wizard-sidebar {
+    -fx-background-color: rgb(16, 30, 56);
+}
+
+.wizard-sidebar-title {
+    -fx-text-fill: rgb(232, 236, 244);
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.wizard-sidebar-subtitle {
+    -fx-text-fill: rgb(140, 155, 182);
+}
+
+.wizard-step-circle {
+    -fx-fill: rgb(122, 132, 148);
+}
+
+.wizard-step-number {
+    -fx-text-fill: rgb(22, 30, 44);
+    -fx-font-weight: bold;
+}
+
+.wizard-step-label {
+    -fx-text-fill: rgb(196, 203, 215);
+    -fx-font-size: 14px;
+}
+
+.wizard-step-connector {
+    -fx-stroke: rgb(98, 108, 126);
+    -fx-stroke-width: 1.5;
+}
+
+.wizard-step:done .wizard-step-circle {
+    -fx-fill: rgb(75, 110, 175);
+}
+
+.wizard-step:done .wizard-step-number {
+    -fx-text-fill: white;
+}
+
+.wizard-step:current .wizard-step-circle {
+    -fx-fill: rgb(96, 150, 240);
+}
+
+.wizard-step:current .wizard-step-number {
+    -fx-text-fill: white;
+}
+
+.wizard-step:current .wizard-step-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+.wizard-page-title {
+    -fx-text-fill: rgb(232, 232, 232);
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.wizard-page-subtitle,
+.wizard-hint {
+    -fx-text-fill: rgb(165, 170, 178);
+}
+
+.wizard-section-label {
+    -fx-text-fill: rgb(220, 220, 220);
+    -fx-font-weight: bold;
+    -fx-padding: 6 0 0 0;
+}
+
+.toggle-button.archive-type-tile {
+    -fx-background-color: rgb(55, 58, 60);
+    -fx-background-radius: 8;
+    -fx-border-color: rgb(80, 83, 85);
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-padding: 16;
+}
+
+.toggle-button.archive-type-tile:hover {
+    -fx-background-color: rgb(62, 66, 70);
+}
+
+.toggle-button.archive-type-tile:selected {
+    -fx-background-color: rgba(96, 150, 240, 0.16);
+    -fx-border-color: rgb(96, 150, 240);
+}
+
+.archive-type-title {
+    -fx-text-fill: rgb(232, 232, 232);
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.archive-type-desc {
+    -fx-text-fill: rgb(180, 180, 180);
+}
+
+.archive-type-glyph {
+    -fx-fill: transparent;
+    -fx-stroke: rgb(190, 196, 206);
+    -fx-stroke-width: 2.5;
+    -fx-stroke-line-cap: round;
+}
+
+.archive-type-glyph-fill {
+    -fx-fill: rgb(190, 196, 206);
+    -fx-stroke: transparent;
+}
+
+.archive-type-tile:selected .archive-type-glyph {
+    -fx-stroke: rgb(110, 162, 250);
+}
+
+.archive-type-tile:selected .archive-type-glyph-fill {
+    -fx-fill: rgb(110, 162, 250);
+}

@@ -557,3 +557,126 @@
 .markdown-editor .hit-active {
     -rtfx-background-color: -mars-light-search-hit-active;
 }
+/* ---------------------------------------------------------------------
+   New Archive wizard (Dataset Explorer) — light theme
+   --------------------------------------------------------------------- */
+.wizard-sidebar {
+    -fx-background-color: #eef2f8;
+    -fx-border-color: transparent #dde3ec transparent transparent;
+    -fx-border-width: 0 1 0 0;
+}
+
+.wizard-sidebar-title {
+    -fx-text-fill: #1c2b45;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.wizard-sidebar-subtitle {
+    -fx-text-fill: #6a7891;
+}
+
+.wizard-step-circle {
+    -fx-fill: #c6cdd9;
+}
+
+.wizard-step-number {
+    -fx-text-fill: #1c2b45;
+    -fx-font-weight: bold;
+}
+
+.wizard-step-label {
+    -fx-text-fill: #3a4558;
+    -fx-font-size: 14px;
+}
+
+.wizard-step-connector {
+    -fx-stroke: #c6cdd9;
+    -fx-stroke-width: 1.5;
+}
+
+.wizard-step:done .wizard-step-circle {
+    -fx-fill: #8ab8ff;
+}
+
+.wizard-step:done .wizard-step-number {
+    -fx-text-fill: white;
+}
+
+.wizard-step:current .wizard-step-circle {
+    -fx-fill: #007bff;
+}
+
+.wizard-step:current .wizard-step-number {
+    -fx-text-fill: white;
+}
+
+.wizard-step:current .wizard-step-label {
+    -fx-text-fill: #0b1a33;
+    -fx-font-weight: bold;
+}
+
+.wizard-page-title {
+    -fx-text-fill: #1c1c1c;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.wizard-page-subtitle,
+.wizard-hint {
+    -fx-text-fill: #666666;
+}
+
+.wizard-section-label {
+    -fx-text-fill: #222222;
+    -fx-font-weight: bold;
+    -fx-padding: 6 0 0 0;
+}
+
+.toggle-button.archive-type-tile {
+    -fx-background-color: white;
+    -fx-background-radius: 8;
+    -fx-border-color: #d6dbe3;
+    -fx-border-width: 1.5;
+    -fx-border-radius: 8;
+    -fx-padding: 16;
+}
+
+.toggle-button.archive-type-tile:hover {
+    -fx-background-color: #f4f7fc;
+}
+
+.toggle-button.archive-type-tile:selected {
+    -fx-background-color: rgba(0, 123, 255, 0.08);
+    -fx-border-color: #007bff;
+}
+
+.archive-type-title {
+    -fx-text-fill: #1c1c1c;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.archive-type-desc {
+    -fx-text-fill: #555555;
+}
+
+.archive-type-glyph {
+    -fx-fill: transparent;
+    -fx-stroke: #4a5568;
+    -fx-stroke-width: 2.5;
+    -fx-stroke-line-cap: round;
+}
+
+.archive-type-glyph-fill {
+    -fx-fill: #4a5568;
+    -fx-stroke: transparent;
+}
+
+.archive-type-tile:selected .archive-type-glyph {
+    -fx-stroke: #007bff;
+}
+
+.archive-type-tile:selected .archive-type-glyph-fill {
+    -fx-fill: #007bff;
+}

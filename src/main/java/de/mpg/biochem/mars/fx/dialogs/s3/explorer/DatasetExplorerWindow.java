@@ -694,6 +694,11 @@ public class DatasetExplorerWindow {
         toggleRightBtn = iconButton(FontAwesome.CHEVRON_RIGHT, "Show/hide details pane");
         toggleRightBtn.setOnAction(e -> toggleRightPane());
 
+        // Plus: build a new archive from the N5/Zarr datasets the filter shows.
+        Button newArchiveBtn = iconButton(FontAwesome.PLUS,
+                "New Molecule Archive from the filtered N5/Zarr datasets");
+        newArchiveBtn.setOnAction(e -> openNewArchiveWizard());
+
         searchField = new TextField();
         searchField.setPromptText("Search name, tags…  (comma = AND, ! = exclude)");
         // Explicit border so the field is visible in light mode (the default
@@ -749,7 +754,7 @@ public class DatasetExplorerWindow {
         styleFilterToggle(sortToggle);
         sortToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(sortToggle));
 
-        HBox row1 = new HBox(6, toggleLeftBtn, searchStack, archiveToggle, n5Toggle,
+        HBox row1 = new HBox(6, toggleLeftBtn, newArchiveBtn, searchStack, archiveToggle, n5Toggle,
                 recentToggle, sortToggle, toggleRightBtn);
         row1.setAlignment(Pos.CENTER_LEFT);
 
@@ -1470,16 +1475,22 @@ public class DatasetExplorerWindow {
         });
     }
 
-    private void rebuildCards() {
-        cardsBox.getChildren().clear();
-        double iconSize = 72;
-        // FilteredList preserves source order, so sorting happens here at render
-        // time over a copy. Default is Modified-newest.
+    /**
+     * The filtered entries in card order. FilteredList preserves source order,
+     * so sorting happens here over a copy. Default is Modified-newest.
+     */
+    private List<DatasetEntry> sortedFiltered() {
         List<DatasetEntry> ordered = new ArrayList<>(filtered);
         SortOption sort = sortChoice == null ? loadSortPref() : sortChoice.getValue();
         if (sort == null) sort = SortOption.MODIFIED_DESC;
         ordered.sort(sort.comparator);
-        for (DatasetEntry e : ordered) {
+        return ordered;
+    }
+
+    private void rebuildCards() {
+        cardsBox.getChildren().clear();
+        double iconSize = 72;
+        for (DatasetEntry e : sortedFiltered()) {
             // Card is added immediately, icon-less; the identicon is rendered on a
             // background thread pool and patched in via setIcon() once ready, so
             // building a large card grid doesn't serialize icon rasterization on
@@ -1669,6 +1680,52 @@ public class DatasetExplorerWindow {
                         + ": " + ex.getMessage()));
             }
         }, "OpenN5ImagePlus").start();
+    }
+
+    /**
+     * Open the new-archive wizard over the N5/Zarr datasets the current filter
+     * shows, in card order. Archives in the filter are counted but not offered.
+     */
+    private void openNewArchiveWizard() {
+        List<NewArchiveWizard.SourceDataset> datasets = new ArrayList<>();
+        int skippedArchives = 0;
+        for (DatasetEntry e : sortedFiltered()) {
+            if (e.isN5()) datasets.add(new NewArchiveWizard.SourceDataset(e.getName(),
+                    e.getPath(), datasetUrl(e), e.getSizeBytes()));
+            else skippedArchives++;
+        }
+        NewArchiveWizard wizard = new NewArchiveWizard(stage, datasets, skippedArchives,
+                localMode, endpointField.getText().trim(), sourceBucket(), darkMode);
+        wizard.setOnCreated(this::archiveCreated);
+        wizard.show();
+    }
+
+    /**
+     * A new archive was saved: add it to the index when it landed inside the
+     * current bucket/folder (so it shows without a reindex), then open it if
+     * asked.
+     */
+    private void archiveCreated(NewArchiveWizard.Created created) {
+        DatasetEntry entry = null;
+        if (created.relativePath != null) {
+            long now = System.currentTimeMillis();
+            entry = new DatasetEntry(created.name, created.relativePath,
+                    DatasetEntry.Type.ARCHIVE);
+            entry.setCreatedEpochMillis(now);
+            entry.setModifiedEpochMillis(now);
+            allEntries.add(entry);
+            if (store != null) {
+                try {
+                    store.writeIndex(sourceEndpoint(), sourceBucket(),
+                            new ArrayList<>(allEntries));
+                }
+                catch (Exception ignore) {}
+            }
+        }
+        setStatus("Created " + created.location);
+        if (!created.open) return;
+        if (entry != null) openDataset(entry);
+        else if (onOpenArchive != null) onOpenArchive.accept(created.location);
     }
 
     /**
