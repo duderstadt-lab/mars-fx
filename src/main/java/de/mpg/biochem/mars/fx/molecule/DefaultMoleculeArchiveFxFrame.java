@@ -32,15 +32,20 @@ package de.mpg.biochem.mars.fx.molecule;
 import com.fasterxml.jackson.core.JsonParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.scijava.Context;
 
+import de.mpg.biochem.mars.fx.bdv.MarsBdvCard;
 import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
+import de.mpg.biochem.mars.fx.bdv.SingleMolecule.SingleMoleculeCard;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveIndex;
 import de.mpg.biochem.mars.molecule.MoleculeArchiveProperties;
+import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
 
 public class DefaultMoleculeArchiveFxFrame extends
 	AbstractMoleculeArchiveFxFrame<DefaultMarsMetadataTab, DefaultMoleculesTab>
@@ -63,10 +68,28 @@ public class DefaultMoleculeArchiveFxFrame extends
 		return new DefaultMoleculesTab(context);
 	}
 
+	/**
+	 * Single-molecule archives get the Peak-Tracker card; other archive types
+	 * shown in this frame get no custom cards (an empty list also keeps any cards
+	 * restored from saved settings).
+	 */
+	private List<MarsBdvCard> createDefaultCards() {
+		List<MarsBdvCard> cards = new ArrayList<MarsBdvCard>();
+		if (((Object) archive) instanceof SingleMoleculeArchive) {
+			SingleMoleculeCard card = new SingleMoleculeCard();
+			context.inject(card);
+			card.setArchive(archive);
+			card.initialize();
+			cards.add(card);
+		}
+		return cards;
+	}
+
 	@Override
 	public MarsBdvFrame createMarsBdvFrame(boolean useVolatile) {
 		return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-			imageMetadataTab.getSelectedMetadata(), useVolatile, context);
+			imageMetadataTab.getSelectedMetadata(), useVolatile,
+			createDefaultCards(), context);
 	}
 
 	@Override
@@ -75,14 +98,14 @@ public class DefaultMoleculeArchiveFxFrame extends
 	{
 		try {
 			return new MarsBdvFrame(jParser, archive, moleculesTab
-				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(), useVolatile, context);
+				.getSelectedMolecule(), imageMetadataTab.getSelectedMetadata(),
+				useVolatile, createDefaultCards(), context);
 		}
 		catch (IOException e) {
 			// have a nice error dialog show up to alert the user there is an issue.
 
 			// Results frame with defaults
-			return new MarsBdvFrame(archive, moleculesTab.getSelectedMolecule(),
-				imageMetadataTab.getSelectedMetadata(), useVolatile, context);
+			return createMarsBdvFrame(useVolatile);
 		}
 	}
 

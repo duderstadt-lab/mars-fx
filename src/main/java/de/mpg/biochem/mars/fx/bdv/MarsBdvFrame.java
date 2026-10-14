@@ -913,14 +913,23 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 
 					if ("name".equals(jParser.getCurrentName())) {
 						jParser.nextToken();
-						card = marsBdvCardService.createCard(jParser.getText());
+						// Skip cards that no longer exist (renamed, or from a plugin
+						// that isn't installed) rather than failing the whole restore.
+						try {
+							card = marsBdvCardService.createCard(jParser.getText());
+						}
+						catch (IllegalArgumentException e) {
+							card = null;
+						}
 
-						card.setArchive(archive);
-						card.initialize();
+						if (card != null) {
+							card.setArchive(archive);
+							card.initialize();
 
-						if (card instanceof LocationCard) locationCard =
-							(LocationCard) card;
-						else cards.add(card);
+							if (card instanceof LocationCard) locationCard =
+								(LocationCard) card;
+							else cards.add(card);
+						}
 					}
 
 					jParser.nextToken();
@@ -928,6 +937,7 @@ public class MarsBdvFrame<T extends NumericType<T> & NativeType<T>> extends
 					if ("settings".equals(jParser.getCurrentName())) {
 						jParser.nextToken();
 						if (card != null) card.fromJSON(jParser);
+						else jParser.skipChildren();
 					}
 				}
 			}
