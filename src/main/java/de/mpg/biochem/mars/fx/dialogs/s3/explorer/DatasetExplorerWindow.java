@@ -61,6 +61,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
+import org.kordamp.ikonli.material.Material;
 import org.kordamp.ikonli.octicons.Octicons;
 
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -699,6 +700,14 @@ public class DatasetExplorerWindow {
                 "New Molecule Archive from the filtered N5/Zarr datasets");
         newArchiveBtn.setOnAction(e -> openNewArchiveWizard());
 
+        // Merge: combine the filtered archives into a new archive.
+        Button mergeBtn = new Button();
+        // Same glyph as Merge Virtual Stores in the ActionBar (mdi2c-call-merge).
+        mergeBtn.setGraphic(ActionUtils.icon(Material.CALL_MERGE, "1.1em"));
+        mergeBtn.setTooltip(new javafx.scene.control.Tooltip(
+                "Merge the filtered archives into a new archive"));
+        mergeBtn.setOnAction(e -> openMergeDialog());
+
         searchField = new TextField();
         searchField.setPromptText("Search name, tags…  (comma = AND, ! = exclude)");
         // Explicit border so the field is visible in light mode (the default
@@ -754,7 +763,7 @@ public class DatasetExplorerWindow {
         styleFilterToggle(sortToggle);
         sortToggle.selectedProperty().addListener((o, a, b) -> styleFilterToggle(sortToggle));
 
-        HBox row1 = new HBox(6, toggleLeftBtn, newArchiveBtn, searchStack, archiveToggle, n5Toggle,
+        HBox row1 = new HBox(6, toggleLeftBtn, newArchiveBtn, mergeBtn, searchStack, archiveToggle, n5Toggle,
                 recentToggle, sortToggle, toggleRightBtn);
         row1.setAlignment(Pos.CENTER_LEFT);
 
@@ -1701,11 +1710,30 @@ public class DatasetExplorerWindow {
     }
 
     /**
-     * A new archive was saved: add it to the index when it landed inside the
+     * Open the merge dialog over the archives the current filter shows, in card
+     * order. N5/Zarr containers in the filter are counted but not offered.
+     */
+    private void openMergeDialog() {
+        List<MergeArchivesDialog.Archive> archives = new ArrayList<>();
+        int skippedContainers = 0;
+        for (DatasetEntry e : sortedFiltered()) {
+            if (e.isArchive()) archives.add(new MergeArchivesDialog.Archive(e.getName(),
+                    e.getPath(), datasetUrl(e), e.getSizeBytes()));
+            else skippedContainers++;
+        }
+        MergeArchivesDialog dialog = new MergeArchivesDialog(stage, archives,
+                skippedContainers, localMode, endpointField.getText().trim(),
+                sourceBucket(), darkMode);
+        dialog.setOnMerged(this::archiveCreated);
+        dialog.show();
+    }
+
+    /**
+     * A new archive was saved (created or merged): add it to the index when it landed inside the
      * current bucket/folder (so it shows without a reindex), then open it if
      * asked.
      */
-    private void archiveCreated(NewArchiveWizard.Created created) {
+    private void archiveCreated(ArchiveDestinationPane.Created created) {
         DatasetEntry entry = null;
         if (created.relativePath != null) {
             long now = System.currentTimeMillis();

@@ -36,10 +36,11 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.prefs.Preferences;
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 
-import de.mpg.biochem.mars.fx.dialogs.s3.CloudArchiveSaveDialog;
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.BdvSourceOptionsPane;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
@@ -57,7 +58,6 @@ import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonBar.ButtonData;
@@ -71,7 +71,9 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
@@ -89,7 +91,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
 import javafx.util.StringConverter;
@@ -138,29 +139,6 @@ public class NewArchiveWizard extends Dialog<Void> {
         }
     }
 
-    /** Outcome of a successful create, handed to {@link #setOnCreated}. */
-    public static final class Created {
-
-        /** Saved location: S3 URL or absolute local path. */
-        public final String location;
-        /** File name of the archive, including its ending. */
-        public final String name;
-        /**
-         * Path relative to the explorer's current bucket or local root, or null
-         * when the archive was saved outside it.
-         */
-        public final String relativePath;
-        /** True if the user asked for the archive to be opened. */
-        public final boolean open;
-
-        Created(String location, String name, String relativePath, boolean open) {
-            this.location = location;
-            this.name = name;
-            this.relativePath = relativePath;
-            this.open = open;
-        }
-    }
-
     /**
      * The archive types offered on the type step, each with the icon its
      * molecules tab uses in the archive window. Classes are resolved by name
@@ -168,7 +146,7 @@ public class NewArchiveWizard extends Dialog<Void> {
      * which depends on mars-fx rather than the other way round) only show up
      * enabled when they're on the classpath.
      */
-    private enum ArchiveType {
+    enum ArchiveType {
         SINGLE_MOLECULE("Single Molecule", "SingleMoleculeArchive",
                 "de.mpg.biochem.mars.molecule.SingleMoleculeArchive",
                 "Spots tracked over time, e.g. TIRF single-molecule imaging.",
@@ -202,6 +180,12 @@ public class NewArchiveWizard extends Dialog<Void> {
             this.description = description;
             this.iconStyleClass = iconStyleClass;
             this.iconStylesheet = iconStylesheet;
+        }
+
+        /** The type with this archive class name, or null if it isn't one of these. */
+        static ArchiveType forClassName(String className) {
+            for (ArchiveType t : values()) if (t.className.equals(className)) return t;
+            return null;
         }
 
         Class<?> archiveClass() {
@@ -317,14 +301,13 @@ public class NewArchiveWizard extends Dialog<Void> {
         }
     }
 
-    private static final String ENDING_FILE = ".yama";
-    private static final String ENDING_STORE = ".yama.store";
+    private static final String FIELD_STYLE = ArchiveDestinationPane.FIELD_STYLE;
 
-    // Explicit border so fields stay visible in light mode — same treatment as
-    // the explorer's own text fields.
-    private static final String FIELD_STYLE =
-            "-fx-border-color: derive(-fx-text-inner-color, 55%);"
-                    + " -fx-border-width: 1; -fx-border-radius: 4; -fx-background-radius: 4;";
+    // Divider positions of the sources step, remembered between sessions.
+    private static final Preferences PREFS =
+            Preferences.userNodeForPackage(NewArchiveWizard.class).node("newArchiveWizard");
+    private static final String PREF_DIV_DATASETS = "dividerDatasets";
+    private static final String PREF_DIV_SOURCES = "dividerSources";
 
     private static final PseudoClass CURRENT = PseudoClass.getPseudoClass("current");
     private static final PseudoClass DONE = PseudoClass.getPseudoClass("done");
@@ -368,23 +351,20 @@ public class NewArchiveWizard extends Dialog<Void> {
     private Button addChannelsButton;
     private MenuButton applyButton;
     private BdvSourceOptionsPane optionsPane;
+    private SplitPane bodySplit;
+    private SplitPane sourcesSplit;
 
     // Step 3
     private Label typeDescription;
 
     // Step 4
-    private TextField folderField;
-    private String lastDefaultFolder;
-    private TextField nameField;
-    private Button endingButton;
-    private boolean storeEnding = false;
-    private Label destinationPreview;
+    private ArchiveDestinationPane destinationPane;
     private Label summaryLabel;
     private CheckBox openAfterCreate;
     private ProgressIndicator createProgress;
     private Label createStatus;
 
-    private Consumer<Created> onCreated;
+    private Consumer<ArchiveDestinationPane.Created> onCreated;
 
     // Lists the datasets inside each container, a few containers at a time.
     private final ExecutorService executor = Executors.newFixedThreadPool(4, r -> {
@@ -464,6 +444,8 @@ public class NewArchiveWizard extends Dialog<Void> {
 
         setResultConverter(bt -> null);
         setOnHidden(e -> {
+            PREFS.putDouble(PREF_DIV_DATASETS, bodySplit.getDividerPositions()[0]);
+            PREFS.putDouble(PREF_DIV_SOURCES, sourcesSplit.getDividerPositions()[0]);
             executor.shutdownNow();
             // Unbind first so a pending debounced field check finds no source
             // and skips, rather than submitting to the stopped executor.
@@ -479,7 +461,7 @@ public class NewArchiveWizard extends Dialog<Void> {
     }
 
     /** Called on the FX thread once the archive has been saved. */
-    public void setOnCreated(Consumer<Created> handler) {
+    public void setOnCreated(Consumer<ArchiveDestinationPane.Created> handler) {
         this.onCreated = handler;
     }
 
@@ -761,6 +743,7 @@ public class NewArchiveWizard extends Dialog<Void> {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
+                setTooltip(null);
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
@@ -769,6 +752,7 @@ public class NewArchiveWizard extends Dialog<Void> {
                 }
                 if (item instanceof ContainerNode) {
                     setText(((ContainerNode) item).container.name);
+                    setTooltip(new Tooltip(((ContainerNode) item).container.path));
                     setGraphic(ActionUtils.icon(FontAwesome.DATABASE, "1.0em"));
                     setStyle("-fx-font-weight: bold;");
                 }
@@ -891,9 +875,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         // Datasets get their own full-height column so many positions fit.
         VBox left = new VBox(6, sectionLabel("Datasets"), recordTree);
         VBox.setVgrow(recordTree, Priority.ALWAYS);
-        left.setMinWidth(250);
-        left.setPrefWidth(270);
-        left.setMaxWidth(320);
+        left.setMinWidth(160);
 
         // Sources of the selected dataset, then the selected source's settings
         // (the metadata tab's own pane).
@@ -903,20 +885,41 @@ public class NewArchiveWizard extends Dialog<Void> {
         addChannelsButton.setMaxWidth(Region.USE_PREF_SIZE);
         HBox addLine = new HBox(6, addRow, addChannelsButton);
         addLine.setAlignment(Pos.CENTER_LEFT);
-        sourceList.setMinHeight(110);
-        VBox right = new VBox(6,
-                sectionLabel("Sources"), recordSummary, addLine, sourceList, sourceButtons,
-                sectionLabel("Source settings"), optionsPane);
-        HBox.setHgrow(right, Priority.ALWAYS);
+        sourceList.setMinHeight(60);
+        VBox sourcesBox = new VBox(6,
+                sectionLabel("Sources"), recordSummary, addLine, sourceList, sourceButtons);
+        sourcesBox.setPadding(new Insets(0, 0, 8, 0));
+        sourcesBox.setMinHeight(150);
 
-        HBox body = new HBox(16, left, right);
-        VBox.setVgrow(body, Priority.ALWAYS);
+        // The settings scroll when the divider is dragged up past their height.
+        ScrollPane optionsScroll = new ScrollPane(optionsPane);
+        optionsScroll.setFitToWidth(true);
+        optionsScroll.setStyle("-fx-background-color: transparent; -fx-background: transparent;"
+                + " -fx-padding: 0; -fx-background-insets: 0;");
+        VBox settingsBox = new VBox(6, sectionLabel("Source settings"), optionsScroll);
+        VBox.setVgrow(optionsScroll, Priority.ALWAYS);
+        settingsBox.setPadding(new Insets(8, 0, 0, 0));
+        settingsBox.setMinHeight(80);
+
+        // Sources over settings, divider draggable. Settings keep their height as
+        // the dialog grows, so extra room goes to the source list.
+        sourcesSplit = new SplitPane(sourcesBox, settingsBox);
+        sourcesSplit.setOrientation(javafx.geometry.Orientation.VERTICAL);
+        SplitPane.setResizableWithParent(settingsBox, false);
+        sourcesSplit.setDividerPositions(PREFS.getDouble(PREF_DIV_SOURCES, 0.36));
+
+        // Datasets beside sources, divider draggable; the dataset column keeps
+        // its width as the dialog grows.
+        bodySplit = new SplitPane(left, sourcesSplit);
+        SplitPane.setResizableWithParent(left, false);
+        bodySplit.setDividerPositions(PREFS.getDouble(PREF_DIV_DATASETS, 0.27));
+        VBox.setVgrow(bodySplit, Priority.ALWAYS);
 
         return page("BDV Sources",
                 "Select a dataset and add its BigDataViewer sources, usually one per "
                         + "channel. Sources point at the dataset with the next unused "
                         + "channel; use Apply to copy them to the other datasets.",
-                body);
+                bodySplit);
     }
 
     private DatasetRecord selectedRecord() {
@@ -1059,10 +1062,9 @@ public class NewArchiveWizard extends Dialog<Void> {
                 .append(" of them already have sources, which will be replaced.");
         if (tooFewChannels > 0) msg.append("\n\n").append(tooFewChannels)
                 .append(" of them have fewer channels than these sources use.");
-        Alert a = new Alert(Alert.AlertType.CONFIRMATION, msg.toString(),
+        RoverConfirmationDialog a = new RoverConfirmationDialog(
+                getDialogPane().getScene().getWindow(), msg.toString(),
                 ButtonType.YES, ButtonType.NO);
-        a.initOwner(getDialogPane().getScene().getWindow());
-        a.setHeaderText(null);
         a.setTitle("Apply sources");
         MarsThemeManager.applyTheme(a.getDialogPane(), MarsThemeManager.isDarkTheme());
         if (a.showAndWait().orElse(ButtonType.NO) != ButtonType.YES) return;
@@ -1159,44 +1161,9 @@ public class NewArchiveWizard extends Dialog<Void> {
     // -----------------------------------------------------------------
 
     private Region buildDestinationPage() {
-        lastDefaultFolder = defaultFolder();
-        folderField = new TextField(lastDefaultFolder);
-        folderField.setStyle(FIELD_STYLE);
-        folderField.setPromptText(localSource ? "/path/to/folder"
-                : "https://bucket.s3.server:9000/folder/");
-        HBox.setHgrow(folderField, Priority.ALWAYS);
-
-        MenuItem s3Item = new MenuItem("S3 bucket…", ActionUtils.icon(FontAwesome.CLOUD, "1.0em"));
-        s3Item.setOnAction(e -> browseS3());
-        MenuItem localItem = new MenuItem("Local folder…", ActionUtils.icon(FontAwesome.FOLDER, "1.0em"));
-        localItem.setOnAction(e -> browseLocal());
-        MenuButton browse = new MenuButton("Browse", null, s3Item, localItem);
-        HBox folderRow = new HBox(6, folderField, browse);
-        folderRow.setAlignment(Pos.CENTER_LEFT);
-
-        nameField = new TextField(defaultName());
-        nameField.setStyle(FIELD_STYLE);
-        nameField.setPromptText("archive name");
-        HBox.setHgrow(nameField, Priority.ALWAYS);
-        endingButton = new Button(ENDING_FILE);
-        endingButton.setTooltip(new Tooltip(
-                "Click to switch between a single .yama file and a .yama.store "
-                        + "virtual store"));
-        endingButton.setMinWidth(90);
-        endingButton.setOnAction(e -> {
-            storeEnding = !storeEnding;
-            endingButton.setText(storeEnding ? ENDING_STORE : ENDING_FILE);
-            refreshDestinationPreview();
-        });
-        HBox nameRow = new HBox(6, nameField, endingButton);
-        nameRow.setAlignment(Pos.CENTER_LEFT);
-
-        folderField.textProperty().addListener((o, a, b) -> refreshDestinationPreview());
-        nameField.textProperty().addListener((o, a, b) -> refreshDestinationPreview());
-
-        destinationPreview = new Label();
-        destinationPreview.getStyleClass().add("wizard-hint");
-        destinationPreview.setWrapText(true);
+        destinationPane = new ArchiveDestinationPane(localSource, endpoint, bucketOrRoot);
+        destinationPane.setName(defaultName());
+        destinationPane.setOnChange(this::refreshDestinationSummary);
 
         summaryLabel = new Label();
         summaryLabel.setWrapText(true);
@@ -1213,9 +1180,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         statusRow.setAlignment(Pos.CENTER_LEFT);
 
         VBox form = new VBox(6,
-                sectionLabel("Folder"), folderRow,
-                sectionLabel("Name"), nameRow,
-                destinationPreview,
+                destinationPane,
                 new Separator(),
                 sectionLabel("Summary"), summaryLabel,
                 openAfterCreate,
@@ -1231,12 +1196,10 @@ public class NewArchiveWizard extends Dialog<Void> {
 
     /** Re-suggest the folder for the current selection unless it was edited. */
     private void onDestinationPageShown() {
-        String current = folderField.getText() == null ? "" : folderField.getText().trim();
-        if (current.equals(lastDefaultFolder)) {
-            lastDefaultFolder = defaultFolder();
-            folderField.setText(lastDefaultFolder);
-        }
-        refreshDestinationPreview();
+        List<String> paths = new ArrayList<>();
+        for (ContainerNode c : usedContainers()) paths.add(c.container.path);
+        destinationPane.suggestFolder(paths);
+        refreshDestinationSummary();
     }
 
     /** Containers with at least one checked dataset (all of them before listing). */
@@ -1250,37 +1213,6 @@ public class NewArchiveWizard extends Dialog<Void> {
         return used;
     }
 
-    /**
-     * Suggested folder: the explorer's current bucket or local folder, narrowed
-     * to the containers' parent subfolder when they all share the same one.
-     */
-    private String defaultFolder() {
-        if (bucketOrRoot.isEmpty()) return "";
-        String common = null;
-        boolean same = true;
-        for (ContainerNode c : usedContainers()) {
-            String parent = parentOf(c.container.path);
-            if (common == null) common = parent;
-            else if (!common.equals(parent)) { same = false; break; }
-        }
-        String sub = same && common != null ? common : "";
-        if (localSource) {
-            return sub.isEmpty() ? bucketOrRoot : new File(bucketOrRoot, sub).getAbsolutePath();
-        }
-        if (endpoint.isEmpty()) return "";
-        String url = MarsS3Browser.buildPath(endpoint, bucketOrRoot, sub);
-        return url.endsWith("/") ? url : url + "/";
-    }
-
-    /** Parent folder of a relative container path ("" at the top level). */
-    private static String parentOf(String path) {
-        if (path == null) return "";
-        String p = path.replace('\\', '/');
-        while (p.endsWith("/")) p = p.substring(0, p.length() - 1);
-        int i = p.lastIndexOf('/');
-        return i < 0 ? "" : p.substring(0, i);
-    }
-
     private String defaultName() {
         if (containers.size() == 1) {
             String n = containers.get(0).container.name.replaceAll("/+$", "");
@@ -1289,38 +1221,13 @@ public class NewArchiveWizard extends Dialog<Void> {
         return "archive";
     }
 
-    private static boolean isCloud(String folder) {
-        String f = folder.trim().toLowerCase();
-        return f.startsWith("http://") || f.startsWith("https://") || f.startsWith("s3://");
-    }
-
-    private String fileName() {
-        String n = nameField.getText() == null ? "" : nameField.getText().trim();
-        // Drop an ending typed into the name, the button carries it.
-        n = n.replaceAll("(?i)\\.yama(\\.store)?$", "");
-        return n.isEmpty() ? "" : n + (storeEnding ? ENDING_STORE : ENDING_FILE);
-    }
-
-    /** Full destination (S3 URL or absolute path), or null if incomplete. */
-    private String destination() {
-        String folder = folderField.getText() == null ? "" : folderField.getText().trim();
-        String name = fileName();
-        if (folder.isEmpty() || name.isEmpty()) return null;
-        if (isCloud(folder)) return folder.endsWith("/") ? folder + name : folder + "/" + name;
-        return new File(folder, name).getAbsolutePath();
-    }
-
     private boolean canCreate() {
-        return !busy && archiveType != null && destination() != null
+        return !busy && archiveType != null && destinationPane.destination() != null
                 && !includedRecords().isEmpty();
     }
 
-    private void refreshDestinationPreview() {
-        if (destinationPreview == null) return;
-        String dest = destination();
-        destinationPreview.setText(dest == null ? "Enter a folder and a name."
-                : "Saves to " + dest);
-
+    private void refreshDestinationSummary() {
+        if (summaryLabel == null) return;
         List<DatasetRecord> records = includedRecords();
         int sourceCount = 0;
         for (DatasetRecord r : records) sourceCount += r.sources.size();
@@ -1335,44 +1242,16 @@ public class NewArchiveWizard extends Dialog<Void> {
         updateButtons();
     }
 
-    private void browseS3() {
-        CloudArchiveSaveDialog dialog = new CloudArchiveSaveDialog(
-                getDialogPane().getScene().getWindow(), fileName().isEmpty()
-                        ? defaultName() : fileName());
-        MarsThemeManager.applyTheme(dialog.getDialogPane(), MarsThemeManager.isDarkTheme());
-        dialog.showAndWait().ifPresent(url -> {
-            // Split the chosen URL back into folder + name + ending.
-            int slash = url.lastIndexOf('/');
-            String folder = url.substring(0, slash + 1);
-            String file = url.substring(slash + 1);
-            storeEnding = file.endsWith(ENDING_STORE);
-            endingButton.setText(storeEnding ? ENDING_STORE : ENDING_FILE);
-            folderField.setText(folder);
-            nameField.setText(file.replaceAll("\\.yama(\\.store)?$", ""));
-        });
-    }
-
-    private void browseLocal() {
-        DirectoryChooser chooser = new DirectoryChooser();
-        chooser.setTitle("Choose folder for the new archive");
-        String current = folderField.getText() == null ? "" : folderField.getText().trim();
-        File start = !current.isEmpty() && !isCloud(current) ? new File(current)
-                : (localSource && !bucketOrRoot.isEmpty() ? new File(bucketOrRoot) : null);
-        if (start != null && start.isDirectory()) chooser.setInitialDirectory(start);
-        File dir = chooser.showDialog(getDialogPane().getScene().getWindow());
-        if (dir != null) folderField.setText(dir.getAbsolutePath());
-    }
-
     // -----------------------------------------------------------------
     // Create
     // -----------------------------------------------------------------
 
     private void create() {
         if (!canCreate()) return;
-        final String dest = destination();
-        final String name = fileName();
+        final String dest = destinationPane.destination();
+        final String name = destinationPane.fileName();
         final ArchiveType type = archiveType;
-        final boolean store = storeEnding;
+        final boolean store = destinationPane.isStoreEnding();
         final boolean open = openAfterCreate.isSelected();
         final List<DatasetRecord> records = includedRecords();
 
@@ -1381,8 +1260,8 @@ public class NewArchiveWizard extends Dialog<Void> {
         Task<Void> task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
-                if (exists(dest)) throw new IOException(dest + " already exists. "
-                        + "Choose another name or folder.");
+                if (ArchiveDestinationPane.exists(dest)) throw new IOException(dest
+                        + " already exists. Choose another name or folder.");
 
                 MoleculeArchive<?, MarsOMEMetadata, ?, ?> archive = type.create(name);
                 for (DatasetRecord r : records) {
@@ -1403,7 +1282,7 @@ public class NewArchiveWizard extends Dialog<Void> {
                 log += "\n" + LogBuilder.endBlock(true);
                 archive.logln(log);
 
-                if (isCloud(dest)) {
+                if (ArchiveDestinationPane.isCloud(dest)) {
                     if (store) archive.saveAsVirtualStore(dest);
                     else archive.saveAs(dest);
                 }
@@ -1419,8 +1298,8 @@ public class NewArchiveWizard extends Dialog<Void> {
 
         task.setOnSucceeded(e -> {
             setBusy(false, "");
-            if (onCreated != null)
-                onCreated.accept(new Created(dest, name, relativeToSource(dest), open));
+            if (onCreated != null) onCreated.accept(new ArchiveDestinationPane.Created(
+                    dest, name, destinationPane.relativeToSource(dest), open));
             close();
         });
         task.setOnFailed(e -> {
@@ -1434,44 +1313,11 @@ public class NewArchiveWizard extends Dialog<Void> {
         t.start();
     }
 
-    /** True if something is already saved at the destination (local or S3). */
-    private static boolean exists(String dest) {
-        if (!isCloud(dest)) return new File(dest).exists();
-        MarsS3Browser.ParsedPath p = MarsS3Browser.parsePath(dest);
-        if (p == null) return false;
-        try (MarsS3Browser browser = new MarsS3Browser(p.server)) {
-            return browser.exists(p.bucket, p.n5Root);
-        }
-        catch (Exception ex) {
-            return false; // can't tell — let the save itself report problems
-        }
-    }
-
-    /**
-     * The destination's path relative to the explorer's current bucket or local
-     * root, or null when it was saved somewhere else.
-     */
-    private String relativeToSource(String dest) {
-        if (bucketOrRoot.isEmpty()) return null;
-        if (localSource) {
-            if (isCloud(dest)) return null;
-            String root = new File(bucketOrRoot).getAbsolutePath();
-            String abs = new File(dest).getAbsolutePath();
-            if (!abs.startsWith(root + File.separator)) return null;
-            return abs.substring(root.length() + 1);
-        }
-        MarsS3Browser.ParsedPath p = MarsS3Browser.parsePath(dest);
-        if (p == null || !bucketOrRoot.equals(p.bucket)) return null;
-        return p.n5Root;
-    }
-
     private void setBusy(boolean on, String message) {
         busy = on;
         createProgress.setVisible(on);
         createStatus.setText(message);
-        folderField.setDisable(on);
-        nameField.setDisable(on);
-        endingButton.setDisable(on);
+        destinationPane.setEditable(!on);
         updateButtons();
         updateStepCursors();
     }
