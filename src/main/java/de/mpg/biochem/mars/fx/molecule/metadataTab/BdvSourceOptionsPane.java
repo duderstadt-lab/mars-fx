@@ -30,11 +30,16 @@
 package de.mpg.biochem.mars.fx.molecule.metadataTab;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.function.Consumer;
+import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
 import javax.swing.SwingUtilities;
@@ -59,7 +64,10 @@ import org.janelia.saalfeldlab.n5.universe.metadata.ome.ngff.OmeNgffMetadataPars
 
 import org.kordamp.ikonli.fontawesome.FontAwesome;
 
+import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
+import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -68,8 +76,14 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -99,6 +113,11 @@ public class BdvSourceOptionsPane extends VBox {
 	private MarsBdvSource marsBdvSource;
 
 	private HBox n5OptionsHBox;
+
+	// Transform presets stored in the local preferences (BdvTransformPresets).
+	private ComboBox<String> transformPresets;
+	private Map<String, double[]> presetValues = new LinkedHashMap<>();
+	private boolean updatingPresets = false;
 
 	// Icons reused across validation updates.
 	private Text times, check, times2, check2;
@@ -218,6 +237,14 @@ public class BdvSourceOptionsPane extends VBox {
 		GridPane.setMargin(m12, new Insets(0, 5, 10, 5));
 
 		getChildren().add(gridpane2);
+
+		// Predefined transforms (e.g. one per microscope/channel) above the
+		// coefficients. Picking one fills the six fields; editing the fields
+		// re-selects whichever preset they match, if any.
+		getChildren().add(0, buildTransformPresetRow());
+		for (TextField f : new TextField[] { m00, m01, m02, m10, m11, m12 })
+			f.textProperty().addListener((observable, oldValue,
+				newValue) -> syncTransformPreset());
 
 		GridPane gridpane3 = new GridPane();
 
@@ -569,6 +596,183 @@ public class BdvSourceOptionsPane extends VBox {
 	 */
 	public void shutdown() {
 		validationExecutor.shutdownNow();
+	}
+
+	private HBox buildTransformPresetRow() {
+		Label label = new Label("Transform");
+		HBox.setMargin(label, new Insets(0, 5, 10, 5));
+
+		transformPresets = new ComboBox<>();
+		transformPresets.setPrefWidth(260);
+		transformPresets.setPromptText("Custom");
+		transformPresets.setTooltip(new Tooltip(
+			"Predefined transforms saved in your local Fiji settings. None is the " +
+				"identity (no transformation)."));
+		HBox.setMargin(transformPresets, new Insets(0, 5, 10, 5));
+		// Reload on open so presets saved from another window show up.
+		transformPresets.setOnShowing(e -> reloadTransformPresets());
+		transformPresets.valueProperty().addListener((observable, oldValue,
+			newValue) -> {
+			if (updatingPresets || newValue == null) return;
+			applyTransform(BdvTransformPresets.NONE.equals(newValue)
+				? BdvTransformPresets.identity() : presetValues.get(newValue));
+		});
+
+		Button save = new Button("Save");
+		save.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
+		save.setTooltip(new Tooltip(
+			"Save the current coefficients as a named transform"));
+		save.setOnAction(e -> saveTransformPreset());
+		HBox.setMargin(save, new Insets(0, 5, 10, 5));
+
+		Button delete = new Button();
+		delete.setGraphic(ActionUtils.icon(FontAwesome.TRASH, "1.0em"));
+		delete.setTooltip(new Tooltip("Delete the selected saved transform"));
+		delete.disableProperty().bind(transformPresets.valueProperty().isNull()
+			.or(transformPresets.valueProperty().isEqualTo(BdvTransformPresets.NONE)));
+		delete.setOnAction(e -> deleteTransformPreset());
+		HBox.setMargin(delete, new Insets(0, 5, 10, 5));
+
+		reloadTransformPresets();
+
+		HBox row = new HBox(label, transformPresets, save, delete);
+		row.setAlignment(Pos.CENTER_LEFT);
+		return row;
+	}
+
+	/** Refresh the dropdown from the preferences, keeping the matching choice. */
+	private void reloadTransformPresets() {
+		presetValues = BdvTransformPresets.load();
+		updatingPresets = true;
+		List<String> items = new ArrayList<>();
+		items.add(BdvTransformPresets.NONE);
+		items.addAll(presetValues.keySet());
+		transformPresets.getItems().setAll(items);
+		updatingPresets = false;
+		syncTransformPreset();
+	}
+
+	/** The six coefficients currently in the fields, or null if one isn't a number. */
+	private double[] currentTransform() {
+		try {
+			return new double[] { Double.parseDouble(m00.getText()), Double
+				.parseDouble(m01.getText()), Double.parseDouble(m02.getText()), Double
+					.parseDouble(m10.getText()), Double.parseDouble(m11.getText()),
+				Double.parseDouble(m12.getText()) };
+		}
+		catch (NumberFormatException | NullPointerException e) {
+			return null;
+		}
+	}
+
+	/** Select the preset matching the fields: None for identity, else blank (Custom). */
+	private void syncTransformPreset() {
+		if (transformPresets == null || updatingPresets) return;
+		double[] current = currentTransform();
+		String match = null;
+		if (BdvTransformPresets.matches(current, BdvTransformPresets.identity()))
+			match = BdvTransformPresets.NONE;
+		else for (Map.Entry<String, double[]> e : presetValues.entrySet())
+			if (BdvTransformPresets.matches(current, e.getValue())) {
+				match = e.getKey();
+				break;
+			}
+		updatingPresets = true;
+		transformPresets.setValue(match);
+		updatingPresets = false;
+	}
+
+	/** Write a transform into the fields; their listeners update the source. */
+	private void applyTransform(double[] v) {
+		if (v == null) return;
+		updatingPresets = true;
+		m00.setText(String.valueOf(v[0]));
+		m01.setText(String.valueOf(v[1]));
+		m02.setText(String.valueOf(v[2]));
+		m10.setText(String.valueOf(v[3]));
+		m11.setText(String.valueOf(v[4]));
+		m12.setText(String.valueOf(v[5]));
+		updatingPresets = false;
+		syncTransformPreset();
+	}
+
+	private void saveTransformPreset() {
+		double[] current = currentTransform();
+		if (current == null) {
+			showTransformError(
+				"All six coefficients must be numbers to save a transform.");
+			return;
+		}
+		String suggested = transformPresets.getValue() == null ||
+			BdvTransformPresets.NONE.equals(transformPresets.getValue()) ? ""
+				: transformPresets.getValue();
+		TextInputDialog dialog = new TextInputDialog(suggested);
+		dialog.setTitle("Save Transform");
+		dialog.setHeaderText(null);
+		dialog.setContentText("Name (e.g. microscope and channel):");
+		dialog.initOwner(getScene().getWindow());
+		ImageView rover = new ImageView(new Image(
+			"de/mpg/biochem/mars/fx/images/RoverSmile.png"));
+		rover.setFitWidth(80);
+		rover.setFitHeight(80);
+		dialog.setGraphic(rover);
+		MarsThemeManager.applyTheme(dialog.getDialogPane(), MarsThemeManager
+			.isDarkTheme());
+		Optional<String> result = dialog.showAndWait();
+		if (!result.isPresent()) return;
+		String name = result.get().trim();
+		if (name.isEmpty()) return;
+		if (name.equalsIgnoreCase(BdvTransformPresets.NONE) ||
+			name.length() > BdvTransformPresets.MAX_NAME_LENGTH)
+		{
+			showTransformError("Choose a name other than \"" +
+				BdvTransformPresets.NONE + "\", at most " +
+				BdvTransformPresets.MAX_NAME_LENGTH + " characters long.");
+			return;
+		}
+		if (presetValues.containsKey(name) && !confirmTransform(
+			"Replace the saved transform \"" + name + "\"?")) return;
+		try {
+			BdvTransformPresets.save(name, current);
+		}
+		catch (BackingStoreException ex) {
+			showTransformError("Could not save the transform: " +
+				ex.getMessage());
+			return;
+		}
+		reloadTransformPresets();
+	}
+
+	private void deleteTransformPreset() {
+		String name = transformPresets.getValue();
+		if (name == null || BdvTransformPresets.NONE.equals(name)) return;
+		if (!confirmTransform("Delete the saved transform \"" + name + "\"?"))
+			return;
+		try {
+			BdvTransformPresets.remove(name);
+		}
+		catch (BackingStoreException ex) {
+			showTransformError("Could not delete the transform: " +
+				ex.getMessage());
+			return;
+		}
+		reloadTransformPresets();
+	}
+
+	private boolean confirmTransform(String message) {
+		RoverConfirmationDialog alert = new RoverConfirmationDialog(getScene()
+			.getWindow(), message, ButtonType.YES, ButtonType.NO);
+		MarsThemeManager.applyTheme(alert.getDialogPane(), MarsThemeManager
+			.isDarkTheme());
+		return alert.showAndWait().orElse(ButtonType.NO) == ButtonType.YES;
+	}
+
+	private void showTransformError(String message) {
+		RoverErrorDialog alert = new RoverErrorDialog(getScene().getWindow(),
+			message);
+		MarsThemeManager.applyTheme(alert.getDialogPane(), MarsThemeManager
+			.isDarkTheme());
+		alert.showAndWait();
 	}
 
 	private void setAffineTransform3D(String value, int m, int n) {
