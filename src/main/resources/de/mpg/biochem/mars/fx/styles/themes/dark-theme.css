@@ -1328,22 +1328,21 @@ Text, .text {
     -fx-text-fill: rgb(180, 180, 180);
 }
 
-.archive-type-glyph {
-    -fx-fill: transparent;
-    -fx-stroke: rgb(190, 196, 206);
-    -fx-stroke-width: 2.5;
-    -fx-stroke-line-cap: round;
+/* Molecules-tab icons on the type tiles (sized inline by the wizard). */
+.archive-type-icon {
+    -icon-paint: rgb(200, 205, 214) !important;
+    -fx-background-color: rgb(200, 205, 214) !important;
 }
 
-.archive-type-glyph-fill {
-    -fx-fill: rgb(190, 196, 206);
-    -fx-stroke: transparent;
+.toggle-button.archive-type-tile:selected .archive-type-icon {
+    -icon-paint: rgb(110, 162, 250) !important;
+    -fx-background-color: rgb(110, 162, 250) !important;
 }
 
-.archive-type-tile:selected .archive-type-glyph {
-    -fx-stroke: rgb(110, 162, 250);
-}
-
-.archive-type-tile:selected .archive-type-glyph-fill {
-    -fx-fill: rgb(110, 162, 250);
+/* Selected dataset banner on the sources step, led by the channel count. */
+.wizard-record-summary {
+    -fx-background-color: rgba(96, 150, 240, 0.14);
+    -fx-background-radius: 4;
+    -fx-padding: 6 8 6 8;
+    -fx-font-weight: bold;
 }

@@ -30,10 +30,9 @@ package de.mpg.biochem.mars.fx.dialogs.s3.explorer;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -50,8 +49,6 @@ import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.n5.MarsS3Browser;
 import de.mpg.biochem.mars.util.LogBuilder;
 import de.mpg.biochem.mars.util.MarsMath;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -59,7 +56,6 @@ import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -67,11 +63,10 @@ import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonBar.ButtonData;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.CheckBoxTreeItem;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -81,6 +76,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -90,16 +89,18 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.SVGPath;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Window;
+import javafx.util.StringConverter;
 
 /**
  * Step-by-step wizard, opened from the Dataset Explorer's plus button, that
- * builds a new Molecule Archive from the N5/Zarr datasets currently shown by
- * the explorer's filter. Each dataset becomes one {@link MarsOMEMetadata}
- * record, and each record carries the {@link MarsBdvSource}s defined for it.
+ * builds a new Molecule Archive from the N5/Zarr containers currently shown by
+ * the explorer's filter. Every dataset inside a container (typically one per
+ * stage position, Pos0…PosN, each a multi-channel time series) becomes one
+ * {@link MarsOMEMetadata} record, carrying the {@link MarsBdvSource}s defined
+ * for it — usually one per channel.
  *
  * <p>Layout:
  * <pre>
@@ -109,10 +110,11 @@ import javafx.stage.Window;
  *  Buttons:    Cancel · Back · Next (Next becomes Create on the last step)
  * </pre>
  *
- * <p>Steps: 1. Datasets (which datasets become records), 2. BDV Sources
- * (sources per record, autofilled from each container), 3. Archive Type,
+ * <p>Steps: 1. Datasets (a checkable container → dataset tree; checking a
+ * container checks all its datasets), 2. BDV Sources (sources per dataset,
+ * with per-channel autofill and copying to other datasets), 3. Archive Type,
  * 4. Destination (folder + name, defaulting to the explorer's current bucket
- * or local folder, or to the datasets' shared subfolder).
+ * or local folder, or to the containers' shared subfolder).
  *
  * <p>Theme: the sidebar, step and tile styles live in the light/dark theme
  * sheets (classes prefixed {@code wizard-} and {@code archive-type-}), applied
@@ -120,15 +122,15 @@ import javafx.stage.Window;
  */
 public class NewArchiveWizard extends Dialog<Void> {
 
-    /** One N5/Zarr dataset offered by the explorer. */
-    public static final class SourceDataset {
+    /** One N5/Zarr container offered by the explorer. */
+    public static final class Container {
 
         final String name;      // display name, e.g. "lane1.n5"
         final String path;      // path relative to the bucket or local root
         final String url;       // openable URL (S3) or absolute local path
         final long sizeBytes;   // -1 if unknown
 
-        public SourceDataset(String name, String path, String url, long sizeBytes) {
+        public Container(String name, String path, String url, long sizeBytes) {
             this.name = name;
             this.path = path;
             this.url = url;
@@ -160,7 +162,8 @@ public class NewArchiveWizard extends Dialog<Void> {
     }
 
     /**
-     * The archive types offered on the type step. Classes are resolved by name
+     * The archive types offered on the type step, each with the icon its
+     * molecules tab uses in the archive window. Classes are resolved by name
      * so optional types (TransverseFlowArchive lives in mars-transverseflow,
      * which depends on mars-fx rather than the other way round) only show up
      * enabled when they're on the classpath.
@@ -168,28 +171,37 @@ public class NewArchiveWizard extends Dialog<Void> {
     private enum ArchiveType {
         SINGLE_MOLECULE("Single Molecule", "SingleMoleculeArchive",
                 "de.mpg.biochem.mars.molecule.SingleMoleculeArchive",
-                "Spots tracked over time, e.g. TIRF single-molecule imaging."),
+                "Spots tracked over time, e.g. TIRF single-molecule imaging.",
+                "moleculeIcon", null),
         DNA_MOLECULE("DNA Molecule", "DnaMoleculeArchive",
                 "de.mpg.biochem.mars.molecule.DnaMoleculeArchive",
-                "Stretched DNA molecules with positions along each strand."),
+                "Stretched DNA molecules with positions along each strand.",
+                "dnaIcon", null),
         OBJECT("Object", "ObjectArchive",
                 "de.mpg.biochem.mars.object.ObjectArchive",
-                "Segmented objects with shapes tracked over time."),
+                "Segmented objects with shapes tracked over time.",
+                "objectIcon", null),
         TRANSVERSE_FLOW("Transverse Flow", "TransverseFlowArchive",
                 "de.mpg.biochem.mars.transverseflow.TransverseFlowArchive",
-                "Replication forks imaged with transverse flow.");
+                "Replication forks imaged with transverse flow.",
+                "transverseFlowIcon",
+                "de/mpg/biochem/mars/transverseflow/TransverseFlowFrame.css");
 
         final String title;
         final String archiveClassName;
         final String className;
         final String description;
+        final String iconStyleClass;
+        final String iconStylesheet; // extra sheet defining the icon, or null
 
         ArchiveType(String title, String archiveClassName, String className,
-                    String description) {
+                    String description, String iconStyleClass, String iconStylesheet) {
             this.title = title;
             this.archiveClassName = archiveClassName;
             this.className = className;
             this.description = description;
+            this.iconStyleClass = iconStyleClass;
+            this.iconStylesheet = iconStylesheet;
         }
 
         Class<?> archiveClass() {
@@ -213,28 +225,96 @@ public class NewArchiveWizard extends Dialog<Void> {
             return (MoleculeArchive<?, MarsOMEMetadata, ?, ?>) c.getConstructor(
                     String.class).newInstance(name);
         }
+
+        /** The molecules-tab icon for this type, sized for a tile. */
+        Region icon() {
+            Region icon = new Region();
+            icon.getStyleClass().addAll(iconStyleClass, "archive-type-icon");
+            // Inline, since icons.css (loaded after the theme sheets) sizes these at 20.
+            icon.setStyle("-fx-min-width: 40px; -fx-min-height: 40px;"
+                    + " -fx-max-width: 40px; -fx-max-height: 40px;");
+            if (iconStylesheet != null) {
+                Class<?> c = archiveClass();
+                URL sheet = c == null ? null : c.getClassLoader().getResource(iconStylesheet);
+                if (sheet != null) icon.getStylesheets().add(sheet.toExternalForm());
+                else icon.getStyleClass().setAll("moleculeIcon", "archive-type-icon");
+            }
+            return icon;
+        }
     }
 
-    /** One dataset row on the first step, with its include checkbox. */
-    private static final class DatasetRow {
+    /** One container on the dataset tree, with its datasets once listed. */
+    private static final class ContainerNode {
 
-        final SourceDataset dataset;
-        final BooleanProperty include = new SimpleBooleanProperty(true);
+        final Container container;
+        final CheckBoxTreeItem<Object> treeItem;
+        final List<DatasetRecord> datasets = new ArrayList<>();
+        boolean listed;
 
-        DatasetRow(SourceDataset dataset) { this.dataset = dataset; }
+        ContainerNode(Container container) {
+            this.container = container;
+            this.treeItem = new CheckBoxTreeItem<>(this, null, true);
+            this.treeItem.setExpanded(true);
+        }
     }
 
-    /** The metadata record being assembled for one dataset. */
-    private static final class RecordDraft {
+    /**
+     * One dataset inside a container — the unit that becomes a metadata record,
+     * holding the sources defined for it.
+     */
+    private static final class DatasetRecord {
 
-        final SourceDataset dataset;
+        final ContainerNode container;
+        final de.mpg.biochem.mars.n5.DatasetEntry entry;
+        final CheckBoxTreeItem<Object> treeItem;
         final String uid = MarsMath.getUUID58().substring(0, 10);
         final ObservableList<MarsBdvSource> sources = FXCollections.observableArrayList();
-        // Datasets inside the container; null until the background listing returns.
-        List<de.mpg.biochem.mars.n5.DatasetEntry> containerDatasets;
-        boolean listing;
 
-        RecordDraft(SourceDataset dataset) { this.dataset = dataset; }
+        DatasetRecord(ContainerNode container, de.mpg.biochem.mars.n5.DatasetEntry entry) {
+            this.container = container;
+            this.entry = entry;
+            this.treeItem = new CheckBoxTreeItem<>(this);
+        }
+
+        String url() { return container.container.url; }
+
+        /** Dataset path inside the container ("/" when the root is the dataset). */
+        String datasetName() { return entry.getName(); }
+
+        /** Readable name: the dataset, or the container when the root is the dataset. */
+        String displayName() {
+            return MarsS3Browser.ROOT_DATASET.equals(entry.getName())
+                    ? container.container.name : entry.getName();
+        }
+
+        boolean included() { return treeItem.isSelected(); }
+
+        /**
+         * Channels in the dataset. Mars writes XY[Z]CT, and the BDV loader slices
+         * channels from the second-to-last axis, so that's the channel count for
+         * 4+ dimensions; XYT (or smaller) has a single channel.
+         */
+        int channels() {
+            long[] d = entry.getDimensions();
+            return d.length >= 4 ? (int) d[d.length - 2] : 1;
+        }
+
+        /** Timepoints (OME SizeT): the last axis for 3+ dimensions. */
+        long timepoints() {
+            long[] d = entry.getDimensions();
+            return d.length >= 3 ? d[d.length - 1] : 1;
+        }
+
+        /** E.g. "3 channels · 200 timepoints · 512×512 · uint16". */
+        String summary() {
+            long[] d = entry.getDimensions();
+            String xy = d.length >= 2 ? d[0] + "×" + d[1] : entry.getDimensionString();
+            int c = channels();
+            long t = timepoints();
+            return c + (c == 1 ? " channel" : " channels") + " · " + t
+                    + (t == 1 ? " timepoint" : " timepoints") + " · " + xy + " · "
+                    + entry.getDataType();
+        }
     }
 
     private static final String ENDING_FILE = ".yama";
@@ -259,9 +339,7 @@ public class NewArchiveWizard extends Dialog<Void> {
     private final int skippedArchives;
 
     // Model
-    private final ObservableList<DatasetRow> datasetRows = FXCollections.observableArrayList();
-    private final Map<String, RecordDraft> drafts = new LinkedHashMap<>(); // keyed by url
-    private final ObservableList<RecordDraft> records = FXCollections.observableArrayList();
+    private final List<ContainerNode> containers = new ArrayList<>();
     private ArchiveType archiveType;
 
     // Navigation
@@ -278,17 +356,25 @@ public class NewArchiveWizard extends Dialog<Void> {
     private boolean busy = false;
 
     // Step 1
+    private TreeView<Object> datasetTree;
     private Label datasetCountLabel;
+    private int pendingListings = 0;
 
     // Step 2
-    private ListView<RecordDraft> recordList;
+    private TreeView<Object> recordTree;
     private ListView<MarsBdvSource> sourceList;
-    private ComboBox<String> sourceNameBox;
-    private Label containerLabel;
+    private TextField sourceNameField;
+    private Label recordSummary;
+    private Button addChannelsButton;
+    private MenuButton applyButton;
     private BdvSourceOptionsPane optionsPane;
+
+    // Step 3
+    private Label typeDescription;
 
     // Step 4
     private TextField folderField;
+    private String lastDefaultFolder;
     private TextField nameField;
     private Button endingButton;
     private boolean storeEnding = false;
@@ -300,8 +386,8 @@ public class NewArchiveWizard extends Dialog<Void> {
 
     private Consumer<Created> onCreated;
 
-    // Lists container datasets for source autofill, one container at a time.
-    private final ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+    // Lists the datasets inside each container, a few containers at a time.
+    private final ExecutorService executor = Executors.newFixedThreadPool(4, r -> {
         Thread t = new Thread(r, "NewArchiveWizard");
         t.setDaemon(true);
         return t;
@@ -309,15 +395,15 @@ public class NewArchiveWizard extends Dialog<Void> {
 
     /**
      * @param owner the explorer window
-     * @param datasets N5/Zarr datasets from the explorer's current filter, in
-     *          card order
+     * @param containers N5/Zarr containers from the explorer's current filter,
+     *          in card order
      * @param skippedArchives number of archives in the filter (not offered)
      * @param localSource true if the explorer is showing a local folder
      * @param endpoint S3 server (cloud source); ignored for local
      * @param bucketOrRoot current bucket (cloud) or indexed root folder (local)
      * @param darkMode current theme
      */
-    public NewArchiveWizard(Window owner, List<SourceDataset> datasets,
+    public NewArchiveWizard(Window owner, List<Container> containers,
                             int skippedArchives, boolean localSource,
                             String endpoint, String bucketOrRoot, boolean darkMode)
     {
@@ -325,7 +411,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         this.endpoint = endpoint == null ? "" : endpoint;
         this.bucketOrRoot = bucketOrRoot == null ? "" : bucketOrRoot;
         this.skippedArchives = skippedArchives;
-        for (SourceDataset d : datasets) datasetRows.add(new DatasetRow(d));
+        for (Container c : containers) this.containers.add(new ContainerNode(c));
 
         setTitle("New Molecule Archive");
         initOwner(owner);
@@ -341,7 +427,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         content.setLeft(buildSidebar());
         pageHolder.setPadding(new Insets(20, 24, 12, 24));
         content.setCenter(pageHolder);
-        content.setPrefSize(1240, 680);
+        content.setPrefSize(1240, 700);
         // Edge-to-edge sidebar: drop the dialog's default content padding.
         content.setStyle("-fx-padding: 0;");
 
@@ -389,6 +475,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         MarsThemeManager.applyTheme(getDialogPane(), darkMode);
 
         goTo(0);
+        for (ContainerNode c : this.containers) listContainer(c);
     }
 
     /** Called on the FX thread once the archive has been saved. */
@@ -449,7 +536,6 @@ public class NewArchiveWizard extends Dialog<Void> {
     }
 
     private void goTo(int target) {
-        if (step == 0 && target > 0) syncRecords();
         step = target;
         furthestStep = Math.max(furthestStep, step);
         pageHolder.getChildren().setAll(pages[step]);
@@ -462,13 +548,13 @@ public class NewArchiveWizard extends Dialog<Void> {
         updateStepCursors();
 
         if (step == 1) onSourcesPageShown();
-        if (step == 3) refreshDestinationPreview();
+        if (step == 3) onDestinationPageShown();
         updateButtons();
     }
 
     private boolean canAdvance() {
         switch (step) {
-            case 0: return includedCount() > 0;
+            case 0: return pendingListings == 0 && !includedRecords().isEmpty();
             case 2: return archiveType != null;
             default: return true;
         }
@@ -482,111 +568,185 @@ public class NewArchiveWizard extends Dialog<Void> {
         nextButton.setDisable(busy || (last ? !canCreate() : !canAdvance()));
     }
 
+    /** Hand cursor on sidebar steps that can be jumped to. */
+    private void updateStepCursors() {
+        for (int i = 0; i < stepRows.size(); i++)
+            stepRows.get(i).setCursor(!busy && i <= furthestStep && i != step
+                    ? javafx.scene.Cursor.HAND : javafx.scene.Cursor.DEFAULT);
+    }
+
+    /** Checked datasets, in container then dataset order. */
+    private List<DatasetRecord> includedRecords() {
+        List<DatasetRecord> list = new ArrayList<>();
+        for (ContainerNode c : containers)
+            for (DatasetRecord r : c.datasets)
+                if (r.included()) list.add(r);
+        return list;
+    }
+
     // -----------------------------------------------------------------
     // Step 1 — Datasets
     // -----------------------------------------------------------------
 
     private Region buildDatasetsPage() {
-        ListView<DatasetRow> list = new ListView<>(datasetRows);
-        list.setCellFactory(lv -> new DatasetRowCell());
-        list.setPlaceholder(new Label(
-                "No N5/Zarr datasets match the explorer's current filter."));
-        VBox.setVgrow(list, Priority.ALWAYS);
+        CheckBoxTreeItem<Object> root = new CheckBoxTreeItem<>("root");
+        for (ContainerNode c : containers) root.getChildren().add(c.treeItem);
 
-        for (DatasetRow r : datasetRows)
-            r.include.addListener((o, was, now) -> {
-                updateDatasetCount();
-                updateButtons();
-            });
+        TreeView<Object> tree = new TreeView<>(root);
+        datasetTree = tree;
+        tree.setShowRoot(false);
+        tree.setCellFactory(tv -> new DatasetTreeCell());
+        VBox.setVgrow(tree, Priority.ALWAYS);
+        if (containers.isEmpty()) {
+            tree.setVisible(false);
+            tree.setManaged(false);
+        }
+        Label empty = new Label(
+                "No N5/Zarr containers match the explorer's current filter.");
+        empty.setVisible(containers.isEmpty());
+        empty.setManaged(containers.isEmpty());
 
         Button all = new Button("Select all");
-        all.setOnAction(e -> datasetRows.forEach(r -> r.include.set(true)));
+        all.setOnAction(e -> containers.forEach(c -> c.treeItem.setSelected(true)));
         Button none = new Button("Select none");
-        none.setOnAction(e -> datasetRows.forEach(r -> r.include.set(false)));
+        none.setOnAction(e -> containers.forEach(c -> c.treeItem.setSelected(false)));
+        Button expand = new Button("Expand all");
+        expand.setOnAction(e -> containers.forEach(c -> c.treeItem.setExpanded(true)));
+        Button collapse = new Button("Collapse all");
+        collapse.setOnAction(e -> containers.forEach(c -> c.treeItem.setExpanded(false)));
         datasetCountLabel = new Label();
         datasetCountLabel.getStyleClass().add("wizard-hint");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        HBox footer = new HBox(6, datasetCountLabel, spacer, all, none);
+        HBox footer = new HBox(6, datasetCountLabel, spacer, expand, collapse, all, none);
         footer.setAlignment(Pos.CENTER_LEFT);
         updateDatasetCount();
 
         return page("Datasets",
-                "Each N5/Zarr dataset below becomes one metadata record. The list "
-                        + "follows the Dataset Explorer's current search and filters.",
-                list, footer);
+                "Every dataset inside a container (e.g. each stage position Pos0, "
+                        + "Pos1, …) becomes one metadata record. Checking a container "
+                        + "selects all of its datasets. The containers follow the "
+                        + "Dataset Explorer's current search and filters.",
+                tree, empty, footer);
     }
 
-    private int includedCount() {
-        int n = 0;
-        for (DatasetRow r : datasetRows) if (r.include.get()) n++;
-        return n;
+    /** List a container's datasets off the FX thread and add them to the tree. */
+    private void listContainer(ContainerNode c) {
+        pendingListings++;
+        updateDatasetCount();
+        Task<List<de.mpg.biochem.mars.n5.DatasetEntry>> task =
+                new Task<List<de.mpg.biochem.mars.n5.DatasetEntry>>() {
+            @Override
+            protected List<de.mpg.biochem.mars.n5.DatasetEntry> call() {
+                return MarsS3Browser.listDatasets(c.container.url);
+            }
+        };
+        task.setOnSucceeded(e -> containerListed(c, task.getValue()));
+        task.setOnFailed(e -> containerListed(c, new ArrayList<>()));
+        executor.submit(task);
+    }
+
+    private void containerListed(ContainerNode c, List<de.mpg.biochem.mars.n5.DatasetEntry> entries) {
+        pendingListings--;
+        c.listed = true;
+        // New children take the container's state so a checked container stays
+        // fully checked (CheckBoxTreeItem recomputes the parent from children).
+        boolean selected = c.treeItem.isSelected();
+        for (de.mpg.biochem.mars.n5.DatasetEntry entry : entries) {
+            DatasetRecord r = new DatasetRecord(c, entry);
+            r.treeItem.setSelected(selected);
+            r.treeItem.selectedProperty().addListener((o, was, now) -> {
+                updateDatasetCount();
+                updateButtons();
+            });
+            c.datasets.add(r);
+            c.treeItem.getChildren().add(r.treeItem);
+        }
+        if (entries.isEmpty()) c.treeItem.setSelected(false);
+        datasetTree.refresh(); // container row: "Reading …" → dataset count
+        updateDatasetCount();
+        updateButtons();
     }
 
     private void updateDatasetCount() {
         if (datasetCountLabel == null) return;
-        String text = includedCount() + " of " + datasetRows.size()
-                + " dataset(s) selected";
+        List<DatasetRecord> included = includedRecords();
+        int containerCount = 0;
+        for (ContainerNode c : containers)
+            for (DatasetRecord r : c.datasets)
+                if (r.included()) { containerCount++; break; }
+        String text = included.size() + " dataset(s) selected in " + containerCount
+                + " container(s)";
+        if (pendingListings > 0) text = "Reading " + pendingListings + " container(s) … · " + text;
         if (skippedArchives > 0)
             text += " · " + skippedArchives + " archive(s) in the filter skipped";
         datasetCountLabel.setText(text);
     }
 
-    private static final class DatasetRowCell extends ListCell<DatasetRow> {
+    /** Container or dataset row with a checkbox tied to its CheckBoxTreeItem. */
+    private static final class DatasetTreeCell extends TreeCell<Object> {
 
         private final CheckBox check = new CheckBox();
         private final Label name = new Label();
-        private final Label path = new Label();
+        private final Label info = new Label();
         private final Label size = new Label();
+        private final StackPane iconHolder = new StackPane();
         private final HBox root;
-        private DatasetRow bound;
+        private CheckBoxTreeItem<Object> bound;
 
-        DatasetRowCell() {
-            name.setStyle("-fx-font-weight: bold;");
-            path.getStyleClass().add("wizard-hint");
+        DatasetTreeCell() {
+            info.getStyleClass().add("wizard-hint");
             size.getStyleClass().add("wizard-hint");
-            VBox text = new VBox(2, name, path);
+            VBox text = new VBox(1, name, info);
             HBox.setHgrow(text, Priority.ALWAYS);
-            root = new HBox(10, check, ActionUtils.icon(FontAwesome.DATABASE, "1.4em"),
-                    text, size);
+            iconHolder.setMinWidth(22);
+            root = new HBox(8, check, iconHolder, text, size);
             root.setAlignment(Pos.CENTER_LEFT);
-            root.setPadding(new Insets(4, 4, 4, 4));
+            root.setPadding(new Insets(2, 4, 2, 0));
         }
 
         @Override
-        protected void updateItem(DatasetRow item, boolean empty) {
+        @SuppressWarnings("unchecked")
+        protected void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
-            if (bound != null) check.selectedProperty().unbindBidirectional(bound.include);
-            bound = null;
-            if (empty || item == null) {
+            if (bound != null) {
+                check.selectedProperty().unbindBidirectional(bound.selectedProperty());
+                check.indeterminateProperty().unbindBidirectional(bound.indeterminateProperty());
+                bound = null;
+            }
+            if (empty || item == null || !(getTreeItem() instanceof CheckBoxTreeItem)) {
                 setGraphic(null);
                 setText(null);
                 return;
             }
-            bound = item;
-            check.selectedProperty().bindBidirectional(item.include);
-            name.setText(item.dataset.name);
-            path.setText(item.dataset.path);
-            size.setText(item.dataset.sizeBytes >= 0 ? humanBytes(item.dataset.sizeBytes) : "");
+            bound = (CheckBoxTreeItem<Object>) getTreeItem();
+            check.selectedProperty().bindBidirectional(bound.selectedProperty());
+            check.indeterminateProperty().bindBidirectional(bound.indeterminateProperty());
+
+            if (item instanceof ContainerNode) {
+                ContainerNode c = (ContainerNode) item;
+                name.setText(c.container.name);
+                name.setStyle("-fx-font-weight: bold;");
+                String state = !c.listed ? "Reading datasets …"
+                        : c.datasets.isEmpty() ? "No datasets found"
+                        : c.datasets.size() + " dataset(s)";
+                info.setText(c.container.path + " · " + state);
+                size.setText(c.container.sizeBytes >= 0 ? humanBytes(c.container.sizeBytes) : "");
+                iconHolder.getChildren().setAll(ActionUtils.icon(FontAwesome.DATABASE, "1.3em"));
+                check.setDisable(c.listed && c.datasets.isEmpty());
+            }
+            else {
+                DatasetRecord r = (DatasetRecord) item;
+                name.setText(r.displayName());
+                name.setStyle("");
+                info.setText(r.summary());
+                size.setText(humanBytes(r.entry.getNumBytes()));
+                iconHolder.getChildren().setAll(ActionUtils.icon(FontAwesome.IMAGE, "1.0em"));
+                check.setDisable(false);
+            }
             setText(null);
             setGraphic(root);
         }
-    }
-
-    /**
-     * Rebuild the record list from the checked datasets, keeping any sources
-     * already defined for datasets that stay selected.
-     */
-    private void syncRecords() {
-        List<RecordDraft> next = new ArrayList<>();
-        for (DatasetRow r : datasetRows) {
-            if (!r.include.get()) continue;
-            next.add(drafts.computeIfAbsent(r.dataset.url, k -> new RecordDraft(r.dataset)));
-        }
-        RecordDraft selected = recordList.getSelectionModel().getSelectedItem();
-        records.setAll(next);
-        if (selected != null && records.contains(selected))
-            recordList.getSelectionModel().select(selected);
     }
 
     // -----------------------------------------------------------------
@@ -594,62 +754,111 @@ public class NewArchiveWizard extends Dialog<Void> {
     // -----------------------------------------------------------------
 
     private Region buildSourcesPage() {
-        // --- Records (one per dataset) ---
-        recordList = new ListView<>(records);
-        recordList.setCellFactory(lv -> new ListCell<RecordDraft>() {
+        // --- Datasets (records), grouped under their containers ---
+        recordTree = new TreeView<>();
+        recordTree.setShowRoot(false);
+        recordTree.setCellFactory(tv -> new TreeCell<Object>() {
             @Override
-            protected void updateItem(RecordDraft item, boolean empty) {
+            protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
                     setGraphic(null);
+                    setStyle("");
                     return;
                 }
-                setText(item.dataset.name + "  (" + item.sources.size() + ")");
-                setGraphic(ActionUtils.icon(FontAwesome.DATABASE, "1.0em"));
+                if (item instanceof ContainerNode) {
+                    setText(((ContainerNode) item).container.name);
+                    setGraphic(ActionUtils.icon(FontAwesome.DATABASE, "1.0em"));
+                    setStyle("-fx-font-weight: bold;");
+                }
+                else {
+                    DatasetRecord r = (DatasetRecord) item;
+                    int n = r.sources.size();
+                    setText(r.displayName() + "   " + r.channels() + " ch · " + n
+                            + (n == 1 ? " source" : " sources"));
+                    setGraphic(ActionUtils.icon(FontAwesome.IMAGE, "1.0em"));
+                    setStyle("");
+                }
             }
         });
-        recordList.setPrefHeight(170);
-        recordList.getSelectionModel().selectedItemProperty().addListener(
-                (o, was, now) -> showRecord(now));
+        recordTree.getSelectionModel().selectedItemProperty().addListener((o, was, now) -> {
+            Object v = now == null ? null : now.getValue();
+            if (v instanceof ContainerNode && !now.getChildren().isEmpty()) {
+                // A container header isn't a record — step into its first dataset.
+                TreeItem<Object> first = now.getChildren().get(0);
+                javafx.application.Platform.runLater(() ->
+                        recordTree.getSelectionModel().select(first));
+                return;
+            }
+            showRecord(v instanceof DatasetRecord ? (DatasetRecord) v : null);
+        });
 
-        // --- Sources of the selected record ---
-        sourceNameBox = new ComboBox<>();
-        sourceNameBox.setEditable(true);
-        sourceNameBox.setStyle(FIELD_STYLE);
-        sourceNameBox.setPromptText("Source name");
-        sourceNameBox.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(sourceNameBox, Priority.ALWAYS);
-        sourceNameBox.setTooltip(new Tooltip(
-                "Type a name, or pick one of the container's datasets to use it "
-                        + "as both the name and the dataset."));
-        sourceNameBox.getEditor().setOnAction(e -> {
+        // --- Selected dataset's summary, with the channel count up front ---
+        recordSummary = new Label();
+        recordSummary.getStyleClass().add("wizard-record-summary");
+        recordSummary.setWrapText(true);
+        recordSummary.setMaxWidth(Double.MAX_VALUE);
+
+        // --- Sources of the selected dataset ---
+        sourceNameField = new TextField();
+        sourceNameField.setPromptText("Source name");
+        sourceNameField.setStyle(FIELD_STYLE);
+        HBox.setHgrow(sourceNameField, Priority.ALWAYS);
+        sourceNameField.setOnAction(e -> {
             e.consume();
             addSourceFromField();
         });
 
         Button add = new Button();
         add.setGraphic(ActionUtils.icon(FontAwesome.PLUS, "1.0em"));
-        add.setTooltip(new Tooltip("Add source"));
+        add.setTooltip(new Tooltip("Add a source for the next unused channel"));
         add.setOnAction(e -> addSourceFromField());
-        HBox addRow = new HBox(4, sourceNameBox, add);
+        HBox addRow = new HBox(4, sourceNameField, add);
         addRow.setAlignment(Pos.CENTER_LEFT);
 
+        addChannelsButton = new Button("Add a source per channel");
+        addChannelsButton.setGraphic(ActionUtils.icon(FontAwesome.TH_LIST, "1.0em"));
+        addChannelsButton.setMaxWidth(Double.MAX_VALUE);
+        addChannelsButton.setOnAction(e -> addSourcePerChannel());
+
         sourceList = new ListView<>();
-        sourceList.setCellFactory(lv -> new ListCell<MarsBdvSource>() {
-            @Override
-            protected void updateItem(MarsBdvSource item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setGraphic(null);
-                    return;
+        sourceList.setEditable(true);
+        // Double-click renames; the commit renames the source in place.
+        sourceList.setCellFactory(lv -> {
+            TextFieldListCell<MarsBdvSource> cell = new TextFieldListCell<MarsBdvSource>(
+                    new StringConverter<MarsBdvSource>() {
+                @Override
+                public String toString(MarsBdvSource s) {
+                    return s == null ? "" : s.getName();
                 }
-                setText(item.getName());
-                setGraphic(ActionUtils.icon(FontAwesome.IMAGE, "1.0em"));
-            }
+                @Override
+                public MarsBdvSource fromString(String name) {
+                    return new MarsBdvSource(name);
+                }
+            }) {
+                @Override
+                public void updateItem(MarsBdvSource item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (!empty && item != null && !isEditing()) {
+                        setText(item.getName() + "   (C" + item.getChannel() + ")");
+                        setGraphic(ActionUtils.icon(FontAwesome.IMAGE, "1.0em"));
+                    }
+                }
+            };
+            return cell;
+        });
+        sourceList.setOnEditCommit(e -> {
+            MarsBdvSource s = sourceList.getItems().get(e.getIndex());
+            String name = e.getNewValue().getName().trim();
+            boolean taken = false;
+            for (MarsBdvSource other : sourceList.getItems())
+                if (other != s && other.getName().equals(name)) taken = true;
+            if (!name.isEmpty() && !taken) s.setName(name);
+            sourceList.refresh();
         });
         sourceList.setPlaceholder(new Label("No sources yet"));
+        sourceList.setTooltip(new Tooltip("Double-click a source to rename it"));
         VBox.setVgrow(sourceList, Priority.ALWAYS);
         sourceList.getSelectionModel().selectedItemProperty().addListener(
                 (o, was, now) -> optionsPane.setMarsBdvSource(now));
@@ -659,201 +868,218 @@ public class NewArchiveWizard extends Dialog<Void> {
         remove.disableProperty().bind(sourceList.getSelectionModel()
                 .selectedItemProperty().isNull());
         remove.setOnAction(e -> {
-            RecordDraft r = recordList.getSelectionModel().getSelectedItem();
+            DatasetRecord r = selectedRecord();
             MarsBdvSource s = sourceList.getSelectionModel().getSelectedItem();
             if (r != null && s != null) {
                 r.sources.remove(s);
-                recordList.refresh();
+                recordTree.refresh();
             }
         });
 
-        Button applyAll = new Button("Apply to all");
-        applyAll.setGraphic(ActionUtils.icon(FontAwesome.CLONE, "1.0em"));
-        applyAll.setTooltip(new Tooltip(
-                "Copy these sources to every other record, pointing each copy "
-                        + "at that record's own dataset."));
-        applyAll.setOnAction(e -> applySourcesToAll());
-        applyAll.disableProperty().bind(javafx.beans.binding.Bindings.size(records)
-                .lessThan(2));
+        MenuItem toContainer = new MenuItem("Datasets in this container");
+        toContainer.setOnAction(e -> applySources(false));
+        MenuItem toAll = new MenuItem("All datasets");
+        toAll.setOnAction(e -> applySources(true));
+        applyButton = new MenuButton("Apply to", ActionUtils.icon(FontAwesome.CLONE, "1.0em"),
+                toContainer, toAll);
+        applyButton.setTooltip(new Tooltip(
+                "Copy these sources and their settings to other datasets, pointing "
+                        + "each copy at that dataset."));
 
-        HBox sourceButtons = new HBox(6, remove, applyAll);
+        HBox sourceButtons = new HBox(6, remove, applyButton);
 
-        containerLabel = new Label();
-        containerLabel.getStyleClass().add("wizard-hint");
-        containerLabel.setWrapText(true);
+        // Datasets get their own full-height column so many positions fit.
+        VBox left = new VBox(6, sectionLabel("Datasets"), recordTree);
+        VBox.setVgrow(recordTree, Priority.ALWAYS);
+        left.setMinWidth(250);
+        left.setPrefWidth(270);
+        left.setMaxWidth(320);
 
-        VBox left = new VBox(6,
-                sectionLabel("Records"), recordList,
-                sectionLabel("Sources"), addRow, sourceList, sourceButtons,
-                containerLabel);
-        left.setMinWidth(240);
-        left.setPrefWidth(250);
-        left.setMaxWidth(300);
-
-        // --- Settings for the selected source (the metadata tab's own pane) ---
+        // Sources of the selected dataset, then the selected source's settings
+        // (the metadata tab's own pane).
         optionsPane = new BdvSourceOptionsPane();
         optionsPane.setMarsBdvSource(null);
-        VBox right = new VBox(6, sectionLabel("Source settings"), optionsPane);
+        HBox.setHgrow(addRow, Priority.ALWAYS);
+        addChannelsButton.setMaxWidth(Region.USE_PREF_SIZE);
+        HBox addLine = new HBox(6, addRow, addChannelsButton);
+        addLine.setAlignment(Pos.CENTER_LEFT);
+        sourceList.setMinHeight(110);
+        VBox right = new VBox(6,
+                sectionLabel("Sources"), recordSummary, addLine, sourceList, sourceButtons,
+                sectionLabel("Source settings"), optionsPane);
         HBox.setHgrow(right, Priority.ALWAYS);
 
         HBox body = new HBox(16, left, right);
         VBox.setVgrow(body, Priority.ALWAYS);
 
         return page("BDV Sources",
-                "Add the BigDataViewer sources for each record. New sources point "
-                        + "at the record's dataset, with the container dataset and "
-                        + "channel filled in where they can be guessed.",
+                "Select a dataset and add its BigDataViewer sources, usually one per "
+                        + "channel. Sources point at the dataset with the next unused "
+                        + "channel; use Apply to copy them to the other datasets.",
                 body);
     }
 
-    private void onSourcesPageShown() {
-        if (recordList.getSelectionModel().getSelectedItem() == null && !records.isEmpty())
-            recordList.getSelectionModel().select(0);
-        else showRecord(recordList.getSelectionModel().getSelectedItem());
+    private DatasetRecord selectedRecord() {
+        TreeItem<Object> item = recordTree.getSelectionModel().getSelectedItem();
+        return item != null && item.getValue() instanceof DatasetRecord
+                ? (DatasetRecord) item.getValue() : null;
     }
 
-    private void showRecord(RecordDraft r) {
-        if (r == null) {
+    /** Rebuild the dataset tree from the checked datasets, keeping the selection. */
+    private void onSourcesPageShown() {
+        DatasetRecord selected = selectedRecord();
+        TreeItem<Object> root = new TreeItem<>("root");
+        TreeItem<Object> toSelect = null;
+        for (ContainerNode c : containers) {
+            TreeItem<Object> ci = null;
+            for (DatasetRecord r : c.datasets) {
+                if (!r.included()) continue;
+                if (ci == null) {
+                    ci = new TreeItem<>(c);
+                    ci.setExpanded(true);
+                    root.getChildren().add(ci);
+                }
+                TreeItem<Object> ri = new TreeItem<>(r);
+                ci.getChildren().add(ri);
+                if (r == selected || (toSelect == null && selected == null)) toSelect = ri;
+            }
+        }
+        recordTree.setRoot(root);
+        if (toSelect == null && !root.getChildren().isEmpty())
+            toSelect = root.getChildren().get(0).getChildren().get(0);
+        if (toSelect != null) recordTree.getSelectionModel().select(toSelect);
+        else showRecord(null);
+    }
+
+    private void showRecord(DatasetRecord r) {
+        boolean has = r != null;
+        sourceNameField.setDisable(!has);
+        addChannelsButton.setDisable(!has);
+        applyButton.setDisable(!has || includedRecords().size() < 2);
+        if (!has) {
             sourceList.setItems(FXCollections.observableArrayList());
-            sourceNameBox.getItems().clear();
-            containerLabel.setText("");
+            recordSummary.setText("Select a dataset.");
             optionsPane.setMarsBdvSource(null);
             return;
         }
+        recordSummary.setText(r.displayName() + " — " + r.summary());
         sourceList.setItems(r.sources);
         if (!r.sources.isEmpty()) sourceList.getSelectionModel().select(0);
         else optionsPane.setMarsBdvSource(null);
-        updateContainerInfo(r);
-        listContainer(r);
-    }
-
-    private void updateContainerInfo(RecordDraft r) {
-        if (r.containerDatasets == null) {
-            sourceNameBox.getItems().clear();
-            containerLabel.setText(r.listing ? "Reading " + r.dataset.name + " …" : "");
-            return;
-        }
-        List<String> names = new ArrayList<>();
-        for (de.mpg.biochem.mars.n5.DatasetEntry e : r.containerDatasets)
-            names.add(e.getName());
-        sourceNameBox.getItems().setAll(names);
-        containerLabel.setText(names.isEmpty() ? "No datasets found in " + r.dataset.name
-                : "Container datasets: " + String.join(", ", names));
-    }
-
-    /** List the datasets inside the record's container (once), off the FX thread. */
-    private void listContainer(RecordDraft r) {
-        if (r.containerDatasets != null || r.listing) return;
-        r.listing = true;
-        updateContainerInfo(r);
-        Task<List<de.mpg.biochem.mars.n5.DatasetEntry>> task =
-                new Task<List<de.mpg.biochem.mars.n5.DatasetEntry>>() {
-            @Override
-            protected List<de.mpg.biochem.mars.n5.DatasetEntry> call() {
-                return MarsS3Browser.listDatasets(r.dataset.url);
-            }
-        };
-        task.setOnSucceeded(e -> containerListed(r, task.getValue()));
-        task.setOnFailed(e -> containerListed(r, new ArrayList<>()));
-        executor.submit(task);
-    }
-
-    private void containerListed(RecordDraft r, List<de.mpg.biochem.mars.n5.DatasetEntry> list) {
-        r.listing = false;
-        r.containerDatasets = list;
-        // Fill in the dataset for any source added before the listing arrived.
-        for (MarsBdvSource s : r.sources)
-            if (s.getN5Dataset() == null || s.getN5Dataset().isEmpty()) autofill(r, s);
-        if (r == recordList.getSelectionModel().getSelectedItem()) {
-            updateContainerInfo(r);
-            optionsPane.setMarsBdvSource(sourceList.getSelectionModel().getSelectedItem());
-        }
     }
 
     private void addSourceFromField() {
-        RecordDraft r = recordList.getSelectionModel().getSelectedItem();
+        DatasetRecord r = selectedRecord();
         if (r == null) return;
-        String name = sourceNameBox.getEditor().getText();
-        name = name == null ? "" : name.trim();
-        if (name.isEmpty()) return;
+        String name = sourceNameField.getText() == null ? "" : sourceNameField.getText().trim();
+        if (name.isEmpty()) name = uniqueName(r, "Channel " + nextChannel(r));
         for (MarsBdvSource existing : r.sources) {
             if (existing.getName().equals(name)) {
                 sourceList.getSelectionModel().select(existing);
                 return; // names are unique within a record
             }
         }
+        MarsBdvSource s = newSource(r, name, nextChannel(r));
+        r.sources.add(s);
+        sourceNameField.clear();
+        sourceList.getSelectionModel().select(s);
+        recordTree.refresh();
+    }
+
+    /** One source per channel not yet covered, named "Channel n". */
+    private void addSourcePerChannel() {
+        DatasetRecord r = selectedRecord();
+        if (r == null) return;
+        MarsBdvSource last = null;
+        for (int c = 0; c < r.channels(); c++) {
+            if (channelUsed(r, c)) continue;
+            last = newSource(r, uniqueName(r, "Channel " + c), c);
+            r.sources.add(last);
+        }
+        if (last != null) sourceList.getSelectionModel().select(last);
+        recordTree.refresh();
+    }
+
+    /** A source pointing at the dataset, at the given channel, identity transform. */
+    private static MarsBdvSource newSource(DatasetRecord r, String name, int channel) {
         MarsBdvSource s = new MarsBdvSource(name);
         s.setN5(true);
-        s.setPath(r.dataset.url);
-        r.sources.add(s);
-        autofill(r, s);
-        sourceNameBox.getEditor().clear();
-        sourceNameBox.setValue(null);
-        sourceList.getSelectionModel().select(s);
-        recordList.refresh();
+        s.setPath(r.url());
+        s.setN5Dataset(r.datasetName());
+        s.setChannel(channel);
+        return s;
+    }
+
+    private static boolean channelUsed(DatasetRecord r, int channel) {
+        for (MarsBdvSource s : r.sources) if (s.getChannel() == channel) return true;
+        return false;
+    }
+
+    /** Lowest channel with no source yet (0 once every channel is covered). */
+    private static int nextChannel(DatasetRecord r) {
+        for (int c = 0; c < r.channels(); c++) if (!channelUsed(r, c)) return c;
+        return 0;
+    }
+
+    private static String uniqueName(DatasetRecord r, String base) {
+        String name = base;
+        int i = 2;
+        while (true) {
+            boolean taken = false;
+            for (MarsBdvSource s : r.sources) if (s.getName().equals(name)) taken = true;
+            if (!taken) return name;
+            name = base + " (" + i++ + ")";
+        }
     }
 
     /**
-     * Guess the container dataset and channel for a source: a dataset whose name
-     * matches the source name (exactly, then by containment) is used at channel
-     * 0; otherwise the first dataset is used, with the source's position in the
-     * list as its channel, so successive sources step through the channels.
+     * Copy the selected dataset's sources to the other checked datasets — in the
+     * same container, or everywhere — each copy pointing at its own dataset.
      */
-    private static void autofill(RecordDraft r, MarsBdvSource s) {
-        if (r.containerDatasets == null || r.containerDatasets.isEmpty()) return;
-        String name = s.getName().toLowerCase();
-        String match = null;
-        for (de.mpg.biochem.mars.n5.DatasetEntry e : r.containerDatasets)
-            if (e.getName().equalsIgnoreCase(name)) { match = e.getName(); break; }
-        if (match == null)
-            for (de.mpg.biochem.mars.n5.DatasetEntry e : r.containerDatasets) {
-                String n = e.getName().toLowerCase();
-                if (!name.isEmpty() && (n.contains(name) || name.contains(n))
-                        && !n.equals(MarsS3Browser.ROOT_DATASET)) {
-                    match = e.getName();
-                    break;
-                }
-            }
-        if (match != null) {
-            s.setN5Dataset(match);
-            s.setChannel(0);
-        }
-        else {
-            s.setN5Dataset(r.containerDatasets.get(0).getName());
-            s.setChannel(Math.max(0, r.sources.indexOf(s)));
-        }
-    }
-
-    private void applySourcesToAll() {
-        RecordDraft from = recordList.getSelectionModel().getSelectedItem();
+    private void applySources(boolean allContainers) {
+        DatasetRecord from = selectedRecord();
         if (from == null) return;
-        boolean othersHaveSources = false;
-        for (RecordDraft r : records)
-            if (r != from && !r.sources.isEmpty()) othersHaveSources = true;
-        if (othersHaveSources) {
-            Alert a = new Alert(Alert.AlertType.CONFIRMATION,
-                    "Replace the sources of every other record with copies of the "
-                            + "sources of " + from.dataset.name + "?",
-                    ButtonType.YES, ButtonType.NO);
-            a.initOwner(getDialogPane().getScene().getWindow());
-            a.setHeaderText(null);
-            MarsThemeManager.applyTheme(a.getDialogPane(), MarsThemeManager.isDarkTheme());
-            if (a.showAndWait().orElse(ButtonType.NO) != ButtonType.YES) return;
+        List<DatasetRecord> targets = new ArrayList<>();
+        for (DatasetRecord r : includedRecords())
+            if (r != from && (allContainers || r.container == from.container)) targets.add(r);
+        if (targets.isEmpty()) return;
+
+        int withSources = 0;
+        int tooFewChannels = 0;
+        int maxChannel = -1;
+        for (MarsBdvSource s : from.sources) maxChannel = Math.max(maxChannel, s.getChannel());
+        for (DatasetRecord r : targets) {
+            if (!r.sources.isEmpty()) withSources++;
+            if (maxChannel >= r.channels()) tooFewChannels++;
         }
-        for (RecordDraft r : records) {
-            if (r == from) continue;
+        StringBuilder msg = new StringBuilder("Copy the " + from.sources.size()
+                + " source(s) of " + from.displayName() + " to " + targets.size()
+                + " other dataset(s)?");
+        if (withSources > 0) msg.append("\n\n").append(withSources)
+                .append(" of them already have sources, which will be replaced.");
+        if (tooFewChannels > 0) msg.append("\n\n").append(tooFewChannels)
+                .append(" of them have fewer channels than these sources use.");
+        Alert a = new Alert(Alert.AlertType.CONFIRMATION, msg.toString(),
+                ButtonType.YES, ButtonType.NO);
+        a.initOwner(getDialogPane().getScene().getWindow());
+        a.setHeaderText(null);
+        a.setTitle("Apply sources");
+        MarsThemeManager.applyTheme(a.getDialogPane(), MarsThemeManager.isDarkTheme());
+        if (a.showAndWait().orElse(ButtonType.NO) != ButtonType.YES) return;
+
+        for (DatasetRecord r : targets) {
             r.sources.clear();
-            for (MarsBdvSource s : from.sources) r.sources.add(copyFor(s, r.dataset.url));
+            for (MarsBdvSource s : from.sources) r.sources.add(copyFor(s, r));
         }
-        recordList.refresh();
+        recordTree.refresh();
     }
 
-    /** Copy a source's settings, pointing the copy at a different dataset. */
-    private static MarsBdvSource copyFor(MarsBdvSource s, String path) {
+    /** Copy a source's settings, pointing the copy at another dataset. */
+    private static MarsBdvSource copyFor(MarsBdvSource s, DatasetRecord target) {
         MarsBdvSource c = new MarsBdvSource(s.getName());
         c.setN5(s.isN5());
-        c.setPath(path);
-        c.setN5Dataset(s.getN5Dataset());
+        c.setPath(target.url());
+        c.setN5Dataset(target.datasetName());
         c.setChannel(s.getChannel());
         c.setCorrectDrift(s.getCorrectDrift());
         c.setSingleTimePointMode(s.getSingleTimePointMode());
@@ -871,28 +1097,23 @@ public class NewArchiveWizard extends Dialog<Void> {
     private Region buildTypePage() {
         ToggleGroup group = new ToggleGroup();
         GridPane grid = new GridPane();
-        grid.setHgap(16);
-        grid.setVgap(16);
+        grid.setHgap(14);
+        grid.setVgap(14);
 
         ArchiveType[] types = ArchiveType.values();
         for (int i = 0; i < types.length; i++) {
             ArchiveType type = types[i];
             boolean available = type.archiveClass() != null;
 
+            Region icon = type.icon();
+            StackPane iconHolder = new StackPane(icon);
+            iconHolder.setMinHeight(48);
             Label title = new Label(type.title);
             title.getStyleClass().add("archive-type-title");
             Label cls = new Label(type.archiveClassName);
             cls.getStyleClass().add("wizard-hint");
-            Label desc = new Label(available ? type.description
-                    : "Not installed — enable the update site that provides it.");
-            desc.getStyleClass().add("archive-type-desc");
-            desc.setWrapText(true);
-            desc.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
-
-            StackPane glyph = new StackPane(glyphFor(type));
-            glyph.setMinHeight(64);
-            VBox inner = new VBox(8, glyph, title, cls, desc);
-            inner.setAlignment(Pos.TOP_CENTER);
+            VBox inner = new VBox(6, iconHolder, title, cls);
+            inner.setAlignment(Pos.CENTER);
 
             ToggleButton tile = new ToggleButton();
             tile.setGraphic(inner);
@@ -901,16 +1122,21 @@ public class NewArchiveWizard extends Dialog<Void> {
             tile.setUserData(type);
             tile.setToggleGroup(group);
             tile.setDisable(!available);
-            tile.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-            tile.setPrefSize(280, 190);
-            GridPane.setHgrow(tile, Priority.ALWAYS);
-            GridPane.setVgrow(tile, Priority.ALWAYS);
+            tile.setPrefSize(190, 130);
+            tile.setMinSize(190, 130);
+            tile.setMaxSize(190, 130);
+            if (!available) tile.setTooltip(new Tooltip(type.archiveClassName
+                    + " is not installed — enable the update site that provides it."));
             // Double-click picks the type and moves on.
             tile.setOnMouseClicked(e -> {
                 if (e.getClickCount() == 2 && tile.isSelected()) goTo(3);
             });
             grid.add(tile, i % 2, i / 2);
         }
+
+        typeDescription = new Label("Select an archive type.");
+        typeDescription.getStyleClass().add("wizard-page-subtitle");
+        typeDescription.setWrapText(true);
 
         group.selectedToggleProperty().addListener((o, was, now) -> {
             // Keep one tile selected — clicking the selected tile doesn't clear it.
@@ -919,69 +1145,13 @@ public class NewArchiveWizard extends Dialog<Void> {
                 return;
             }
             archiveType = now == null ? null : (ArchiveType) now.getUserData();
+            typeDescription.setText(archiveType == null ? "Select an archive type."
+                    : archiveType.title + ": " + archiveType.description);
             updateButtons();
         });
-        VBox.setVgrow(grid, Priority.ALWAYS);
 
         return page("Archive Type",
-                "Choose the kind of Molecule Archive to create.", grid);
-    }
-
-    /** Small line-art glyph for each archive type, colored by the theme sheet. */
-    private static Node glyphFor(ArchiveType type) {
-        Group g = new Group();
-        switch (type) {
-            case SINGLE_MOLECULE: {
-                // A bright spot with a faint halo, plus a short track.
-                Circle halo = new Circle(32, 32, 20);
-                halo.getStyleClass().add("archive-type-glyph");
-                Circle spot = new Circle(32, 32, 8);
-                spot.getStyleClass().add("archive-type-glyph-fill");
-                SVGPath track = svg("M 58 50 C 66 44, 70 54, 78 46 S 88 40, 92 30");
-                Circle end = new Circle(92, 30, 4);
-                end.getStyleClass().add("archive-type-glyph-fill");
-                g.getChildren().addAll(halo, spot, track, end);
-                break;
-            }
-            case DNA_MOLECULE: {
-                // Two intertwined strands tethered at both ends.
-                SVGPath a = svg("M 4 32 C 19 8, 34 8, 49 32 S 79 56, 94 32");
-                SVGPath b = svg("M 4 32 C 19 56, 34 56, 49 32 S 79 8, 94 32");
-                Circle left = new Circle(4, 32, 4);
-                left.getStyleClass().add("archive-type-glyph-fill");
-                Circle right = new Circle(94, 32, 4);
-                right.getStyleClass().add("archive-type-glyph-fill");
-                g.getChildren().addAll(a, b, left, right);
-                break;
-            }
-            case OBJECT: {
-                // An irregular cell outline with a nucleus.
-                SVGPath outline = svg("M 28 10 C 48 0, 74 6, 82 24 S 76 58, 54 60 "
-                        + "S 14 58, 12 38 S 14 16, 28 10 Z");
-                Circle nucleus = new Circle(46, 32, 9);
-                nucleus.getStyleClass().add("archive-type-glyph-fill");
-                g.getChildren().addAll(outline, nucleus);
-                break;
-            }
-            case TRANSVERSE_FLOW: {
-                // A replication fork: parental duplex splitting into two arms.
-                SVGPath parental = svg("M 4 32 L 44 32");
-                SVGPath leading = svg("M 44 32 C 58 30, 70 18, 92 10");
-                SVGPath lagging = svg("M 44 32 C 58 34, 70 46, 92 54");
-                Circle fork = new Circle(44, 32, 5);
-                fork.getStyleClass().add("archive-type-glyph-fill");
-                g.getChildren().addAll(parental, leading, lagging, fork);
-                break;
-            }
-        }
-        return g;
-    }
-
-    private static SVGPath svg(String content) {
-        SVGPath p = new SVGPath();
-        p.setContent(content);
-        p.getStyleClass().add("archive-type-glyph");
-        return p;
+                "Choose the kind of Molecule Archive to create.", grid, typeDescription);
     }
 
     // -----------------------------------------------------------------
@@ -989,7 +1159,8 @@ public class NewArchiveWizard extends Dialog<Void> {
     // -----------------------------------------------------------------
 
     private Region buildDestinationPage() {
-        folderField = new TextField(defaultFolder());
+        lastDefaultFolder = defaultFolder();
+        folderField = new TextField(lastDefaultFolder);
         folderField.setStyle(FIELD_STYLE);
         folderField.setPromptText(localSource ? "/path/to/folder"
                 : "https://bucket.s3.server:9000/folder/");
@@ -1053,21 +1224,42 @@ public class NewArchiveWizard extends Dialog<Void> {
 
         return page("Destination",
                 "Choose where the new archive is saved. It defaults to the bucket "
-                        + "or folder open in the explorer, inside the datasets' "
+                        + "or folder open in the explorer, inside the containers' "
                         + "shared subfolder when they all have one.",
                 form);
     }
 
+    /** Re-suggest the folder for the current selection unless it was edited. */
+    private void onDestinationPageShown() {
+        String current = folderField.getText() == null ? "" : folderField.getText().trim();
+        if (current.equals(lastDefaultFolder)) {
+            lastDefaultFolder = defaultFolder();
+            folderField.setText(lastDefaultFolder);
+        }
+        refreshDestinationPreview();
+    }
+
+    /** Containers with at least one checked dataset (all of them before listing). */
+    private List<ContainerNode> usedContainers() {
+        List<ContainerNode> used = new ArrayList<>();
+        for (ContainerNode c : containers) {
+            boolean any = !c.listed;
+            for (DatasetRecord r : c.datasets) if (r.included()) any = true;
+            if (any) used.add(c);
+        }
+        return used;
+    }
+
     /**
      * Suggested folder: the explorer's current bucket or local folder, narrowed
-     * to the datasets' parent subfolder when they all share the same one.
+     * to the containers' parent subfolder when they all share the same one.
      */
     private String defaultFolder() {
         if (bucketOrRoot.isEmpty()) return "";
         String common = null;
         boolean same = true;
-        for (DatasetRow r : datasetRows) {
-            String parent = parentOf(r.dataset.path);
+        for (ContainerNode c : usedContainers()) {
+            String parent = parentOf(c.container.path);
             if (common == null) common = parent;
             else if (!common.equals(parent)) { same = false; break; }
         }
@@ -1080,8 +1272,8 @@ public class NewArchiveWizard extends Dialog<Void> {
         return url.endsWith("/") ? url : url + "/";
     }
 
-    /** Parent folder of a relative dataset path ("" at the top level). */
-    private String parentOf(String path) {
+    /** Parent folder of a relative container path ("" at the top level). */
+    private static String parentOf(String path) {
         if (path == null) return "";
         String p = path.replace('\\', '/');
         while (p.endsWith("/")) p = p.substring(0, p.length() - 1);
@@ -1090,8 +1282,8 @@ public class NewArchiveWizard extends Dialog<Void> {
     }
 
     private String defaultName() {
-        if (datasetRows.size() == 1) {
-            String n = datasetRows.get(0).dataset.name.replaceAll("/+$", "");
+        if (containers.size() == 1) {
+            String n = containers.get(0).container.name.replaceAll("/+$", "");
             return n.replaceAll("(?i)\\.(n5|zarr)$", "");
         }
         return "archive";
@@ -1119,7 +1311,8 @@ public class NewArchiveWizard extends Dialog<Void> {
     }
 
     private boolean canCreate() {
-        return !busy && archiveType != null && destination() != null;
+        return !busy && archiveType != null && destination() != null
+                && !includedRecords().isEmpty();
     }
 
     private void refreshDestinationPreview() {
@@ -1128,12 +1321,17 @@ public class NewArchiveWizard extends Dialog<Void> {
         destinationPreview.setText(dest == null ? "Enter a folder and a name."
                 : "Saves to " + dest);
 
+        List<DatasetRecord> records = includedRecords();
         int sourceCount = 0;
-        for (RecordDraft r : records) sourceCount += r.sources.size();
-        summaryLabel.setText("Creates a "
+        for (DatasetRecord r : records) sourceCount += r.sources.size();
+        int withoutSources = 0;
+        for (DatasetRecord r : records) if (r.sources.isEmpty()) withoutSources++;
+        String text = "Creates a "
                 + (archiveType == null ? "Molecule Archive" : archiveType.archiveClassName)
-                + " with " + records.size() + " metadata record(s) and "
-                + sourceCount + " BDV source(s).");
+                + " with " + records.size() + " metadata record(s), one per dataset, and "
+                + sourceCount + " BDV source(s).";
+        if (withoutSources > 0) text += " " + withoutSources + " record(s) have no sources.";
+        summaryLabel.setText(text);
         updateButtons();
     }
 
@@ -1176,7 +1374,7 @@ public class NewArchiveWizard extends Dialog<Void> {
         final ArchiveType type = archiveType;
         final boolean store = storeEnding;
         final boolean open = openAfterCreate.isSelected();
-        final List<RecordDraft> recordSnapshot = new ArrayList<>(records);
+        final List<DatasetRecord> records = includedRecords();
 
         setBusy(true, "Creating " + name + " …");
 
@@ -1187,18 +1385,19 @@ public class NewArchiveWizard extends Dialog<Void> {
                         + "Choose another name or folder.");
 
                 MoleculeArchive<?, MarsOMEMetadata, ?, ?> archive = type.create(name);
-                for (RecordDraft r : recordSnapshot) {
+                for (DatasetRecord r : records) {
                     MarsOMEMetadata metadata = new MarsOMEMetadata(r.uid);
-                    metadata.setSourceDirectory(r.dataset.url);
+                    metadata.setSourceDirectory(r.url());
                     for (MarsBdvSource s : r.sources) metadata.putBdvSource(s);
-                    metadata.logln("Created in the Dataset Explorer from " + r.dataset.url);
+                    metadata.logln("Created in the Dataset Explorer from dataset "
+                            + r.datasetName() + " of " + r.url());
                     archive.putMetadata(metadata);
                 }
 
                 LogBuilder builder = new LogBuilder();
                 String log = LogBuilder.buildTitleBlock("New Archive (Dataset Explorer)");
                 builder.addParameter("Archive type", type.archiveClassName);
-                builder.addParameter("Metadata records", recordSnapshot.size());
+                builder.addParameter("Metadata records", records.size());
                 builder.addParameter("Destination", dest);
                 log += builder.buildParameterList();
                 log += "\n" + LogBuilder.endBlock(true);
@@ -1275,13 +1474,6 @@ public class NewArchiveWizard extends Dialog<Void> {
         endingButton.setDisable(on);
         updateButtons();
         updateStepCursors();
-    }
-
-    /** Hand cursor on sidebar steps that can be jumped to. */
-    private void updateStepCursors() {
-        for (int i = 0; i < stepRows.size(); i++)
-            stepRows.get(i).setCursor(!busy && i <= furthestStep && i != step
-                    ? javafx.scene.Cursor.HAND : javafx.scene.Cursor.DEFAULT);
     }
 
     // -----------------------------------------------------------------

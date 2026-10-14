@@ -661,22 +661,21 @@
     -fx-text-fill: #555555;
 }
 
-.archive-type-glyph {
-    -fx-fill: transparent;
-    -fx-stroke: #4a5568;
-    -fx-stroke-width: 2.5;
-    -fx-stroke-line-cap: round;
+/* Molecules-tab icons on the type tiles (sized inline by the wizard). */
+.archive-type-icon {
+    -icon-paint: #4a5568 !important;
+    -fx-background-color: #4a5568 !important;
 }
 
-.archive-type-glyph-fill {
-    -fx-fill: #4a5568;
-    -fx-stroke: transparent;
+.toggle-button.archive-type-tile:selected .archive-type-icon {
+    -icon-paint: #007bff !important;
+    -fx-background-color: #007bff !important;
 }
 
-.archive-type-tile:selected .archive-type-glyph {
-    -fx-stroke: #007bff;
-}
-
-.archive-type-tile:selected .archive-type-glyph-fill {
-    -fx-fill: #007bff;
+/* Selected dataset banner on the sources step, led by the channel count. */
+.wizard-record-summary {
+    -fx-background-color: rgba(0, 123, 255, 0.07);
+    -fx-background-radius: 4;
+    -fx-padding: 6 8 6 8;
+    -fx-font-weight: bold;
 }

@@ -1683,18 +1683,18 @@ public class DatasetExplorerWindow {
     }
 
     /**
-     * Open the new-archive wizard over the N5/Zarr datasets the current filter
+     * Open the new-archive wizard over the N5/Zarr containers the current filter
      * shows, in card order. Archives in the filter are counted but not offered.
      */
     private void openNewArchiveWizard() {
-        List<NewArchiveWizard.SourceDataset> datasets = new ArrayList<>();
+        List<NewArchiveWizard.Container> containers = new ArrayList<>();
         int skippedArchives = 0;
         for (DatasetEntry e : sortedFiltered()) {
-            if (e.isN5()) datasets.add(new NewArchiveWizard.SourceDataset(e.getName(),
+            if (e.isN5()) containers.add(new NewArchiveWizard.Container(e.getName(),
                     e.getPath(), datasetUrl(e), e.getSizeBytes()));
             else skippedArchives++;
         }
-        NewArchiveWizard wizard = new NewArchiveWizard(stage, datasets, skippedArchives,
+        NewArchiveWizard wizard = new NewArchiveWizard(stage, containers, skippedArchives,
                 localMode, endpointField.getText().trim(), sourceBucket(), darkMode);
         wizard.setOnCreated(this::archiveCreated);
         wizard.show();
