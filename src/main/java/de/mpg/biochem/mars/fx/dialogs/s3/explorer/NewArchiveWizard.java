@@ -43,6 +43,7 @@ import org.kordamp.ikonli.fontawesome.FontAwesome;
 import de.mpg.biochem.mars.fx.dialogs.RoverConfirmationDialog;
 import de.mpg.biochem.mars.fx.molecule.metadataTab.BdvSourceOptionsPane;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
+import de.mpg.biochem.mars.fx.util.MarsN5ImageMetadata;
 import de.mpg.biochem.mars.fx.util.MarsThemeManager;
 import de.mpg.biochem.mars.metadata.MarsBdvSource;
 import de.mpg.biochem.mars.metadata.MarsOMEMetadata;
@@ -1267,6 +1268,9 @@ public class NewArchiveWizard extends Dialog<Void> {
                 for (DatasetRecord r : records) {
                     MarsOMEMetadata metadata = new MarsOMEMetadata(r.uid);
                     metadata.setSourceDirectory(r.url());
+                    // Sizes and planes from the dataset, so tracking can use the record.
+                    metadata.setImage(MarsN5ImageMetadata.createImage(
+                            r.entry.getDimensions(), r.displayName()), 0);
                     for (MarsBdvSource s : r.sources) metadata.putBdvSource(s);
                     metadata.logln("Created in the Dataset Explorer from dataset "
                             + r.datasetName() + " of " + r.url());
