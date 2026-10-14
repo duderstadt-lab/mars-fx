@@ -649,13 +649,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 
 		boolean discoveredBdvFrameSettings = false;
 		if (archive.getSource() != null && archive.getSource().getPath() != null) {
+			// Archives that were never saved from this window (e.g. created in the
+			// Dataset Explorer) have no .rover file. Check first, as loadState does:
+			// a missing S3 key throws NoSuchKeyException, a RuntimeException that
+			// an IOException catch would let escape and abort opening the video.
 			try {
-				ObjectMapper mapper = new ObjectMapper();
-				JsonNode jsonNode = mapper.readTree(archive.getSource().getRoverInputStream());
-				if (jsonNode.get("bdvFrames") != null) discoveredBdvFrameSettings =
-					true;
+				if (archive.getSource().exists(archive.getSource().getPath() +
+					".rover"))
+				{
+					ObjectMapper mapper = new ObjectMapper();
+					JsonNode jsonNode = mapper.readTree(archive.getSource()
+						.getRoverInputStream());
+					if (jsonNode.get("bdvFrames") != null) discoveredBdvFrameSettings =
+						true;
+				}
 			}
-			catch (IOException e) {}
+			catch (IOException | RuntimeException e) {}
 		}
 
 		// Check if there are settings for MarsBdvFrames in the rover file...
