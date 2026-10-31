@@ -173,7 +173,9 @@ public class KymographPane {
 	private static final double COMBO_WIDTH = 116;
 
 	private RangeSlider frameSlider;
-	private Label frameRangeLabel;
+	private Spinner<Integer> frameMinSpinner;
+	private Spinner<Integer> frameMaxSpinner;
+	private boolean syncingFrames = false;
 	private int numberOfFrames = 1;
 	private ComboBox<Integer> filterChannelComboBox;
 	private VBox channelsBox;
@@ -610,6 +612,10 @@ public class KymographPane {
 	private void setBusy(boolean busy, String message) {
 		this.busy = busy;
 		busyBox.setVisible(busy);
+		// Keep the busy message clear of the placeholder or error text behind it.
+		if (busy) errorArea.setVisible(false);
+		placeholderLabel.setVisible(!busy && imageView.getImage() == null &&
+			!errorArea.isVisible());
 		busyLabel.setText(message);
 		generateButton.setText(busy ? "Cancel" : "Generate");
 		exportButton.setDisable(busy || getFigure() == null);
@@ -907,25 +913,35 @@ public class KymographPane {
 		// Time points
 		Section frames = new Section("Time points", true);
 		frameSlider = new RangeSlider(0, 1, 0, 1);
-		frameSlider.setMajorTickUnit(1);
-		frameSlider.setMinorTickCount(0);
-		frameSlider.setSnapToTicks(true);
-		frameRangeLabel = new Label();
-		frameRangeLabel.setMinWidth(Region.USE_PREF_SIZE);
+		// Not snapping to ticks, so every time point can be reached.
+		frameSlider.setSnapToTicks(false);
+		frameSlider.setBlockIncrement(1);
+		frameSlider.setMaxWidth(Double.MAX_VALUE);
+		frameMinSpinner = new Spinner<>(0, 1, 0);
+		frameMaxSpinner = new Spinner<>(0, 1, 1);
+		for (Spinner<Integer> spinner : List.of(frameMinSpinner, frameMaxSpinner)) {
+			spinner.setEditable(true);
+			compact(spinner);
+			commitOnFocusLost(spinner);
+		}
+		frameMinSpinner.setTooltip(new Tooltip("First time point"));
+		frameMaxSpinner.setTooltip(new Tooltip("Last time point"));
 		ChangeListener<Number> frameListener = (ob, o, n) -> {
-			int low = (int) Math.round(frameSlider.getLowValue());
-			int high = (int) Math.round(frameSlider.getHighValue());
-			frameRangeLabel.setText(low + " - " + high);
-			if (pushing) return;
-			settings.minT = low;
-			settings.maxT = high >= numberOfFrames - 1 ? -1 : high;
+			if (syncingFrames) return;
+			setFrameRange((int) Math.round(frameSlider.getLowValue()), (int) Math
+				.round(frameSlider.getHighValue()));
 		};
 		frameSlider.lowValueProperty().addListener(frameListener);
 		frameSlider.highValueProperty().addListener(frameListener);
-		HBox.setHgrow(frameSlider, Priority.ALWAYS);
-		HBox rangeRow = row(frameSlider, frameRangeLabel);
-		rangeRow.setMaxWidth(Double.MAX_VALUE);
-		frames.add("Range", rangeRow);
+		ChangeListener<Integer> spinnerListener = (ob, o, n) -> {
+			if (syncingFrames || n == null) return;
+			setFrameRange(frameMinSpinner.getValue(), frameMaxSpinner.getValue());
+		};
+		frameMinSpinner.valueProperty().addListener(spinnerListener);
+		frameMaxSpinner.valueProperty().addListener(spinnerListener);
+		frames.add("Range", frameSlider);
+		frames.add("", row(new Label("from"), frameMinSpinner, new Label("to"),
+			frameMaxSpinner));
 		Label reductionBy = new Label("by");
 		Spinner<Integer> reductionFactor = intField(1, 10000,
 			() -> settings.frameReductionFactor,
@@ -1086,12 +1102,43 @@ public class KymographPane {
 		int max = Math.max(1, numberOfFrames - 1);
 		frameSlider.setMax(max);
 		frameSlider.setMajorTickUnit(Math.max(1, max / 10.0));
+		((SpinnerValueFactory.IntegerSpinnerValueFactory) frameMinSpinner
+			.getValueFactory()).setMax(max);
+		((SpinnerValueFactory.IntegerSpinnerValueFactory) frameMaxSpinner
+			.getValueFactory()).setMax(max);
 		int low = Math.max(0, Math.min(settings.minT, max));
 		int high = settings.maxT < 0 ? max : Math.min(settings.maxT, max);
-		frameSlider.setLowValue(0);
-		frameSlider.setHighValue(high);
-		frameSlider.setLowValue(low);
-		frameRangeLabel.setText(low + " - " + high);
+		setFrameRange(low, high);
+	}
+
+	/**
+	 * Set the time point range on the slider, the spinners and, unless the
+	 * settings are being pushed into the controls, the settings.
+	 */
+	private void setFrameRange(int low, int high) {
+		int max = Math.max(1, numberOfFrames - 1);
+		low = Math.max(0, Math.min(low, max));
+		high = Math.max(low, Math.min(high, max));
+		syncingFrames = true;
+		try {
+			// Order the updates so the low value never exceeds the high value.
+			if (low > frameSlider.getHighValue()) {
+				frameSlider.setHighValue(high);
+				frameSlider.setLowValue(low);
+			}
+			else {
+				frameSlider.setLowValue(low);
+				frameSlider.setHighValue(high);
+			}
+			frameMinSpinner.getValueFactory().setValue(low);
+			frameMaxSpinner.getValueFactory().setValue(high);
+		}
+		finally {
+			syncingFrames = false;
+		}
+		if (pushing) return;
+		settings.minT = low;
+		settings.maxT = high >= max ? -1 : high;
 	}
 
 	private void rebuildChannels() {
