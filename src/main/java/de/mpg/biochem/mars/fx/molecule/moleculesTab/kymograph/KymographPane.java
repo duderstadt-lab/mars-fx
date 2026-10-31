@@ -61,6 +61,8 @@ import de.mpg.biochem.mars.fx.dialogs.RoverErrorDialog;
 import de.mpg.biochem.mars.fx.event.FigureChangedEvent;
 import de.mpg.biochem.mars.fx.event.RunMoleculeArchiveTaskEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographSettings.ChannelSettings;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographSettings.Filter;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographSettings.FrameReduction;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographSettings.Mode;
 import de.mpg.biochem.mars.metadata.MarsMetadata;
 import de.mpg.biochem.mars.molecule.Molecule;
@@ -98,6 +100,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -164,6 +167,10 @@ public class KymographPane {
 	private final List<Runnable> pushers = new ArrayList<>();
 	private boolean pushing = false;
 	private final List<Runnable> visibilityUpdaters = new ArrayList<>();
+	private final List<Section> sections = new ArrayList<>();
+
+	private static final double SPINNER_WIDTH = 76;
+	private static final double COMBO_WIDTH = 116;
 
 	private RangeSlider frameSlider;
 	private Label frameRangeLabel;
@@ -788,6 +795,10 @@ public class KymographPane {
 		}
 		state.put("autoGenerate", autoGenerateCheckBox.isSelected());
 		state.put("keepSettings", keepSettingsButton.isSelected());
+		ObjectNode expanded = state.putObject("expandedSections");
+		for (Section section : sections)
+			expanded.put(section.titledPane.getText(), section.titledPane
+				.isExpanded());
 		return state.toString();
 	}
 
@@ -800,6 +811,10 @@ public class KymographPane {
 				.get("autoGenerate").asBoolean());
 			if (state.has("keepSettings")) keepSettingsButton.setSelected(state.get(
 				"keepSettings").asBoolean());
+			JsonNode expanded = state.get("expandedSections");
+			if (expanded != null) for (Section section : sections)
+				if (expanded.has(section.titledPane.getText())) section.titledPane
+					.setExpanded(expanded.get(section.titledPane.getText()).asBoolean());
 			pushSettings();
 		}
 		catch (IOException e) {
@@ -836,7 +851,7 @@ public class KymographPane {
 
 	private void buildSections() {
 		// Figure
-		Section figure = new Section("Figure");
+		Section figure = new Section("Figure", true);
 		ToggleGroup modeGroup = new ToggleGroup();
 		ToggleButton kymographButton = new ToggleButton("Kymograph");
 		ToggleButton montageButton = new ToggleButton("Montage");
@@ -867,32 +882,36 @@ public class KymographPane {
 		figure.add("Title", titleField);
 
 		// Source
-		Section source = new Section("Source");
+		Section source = new Section("Source", true);
 		source.add("Projection width", intField(1, 1000, () -> settings.projectionWidth,
 			v -> settings.projectionWidth = v), this::isKymograph);
-		source.add("Border width", intField(0, 1000, () -> settings.borderWidth,
-			v -> settings.borderWidth = v), () -> !isKymograph() &&
-				!isSingleMolecule());
-		source.add("Border height", intField(0, 1000, () -> settings.borderHeight,
-			v -> settings.borderHeight = v), () -> !isKymograph() &&
-				!isSingleMolecule());
+		source.add("Border", row(new Label("W"), intField(0, 1000,
+			() -> settings.borderWidth, v -> settings.borderWidth = v), new Label(
+				"H"), intField(0, 1000, () -> settings.borderHeight,
+					v -> settings.borderHeight = v)), () -> !isKymograph() &&
+						!isSingleMolecule());
 		source.add("Spot radius", intField(1, 1000, () -> settings.spotRadius,
 			v -> settings.spotRadius = v), this::isSingleMolecule);
-		source.add("X location", textField(() -> settings.xLocationSource,
-			v -> settings.xLocationSource = v), this::isSingleMolecule);
-		source.add("Y location", textField(() -> settings.yLocationSource,
-			v -> settings.yLocationSource = v), this::isSingleMolecule);
-		source.add("", checkBox("Location from parameters",
+		TextField xLocation = textField(() -> settings.xLocationSource,
+			v -> settings.xLocationSource = v);
+		TextField yLocation = textField(() -> settings.yLocationSource,
+			v -> settings.yLocationSource = v);
+		xLocation.setPrefColumnCount(4);
+		yLocation.setPrefColumnCount(4);
+		source.add("Location", row(new Label("X"), xLocation, new Label("Y"),
+			yLocation), this::isSingleMolecule);
+		source.add("", checkBox("From parameters",
 			() -> settings.locationFromParameters,
 			v -> settings.locationFromParameters = v), this::isSingleMolecule);
 
-		// Frames
-		Section frames = new Section("Frames");
+		// Time points
+		Section frames = new Section("Time points", true);
 		frameSlider = new RangeSlider(0, 1, 0, 1);
 		frameSlider.setMajorTickUnit(1);
 		frameSlider.setMinorTickCount(0);
 		frameSlider.setSnapToTicks(true);
 		frameRangeLabel = new Label();
+		frameRangeLabel.setMinWidth(Region.USE_PREF_SIZE);
 		ChangeListener<Number> frameListener = (ob, o, n) -> {
 			int low = (int) Math.round(frameSlider.getLowValue());
 			int high = (int) Math.round(frameSlider.getHighValue());
@@ -903,20 +922,34 @@ public class KymographPane {
 		};
 		frameSlider.lowValueProperty().addListener(frameListener);
 		frameSlider.highValueProperty().addListener(frameListener);
-		frames.add("Range", new VBox(2, frameSlider, frameRangeLabel));
-		frames.add("Reduction", enumField(KymographSettings.FrameReduction.values(),
-			() -> settings.frameReduction, v -> settings.frameReduction = v));
-		frames.add("Group / skip size", intField(1, 10000,
+		HBox.setHgrow(frameSlider, Priority.ALWAYS);
+		HBox rangeRow = row(frameSlider, frameRangeLabel);
+		rangeRow.setMaxWidth(Double.MAX_VALUE);
+		frames.add("Range", rangeRow);
+		Label reductionBy = new Label("by");
+		Spinner<Integer> reductionFactor = intField(1, 10000,
 			() -> settings.frameReductionFactor,
-			v -> settings.frameReductionFactor = v));
+			v -> settings.frameReductionFactor = v);
+		reductionFactor.setTooltip(new Tooltip(
+			"Number of time points to skip, average or sum."));
+		showWhen(() -> settings.frameReduction != FrameReduction.NONE, reductionBy,
+			reductionFactor);
+		frames.add("Reduction", row(enumField(FrameReduction.values(),
+			() -> settings.frameReduction, v -> settings.frameReduction = v),
+			reductionBy, reductionFactor));
 
 		// Processing
-		Section processing = new Section("Processing");
-		processing.add("Filter", enumField(KymographSettings.Filter.values(),
-			() -> settings.filter, v -> settings.filter = v));
-		processing.add("Filter size", doubleField(0.1, 1000, 0.5,
-			() -> settings.filterSize, v -> settings.filterSize = v));
+		Section processing = new Section("Processing", false);
+		Label filterSizeLabel = new Label("size");
+		Spinner<Double> filterSize = doubleField(0.1, 1000, 0.5,
+			() -> settings.filterSize, v -> settings.filterSize = v);
+		showWhen(() -> settings.filter != Filter.NONE, filterSizeLabel, filterSize);
+		processing.add("Filter", row(enumField(Filter.values(),
+			() -> settings.filter, v -> settings.filter = v), filterSizeLabel,
+			filterSize));
 		filterChannelComboBox = new ComboBox<>();
+		filterChannelComboBox.setPrefWidth(COMBO_WIDTH);
+		filterChannelComboBox.setMaxWidth(Region.USE_PREF_SIZE);
 		filterChannelComboBox.setConverter(new StringConverter<Integer>() {
 
 			@Override
@@ -933,40 +966,41 @@ public class KymographPane {
 			if (!pushing && n != null) settings.filterChannel = n;
 		});
 		processing.add("Filter channel", filterChannelComboBox,
-			() -> !isKymograph());
+			() -> !isKymograph() && settings.filter != Filter.NONE);
 		processing.add("Interpolation", doubleField(1, 20, 0.5,
 			() -> settings.interpolation, v -> settings.interpolation = v));
-		processing.add("", checkBox("Vertical reflection",
-			() -> settings.verticalReflection, v -> settings.verticalReflection = v));
-		processing.add("", checkBox("Horizontal reflection",
+		CheckBox horizontalReflection = checkBox("Horizontal",
 			() -> settings.horizontalReflection,
-			v -> settings.horizontalReflection = v), () -> !isKymograph());
+			v -> settings.horizontalReflection = v);
+		showWhen(() -> !isKymograph(), horizontalReflection);
+		processing.add("Reflect", row(checkBox("Vertical",
+			() -> settings.verticalReflection, v -> settings.verticalReflection = v),
+			horizontalReflection));
 
 		// Montage layout
-		Section layout = new Section("Layout");
-		layout.add("Spacing", intField(0, 1000, () -> settings.spacing,
-			v -> settings.spacing = v));
-		layout.add("", checkBox("Horizontal layout",
-			() -> settings.horizontalLayout, v -> settings.horizontalLayout = v));
+		Section layout = new Section("Layout", false);
 		Spinner<Integer> columns = intField(0, 10000, () -> Math.max(0,
 			settings.columns), v -> settings.columns = v == 0 ? -1 : v);
 		columns.setTooltip(new Tooltip("0 means a single row or column."));
-		layout.add("Columns", columns);
+		layout.add("Spacing", row(intField(0, 1000, () -> settings.spacing,
+			v -> settings.spacing = v), new Label("Columns"), columns));
+		layout.add("", checkBox("Horizontal layout",
+			() -> settings.horizontalLayout, v -> settings.horizontalLayout = v));
 		visibilityUpdaters.add(() -> layout.setVisible(!isKymograph()));
 
 		// Channels
-		Section channels = new Section("Channels");
-		channelsBox = new VBox(6);
+		Section channels = new Section("Channels", true);
+		channelsBox = new VBox(4);
 		channels.addFull(channelsBox);
 
 		// Axes
-		Section axes = new Section("Axes");
+		Section axes = new Section("Axes", false);
 		axes.add("", checkBox("Show x axis", () -> settings.showXAxis,
 			v -> settings.showXAxis = v));
 		xAxisLabelField = textField(() -> settings.xAxisLabel,
 			v -> settings.xAxisLabel = v);
 		axes.add("X label", xAxisLabelField, () -> settings.showXAxis);
-		axes.add("", checkBox("Automatic x range from time",
+		axes.add("", checkBox("Automatic range from time",
 			() -> settings.autoXAxisRange, v -> settings.autoXAxisRange = v),
 			() -> settings.showXAxis);
 		axes.add("Time unit", enumField(KymographSettings.TimeUnit.values(),
@@ -979,62 +1013,62 @@ public class KymographPane {
 				settings.timeUnit = v;
 			}),
 			() -> settings.showXAxis && settings.autoXAxisRange);
-		axes.add("X min", doubleField(-1e9, 1e9, 1, () -> settings.xAxisMin,
-			v -> settings.xAxisMin = v), () -> settings.showXAxis &&
-				!settings.autoXAxisRange);
-		axes.add("X max", doubleField(-1e9, 1e9, 1, () -> settings.xAxisMax,
-			v -> settings.xAxisMax = v), () -> settings.showXAxis &&
-				!settings.autoXAxisRange);
-		axes.add("X step (0 auto)", doubleField(0, 1e9, 1,
-			() -> settings.xStepSize, v -> settings.xStepSize = v),
-			() -> settings.showXAxis);
-		axes.add("X precision", intField(0, 10, () -> settings.xAxisPrecision,
+		axes.add("X range", row(doubleField(-1e9, 1e9, 1, () -> settings.xAxisMin,
+			v -> settings.xAxisMin = v), new Label("to"), doubleField(-1e9, 1e9, 1,
+				() -> settings.xAxisMax, v -> settings.xAxisMax = v)),
+			() -> settings.showXAxis && !settings.autoXAxisRange);
+		axes.add("X step", stepAndPrecision(() -> settings.xStepSize,
+			v -> settings.xStepSize = v, () -> settings.xAxisPrecision,
 			v -> settings.xAxisPrecision = v), () -> settings.showXAxis);
 
 		axes.add("", checkBox("Show y axis", () -> settings.showYAxis,
 			v -> settings.showYAxis = v));
 		axes.add("Y label", textField(() -> settings.yAxisLabel,
 			v -> settings.yAxisLabel = v), () -> settings.showYAxis);
-		axes.add("", checkBox("Automatic y range in pixels",
+		axes.add("", checkBox("Automatic range in pixels",
 			() -> settings.autoYAxisRange, v -> settings.autoYAxisRange = v),
 			() -> settings.showYAxis);
-		axes.add("Y min", doubleField(-1e9, 1e9, 1, () -> settings.yAxisMin,
-			v -> settings.yAxisMin = v), () -> settings.showYAxis &&
-				!settings.autoYAxisRange);
-		axes.add("Y max", doubleField(-1e9, 1e9, 1, () -> settings.yAxisMax,
-			v -> settings.yAxisMax = v), () -> settings.showYAxis &&
-				!settings.autoYAxisRange);
-		axes.add("Y step (0 auto)", doubleField(0, 1e9, 1,
-			() -> settings.yStepSize, v -> settings.yStepSize = v),
-			() -> settings.showYAxis);
-		axes.add("Y precision", intField(0, 10, () -> settings.yAxisPrecision,
+		axes.add("Y range", row(doubleField(-1e9, 1e9, 1, () -> settings.yAxisMin,
+			v -> settings.yAxisMin = v), new Label("to"), doubleField(-1e9, 1e9, 1,
+				() -> settings.yAxisMax, v -> settings.yAxisMax = v)),
+			() -> settings.showYAxis && !settings.autoYAxisRange);
+		axes.add("Y step", stepAndPrecision(() -> settings.yStepSize,
+			v -> settings.yStepSize = v, () -> settings.yAxisPrecision,
 			v -> settings.yAxisPrecision = v), () -> settings.showYAxis);
 		axes.add("Orientation", enumField(KymographSettings.Orientation.values(),
 			() -> settings.orientation, v -> settings.orientation = v));
 
 		// Style
-		Section style = new Section("Style");
+		Section style = new Section("Style", false);
 		style.add("Rescale", intField(1, 50, () -> settings.rescale,
 			v -> settings.rescale = v));
-		style.add("", checkBox("Dark theme", () -> settings.darkTheme,
-			v -> settings.darkTheme = v));
-		style.add("", checkBox("Stack channels", () -> settings.channelStack,
-			v -> settings.channelStack = v));
+		style.add("", row(checkBox("Dark theme", () -> settings.darkTheme,
+			v -> settings.darkTheme = v), checkBox("Stack channels",
+				() -> settings.channelStack, v -> settings.channelStack = v)));
 		style.add("Stack spacing", intField(0, 1000,
 			() -> settings.channelStackSpacing,
 			v -> settings.channelStackSpacing = v), () -> settings.channelStack);
-		style.add("Axis font size", intField(4, 200, () -> settings.axisFontSize,
-			v -> settings.axisFontSize = v));
-		style.add("Label font size", intField(4, 200,
-			() -> settings.labelFontSize, v -> settings.labelFontSize = v));
-		style.add("Title font size", intField(4, 200,
-			() -> settings.titleFontSize, v -> settings.titleFontSize = v));
+		style.add("Font size", row(new Label("Axis"), intField(4, 200,
+			() -> settings.axisFontSize, v -> settings.axisFontSize = v), new Label(
+				"Label"), intField(4, 200, () -> settings.labelFontSize,
+					v -> settings.labelFontSize = v)));
+		style.add("", row(new Label("Title"), intField(4, 200,
+			() -> settings.titleFontSize, v -> settings.titleFontSize = v)));
 
-		for (Section section : new Section[] { figure, source, frames, processing,
-			layout, channels, axes, style })
+		for (Section section : sections)
 			sectionsBox.getChildren().add(section.titledPane);
-		axes.titledPane.setExpanded(false);
-		style.titledPane.setExpanded(false);
+	}
+
+	private HBox stepAndPrecision(DoubleSupplier stepGetter,
+		DoubleConsumer stepSetter, IntSupplier precisionGetter,
+		IntConsumer precisionSetter)
+	{
+		Spinner<Double> step = doubleField(0, 1e9, 1, stepGetter, stepSetter);
+		step.setTooltip(new Tooltip("Distance between ticks. 0 chooses it automatically."));
+		Spinner<Integer> precision = intField(0, 10, precisionGetter,
+			precisionSetter);
+		precision.setTooltip(new Tooltip("Number of decimals in the tick labels."));
+		return row(step, new Label("decimals"), precision);
 	}
 
 	private static String timeLabel(KymographSettings.TimeUnit unit) {
@@ -1081,7 +1115,9 @@ public class KymographPane {
 		for (ChannelSettings channel : settings.channels) {
 			filterChannelComboBox.getItems().add(channel.channel);
 
-			CheckBox visible = new CheckBox("Channel " + channel.channel);
+			CheckBox visible = new CheckBox("C" + channel.channel);
+			visible.setMinWidth(Region.USE_PREF_SIZE);
+			visible.setTooltip(new Tooltip("Show channel " + channel.channel));
 			visible.setSelected(channel.visible);
 			visible.selectedProperty().addListener((ob, o, n) -> channel.visible = n);
 
@@ -1089,36 +1125,47 @@ public class KymographPane {
 			lut.getItems().addAll(luts);
 			lut.setEditable(true);
 			lut.setValue(channel.lut);
-			lut.setMaxWidth(Double.MAX_VALUE);
+			lut.setPrefWidth(COMBO_WIDTH);
+			lut.setMinWidth(60);
 			lut.valueProperty().addListener((ob, o, n) -> {
 				if (n != null && !n.isEmpty()) channel.lut = n;
 			});
-			HBox.setHgrow(lut, Priority.ALWAYS);
 
 			CheckBox auto = new CheckBox("Auto");
+			auto.setMinWidth(Region.USE_PREF_SIZE);
 			auto.setSelected(channel.autoDisplayRange);
 			auto.setTooltip(new Tooltip(
-				"Calculate the display range automatically. The values used are shown after generating."));
+				"Calculate the display range automatically."));
+
+			// The range used last time, shown while the range is automatic.
+			Label autoRange = new Label(KymographScriptBuilder.number(
+				channel.displayRangeMin) + " - " + KymographScriptBuilder.number(
+					channel.displayRangeMax));
+			autoRange.setStyle("-fx-opacity: 0.6;");
+			autoRange.setTooltip(new Tooltip("Display range used last time"));
 
 			TextField min = numberTextField(channel.displayRangeMin,
 				v -> channel.displayRangeMin = v);
 			TextField max = numberTextField(channel.displayRangeMax,
 				v -> channel.displayRangeMax = v);
-			min.setDisable(channel.autoDisplayRange);
-			max.setDisable(channel.autoDisplayRange);
+			HBox range = row(new Label("Min"), min, new Label("Max"), max);
+			range.setPadding(new Insets(0, 0, 2, 24));
+
+			Runnable updateAuto = () -> {
+				boolean isAuto = channel.autoDisplayRange;
+				autoRange.setVisible(isAuto && channel.displayRangeMax > channel.displayRangeMin &&
+					!(channel.displayRangeMin == 0 && channel.displayRangeMax == 1));
+				range.setVisible(!isAuto);
+				range.setManaged(!isAuto);
+			};
+			updateAuto.run();
 			auto.selectedProperty().addListener((ob, o, n) -> {
 				channel.autoDisplayRange = n;
-				min.setDisable(n);
-				max.setDisable(n);
+				updateAuto.run();
 			});
 
-			HBox header = new HBox(8, visible, lut);
-			header.setAlignment(Pos.CENTER_LEFT);
-			HBox range = new HBox(6, auto, new Label("Min"), min, new Label("Max"),
-				max);
-			range.setAlignment(Pos.CENTER_LEFT);
-			range.setPadding(new Insets(0, 0, 4, 22));
-			channelsBox.getChildren().add(new VBox(4, header, range));
+			channelsBox.getChildren().add(new VBox(2, row(visible, lut, auto,
+				autoRange), range));
 		}
 		filterChannelComboBox.setValue(filterChannelComboBox.getItems().contains(
 			filterChannel) ? filterChannel : 0);
@@ -1133,7 +1180,7 @@ public class KymographPane {
 		Spinner<Integer> spinner = new Spinner<>(min, max, Math.max(min, Math.min(
 			max, getter.getAsInt())));
 		spinner.setEditable(true);
-		spinner.setMaxWidth(Double.MAX_VALUE);
+		compact(spinner);
 		commitOnFocusLost(spinner);
 		spinner.valueProperty().addListener((ob, o, n) -> {
 			if (!pushing && n != null) setter.accept(n);
@@ -1168,13 +1215,45 @@ public class KymographPane {
 		});
 		Spinner<Double> spinner = new Spinner<>(factory);
 		spinner.setEditable(true);
-		spinner.setMaxWidth(Double.MAX_VALUE);
+		compact(spinner);
 		commitOnFocusLost(spinner);
 		spinner.valueProperty().addListener((ob, o, n) -> {
 			if (!pushing && n != null) setter.accept(n);
 		});
 		pushers.add(() -> factory.setValue(getter.getAsDouble()));
 		return spinner;
+	}
+
+	private static void compact(Spinner<?> spinner) {
+		spinner.getEditor().setPrefColumnCount(3);
+		spinner.setPrefWidth(SPINNER_WIDTH);
+		spinner.setMinWidth(SPINNER_WIDTH);
+		spinner.setMaxWidth(Region.USE_PREF_SIZE);
+	}
+
+	/**
+	 * Controls in a single row, for related settings that belong together.
+	 */
+	private static HBox row(Node... nodes) {
+		HBox row = new HBox(6, nodes);
+		row.setAlignment(Pos.CENTER_LEFT);
+		for (Node node : nodes)
+			if (node instanceof Label) ((Label) node).setMinWidth(
+				Region.USE_PREF_SIZE);
+		return row;
+	}
+
+	/**
+	 * Show the nodes only while the condition holds.
+	 */
+	private void showWhen(Supplier<Boolean> condition, Node... nodes) {
+		visibilityUpdaters.add(() -> {
+			boolean show = condition.get();
+			for (Node node : nodes) {
+				node.setVisible(show);
+				node.setManaged(show);
+			}
+		});
 	}
 
 	private static <T> void commitOnFocusLost(Spinner<T> spinner) {
@@ -1235,7 +1314,9 @@ public class KymographPane {
 	{
 		ComboBox<E> comboBox = new ComboBox<>();
 		comboBox.getItems().addAll(values);
-		comboBox.setMaxWidth(Double.MAX_VALUE);
+		comboBox.setPrefWidth(COMBO_WIDTH);
+		comboBox.setMinWidth(COMBO_WIDTH);
+		comboBox.setMaxWidth(Region.USE_PREF_SIZE);
 		comboBox.setConverter(new StringConverter<E>() {
 
 			@Override
@@ -1268,19 +1349,21 @@ public class KymographPane {
 		private final GridPane grid;
 		private int row = 0;
 
-		Section(String title) {
+		Section(String title, boolean expanded) {
 			grid = new GridPane();
 			grid.setHgap(8);
-			grid.setVgap(6);
-			grid.setPadding(new Insets(6));
+			grid.setVgap(4);
+			grid.setPadding(new Insets(4, 6, 6, 6));
 			ColumnConstraints labels = new ColumnConstraints();
-			labels.setMinWidth(90);
+			labels.setMinWidth(Region.USE_PREF_SIZE);
 			ColumnConstraints controls = new ColumnConstraints();
 			controls.setHgrow(Priority.ALWAYS);
 			controls.setFillWidth(true);
 			grid.getColumnConstraints().addAll(labels, controls);
 			titledPane = new TitledPane(title, grid);
 			titledPane.setAnimated(false);
+			titledPane.setExpanded(expanded);
+			sections.add(this);
 		}
 
 		void add(String label, Node control) {
@@ -1289,6 +1372,7 @@ public class KymographPane {
 
 		void add(String label, Node control, Supplier<Boolean> visible) {
 			Label labelNode = new Label(label);
+			labelNode.setMinWidth(Region.USE_PREF_SIZE);
 			grid.add(labelNode, 0, row);
 			grid.add(control, 1, row);
 			row++;
