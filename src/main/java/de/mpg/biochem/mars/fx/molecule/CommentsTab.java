@@ -591,6 +591,23 @@ public class CommentsTab extends AbstractMoleculeArchiveTab {
 		return activeDocumentEditor.getReadOnlyProperty();
 	}
 
+	/**
+	 * Add a new document with the content provided. A number is added to the
+	 * name if it is already in use.
+	 *
+	 * @param name Document name.
+	 * @param content Markdown content.
+	 */
+	public void addDocument(String name, String content) {
+		if (archive == null) return;
+		String uniqueName = name;
+		for (int i = 2; archive.properties().getDocumentNames().contains(
+			uniqueName); i++)
+			uniqueName = name + " " + i;
+		archive.properties().putDocument(uniqueName, content);
+		newEditor(uniqueName);
+	}
+
 	DocumentEditor newEditor(String name) {
 		DocumentEditor documentEditor = new DocumentEditor(context, archive, this,
 			name);

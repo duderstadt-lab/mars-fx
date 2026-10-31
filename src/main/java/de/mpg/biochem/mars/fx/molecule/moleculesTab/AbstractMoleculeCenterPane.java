@@ -45,6 +45,7 @@ import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.dashboard.MoleculeDashboard;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographPane;
 import de.mpg.biochem.mars.fx.plot.PlotPane;
 import de.mpg.biochem.mars.fx.plot.event.PlotEvent;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
@@ -69,10 +70,12 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	protected Tab dataTableTab;
 	protected Tab plotTab;
 	protected Tab moleculeDashboardTab;
+	protected Tab kymographTab;
 
 	protected BorderPane dataTableContainer;
 	protected P plotPane;
 	protected MoleculeDashboard<M> moleculeDashboardPane;
+	protected KymographPane kymographPane;
 
 	protected Set<List<String>> segmentTableNames;
 	protected Set<String> refreshedTabs;
@@ -102,6 +105,13 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 		moleculeDashboardTab.setGraphic(ActionUtils.icon(Material.DASHBOARD, "1.0em"));
 		moleculeDashboardPane = new MoleculeDashboard<M>(context);
 		moleculeDashboardTab.setContent(moleculeDashboardPane.getNode());
+
+		// Only added for archives that support figures, see
+		// updateKymographTab().
+		kymographTab = new Tab();
+		kymographTab.setText("Kymograph");
+		kymographPane = new KymographPane(context);
+		kymographTab.setContent(kymographPane.getNode());
 
 		tabPane.getTabs().add(dataTableTab);
 		tabPane.getTabs().add(plotTab);
@@ -140,12 +150,19 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 						moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e
 							.getArchive()));
 						if (e.getArchive() == null) molecule = null;
+						updateKymographTab(kymographPane.setArchive(e.getArchive()));
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(
 						"MOLECULE_ARCHIVE_UNLOCK"))
 			{
 				plotPane.fireEvent(new MoleculeArchiveUnlockEvent(e.getArchive()));
+				e.consume();
+			}
+					else if (e.getEventType().getName().equals(
+						"MOLECULE_ARCHIVE_LOCK"))
+			{
+				kymographPane.onArchiveLocked();
 				e.consume();
 			}
 				}
@@ -165,6 +182,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			dataTableContainer.setCenter(new MarsTableView(new MarsTable()));
 			plotPane.fireEvent(new MoleculeSelectionChangedEvent(null));
 			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(null));
+			if (selectedTab.equals(kymographTab)) kymographPane.refresh();
 			return;
 		}
 
@@ -181,11 +199,41 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
 				molecule));
 		}
+		else if (selectedTab.equals(kymographTab)) {
+			kymographPane.refresh();
+		}
 		else {
 			((BorderPane) selectedTab.getContent()).setCenter(new MarsTableView(
 				molecule.getSegmentsTable(tabNameToSegmentName.get(tabName))));
 		}
 		refreshedTabs.add(tabName);
+	}
+
+	/**
+	 * Show the kymograph tab right after the plot tab for archives that support
+	 * figures, or remove it for archives that don't.
+	 */
+	protected void updateKymographTab(boolean supported) {
+		if (supported) {
+			kymographTab.setText(kymographPane.getTabName());
+			if (!tabPane.getTabs().contains(kymographTab)) tabPane.getTabs().add(
+				tabPane.getTabs().indexOf(plotTab) + 1, kymographTab);
+		}
+		else {
+			if (tabPane.getSelectionModel().getSelectedItem() == kymographTab)
+				tabPane.getSelectionModel().select(dataTableTab);
+			tabPane.getTabs().remove(kymographTab);
+		}
+	}
+
+	/**
+	 * Show the kymograph tab and the dialog for generating figures for many
+	 * molecules.
+	 */
+	public void showGenerateFiguresDialog() {
+		if (tabPane.getTabs().contains(kymographTab)) tabPane.getSelectionModel()
+			.select(kymographTab);
+		kymographPane.showBatchDialog();
 	}
 
 	protected Tab buildSegmentTab(List<String> segmentTableName) {
@@ -237,6 +285,7 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 	@SuppressWarnings("unchecked")
 	public void onMoleculeSelectionChangedEvent(Molecule molecule) {
 		this.molecule = (M) molecule;
+		kymographPane.setMolecule(molecule);
 		moleculeDashboardPane.fireEvent(new MoleculeSelectionChangedEvent(
 			molecule));
 
@@ -260,6 +309,10 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 			jGenerator.writeFieldName("moleculeDashboard");
 			moleculeDashboardPane.toJSON(jGenerator);
 		}, jParser -> moleculeDashboardPane.fromJSON(jParser));
+
+		setJsonField("kymographPane", jGenerator -> jGenerator.writeStringField(
+			"kymographPane", kymographPane.getState()), jParser -> kymographPane
+				.setState(jParser.getText()));
 
 		/*
 		 * 
