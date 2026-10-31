@@ -149,8 +149,11 @@ public abstract class AbstractMoleculeCenterPane<M extends Molecule, P extends P
 							.getArchive()));
 						moleculeDashboardPane.fireEvent(new InitializeMoleculeArchiveEvent(e
 							.getArchive()));
+						boolean figuresSupported = kymographPane.setArchive(e.getArchive());
+						// On close, leave the tabs alone: changing the selection here
+						// would refresh tabs while the archive is being torn down.
 						if (e.getArchive() == null) molecule = null;
-						updateKymographTab(kymographPane.setArchive(e.getArchive()));
+						else updateKymographTab(figuresSupported);
 						e.consume();
 					}
 					else if (e.getEventType().getName().equals(

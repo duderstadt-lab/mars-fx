@@ -212,7 +212,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MoleculeEvent e) {
-					if (molecule == null) return;
+					if (molecule == null || archive == null) return;
 					//If there are no molecule records do nothing...
 					if (archive.getNumberOfMolecules() == 0) return;
 					
