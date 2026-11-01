@@ -349,10 +349,6 @@ public class MarsTableView extends TableView<MarsTableView.MarsTableRowObject> {
 
 		private final Tooltip tooltip = new Tooltip();
 
-		DoubleCell() {
-			setStyle("-fx-alignment: CENTER-RIGHT;");
-		}
-
 		@Override
 		protected void updateItem(Object item, boolean empty) {
 			super.updateItem(item, empty);
