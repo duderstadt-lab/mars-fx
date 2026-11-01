@@ -1081,8 +1081,11 @@ public class KymographPane {
 
 		// Style
 		Section style = new Section("Style", false);
-		style.add("Rescale", intField(1, 50, () -> settings.rescale,
-			v -> settings.rescale = v));
+		Spinner<Integer> resolution = intField(1, 50, () -> settings.rescale,
+			v -> settings.rescale = v);
+		resolution.setTooltip(new Tooltip(
+			"Output pixels per image pixel. Higher values give a larger, sharper image with the same layout."));
+		style.add("Resolution", row(resolution, new Label("x")));
 		style.add("", row(checkBox("Dark theme", () -> settings.darkTheme,
 			v -> settings.darkTheme = v), checkBox("Stack channels",
 				() -> settings.channelStack, v -> settings.channelStack = v)));
