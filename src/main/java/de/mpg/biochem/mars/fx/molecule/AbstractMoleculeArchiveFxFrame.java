@@ -129,8 +129,6 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane.TabClosingPolicy;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
@@ -174,7 +172,7 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		.observableArrayList();
 
 	protected MenuBar menuBar;
-	protected HBox menuHBox;
+	protected StackPane menuPane;
 	protected Button showPropertiesButton;
 
 	protected Menu fileMenu, toolsMenu;
@@ -624,23 +622,22 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			}
 		});
 
-		menuHBox = new HBox(menuBar);
-		menuHBox.setAlignment(Pos.CENTER);
-		HBox.setHgrow(menuBar, Priority.ALWAYS);
-		HBox.setHgrow(showPropertiesButton, Priority.NEVER);
+		// The button always takes part in the layout, so the menu bar keeps
+		// the same height on tabs where it is hidden.
+		showPropertiesButton.setVisible(false);
+		menuBar.setMaxHeight(Double.MAX_VALUE);
+		StackPane.setAlignment(showPropertiesButton, Pos.CENTER_RIGHT);
+		menuPane = new StackPane(menuBar, showPropertiesButton);
 
-		borderPane.setTop(menuHBox);
+		borderPane.setTop(menuPane);
 	}
 
 	public void showPropertiesButton() {
-		menuHBox.getChildren().clear();
-		menuHBox.getChildren().add(menuBar);
-		menuHBox.getChildren().add(showPropertiesButton);
+		showPropertiesButton.setVisible(true);
 	}
 
 	public void hidePropertiesButton() {
-		menuHBox.getChildren().clear();
-		menuHBox.getChildren().add(menuBar);
+		showPropertiesButton.setVisible(false);
 	}
 
 	protected void showVideo() {
