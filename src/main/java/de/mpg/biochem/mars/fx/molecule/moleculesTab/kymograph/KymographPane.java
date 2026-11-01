@@ -1096,6 +1096,13 @@ public class KymographPane {
 					v -> settings.labelFontSize = v)));
 		style.add("", row(new Label("Title"), intField(4, 200,
 			() -> settings.titleFontSize, v -> settings.titleFontSize = v)));
+		style.add("Axis line", row(doubleField(0.25, 50, 0.25,
+			() -> settings.axisLineWidth, v -> settings.axisLineWidth = v),
+			pixels()));
+		style.add("Ticks", row(new Label("Length"), intField(0, 100,
+			() -> settings.tickLength, v -> settings.tickLength = v), new Label(
+				"Width"), doubleField(0.25, 50, 0.25, () -> settings.tickLineWidth,
+					v -> settings.tickLineWidth = v)));
 
 		for (Section section : sections)
 			sectionsBox.getChildren().add(section.titledPane);

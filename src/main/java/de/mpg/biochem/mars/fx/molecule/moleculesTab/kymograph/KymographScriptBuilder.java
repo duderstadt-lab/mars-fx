@@ -335,6 +335,9 @@ public class KymographScriptBuilder {
 		line(sb, ".setAxisFontSize(" + settings.axisFontSize + ")");
 		line(sb, ".setLabelFontSize(" + settings.labelFontSize + ")");
 		line(sb, ".setTitleFontSize(" + settings.titleFontSize + ")");
+		line(sb, ".setAxisLineWidth(" + number(settings.axisLineWidth) + ")");
+		line(sb, ".setTickLineWidth(" + number(settings.tickLineWidth) + ")");
+		line(sb, ".setTickLength(" + settings.tickLength + ")");
 		if (settings.darkTheme) line(sb, ".setDarkTheme(true)");
 		sb.append("formatter.build()\n\n");
 	}

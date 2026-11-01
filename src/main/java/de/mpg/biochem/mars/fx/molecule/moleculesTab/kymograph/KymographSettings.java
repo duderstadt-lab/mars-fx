@@ -133,9 +133,13 @@ public class KymographSettings {
 	public boolean darkTheme = false;
 	public boolean channelStack = false;
 	public int channelStackSpacing = 25;
-	public int axisFontSize = 16;
-	public int labelFontSize = 16;
-	public int titleFontSize = 16;
+	// Sizes in pixels at rescale 1. They are enlarged with the figure.
+	public int axisFontSize = 10;
+	public int labelFontSize = 10;
+	public int titleFontSize = 10;
+	public double axisLineWidth = 1;
+	public double tickLineWidth = 1;
+	public int tickLength = 3;
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ChannelSettings {
