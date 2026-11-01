@@ -43,6 +43,20 @@ import de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph.KymographSettings.
  */
 public class KymographScriptBuilder {
 
+	// ImageFormatter.setScale is only available in newer mars-kymograph versions.
+	private static final boolean SUPPORTS_SCALE = hasScale();
+
+	private static boolean hasScale() {
+		try {
+			Class.forName(KymographArchiveType.KYMOGRAPH_PACKAGE + ".ImageFormatter")
+				.getMethod("setScale", double.class);
+			return true;
+		}
+		catch (ClassNotFoundException | NoSuchMethodException | LinkageError e) {
+			return false;
+		}
+	}
+
 	public static final String IMAGE_OUTPUT = "imgsrc";
 	public static final String DISPLAY_RANGES_OUTPUT = "displayRanges";
 	public static final String WIDGET_KEYWORD = "groovy-image-widget";
@@ -255,6 +269,13 @@ public class KymographScriptBuilder {
 
 		sb.append("def formatter = new ImageFormatter(scijavaContext, image)\n");
 		line(sb, ".setRescale(" + settings.rescale + ")");
+		// Keep the axes and text the same size relative to the figure when the
+		// image is enlarged. Interpolation enlarges montages in both directions,
+		// but kymographs only along the DNA, so it is left out for kymographs.
+		double scale = (isKymograph() ? 1 : Math.max(1, settings.interpolation)) *
+			settings.rescale;
+		if (scale != 1 && SUPPORTS_SCALE) line(sb, ".setScale(" + number(scale) +
+			")");
 		line(sb, ".setTitle(" + (settings.title == null ? "UID" : quote(
 			settings.title)) + ")");
 
