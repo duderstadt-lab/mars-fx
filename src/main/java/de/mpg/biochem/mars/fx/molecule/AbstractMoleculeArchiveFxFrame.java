@@ -77,7 +77,9 @@ import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStarter;
 import de.mpg.biochem.mars.fx.bdv.ViewerTransformSyncStopper;
 import de.mpg.biochem.mars.fx.event.DashboardChangedEvent;
+import de.mpg.biochem.mars.fx.event.AddDocumentEvent;
 import de.mpg.biochem.mars.fx.event.DocumentChangedEvent;
+import de.mpg.biochem.mars.fx.event.FigureChangedEvent;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MetadataParametersChangedEvent;
 import de.mpg.biochem.mars.fx.event.MetadataTagsChangedEvent;
@@ -392,6 +394,14 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 			markDirty::handle);
 		getNode().addEventFilter(DocumentChangedEvent.DOCUMENT_CHANGED,
 			markDirty::handle);
+		getNode().addEventFilter(FigureChangedEvent.FIGURE_CHANGED,
+			markDirty::handle);
+		getNode().addEventFilter(AddDocumentEvent.ADD_DOCUMENT, e -> {
+			commentsTab.addDocument(e.getName(), e.getContent());
+			tabsContainer.getSelectionModel().select(commentsTab.getTab());
+			dirty.set(true);
+			e.consume();
+		});
 		getNode().addEventFilter(DashboardChangedEvent.DASHBOARD_CHANGED,
 			markDirty::handle);
 
@@ -566,6 +576,12 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		Action mergeMoleculesAction = new Action("Merge Molecules", null, null,
 			e -> mergeMolecules());
 
+		Action generateFiguresAction = new Action("Generate Figures...", null,
+			null, e -> {
+				tabsContainer.getSelectionModel().select(moleculesTab.getTab());
+				moleculesTab.showGenerateFiguresDialog();
+			});
+
 		Action rebuildIndexesAction = new Action("Rebuild Indexes", null, null,
 			e -> {
 				runTask(() -> {
@@ -581,7 +597,8 @@ public abstract class AbstractMoleculeArchiveFxFrame<I extends MarsMetadataTab<?
 		toolsMenu = ActionUtils.createMenu("Tools", deleteMoleculesAction,
 			deleteMoleculeTagsAction, deleteMoleculeParametersAction,
 			deleteMoleculeRegionsAction, deleteMoleculePositionsAction,
-			deleteSegmentTablesAction, mergeMoleculesAction, null, showVideoAction,
+			deleteSegmentTablesAction, mergeMoleculesAction, null,
+			generateFiguresAction, showVideoAction,
 			null, rebuildIndexesAction);
 
 		menuBar = new MenuBar(fileMenu, toolsMenu);

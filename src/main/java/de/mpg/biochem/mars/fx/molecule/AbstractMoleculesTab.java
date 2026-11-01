@@ -48,9 +48,11 @@ import de.mpg.biochem.mars.fx.bdv.MarsBdvFrame;
 import de.mpg.biochem.mars.fx.util.ActionUtils;
 import de.mpg.biochem.mars.fx.event.InitializeMoleculeArchiveEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveEvent;
+import de.mpg.biochem.mars.fx.event.MoleculeArchiveLockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeArchiveUnlockEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeEvent;
 import de.mpg.biochem.mars.fx.event.MoleculeSelectionChangedEvent;
+import de.mpg.biochem.mars.fx.molecule.moleculesTab.AbstractMoleculeCenterPane;
 import de.mpg.biochem.mars.fx.molecule.moleculesTab.MoleculeSubPane;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataPositionEvent;
 import de.mpg.biochem.mars.fx.plot.event.NewMetadataRegionEvent;
@@ -210,7 +212,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 				@SuppressWarnings("unchecked")
 				@Override
 				public void handle(MoleculeEvent e) {
-					if (molecule == null) return;
+					if (molecule == null || archive == null) return;
 					//If there are no molecule records do nothing...
 					if (archive.getNumberOfMolecules() == 0) return;
 					
@@ -611,6 +613,13 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 	}
 
 	@Override
+	public void showGenerateFiguresDialog() {
+		if (moleculeCenterPane instanceof AbstractMoleculeCenterPane)
+			((AbstractMoleculeCenterPane<?, ?>) moleculeCenterPane)
+				.showGenerateFiguresDialog();
+	}
+
+	@Override
 	public void setCacheLookAhead(int lookAhead) {
 		if (cache != null) cache.setLookAhead(lookAhead);
 	}
@@ -755,6 +764,7 @@ public abstract class AbstractMoleculesTab<M extends Molecule, C extends Molecul
 		// against the store, so block here until the cache is fully flushed.
 		if (cache != null) cache.flushAndWait();
 		saveCurrentRecord();
+		moleculeCenterPane.fireEvent(new MoleculeArchiveLockEvent(archive));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -56,4 +56,7 @@ public interface MoleculesTab<C extends MoleculeSubPane, O extends MoleculeSubPa
 
 	/** Records behind the selection to prefetch. 0 disables prefetching. */
 	public void setCacheLookBehind(int lookBehind);
+
+	/** Show the dialog for generating kymographs or montages for many molecules. */
+	public default void showGenerateFiguresDialog() {}
 }
