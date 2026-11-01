@@ -1068,9 +1068,11 @@ public class KymographPane {
 			v -> settings.showYAxis = v));
 		axes.add("Y label", textField(() -> settings.yAxisLabel,
 			v -> settings.yAxisLabel = v), () -> settings.showYAxis);
-		axes.add("", checkBox("Automatic range in pixels",
-			() -> settings.autoYAxisRange, v -> settings.autoYAxisRange = v),
-			() -> settings.showYAxis);
+		CheckBox autoYRange = checkBox("Automatic range in image pixels",
+			() -> settings.autoYAxisRange, v -> settings.autoYAxisRange = v);
+		autoYRange.setTooltip(new Tooltip(
+			"Label the y axis from 0 to the height of the region in image pixels.\nTurn off to enter your own range, for example in kb or µm."));
+		axes.add("", autoYRange, () -> settings.showYAxis);
 		axes.add("Y range", row(doubleField(-1e9, 1e9, 1, () -> settings.yAxisMin,
 			v -> settings.yAxisMin = v), new Label("to"), doubleField(-1e9, 1e9, 1,
 				() -> settings.yAxisMax, v -> settings.yAxisMax = v)),
@@ -1128,7 +1130,7 @@ public class KymographPane {
 			case MINUTES:
 				return "Time (min)";
 			case FRAMES:
-				return "Frame";
+				return "T";
 			default:
 				return "Time (s)";
 		}
@@ -1414,6 +1416,8 @@ public class KymographPane {
 			@Override
 			public String toString(E value) {
 				if (value == null) return "";
+				// Time points are called T throughout Mars.
+				if (value == KymographSettings.TimeUnit.FRAMES) return "T";
 				String name = value.name().replace('_', ' ').toLowerCase();
 				return Character.toUpperCase(name.charAt(0)) + name.substring(1);
 			}
