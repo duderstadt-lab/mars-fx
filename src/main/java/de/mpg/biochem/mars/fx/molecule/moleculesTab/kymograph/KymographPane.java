@@ -50,6 +50,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.controlsfx.control.RangeSlider;
+import org.controlsfx.control.SearchableComboBox;
 import org.scijava.Context;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -149,7 +150,7 @@ public class KymographPane {
 	private final Button addToCommentsButton;
 	private final Button batchButton;
 	private final CheckBox autoGenerateCheckBox;
-	private final ToggleButton keepSettingsButton;
+	private final CheckBox keepSettingsCheckBox;
 
 	private MoleculeArchive<?, ?, ?, ?> archive;
 	private KymographArchiveType archiveType;
@@ -197,9 +198,9 @@ public class KymographPane {
 		autoGenerateCheckBox.setTooltip(new Tooltip(
 			"Generate a figure when a molecule without one is selected."));
 
-		keepSettingsButton = new ToggleButton("Keep settings");
-		keepSettingsButton.setTooltip(new Tooltip(
-			"Keep the current settings when the selection changes instead of loading the settings stored with each molecule."));
+		keepSettingsCheckBox = new CheckBox("Keep settings when switching molecules");
+		keepSettingsCheckBox.setTooltip(new Tooltip(
+			"When on, the current settings stay when another molecule is selected.\nWhen off, the settings stored with that molecule's figure are loaded."));
 
 		generateButton = new Button("Generate");
 		generateButton.setDefaultButton(true);
@@ -232,8 +233,8 @@ public class KymographPane {
 		HBox.setHgrow(exportButton, Priority.ALWAYS);
 		HBox.setHgrow(addToCommentsButton, Priority.ALWAYS);
 
-		VBox actionsBox = new VBox(6, new HBox(10, autoGenerateCheckBox,
-			keepSettingsButton), generateButton, buttonRow);
+		VBox actionsBox = new VBox(6, autoGenerateCheckBox, keepSettingsCheckBox,
+			generateButton, buttonRow);
 		actionsBox.setPadding(new Insets(8));
 		autoGenerateCheckBox.setAlignment(Pos.CENTER_LEFT);
 
@@ -370,7 +371,7 @@ public class KymographPane {
 		if (archiveType == null) return;
 		updateMoleculeInfo();
 		MarsFigure figure = getFigure();
-		if (figure != null && !keepSettingsButton.isSelected()) {
+		if (figure != null && !keepSettingsCheckBox.isSelected()) {
 			KymographSettings stored = KymographSettings.fromJson(figure
 				.getSettings());
 			if (!archiveType.supportsKymograph()) stored.mode = Mode.MONTAGE;
@@ -800,7 +801,7 @@ public class KymographPane {
 			// Settings are always valid json.
 		}
 		state.put("autoGenerate", autoGenerateCheckBox.isSelected());
-		state.put("keepSettings", keepSettingsButton.isSelected());
+		state.put("keepSettings", keepSettingsCheckBox.isSelected());
 		ObjectNode expanded = state.putObject("expandedSections");
 		for (Section section : sections)
 			expanded.put(section.titledPane.getText(), section.titledPane
@@ -815,7 +816,7 @@ public class KymographPane {
 				.get("settings").toString());
 			if (state.has("autoGenerate")) autoGenerateCheckBox.setSelected(state
 				.get("autoGenerate").asBoolean());
-			if (state.has("keepSettings")) keepSettingsButton.setSelected(state.get(
+			if (state.has("keepSettings")) keepSettingsCheckBox.setSelected(state.get(
 				"keepSettings").asBoolean());
 			JsonNode expanded = state.get("expandedSections");
 			if (expanded != null) for (Section section : sections)
@@ -1168,9 +1169,11 @@ public class KymographPane {
 			visible.setSelected(channel.visible);
 			visible.selectedProperty().addListener((ob, o, n) -> channel.visible = n);
 
-			ComboBox<String> lut = new ComboBox<>();
+			// Only existing LUTs can be picked. Typing filters the list.
+			SearchableComboBox<String> lut = new SearchableComboBox<>();
 			lut.getItems().addAll(luts);
-			lut.setEditable(true);
+			if (channel.lut != null && !lut.getItems().contains(channel.lut)) lut
+				.getItems().add(channel.lut);
 			lut.setValue(channel.lut);
 			lut.setPrefWidth(COMBO_WIDTH);
 			lut.setMinWidth(60);
