@@ -41,12 +41,18 @@
     -mwfx-hit: -mars-light-search-hit-active;
 }
 
-/* Text styling */
+/* Text styling: a border layer under the field so it stands out from white panes */
 .text-field {
     -fx-prompt-text-fill: -mars-light-text-disabled;
-    -fx-background-color: -mars-light-bg-field;
+    -fx-background-color: -mars-light-border-primary, -mars-light-bg-field;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 3, 2;
     -fx-text-fill: -mars-light-text-field;
     -fx-accent: -mars-light-accent-primary;
+}
+
+.text-field:focused {
+    -fx-background-color: -mars-light-accent-primary, -mars-light-bg-field;
 }
 
 .rounded-corners-textfield {
