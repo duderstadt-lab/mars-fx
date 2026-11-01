@@ -898,15 +898,16 @@ public class KymographPane {
 
 		// Source
 		Section source = new Section("Source", true);
-		source.add("Projection width", intField(1, 1000, () -> settings.projectionWidth,
-			v -> settings.projectionWidth = v), this::isKymograph);
+		source.add("Projection width", row(intField(1, 1000,
+			() -> settings.projectionWidth, v -> settings.projectionWidth = v),
+			pixels()), this::isKymograph);
 		source.add("Border", row(new Label("W"), intField(0, 1000,
 			() -> settings.borderWidth, v -> settings.borderWidth = v), new Label(
 				"H"), intField(0, 1000, () -> settings.borderHeight,
-					v -> settings.borderHeight = v)), () -> !isKymograph() &&
+					v -> settings.borderHeight = v), pixels()), () -> !isKymograph() &&
 						!isSingleMolecule());
-		source.add("Spot radius", intField(1, 1000, () -> settings.spotRadius,
-			v -> settings.spotRadius = v), this::isSingleMolecule);
+		source.add("Spot radius", row(intField(1, 1000, () -> settings.spotRadius,
+			v -> settings.spotRadius = v), pixels()), this::isSingleMolecule);
 		TextField xLocation = textField(() -> settings.xLocationSource,
 			v -> settings.xLocationSource = v);
 		TextField yLocation = textField(() -> settings.yLocationSource,
@@ -994,13 +995,6 @@ public class KymographPane {
 			() -> !isKymograph() && settings.filter != Filter.NONE);
 		processing.add("Interpolation", doubleField(1, 20, 0.5,
 			() -> settings.interpolation, v -> settings.interpolation = v));
-		CheckBox horizontalReflection = checkBox("Horizontal",
-			() -> settings.horizontalReflection,
-			v -> settings.horizontalReflection = v);
-		showWhen(() -> !isKymograph(), horizontalReflection);
-		processing.add("Reflect", row(checkBox("Vertical",
-			() -> settings.verticalReflection, v -> settings.verticalReflection = v),
-			horizontalReflection));
 
 		// Layout
 		Section layout = new Section("Layout", false);
@@ -1021,14 +1015,21 @@ public class KymographPane {
 		showWhen(() -> settings.columns > 0, columnsLabel, columns);
 		layout.add("Arrange", row(arrangement, columnsLabel, columns),
 			() -> !isKymograph());
-		layout.add("Spacing", intField(0, 1000, () -> settings.spacing,
-			v -> settings.spacing = v), () -> !isKymograph());
+		layout.add("Spacing", row(intField(0, 1000, () -> settings.spacing,
+			v -> settings.spacing = v), pixels()), () -> !isKymograph());
 		ComboBox<KymographSettings.Orientation> orientation = enumField(
 			KymographSettings.Orientation.values(), () -> settings.orientation,
 			v -> settings.orientation = v);
 		orientation.setTooltip(new Tooltip(
 			"Horizontal keeps time running left to right. The vertical options rotate the figure by 90 degrees to the left or right."));
 		layout.add("Orientation", orientation);
+		CheckBox horizontalReflection = checkBox("Horizontal",
+			() -> settings.horizontalReflection,
+			v -> settings.horizontalReflection = v);
+		showWhen(() -> !isKymograph(), horizontalReflection);
+		layout.add("Reflect", row(checkBox("Vertical",
+			() -> settings.verticalReflection, v -> settings.verticalReflection = v),
+			horizontalReflection));
 
 		// Channels
 		Section channels = new Section("Channels", true);
@@ -1085,9 +1086,10 @@ public class KymographPane {
 		style.add("", row(checkBox("Dark theme", () -> settings.darkTheme,
 			v -> settings.darkTheme = v), checkBox("Stack channels",
 				() -> settings.channelStack, v -> settings.channelStack = v)));
-		style.add("Stack spacing", intField(0, 1000,
+		style.add("Stack spacing", row(intField(0, 1000,
 			() -> settings.channelStackSpacing,
-			v -> settings.channelStackSpacing = v), () -> settings.channelStack);
+			v -> settings.channelStackSpacing = v), pixels()),
+			() -> settings.channelStack);
 		style.add("Font size", row(new Label("Axis"), intField(4, 200,
 			() -> settings.axisFontSize, v -> settings.axisFontSize = v), new Label(
 				"Label"), intField(4, 200, () -> settings.labelFontSize,
@@ -1314,6 +1316,13 @@ public class KymographPane {
 			if (node instanceof Label) ((Label) node).setMinWidth(
 				Region.USE_PREF_SIZE);
 		return row;
+	}
+
+	/** A unit label for pixel values. */
+	private static Label pixels() {
+		Label label = new Label("px");
+		label.setTooltip(new Tooltip("pixels"));
+		return label;
 	}
 
 	/**
