@@ -59,6 +59,8 @@ public class KymographScriptBuilder {
 
 	public static final String IMAGE_OUTPUT = "imgsrc";
 	public static final String DISPLAY_RANGES_OUTPUT = "displayRanges";
+	public static final String SOURCE_IMAGE_OUTPUT = "sourceImage";
+	public static final String SOURCE_IMAGE_INPUT = "cachedImage";
 	public static final String WIDGET_KEYWORD = "groovy-image-widget";
 
 	private static final String INDENT = "        ";
@@ -67,6 +69,8 @@ public class KymographScriptBuilder {
 	private final KymographArchiveType archiveType;
 	private final String UID;
 	private boolean reportDisplayRanges = false;
+	private boolean outputSourceImage = false;
+	private boolean useSourceImage = false;
 	private String svgPath = null;
 
 	public KymographScriptBuilder(KymographSettings settings,
@@ -78,8 +82,8 @@ public class KymographScriptBuilder {
 	}
 
 	/**
-	 * Add an output with the display range of each channel actually used, so
-	 * the GUI can show them after automatic ranges are calculated.
+	 * Add an output with the pixel range and the automatic display range of each
+	 * channel, so the GUI can show them and offer them as starting points.
 	 *
 	 * @param reportDisplayRanges Whether to add the output.
 	 * @return This builder.
@@ -89,6 +93,44 @@ public class KymographScriptBuilder {
 	{
 		this.reportDisplayRanges = reportDisplayRanges;
 		return this;
+	}
+
+	/**
+	 * Add an output with the image built from the source, before formatting,
+	 * so it can be formatted again without reading the source.
+	 *
+	 * @param outputSourceImage Whether to add the output.
+	 * @return This builder.
+	 */
+	public KymographScriptBuilder outputSourceImage(boolean outputSourceImage) {
+		this.outputSourceImage = outputSourceImage;
+		return this;
+	}
+
+	/**
+	 * Format an image provided as an input instead of building it from the
+	 * source. The image is the source image output by an earlier script with
+	 * the same {@link #sourceKey()}.
+	 *
+	 * @param useSourceImage Whether to take the image as an input.
+	 * @return This builder.
+	 */
+	public KymographScriptBuilder useSourceImage(boolean useSourceImage) {
+		this.useSourceImage = useSourceImage;
+		return this;
+	}
+
+	/**
+	 * The part of the script that builds the image from the source. Scripts with
+	 * the same key build the same image, so an image can be reused when only
+	 * the formatting changed.
+	 *
+	 * @return The source part of the script.
+	 */
+	public String sourceKey() {
+		StringBuilder sb = new StringBuilder();
+		appendSource(sb);
+		return sb.toString();
 	}
 
 	/**
@@ -110,13 +152,19 @@ public class KymographScriptBuilder {
 		StringBuilder sb = new StringBuilder();
 		sb.append("#@ Context scijavaContext\n");
 		sb.append("#@ MoleculeArchive archive\n");
+		if (useSourceImage) sb.append("#@ Object " + SOURCE_IMAGE_INPUT + "\n");
 		sb.append("#@OUTPUT String " + IMAGE_OUTPUT + "\n");
 		if (reportDisplayRanges) sb.append("#@OUTPUT String " +
 			DISPLAY_RANGES_OUTPUT + "\n");
+		if (outputSourceImage) sb.append("#@OUTPUT Object " + SOURCE_IMAGE_OUTPUT +
+			"\n");
 		sb.append("\n");
 
 		String pkg = KymographArchiveType.KYMOGRAPH_PACKAGE;
-		if (isKymograph()) {
+		if (useSourceImage) {
+			// Nothing to import for building the image.
+		}
+		else if (isKymograph()) {
 			sb.append("import " + pkg + ".DnaArchiveKymographBuilder\n");
 		}
 		else {
@@ -125,20 +173,17 @@ public class KymographScriptBuilder {
 		}
 		sb.append("import " + pkg + ".ImageFormatter\n\n");
 
-		sb.append("def UID = " + quote(UID) + "\n");
-		sb.append("def omeImage = archive.getMetadata(archive.get(UID).getMetadataUID()).getImage(0)\n");
-		sb.append("def minT = " + (settings.minT < 0 ? "0" : settings.minT) + "\n");
-		sb.append("def maxT = " + (settings.maxT < 0 ? "omeImage.getSizeT() - 1"
-			: "Math.min(" + settings.maxT + ", omeImage.getSizeT() - 1)") + "\n\n");
-
-		if (isKymograph()) appendKymograph(sb);
-		else appendMontage(sb);
+		if (useSourceImage) {
+			appendTimeRange(sb);
+			sb.append("def image = " + SOURCE_IMAGE_INPUT + "\n\n");
+		}
+		else appendSource(sb);
 
 		appendFormatter(sb);
 
 		sb.append(IMAGE_OUTPUT + " = formatter.getHtmlEncodedImage()\n");
-		if (reportDisplayRanges) sb.append(DISPLAY_RANGES_OUTPUT +
-			" = formatter.getAllFinalDisplayRanges().collect { c, r -> \"${c}:${r[0]}:${r[1]}\" }.join(';')\n");
+		if (reportDisplayRanges) appendDisplayRanges(sb);
+		if (outputSourceImage) sb.append(SOURCE_IMAGE_OUTPUT + " = image\n");
 		if (svgPath != null) sb.append("formatter.saveAsSVG(" + quote(svgPath) +
 			")\n");
 		return sb.toString();
@@ -151,6 +196,20 @@ public class KymographScriptBuilder {
 	 */
 	public String buildFencedCodeBlock() {
 		return "```" + WIDGET_KEYWORD + "\n" + build() + "```\n";
+	}
+
+	private void appendTimeRange(StringBuilder sb) {
+		sb.append("def UID = " + quote(UID) + "\n");
+		sb.append("def omeImage = archive.getMetadata(archive.get(UID).getMetadataUID()).getImage(0)\n");
+		sb.append("def minT = " + (settings.minT < 0 ? "0" : settings.minT) + "\n");
+		sb.append("def maxT = " + (settings.maxT < 0 ? "omeImage.getSizeT() - 1"
+			: "Math.min(" + settings.maxT + ", omeImage.getSizeT() - 1)") + "\n\n");
+	}
+
+	private void appendSource(StringBuilder sb) {
+		appendTimeRange(sb);
+		if (isKymograph()) appendKymograph(sb);
+		else appendMontage(sb);
 	}
 
 	private void appendKymograph(StringBuilder sb) {
@@ -340,6 +399,24 @@ public class KymographScriptBuilder {
 		line(sb, ".setTickLength(" + settings.tickLength + ")");
 		if (settings.darkTheme) line(sb, ".setDarkTheme(true)");
 		sb.append("formatter.build()\n\n");
+	}
+
+	/**
+	 * Report "channel:pixel min:pixel max:auto min:auto max" for each channel.
+	 * The automatic range is calculated the same way as the ImageFormatter,
+	 * which doesn't report it reliably.
+	 */
+	private void appendDisplayRanges(StringBuilder sb) {
+		sb.append("\ndef cAxis = image.dimensionIndex(net.imagej.axis.Axes.CHANNEL)\n");
+		sb.append("def nChannels = cAxis < 0 ? 1 : image.dimension(cAxis)\n");
+		sb.append(DISPLAY_RANGES_OUTPUT + " = (1..nChannels).collect { c ->\n");
+		sb.append(INDENT + "def channelImage = net.imglib2.img.display.imagej.ImageJFunctions.wrap(\n");
+		sb.append(INDENT + INDENT + "cAxis < 0 ? image : net.imglib2.view.Views.hyperSlice(image, cAxis, c - 1), \"C\" + c)\n");
+		sb.append(INDENT + "def ip = channelImage.getProcessor()\n");
+		sb.append(INDENT + "def stats = channelImage.getStackSize() > 1 ? new ij.process.StackStatistics(channelImage) : ip.getStats()\n");
+		sb.append(INDENT + "new ij.plugin.ContrastEnhancer().stretchHistogram(ip, 0.35, stats)\n");
+		sb.append(INDENT + "\"${c}:${stats.min}:${stats.max}:${ip.getMin()}:${ip.getMax()}\"\n");
+		sb.append("}.join(';')\n");
 	}
 
 	private static void line(StringBuilder sb, String call) {

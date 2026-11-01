@@ -70,11 +70,21 @@ public class KymographScriptRunner {
 
 		private final String image;
 		private final Map<Integer, double[]> displayRanges;
+		private final Map<Integer, double[]> pixelRanges;
+		private final Object sourceImage;
 		private final String error;
 
 		Result(String image, Map<Integer, double[]> displayRanges, String error) {
+			this(image, displayRanges, new LinkedHashMap<>(), null, error);
+		}
+
+		Result(String image, Map<Integer, double[]> displayRanges,
+			Map<Integer, double[]> pixelRanges, Object sourceImage, String error)
+		{
 			this.image = image;
 			this.displayRanges = displayRanges;
+			this.pixelRanges = pixelRanges;
+			this.sourceImage = sourceImage;
 			this.error = error;
 		}
 
@@ -86,10 +96,26 @@ public class KymographScriptRunner {
 		}
 
 		/**
-		 * @return The display range used for each channel, if reported.
+		 * @return The automatic display range of each channel, if reported.
 		 */
 		public Map<Integer, double[]> getDisplayRanges() {
 			return displayRanges;
+		}
+
+		/**
+		 * @return The lowest and highest pixel value of each channel, if
+		 *         reported.
+		 */
+		public Map<Integer, double[]> getPixelRanges() {
+			return pixelRanges;
+		}
+
+		/**
+		 * @return The image built from the source before formatting, if the
+		 *         script output it.
+		 */
+		public Object getSourceImage() {
+			return sourceImage;
 		}
 
 		public String getError() {
@@ -103,6 +129,22 @@ public class KymographScriptRunner {
 
 	public Result run(MoleculeArchive<?, ?, ?, ?> archive, String script)
 		throws InterruptedException
+	{
+		return run(archive, script, null);
+	}
+
+	/**
+	 * Run a script.
+	 *
+	 * @param archive The archive the figure is made from.
+	 * @param script The script to run.
+	 * @param sourceImage The source image to format for scripts built with
+	 *          {@link KymographScriptBuilder#useSourceImage(boolean)}, or null.
+	 * @return The result.
+	 * @throws InterruptedException If the script was cancelled.
+	 */
+	public Result run(MoleculeArchive<?, ?, ?, ?> archive, String script,
+		Object sourceImage) throws InterruptedException
 	{
 		ScriptInfo scriptInfo = new ScriptInfo(context, "kymograph.groovy",
 			new StringReader(script));
@@ -121,6 +163,8 @@ public class KymographScriptRunner {
 		Map<String, Object> inputs = new HashMap<>();
 		inputs.put("scijavaContext", context);
 		inputs.put("archive", archive);
+		if (sourceImage != null) inputs.put(KymographScriptBuilder.SOURCE_IMAGE_INPUT,
+			sourceImage);
 		module.setInputs(inputs);
 
 		StringWriter output = new StringWriter();
@@ -143,24 +187,34 @@ public class KymographScriptRunner {
 			return new Result(null, null, message);
 		}
 
-		return new Result((String) image, parseDisplayRanges(module.getOutput(
-			KymographScriptBuilder.DISPLAY_RANGES_OUTPUT)), null);
+		Map<Integer, double[]> displayRanges = new LinkedHashMap<>();
+		Map<Integer, double[]> pixelRanges = new LinkedHashMap<>();
+		parseRanges(module.getOutput(KymographScriptBuilder.DISPLAY_RANGES_OUTPUT),
+			displayRanges, pixelRanges);
+		return new Result((String) image, displayRanges, pixelRanges, module
+			.getOutput(KymographScriptBuilder.SOURCE_IMAGE_OUTPUT), null);
 	}
 
-	private static Map<Integer, double[]> parseDisplayRanges(Object output) {
-		Map<Integer, double[]> ranges = new LinkedHashMap<>();
-		if (output == null) return ranges;
+	/**
+	 * Read "channel:pixel min:pixel max:auto min:auto max" entries.
+	 */
+	private static void parseRanges(Object output,
+		Map<Integer, double[]> displayRanges, Map<Integer, double[]> pixelRanges)
+	{
+		if (output == null) return;
 		for (String entry : output.toString().split(";")) {
 			String[] parts = entry.split(":");
-			if (parts.length != 3) continue;
+			if (parts.length != 5) continue;
 			try {
-				ranges.put(Integer.parseInt(parts[0].trim()), new double[] { Double
-					.parseDouble(parts[1]), Double.parseDouble(parts[2]) });
+				int channel = Integer.parseInt(parts[0].trim());
+				pixelRanges.put(channel, new double[] { Double.parseDouble(parts[1]),
+					Double.parseDouble(parts[2]) });
+				displayRanges.put(channel, new double[] { Double.parseDouble(parts[3]),
+					Double.parseDouble(parts[4]) });
 			}
 			catch (NumberFormatException e) {
 				// Skip entries that can't be read.
 			}
 		}
-		return ranges;
 	}
 }

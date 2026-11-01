@@ -151,6 +151,9 @@ public class KymographSettings {
 		public boolean autoDisplayRange = true;
 		public double displayRangeMin = 0;
 		public double displayRangeMax = 65535;
+		// Lowest and highest pixel value in the figure, once one was generated.
+		public Double pixelMin = null;
+		public Double pixelMax = null;
 
 		public ChannelSettings() {}
 
