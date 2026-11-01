@@ -170,6 +170,14 @@ public class KymographPane {
 	private final List<Runnable> visibilityUpdaters = new ArrayList<>();
 	private final List<Section> sections = new ArrayList<>();
 
+	/** How the time points of a montage are arranged. */
+	private enum Arrangement {
+			SINGLE_ROW, SINGLE_COLUMN, GRID
+	}
+
+	// Columns used when switching the montage to a grid.
+	private int gridColumns = 5;
+
 	private static final double SPINNER_WIDTH = 76;
 	private static final double COMBO_WIDTH = 116;
 
@@ -994,16 +1002,33 @@ public class KymographPane {
 			() -> settings.verticalReflection, v -> settings.verticalReflection = v),
 			horizontalReflection));
 
-		// Montage layout
+		// Layout
 		Section layout = new Section("Layout", false);
-		Spinner<Integer> columns = intField(0, 10000, () -> Math.max(0,
-			settings.columns), v -> settings.columns = v == 0 ? -1 : v);
-		columns.setTooltip(new Tooltip("0 means a single row or column."));
-		layout.add("Spacing", row(intField(0, 1000, () -> settings.spacing,
-			v -> settings.spacing = v), new Label("Columns"), columns));
-		layout.add("", checkBox("Horizontal layout",
-			() -> settings.horizontalLayout, v -> settings.horizontalLayout = v));
-		visibilityUpdaters.add(() -> layout.setVisible(!isKymograph()));
+		ComboBox<Arrangement> arrangement = enumField(Arrangement.values(),
+			() -> settings.columns > 0 ? Arrangement.GRID : settings.horizontalLayout
+				? Arrangement.SINGLE_ROW : Arrangement.SINGLE_COLUMN, v -> {
+					settings.horizontalLayout = v != Arrangement.SINGLE_COLUMN;
+					settings.columns = v == Arrangement.GRID ? gridColumns : -1;
+				});
+		arrangement.setTooltip(new Tooltip(
+			"How the time points of the montage are arranged."));
+		Label columnsLabel = new Label("columns");
+		Spinner<Integer> columns = intField(1, 10000, () -> settings.columns > 0
+			? settings.columns : gridColumns, v -> {
+				gridColumns = v;
+				if (settings.columns > 0) settings.columns = v;
+			});
+		showWhen(() -> settings.columns > 0, columnsLabel, columns);
+		layout.add("Arrange", row(arrangement, columnsLabel, columns),
+			() -> !isKymograph());
+		layout.add("Spacing", intField(0, 1000, () -> settings.spacing,
+			v -> settings.spacing = v), () -> !isKymograph());
+		ComboBox<KymographSettings.Orientation> orientation = enumField(
+			KymographSettings.Orientation.values(), () -> settings.orientation,
+			v -> settings.orientation = v);
+		orientation.setTooltip(new Tooltip(
+			"Horizontal keeps time running left to right. The vertical options rotate the figure by 90 degrees to the left or right."));
+		layout.add("Orientation", orientation);
 
 		// Channels
 		Section channels = new Section("Channels", true);
@@ -1052,8 +1077,6 @@ public class KymographPane {
 		axes.add("Y step", stepAndPrecision(() -> settings.yStepSize,
 			v -> settings.yStepSize = v, () -> settings.yAxisPrecision,
 			v -> settings.yAxisPrecision = v), () -> settings.showYAxis);
-		axes.add("Orientation", enumField(KymographSettings.Orientation.values(),
-			() -> settings.orientation, v -> settings.orientation = v));
 
 		// Style
 		Section style = new Section("Style", false);
