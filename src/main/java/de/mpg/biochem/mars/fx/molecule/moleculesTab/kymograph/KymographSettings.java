@@ -140,6 +140,10 @@ public class KymographSettings {
 	public double axisLineWidth = 1;
 	public double tickLineWidth = 1;
 	public int tickLength = 3;
+	// Object archives only
+	public boolean showOutlines = false;
+	public String outlineColor = "#ffff00";
+	public double outlineLineWidth = 1;
 
 	@JsonIgnoreProperties(ignoreUnknown = true)
 	public static class ChannelSettings {

@@ -57,6 +57,28 @@ public class KymographScriptBuilder {
 		}
 	}
 
+	// ImageFormatter.addOutline is only available in newer mars-kymograph versions.
+	private static final boolean SUPPORTS_OUTLINES = hasOutlines();
+
+	private static boolean hasOutlines() {
+		try {
+			Class.forName(KymographArchiveType.KYMOGRAPH_PACKAGE + ".ImageFormatter")
+				.getMethod("addOutline", double[].class, double[].class);
+			return true;
+		}
+		catch (ClassNotFoundException | NoSuchMethodException | LinkageError e) {
+			return false;
+		}
+	}
+
+	/**
+	 * @param type The archive type.
+	 * @return True if outlines can be drawn on figures for the archive type.
+	 */
+	public static boolean supportsOutlines(KymographArchiveType type) {
+		return type == KymographArchiveType.OBJECT && SUPPORTS_OUTLINES;
+	}
+
 	public static final String IMAGE_OUTPUT = "imgsrc";
 	public static final String DISPLAY_RANGES_OUTPUT = "displayRanges";
 	public static final String SOURCE_IMAGE_OUTPUT = "sourceImage";
@@ -175,15 +197,25 @@ public class KymographScriptBuilder {
 
 		if (useSourceImage) {
 			appendTimeRange(sb);
-			sb.append("def image = " + SOURCE_IMAGE_INPUT + "\n\n");
+			// Cached together with the image, so outlines can be turned on later.
+			if (supportsOutlines(archiveType)) sb.append("def image = " +
+				SOURCE_IMAGE_INPUT + "[0]\ndef outlines = " + SOURCE_IMAGE_INPUT +
+				"[1]\n\n");
+			else sb.append("def image = " + SOURCE_IMAGE_INPUT + "\n\n");
 		}
-		else appendSource(sb);
+		else {
+			appendSource(sb);
+			if (supportsOutlines(archiveType) && (settings.showOutlines ||
+				outputSourceImage)) sb.append(
+					"def outlines = regionBuilder.getOutlines(montageBuilder)\n\n");
+		}
 
 		appendFormatter(sb);
 
 		sb.append(IMAGE_OUTPUT + " = formatter.getHtmlEncodedImage()\n");
 		if (reportDisplayRanges) appendDisplayRanges(sb);
-		if (outputSourceImage) sb.append(SOURCE_IMAGE_OUTPUT + " = image\n");
+		if (outputSourceImage) sb.append(SOURCE_IMAGE_OUTPUT + " = " +
+			(supportsOutlines(archiveType) ? "[image, outlines]" : "image") + "\n");
 		if (svgPath != null) sb.append("formatter.saveAsSVG(" + quote(svgPath) +
 			")\n");
 		return sb.toString();
@@ -241,9 +273,12 @@ public class KymographScriptBuilder {
 	}
 
 	private void appendMontage(StringBuilder sb) {
-		sb.append("def region = new " + archiveType.getRegionBuilder() +
-			"(scijavaContext, archive)\n");
-		line(sb, ".setMolecule(UID)");
+		// Outlines need the region and montage builders after they are built.
+		boolean keepBuilders = supportsOutlines(archiveType);
+		sb.append("def " + (keepBuilders ? "regionBuilder" : "region") + " = new " +
+			archiveType.getRegionBuilder() + "(scijavaContext, archive)\n");
+		line(sb, archiveType == KymographArchiveType.OBJECT ? ".setObject(UID)"
+			: ".setMolecule(UID)");
 		if (archiveType == KymographArchiveType.SINGLE_MOLECULE) {
 			line(sb, ".setRadius(" + settings.spotRadius + ")");
 			line(sb, ".setLocationSource(" + quote(settings.xLocationSource) + ", " +
@@ -254,10 +289,12 @@ public class KymographScriptBuilder {
 			line(sb, ".setBorderWidth(" + settings.borderWidth + ")");
 			line(sb, ".setBorderHeight(" + settings.borderHeight + ")");
 		}
-		line(sb, ".build()");
+		if (keepBuilders) sb.append("def region = regionBuilder.build()\n");
+		else line(sb, ".build()");
 		sb.append("\n");
 
-		sb.append("def image = new MontageBuilder(scijavaContext)\n");
+		sb.append("def " + (keepBuilders ? "montageBuilder" : "image") +
+			" = new MontageBuilder(scijavaContext)\n");
 		line(sb, ".setSource(region)");
 		line(sb, ".setMinT(minT)");
 		line(sb, ".setMaxT(maxT)");
@@ -287,7 +324,8 @@ public class KymographScriptBuilder {
 		if (settings.horizontalReflection) line(sb,
 			".setHorizontalReflection(true)");
 		line(sb, ".threads(Runtime.getRuntime().availableProcessors())");
-		line(sb, ".build()");
+		if (keepBuilders) sb.append("def image = montageBuilder.build()\n");
+		else line(sb, ".build()");
 		sb.append("\n");
 	}
 
@@ -398,6 +436,13 @@ public class KymographScriptBuilder {
 		line(sb, ".setTickLineWidth(" + number(settings.tickLineWidth) + ")");
 		line(sb, ".setTickLength(" + settings.tickLength + ")");
 		if (settings.darkTheme) line(sb, ".setDarkTheme(true)");
+		if (settings.showOutlines && supportsOutlines(archiveType)) {
+			line(sb, ".setOutlineColor(java.awt.Color.decode(" + quote(
+				settings.outlineColor) + "))");
+			line(sb, ".setOutlineLineWidth(" + number(settings.outlineLineWidth) +
+				")");
+			sb.append("outlines.each { formatter.addOutline(it[0], it[1]) }\n");
+		}
 		sb.append("formatter.build()\n\n");
 	}
 

@@ -32,6 +32,7 @@ package de.mpg.biochem.mars.fx.molecule.moleculesTab.kymograph;
 import de.mpg.biochem.mars.molecule.DnaMoleculeArchive;
 import de.mpg.biochem.mars.molecule.MoleculeArchive;
 import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
+import de.mpg.biochem.mars.object.ObjectArchive;
 
 /**
  * Archive types supported by the kymograph tab. Transverse flow archives are
@@ -40,7 +41,8 @@ import de.mpg.biochem.mars.molecule.SingleMoleculeArchive;
 public enum KymographArchiveType {
 		DNA("DnaArchiveMoleculeRegionBuilder"), SINGLE_MOLECULE(
 			"SingleMoleculeArchiveRegionBuilder"), TRANSVERSE_FLOW(
-				"TransverseFlowArchiveMoleculeRegionBuilder");
+				"TransverseFlowArchiveMoleculeRegionBuilder"), OBJECT(
+					"ObjectArchiveRegionBuilder");
 
 	public static final String KYMOGRAPH_PACKAGE = "de.mpg.biochem.mars.kymograph";
 
@@ -74,6 +76,13 @@ public enum KymographArchiveType {
 	}
 
 	/**
+	 * @return What the records of this archive type are called in the GUI.
+	 */
+	public String getRecordName() {
+		return this == OBJECT ? "object" : "molecule";
+	}
+
+	/**
 	 * Whether the mars-kymograph classes needed for this archive type are
 	 * installed.
 	 *
@@ -94,6 +103,7 @@ public enum KymographArchiveType {
 		if (archive == null) return null;
 		if (archive instanceof DnaMoleculeArchive) return DNA;
 		if (archive instanceof SingleMoleculeArchive) return SINGLE_MOLECULE;
+		if (archive instanceof ObjectArchive) return OBJECT;
 		for (Class<?> c = archive.getClass(); c != null; c = c.getSuperclass())
 			if (c.getName().equals(TRANSVERSE_FLOW_ARCHIVE)) return TRANSVERSE_FLOW;
 		return null;

@@ -81,6 +81,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
@@ -106,6 +107,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
@@ -703,10 +705,12 @@ public class KymographPane {
 		placeholderLabel.setVisible(image == null);
 		if (archiveType == null) placeholderLabel.setText(
 			"Figures are not available for this archive.");
-		else if (molecule == null) placeholderLabel.setText(
-			"Select a molecule to create a " + getTabName().toLowerCase() + ".");
+		else if (molecule == null) placeholderLabel.setText("Select a " +
+			archiveType.getRecordName() + " to create a " + getTabName()
+				.toLowerCase() + ".");
 		else placeholderLabel.setText("No " + getTabName().toLowerCase() +
-			" has been generated for this molecule yet. Press Generate.");
+			" has been generated for this " + archiveType.getRecordName() +
+			" yet. Press Generate.");
 
 		if (figure != null) statusLabel.setText(figure.getType() + " · " +
 			(figure.getCreated() != null ? CREATED_FORMAT.format(figure
@@ -903,6 +907,10 @@ public class KymographPane {
 	private boolean isKymograph() {
 		return settings.mode == Mode.KYMOGRAPH && (archiveType == null ||
 			archiveType.supportsKymograph());
+	}
+
+	private boolean supportsOutlines() {
+		return KymographScriptBuilder.supportsOutlines(archiveType);
 	}
 
 	private boolean isSingleMolecule() {
@@ -1153,6 +1161,13 @@ public class KymographPane {
 			() -> settings.tickLength, v -> settings.tickLength = v), new Label(
 				"Width"), doubleField(0.25, 50, 0.25, () -> settings.tickLineWidth,
 					v -> settings.tickLineWidth = v)));
+		style.add("Outlines", row(outlineCheckBox(), outlineColorPicker()),
+			this::supportsOutlines);
+		style.add("", row(new Label("Width"), doubleField(0.25, 50, 0.25,
+			() -> settings.outlineLineWidth, v -> {
+				settings.outlineLineWidth = v;
+				updateFigureQuickly();
+			}), pixels()), this::supportsOutlines);
 
 		for (Section section : sections)
 			sectionsBox.getChildren().add(section.titledPane);
@@ -1305,6 +1320,31 @@ public class KymographPane {
 		}
 		filterChannelComboBox.setValue(filterChannelComboBox.getItems().contains(
 			filterChannel) ? filterChannel : 0);
+	}
+
+	private CheckBox outlineCheckBox() {
+		CheckBox show = checkBox("Show", () -> settings.showOutlines,
+			v -> settings.showOutlines = v);
+		show.setTooltip(new Tooltip("Draw the object's outline on each time point"));
+		show.selectedProperty().addListener((ob, o, n) -> {
+			if (!pushing) updateFigureQuickly();
+		});
+		return show;
+	}
+
+	private ColorPicker outlineColorPicker() {
+		ColorPicker picker = new ColorPicker(Color.web(settings.outlineColor));
+		picker.getStyleClass().add("button");
+		picker.setPrefWidth(COMBO_WIDTH);
+		picker.valueProperty().addListener((ob, o, n) -> {
+			if (pushing || n == null) return;
+			settings.outlineColor = String.format("#%02x%02x%02x", Math.round(n
+				.getRed() * 255), Math.round(n.getGreen() * 255), Math.round(n
+					.getBlue() * 255));
+			updateFigureQuickly();
+		});
+		pushers.add(() -> picker.setValue(Color.web(settings.outlineColor)));
+		return picker;
 	}
 
 	/**
